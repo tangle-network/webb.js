@@ -5,7 +5,7 @@ import type { Struct, U8aFixed, Vec, bool, u32 } from '@polkadot/types';
 import type { AccountId, Balance, BlockNumber } from '@webb-tools/types/interfaces/runtime';
 
 /** @name Commitment */
-export interface Commitment extends Data {}
+export interface Commitment extends U8aFixed {}
 
 /** @name Data */
 export interface Data extends U8aFixed {}
@@ -31,6 +31,6 @@ export interface MixerInfo extends Struct {
 }
 
 /** @name Nullifier */
-export interface Nullifier extends Data {}
+export interface Nullifier extends U8aFixed {}
 
 export type PHANTOM_MIXER = 'mixer';
