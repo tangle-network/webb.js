@@ -73,7 +73,7 @@ const additionalOverride = {
 };
 
 const webbDefs = {
-  mixer,
+  mixer
 };
 
 export const types = {

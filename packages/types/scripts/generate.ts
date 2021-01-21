@@ -35,6 +35,7 @@ function filterModules(names: string[], defs: any): string {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { runtime, ...substrateDefinitions } = defaultDefinitions;
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const definitions = {
   '@polkadot/types/interfaces': substrateDefinitions,
   '@webb-tools/types/interfaces': webbDefinitions
