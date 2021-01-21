@@ -1,0 +1,30 @@
+{
+  "name": "@webb-tools/types",
+  "version": "0.1.0",
+  "description": "Polkadot.js type definations for Webb Network",
+  "main": "index.js",
+  "author": "Webb Developers <drew@webb.tools>",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "repository": "https://github.com/webb-tools/webb.js.git",
+  "bugs": {
+    "url": "https://github.com/webb-tools/webb.js/issues"
+  },
+  "homepage": "https://github.com/webb-tools/webb.js",
+  "dependencies": {
+    "@babel/runtime": "^7.10.2",
+    "@open-web3/api-mobx": "^0.8.2-6",
+    "@open-web3/orml-types": "^0.8.2-6",
+    "@polkadot/api": "^3.4.1",
+    "@polkadot/typegen": "^3.4.1",
+    "@polkadot/types": "^3.4.1",
+    "@webb-tools/type-definitions": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/websocket": "^1.0.0",
+    "websocket": "^1.0.31"
+  }
+}

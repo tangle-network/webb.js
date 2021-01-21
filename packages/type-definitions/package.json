@@ -1,0 +1,20 @@
+{
+  "name": "@webb-tools/type-definitions",
+  "version": "0.1.0",
+  "description": "Polkadot.js type definations for Webb Network",
+  "main": "index.js",
+  "author": "Webb Developers <drew@webb.tools>",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "repository": "https://github.com/webb-tools/webb.js.git",
+  "bugs": {
+    "url": "https://github.com/webb-tools/webb.js/issues"
+  },
+  "homepage": "https://github.com/webb-tools/webb.js",
+  "dependencies": {
+    "@open-web3/orml-type-definitions": "^0.8.2-6"
+  }
+}
