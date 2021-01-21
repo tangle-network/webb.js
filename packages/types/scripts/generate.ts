@@ -42,7 +42,7 @@ const definitions = {
 } as any;
 
 const metadata = filterModules(['Mixer'], definitions);
-console.log(metadata);
+
 generateTsDef(definitions, 'packages/types/src/interfaces', '@webb-tools/types/interfaces');
 generateInterfaceTypes(definitions, 'packages/types/src/interfaces/augment-types.ts');
 generateDefaultConsts('packages/types/src/interfaces/augment-api-consts.ts', metadata, definitions);
