@@ -2486,7 +2486,7 @@ __metadata:
     "@babel/runtime": ^7.10.2
     "@polkadot/api": ^3.4.1
     "@polkadot/rpc-core": ^3.4.1
-    "@webb-tools/types": 0.1.2-5
+    "@webb-tools/types": 0.1.2-6
   languageName: unknown
   linkType: soft
 
@@ -2499,7 +2499,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webb-tools/type-definitions@0.1.2-5, @webb-tools/type-definitions@workspace:packages/type-definitions":
+"@webb-tools/type-definitions@0.1.2-6, @webb-tools/type-definitions@workspace:packages/type-definitions":
   version: 0.0.0-use.local
   resolution: "@webb-tools/type-definitions@workspace:packages/type-definitions"
   dependencies:
@@ -2507,7 +2507,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webb-tools/types@0.1.2-5, @webb-tools/types@workspace:packages/types":
+"@webb-tools/types@0.1.2-6, @webb-tools/types@workspace:packages/types":
   version: 0.0.0-use.local
   resolution: "@webb-tools/types@workspace:packages/types"
   dependencies:
@@ -2518,7 +2518,7 @@ __metadata:
     "@polkadot/typegen": ^3.4.1
     "@polkadot/types": ^3.4.1
     "@types/websocket": ^1.0.0
-    "@webb-tools/type-definitions": 0.1.2-5
+    "@webb-tools/type-definitions": 0.1.2-6
     websocket: ^1.0.31
   languageName: unknown
   linkType: soft
