@@ -1,4 +1,3 @@
-import { derive as webbDerives } from '@webb-tools/api-derive';
 import {
   rpc as webbRpc,
   types as webbTypes,
@@ -30,9 +29,6 @@ export const options = ({
   typesAlias: {
     ...webbTypesAlias,
     ...typesAlias
-  },
-  derives: {
-    ...webbDerives
   },
   typesBundle: {
     ...typesBundle,

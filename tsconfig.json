@@ -21,12 +21,6 @@
       "@webb-tools/types/*": [
         "packages/types/src/*"
       ],
-      "@webb-tools/api-derive": [
-        "packages/api-derive/src"
-      ],
-      "@webb-tools/api-derive/*": [
-        "packages/api-derive/src/*"
-      ],
       "@webb-tools/type-definitions": [
         "packages/type-definitions/src"
       ],

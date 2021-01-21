@@ -3,8 +3,6 @@
 
 import type { Bytes, Compact, DoNotConstruct, Enum, GenericAccountId, GenericAccountIndex, GenericBlock, GenericCall, GenericConsensusEngineId, GenericLookupSource, GenericMultiAddress, Int, Null, StorageKey, Struct, U8aFixed, UInt, Vec, u16, u32, u64, u8 } from '@polkadot/types';
 import type { ITuple } from '@polkadot/types/types';
-import type { AuthoritysOriginId, CurrencyId } from '@webb-network/types/interfaces/primitives';
-import type { Price } from '@open-web3/orml-types/interfaces/traits';
 import type { AuthorityId } from '@polkadot/types/interfaces/consensus';
 import type { Signature } from '@polkadot/types/interfaces/extrinsics';
 import type { SystemOrigin } from '@polkadot/types/interfaces/system';
@@ -20,9 +18,6 @@ export interface AccountIndex extends GenericAccountIndex {}
 
 /** @name Address */
 export interface Address extends LookupSource {}
-
-/** @name AsOriginId */
-export interface AsOriginId extends AuthoritysOriginId {}
 
 /** @name AssetId */
 export interface AssetId extends u32 {}
@@ -59,9 +54,6 @@ export interface Consensus extends ITuple<[ConsensusEngineId, Bytes]> {}
 
 /** @name ConsensusEngineId */
 export interface ConsensusEngineId extends GenericConsensusEngineId {}
-
-/** @name DestAddress */
-export interface DestAddress extends U8aFixed {}
 
 /** @name Digest */
 export interface Digest extends Struct {
@@ -181,12 +173,6 @@ export interface MultiAddress extends GenericMultiAddress {}
 
 /** @name OpaqueCall */
 export interface OpaqueCall extends Bytes {}
-
-/** @name OracleKey */
-export interface OracleKey extends CurrencyId {}
-
-/** @name OracleValue */
-export interface OracleValue extends Price {}
 
 /** @name Origin */
 export interface Origin extends DoNotConstruct {}

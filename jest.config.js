@@ -2,7 +2,6 @@ const config = require('@open-web3/dev-config/config/jest.cjs');
 
 module.exports = Object.assign({}, config, {
   moduleNameMapper: {
-    '@webb-tools/api-derive(.*)$': '<rootDir>/packages/api-derive/src/$1',
     '@webb-tools/api(.*)$': '<rootDir>/packages/api/src/$1',
     '@webb-tools/types(.*)$': '<rootDir>/packages/types/src/$1',
     '@webb-tools/type-definitions(.*)$': '<rootDir>/packages/type-definitions/src/$1',

@@ -2,7 +2,8 @@ export default {
   rpc: {},
   types: {
     Data: '[u8; 32]',
-    Commitment: '[u8; 32]',
+    Nullifier: 'Data',
+    Commitment: 'Data',
     GroupId: 'u32',
     GroupTree: {
       manager: 'AccountId',

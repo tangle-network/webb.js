@@ -45,8 +45,6 @@ console.log(data.toHuman())
 
 - [api](./packages/api)
   - Contains necessary options to create a polkadot.js API instance
-- [api-derive](./packages/api-derive)
-  - Additional polkadot.js derives for Webb Network
 - [app-util](./packages/app-util)
   - Utilities to work with Webb Network
 - [types](./packages/types)
