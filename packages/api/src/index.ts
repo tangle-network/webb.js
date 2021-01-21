@@ -37,10 +37,6 @@ export const options = ({
       webb: {
         ...webbTypesBundle?.spec?.webb,
         ...typesBundle?.spec?.webb
-      },
-      mandala: {
-        ...webbTypesBundle?.spec?.mandala,
-        ...typesBundle?.spec?.mandala
       }
     }
   },

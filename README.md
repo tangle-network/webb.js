@@ -23,7 +23,7 @@ import { WsProvider } from '@polkadot/rpc-provider';
 import { options } from '@webb-tools/api';
 
 async function main() {
-    const provider = new WsProvider('wss://testnet-node-1.acala.laminar.one/ws');
+    const provider = new WsProvider('wss://localhost:9944');
     const api = new ApiPromise(options({ provider }));
     await api.isReady;
 

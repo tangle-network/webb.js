@@ -82,15 +82,17 @@ export interface StorageType extends BaseStorageType {
     /**
      * Map of used nullifiers (Data) for each tree.
      **/
-    usedNullifiers: StorageMap<ITuple<[GroupId, Data]> | [GroupId | AnyNumber, Data | string], bool>;
+    usedNullifiers: StorageMap<ITuple<[GroupId, Data]> | [GroupId | AnyNumber, Data | { None: any } | { Raw: any } | { BlakeTwo256: any } | { Sha256: any } | { Keccak256: any } | { ShaThree256: any } | string], bool>;
   };
   mixer: {    initialised: bool | null;
+    /**
+     * The vec of group ids
+     **/
+    mixerGroupIds: Vec<GroupId> | null;
     /**
      * The map of mixer groups to their metadata
      **/
     mixerGroups: StorageMap<GroupId | AnyNumber, MixerInfo>;
-  };
-  new: {    initialised: bool | null;
   };
   randomnessCollectiveFlip: {    /**
      * Series of block headers from the last 81 blocks that acts as random seed material. This

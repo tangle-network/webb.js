@@ -1,7 +1,7 @@
 import {
-  typesBundle as acalaTypesBundle,
-  types as acalaTypes,
-  typesAlias as acalaTypeAlias,
+  typesBundle as webbTypesBundle,
+  types as webbTypes,
+  typesAlias as webbTypeAlias,
   rpc as webbRpc
 } from '@webb-tools/type-definitions';
 import {
@@ -20,10 +20,10 @@ import './interfaces/augment-types';
 
 export * from './interfaces/augment-api-mobx';
 
-export const types: RegistryTypes = acalaTypes;
+export const types: RegistryTypes = webbTypes;
 
 export const rpc: Record<string, Record<string, DefinitionRpc | DefinitionRpcSub>> = webbRpc;
 
-export const typesAlias: Record<string, OverrideModuleType> = acalaTypeAlias;
+export const typesAlias: Record<string, OverrideModuleType> = webbTypeAlias;
 
-export const typesBundle = (acalaTypesBundle as unknown) as OverrideBundleType;
+export const typesBundle = (webbTypesBundle as unknown) as OverrideBundleType;

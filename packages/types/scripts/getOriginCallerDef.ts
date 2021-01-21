@@ -8,16 +8,14 @@ const POLKADOT_KNOWN_ORIGINS: Record<string, string> = {
   TechnicalCommittee: 'CollectiveOrigin'
 };
 
-const ACALA_KNOWN_ORIGINS: Record<string, string> = {
+const WEBB_KNOWN_ORIGINS: Record<string, string> = {
   GeneralCouncil: 'CollectiveOrigin',
-  HonzonCouncil: 'CollectiveOrigin',
-  HomaCouncil: 'CollectiveOrigin',
   Authority: 'DelayedOrigin'
 };
 
 const KNOWN_ORIGINS = {
   ...POLKADOT_KNOWN_ORIGINS,
-  ...ACALA_KNOWN_ORIGINS
+  ...WEBB_KNOWN_ORIGINS
 };
 
 function getOriginCallerDef(): void {
