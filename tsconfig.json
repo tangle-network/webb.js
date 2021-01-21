@@ -27,18 +27,6 @@
       "@webb-tools/type-definitions/*": [
         "packages/type-definitions/src/*"
       ],
-      "@webb-tools/sdk-core": [
-        "packages/sdk-core/src"
-      ],
-      "@webb-tools/sdk-core/*": [
-        "packages/sdk-core/src/*"
-      ],
-      "@webb-tools/sdk-swap": [
-        "packages/sdk-swap/src"
-      ],
-      "@webb-tools/sdk-swap/*": [
-        "packages/sdk-swap/src/*"
-      ],
     },
     "skipLibCheck": true,
     "typeRoots": [
