@@ -27,6 +27,18 @@
       "@webb-tools/type-definitions/*": [
         "packages/type-definitions/src/*"
       ],
+      "@webb-tools/sdk-core": [
+        "packages/sdk-core/src"
+      ],
+      "@webb-tools/sdk-core/*": [
+        "packages/sdk-core/src/*"
+      ],
+      "@webb-tools/sdk-bridge": [
+        "packages/sdk-bridge/src"
+      ],
+      "@webb-tools/sdk-bridge/*": [
+        "packages/sdk-bridge/src/*"
+      ],
     },
     "skipLibCheck": true,
     "typeRoots": [

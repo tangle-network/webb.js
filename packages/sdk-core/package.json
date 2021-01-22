@@ -1,7 +1,7 @@
 {
-  "name": "@webb-tools/type-definitions",
+  "name": "@webb-tools/sdk-core",
   "version": "0.1.2-10",
-  "description": "Polkadot.js type definations for Webb Network",
+  "description": "the core of webb tools sdk",
   "main": "index.js",
   "author": "Webb Developers <drew@webb.tools>",
   "license": "Apache-2.0",
@@ -15,6 +15,14 @@
   },
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
-    "@open-web3/orml-type-definitions": "^0.8.2-6"
+    "@polkadot/api": "^3.4.1",
+    "@types/events": "^3.0.0",
+    "@webb-tools/api": "^0.1.2-10",
+    "bignumber.js": "^9.0.0",
+    "events": "^3.2.0",
+    "lodash": "^4.17.20"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.161"
   }
 }

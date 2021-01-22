@@ -1,11 +1,25 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import type { Data, Struct, Vec, bool, u32 } from '@polkadot/types';
-import type { AccountId, Balance, BlockNumber } from '@webb-tools/types/interfaces/runtime';
+import type { Data, Enum, Struct, Vec, bool, u32 } from '@polkadot/types';
+import type { ITuple } from '@polkadot/types/types';
+import type { AccountId, Balance, BlockNumber, H160 } from '@webb-tools/types/interfaces/runtime';
 
 /** @name Commitment */
 export interface Commitment extends Data {}
+
+/** @name CurrencyId */
+export interface CurrencyId extends Enum {
+  readonly isToken: boolean;
+  readonly asToken: TokenSymbol;
+  readonly isDexShare: boolean;
+  readonly asDexShare: ITuple<[TokenSymbol, TokenSymbol]>;
+  readonly isErc20: boolean;
+  readonly asErc20: EvmAddress;
+}
+
+/** @name EvmAddress */
+export interface EvmAddress extends H160 {}
 
 /** @name GroupId */
 export interface GroupId extends u32 {}
@@ -29,5 +43,13 @@ export interface MixerInfo extends Struct {
 
 /** @name Nullifier */
 export interface Nullifier extends Data {}
+
+/** @name TokenSymbol */
+export interface TokenSymbol extends Enum {
+  readonly isEdg: boolean;
+  readonly isHedg: boolean;
+  readonly isDot: boolean;
+  readonly isKsm: boolean;
+}
 
 export type PHANTOM_MIXER = 'mixer';

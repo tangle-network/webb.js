@@ -1,6 +1,17 @@
 export default {
   rpc: {},
   types: {
+    EvmAddress: 'H160',
+    TokenSymbol: {
+      _enum: ['EDG', 'HEDG', 'DOT', 'KSM']
+    },
+    CurrencyId: {
+      _enum: {
+        Token: 'TokenSymbol',
+        DEXShare: '(TokenSymbol, TokenSymbol)',
+        ERC20: 'EvmAddress'
+      }
+    },
     Nullifier: 'Data',
     Commitment: 'Data',
     GroupId: 'u32',

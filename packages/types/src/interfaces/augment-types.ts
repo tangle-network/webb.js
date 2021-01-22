@@ -50,7 +50,7 @@ import type { Bounty, BountyIndex, BountyStatus, BountyStatusActive, BountyStatu
 import type { Multiplier } from '@polkadot/types/interfaces/txpayment';
 import type { Multisig, Timepoint } from '@polkadot/types/interfaces/utility';
 import type { VestingInfo } from '@polkadot/types/interfaces/vesting';
-import type { Commitment, GroupId, GroupTree, MixerInfo, Nullifier } from '@webb-tools/types/interfaces/mixer';
+import type { Commitment, CurrencyId, EvmAddress, GroupId, GroupTree, MixerInfo, Nullifier, TokenSymbol } from '@webb-tools/types/interfaces/mixer';
 import type { AccountId, AccountIdOf, AccountIndex, Address, AssetId, Balance, BalanceOf, Block, BlockNumber, Call, CallHash, CallHashOf, ChangesTrieConfiguration, Consensus, ConsensusEngineId, Digest, DigestItem, ExtrinsicsWeight, Fixed128, Fixed64, FixedI128, FixedI64, FixedU128, FixedU64, H1024, H128, H160, H2048, H256, H512, H64, Hash, Header, I32F32, Index, IndicesLookupSource, Justification, KeyTypeId, KeyValue, LockIdentifier, LookupSource, LookupTarget, ModuleId, Moment, MultiAddress, OpaqueCall, Origin, OriginCaller, PalletVersion, PalletsOrigin, Pays, PerU16, Perbill, Percent, Permill, Perquintill, Phantom, PhantomData, PreRuntime, Releases, RuntimeDbWeight, Seal, SealV0, SignedBlock, StorageData, TransactionPriority, U32F32, ValidatorId, ValidatorIdOf, Weight, WeightMultiplier } from '@webb-tools/types/interfaces/runtime';
 
 declare module '@polkadot/types/types/registry' {
@@ -281,6 +281,7 @@ declare module '@polkadot/types/types/registry' {
     'Option<CoreIndex>': Option<CoreIndex>;
     'Option<CoreOccupied>': Option<CoreOccupied>;
     'Option<CreatedBlock>': Option<CreatedBlock>;
+    'Option<CurrencyId>': Option<CurrencyId>;
     'Option<Data>': Option<Data>;
     'Option<DeferredOffenceOf>': Option<DeferredOffenceOf>;
     'Option<DefunctVoter>': Option<DefunctVoter>;
@@ -369,6 +370,7 @@ declare module '@polkadot/types/types/registry' {
     'Option<EventMetadataV9>': Option<EventMetadataV9>;
     'Option<EventRecord>': Option<EventRecord>;
     'Option<EvmAccount>': Option<EvmAccount>;
+    'Option<EvmAddress>': Option<EvmAddress>;
     'Option<EvmLog>': Option<EvmLog>;
     'Option<EvmVicinity>': Option<EvmVicinity>;
     'Option<ExchangeAsset>': Option<ExchangeAsset>;
@@ -772,6 +774,7 @@ declare module '@polkadot/types/types/registry' {
     'Option<TeleportAsset>': Option<TeleportAsset>;
     'Option<Text>': Option<Text>;
     'Option<Timepoint>': Option<Timepoint>;
+    'Option<TokenSymbol>': Option<TokenSymbol>;
     'Option<TombstoneContractInfo>': Option<TombstoneContractInfo>;
     'Option<Transact>': Option<Transact>;
     'Option<TransactionPriority>': Option<TransactionPriority>;
@@ -992,6 +995,7 @@ declare module '@polkadot/types/types/registry' {
     'Vec<CoreIndex>': Vec<CoreIndex>;
     'Vec<CoreOccupied>': Vec<CoreOccupied>;
     'Vec<CreatedBlock>': Vec<CreatedBlock>;
+    'Vec<CurrencyId>': Vec<CurrencyId>;
     'Vec<Data>': Vec<Data>;
     'Vec<DeferredOffenceOf>': Vec<DeferredOffenceOf>;
     'Vec<DefunctVoter>': Vec<DefunctVoter>;
@@ -1080,6 +1084,7 @@ declare module '@polkadot/types/types/registry' {
     'Vec<EventMetadataV9>': Vec<EventMetadataV9>;
     'Vec<EventRecord>': Vec<EventRecord>;
     'Vec<EvmAccount>': Vec<EvmAccount>;
+    'Vec<EvmAddress>': Vec<EvmAddress>;
     'Vec<EvmLog>': Vec<EvmLog>;
     'Vec<EvmVicinity>': Vec<EvmVicinity>;
     'Vec<ExchangeAsset>': Vec<ExchangeAsset>;
@@ -1483,6 +1488,7 @@ declare module '@polkadot/types/types/registry' {
     'Vec<TeleportAsset>': Vec<TeleportAsset>;
     'Vec<Text>': Vec<Text>;
     'Vec<Timepoint>': Vec<Timepoint>;
+    'Vec<TokenSymbol>': Vec<TokenSymbol>;
     'Vec<TombstoneContractInfo>': Vec<TombstoneContractInfo>;
     'Vec<Transact>': Vec<Transact>;
     'Vec<TransactionPriority>': Vec<TransactionPriority>;
@@ -1703,6 +1709,7 @@ declare module '@polkadot/types/types/registry' {
     CoreIndex: CoreIndex;
     CoreOccupied: CoreOccupied;
     CreatedBlock: CreatedBlock;
+    CurrencyId: CurrencyId;
     Data: Data;
     DeferredOffenceOf: DeferredOffenceOf;
     DefunctVoter: DefunctVoter;
@@ -1791,6 +1798,7 @@ declare module '@polkadot/types/types/registry' {
     EventMetadataV9: EventMetadataV9;
     EventRecord: EventRecord;
     EvmAccount: EvmAccount;
+    EvmAddress: EvmAddress;
     EvmLog: EvmLog;
     EvmVicinity: EvmVicinity;
     ExchangeAsset: ExchangeAsset;
@@ -2194,6 +2202,7 @@ declare module '@polkadot/types/types/registry' {
     TeleportAsset: TeleportAsset;
     Text: Text;
     Timepoint: Timepoint;
+    TokenSymbol: TokenSymbol;
     TombstoneContractInfo: TombstoneContractInfo;
     Transact: Transact;
     TransactionPriority: TransactionPriority;
