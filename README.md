@@ -3,7 +3,7 @@
 
 # @webb-tools
 
-This library provides additional typing information for user to access Webb Network by using [polkadot.js](https://github.com/polkadot-js/api).
+This library provides additional typing information for user to access Webb's modules by using [polkadot.js](https://github.com/polkadot-js/api).
 
 # Getting Started
 
