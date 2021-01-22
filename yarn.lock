@@ -10525,13 +10525,13 @@ __metadata:
   linkType: hard
 
 "typedoc-plugin-markdown@npm:^3.0.11":
-  version: 3.4.1
-  resolution: "typedoc-plugin-markdown@npm:3.4.1"
+  version: 3.4.2
+  resolution: "typedoc-plugin-markdown@npm:3.4.2"
   dependencies:
     handlebars: ^4.7.6
   peerDependencies:
     typedoc: ">=0.20.0"
-  checksum: 25bb6ee3c3d157f6515f2c415ffc4dd077e19595c0c361b6c13bbf0b7f1fd8e3fe2207326924308a82ce33c3de5889aaf765aa2424cd4f4558ec4435dd49bf7d
+  checksum: 2cfa43cad51c3cec9082608f6e29102d246da40481baf29ff780eebaec7ee02f744446aa19fe5729df93927dedacefda0b533dbe340f3936ffe13bac68162e5d
   languageName: node
   linkType: hard
 
