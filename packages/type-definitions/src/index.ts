@@ -1,4 +1,4 @@
-import { jsonrpcFromDefs, typesAliasFromDefs } from '@open-web3/orml-type-definitions/utils';
+import { jsonrpcFromDefs, typesAliasFromDefs, typesFromDefs } from '@open-web3/orml-type-definitions/utils';
 
 import mixer from './mixer';
 import versioned from './types-known/versioned';
@@ -14,6 +14,7 @@ const webbDefs = {
 };
 
 export const types = {
+  ...typesFromDefs(webbDefs),
   ...additionalOverride
 };
 
@@ -45,6 +46,5 @@ const bundle = {
 export const typesBundleForPolkadot = {
   spec: {
     webb: bundle,
-    mandala: bundle
   }
 };
