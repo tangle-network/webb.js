@@ -45,6 +45,6 @@ const bundle = {
 // Type overrides have priority issues
 export const typesBundleForPolkadot = {
   spec: {
-    webb: bundle,
+    webb: bundle
   }
 };

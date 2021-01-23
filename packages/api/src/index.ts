@@ -37,7 +37,7 @@ export const options = ({
       webb: {
         ...webbTypesBundle?.spec?.webb,
         ...typesBundle?.spec?.webb
-      },
+      }
     }
   },
   ...otherOptions
