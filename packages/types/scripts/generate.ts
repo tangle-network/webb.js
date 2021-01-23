@@ -41,7 +41,7 @@ const definitions = {
   '@webb-tools/types/interfaces': webbDefinitions
 } as any;
 
-const metadata = filterModules(['Mixer'], definitions);
+const metadata = filterModules(['Mixer', 'Merkle'], definitions);
 
 generateTsDef(definitions, 'packages/types/src/interfaces', '@webb-tools/types/interfaces');
 generateInterfaceTypes(definitions, 'packages/types/src/interfaces/augment-types.ts');
