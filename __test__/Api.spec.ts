@@ -3,7 +3,8 @@ import { WsProvider } from '@polkadot/rpc-provider';
 import { options } from '@webb-tools/api';
 
 describe('init the api', () => {
-  test('constructor should work', async () => {
+  // This is just for local testing purposes
+  test.skip('constructor should work', async () => {
     const provider = new WsProvider('ws://localhost:9944');
     const api = new ApiPromise(options({ provider }));
     await api.isReady;
