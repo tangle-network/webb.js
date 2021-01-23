@@ -3,10 +3,6 @@
         "webb": {
             "types": [
                 {
-                    "minmax": [
-                        0,
-                        null
-                    ],
                     "types": {
                         "EvmAddress": "H160",
                         "TokenSymbol": {
@@ -41,6 +37,26 @@
                             "leaves": "Vec<Data>"
                         },
                         "Keys": "SessionKeys2",
+                        "PalletsOrigin": {
+                            "_enum": {
+                                "System": "SystemOrigin",
+                                "Timestamp": "Null",
+                                "RandomnessCollectiveFlip": "Null",
+                                "Balances": "Null",
+                                "Utility": "Null",
+                                "Indices": "Null",
+                                "Authorship": "Null",
+                                "Aura": "Null",
+                                "Grandpa": "Null",
+                                "Staking": "Null",
+                                "Session": "Null",
+                                "Historical": "Null",
+                                "Sudo": "Null",
+                                "TransactionPayment": "Null",
+                                "Merkle": "Null",
+                                "Mixer": "Null"
+                            }
+                        },
                         "Address": "GenericMultiAddress",
                         "LookupSource": "GenericMultiAddress"
                     }

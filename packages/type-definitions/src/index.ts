@@ -6,7 +6,36 @@ import versioned from './types-known/versioned';
 // FIXME: currently we cannot override this in runtime definations because the code generation script cannot handle overrides
 // This will make it behave correctly in runtime, but wrong types in TS defination.
 const additionalOverride = {
-  Keys: 'SessionKeys2'
+  Keys: 'SessionKeys2',
+  PalletsOrigin: {
+    _enum: {
+      System: 'SystemOrigin',
+      Timestamp: 'Null',
+      RandomnessCollectiveFlip: 'Null',
+      Balances: 'Null',
+      // Vesting: 'Null',
+      // Treasury: 'Null',
+      Utility: 'Null',
+      // Multisig: 'Null',
+      // Recovery: 'Null',
+      // Proxy: 'Null',
+      // Scheduler: 'Null',
+      Indices: 'Null',
+      Authorship: 'Null',
+      Aura: 'Null',
+      Grandpa: 'Null',
+      Staking: 'Null',
+      Session: 'Null',
+      Historical: 'Null',
+      // Council: 'CollectiveOrigin',
+      // Contracts: 'Null',
+      // EVM: 'Null',
+      Sudo: 'Null',
+      TransactionPayment: 'Null',
+      Merkle: 'Null',
+      Mixer: 'Null'
+    }
+  }
 };
 
 const webbDefs = {
@@ -32,7 +61,6 @@ export const typesAlias = typesAliasFromDefs(webbDefs, {});
 const bundle = {
   types: [...versioned].map((version) => {
     return {
-      minmax: version.minmax,
       types: {
         ...types,
         ...version.types
