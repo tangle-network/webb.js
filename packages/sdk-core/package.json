@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/sdk-core",
-  "version": "0.1.2-11",
+  "version": "0.1.2-12",
   "description": "the core of webb tools sdk",
   "main": "index.js",
   "author": "Webb Developers <drew@webb.tools>",
@@ -17,7 +17,7 @@
   "dependencies": {
     "@polkadot/api": "^3.4.1",
     "@types/events": "^3.0.0",
-    "@webb-tools/api": "^0.1.2-11",
+    "@webb-tools/api": "^0.1.2-12",
     "bignumber.js": "^9.0.0",
     "events": "^3.2.0",
     "lodash": "^4.17.20"
