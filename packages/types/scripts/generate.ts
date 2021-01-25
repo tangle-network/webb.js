@@ -10,7 +10,7 @@ import { generateDefaultTx } from '@polkadot/typegen/generate/tx';
 import { registerDefinitions } from '@polkadot/typegen/util';
 import generateMobx from '@open-web3/api-mobx/scripts/mobx';
 import metaHex from '../src/metadata/static-latest';
-
+import fs from 'fs';
 import * as defaultDefinitions from '@polkadot/types/interfaces/definitions';
 
 import * as webbDefinitions from '../src/interfaces/definitions';
@@ -43,7 +43,14 @@ const definitions = {
 } as any;
 
 const metadata = filterModules(['Mixer', 'Merkle'], definitions);
-
+const augmentApiIndex = `
+/* eslint-disable */
+export * from './augment-api-consts';
+export * from './augment-api-tx';
+export * from './augment-api-query';
+export * from './augment-api-mobx';
+export * from './augment-types';
+`.trim();
 generateTsDef(definitions, 'packages/types/src/interfaces', '@webb-tools/types/interfaces');
 generateInterfaceTypes(definitions, 'packages/types/src/interfaces/augment-types.ts');
 generateDefaultConsts('packages/types/src/interfaces/augment-api-consts.ts', metadata, definitions);
@@ -52,3 +59,4 @@ generateDefaultTx('packages/types/src/interfaces/augment-api-tx.ts', metadata, d
 generateDefaultQuery('packages/types/src/interfaces/augment-api-query.ts', metadata, definitions);
 
 generateMobx('packages/types/src/interfaces/augment-api-mobx.ts', metaHex, definitions);
+fs.writeFileSync('packages/types/src/interfaces/augment-api.ts', augmentApiIndex);
