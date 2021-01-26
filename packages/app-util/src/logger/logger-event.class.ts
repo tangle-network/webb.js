@@ -4,7 +4,7 @@ import { EventBus } from '../shared/event-bus.class';
 export type LogEvent = {
   log: {
     ctx: string;
-    log: String;
+    log: string;
     level: LogLevel;
   };
 };

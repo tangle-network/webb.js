@@ -7,7 +7,7 @@ type LoggersMaps = Record<string, LoggerService>;
 export class LoggerService {
   public static readonly eventBus = new LoggerEvent();
   private static _loggers: LoggersMaps = {};
-  public static _enabled: boolean = true;
+  public static _enabled = true;
 
   static new(ctx: string, logLevel: LogLevel = LogLevel.trace): LoggerService {
     const logger = new LoggerService(ctx, logLevel);
