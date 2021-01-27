@@ -34,6 +34,9 @@ export interface Block extends GenericBlock {}
 /** @name BlockNumber */
 export interface BlockNumber extends u32 {}
 
+/** @name BlockWeights */
+export interface BlockWeights extends Bytes {}
+
 /** @name Call */
 export interface Call extends GenericCall {}
 
