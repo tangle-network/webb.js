@@ -1,4 +1,6 @@
 export default {
   rpc: {},
-  types: {}
+  types: {
+    BlockWeights: 'Vec<u8>'
+  }
 };
