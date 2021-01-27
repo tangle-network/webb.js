@@ -2493,14 +2493,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webb-tools/api@^0.1.2-19, @webb-tools/api@workspace:packages/api":
+"@webb-tools/api@^0.1.2-20, @webb-tools/api@workspace:packages/api":
   version: 0.0.0-use.local
   resolution: "@webb-tools/api@workspace:packages/api"
   dependencies:
     "@babel/runtime": ^7.10.2
     "@polkadot/api": ^3.4.1
     "@polkadot/rpc-core": ^3.4.1
-    "@webb-tools/types": 0.1.2-19
+    "@webb-tools/types": 0.1.2-20
   languageName: unknown
   linkType: soft
 
@@ -2518,26 +2518,26 @@ __metadata:
   resolution: "@webb-tools/sdk-bridge@workspace:packages/sdk-bridge"
   dependencies:
     "@types/lodash": ^4.14.161
-    "@webb-tools/sdk-core": ^0.1.2-19
+    "@webb-tools/sdk-core": ^0.1.2-20
     lodash: ^4.17.20
   languageName: unknown
   linkType: soft
 
-"@webb-tools/sdk-core@^0.1.2-19, @webb-tools/sdk-core@workspace:packages/sdk-core":
+"@webb-tools/sdk-core@^0.1.2-20, @webb-tools/sdk-core@workspace:packages/sdk-core":
   version: 0.0.0-use.local
   resolution: "@webb-tools/sdk-core@workspace:packages/sdk-core"
   dependencies:
     "@polkadot/api": ^3.4.1
     "@types/events": ^3.0.0
     "@types/lodash": ^4.14.161
-    "@webb-tools/api": ^0.1.2-19
+    "@webb-tools/api": ^0.1.2-20
     bignumber.js: ^9.0.0
     events: ^3.2.0
     lodash: ^4.17.20
   languageName: unknown
   linkType: soft
 
-"@webb-tools/type-definitions@0.1.2-19, @webb-tools/type-definitions@workspace:packages/type-definitions":
+"@webb-tools/type-definitions@0.1.2-20, @webb-tools/type-definitions@workspace:packages/type-definitions":
   version: 0.0.0-use.local
   resolution: "@webb-tools/type-definitions@workspace:packages/type-definitions"
   dependencies:
@@ -2545,7 +2545,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webb-tools/types@0.1.2-19, @webb-tools/types@workspace:packages/types":
+"@webb-tools/types@0.1.2-20, @webb-tools/types@workspace:packages/types":
   version: 0.0.0-use.local
   resolution: "@webb-tools/types@workspace:packages/types"
   dependencies:
@@ -2556,7 +2556,7 @@ __metadata:
     "@polkadot/typegen": ^3.4.1
     "@polkadot/types": ^3.4.1
     "@types/websocket": ^1.0.0
-    "@webb-tools/type-definitions": 0.1.2-19
+    "@webb-tools/type-definitions": 0.1.2-20
     websocket: ^1.0.31
   languageName: unknown
   linkType: soft

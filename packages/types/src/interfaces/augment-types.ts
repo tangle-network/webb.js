@@ -51,7 +51,7 @@ import type { Multiplier } from '@polkadot/types/interfaces/txpayment';
 import type { Multisig, Timepoint } from '@polkadot/types/interfaces/utility';
 import type { VestingInfo } from '@polkadot/types/interfaces/vesting';
 import type { Commitment, CurrencyId, EvmAddress, GroupId, GroupTree, MixerInfo, Nullifier, TokenSymbol } from '@webb-tools/types/interfaces/mixer';
-import type { AccountId, AccountIdOf, AccountIndex, Address, AssetId, Balance, BalanceOf, Block, BlockNumber, Call, CallHash, CallHashOf, ChangesTrieConfiguration, Consensus, ConsensusEngineId, Digest, DigestItem, ExtrinsicsWeight, Fixed128, Fixed64, FixedI128, FixedI64, FixedU128, FixedU64, H1024, H128, H160, H2048, H256, H512, H64, Hash, Header, I32F32, Index, IndicesLookupSource, Justification, KeyTypeId, KeyValue, LockIdentifier, LookupSource, LookupTarget, ModuleId, Moment, MultiAddress, OpaqueCall, Origin, OriginCaller, PalletVersion, PalletsOrigin, Pays, PerU16, Perbill, Percent, Permill, Perquintill, Phantom, PhantomData, PreRuntime, Releases, RuntimeDbWeight, Seal, SealV0, SignedBlock, StorageData, TransactionPriority, U32F32, ValidatorId, ValidatorIdOf, Weight, WeightMultiplier } from '@webb-tools/types/interfaces/runtime';
+import type { AccountId, AccountIdOf, AccountIndex, Address, AssetId, Balance, BalanceOf, Block, BlockNumber, Call, CallHash, CallHashOf, ChainId, ChangesTrieConfiguration, Consensus, ConsensusEngineId, Digest, DigestItem, ExtrinsicsWeight, Fixed128, Fixed64, FixedI128, FixedI64, FixedU128, FixedU64, H1024, H128, H160, H2048, H256, H512, H64, Hash, Header, I32F32, Index, IndicesLookupSource, Justification, KeyTypeId, KeyValue, LockIdentifier, LookupSource, LookupTarget, ModuleId, Moment, MultiAddress, OpaqueCall, Origin, OriginCaller, PalletVersion, PalletsOrigin, Pays, PerU16, Perbill, Percent, Permill, Perquintill, Phantom, PhantomData, PreRuntime, Releases, RuntimeDbWeight, Seal, SealV0, SignedBlock, StorageData, TransactionPriority, U32F32, ValidatorId, ValidatorIdOf, Weight, WeightMultiplier } from '@webb-tools/types/interfaces/runtime';
 
 declare module '@polkadot/types/types/registry' {
   export interface InterfaceTypes {
@@ -69,6 +69,7 @@ declare module '@polkadot/types/types/registry' {
     'Compact<BalanceOf>': Compact<BalanceOf>;
     'Compact<BlockNumber>': Compact<BlockNumber>;
     'Compact<BountyIndex>': Compact<BountyIndex>;
+    'Compact<ChainId>': Compact<ChainId>;
     'Compact<ConsensusEngineId>': Compact<ConsensusEngineId>;
     'Compact<ContractDiscriminant>': Compact<ContractDiscriminant>;
     'Compact<CoreIndex>': Compact<CoreIndex>;
@@ -223,6 +224,7 @@ declare module '@polkadot/types/types/registry' {
     'Option<CandidateHash>': Option<CandidateHash>;
     'Option<CandidatePendingAvailability>': Option<CandidatePendingAvailability>;
     'Option<CandidateReceipt>': Option<CandidateReceipt>;
+    'Option<ChainId>': Option<ChainId>;
     'Option<ChainProperties>': Option<ChainProperties>;
     'Option<ChainType>': Option<ChainType>;
     'Option<ChangesTrieConfiguration>': Option<ChangesTrieConfiguration>;
@@ -937,6 +939,7 @@ declare module '@polkadot/types/types/registry' {
     'Vec<CandidateHash>': Vec<CandidateHash>;
     'Vec<CandidatePendingAvailability>': Vec<CandidatePendingAvailability>;
     'Vec<CandidateReceipt>': Vec<CandidateReceipt>;
+    'Vec<ChainId>': Vec<ChainId>;
     'Vec<ChainProperties>': Vec<ChainProperties>;
     'Vec<ChainType>': Vec<ChainType>;
     'Vec<ChangesTrieConfiguration>': Vec<ChangesTrieConfiguration>;
@@ -1651,6 +1654,7 @@ declare module '@polkadot/types/types/registry' {
     CandidateHash: CandidateHash;
     CandidatePendingAvailability: CandidatePendingAvailability;
     CandidateReceipt: CandidateReceipt;
+    ChainId: ChainId;
     ChainProperties: ChainProperties;
     ChainType: ChainType;
     ChangesTrieConfiguration: ChangesTrieConfiguration;
