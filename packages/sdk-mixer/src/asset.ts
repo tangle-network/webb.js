@@ -6,6 +6,7 @@ export class Asset {
 
 export class MixerAssetGroup {
   constructor(
+    /** The group id for pallet merkle group / merkle tree */
     public readonly gid: number,
     public readonly tokenSymbol: TokenSymbol,
     public readonly treeDepth: number

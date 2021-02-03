@@ -3,9 +3,9 @@ import sys from '@webb-tools/mixer-client';
 
 export class ZKProof {
   constructor(
-    public readonly leafIndexCommentents: Array<Scalar>,
-    public readonly commentents: Array<Scalar>,
-    public readonly proofCommentents: Array<Scalar>,
+    public readonly leafIndexCommitments: Array<Scalar>,
+    public readonly commitments: Array<Scalar>,
+    public readonly proofCommitments: Array<Scalar>,
     public readonly nullifierHash: Scalar,
     public readonly proof: Scalar
   ) {}
