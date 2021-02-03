@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/sdk-mixer",
-  "version": "0.1.2-20",
+  "version": "0.1.2-21",
   "description": "the mixer submodule in webb tools sdk",
   "main": "index.js",
   "author": "Webb Developers <drew@webb.tools>",
@@ -17,7 +17,7 @@
   "dependencies": {
     "@polkadot/util": "^3.4.1",
     "@webb-tools/mixer-client": "^0.0.4",
-    "@webb-tools/sdk-core": "^0.1.2-20",
+    "@webb-tools/sdk-core": "^0.1.2-21",
     "lodash": "^4.17.20"
   },
   "devDependencies": {
