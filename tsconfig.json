@@ -33,14 +33,15 @@
       "@webb-tools/sdk-core/*": [
         "packages/sdk-core/src/*"
       ],
-      "@webb-tools/sdk-bridge": [
-        "packages/sdk-bridge/src"
+      "@webb-tools/sdk-mixer": [
+        "packages/sdk-mixer/src"
       ],
-      "@webb-tools/sdk-bridge/*": [
-        "packages/sdk-bridge/src/*"
-      ],
+      "@webb-tools/sdk-mixer/*": [
+        "packages/sdk-mixer/src/*"
+      ]
     },
     "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
     "typeRoots": [
       "./node_modules/@polkadot/ts",
       "./node_modules/@types"
