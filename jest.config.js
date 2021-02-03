@@ -16,9 +16,5 @@ module.exports = Object.assign({}, config, {
     '<rootDir>/packages/type-definitions/build',
     '<rootDir>/packages/sdk-core/build',
     '<rootDir>/packages/sdk-mixer/build'
-  ],
-  transformIgnorePatterns: [
-    '<rootDir>/node_modules/@webb-tools/mixer-client/*.js',
-    '!<rootDir>/node_modules/@webb-tools/mixer-client/*.wasm'
   ]
 });

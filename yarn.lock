@@ -2546,10 +2546,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webb-tools/mixer-client@npm:^0.0.3":
-  version: 0.0.3
-  resolution: "@webb-tools/mixer-client@npm:0.0.3"
-  checksum: 6cde931a9a7e9cc44a0e27c8157d10658ea49f67c2490fd41a900704ae922ed9750875a4fb74461211be961f456fc3325e9e5a8cd859fcb788748d7ec29082de
+"@webb-tools/mixer-client@npm:^0.0.4":
+  version: 0.0.4
+  resolution: "@webb-tools/mixer-client@npm:0.0.4"
+  checksum: edfaf1c0c2465940b1947448cde05d50f6604e60756a479a845532248405882b9b406581a2c68eef9fa57cf2a324fdaf93b7a0d93afdfbf9bae3c089a6a3cc7d
   languageName: node
   linkType: hard
 
@@ -2573,7 +2573,7 @@ __metadata:
   dependencies:
     "@polkadot/util": ^3.4.1
     "@types/lodash": ^4.14.161
-    "@webb-tools/mixer-client": ^0.0.3
+    "@webb-tools/mixer-client": ^0.0.4
     "@webb-tools/sdk-core": ^0.1.2-20
     lodash: ^4.17.20
   languageName: unknown
