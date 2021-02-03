@@ -6,7 +6,8 @@ module.exports = Object.assign({}, config, {
     '@webb-tools/types(.*)$': '<rootDir>/packages/types/src/$1',
     '@webb-tools/type-definitions(.*)$': '<rootDir>/packages/type-definitions/src/$1',
     '@webb-tools/sdk-core(.*)$': '<rootDir>/packages/sdk-core/src/$1',
-    '@webb-tools/sdk-bridge(.*)$': '<rootDir>/packages/sdk-swapcore/src/$1'
+    '@webb-tools/sdk-mixer(.*)$': '<rootDir>/packages/sdk-mixer/src/$1',
+    '@webb-tools/mixer-client': '<rootDir>/node_modules/@webb-tools/mixer-client/mixer-client.js'
   },
   modulePathIgnorePatterns: [
     '<rootDir>/build',
@@ -14,6 +15,10 @@ module.exports = Object.assign({}, config, {
     '<rootDir>/packages/types/build',
     '<rootDir>/packages/type-definitions/build',
     '<rootDir>/packages/sdk-core/build',
-    '<rootDir>/packages/sdk-swap/build'
+    '<rootDir>/packages/sdk-mixer/build'
+  ],
+  transformIgnorePatterns: [
+    '<rootDir>/node_modules/@webb-tools/mixer-client/*.js',
+    '!<rootDir>/node_modules/@webb-tools/mixer-client/*.wasm'
   ]
 });
