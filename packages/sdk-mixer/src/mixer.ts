@@ -1,18 +1,14 @@
 import { Note, Asset, MixerAssetGroup, TokenSymbol, Withdrawer } from '@webb-tools/sdk-mixer';
-import * as sys from '@webb-tools/mixer-client';
+import type { Mixer as WasmMixer } from '@webb-tools/mixer-client';
 
 export class Mixer {
-  private readonly inner: sys.Mixer;
-
-  private constructor(private readonly assetGroups: MixerAssetGroup[]) {
-    const tree: Array<[TokenSymbol, number, number]> = assetGroups.map((v) => [v.tokenSymbol, v.gid, v.treeDepth]);
-    this.inner = sys.Mixer.new(tree);
-  }
+  private constructor(private readonly assetGroups: MixerAssetGroup[], private readonly inner: WasmMixer) {}
 
   public static async init(assetGroups: MixerAssetGroup[]): Promise<Mixer> {
-    // init wasm (load it lazily).
-    await sys.default();
-    return new Mixer(assetGroups);
+    const tree: Array<[TokenSymbol, number, number]> = assetGroups.map((v) => [v.tokenSymbol, v.gid, v.treeDepth]);
+    const wasm = await import('@webb-tools/mixer-client');
+    const mixer = wasm.Mixer.new(tree);
+    return new Mixer(assetGroups, mixer);
   }
 
   /**
@@ -63,9 +59,10 @@ export class Mixer {
    * So you can freely create new {Withdrawer}s at any point in time.
    *
    **/
-  public asWithdrawer(note: Note, root: Uint8Array, leaves: Array<Uint8Array>): Withdrawer {
+  public async asWithdrawer(note: Note, root: Uint8Array, leaves: Array<Uint8Array>): Promise<Withdrawer> {
     // create a new mixer instance to be used to avoid `leaves` deplucation.
-    const mixer = sys.Mixer.new(this.assetGroups);
+    const wasm = await import('@webb-tools/mixer-client'); // cached
+    const mixer = wasm.Mixer.new(this.assetGroups);
     mixer.add_leaves(note.tokenSymbol, note.id, leaves);
     return new Withdrawer(mixer, root, note);
   }
