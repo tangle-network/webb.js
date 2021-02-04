@@ -1,11 +1,18 @@
 import { Note, Asset, MixerAssetGroup, TokenSymbol, Withdrawer } from '@webb-tools/sdk-mixer';
-import sys from '@webb-tools/mixer-client';
+import * as sys from '@webb-tools/mixer-client';
 
 export class Mixer {
   private readonly inner: sys.Mixer;
+
   constructor(private readonly assetGroups: MixerAssetGroup[]) {
     const tree: Array<[TokenSymbol, number, number]> = assetGroups.map((v) => [v.tokenSymbol, v.gid, v.treeDepth]);
     this.inner = sys.Mixer.new(tree);
+  }
+
+  public static async init(assetGroups: MixerAssetGroup[]): Promise<Mixer> {
+    // init wasm (load it lazily).
+    await sys.default();
+    return new Mixer(assetGroups);
   }
 
   /**
