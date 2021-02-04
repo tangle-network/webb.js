@@ -1,5 +1,5 @@
 import { Note, Scalar } from '@webb-tools/sdk-mixer';
-import sys from '@webb-tools/mixer-client';
+import * as sys from '@webb-tools/mixer-client';
 
 export class ZKProof {
   constructor(
