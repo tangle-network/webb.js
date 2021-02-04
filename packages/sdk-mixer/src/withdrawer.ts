@@ -1,5 +1,5 @@
 import { Note, Scalar } from '@webb-tools/sdk-mixer';
-import * as sys from '@webb-tools/mixer-client';
+import type { Mixer as WasmMixer } from '@webb-tools/mixer-client';
 
 export class ZKProof {
   constructor(
@@ -12,7 +12,7 @@ export class ZKProof {
 }
 
 export class Withdrawer {
-  constructor(private readonly mixer: sys.Mixer, private readonly root: Uint8Array, private readonly note: Note) {}
+  constructor(private readonly mixer: WasmMixer, private readonly root: Uint8Array, private readonly note: Note) {}
 
   /**
    * generate a zkproof and then do the withdraw operation using this ZKProof.
