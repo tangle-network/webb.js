@@ -15,7 +15,7 @@ export class Note {
 
   public static deserialize(value: string): Note {
     const parts = value.split('-');
-    const withBlockNumber = parts.length === 5;
+    const withBlockNumber = parts.length === 6;
     let i = -1;
     const prefix = parts[++i] as WebbNotePrefix; // 0
     const version = parts[++i]; // 1
