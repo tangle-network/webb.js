@@ -26,8 +26,8 @@ export class Note {
     if (withBlockNumber) {
       blockNumber = parseInt(parts[++i]); // 4?
     }
-    const r = hexToU8a(parts[++i]); // 4-5
-    const nullifier = hexToU8a(parts[++i]); // 5-6
+    const r = hexToU8a('0x' + parts[++i]); // 4-5
+    const nullifier = hexToU8a('0x' + parts[++i]); // 5-6
     // assign values here after parsing it.
     return new Note(prefix, version, tokenSymbol, id, blockNumber, r, nullifier);
   }
