@@ -1,5 +1,5 @@
-import wasm, { Mixer } from '@webb-tools/mixer-client';
-import type { TokenSymbol } from '@webb-tools/sdk-mixer/types';
+import type { Mixer } from '@webb-tools/mixer-client';
+import type { TokenSymbol } from '@webb-tools/sdk-mixer';
 
 type Asset = {
   id: number;
@@ -36,12 +36,15 @@ export type Event<T extends keyof WasmWorkerMessageTX = any> = {
 };
 
 class MixerWasm {
-  // @ts-ignore
   private mixer: Mixer | null = null;
 
   init(mixerGroup: Array<[TokenSymbol, number, number]>): void {
-    this.mixer = wasm.Mixer.new(mixerGroup);
-    this.emit('ready', undefined);
+    import('@webb-tools/mixer-client')
+      .then((wasm) => {
+        this.mixer = wasm.Mixer.new(mixerGroup);
+        this.emit('ready', undefined);
+      })
+      .catch(console.error);
   }
 
   generateNote(asset: Asset) {

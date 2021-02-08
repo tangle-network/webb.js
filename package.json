@@ -23,7 +23,7 @@
     "test:old": "cross-env NODE_OPTIONS=--experimental-vm-modules polkadot-dev-run-test --coverage",
     "check-deps": "./node_modules/@open-web3/util/scripts/check-deps.js yarn.lock @polkadot/ @open-web3/",
     "update-metadata": "ts-node --project ./tsconfig.json packages/types/scripts/updateMetadata.ts",
-    "exmple:sdk-mixer": "cd ./examples/sdk-mixer && yarn dev"
+    "example:sdk-mixer": "cd ./examples/sdk-mixer && yarn dev"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",

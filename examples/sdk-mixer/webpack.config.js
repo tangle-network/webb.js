@@ -4,6 +4,8 @@ const webpack = require('webpack');
 const UglifyJsWebpackPlugin = require('uglifyjs-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const babel = require('@open-web3/dev-config/config/babel-config-esm.cjs');
+
 module.exports = {
   entry: './main.ts',
   mode: 'development',
@@ -37,29 +39,7 @@ module.exports = {
             options: {
               cacheDirectory: true,
               babelrc: false,
-              presets: [
-                [
-                  '@babel/preset-env',
-                  {
-                    targets: {
-                      chrome: '58',
-                      ie: '11'
-                    }
-                  }
-                ],
-                '@babel/preset-typescript',
-                '@babel/preset-react'
-              ],
-              plugins: [
-                '@babel/plugin-syntax-dynamic-import',
-                '@babel/plugin-proposal-optional-chaining',
-                [
-                  '@babel/plugin-proposal-class-properties',
-                  {
-                    loose: true
-                  }
-                ]
-              ]
+              ...babel
             }
           }
         ]
@@ -68,7 +48,9 @@ module.exports = {
   },
   plugins: [
     new ForkTsCheckerWebpackPlugin({
-      path: path.join(__dirname, '..', '..', 'tsconfig.json')
+      typescript: {
+        configFile: path.join(__dirname, '..', '..', 'tsconfig.json')
+      }
     }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, 'public', 'index.html')

@@ -4,7 +4,7 @@ import type { Event, WasmWorkerMessageRX } from './wasm.worker';
 export class Mixer {
   private constructor(private readonly worker: Worker, private readonly assetGroups: MixerAssetGroup[]) {}
 
-  public destroy() {
+  public destroy(): void {
     this.worker.terminate();
   }
 
@@ -16,11 +16,11 @@ export class Mixer {
     } as WasmWorkerMessageRX['init']);
     const mixer = new Mixer(worker, assetGroups);
     // eslint-disable-next-line promise/param-names
-    return new Promise((res, _rej) => {
-      const handler = (event: any) => {
-        const data = event.data as Event;
+    return new Promise((resolve, reject) => {
+      const handler = (event: { data: Event }) => {
+        const data = event.data;
         if (data.name === 'init') {
-          res(mixer);
+          resolve(mixer);
           worker.removeEventListener('message', handler);
         }
       };
