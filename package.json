@@ -5,7 +5,8 @@
     "yarn": "^1.10.1"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "resolutions": {
     "typescript": "3.8.3",
@@ -21,7 +22,8 @@
     "test": "exit 0",
     "test:old": "cross-env NODE_OPTIONS=--experimental-vm-modules polkadot-dev-run-test --coverage",
     "check-deps": "./node_modules/@open-web3/util/scripts/check-deps.js yarn.lock @polkadot/ @open-web3/",
-    "update-metadata": "ts-node --project ./tsconfig.json packages/types/scripts/updateMetadata.ts"
+    "update-metadata": "ts-node --project ./tsconfig.json packages/types/scripts/updateMetadata.ts",
+    "exmple:sdk-mixer": "cd ./examples/sdk-mixer && yarn dev"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
