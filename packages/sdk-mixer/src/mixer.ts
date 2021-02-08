@@ -1,14 +1,30 @@
-import { Note, Asset, MixerAssetGroup, TokenSymbol, Withdrawer } from '@webb-tools/sdk-mixer';
-import type { Mixer as WasmMixer } from '@webb-tools/mixer-client';
+import { Asset, MixerAssetGroup, Note, TokenSymbol, Withdrawer } from '@webb-tools/sdk-mixer';
+import type { Event, WasmWorkerMessageRX } from './wasm.worker';
 
 export class Mixer {
-  private constructor(private readonly assetGroups: MixerAssetGroup[], private readonly inner: WasmMixer) {}
+  private constructor(private readonly worker: Worker, private readonly assetGroups: MixerAssetGroup[]) {}
+
+  public destroy() {
+    this.worker.terminate();
+  }
 
   public static async init(assetGroups: MixerAssetGroup[]): Promise<Mixer> {
     const tree: Array<[TokenSymbol, number, number]> = assetGroups.map((v) => [v.tokenSymbol, v.gid, v.treeDepth]);
-    const wasm = await import('@webb-tools/mixer-client');
-    const mixer = wasm.Mixer.new(tree);
-    return new Mixer(assetGroups, mixer);
+    const worker = new Worker(`./wasm.worker.js`);
+    worker.postMessage({
+      mixerGroup: tree
+    } as WasmWorkerMessageRX['init']);
+    const mixer = new Mixer(worker, assetGroups);
+    return new Promise((res) => {
+      const handler = (event: any) => {
+        const data = event.data as Event;
+        if (data.name === 'init') {
+          res(mixer);
+          worker.removeEventListener('message', handler);
+        }
+      };
+      worker.addEventListener('message', handler);
+    });
   }
 
   /**
