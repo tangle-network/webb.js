@@ -15,7 +15,8 @@ export class Mixer {
       mixerGroup: tree
     } as WasmWorkerMessageRX['init']);
     const mixer = new Mixer(worker, assetGroups);
-    return new Promise((res) => {
+    // eslint-disable-next-line promise/param-names
+    return new Promise((res, _rej) => {
       const handler = (event: any) => {
         const data = event.data as Event;
         if (data.name === 'init') {
@@ -32,9 +33,20 @@ export class Mixer {
    *
    * The generated note can be used later to do a deposit.
    **/
-  public generateNote(asset: Asset): Note {
-    const rawNote = this.inner.generate_note(asset.tokenSymbol, asset.id);
-    return Note.deserialize(rawNote);
+  public async generateNote(asset: Asset): Promise<Note> {
+    this.worker.postMessage({
+      ...asset
+    } as WasmWorkerMessageRX['generateNote']);
+    return new Promise((resolve, reject) => {
+      const handler = (event: any) => {
+        const data = event.data as Event<'generatedNote'>;
+        if (data.name === 'generatedNote') {
+          resolve(Note.deserialize(data.value.note));
+          this.worker.removeEventListener('message', handler);
+        }
+      };
+      this.worker.addEventListener('message', handler);
+    });
   }
 
   /**
@@ -46,24 +58,31 @@ export class Mixer {
    * a new `Note` and prepare it for the deposit TX.
    **/
   public async deposit(noteOrAsset: Note | Asset, fn: (leaf: Uint8Array) => Promise<number>): Promise<Note> {
-    type SavedNote = Map<'leaf' | 'asset' | 'id', any>;
-    let note: Note;
-    let savedNote: SavedNote;
+    const [leaf, noteSerialized] = await new Promise<[Uint8Array, string]>((resolve, reject) => {
+      const handler = (event: any) => {
+        const data = event.data as Event<'deposit'>;
+        if (data.name === 'deposit') {
+          resolve([data.value.leaf, data.value.note]);
+          this.worker.removeEventListener('message', handler);
+        }
+      };
+      this.worker.addEventListener('message', handler);
 
-    if (noteOrAsset instanceof Asset) {
-      const asset: Asset = noteOrAsset;
-      const rawNote = this.inner.generate_note(asset.tokenSymbol, asset.id);
-      note = Note.deserialize(rawNote);
-      savedNote = this.inner.save_note(rawNote) as SavedNote;
-    } else if (noteOrAsset instanceof Note) {
-      note = noteOrAsset;
-      savedNote = this.inner.save_note(noteOrAsset.serialize()) as SavedNote;
-    } else {
-      throw new Error('Bad Note or Asset provided');
-    }
+      if (noteOrAsset instanceof Asset) {
+        this.worker.postMessage({
+          asset: noteOrAsset,
+          note: undefined
+        } as WasmWorkerMessageRX['deposit']);
+      } else {
+        this.worker.postMessage({
+          asset: undefined,
+          note: noteOrAsset.serialize()
+        } as WasmWorkerMessageRX['deposit']);
+      }
+    });
 
-    const leaf = savedNote.get('leaf') as Uint8Array;
     const blockNumber = await fn(leaf);
+    const note = Note.deserialize(noteSerialized);
     note.blockNumber = blockNumber;
     return note;
   }
