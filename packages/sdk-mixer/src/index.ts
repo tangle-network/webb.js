@@ -3,4 +3,4 @@ export * from './asset';
 export * from './mixer';
 export * from './types';
 export * from './withdrawer';
-export * from './wasm.worker';
+export * from './wasm-thread';

@@ -2,6 +2,7 @@
   "extends": "@open-web3/dev-config/config/tsconfig.json",
   "exclude": [
     "build/**/*",
+    "examples/**/*",
     "**/build/**/*"
   ],
   "compilerOptions": {
@@ -9,9 +10,6 @@
     "module": "ESNext",
     "baseUrl": ".",
     "paths": {
-      "@examples/*": [
-        "examples/"
-      ],
       "@webb-tools/api": [
         "packages/api/src"
       ],

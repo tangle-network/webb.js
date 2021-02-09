@@ -1,31 +1,39 @@
-import { Asset, MixerAssetGroup, Note, TokenSymbol, Withdrawer } from '@webb-tools/sdk-mixer';
-import type { Event, WasmWorkerMessageRX } from './wasm.worker';
+import { Asset, MixerAssetGroup, Note, TokenSymbol, WasmMessage, WasmWorkerMessageTX } from '@webb-tools/sdk-mixer';
+import type { Event, WasmWorkerMessageRX } from './wasm-thread';
 
 export class Mixer {
+  // @ts-ignore
   private constructor(private readonly worker: Worker, private readonly assetGroups: MixerAssetGroup[]) {}
 
   public destroy(): void {
     this.worker.terminate();
   }
 
-  public static async init(assetGroups: MixerAssetGroup[]): Promise<Mixer> {
-    const tree: Array<[TokenSymbol, number, number]> = assetGroups.map((v) => [v.tokenSymbol, v.gid, v.treeDepth]);
-    const worker = new Worker(new URL('./wasm.worker.js', import.meta.url));
-    worker.postMessage({
-      mixerGroup: tree
-    } as WasmWorkerMessageRX['init']);
-    const mixer = new Mixer(worker, assetGroups);
-    // eslint-disable-next-line promise/param-names
+  private postMessage<T extends keyof WasmMessage>(
+    name: T,
+    value: WasmWorkerMessageRX[T]
+  ): Promise<WasmWorkerMessageTX[T]> {
+    this.worker.postMessage({ [name]: value });
+
     return new Promise((resolve, reject) => {
-      const handler = (event: { data: Event }) => {
+      const handler = (event: { data: Event<T> }) => {
         const data = event.data;
-        if (data.name === 'init') {
-          resolve(mixer);
-          worker.removeEventListener('message', handler);
+        if (data.name === name) {
+          resolve(data.value);
+          this.worker.removeEventListener('message', handler);
         }
       };
-      worker.addEventListener('message', handler);
+      this.worker.addEventListener('message', handler);
     });
+  }
+
+  public static async init(worker: Worker, assetGroups: MixerAssetGroup[]): Promise<Mixer> {
+    const tree: Array<[TokenSymbol, number, number]> = assetGroups.map((v) => [v.tokenSymbol, v.gid, v.treeDepth]);
+    const mixer = new Mixer(worker, assetGroups);
+    await mixer.postMessage('init', {
+      mixerGroup: tree
+    });
+    return mixer;
   }
 
   /**
@@ -34,19 +42,10 @@ export class Mixer {
    * The generated note can be used later to do a deposit.
    **/
   public async generateNote(asset: Asset): Promise<Note> {
-    this.worker.postMessage({
+    const { note: noteSerialized } = await this.postMessage('generateNote', {
       ...asset
-    } as WasmWorkerMessageRX['generateNote']);
-    return new Promise((resolve, reject) => {
-      const handler = (event: any) => {
-        const data = event.data as Event<'generatedNote'>;
-        if (data.name === 'generatedNote') {
-          resolve(Note.deserialize(data.value.note));
-          this.worker.removeEventListener('message', handler);
-        }
-      };
-      this.worker.addEventListener('message', handler);
     });
+    return Note.deserialize(noteSerialized);
   }
 
   /**
@@ -58,31 +57,23 @@ export class Mixer {
    * a new `Note` and prepare it for the deposit TX.
    **/
   public async deposit(noteOrAsset: Note | Asset, fn: (leaf: Uint8Array) => Promise<number>): Promise<Note> {
-    const [leaf, noteSerialized] = await new Promise<[Uint8Array, string]>((resolve, reject) => {
-      const handler = (event: any) => {
-        const data = event.data as Event<'deposit'>;
-        if (data.name === 'deposit') {
-          resolve([data.value.leaf, data.value.note]);
-          this.worker.removeEventListener('message', handler);
-        }
-      };
-      this.worker.addEventListener('message', handler);
-
-      if (noteOrAsset instanceof Asset) {
-        this.worker.postMessage({
-          asset: noteOrAsset,
-          note: undefined
-        } as WasmWorkerMessageRX['deposit']);
-      } else {
-        this.worker.postMessage({
-          asset: undefined,
-          note: noteOrAsset.serialize()
-        } as WasmWorkerMessageRX['deposit']);
-      }
-    });
+    let leaf: Uint8Array;
+    let note: Note;
+    if (noteOrAsset instanceof Asset) {
+      const { note: _note, leaf: _leaf } = await this.postMessage('deposit', {
+        asset: { id: noteOrAsset.id, tokenSymbol: noteOrAsset.tokenSymbol }
+      });
+      leaf = _leaf;
+      note = Note.deserialize(_note);
+    } else {
+      const { note: _note, leaf: _leaf } = await this.postMessage('deposit', {
+        note: noteOrAsset.serialize()
+      });
+      leaf = _leaf;
+      note = Note.deserialize(_note);
+    }
 
     const blockNumber = await fn(leaf);
-    const note = Note.deserialize(noteSerialized);
     note.blockNumber = blockNumber;
     return note;
   }
@@ -94,11 +85,12 @@ export class Mixer {
    * So you can freely create new {Withdrawer}s at any point in time.
    *
    **/
-  public async asWithdrawer(note: Note, root: Uint8Array, leaves: Array<Uint8Array>): Promise<Withdrawer> {
-    // create a new mixer instance to be used to avoid `leaves` deplucation.
-    const wasm = await import('@webb-tools/mixer-client'); // cached
-    const mixer = wasm.Mixer.new(this.assetGroups);
-    mixer.add_leaves(note.tokenSymbol, note.id, leaves);
-    return new Withdrawer(mixer, root, note);
-  }
+  // public async asWithdrawer(note: Note, root: Uint8Array, leaves: Array<Uint8Array>): Promise<any> {
+  //   // create a new mixer instance to be used to avoid `leaves` deplucation.
+  //   // const wasm = await import('@webb-tools/mixer-client'); // cached
+  //   // const mixer = wasm.Mixer.new(this.assetGroups);
+  //   // mixer.add_leaves(note.tokenSymbol, note.id, leaves);
+  //   // return new Withdrawer(mixer, root, note);
+  //   return {};
+  // }
 }

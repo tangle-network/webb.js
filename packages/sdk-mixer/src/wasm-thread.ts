@@ -5,17 +5,22 @@ type Asset = {
   id: number;
   tokenSymbol: TokenSymbol;
 };
-export type WasmWorkerMessageTX = {
-  ready: void;
-  generatedNote: {
+export type eventNames = 'init' | 'generateNote' | 'deposit' | 'withdraw';
+export type WasmMessage = Record<eventNames, unknown>;
+
+export interface WasmWorkerMessageTX extends WasmMessage {
+  init: void;
+  generateNote: {
     note: string;
   };
   deposit: {
     leaf: Uint8Array;
     note: string;
   };
-};
-export type WasmWorkerMessageRX = {
+  withdraw: void;
+}
+
+export interface WasmWorkerMessageRX extends WasmMessage {
   generateNote: Asset;
   init: {
     mixerGroup: Array<[TokenSymbol, number, number]>;
@@ -29,20 +34,31 @@ export type WasmWorkerMessageRX = {
     root: Uint8Array;
     note: string;
   };
-};
+}
+
 export type Event<T extends keyof WasmWorkerMessageTX = any> = {
   name: T;
   value: WasmWorkerMessageTX[T];
 };
+export type EventRX<T extends keyof WasmWorkerMessageRX = any> = {
+  name: T;
+  value: WasmWorkerMessageRX[T];
+};
 
-class MixerWasm {
+export class WasmMixer {
   private mixer: Mixer | null = null;
+
+  constructor() {
+    self.addEventListener('message', (event) => {
+      this.on((event.data as unknown) as WasmWorkerMessageRX);
+    });
+  }
 
   init(mixerGroup: Array<[TokenSymbol, number, number]>): void {
     import('@webb-tools/mixer-client')
       .then((wasm) => {
         this.mixer = wasm.Mixer.new(mixerGroup);
-        this.emit('ready', undefined);
+        this.emit('init', undefined);
       })
       .catch(console.error);
   }
@@ -53,7 +69,7 @@ class MixerWasm {
       return;
     }
     const note = this.mixer.generate_note(asset.tokenSymbol, asset.id);
-    this.emit('generatedNote', {
+    this.emit('generateNote', {
       note: note
     });
   }
@@ -107,8 +123,3 @@ class MixerWasm {
     }
   }
 }
-
-const worker = new MixerWasm();
-self.addEventListener('message', (event) => {
-  worker.on((event.data as unknown) as WasmWorkerMessageRX);
-});
