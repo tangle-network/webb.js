@@ -13,6 +13,7 @@
       "@webb-tools/api": [
         "packages/api/src"
       ],
+
       "@webb-tools/api/*": [
         "packages/api/src/*"
       ],
@@ -39,7 +40,12 @@
       ],
       "@webb-tools/sdk-mixer/*": [
         "packages/sdk-mixer/src/*"
-      ]
+      ],
+      "@webb-tools/app-util": [
+        "packages/app-util/src"
+      ],"@webb-tools/app-util/*": [
+        "packages/app-util/src/*"
+      ],
     },
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,

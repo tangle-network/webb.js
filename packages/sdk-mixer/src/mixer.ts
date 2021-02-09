@@ -1,24 +1,46 @@
-import { Asset, MixerAssetGroup, Note, TokenSymbol, WasmMessage, WasmWorkerMessageTX } from '@webb-tools/sdk-mixer';
-import type { Event, WasmWorkerMessageRX } from './wasm-thread';
+import {
+  Asset,
+  Event,
+  MixerAssetGroup,
+  Note,
+  TokenSymbol,
+  WasmMessage,
+  WasmWorkerMessageRX,
+  WasmWorkerMessageTX
+} from '@webb-tools/sdk-mixer';
+import { LoggerService } from '@webb-tools/app-util';
 
 export class Mixer {
+  private logger = LoggerService.new('Mixer');
+  private destroyed = false;
+
   // @ts-ignore
   private constructor(private readonly worker: Worker, private readonly assetGroups: MixerAssetGroup[]) {}
 
   public destroy(): void {
+    this.logger.info(`Worker destroyed`);
     this.worker.terminate();
+    this.destroyed = true;
+  }
+
+  private async destroyGuard(): Promise<void> {
+    if (this.destroyed) {
+      throw new Error('Mixer is destroyed');
+    }
   }
 
   private postMessage<T extends keyof WasmMessage>(
     name: T,
     value: WasmWorkerMessageRX[T]
   ): Promise<WasmWorkerMessageTX[T]> {
+    this.logger.debug(`Posting event${name}`, value);
     this.worker.postMessage({ [name]: value });
 
     return new Promise((resolve, reject) => {
       const handler = (event: { data: Event<T> }) => {
         const data = event.data;
         if (data.name === name) {
+          this.logger.debug(`Data for event${name} is`, value);
           resolve(data.value);
           this.worker.removeEventListener('message', handler);
         }
@@ -30,6 +52,7 @@ export class Mixer {
   public static async init(worker: Worker, assetGroups: MixerAssetGroup[]): Promise<Mixer> {
     const tree: Array<[TokenSymbol, number, number]> = assetGroups.map((v) => [v.tokenSymbol, v.gid, v.treeDepth]);
     const mixer = new Mixer(worker, assetGroups);
+    mixer.logger.debug(`Mixer initialized with assetGroups`, assetGroups);
     await mixer.postMessage('init', {
       mixerGroup: tree
     });
@@ -42,6 +65,7 @@ export class Mixer {
    * The generated note can be used later to do a deposit.
    **/
   public async generateNote(asset: Asset): Promise<Note> {
+    await this.destroyGuard();
     const { note: noteSerialized } = await this.postMessage('generateNote', {
       ...asset
     });
@@ -59,6 +83,8 @@ export class Mixer {
   public async deposit(noteOrAsset: Note | Asset, fn: (leaf: Uint8Array) => Promise<number>): Promise<Note> {
     let leaf: Uint8Array;
     let note: Note;
+    await this.destroyGuard();
+
     if (noteOrAsset instanceof Asset) {
       const { note: _note, leaf: _leaf } = await this.postMessage('deposit', {
         asset: { id: noteOrAsset.id, tokenSymbol: noteOrAsset.tokenSymbol }
