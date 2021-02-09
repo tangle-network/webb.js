@@ -10,7 +10,7 @@ export class Mixer {
 
   public static async init(assetGroups: MixerAssetGroup[]): Promise<Mixer> {
     const tree: Array<[TokenSymbol, number, number]> = assetGroups.map((v) => [v.tokenSymbol, v.gid, v.treeDepth]);
-    const worker = new Worker(`./wasm.worker.js`);
+    const worker = new Worker('@webb-tools/sdk-mixer/wasm.worker');
     worker.postMessage({
       mixerGroup: tree
     } as WasmWorkerMessageRX['init']);
