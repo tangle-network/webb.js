@@ -9,6 +9,9 @@
     "module": "CommonJS",
     "baseUrl": ".",
     "paths": {
+      "@examples/*": [
+        "examples/"
+      ],
       "@webb-tools/api": [
         "packages/api/src"
       ],
