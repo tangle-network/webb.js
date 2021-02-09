@@ -15,7 +15,7 @@
   "scripts": {
     "build": "yarn build:interfaces && polkadot-dev-build-ts",
     "build:release": "polkadot-ci-ghact-build",
-    "build:interfaces": "node -r ts-node/register -r tsconfig-paths/register packages/types/scripts/generate.ts && node -r ts-node/register -r tsconfig-paths/register packages/type-definitions/scripts/generate.ts",
+    "build:interfaces": "ts-node-script -r tsconfig-paths/register packages/types/scripts/generate.ts && ts-node-script -r tsconfig-paths/register packages/type-definitions/scripts/generate.ts",
     "lint": "polkadot-dev-run-lint",
     "clean": "polkadot-dev-clean-build",
     "postinstall": "polkadot-dev-yarn-only",
@@ -33,7 +33,7 @@
     "@open-web3/util": "^0.8.2-6",
     "@types/jest": "^25.2.3",
     "cross-env": "^7.0.3",
-    "ts-node": "^8.6.1",
+    "ts-node": "^9.1.1",
     "tsconfig-paths": "^3.9.0",
     "worker-loader": "^3.0.7"
   }
