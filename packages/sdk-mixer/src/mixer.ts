@@ -33,14 +33,14 @@ export class Mixer {
     name: T,
     value: WasmWorkerMessageRX[T]
   ): Promise<WasmWorkerMessageTX[T]> {
-    this.logger.debug(`Posting event${name}`, value);
+    this.logger.debug(`Posting event ${name}`, value);
     this.worker.postMessage({ [name]: value });
 
     return new Promise((resolve, reject) => {
       const handler = (event: { data: Event<T> }) => {
         const data = event.data;
         if (data.name === name) {
-          this.logger.debug(`Data for event${name} is`, value);
+          this.logger.debug(`Data for event ${name} is`, value);
           resolve(data.value);
           this.worker.removeEventListener('message', handler);
         }
