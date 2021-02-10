@@ -8799,7 +8799,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.1.2":
+"prettier@npm:^2.1.2, prettier@npm:^2.2.1":
   version: 2.2.1
   resolution: "prettier@npm:2.2.1"
   bin:
@@ -9457,6 +9457,7 @@ __metadata:
     "@open-web3/util": ^0.8.2-6
     "@types/jest": ^25.2.3
     cross-env: ^7.0.3
+    prettier: ^2.2.1
     ts-node: ^9.1.1
     tsconfig-paths: ^3.9.0
     worker-loader: ^3.0.7

@@ -1,5 +1,6 @@
 import type { Mixer } from '@webb-tools/mixer-client';
 import type { TokenSymbol } from '@webb-tools/sdk-mixer';
+import { LoggerService } from '@webb-tools/app-util';
 
 type Asset = {
   id: number;
@@ -47,7 +48,7 @@ export type EventRX<T extends keyof WasmWorkerMessageRX = any> = {
 
 export class WasmMixer {
   private mixer: Mixer | null = null;
-
+  private logger = LoggerService.new('WasmMixer');
   constructor() {
     self.addEventListener('message', (event) => {
       this.on((event.data as unknown) as WasmWorkerMessageRX);
@@ -57,10 +58,13 @@ export class WasmMixer {
   init(mixerGroup: Array<[TokenSymbol, number, number]>): void {
     import('@webb-tools/mixer-client')
       .then((wasm) => {
+        this.logger.debug('Mixer initialized with mixerGroup ', mixerGroup);
         this.mixer = wasm.Mixer.new(mixerGroup);
         this.emit('init', undefined);
       })
-      .catch(console.error);
+      .catch((e) => {
+        this.logger.error(`Failed to initialized the mixer`, e);
+      });
   }
 
   generateNote(asset: Asset) {
@@ -99,6 +103,8 @@ export class WasmMixer {
   }
 
   emit<T extends keyof WasmWorkerMessageTX>(name: T, value: WasmWorkerMessageTX[T]) {
+    this.logger.trace(`Got message  ${name}`, value);
+
     // @ts-ignore
     self.postMessage({
       name,
@@ -108,6 +114,7 @@ export class WasmMixer {
 
   on(event: WasmWorkerMessageRX) {
     const name = Object.keys(event)[0] as keyof WasmWorkerMessageRX;
+    this.logger.trace(`Got message  ${name} `, event);
     switch (name) {
       case 'generateNote':
         this.generateNote(event[name]);
