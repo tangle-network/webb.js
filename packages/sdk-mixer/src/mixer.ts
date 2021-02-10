@@ -9,12 +9,11 @@ import {
   WasmWorkerMessageTX
 } from '@webb-tools/sdk-mixer';
 import { LoggerService } from '@webb-tools/app-util';
+import { ZKProof } from './zkproof';
 
 export class Mixer {
-  private logger = LoggerService.new('Mixer');
+  private readonly logger = LoggerService.new('Mixer');
   private destroyed = false;
-
-  // @ts-ignore
   private constructor(private readonly worker: Worker, private readonly assetGroups: MixerAssetGroup[]) {}
 
   public destroy(): void {
@@ -37,12 +36,15 @@ export class Mixer {
     this.worker.postMessage({ [name]: value });
 
     return new Promise((resolve, reject) => {
-      const handler = (event: { data: Event<T> }) => {
-        const data = event.data;
-        if (data.name === name) {
-          this.logger.debug(`Data for event ${name} is`, value);
-          resolve(data.value);
+      const handler = ({ data: result }: { data: Event<T> }) => {
+        if (result.name === name && !result.error) {
+          this.logger.debug(`Data for event ${name} is`, result.value);
           this.worker.removeEventListener('message', handler);
+          resolve(result.value);
+        } else if (result.name === name && result.error) {
+          this.logger.error(`Got Error for event ${name} with`, result.value);
+          this.worker.removeEventListener('message', handler);
+          reject(result.value);
         }
       };
       this.worker.addEventListener('message', handler);
@@ -105,18 +107,37 @@ export class Mixer {
   }
 
   /**
-   * Get a new {Withdrawer} that can be used for withdrawing TXs.
+   * Withdraw a note with the specified root and leaves.
+   * generate a zkproof and then do the withdraw operation using this ZKProof.
+   * the `fn` callback should do the withdraw operation.
    *
-   * Note: This will create a new mixer, these `leaves` will not be added to the current Mixer.
-   * So you can freely create new {Withdrawer}s at any point in time.
+   * Note: This will create a new mixer under the hood, these `leaves` will not be added to the current Mixer.
+   * So you can freely call this method at any point in time.
    *
    **/
-  // public async asWithdrawer(note: Note, root: Uint8Array, leaves: Array<Uint8Array>): Promise<any> {
-  //   // create a new mixer instance to be used to avoid `leaves` deplucation.
-  //   // const wasm = await import('@webb-tools/mixer-client'); // cached
-  //   // const mixer = wasm.Mixer.new(this.assetGroups);
-  //   // mixer.add_leaves(note.tokenSymbol, note.id, leaves);
-  //   // return new Withdrawer(mixer, root, note);
-  //   return {};
-  // }
+  public async withdraw(
+    note: Note,
+    root: Uint8Array,
+    leaves: Array<Uint8Array>,
+    fn: (zkProof: ZKProof) => Promise<void>
+  ): Promise<void> {
+    await this.destroyGuard();
+    const mixerGroup: Array<[TokenSymbol, number, number]> = this.assetGroups.map((v) => [
+      v.tokenSymbol,
+      v.gid,
+      v.treeDepth
+    ]);
+    const { leafIndexCommitments, commitments, proofCommitments, proof, nullifierHash } = await this.postMessage(
+      'withdraw',
+      {
+        note: note.serialize(),
+        mixerGroup,
+        leaves,
+        root
+      }
+    );
+
+    const zkProof = new ZKProof(leafIndexCommitments, commitments, proofCommitments, nullifierHash, proof);
+    await fn(zkProof);
+  }
 }
