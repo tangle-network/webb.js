@@ -1,5 +1,5 @@
 {
-  "version": "0.1.2-31",
+  "version": "0.1.2-32",
   "private": true,
   "engines": {
     "yarn": "^1.10.1"
@@ -25,7 +25,6 @@
     "update-metadata": "ts-node --project ./tsconfig.json packages/types/scripts/updateMetadata.ts",
     "example:sdk-mixer": "cd ./examples/sdk-mixer && yarn dev",
     "format": "prettier --write \"packages/**/*.{ts,js,jsx,tsx}\""
-
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
