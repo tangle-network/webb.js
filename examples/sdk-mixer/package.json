@@ -1,0 +1,39 @@
+{
+  "name": "sdk-mixer-exmaple",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "MIT",
+  "scripts": {
+    "dev": "webpack-dev-server --config ./webpack.config.js --hot --inline",
+    "build": "webpack --config ./webpack.config.js "
+  },
+  "dependencies": {
+    "@polkadot/api": "^3.4",
+    "@webb-tools/api": "^0.1.2-33",
+    "@webb-tools/app-util": "^0.1.2-33",
+    "@webb-tools/mixer-client": "^0.0.7",
+    "@webb-tools/sdk-core": "^0.1.2-33",
+    "@webb-tools/sdk-mixer": "^0.1.2-33",
+    "@webb-tools/types": "^0.1.2-33"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.10",
+    "@babel/preset-env": "^7.7.4",
+    "@babel/preset-es2015": "^7.0.0-beta.53",
+    "@babel/preset-react": "^7.7.4",
+    "@babel/preset-stage-2": "^7.0.0",
+    "@babel/preset-typescript": "^7.7.4",
+    "@types/webpack-env": "^1.16.0",
+    "babel-loader": "^8.0.6",
+    "fork-ts-checker-webpack-plugin": "^6.1.0",
+    "html-webpack-plugin": "^4.5.1",
+    "prettier": "^2.2.1",
+    "ts-loader": "^8.0.14",
+    "tsconfig-paths-webpack-plugin": "^3.3.0",
+    "typescript": "^4.1.3",
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.9.0"
+  }
+}

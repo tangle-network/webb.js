@@ -68,8 +68,9 @@ export class WasmMixer {
   init(mixerGroup: Array<[TokenSymbol, number, number]>): void {
     import('@webb-tools/mixer-client')
       .then((wasm) => {
-        this.logger.debug('Mixer initialized with mixerGroup ', mixerGroup);
+        this.logger.debug('Mixer initializing with mixerGroup ', mixerGroup);
         this.mixer = wasm.Mixer.new(mixerGroup);
+        this.logger.debug('Mixer initialized with mixerGroup ', mixerGroup);
         this.emit('init', undefined);
       })
       .catch((e) => {
