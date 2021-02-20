@@ -1,10 +1,9 @@
 import { MerkleTree, createHash } from '@guildofweavers/merkle';
 
+export * from '@guildofweavers/merkle';
 export * from './wasm-thread';
 export * from './leaf';
-export * from './hash';
 export * from './tree';
-export * from '@guildofweavers/merkle';
 
 export const buildMerkleTree = (leaves: Array<Uint8Array>): Promise<MerkleTree> => {
   const hash = createHash('sha256');

@@ -45,7 +45,7 @@ export default class Tree {
   /**
    * Hash two elements using the poseidon hash functions
    **/
-  public async generateNote(left: Uint8Array, right: Uint8Array): Promise<any> {
+  public async poseidon(left: Uint8Array, right: Uint8Array): Promise<any> {
     await this.destroyGuard();
     const { hash } = await this.postMessage('poseidon', {
       left,

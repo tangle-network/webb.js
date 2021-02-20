@@ -17,6 +17,7 @@
   "dependencies": {
     "@polkadot/util": "^3.4.1",
     "@webb-tools/sdk-core": "^0.1.2-33",
+    "@guildofweaver/merkle": "git+https://github.com/webb-tools/merkle.git",
     "lodash": "^4.17.20"
   },
   "devDependencies": {
