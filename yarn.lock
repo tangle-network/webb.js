@@ -5,6 +5,13 @@ __metadata:
   version: 4
   cacheKey: 7
 
+"@assemblyscript/loader@npm:0.8.x":
+  version: 0.8.1
+  resolution: "@assemblyscript/loader@npm:0.8.1"
+  checksum: 604d79ce28639a2a25a50cd99e58256b419cabc803de1f3c749347fcafd0867eb62d8c176dbe1c700e4c7071e424d3da87bbac2dfa250b9f0bc0925be7934394
+  languageName: node
+  linkType: hard
+
 "@babel/cli@npm:^7.12.1":
   version: 7.12.10
   resolution: "@babel/cli@npm:7.12.10"
@@ -1400,6 +1407,15 @@ __metadata:
     minimatch: ^3.0.4
     strip-json-comments: ^3.1.1
   checksum: 00e87c194672eb85dcea22ba749fb3cabdd9768e952e748b2c727940f06691c873369d75cf3bddb239301eca8c38de6e098b0de4839fa7c16a2062e536e8ff5a
+  languageName: node
+  linkType: hard
+
+"@guildofweavers/merkle@npm:^0.3.12":
+  version: 0.3.12
+  resolution: "@guildofweavers/merkle@npm:0.3.12"
+  dependencies:
+    "@assemblyscript/loader": 0.8.x
+  checksum: 4d8b3c83b84f0059d8d514d6b0a4def28c1edd1727f29e1e392b4888b84184b02438ec2a8bdda5d0a2be150481bc70a253ffecabac10c662e55895c4d51efde2
   languageName: node
   linkType: hard
 
@@ -9453,6 +9469,7 @@ __metadata:
     "@babel/core": ^7.10.2
     "@babel/register": ^7.10.1
     "@babel/runtime": ^7.10.2
+    "@guildofweavers/merkle": ^0.3.12
     "@open-web3/dev-config": ^0.1.10
     "@open-web3/util": ^0.8.2-6
     "@types/jest": ^25.2.3
