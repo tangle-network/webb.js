@@ -35,6 +35,12 @@
       "@webb-tools/sdk-core/*": [
         "packages/sdk-core/src/*"
       ],
+      "@webb-tools/sdk-merkle": [
+        "packages/sdk-merkle/src"
+      ],
+      "@webb-tools/sdk-merkle/*": [
+        "packages/sdk-merkle/src/*"
+      ],
       "@webb-tools/sdk-mixer": [
         "packages/sdk-mixer/src"
       ],

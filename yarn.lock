@@ -5,6 +5,13 @@ __metadata:
   version: 4
   cacheKey: 7
 
+"@assemblyscript/loader@npm:0.8.x":
+  version: 0.8.1
+  resolution: "@assemblyscript/loader@npm:0.8.1"
+  checksum: 604d79ce28639a2a25a50cd99e58256b419cabc803de1f3c749347fcafd0867eb62d8c176dbe1c700e4c7071e424d3da87bbac2dfa250b9f0bc0925be7934394
+  languageName: node
+  linkType: hard
+
 "@babel/cli@npm:^7.12.1":
   version: 7.12.10
   resolution: "@babel/cli@npm:7.12.10"
@@ -1403,6 +1410,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@guildofweaver/merkle@git+https://github.com/webb-tools/merkle.git":
+  version: 0.3.12
+  resolution: "@guildofweaver/merkle@https://github.com/webb-tools/merkle.git#commit=0235f48f6603153c0d6f05fdbc5f0def8a31c3d0"
+  dependencies:
+    "@assemblyscript/loader": 0.8.x
+  checksum: fba41b296f0219991beecf1e0665e66adfbaa125f4f8965a191f3114f6d806a01f4d2e4bb2cc10089fd3b73b230c515d491f5f529e8b5ed5d52d54608c63117f
+  languageName: node
+  linkType: hard
+
+"@guildofweavers/merkle@npm:^0.3.12":
+  version: 0.3.12
+  resolution: "@guildofweavers/merkle@npm:0.3.12"
+  dependencies:
+    "@assemblyscript/loader": 0.8.x
+  checksum: 4d8b3c83b84f0059d8d514d6b0a4def28c1edd1727f29e1e392b4888b84184b02438ec2a8bdda5d0a2be150481bc70a253ffecabac10c662e55895c4d51efde2
+  languageName: node
+  linkType: hard
+
 "@istanbuljs/load-nyc-config@npm:^1.0.0":
   version: 1.1.0
   resolution: "@istanbuljs/load-nyc-config@npm:1.1.0"
@@ -2567,6 +2592,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@webb-tools/sdk-merkle@^0.1.2-33, @webb-tools/sdk-merkle@workspace:packages/sdk-merkle":
+  version: 0.0.0-use.local
+  resolution: "@webb-tools/sdk-merkle@workspace:packages/sdk-merkle"
+  dependencies:
+    "@guildofweaver/merkle": "git+https://github.com/webb-tools/merkle.git"
+    "@polkadot/util": ^3.4.1
+    "@types/lodash": ^4.14.161
+    "@webb-tools/sdk-core": ^0.1.2-33
+    lodash: ^4.17.20
+  languageName: unknown
+  linkType: soft
+
 "@webb-tools/sdk-mixer@workspace:packages/sdk-mixer":
   version: 0.0.0-use.local
   resolution: "@webb-tools/sdk-mixer@workspace:packages/sdk-mixer"
@@ -2575,6 +2612,7 @@ __metadata:
     "@types/lodash": ^4.14.161
     "@webb-tools/mixer-client": ^0.0.6
     "@webb-tools/sdk-core": ^0.1.2-33
+    "@webb-tools/sdk-merkle": ^0.1.2-33
     lodash: ^4.17.20
   languageName: unknown
   linkType: soft
@@ -9453,6 +9491,7 @@ __metadata:
     "@babel/core": ^7.10.2
     "@babel/register": ^7.10.1
     "@babel/runtime": ^7.10.2
+    "@guildofweavers/merkle": ^0.3.12
     "@open-web3/dev-config": ^0.1.10
     "@open-web3/util": ^0.8.2-6
     "@types/jest": ^25.2.3

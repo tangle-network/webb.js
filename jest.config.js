@@ -6,6 +6,7 @@ module.exports = Object.assign({}, config, {
     '@webb-tools/types(.*)$': '<rootDir>/packages/types/src/$1',
     '@webb-tools/type-definitions(.*)$': '<rootDir>/packages/type-definitions/src/$1',
     '@webb-tools/sdk-core(.*)$': '<rootDir>/packages/sdk-core/src/$1',
+    '@webb-tools/sdk-merkle(.*)$': '<rootDir>/packages/sdk-merkle/src/$1',
     '@webb-tools/sdk-mixer(.*)$': '<rootDir>/packages/sdk-mixer/src/$1'
   },
   modulePathIgnorePatterns: [
@@ -14,6 +15,7 @@ module.exports = Object.assign({}, config, {
     '<rootDir>/packages/types/build',
     '<rootDir>/packages/type-definitions/build',
     '<rootDir>/packages/sdk-core/build',
+    '<rootDir>/packages/sdk-merkle/build',
     '<rootDir>/packages/sdk-mixer/build'
   ],
   transform: {}

@@ -38,5 +38,8 @@
     "ts-node": "^9.1.1",
     "tsconfig-paths": "^3.9.0",
     "worker-loader": "^3.0.7"
+  },
+  "dependencies": {
+    "@guildofweavers/merkle": "^0.3.12"
   }
 }
