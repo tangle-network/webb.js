@@ -1410,6 +1410,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@guildofweaver/merkle@git+https://github.com/webb-tools/merkle.git":
+  version: 0.3.12
+  resolution: "@guildofweaver/merkle@https://github.com/webb-tools/merkle.git#commit=0235f48f6603153c0d6f05fdbc5f0def8a31c3d0"
+  dependencies:
+    "@assemblyscript/loader": 0.8.x
+  checksum: fba41b296f0219991beecf1e0665e66adfbaa125f4f8965a191f3114f6d806a01f4d2e4bb2cc10089fd3b73b230c515d491f5f529e8b5ed5d52d54608c63117f
+  languageName: node
+  linkType: hard
+
 "@guildofweavers/merkle@npm:^0.3.12":
   version: 0.3.12
   resolution: "@guildofweavers/merkle@npm:0.3.12"
@@ -2583,6 +2592,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@webb-tools/sdk-merkle@^0.1.2-33, @webb-tools/sdk-merkle@workspace:packages/sdk-merkle":
+  version: 0.0.0-use.local
+  resolution: "@webb-tools/sdk-merkle@workspace:packages/sdk-merkle"
+  dependencies:
+    "@guildofweaver/merkle": "git+https://github.com/webb-tools/merkle.git"
+    "@polkadot/util": ^3.4.1
+    "@types/lodash": ^4.14.161
+    "@webb-tools/sdk-core": ^0.1.2-33
+    lodash: ^4.17.20
+  languageName: unknown
+  linkType: soft
+
 "@webb-tools/sdk-mixer@workspace:packages/sdk-mixer":
   version: 0.0.0-use.local
   resolution: "@webb-tools/sdk-mixer@workspace:packages/sdk-mixer"
@@ -2591,6 +2612,7 @@ __metadata:
     "@types/lodash": ^4.14.161
     "@webb-tools/mixer-client": ^0.0.6
     "@webb-tools/sdk-core": ^0.1.2-33
+    "@webb-tools/sdk-merkle": ^0.1.2-33
     lodash: ^4.17.20
   languageName: unknown
   linkType: soft
