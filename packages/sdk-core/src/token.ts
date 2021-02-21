@@ -133,7 +133,7 @@ export function getPresetToken(name: PresetToken, chain: CHAIN = 'edgeware'): To
 }
 
 const TOKEN_SORT: Record<string, number> = {
-  WEBB: 0,
+  WEBB: 0
 };
 
 export function sortTokens(token1: Token, token2: Token, ...other: Token[]): Token[] {
