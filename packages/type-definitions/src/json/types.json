@@ -32,6 +32,7 @@
         "leaves": "Vec<Data>"
     },
     "Keys": "SessionKeys2",
+    "ChainId": "u8",
     "PalletsOrigin": {
         "_enum": {
             "System": "SystemOrigin",
