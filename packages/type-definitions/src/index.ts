@@ -7,6 +7,7 @@ import versioned from './types-known/versioned';
 // This will make it behave correctly in runtime, but wrong types in TS defination.
 const additionalOverride = {
   Keys: 'SessionKeys2',
+  ChainId: 'u8',
   PalletsOrigin: {
     _enum: {
       System: 'SystemOrigin',
