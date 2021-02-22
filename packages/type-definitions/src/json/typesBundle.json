@@ -36,6 +36,8 @@
                             "fixed_deposit_size": "Balance",
                             "leaves": "Vec<Data>"
                         },
+                        "Address": "GenericMultiAddress",
+                        "LookupSource": "GenericMultiAddress",
                         "Keys": "SessionKeys2",
                         "ChainId": "u8",
                         "PalletsOrigin": {
@@ -57,9 +59,7 @@
                                 "Merkle": "Null",
                                 "Mixer": "Null"
                             }
-                        },
-                        "Address": "GenericMultiAddress",
-                        "LookupSource": "GenericMultiAddress"
+                        }
                     }
                 }
             ],

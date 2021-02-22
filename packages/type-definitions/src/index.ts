@@ -6,6 +6,8 @@ import versioned from './types-known/versioned';
 // FIXME: currently we cannot override this in runtime definations because the code generation script cannot handle overrides
 // This will make it behave correctly in runtime, but wrong types in TS defination.
 const additionalOverride = {
+  Address: 'AccountId',
+  LookupSource: 'AccountId',
   Keys: 'SessionKeys2',
   ChainId: 'u8',
   PalletsOrigin: {
