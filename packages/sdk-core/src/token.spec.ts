@@ -1,4 +1,4 @@
-import { Token, getPresetToken, sortTokens } from './token';
+import { Token } from './token';
 import { FixedPointNumber } from './fixed-point-number';
 
 describe('token', () => {
@@ -22,12 +22,12 @@ describe('token', () => {
   });
 });
 
-describe('sort tokens', () => {
-  const aca = getPresetToken('ACA');
-  const xbtc = getPresetToken('XBTC');
-  const renbtc = getPresetToken('RENBTC');
+// describe('sort tokens', () => {
+//   const aca = getPresetToken('ACA');
+//   const xbtc = getPresetToken('XBTC');
+//   const renbtc = getPresetToken('RENBTC');
 
-  expect(sortTokens(aca, xbtc)).toEqual([aca, xbtc]);
-  expect(sortTokens(xbtc, aca)).toEqual([aca, xbtc]);
-  expect(sortTokens(xbtc, renbtc, aca)).toEqual([aca, xbtc, renbtc]);
-});
+//   expect(sortTokens(aca, xbtc)).toEqual([aca, xbtc]);
+//   expect(sortTokens(xbtc, aca)).toEqual([aca, xbtc]);
+//   expect(sortTokens(xbtc, renbtc, aca)).toEqual([aca, xbtc, renbtc]);
+// });

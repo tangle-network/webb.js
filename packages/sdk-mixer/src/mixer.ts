@@ -9,12 +9,15 @@ import {
   WasmWorkerMessageTX
 } from '@webb-tools/sdk-mixer';
 import { LoggerService } from '@webb-tools/app-util';
+// import { MerkleTree, buildMerkleTree as build } from '@webb-tools/sdk-merkle';
 import { ZKProof } from './zkproof';
 
 export class Mixer {
   private readonly logger = LoggerService.new('Mixer');
   private destroyed = false;
   private constructor(private readonly worker: Worker, private readonly assetGroups: MixerAssetGroup[]) {}
+
+  // private mt: MerkleTree;
 
   public destroy(): void {
     this.logger.info(`Worker destroyed`);
@@ -140,4 +143,9 @@ export class Mixer {
     const zkProof = new ZKProof(leafIndexCommitments, commitments, proofCommitments, nullifierHash, proof);
     await fn(zkProof);
   }
+
+  // public async buildMerkleTree(leaves: Array<Uint8Array>): Promise<MerkleTree> {
+  //   this.mt = await build(leaves);
+  //   return this.mt;
+  // }
 }

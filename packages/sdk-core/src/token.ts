@@ -12,45 +12,29 @@ export interface TokenConfig {
 }
 
 // preset token type
-export type PresetToken = 'ACA' | 'AUSD' | 'DOT' | 'XBTC' | 'LDOT' | 'RENBTC' | 'KSM';
+export type PresetToken = 'EDG' | 'WEBB' | 'DOT' | 'KSM';
 
 // common tokens config in acala network and polkadot
 export const presetTokensConfig: Record<CHAIN, Record<PresetToken, TokenConfig>> = {
-  acala: {
-    ACA: {
-      chain: 'acala',
-      name: 'ACA',
-      symbol: 'ACA',
+  edgeware: {
+    EDG: {
+      chain: 'edgeware',
+      name: 'EDG',
+      symbol: 'EDG',
       precision: 18
     },
-    AUSD: {
-      chain: 'acala',
-      name: 'AUSD',
-      symbol: 'aUSD',
+    WEBB: {
+      chain: 'webb',
+      name: 'WEBB',
+      symbol: 'WEBB',
       precision: 18
-    },
-    DOT: {
-      chain: 'acala',
-      name: 'DOT',
-      symbol: 'DOT',
-      precision: 18
-    },
-    RENBTC: {
-      chain: 'acala',
-      name: 'RENBTC',
-      symbol: 'renBTC',
-      precision: 18
-    },
-    LDOT: {
-      chain: 'acala',
-      name: 'LDOT',
-      symbol: 'LDOT',
-      precision: 18
-    },
-    XBTC: {
-      chain: 'acala',
-      name: 'XBTC',
-      symbol: 'XBTC',
+    }
+  } as Record<PresetToken, TokenConfig>,
+  webb: {
+    WEBB: {
+      chain: 'webb',
+      name: 'WEBB',
+      symbol: 'WEBB',
       precision: 18
     }
   } as Record<PresetToken, TokenConfig>,
@@ -62,6 +46,7 @@ export const presetTokensConfig: Record<CHAIN, Record<PresetToken, TokenConfig>>
       precision: 10
     }
   } as Record<PresetToken, TokenConfig>,
+  acala: {} as Record<PresetToken, TokenConfig>,
   kurara: {} as Record<PresetToken, TokenConfig>,
   kusama: {
     KSM: {
@@ -87,7 +72,7 @@ export class Token {
     this.name = config.name;
     this.symbol = config.symbol || config.name;
     this.precision = config.precision || 18;
-    this.chain = config.chain || 'acala';
+    this.chain = config.chain || 'edgeware';
 
     if (config.amount) {
       if (config.amount instanceof FixedPointNumber) {
@@ -111,7 +96,7 @@ export class Token {
   }
 
   public toChainData(): { Token: string } | string {
-    if (this.chain === 'acala') {
+    if (this.chain === 'edgeware') {
       return { Token: this.name };
     }
 
@@ -143,17 +128,12 @@ function convert(config: Record<CHAIN, Record<string, TokenConfig>>): Record<CHA
 
 export const PRESET_TOKENS = convert(presetTokensConfig);
 
-export function getPresetToken(name: PresetToken, chain: CHAIN = 'acala'): Token {
+export function getPresetToken(name: PresetToken, chain: CHAIN = 'edgeware'): Token {
   return PRESET_TOKENS[chain][name];
 }
 
 const TOKEN_SORT: Record<string, number> = {
-  ACA: 0,
-  AUSD: 1,
-  DOT: 2,
-  XBTC: 3,
-  LDOT: 4,
-  RENBTC: 5
+  WEBB: 0
 };
 
 export function sortTokens(token1: Token, token2: Token, ...other: Token[]): Token[] {

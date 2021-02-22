@@ -1,5 +1,5 @@
 {
-  "version": "0.1.2-33",
+  "version": "0.1.2-36",
   "private": true,
   "engines": {
     "yarn": "^1.10.1"
@@ -38,5 +38,8 @@
     "ts-node": "^9.1.1",
     "tsconfig-paths": "^3.9.0",
     "worker-loader": "^3.0.8"
+  },
+  "dependencies": {
+    "@guildofweavers/merkle": "^0.3.12"
   }
 }
