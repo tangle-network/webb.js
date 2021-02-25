@@ -12,6 +12,7 @@ export default {
         ERC20: 'EvmAddress'
       }
     },
+    Data: '[u8;32]',
     Nullifier: 'Data',
     Commitment: 'Data',
     GroupId: 'u32',
