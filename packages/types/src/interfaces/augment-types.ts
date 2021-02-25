@@ -50,7 +50,7 @@ import type { Bounty, BountyIndex, BountyStatus, BountyStatusActive, BountyStatu
 import type { Multiplier } from '@polkadot/types/interfaces/txpayment';
 import type { Multisig, Timepoint } from '@polkadot/types/interfaces/utility';
 import type { VestingInfo } from '@polkadot/types/interfaces/vesting';
-import type { Commitment, CurrencyId, EvmAddress, GroupId, GroupTree, MixerInfo, Nullifier, TokenSymbol } from '@webb-tools/types/interfaces/mixer';
+import type { Commitment, CurrencyId, EvmAddress, GroupId, GroupTree, MixerInfo, Nullifier, ScalarData, TokenSymbol } from '@webb-tools/types/interfaces/mixer';
 import type { AccountId, AccountIdOf, AccountIndex, Address, AssetId, Balance, BalanceOf, Block, BlockNumber, Call, CallHash, CallHashOf, ChainId, ChangesTrieConfiguration, Consensus, ConsensusEngineId, Digest, DigestItem, ExtrinsicsWeight, Fixed128, Fixed64, FixedI128, FixedI64, FixedU128, FixedU64, H1024, H128, H160, H2048, H256, H512, H64, Hash, Header, I32F32, Index, IndicesLookupSource, Justification, KeyTypeId, KeyValue, LockIdentifier, LookupSource, LookupTarget, ModuleId, Moment, MultiAddress, OpaqueCall, Origin, OriginCaller, PalletVersion, PalletsOrigin, Pays, PerU16, Perbill, Percent, Permill, Perquintill, Phantom, PhantomData, PreRuntime, Releases, RuntimeDbWeight, Seal, SealV0, SignedBlock, StorageData, TransactionPriority, U32F32, ValidatorId, ValidatorIdOf, Weight, WeightMultiplier } from '@webb-tools/types/interfaces/runtime';
 
 declare module '@polkadot/types/types/registry' {
@@ -676,6 +676,7 @@ declare module '@polkadot/types/types/registry' {
     'Option<RuntimeDispatchInfo>': Option<RuntimeDispatchInfo>;
     'Option<RuntimeVersion>': Option<RuntimeVersion>;
     'Option<RuntimeVersionApi>': Option<RuntimeVersionApi>;
+    'Option<ScalarData>': Option<ScalarData>;
     'Option<Schedule>': Option<Schedule>;
     'Option<Scheduled>': Option<Scheduled>;
     'Option<ScheduledTo254>': Option<ScheduledTo254>;
@@ -1391,6 +1392,7 @@ declare module '@polkadot/types/types/registry' {
     'Vec<RuntimeDispatchInfo>': Vec<RuntimeDispatchInfo>;
     'Vec<RuntimeVersion>': Vec<RuntimeVersion>;
     'Vec<RuntimeVersionApi>': Vec<RuntimeVersionApi>;
+    'Vec<ScalarData>': Vec<ScalarData>;
     'Vec<Schedule>': Vec<Schedule>;
     'Vec<Scheduled>': Vec<Scheduled>;
     'Vec<ScheduledTo254>': Vec<ScheduledTo254>;
@@ -2106,6 +2108,7 @@ declare module '@polkadot/types/types/registry' {
     RuntimeDispatchInfo: RuntimeDispatchInfo;
     RuntimeVersion: RuntimeVersion;
     RuntimeVersionApi: RuntimeVersionApi;
+    ScalarData: ScalarData;
     Schedule: Schedule;
     Scheduled: Scheduled;
     ScheduledTo254: ScheduledTo254;

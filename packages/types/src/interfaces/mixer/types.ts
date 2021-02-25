@@ -1,12 +1,12 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import type { Data, Enum, Struct, Vec, bool, u32 } from '@polkadot/types';
+import type { Data, Enum, Struct, U8aFixed, Vec, bool, u32 } from '@polkadot/types';
 import type { ITuple } from '@polkadot/types/types';
 import type { AccountId, Balance, BlockNumber, H160 } from '@webb-tools/types/interfaces/runtime';
 
 /** @name Commitment */
-export interface Commitment extends Data {}
+export interface Commitment extends ScalarData {}
 
 /** @name CurrencyId */
 export interface CurrencyId extends Enum {
@@ -31,18 +31,21 @@ export interface GroupTree extends Struct {
   readonly leaf_count: u32;
   readonly max_leaves: u32;
   readonly root_hash: Data;
-  readonly edge_nodes: Vec<Data>;
+  readonly edge_nodes: Vec<ScalarData>;
 }
 
 /** @name MixerInfo */
 export interface MixerInfo extends Struct {
   readonly minimum_deposit_length_for_reward: BlockNumber;
   readonly fixed_deposit_size: Balance;
-  readonly leaves: Vec<Data>;
+  readonly leaves: Vec<ScalarData>;
 }
 
 /** @name Nullifier */
-export interface Nullifier extends Data {}
+export interface Nullifier extends ScalarData {}
+
+/** @name ScalarData */
+export interface ScalarData extends U8aFixed {}
 
 /** @name TokenSymbol */
 export interface TokenSymbol extends Enum {
