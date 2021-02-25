@@ -12,9 +12,9 @@ export default {
         ERC20: 'EvmAddress'
       }
     },
-    Data: '[u8;32]',
-    Nullifier: 'Data',
-    Commitment: 'Data',
+    ScalarData: '[u8;32]',
+    Nullifier: 'ScalarData',
+    Commitment: 'ScalarData',
     GroupId: 'u32',
     GroupTree: {
       manager: 'AccountId',
@@ -22,12 +22,12 @@ export default {
       leaf_count: 'u32',
       max_leaves: 'u32',
       root_hash: 'Data',
-      edge_nodes: 'Vec<Data>'
+      edge_nodes: 'Vec<ScalarData>'
     },
     MixerInfo: {
       minimum_deposit_length_for_reward: 'BlockNumber',
       fixed_deposit_size: 'Balance',
-      leaves: 'Vec<Data>'
+      leaves: 'Vec<ScalarData>'
     }
   }
 };
