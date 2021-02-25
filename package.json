@@ -10,7 +10,7 @@
   ],
   "resolutions": {
     "typescript": "3.8.3",
-    "@webb-tools/mixer-client": "^0.0.6"
+    "@webb-tools/mixer-client": "^0.0.8"
   },
   "scripts": {
     "build": "yarn build:interfaces && polkadot-dev-build-ts",
@@ -22,7 +22,7 @@
     "test": "exit 0",
     "test:old": "cross-env NODE_OPTIONS=--experimental-vm-modules polkadot-dev-run-test --coverage",
     "check-deps": "./node_modules/@open-web3/util/scripts/check-deps.js yarn.lock @polkadot/ @open-web3/",
-    "update-metadata": "ts-node --project ./tsconfig.json packages/types/scripts/updateMetadata.ts",
+    "update-metadata": "ts-node-script -r tsconfig-paths/register packages/types/scripts/updateMetadata.ts",
     "example:sdk-mixer": "cd ./examples/sdk-mixer && yarn dev",
     "format": "prettier --write \"packages/**/*.{ts,js,jsx,tsx}\""
   },
