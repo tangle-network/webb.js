@@ -1,7 +1,7 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import type { Data, Enum, Struct, U8aFixed, Vec, bool, u32 } from '@polkadot/types';
+import type { Enum, Struct, U8aFixed, Vec, bool, u32 } from '@polkadot/types';
 import type { ITuple } from '@polkadot/types/types';
 import type { AccountId, Balance, BlockNumber, H160 } from '@webb-tools/types/interfaces/runtime';
 
@@ -30,7 +30,7 @@ export interface GroupTree extends Struct {
   readonly manager_required: bool;
   readonly leaf_count: u32;
   readonly max_leaves: u32;
-  readonly root_hash: Data;
+  readonly root_hash: ScalarData;
   readonly edge_nodes: Vec<ScalarData>;
 }
 
