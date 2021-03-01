@@ -12,7 +12,6 @@ export default {
         ERC20: 'EvmAddress'
       }
     },
-    ScalarData: '[u8; 32]',
     Nullifier: 'ScalarData',
     Commitment: 'ScalarData',
     GroupId: 'u32',
