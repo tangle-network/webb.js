@@ -8,8 +8,9 @@ import type { SetId, StoredPendingChange, StoredState } from '@polkadot/types/in
 import type { SessionIndex } from '@polkadot/types/interfaces/session';
 import type { AccountInfo, ConsumedWeight, DigestOf, EventIndex, EventRecord, LastRuntimeUpgradeInfo, Phase } from '@polkadot/types/interfaces/system';
 import type { Multiplier } from '@polkadot/types/interfaces/txpayment';
-import type { GroupId, GroupTree, MixerInfo } from '@webb-tools/types/interfaces/mixer';
-import type { AccountId, Balance, BalanceOf, BlockNumber, Hash, Manager, Moment, Releases, ScalarData } from '@webb-tools/types/interfaces/runtime';
+import type { Manager } from '@webb-tools/types/interfaces/merkle';
+import type { GroupId, GroupTree, MixerInfo, ScalarData } from '@webb-tools/types/interfaces/mixer';
+import type { AccountId, Balance, BalanceOf, BlockNumber, Hash, Moment, Releases } from '@webb-tools/types/interfaces/runtime';
 import type { BaseStorageType, StorageDoubleMap, StorageMap } from '@open-web3/api-mobx';
 
 export interface StorageType extends BaseStorageType {

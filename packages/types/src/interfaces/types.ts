@@ -3,3 +3,4 @@
 
 export * from './mixer/types';
 export * from './runtime/types';
+export * from './merkle/types';

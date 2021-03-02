@@ -12,6 +12,7 @@ export default {
         ERC20: 'EvmAddress'
       }
     },
+    ScalarData: '[u8; 32]',
     Nullifier: 'ScalarData',
     Commitment: 'ScalarData',
     GroupId: 'u32',
@@ -29,9 +30,5 @@ export default {
       leaves: 'Vec<ScalarData>'
     }
   },
-  typesAlias: {
-    mixer: {
-      Data: 'ScalarData'
-    }
-  }
+  typesAlias: {}
 };

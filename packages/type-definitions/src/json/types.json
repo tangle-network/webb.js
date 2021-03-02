@@ -15,6 +15,7 @@
             "ERC20": "EvmAddress"
         }
     },
+    "ScalarData": "[u8; 32]",
     "Nullifier": "ScalarData",
     "Commitment": "ScalarData",
     "GroupId": "u32",
@@ -31,10 +32,13 @@
         "fixed_deposit_size": "Balance",
         "leaves": "Vec<ScalarData>"
     },
+    "Manager": {
+        "accountId": "AccountId",
+        "required": "bool"
+    },
     "Address": "AccountId",
     "LookupSource": "AccountId",
     "Keys": "SessionKeys2",
-    "ChainId": "u8",
     "PalletsOrigin": {
         "_enum": {
             "System": "SystemOrigin",
