@@ -1,9 +1,9 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import type { Enum, Struct, Vec, bool, u32 } from '@polkadot/types';
+import type { Enum, Struct, U8aFixed, Vec, bool, u32 } from '@polkadot/types';
 import type { ITuple } from '@polkadot/types/types';
-import type { AccountId, Balance, BlockNumber, H160, ScalarData } from '@webb-tools/types/interfaces/runtime';
+import type { AccountId, Balance, BlockNumber, H160 } from '@webb-tools/types/interfaces/runtime';
 
 /** @name Commitment */
 export interface Commitment extends ScalarData {}
@@ -43,6 +43,9 @@ export interface MixerInfo extends Struct {
 
 /** @name Nullifier */
 export interface Nullifier extends ScalarData {}
+
+/** @name ScalarData */
+export interface ScalarData extends U8aFixed {}
 
 /** @name TokenSymbol */
 export interface TokenSymbol extends Enum {

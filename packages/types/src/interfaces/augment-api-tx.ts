@@ -4,8 +4,8 @@
 import type { Bytes, Option, Vec, bool, u8 } from '@polkadot/types';
 import type { AnyNumber, ITuple } from '@polkadot/types/types';
 import type { Extrinsic } from '@polkadot/types/interfaces/extrinsics';
-import type { Commitment, GroupId } from '@webb-tools/types/interfaces/mixer';
-import type { AccountId, BlockNumber, Call, ScalarData } from '@webb-tools/types/interfaces/runtime';
+import type { Commitment, GroupId, ScalarData } from '@webb-tools/types/interfaces/mixer';
+import type { AccountId, BlockNumber, Call } from '@webb-tools/types/interfaces/runtime';
 import type { ApiTypes, SubmittableExtrinsic } from '@polkadot/api/types';
 
 declare module '@polkadot/api/types/submittable' {

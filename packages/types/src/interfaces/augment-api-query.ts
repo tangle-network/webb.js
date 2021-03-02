@@ -3,8 +3,9 @@
 
 import type { Option, Vec, bool } from '@polkadot/types';
 import type { AnyNumber, ITuple, Observable } from '@polkadot/types/types';
-import type { GroupId, GroupTree, MixerInfo } from '@webb-tools/types/interfaces/mixer';
-import type { AccountId, BalanceOf, BlockNumber, Manager, ScalarData } from '@webb-tools/types/interfaces/runtime';
+import type { Manager } from '@webb-tools/types/interfaces/merkle';
+import type { GroupId, GroupTree, MixerInfo, ScalarData } from '@webb-tools/types/interfaces/mixer';
+import type { AccountId, BalanceOf, BlockNumber } from '@webb-tools/types/interfaces/runtime';
 import type { ApiTypes } from '@polkadot/api/types';
 
 declare module '@polkadot/api/types/storage' {
