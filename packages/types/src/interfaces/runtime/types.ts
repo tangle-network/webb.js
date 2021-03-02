@@ -168,6 +168,9 @@ export interface LookupSource extends IndicesLookupSource {}
 /** @name LookupTarget */
 export interface LookupTarget extends AccountId {}
 
+/** @name Manager */
+export interface Manager extends Bytes {}
+
 /** @name ModuleId */
 export interface ModuleId extends LockIdentifier {}
 
@@ -248,6 +251,9 @@ export interface RuntimeDbWeight extends Struct {
   readonly read: Weight;
   readonly write: Weight;
 }
+
+/** @name ScalarData */
+export interface ScalarData extends U8aFixed {}
 
 /** @name Seal */
 export interface Seal extends ITuple<[ConsensusEngineId, Bytes]> {}

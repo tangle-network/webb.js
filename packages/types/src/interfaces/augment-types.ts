@@ -50,8 +50,8 @@ import type { Bounty, BountyIndex, BountyStatus, BountyStatusActive, BountyStatu
 import type { Multiplier } from '@polkadot/types/interfaces/txpayment';
 import type { Multisig, Timepoint } from '@polkadot/types/interfaces/utility';
 import type { VestingInfo } from '@polkadot/types/interfaces/vesting';
-import type { Commitment, CurrencyId, EvmAddress, GroupId, GroupTree, MixerInfo, Nullifier, ScalarData, TokenSymbol } from '@webb-tools/types/interfaces/mixer';
-import type { AccountId, AccountIdOf, AccountIndex, Address, AssetId, Balance, BalanceOf, Block, BlockNumber, Call, CallHash, CallHashOf, ChainId, ChangesTrieConfiguration, Consensus, ConsensusEngineId, Digest, DigestItem, ExtrinsicsWeight, Fixed128, Fixed64, FixedI128, FixedI64, FixedU128, FixedU64, H1024, H128, H160, H2048, H256, H512, H64, Hash, Header, I32F32, Index, IndicesLookupSource, Justification, KeyTypeId, KeyValue, LockIdentifier, LookupSource, LookupTarget, ModuleId, Moment, MultiAddress, OpaqueCall, Origin, OriginCaller, PalletVersion, PalletsOrigin, Pays, PerU16, Perbill, Percent, Permill, Perquintill, Phantom, PhantomData, PreRuntime, Releases, RuntimeDbWeight, Seal, SealV0, SignedBlock, StorageData, TransactionPriority, U32F32, ValidatorId, ValidatorIdOf, Weight, WeightMultiplier } from '@webb-tools/types/interfaces/runtime';
+import type { Commitment, CurrencyId, EvmAddress, GroupId, GroupTree, MixerInfo, Nullifier, TokenSymbol } from '@webb-tools/types/interfaces/mixer';
+import type { AccountId, AccountIdOf, AccountIndex, Address, AssetId, Balance, BalanceOf, Block, BlockNumber, Call, CallHash, CallHashOf, ChainId, ChangesTrieConfiguration, Consensus, ConsensusEngineId, Digest, DigestItem, ExtrinsicsWeight, Fixed128, Fixed64, FixedI128, FixedI64, FixedU128, FixedU64, H1024, H128, H160, H2048, H256, H512, H64, Hash, Header, I32F32, Index, IndicesLookupSource, Justification, KeyTypeId, KeyValue, LockIdentifier, LookupSource, LookupTarget, Manager, ModuleId, Moment, MultiAddress, OpaqueCall, Origin, OriginCaller, PalletVersion, PalletsOrigin, Pays, PerU16, Perbill, Percent, Permill, Perquintill, Phantom, PhantomData, PreRuntime, Releases, RuntimeDbWeight, ScalarData, Seal, SealV0, SignedBlock, StorageData, TransactionPriority, U32F32, ValidatorId, ValidatorIdOf, Weight, WeightMultiplier } from '@webb-tools/types/interfaces/runtime';
 
 declare module '@polkadot/types/types/registry' {
   export interface InterfaceTypes {
@@ -500,6 +500,7 @@ declare module '@polkadot/types/types/registry' {
     'Option<LookupSource>': Option<LookupSource>;
     'Option<LookupTarget>': Option<LookupTarget>;
     'Option<LotteryConfig>': Option<LotteryConfig>;
+    'Option<Manager>': Option<Manager>;
     'Option<MapTypeLatest>': Option<MapTypeLatest>;
     'Option<MapTypeV10>': Option<MapTypeV10>;
     'Option<MapTypeV11>': Option<MapTypeV11>;
@@ -1216,6 +1217,7 @@ declare module '@polkadot/types/types/registry' {
     'Vec<LookupSource>': Vec<LookupSource>;
     'Vec<LookupTarget>': Vec<LookupTarget>;
     'Vec<LotteryConfig>': Vec<LotteryConfig>;
+    'Vec<Manager>': Vec<Manager>;
     'Vec<MapTypeLatest>': Vec<MapTypeLatest>;
     'Vec<MapTypeV10>': Vec<MapTypeV10>;
     'Vec<MapTypeV11>': Vec<MapTypeV11>;
@@ -1932,6 +1934,7 @@ declare module '@polkadot/types/types/registry' {
     LookupSource: LookupSource;
     LookupTarget: LookupTarget;
     LotteryConfig: LotteryConfig;
+    Manager: Manager;
     MapTypeLatest: MapTypeLatest;
     MapTypeV10: MapTypeV10;
     MapTypeV11: MapTypeV11;
