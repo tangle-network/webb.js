@@ -1,6 +1,6 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "es5",
     "lib": [
       "dom",
       "dom.iterable",
@@ -13,21 +13,11 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "esnext",
-    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react",
-    "baseUrl": "./src",
-    "skipDefaultLibCheck": true,
-    "paths": {
-      "@webb-tools/sdk-mixer": [
-        "@webb-tools/sdk-mixer/build/"
-      ],
-      "@webb-tools/sdk-mixer/*": [
-        "@webb-tools/sdk-mixer/build/*"
-      ]
-    }
+    "baseUrl": ".",
+    "skipDefaultLibCheck": true
   },
   "exclude": [
     "build/**/*",

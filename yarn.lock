@@ -4725,10 +4725,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webb-tools/mixer-client@npm:^0.0.8":
-  version: 0.0.8
-  resolution: "@webb-tools/mixer-client@npm:0.0.8"
-  checksum: 20b420cd257982b8070b77e9a6023f064348ac6c2b87c3f023119fddaa7410bf822b57bc5f311d29cbbf9e927241aa0cbbd282f25136eeab86127969b30d5b72
+"@webb-tools/mixer-client@npm:^0.0.9":
+  version: 0.0.9
+  resolution: "@webb-tools/mixer-client@npm:0.0.9"
+  checksum: 8d762bc308cdc73d3e4cc3f1c36233de13a7b2954f7b84156e87fadbb6d22706388db61e267581acc640a401a312f8e435891658d544b174ed4a555685250fe2
   languageName: node
   linkType: hard
 
@@ -14041,6 +14041,7 @@ fsevents@^1.2.7:
     webpack: ^4.41.2
     webpack-cli: ^3.3.10
     webpack-dev-server: ^3.9.0
+    worker-loader: ^3.0.7
   languageName: unknown
   linkType: soft
 
