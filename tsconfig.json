@@ -9,6 +9,7 @@
     "target": "ES2020",
     "module": "ESNext",
     "baseUrl": ".",
+    "allowJs": true,
     "paths": {
       "@webb-tools/api": [
         "packages/api/src"
@@ -49,9 +50,10 @@
       ],
       "@webb-tools/app-util": [
         "packages/app-util/src"
-      ],"@webb-tools/app-util/*": [
-        "packages/app-util/src/*"
       ],
+      "@webb-tools/app-util/*": [
+        "packages/app-util/src/*"
+      ]
     },
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,

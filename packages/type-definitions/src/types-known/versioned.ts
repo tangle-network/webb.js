@@ -1,8 +1,8 @@
 const typesBundleTypes = [
   {
     types: {
-      Address: 'GenericMultiAddress',
-      LookupSource: 'GenericMultiAddress'
+      Address: 'AccountId',
+      LookupSource: 'AccountId'
     }
   }
 ];

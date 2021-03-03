@@ -15,7 +15,11 @@ import { ZKProof } from './zkproof';
 export class Mixer {
   private readonly logger = LoggerService.new('Mixer');
   private destroyed = false;
-  private constructor(private readonly worker: Worker, private readonly assetGroups: MixerAssetGroup[]) {}
+  private constructor(
+    private readonly worker: Worker,
+    private readonly assetGroups: MixerAssetGroup[],
+    private readonly bulletproofGens?: Uint8Array
+  ) {}
 
   // private mt: MerkleTree;
 
@@ -54,14 +58,30 @@ export class Mixer {
     });
   }
 
-  public static async init(worker: Worker, assetGroups: MixerAssetGroup[]): Promise<Mixer> {
+  public static async init(
+    worker: Worker,
+    assetGroups: MixerAssetGroup[],
+    bulletproofGens?: Uint8Array
+  ): Promise<Mixer> {
     const tree: Array<[TokenSymbol, number, number]> = assetGroups.map((v) => [v.tokenSymbol, v.gid, v.treeDepth]);
-    const mixer = new Mixer(worker, assetGroups);
+    const mixer = new Mixer(worker, assetGroups, bulletproofGens);
     mixer.logger.debug(`Mixer initialized with assetGroups`, assetGroups);
     await mixer.postMessage('init', {
-      mixerGroup: tree
+      mixerGroup: tree,
+      bulletproofGens
     });
     return mixer;
+  }
+
+  /**
+   * Calculates the `BulletproofsGens` beforehand.
+   * so it can be easily cached and reused whenever you need the mixer.
+   *
+   * */
+  public static async preGenerateBulletproofGens(worker: Worker): Promise<Uint8Array> {
+    const mixer = new Mixer(worker, []); // just to get the postMessage.
+    const { bulletproofGens } = await mixer.postMessage('preGenerateBulletproofGens', undefined);
+    return bulletproofGens;
   }
 
   /**
@@ -75,6 +95,17 @@ export class Mixer {
       ...asset
     });
     return Note.deserialize(noteSerialized);
+  }
+
+  /**
+   * Saves the note into the MerkleTree and retuns the leaf (NoteCommitment)
+   * */
+  public async saveNote(note: Note): Promise<Uint8Array> {
+    await this.destroyGuard();
+    const { leaf } = await this.postMessage('deposit', {
+      note: note.serialize()
+    });
+    return leaf;
   }
 
   /**
@@ -136,7 +167,8 @@ export class Mixer {
         note: note.serialize(),
         mixerGroup,
         leaves,
-        root
+        root,
+        bulletproofGens: this.bulletproofGens
       }
     );
 

@@ -1,6 +1,7 @@
 import { jsonrpcFromDefs, typesAliasFromDefs, typesFromDefs } from '@open-web3/orml-type-definitions/utils';
 
 import mixer from './mixer';
+import merkle from './merkle';
 import versioned from './types-known/versioned';
 
 // FIXME: currently we cannot override this in runtime definations because the code generation script cannot handle overrides
@@ -9,7 +10,6 @@ const additionalOverride = {
   Address: 'AccountId',
   LookupSource: 'AccountId',
   Keys: 'SessionKeys2',
-  ChainId: 'u8',
   PalletsOrigin: {
     _enum: {
       System: 'SystemOrigin',
@@ -42,7 +42,8 @@ const additionalOverride = {
 };
 
 const webbDefs = {
-  mixer
+  mixer,
+  merkle
 };
 
 export const types = {
