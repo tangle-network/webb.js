@@ -71,7 +71,7 @@ export class WasmMixer {
     });
   }
 
-  preGenerateBulletproofGens(): void {
+  public preGenerateBulletproofGens(): void {
     import('@webb-tools/mixer-client')
       .then((wasm) => {
         const opts = new wasm.PoseidonHasherOptions();
@@ -84,7 +84,7 @@ export class WasmMixer {
       });
   }
 
-  init(mixerGroup: Array<[TokenSymbol, number, number]>, bulletproofGens?: Uint8Array): void {
+  public init(mixerGroup: Array<[TokenSymbol, number, number]>, bulletproofGens?: Uint8Array): void {
     import('@webb-tools/mixer-client')
       .then((wasm) => {
         const opts = new wasm.PoseidonHasherOptions();
@@ -102,7 +102,7 @@ export class WasmMixer {
       });
   }
 
-  generateNote(asset: Asset): void {
+  public generateNote(asset: Asset): void {
     if (!this.mixer) {
       this.emit('generateNote', 'Mixer is not initialized', true);
       return;
@@ -117,7 +117,7 @@ export class WasmMixer {
     }
   }
 
-  deposit(noteSerialized?: string, assetSerialized?: Asset): void {
+  public deposit(noteSerialized?: string, assetSerialized?: Asset): void {
     if (!this.mixer) {
       this.emit('deposit', 'Mixer is not initialized', true);
       return;
@@ -145,7 +145,7 @@ export class WasmMixer {
     }
   }
 
-  withdraw(
+  public withdraw(
     mixerGroup: Array<[TokenSymbol, number, number]>,
     note: string,
     root: Uint8Array,
@@ -189,7 +189,7 @@ export class WasmMixer {
     }
   }
 
-  emit<T extends keyof WasmWorkerMessageTX, V extends WasmWorkerMessageTX[T] | string>(
+  protected emit<T extends keyof WasmWorkerMessageTX, V extends WasmWorkerMessageTX[T] | string>(
     name: T,
     value: V,
     error = false
@@ -203,7 +203,7 @@ export class WasmMixer {
     });
   }
 
-  on(event: WasmWorkerMessageRX): void {
+  protected on(event: WasmWorkerMessageRX): void {
     const name = Object.keys(event)[0] as keyof WasmWorkerMessageRX;
     this.logger.trace(`Got message  ${name} `, event);
     switch (name) {

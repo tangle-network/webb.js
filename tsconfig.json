@@ -50,7 +50,8 @@
       ],
       "@webb-tools/app-util": [
         "packages/app-util/src"
-      ],"@webb-tools/app-util/*": [
+      ],
+      "@webb-tools/app-util/*": [
         "packages/app-util/src/*"
       ]
     },
