@@ -4705,7 +4705,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webb-tools/api@^0.1.2-33, @webb-tools/api@^0.1.2-44, @webb-tools/api@workspace:packages/api":
+"@webb-tools/api@^0.1.2-44, @webb-tools/api@workspace:packages/api":
   version: 0.0.0-use.local
   resolution: "@webb-tools/api@workspace:packages/api"
   dependencies:
@@ -4716,7 +4716,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webb-tools/app-util@^0.1.2-33, @webb-tools/app-util@^0.1.2-44, @webb-tools/app-util@workspace:packages/app-util":
+"@webb-tools/app-util@^0.1.2-44, @webb-tools/app-util@workspace:packages/app-util":
   version: 0.0.0-use.local
   resolution: "@webb-tools/app-util@workspace:packages/app-util"
   dependencies:
@@ -4732,7 +4732,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webb-tools/sdk-core@^0.1.2-33, @webb-tools/sdk-core@^0.1.2-44, @webb-tools/sdk-core@workspace:packages/sdk-core":
+"@webb-tools/sdk-core@^0.1.2-44, @webb-tools/sdk-core@workspace:packages/sdk-core":
   version: 0.0.0-use.local
   resolution: "@webb-tools/sdk-core@workspace:packages/sdk-core"
   dependencies:
@@ -4758,7 +4758,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webb-tools/sdk-mixer@^0.1.2-33, @webb-tools/sdk-mixer@workspace:packages/sdk-mixer":
+"@webb-tools/sdk-mixer@^0.1.2-44, @webb-tools/sdk-mixer@workspace:packages/sdk-mixer":
   version: 0.0.0-use.local
   resolution: "@webb-tools/sdk-mixer@workspace:packages/sdk-mixer"
   dependencies:
@@ -4780,7 +4780,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webb-tools/types@0.1.2-44, @webb-tools/types@^0.1.2-33, @webb-tools/types@workspace:packages/types":
+"@webb-tools/types@0.1.2-44, @webb-tools/types@^0.1.2-44, @webb-tools/types@workspace:packages/types":
   version: 0.0.0-use.local
   resolution: "@webb-tools/types@workspace:packages/types"
   dependencies:
@@ -14024,12 +14024,12 @@ fsevents@^1.2.7:
     "@babel/preset-typescript": ^7.7.4
     "@polkadot/api": ^3.4
     "@types/webpack-env": ^1.16.0
-    "@webb-tools/api": ^0.1.2-33
-    "@webb-tools/app-util": ^0.1.2-33
+    "@webb-tools/api": ^0.1.2-44
+    "@webb-tools/app-util": ^0.1.2-44
     "@webb-tools/mixer-client": ^0.0.7
-    "@webb-tools/sdk-core": ^0.1.2-33
-    "@webb-tools/sdk-mixer": ^0.1.2-33
-    "@webb-tools/types": ^0.1.2-33
+    "@webb-tools/sdk-core": ^0.1.2-44
+    "@webb-tools/sdk-mixer": ^0.1.2-44
+    "@webb-tools/types": ^0.1.2-44
     babel-loader: ^8.0.6
     fork-ts-checker-webpack-plugin: ^6.1.0
     html-webpack-plugin: ^4.5.1

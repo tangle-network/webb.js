@@ -9,12 +9,12 @@
   },
   "dependencies": {
     "@polkadot/api": "^3.4",
-    "@webb-tools/api": "^0.1.2-33",
-    "@webb-tools/app-util": "^0.1.2-33",
+    "@webb-tools/api": "^0.1.2-44",
+    "@webb-tools/app-util": "^0.1.2-44",
     "@webb-tools/mixer-client": "^0.0.7",
-    "@webb-tools/sdk-core": "^0.1.2-33",
-    "@webb-tools/sdk-mixer": "^0.1.2-33",
-    "@webb-tools/types": "^0.1.2-33"
+    "@webb-tools/sdk-core": "^0.1.2-44",
+    "@webb-tools/sdk-mixer": "^0.1.2-44",
+    "@webb-tools/types": "^0.1.2-44"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
