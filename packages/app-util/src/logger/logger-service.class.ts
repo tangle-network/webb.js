@@ -43,7 +43,11 @@ export class LoggerService {
       return;
     }
     if (this.logLevel <= level) {
-      console.log(`${color}  [${this.ctx}] `, ...message);
+      const date = new Date();
+      console.log(
+        `${color}[${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}] , [${this.ctx}] `,
+        ...message
+      );
     }
   };
 
