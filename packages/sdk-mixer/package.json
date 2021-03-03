@@ -16,6 +16,7 @@
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
     "@polkadot/util": "^3.4.1",
+    "@webb-tools/app-util": "^0.1.2-43",
     "@webb-tools/mixer-client": "^0.0.8",
     "@webb-tools/sdk-core": "^0.1.2-43",
     "@webb-tools/sdk-merkle": "^0.1.2-43",
