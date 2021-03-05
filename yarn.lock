@@ -4705,18 +4705,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webb-tools/api@^0.1.2-44, @webb-tools/api@^0.1.2-45, @webb-tools/api@workspace:packages/api":
+"@webb-tools/api@^0.1.2-44, @webb-tools/api@^0.1.2-46, @webb-tools/api@workspace:packages/api":
   version: 0.0.0-use.local
   resolution: "@webb-tools/api@workspace:packages/api"
   dependencies:
     "@babel/runtime": ^7.10.2
     "@polkadot/api": ^3.4.1
     "@polkadot/rpc-core": ^3.4.1
-    "@webb-tools/types": 0.1.2-45
+    "@webb-tools/types": 0.1.2-46
   languageName: unknown
   linkType: soft
 
-"@webb-tools/app-util@^0.1.2-44, @webb-tools/app-util@^0.1.2-45, @webb-tools/app-util@workspace:packages/app-util":
+"@webb-tools/app-util@^0.1.2-44, @webb-tools/app-util@^0.1.2-46, @webb-tools/app-util@workspace:packages/app-util":
   version: 0.0.0-use.local
   resolution: "@webb-tools/app-util@workspace:packages/app-util"
   dependencies:
@@ -4732,28 +4732,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webb-tools/sdk-core@^0.1.2-44, @webb-tools/sdk-core@^0.1.2-45, @webb-tools/sdk-core@workspace:packages/sdk-core":
+"@webb-tools/sdk-core@^0.1.2-44, @webb-tools/sdk-core@^0.1.2-46, @webb-tools/sdk-core@workspace:packages/sdk-core":
   version: 0.0.0-use.local
   resolution: "@webb-tools/sdk-core@workspace:packages/sdk-core"
   dependencies:
     "@polkadot/api": ^3.4.1
     "@types/events": ^3.0.0
     "@types/lodash": ^4.14.161
-    "@webb-tools/api": ^0.1.2-45
+    "@webb-tools/api": ^0.1.2-46
     bignumber.js: ^9.0.0
     events: ^3.2.0
     lodash: ^4.17.20
   languageName: unknown
   linkType: soft
 
-"@webb-tools/sdk-merkle@^0.1.2-45, @webb-tools/sdk-merkle@workspace:packages/sdk-merkle":
+"@webb-tools/sdk-merkle@^0.1.2-46, @webb-tools/sdk-merkle@workspace:packages/sdk-merkle":
   version: 0.0.0-use.local
   resolution: "@webb-tools/sdk-merkle@workspace:packages/sdk-merkle"
   dependencies:
     "@guildofweaver/merkle": "git+https://github.com/webb-tools/merkle.git"
     "@polkadot/util": ^3.4.1
     "@types/lodash": ^4.14.161
-    "@webb-tools/sdk-core": ^0.1.2-45
+    "@webb-tools/sdk-core": ^0.1.2-46
     lodash: ^4.17.20
   languageName: unknown
   linkType: soft
@@ -4764,15 +4764,15 @@ __metadata:
   dependencies:
     "@polkadot/util": ^3.4.1
     "@types/lodash": ^4.14.161
-    "@webb-tools/app-util": ^0.1.2-45
+    "@webb-tools/app-util": ^0.1.2-46
     "@webb-tools/mixer-client": ^0.0.8
-    "@webb-tools/sdk-core": ^0.1.2-45
-    "@webb-tools/sdk-merkle": ^0.1.2-45
+    "@webb-tools/sdk-core": ^0.1.2-46
+    "@webb-tools/sdk-merkle": ^0.1.2-46
     lodash: ^4.17.20
   languageName: unknown
   linkType: soft
 
-"@webb-tools/type-definitions@0.1.2-45, @webb-tools/type-definitions@workspace:packages/type-definitions":
+"@webb-tools/type-definitions@0.1.2-46, @webb-tools/type-definitions@workspace:packages/type-definitions":
   version: 0.0.0-use.local
   resolution: "@webb-tools/type-definitions@workspace:packages/type-definitions"
   dependencies:
@@ -4780,7 +4780,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webb-tools/types@0.1.2-45, @webb-tools/types@^0.1.2-44, @webb-tools/types@workspace:packages/types":
+"@webb-tools/types@0.1.2-46, @webb-tools/types@^0.1.2-44, @webb-tools/types@workspace:packages/types":
   version: 0.0.0-use.local
   resolution: "@webb-tools/types@workspace:packages/types"
   dependencies:
@@ -4791,7 +4791,7 @@ __metadata:
     "@polkadot/typegen": ^3.4.1
     "@polkadot/types": ^3.4.1
     "@types/websocket": ^1.0.0
-    "@webb-tools/type-definitions": 0.1.2-45
+    "@webb-tools/type-definitions": 0.1.2-46
     websocket: ^1.0.31
   languageName: unknown
   linkType: soft
