@@ -3,7 +3,7 @@ export default {
   types: {
     EvmAddress: 'H160',
     TokenSymbol: {
-      _enum: ['EDG', 'HEDG', 'DOT', 'KSM']
+      _enum: ['EDG']
     },
     CurrencyId: {
       _enum: {
