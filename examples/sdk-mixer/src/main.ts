@@ -2,7 +2,7 @@
 import Worker from './mixer.worker.ts';
 import { Mixer, MixerAssetGroup } from '@webb-tools/sdk-mixer';
 
-async function main() {
+async function bulletProffMixer() {
   const worker = new Worker();
   console.time('Bulletproof');
   const gens = await Mixer.preGenerateBulletproofGens(worker);
@@ -14,4 +14,4 @@ async function main() {
   mixer.destroy();
 }
 
-main();
+bulletProffMixer();

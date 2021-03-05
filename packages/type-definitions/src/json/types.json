@@ -2,10 +2,7 @@
     "EvmAddress": "H160",
     "TokenSymbol": {
         "_enum": [
-            "EDG",
-            "HEDG",
-            "DOT",
-            "KSM"
+            "EDG"
         ]
     },
     "CurrencyId": {

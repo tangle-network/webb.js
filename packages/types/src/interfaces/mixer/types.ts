@@ -37,9 +37,6 @@ export interface ScalarData extends U8aFixed {}
 /** @name TokenSymbol */
 export interface TokenSymbol extends Enum {
   readonly isEdg: boolean;
-  readonly isHedg: boolean;
-  readonly isDot: boolean;
-  readonly isKsm: boolean;
 }
 
 export type PHANTOM_MIXER = 'mixer';
