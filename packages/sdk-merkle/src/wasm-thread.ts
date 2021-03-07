@@ -36,6 +36,7 @@ export type EventRX<T extends keyof WasmWorkerMessageRX = any> = {
 export class WasmPoseidonHash {
   private PoseidonHasher: any = null;
   private logger = LoggerService.new('WasmPoseidonHash');
+
   constructor() {
     self.addEventListener('message', (event) => {
       this.on((event.data as unknown) as WasmWorkerMessageRX);
