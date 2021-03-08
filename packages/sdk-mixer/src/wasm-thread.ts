@@ -183,9 +183,8 @@ export class WasmMixer {
             tree_depth
           }));
           const mixer = new wasm.Mixer(mixerGroups, hasher);
-          this.logger.trace(`adding leaves`);
           this.logger.debug(
-            `add_leaves [mynote.tokenSymbol, mynote.id, leaves, root]`,
+            `adding [mynote.tokenSymbol, mynote.id, leaves, root]`,
             mynote.tokenSymbol,
             mynote.id,
             leaves,
