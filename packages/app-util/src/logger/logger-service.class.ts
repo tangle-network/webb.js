@@ -3,6 +3,7 @@ import { LoggerEvent } from './logger-event.class';
 import { Color } from './logs-colors.enum';
 
 type LoggersMaps = Record<string, LoggerService>;
+type LoggerFn = (...message: any[]) => void;
 
 export class LoggerService {
   public static readonly eventBus = new LoggerEvent();
@@ -27,7 +28,7 @@ export class LoggerService {
     return this;
   }
 
-  private logger = (level: LogLevel = LogLevel.trace, color: Color, ...message: any[]) => {
+  private logger = (level: LogLevel = LogLevel.trace, color: Color, ...message: any[]): any[] | void => {
     let m = '';
     try {
       m = JSON.stringify(message, null, 2);
@@ -44,36 +45,59 @@ export class LoggerService {
     }
     if (this.logLevel <= level) {
       const date = new Date();
-      console.log(
-        `${color}[${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}] , [${this.ctx}] `,
-        ...message
-      );
+      return [`${color}[${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}] , [${this.ctx}] `, ...message];
     }
   };
 
-  debug(...message: any[]) {
-    this.logger(LogLevel.debug, Color.FgBlack, ...message);
-  }
+  mutedLogger = () => {
+    return null;
+  };
 
-  error(...message: any[]) {
-    this.logger(LogLevel.error, Color.FgRed, ...message);
-  }
-
-  info(...message: any[]) {
-    this.logger(LogLevel.info, Color.FgCyan, ...message);
-  }
-
-  warn(...message: any[]) {
-    this.logger(LogLevel.warn, Color.FgYellow, ...message);
-  }
-
-  log(...message: any[]) {
-    this.logger(LogLevel.log, Color.FgWhite, ...message);
-  }
-
-  trace(...message: any[]) {
-    if (this.logLevel <= LogLevel.trace) {
-      console.log(`  [${this.ctx}] ${Color.FgBlack} ${message.join('')}`);
+  debug = ((...message: any[]) => {
+    const log = this.logger(LogLevel.debug, Color.FgBlack, ...message);
+    if (!log) {
+      return this.mutedLogger;
     }
-  }
+    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
+  })();
+
+  error = ((...message: any[]) => {
+    const log = this.logger(LogLevel.error, Color.FgRed, ...message);
+    if (!log) {
+      return this.mutedLogger;
+    }
+    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
+  })();
+
+  info = ((...message: any[]) => {
+    const log = this.logger(LogLevel.info, Color.FgCyan, ...message);
+    if (!log) {
+      return this.mutedLogger;
+    }
+    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
+  })();
+
+  warn = ((...message: any[]) => {
+    const log = this.logger(LogLevel.warn, Color.FgYellow, ...message);
+    if (!log) {
+      return this.mutedLogger;
+    }
+    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
+  })();
+
+  trace = ((...message: any[]) => {
+    const log = this.logger(LogLevel.trace, Color.FgBlack, ...message);
+    if (!log) {
+      return this.mutedLogger;
+    }
+    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
+  })();
+
+  log = ((...message: any[]) => {
+    const log = this.logger(LogLevel.log, Color.FgWhite, ...message);
+    if (!log) {
+      return this.mutedLogger;
+    }
+    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
+  })();
 }
