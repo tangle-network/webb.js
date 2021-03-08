@@ -1,8 +1,8 @@
 import type { Mixer } from '@webb-tools/mixer-client';
+import { MixerGroups } from '@webb-tools/mixer-client';
 import type { TokenSymbol } from '@webb-tools/sdk-mixer';
 import { Note } from '@webb-tools/sdk-mixer';
 import { LoggerService } from '@webb-tools/app-util';
-import { MixerGroups } from '@webb-tools/mixer-client';
 
 type Asset = {
   id: number;
@@ -190,11 +190,14 @@ export class WasmMixer {
             leaves,
             root
           );
-          mixer.add_leaves(mynote.tokenSymbol, mynote.id, leaves, root);
-          this.logger.trace(`Added leaves`);
+
           this.logger.trace(`Saving note`);
           const leaf = mixer.save_note(note);
           this.logger.trace(`Saved  note`);
+          leaves.push(leaf);
+          mixer.add_leaves(mynote.tokenSymbol, mynote.id, leaves, root);
+          this.logger.trace(`Added leaves`);
+
           this.logger.debug(`Got leaf from  saved note`, leaf);
           this.logger.trace(`Generating Zero knowledge proof`);
           this.logger.debug(
@@ -204,6 +207,7 @@ export class WasmMixer {
             root,
             leaf
           );
+
           const zkProofMap = mixer.generate_proof(mynote.tokenSymbol, mynote.id, root, leaf) as ZKProofMap;
           this.logger.trace(`Generated zKProof`);
           this.emit('withdraw', {
