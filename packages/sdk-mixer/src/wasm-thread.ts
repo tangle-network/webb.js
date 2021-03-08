@@ -94,10 +94,10 @@ export class WasmMixer {
           opts.bp_gens = bulletproofGens;
         }
         const hasher = new wasm.PoseidonHasher(opts);
-        const mixerGroups: MixerGroups = mixerGroup.map(([asset, group_id, tree_depth]) => ({
+        const mixerGroups: MixerGroups = mixerGroup.map(([asset, groupId, treeDepth]) => ({
           asset,
-          group_id,
-          tree_depth
+          group_id: groupId,
+          tree_depth: treeDepth
         }));
         this.logger.debug('Mixer initialized with mixerGroup ', mixerGroups);
         this.mixer = new wasm.Mixer(mixerGroups, hasher);
@@ -177,10 +177,10 @@ export class WasmMixer {
           const hasher = new wasm.PoseidonHasher(opts);
           this.logger.trace(`Created poseidon hasher`);
           this.logger.trace(`Init new mixer with hasher `, hasher, 'mixerGroup', mixerGroup);
-          const mixerGroups: MixerGroups = mixerGroup.map(([asset, group_id, tree_depth]) => ({
+          const mixerGroups: MixerGroups = mixerGroup.map(([asset, groupId, treeDepth]) => ({
             asset,
-            group_id,
-            tree_depth
+            group_id: groupId,
+            tree_depth: treeDepth
           }));
           const mixer = new wasm.Mixer(mixerGroups, hasher);
           this.logger.debug(
