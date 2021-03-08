@@ -65,6 +65,7 @@ export type EventRX<T extends keyof WasmWorkerMessageRX = any> = {
 export class WasmMixer {
   private mixer: Mixer | null = null;
   private logger = LoggerService.new('WasmMixer');
+
   constructor() {
     self.addEventListener('message', (event) => {
       this.on((event.data as unknown) as WasmWorkerMessageRX);
@@ -161,17 +162,44 @@ export class WasmMixer {
       const mynote = Note.deserialize(note);
       import('@webb-tools/mixer-client')
         .then((wasm) => {
-          this.logger.debug('Created a new Mixer for Withdrawer..');
+          this.logger.debug('Created a new Mixer for Withdrawal..');
+          this.logger.trace(`Generating poseidon hash options`);
           const opts = new wasm.PoseidonHasherOptions();
+          this.logger.trace(`Generating poseidon hash options`, opts);
           if (bulletproofGens && bulletproofGens.length !== 0) {
+            this.logger.trace(`Setting bulletproofGens with length `, bulletproofGens.length);
             opts.bp_gens = bulletproofGens;
           }
+          this.logger.trace(`Creating poseidon hasher`);
           const hasher = new wasm.PoseidonHasher(opts);
+          this.logger.trace(`Created poseidon hasher`);
+          this.logger.trace(`Init new mixer with hasher `, hasher, 'mixerGroup', mixerGroup);
           const mixer = new wasm.Mixer(mixerGroup, hasher);
+          this.logger.trace(`adding leaves`);
+          this.logger.debug(
+            `add_leaves [mynote.tokenSymbol, mynote.id, leaves, root]`,
+            mynote.tokenSymbol,
+            mynote.id,
+            leaves,
+            root
+          );
           mixer.add_leaves(mynote.tokenSymbol, mynote.id, leaves, root);
+          this.logger.trace(`Added leaves`);
+          this.logger.trace(`Saving note`);
           const savedNote = mixer.save_note(note);
+          this.logger.trace(`Saved  note`);
           const leaf = savedNote.get('leaf') as Uint8Array;
+          this.logger.debug(`Got leaf from  saved note`, leaf);
+          this.logger.trace(`Generating Zero knowledge proof`);
+          this.logger.debug(
+            `GZKP args [mynote.tokenSymbol, mynote.id, root, leaf] `,
+            mynote.tokenSymbol,
+            mynote.id,
+            root,
+            leaf
+          );
           const zkProofMap = mixer.generate_proof(mynote.tokenSymbol, mynote.id, root, leaf) as ZKProofMap;
+          this.logger.trace(`Generated zKProof`);
           this.emit('withdraw', {
             leafIndexCommitments: zkProofMap.get('leaf_index_comms') as Array<Uint8Array>,
             commitments: zkProofMap.get('comms') as Array<Uint8Array>,
