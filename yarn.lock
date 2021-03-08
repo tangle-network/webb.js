@@ -4725,10 +4725,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webb-tools/mixer-client@npm:^0.0.9":
-  version: 0.0.9
-  resolution: "@webb-tools/mixer-client@npm:0.0.9"
-  checksum: 8d762bc308cdc73d3e4cc3f1c36233de13a7b2954f7b84156e87fadbb6d22706388db61e267581acc640a401a312f8e435891658d544b174ed4a555685250fe2
+"@webb-tools/mixer-client@npm:^0.0.10":
+  version: 0.0.10
+  resolution: "@webb-tools/mixer-client@npm:0.0.10"
+  checksum: 2edc6c15dd182a9d4b5e99ca12701c2461d10a80cb15fb638f2f7a11edf46e46900ac6e6fdb97604c6a6325feefaec61c903891d70d34251e82f7422de5b7fb8
   languageName: node
   linkType: hard
 

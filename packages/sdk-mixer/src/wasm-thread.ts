@@ -2,6 +2,7 @@ import type { Mixer } from '@webb-tools/mixer-client';
 import type { TokenSymbol } from '@webb-tools/sdk-mixer';
 import { Note } from '@webb-tools/sdk-mixer';
 import { LoggerService } from '@webb-tools/app-util';
+import { MixerGroups } from '@webb-tools/mixer-client';
 
 type Asset = {
   id: number;
@@ -93,8 +94,13 @@ export class WasmMixer {
           opts.bp_gens = bulletproofGens;
         }
         const hasher = new wasm.PoseidonHasher(opts);
-        this.logger.debug('Mixer initialized with mixerGroup ', mixerGroup);
-        this.mixer = new wasm.Mixer(mixerGroup, hasher);
+        const mixerGroups: MixerGroups = mixerGroup.map(([asset, group_id, tree_depth]) => ({
+          asset,
+          group_id,
+          tree_depth
+        }));
+        this.logger.debug('Mixer initialized with mixerGroup ', mixerGroups);
+        this.mixer = new wasm.Mixer(mixerGroups, hasher);
         this.emit('init', undefined);
       })
       .catch((e) => {
@@ -124,18 +130,15 @@ export class WasmMixer {
       return;
     }
     try {
-      type SavedNote = Map<'leaf' | 'asset' | 'id', any>;
       if (noteSerialized) {
-        const note = this.mixer.save_note(noteSerialized) as SavedNote;
-        const leaf = note.get('leaf') as Uint8Array;
+        const leaf = this.mixer.save_note(noteSerialized);
         return this.emit('deposit', {
           leaf,
           note: noteSerialized
         });
       } else if (assetSerialized) {
         const note = this.mixer.generate_note(assetSerialized.tokenSymbol, assetSerialized.id);
-        const savedNote = this.mixer.save_note(note) as SavedNote;
-        const leaf = savedNote.get('leaf') as Uint8Array;
+        const leaf = this.mixer.save_note(note);
         return this.emit('deposit', {
           leaf,
           note
@@ -174,7 +177,12 @@ export class WasmMixer {
           const hasher = new wasm.PoseidonHasher(opts);
           this.logger.trace(`Created poseidon hasher`);
           this.logger.trace(`Init new mixer with hasher `, hasher, 'mixerGroup', mixerGroup);
-          const mixer = new wasm.Mixer(mixerGroup, hasher);
+          const mixerGroups: MixerGroups = mixerGroup.map(([asset, group_id, tree_depth]) => ({
+            asset,
+            group_id,
+            tree_depth
+          }));
+          const mixer = new wasm.Mixer(mixerGroups, hasher);
           this.logger.trace(`adding leaves`);
           this.logger.debug(
             `add_leaves [mynote.tokenSymbol, mynote.id, leaves, root]`,
@@ -186,9 +194,8 @@ export class WasmMixer {
           mixer.add_leaves(mynote.tokenSymbol, mynote.id, leaves, root);
           this.logger.trace(`Added leaves`);
           this.logger.trace(`Saving note`);
-          const savedNote = mixer.save_note(note);
+          const leaf = mixer.save_note(note);
           this.logger.trace(`Saved  note`);
-          const leaf = savedNote.get('leaf') as Uint8Array;
           this.logger.debug(`Got leaf from  saved note`, leaf);
           this.logger.trace(`Generating Zero knowledge proof`);
           this.logger.debug(
