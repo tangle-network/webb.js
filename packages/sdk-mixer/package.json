@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/sdk-mixer",
-  "version": "0.1.2-50",
+  "version": "0.1.2-51",
   "description": "the mixer submodule in webb tools sdk",
   "main": "index.js",
   "author": "Webb Developers <drew@webb.tools>",
@@ -16,10 +16,10 @@
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
     "@polkadot/util": "^3.4.1",
-    "@webb-tools/app-util": "^0.1.2-50",
+    "@webb-tools/app-util": "^0.1.2-51",
     "@webb-tools/mixer-client": "^0.0.8",
-    "@webb-tools/sdk-core": "^0.1.2-50",
-    "@webb-tools/sdk-merkle": "^0.1.2-50",
+    "@webb-tools/sdk-core": "^0.1.2-51",
+    "@webb-tools/sdk-merkle": "^0.1.2-51",
     "lodash": "^4.17.20"
   },
   "devDependencies": {
