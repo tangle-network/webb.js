@@ -12,7 +12,7 @@ export abstract class EventBus<T extends Event> {
       return;
     }
     this.subscriptions[event] = [...(this.subscriptions[event] || []), cb];
-    return this.off(event, cb);
+    return () => this.off(event, cb);
   };
 
   emit = <E extends keyof T>(event: E, data: T[E]) => {
