@@ -3,6 +3,7 @@ import { LoggerEvent } from './logger-event.class';
 import { Color } from './logs-colors.enum';
 
 type LoggersMaps = Record<string, LoggerService>;
+type LoggerFn = (...message: any[]) => void;
 
 export class LoggerService {
   public static readonly eventBus = new LoggerEvent();
@@ -52,57 +53,51 @@ export class LoggerService {
     return null;
   };
 
-  // @ts-ignore
   debug = ((...message: any[]) => {
     const log = this.logger(LogLevel.debug, Color.FgBlack, ...message);
     if (!log) {
       return this.mutedLogger;
     }
-    return Function.prototype.bind.call(console.log, console, ...log);
+    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
   })();
 
-  // @ts-ignore
   error = ((...message: any[]) => {
     const log = this.logger(LogLevel.error, Color.FgRed, ...message);
     if (!log) {
       return this.mutedLogger;
     }
-    return Function.prototype.bind.call(console.log, console, ...log);
+    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
   })();
 
-  // @ts-ignore
   info = ((...message: any[]) => {
     const log = this.logger(LogLevel.info, Color.FgCyan, ...message);
     if (!log) {
       return this.mutedLogger;
     }
-    return Function.prototype.bind.call(console.log, console, ...log);
+    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
   })();
 
-  // @ts-ignore
   warn = ((...message: any[]) => {
     const log = this.logger(LogLevel.warn, Color.FgYellow, ...message);
     if (!log) {
       return this.mutedLogger;
     }
-    return Function.prototype.bind.call(console.log, console, ...log);
+    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
   })();
 
-  // @ts-ignore
   trace = ((...message: any[]) => {
     const log = this.logger(LogLevel.trace, Color.FgBlack, ...message);
     if (!log) {
       return this.mutedLogger;
     }
-    return Function.prototype.bind.call(console.log, console, ...log);
+    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
   })();
 
-  // @ts-ignore
   log = ((...message: any[]) => {
     const log = this.logger(LogLevel.log, Color.FgWhite, ...message);
     if (!log) {
       return this.mutedLogger;
     }
-    return Function.prototype.bind.call(console.log, console, ...log);
+    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
   })();
 }
