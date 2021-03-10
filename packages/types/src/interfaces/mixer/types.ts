@@ -1,9 +1,10 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import type { Enum, Struct, U8aFixed, Vec } from '@polkadot/types';
+import type { Bytes, Enum, Option, Struct, U8aFixed, Vec } from '@polkadot/types';
 import type { ITuple } from '@polkadot/types/types';
-import type { Balance, BlockNumber, H160 } from '@webb-tools/types/interfaces/runtime';
+import type { GroupId } from '@webb-tools/types/interfaces/merkle';
+import type { AccountId, Balance, BlockNumber, H160 } from '@webb-tools/types/interfaces/runtime';
 
 /** @name Commitment */
 export interface Commitment extends ScalarData {}
@@ -37,6 +38,20 @@ export interface ScalarData extends U8aFixed {}
 /** @name TokenSymbol */
 export interface TokenSymbol extends Enum {
   readonly isEdg: boolean;
+}
+
+/** @name WithdrawProof */
+export interface WithdrawProof extends Struct {
+  readonly mixer_id: GroupId;
+  readonly cached_block: BlockNumber;
+  readonly cached_root: ScalarData;
+  readonly comms: Vec<Commitment>;
+  readonly nullifier_hash: ScalarData;
+  readonly proof_bytes: Bytes;
+  readonly leaf_index_commitments: Vec<Commitment>;
+  readonly proof_commitments: Vec<Commitment>;
+  readonly recipient: Option<AccountId>;
+  readonly relayer: Option<AccountId>;
 }
 
 export type PHANTOM_MIXER = 'mixer';

@@ -25,6 +25,18 @@
                             "fixed_deposit_size": "Balance",
                             "leaves": "Vec<ScalarData>"
                         },
+                        "WithdrawProof": {
+                            "mixer_id": "GroupId",
+                            "cached_block": "BlockNumber",
+                            "cached_root": "ScalarData",
+                            "comms": "Vec<Commitment>",
+                            "nullifier_hash": "ScalarData",
+                            "proof_bytes": "Vec<u8>",
+                            "leaf_index_commitments": "Vec<Commitment>",
+                            "proof_commitments": "Vec<Commitment>",
+                            "recipient": "Option<AccountId>",
+                            "relayer": "Option<AccountId>"
+                        },
                         "GroupId": "u32",
                         "Manager": {
                             "accountId": "AccountId",

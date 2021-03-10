@@ -4762,12 +4762,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@webb-tools/sdk-mixer@workspace:packages/sdk-mixer"
   dependencies:
+    "@polkadot/api": ^3.4.1
     "@polkadot/util": ^3.4.1
     "@types/lodash": ^4.14.161
     "@webb-tools/app-util": ^0.1.2-53
     "@webb-tools/mixer-client": ^0.0.8
     "@webb-tools/sdk-core": ^0.1.2-53
     "@webb-tools/sdk-merkle": ^0.1.2-53
+    "@webb-tools/types": ^0.1.2-53
     lodash: ^4.17.20
   languageName: unknown
   linkType: soft
@@ -4780,7 +4782,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webb-tools/types@0.1.2-53, @webb-tools/types@^0.1.2-44, @webb-tools/types@workspace:packages/types":
+"@webb-tools/types@0.1.2-53, @webb-tools/types@^0.1.2-44, @webb-tools/types@^0.1.2-53, @webb-tools/types@workspace:packages/types":
   version: 0.0.0-use.local
   resolution: "@webb-tools/types@workspace:packages/types"
   dependencies:

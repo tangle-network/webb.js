@@ -51,7 +51,7 @@ import type { Multiplier } from '@polkadot/types/interfaces/txpayment';
 import type { Multisig, Timepoint } from '@polkadot/types/interfaces/utility';
 import type { VestingInfo } from '@polkadot/types/interfaces/vesting';
 import type { GroupId, GroupTree, Manager } from '@webb-tools/types/interfaces/merkle';
-import type { Commitment, CurrencyId, EvmAddress, MixerInfo, Nullifier, ScalarData, TokenSymbol } from '@webb-tools/types/interfaces/mixer';
+import type { Commitment, CurrencyId, EvmAddress, MixerInfo, Nullifier, ScalarData, TokenSymbol, WithdrawProof } from '@webb-tools/types/interfaces/mixer';
 import type { AccountId, AccountIdOf, AccountIndex, Address, AssetId, Balance, BalanceOf, Block, BlockNumber, Call, CallHash, CallHashOf, ChainId, ChangesTrieConfiguration, Consensus, ConsensusEngineId, Digest, DigestItem, ExtrinsicsWeight, Fixed128, Fixed64, FixedI128, FixedI64, FixedU128, FixedU64, H1024, H128, H160, H2048, H256, H512, H64, Hash, Header, I32F32, Index, IndicesLookupSource, Justification, KeyTypeId, KeyValue, LockIdentifier, LookupSource, LookupTarget, ModuleId, Moment, MultiAddress, OpaqueCall, Origin, OriginCaller, PalletVersion, PalletsOrigin, Pays, PerU16, Perbill, Percent, Permill, Perquintill, Phantom, PhantomData, PreRuntime, Releases, RuntimeDbWeight, Seal, SealV0, SignedBlock, StorageData, TransactionPriority, U32F32, ValidatorId, ValidatorIdOf, Weight, WeightMultiplier } from '@webb-tools/types/interfaces/runtime';
 
 declare module '@polkadot/types/types/registry' {
@@ -851,6 +851,7 @@ declare module '@polkadot/types/types/registry' {
     'Option<WinningData>': Option<WinningData>;
     'Option<WinningDataEntry>': Option<WinningDataEntry>;
     'Option<WithdrawAsset>': Option<WithdrawAsset>;
+    'Option<WithdrawProof>': Option<WithdrawProof>;
     'Option<WithdrawReasons>': Option<WithdrawReasons>;
     'Option<Xcm>': Option<Xcm>;
     'Option<XcmError>': Option<XcmError>;
@@ -1568,6 +1569,7 @@ declare module '@polkadot/types/types/registry' {
     'Vec<WinningData>': Vec<WinningData>;
     'Vec<WinningDataEntry>': Vec<WinningDataEntry>;
     'Vec<WithdrawAsset>': Vec<WithdrawAsset>;
+    'Vec<WithdrawProof>': Vec<WithdrawProof>;
     'Vec<WithdrawReasons>': Vec<WithdrawReasons>;
     'Vec<Xcm>': Vec<Xcm>;
     'Vec<XcmError>': Vec<XcmError>;
@@ -2285,6 +2287,7 @@ declare module '@polkadot/types/types/registry' {
     WinningData: WinningData;
     WinningDataEntry: WinningDataEntry;
     WithdrawAsset: WithdrawAsset;
+    WithdrawProof: WithdrawProof;
     WithdrawReasons: WithdrawReasons;
     Xcm: Xcm;
     XcmError: XcmError;

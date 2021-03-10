@@ -12,10 +12,9 @@ export interface WasmWorkerMessageTX extends WasmMessage {
 }
 
 export interface WasmWorkerMessageRX extends WasmMessage {
-  // TODO: Define hasher init
-  // init: {
-  //   mixerGroup: Array<[TokenSymbol, number, number]>;
-  // };
+  init: {
+    mixerGroup: Array<[TokenSymbol, number, number]>;
+  };
   poseidon: {
     left: Uint8Array;
     right: Uint8Array;

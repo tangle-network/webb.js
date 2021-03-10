@@ -15,11 +15,13 @@
   },
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
+    "@polkadot/api": "^3.4.1",
     "@polkadot/util": "^3.4.1",
     "@webb-tools/app-util": "^0.1.2-53",
     "@webb-tools/mixer-client": "^0.0.8",
     "@webb-tools/sdk-core": "^0.1.2-53",
     "@webb-tools/sdk-merkle": "^0.1.2-53",
+    "@webb-tools/types": "^0.1.2-53",
     "lodash": "^4.17.20"
   },
   "devDependencies": {
