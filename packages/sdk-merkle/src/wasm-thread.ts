@@ -1,11 +1,11 @@
 import { LoggerService } from '@webb-tools/app-util';
+import { PoseidonHasher } from 'rust/pkg/mixer-client';
 
 export type Events = 'poseidon' | 'hash';
 export type WasmMessage = Record<Events, unknown>;
 
 export interface WasmWorkerMessageTX extends WasmMessage {
-  // TODO: Define hasher init
-  // init: void;
+  init: void;
   poseidon: {
     hash: Uint8Array;
   };
@@ -13,7 +13,7 @@ export interface WasmWorkerMessageTX extends WasmMessage {
 
 export interface WasmWorkerMessageRX extends WasmMessage {
   init: {
-    mixerGroup: Array<[TokenSymbol, number, number]>;
+    bulletproofGens: Uint8Array;
   };
   poseidon: {
     left: Uint8Array;
@@ -33,7 +33,7 @@ export type EventRX<T extends keyof WasmWorkerMessageRX = any> = {
 };
 
 export class WasmPoseidonHash {
-  private PoseidonHasher: any = null;
+  // private hasher: PoseidonHasher;
   private logger = LoggerService.new('WasmPoseidonHash');
 
   constructor() {
@@ -42,25 +42,29 @@ export class WasmPoseidonHash {
     });
   }
 
-  // init(mixerGroup: Array<[TokenSymbol, number, number]>): void {
-  //   import('@webb-tools/mixer-client')
-  //     .then((wasm) => {
-  //       this.logger.debug('Mixer initialized with mixerGroup ', mixerGroup);
-  //       this.mixer = wasm.Mixer.new(mixerGroup);
-  //       this.emit('init', undefined);
-  //     })
-  //     .catch((e) => {
-  //       this.logger.error(`Failed to initialized the mixer`, e);
-  //       this.emit('init', e, true);
-  //     });
-  // }
+  init(bulletproofGens?: Uint8Array): void {
+    import('@webb-tools/mixer-client')
+      .then((wasm) => {
+        const opts = new wasm.PoseidonHasherOptions();
+        if (bulletproofGens && bulletproofGens.length !== 0) {
+          opts.bp_gens = bulletproofGens;
+        }
+        // this.hasher = new wasm.PoseidonHasher(opts);
+        this.logger.debug('Poseidon hasher initialized');
+        this.emit('init', undefined);
+      })
+      .catch((e) => {
+        this.logger.error(`Failed to initialized the mixer`, e);
+        this.emit('init', e, true);
+      });
+  }
 
   poseidon(left: Uint8Array, right: Uint8Array): void {
     try {
-      const hash = this.PoseidonHasher.hash(left, right);
-      this.emit('poseidon', {
-        hash
-      });
+      // const hash = this.PoseidonHasher.hash(left, right);
+      // this.emit('poseidon', {
+      //   hash
+      // });
     } catch (e) {
       this.emit('poseidon', e, true);
     }

@@ -8,11 +8,9 @@ import {
   WasmWorkerMessageRX,
   WasmWorkerMessageTX
 } from '@webb-tools/sdk-mixer';
-import { WithdrawProof } from '@webb-tools/types';
 import { LoggerService } from '@webb-tools/app-util';
 // import { MerkleTree, buildMerkleTree as build } from '@webb-tools/sdk-merkle';
 import { ZKProof } from './zkproof';
-import { ApiPromise } from '@polkadot/api';
 
 export class Mixer {
   private readonly logger = LoggerService.new('Mixer');
@@ -104,7 +102,7 @@ export class Mixer {
    * */
   public async saveNote(note: Note): Promise<Uint8Array> {
     await this.destroyGuard();
-    const { leaf } = await this.postMessage('deposit', {
+    const { leaf } = await this.postMessage('generateNoteAndLeaf', {
       note: note.serialize()
     });
     return leaf;
@@ -118,33 +116,26 @@ export class Mixer {
    * This method also could be called by using only the `Asset` and if so this method will generate
    * a new `Note` and prepare it for the deposit TX.
    **/
-  public async deposit(noteOrAsset: Note | Asset, api: ApiPromise): Promise<Note | any> {
+  public async generateNoteAndLeaf(noteOrAsset: Note | Asset): Promise<[Note, Uint8Array]> {
     let leaf: Uint8Array;
     let note: Note;
     await this.destroyGuard();
 
     if (noteOrAsset instanceof Asset) {
-      const { note: _note, leaf: _leaf } = await this.postMessage('deposit', {
+      const { note: _note, leaf: _leaf } = await this.postMessage('generateNoteAndLeaf', {
         asset: { id: noteOrAsset.id, tokenSymbol: noteOrAsset.tokenSymbol }
       });
       leaf = _leaf;
       note = Note.deserialize(_note);
     } else {
-      const { note: _note, leaf: _leaf } = await this.postMessage('deposit', {
+      const { note: _note, leaf: _leaf } = await this.postMessage('generateNoteAndLeaf', {
         note: noteOrAsset.serialize()
       });
       leaf = _leaf;
       note = Note.deserialize(_note);
     }
 
-    api.tx.mixer.deposit(note.id, [leaf]).signAndSend('SENDER', ({ status }) => {
-      if (status.isInBlock || status.isFinalized) {
-        api.query.system.number().then((b) => {
-          note.blockNumber = b.toNumber();
-          return note;
-        });
-      }
-    });
+    return [note, leaf];
   }
 
   /**
@@ -156,7 +147,7 @@ export class Mixer {
    * So you can freely call this method at any point in time.
    *
    **/
-  public async withdraw(note: Note, root: Uint8Array, leaves: Array<Uint8Array>, api: ApiPromise): Promise<void> {
+  public async withdraw(note: Note, root: Uint8Array, leaves: Array<Uint8Array>): Promise<ZKProof> {
     await this.destroyGuard();
     const mixerGroup: Array<[TokenSymbol, number, number]> = this.assetGroups.map((v) => [
       v.tokenSymbol,
@@ -174,19 +165,6 @@ export class Mixer {
       }
     );
 
-    const zkProof = new ZKProof(leafIndexCommitments, commitments, proofCommitments, nullifierHash, proof);
-    const withdrawProof: WithdrawProof = {
-      mixer_id: note.id,
-      cached_block: 0,
-      cached_root: root,
-      comms: zkProof.commitments,
-      nullifier_hash: zkProof.nullifierHash,
-      proof_bytes: zkProof.proof,
-      leaf_index_commitments: zkProof.leafIndexCommitments,
-      proof_commitments: zkProof.proofCommitments,
-      recipient: 'SENDER',
-      relayer: 'SENDER'
-    };
-    const result = await api.tx.mixer.withdraw(withdrawProof).signAndSend('SENDER');
+    return new ZKProof(leafIndexCommitments, commitments, proofCommitments, nullifierHash, proof);
   }
 }

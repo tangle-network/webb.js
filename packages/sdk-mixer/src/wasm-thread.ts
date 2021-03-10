@@ -8,7 +8,7 @@ type Asset = {
   id: number;
   tokenSymbol: TokenSymbol;
 };
-export type Events = 'init' | 'generateNote' | 'deposit' | 'createProof' | 'preGenerateBulletproofGens';
+export type Events = 'init' | 'generateNote' | 'generateNoteAndLeaf' | 'createProof' | 'preGenerateBulletproofGens';
 export type WasmMessage = Record<Events, unknown>;
 
 export interface WasmWorkerMessageTX extends WasmMessage {
@@ -19,7 +19,7 @@ export interface WasmWorkerMessageTX extends WasmMessage {
   generateNote: {
     note: string;
   };
-  deposit: {
+  generateNoteAndLeaf: {
     leaf: Uint8Array;
     note: string;
   };
@@ -39,7 +39,7 @@ export interface WasmWorkerMessageRX extends WasmMessage {
     bulletproofGens?: Uint8Array;
   };
   preGenerateBulletproofGens: void;
-  deposit: {
+  generateNoteAndLeaf: {
     note?: string;
     asset?: Asset;
   };
@@ -124,28 +124,28 @@ export class WasmMixer {
     }
   }
 
-  public deposit(noteSerialized?: string, assetSerialized?: Asset): void {
+  public generateNoteAndLeaf(noteSerialized?: string, assetSerialized?: Asset): void {
     if (!this.mixer) {
-      this.emit('deposit', 'Mixer is not initialized', true);
+      this.emit('generateNoteAndLeaf', 'Mixer is not initialized', true);
       return;
     }
     try {
       if (noteSerialized) {
         const leaf = this.mixer.save_note(noteSerialized);
-        return this.emit('deposit', {
+        return this.emit('generateNoteAndLeaf', {
           leaf,
           note: noteSerialized
         });
       } else if (assetSerialized) {
         const note = this.mixer.generate_note(assetSerialized.tokenSymbol, assetSerialized.id);
         const leaf = this.mixer.save_note(note);
-        return this.emit('deposit', {
+        return this.emit('generateNoteAndLeaf', {
           leaf,
           note
         });
       }
     } catch (e) {
-      this.emit('deposit', e, true);
+      this.emit('generateNoteAndLeaf', e, true);
     }
   }
 
@@ -253,8 +253,8 @@ export class WasmMixer {
       case 'init':
         this.init(event[name].mixerGroup, event[name].bulletproofGens);
         break;
-      case 'deposit':
-        this.deposit(event[name].note, event[name].asset);
+      case 'generateNoteAndLeaf':
+        this.generateNoteAndLeaf(event[name].note, event[name].asset);
         break;
       case 'createProof':
         this.createProof(
