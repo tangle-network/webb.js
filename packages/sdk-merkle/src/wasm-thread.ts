@@ -1,5 +1,4 @@
 import { LoggerService } from '@webb-tools/app-util';
-import { PoseidonHasher } from 'rust/pkg/mixer-client';
 
 export type Events = 'poseidon' | 'hash';
 export type WasmMessage = Record<Events, unknown>;

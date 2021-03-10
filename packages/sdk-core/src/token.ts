@@ -12,7 +12,7 @@ export interface TokenConfig {
 }
 
 // preset token type
-export type PresetToken = 'EDG' | 'WEBB';
+export type PresetToken = 'EDG' | 'WEBB' | 'DEV';
 
 // common tokens config in acala network and polkadot
 export const presetTokensConfig: Record<CHAIN, Record<PresetToken, TokenConfig>> = {
@@ -25,8 +25,16 @@ export const presetTokensConfig: Record<CHAIN, Record<PresetToken, TokenConfig>>
     }
   } as Record<PresetToken, TokenConfig>,
   dev: {
-    WEBB: {
+    DEV: {
       chain: 'dev',
+      name: 'DEV',
+      symbol: 'DEV',
+      precision: 12
+    }
+  } as Record<PresetToken, TokenConfig>,
+  webb: {
+    WEBB: {
+      chain: 'webb',
       name: 'WEBB',
       symbol: 'WEBB',
       precision: 18

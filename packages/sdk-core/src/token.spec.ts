@@ -2,13 +2,13 @@ import { Token } from './token';
 import { FixedPointNumber } from './fixed-point-number';
 
 describe('token', () => {
-  const t1 = new Token({ name: 'T1', symbol: 'Token1', chain: 'acala', amount: 1, precision: 18 });
-  const t2 = new Token({ name: 'T2', symbol: 'Token1', chain: 'acala', amount: 1, precision: 16 });
+  const t1 = new Token({ name: 'T1', symbol: 'Token1', chain: 'dev', amount: 1, precision: 18 });
+  const t2 = new Token({ name: 'T2', symbol: 'Token1', chain: 'dev', amount: 1, precision: 16 });
 
   test('token constructor', () => {
     expect(t1.name).toEqual('T1');
     expect(t1.symbol).toEqual('Token1');
-    expect(t1.chain).toEqual('acala');
+    expect(t1.chain).toEqual('dev');
     expect(t1.amount.toNumber()).toEqual(1);
     expect(t1.precision).toEqual(18);
   });
