@@ -27,7 +27,7 @@ async function main() {
     const api = new ApiPromise(options({ provider }));
     await api.isReady;
 
-    // use api
+    // use the api
 }
 
 main()
