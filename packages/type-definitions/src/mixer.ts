@@ -1,6 +1,7 @@
 export default {
   rpc: {},
   types: {
+    // TODO: How can we update this or remove it
     EvmAddress: 'H160',
     TokenSymbol: {
       _enum: ['EDG']
