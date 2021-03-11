@@ -33,6 +33,8 @@ jobs:
             ~/.cargo/bin
             packages/wasm-utils/target
           key: ${{ runner.os }}-cargo-${{ steps.rust_toolchain.outputs.rustc_hash }}
+      - name: install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh -s -- -f
       - name: ${{ matrix.step }}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}

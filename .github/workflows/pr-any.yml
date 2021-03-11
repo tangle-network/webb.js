@@ -27,6 +27,8 @@ jobs:
             ~/.cargo/bin
             packages/wasm-utils/target
           key: ${{ runner.os }}-cargo-${{ steps.rust_toolchain.outputs.rustc_hash }}
+      - name: install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh -s -- -f
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
@@ -77,6 +79,8 @@ jobs:
             ~/.cargo/bin
             packages/wasm-utils/target
           key: ${{ runner.os }}-cargo-${{ steps.rust_toolchain.outputs.rustc_hash }}
+      - name: install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh -s -- -f
       - name: test
         run: |
           yarn install --immutable | grep -v 'YN0013'
@@ -111,6 +115,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+      - name: install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh -s -- -f
       - name: build
         run: |
           yarn install --immutable | grep -v 'YN0013'
