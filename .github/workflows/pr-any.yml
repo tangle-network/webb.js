@@ -40,13 +40,13 @@ jobs:
         continue-on-error: false
         with:
           command: clippy
-          args: -- -D warnings
+          args: --manifest-path packages/wasm-utils/Cargo.toml -- -D warnings
       - name: Run cargo fmt
         uses: actions-rs/cargo@v1
         continue-on-error: false
         with:
           command: fmt
-          args: --all -- --check
+          args: --manifest-path packages/wasm-utils/Cargo.toml -- --check
 
   test:
     name: Testing
