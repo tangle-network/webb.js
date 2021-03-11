@@ -7,6 +7,15 @@
     "start": "rimraf build pkg && webpack-dev-server --open -d",
     "test": "cargo test && wasm-pack test --headless"
   },
+  "files": [
+    "wasm-utils_bg.wasm",
+    "wasm-utils.js",
+    "wasm-utils_bg.js",
+    "wasm-utils.d.ts"
+  ],
+  "module": "wasm-utils.js",
+  "types": "wasm-utils.d.ts",
+  "sideEffects": false,
   "devDependencies": {
     "@open-web3/dev-config": "^0.1.10",
     "@wasm-tool/wasm-pack-plugin": "^1.3",
