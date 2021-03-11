@@ -52,6 +52,12 @@
       ],
       "@webb-tools/app-util/*": [
         "packages/app-util/src/*"
+      ],
+      "@webb-tools/wasm-utils": [
+        "packages/wasm-utils/build"
+      ],
+      "@webb-tools/wasm-utils/*": [
+        "packages/wasm-utils/build/*"
       ]
     },
     "skipLibCheck": true,

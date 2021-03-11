@@ -8,7 +8,7 @@ type Asset = {
   id: number;
   tokenSymbol: TokenSymbol;
 };
-export type Events = 'init' | 'generateNote' | 'deposit' | 'withdraw' | 'preGenerateBulletproofGens';
+export type Events = 'init' | 'generateNote' | 'generateNoteAndLeaf' | 'createProof' | 'preGenerateBulletproofGens';
 export type WasmMessage = Record<Events, unknown>;
 
 export interface WasmWorkerMessageTX extends WasmMessage {
@@ -19,11 +19,11 @@ export interface WasmWorkerMessageTX extends WasmMessage {
   generateNote: {
     note: string;
   };
-  deposit: {
+  generateNoteAndLeaf: {
     leaf: Uint8Array;
     note: string;
   };
-  withdraw: {
+  createProof: {
     leafIndexCommitments: Array<Uint8Array>;
     commitments: Array<Uint8Array>;
     proofCommitments: Array<Uint8Array>;
@@ -39,11 +39,11 @@ export interface WasmWorkerMessageRX extends WasmMessage {
     bulletproofGens?: Uint8Array;
   };
   preGenerateBulletproofGens: void;
-  deposit: {
+  generateNoteAndLeaf: {
     note?: string;
     asset?: Asset;
   };
-  withdraw: {
+  createProof: {
     mixerGroup: Array<[TokenSymbol, number, number]>;
     leaves: Array<Uint8Array>;
     root: Uint8Array;
@@ -124,32 +124,32 @@ export class WasmMixer {
     }
   }
 
-  public deposit(noteSerialized?: string, assetSerialized?: Asset): void {
+  public generateNoteAndLeaf(noteSerialized?: string, assetSerialized?: Asset): void {
     if (!this.mixer) {
-      this.emit('deposit', 'Mixer is not initialized', true);
+      this.emit('generateNoteAndLeaf', 'Mixer is not initialized', true);
       return;
     }
     try {
       if (noteSerialized) {
         const leaf = this.mixer.save_note(noteSerialized);
-        return this.emit('deposit', {
+        return this.emit('generateNoteAndLeaf', {
           leaf,
           note: noteSerialized
         });
       } else if (assetSerialized) {
         const note = this.mixer.generate_note(assetSerialized.tokenSymbol, assetSerialized.id);
         const leaf = this.mixer.save_note(note);
-        return this.emit('deposit', {
+        return this.emit('generateNoteAndLeaf', {
           leaf,
           note
         });
       }
     } catch (e) {
-      this.emit('deposit', e, true);
+      this.emit('generateNoteAndLeaf', e, true);
     }
   }
 
-  public withdraw(
+  public createProof(
     mixerGroup: Array<[TokenSymbol, number, number]>,
     note: string,
     root: Uint8Array,
@@ -157,7 +157,7 @@ export class WasmMixer {
     bulletproofGens?: Uint8Array
   ): void {
     if (!this.mixer) {
-      this.emit('withdraw', 'Mixer is not initialized', true);
+      this.emit('createProof', 'Mixer is not initialized', true);
       return;
     }
     try {
@@ -165,7 +165,7 @@ export class WasmMixer {
       const mynote = Note.deserialize(note);
       import('@webb-tools/mixer-client')
         .then((wasm) => {
-          this.logger.debug('Created a new Mixer for Withdrawal..');
+          this.logger.debug('Created a new Mixer for createProofal..');
           this.logger.trace(`Generating poseidon hash options`);
           const opts = new wasm.PoseidonHasherOptions();
           this.logger.trace(`Generating poseidon hash options`, opts);
@@ -177,11 +177,13 @@ export class WasmMixer {
           const hasher = new wasm.PoseidonHasher(opts);
           this.logger.trace(`Created poseidon hasher`);
           this.logger.trace(`Init new mixer with hasher `, hasher, 'mixerGroup', mixerGroup);
-          const mixerGroups: MixerGroups = mixerGroup.map(([asset, groupId, treeDepth]) => ({
-            asset,
-            group_id: groupId,
-            tree_depth: treeDepth
-          }));
+          const mixerGroups: MixerGroups = mixerGroup
+            .filter(([asset, groupId, treeDepth]) => asset === mynote.asAsset().tokenSymbol)
+            .map(([asset, groupId, treeDepth]) => ({
+              asset,
+              group_id: groupId,
+              tree_depth: treeDepth
+            }));
           const mixer = new wasm.Mixer(mixerGroups, hasher);
           this.logger.debug(
             `adding [mynote.tokenSymbol, mynote.id, leaves, root]`,
@@ -210,7 +212,7 @@ export class WasmMixer {
 
           const zkProofMap = mixer.generate_proof(mynote.tokenSymbol, mynote.id, root, leaf) as ZKProofMap;
           this.logger.trace(`Generated zKProof`);
-          this.emit('withdraw', {
+          this.emit('createProof', {
             leafIndexCommitments: zkProofMap.get('leaf_index_comms') as Array<Uint8Array>,
             commitments: zkProofMap.get('comms') as Array<Uint8Array>,
             proofCommitments: zkProofMap.get('proof_comms') as Array<Uint8Array>,
@@ -219,11 +221,11 @@ export class WasmMixer {
           });
         })
         .catch((e) => {
-          this.logger.error(`Failed to initialize the mixer for withdrawer`, e);
-          this.emit('withdraw', e, true);
+          this.logger.error(`Failed to initialize the mixer for createProofer`, e);
+          this.emit('createProof', e, true);
         });
     } catch (e) {
-      this.emit('withdraw', e, true);
+      this.emit('createProof', e, true);
     }
   }
 
@@ -251,11 +253,11 @@ export class WasmMixer {
       case 'init':
         this.init(event[name].mixerGroup, event[name].bulletproofGens);
         break;
-      case 'deposit':
-        this.deposit(event[name].note, event[name].asset);
+      case 'generateNoteAndLeaf':
+        this.generateNoteAndLeaf(event[name].note, event[name].asset);
         break;
-      case 'withdraw':
-        this.withdraw(
+      case 'createProof':
+        this.createProof(
           event[name].mixerGroup,
           event[name].note,
           event[name].root,

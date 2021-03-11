@@ -12,7 +12,7 @@ export interface TokenConfig {
 }
 
 // preset token type
-export type PresetToken = 'EDG' | 'WEBB' | 'DOT' | 'KSM';
+export type PresetToken = 'EDG' | 'WEBB' | 'DEV';
 
 // common tokens config in acala network and polkadot
 export const presetTokensConfig: Record<CHAIN, Record<PresetToken, TokenConfig>> = {
@@ -22,12 +22,14 @@ export const presetTokensConfig: Record<CHAIN, Record<PresetToken, TokenConfig>>
       name: 'EDG',
       symbol: 'EDG',
       precision: 18
-    },
-    WEBB: {
-      chain: 'webb',
-      name: 'WEBB',
-      symbol: 'WEBB',
-      precision: 18
+    }
+  } as Record<PresetToken, TokenConfig>,
+  dev: {
+    DEV: {
+      chain: 'dev',
+      name: 'DEV',
+      symbol: 'DEV',
+      precision: 12
     }
   } as Record<PresetToken, TokenConfig>,
   webb: {
@@ -36,24 +38,6 @@ export const presetTokensConfig: Record<CHAIN, Record<PresetToken, TokenConfig>>
       name: 'WEBB',
       symbol: 'WEBB',
       precision: 18
-    }
-  } as Record<PresetToken, TokenConfig>,
-  polkadot: {
-    DOT: {
-      chain: 'polkadot',
-      name: 'DOT',
-      symbol: 'DOT',
-      precision: 10
-    }
-  } as Record<PresetToken, TokenConfig>,
-  acala: {} as Record<PresetToken, TokenConfig>,
-  kurara: {} as Record<PresetToken, TokenConfig>,
-  kusama: {
-    KSM: {
-      chain: 'kusama',
-      name: 'KSM',
-      symbol: 'KSM',
-      precision: 12
     }
   } as Record<PresetToken, TokenConfig>
 };
@@ -133,6 +117,7 @@ export function getPresetToken(name: PresetToken, chain: CHAIN = 'edgeware'): To
 }
 
 const TOKEN_SORT: Record<string, number> = {
+  EDG: 0,
   WEBB: 0
 };
 
