@@ -5,7 +5,7 @@
   "scripts": {
     "build": "rimraf build pkg && webpack",
     "start": "rimraf build pkg && webpack-dev-server --open -d",
-    "test": "cargo test && wasm-pack test --headless"
+    "test": "wasm-pack test --chrome --headless"
   },
   "files": [
     "wasm-utils_bg.wasm",
