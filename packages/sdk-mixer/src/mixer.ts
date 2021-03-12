@@ -1,27 +1,12 @@
-import {
-  Asset,
-  Event,
-  MixerAssetGroup,
-  Note,
-  TokenSymbol,
-  WasmMessage,
-  WasmWorkerMessageRX,
-  WasmWorkerMessageTX
-} from '@webb-tools/sdk-mixer';
+import { Asset, Event, Note, WasmMessage, WasmWorkerMessageRX, WasmWorkerMessageTX } from '@webb-tools/sdk-mixer';
 import { LoggerService } from '@webb-tools/app-util';
-// import { MerkleTree, buildMerkleTree as build } from '@webb-tools/sdk-merkle';
 import { ZKProof } from './zkproof';
 
 export class Mixer {
   private readonly logger = LoggerService.new('Mixer');
   private destroyed = false;
-  private constructor(
-    private readonly worker: Worker,
-    private readonly assetGroups: MixerAssetGroup[],
-    private readonly bulletproofGens?: Uint8Array
-  ) {}
 
-  // private mt: MerkleTree;
+  private constructor(private readonly worker: Worker, private readonly bulletproofGens?: Uint8Array) {}
 
   public destroy(): void {
     this.logger.info(`Worker destroyed`);
@@ -58,18 +43,16 @@ export class Mixer {
     });
   }
 
-  public static async init(
-    worker: Worker,
-    assetGroups: MixerAssetGroup[],
-    bulletproofGens?: Uint8Array
-  ): Promise<Mixer> {
-    const tree: Array<[TokenSymbol, number, number]> = assetGroups.map((v) => [v.tokenSymbol, v.gid, v.treeDepth]);
-    const mixer = new Mixer(worker, assetGroups, bulletproofGens);
-    mixer.logger.debug(`Mixer initialized with assetGroups`, assetGroups);
-    await mixer.postMessage('init', {
-      mixerGroup: tree,
-      bulletproofGens
-    });
+  public static async init(worker: Worker, bulletproofGens?: Uint8Array): Promise<Mixer> {
+    const mixer = new Mixer(worker, bulletproofGens);
+    if (bulletproofGens) {
+      await mixer.postMessage('setBulletProofGens', {
+        bulletProofGens: bulletproofGens
+      });
+    } else {
+      await mixer.postMessage('preGenerateBulletproofGens', undefined);
+    }
+
     return mixer;
   }
 
@@ -79,7 +62,7 @@ export class Mixer {
    *
    * */
   public static async preGenerateBulletproofGens(worker: Worker): Promise<Uint8Array> {
-    const mixer = new Mixer(worker, []); // just to get the postMessage.
+    const mixer = new Mixer(worker); // just to get the postMessage.
     const { bulletproofGens } = await mixer.postMessage('preGenerateBulletproofGens', undefined);
     return bulletproofGens;
   }
@@ -98,17 +81,6 @@ export class Mixer {
   }
 
   /**
-   * Saves the note into the MerkleTree and retuns the leaf (NoteCommitment)
-   * */
-  public async saveNote(note: Note): Promise<Uint8Array> {
-    await this.destroyGuard();
-    const { leaf } = await this.postMessage('generateNoteAndLeaf', {
-      note: note.serialize()
-    });
-    return leaf;
-  }
-
-  /**
    * Prepare the Note and generate a `leaf` to be sent when doing the deposit TX.
    *
    * the `fn` callback should do the deposit operation and return the Transaction `BlockNumber`.
@@ -116,26 +88,13 @@ export class Mixer {
    * This method also could be called by using only the `Asset` and if so this method will generate
    * a new `Note` and prepare it for the deposit TX.
    **/
-  public async generateNoteAndLeaf(noteOrAsset: Note | Asset): Promise<[Note, Uint8Array]> {
-    let leaf: Uint8Array;
-    let note: Note;
+  public async generateNoteAndLeaf(asset: Asset): Promise<[Note, Uint8Array]> {
     await this.destroyGuard();
-
-    if (noteOrAsset instanceof Asset) {
-      const { note: _note, leaf: _leaf } = await this.postMessage('generateNoteAndLeaf', {
-        asset: { id: noteOrAsset.id, tokenSymbol: noteOrAsset.tokenSymbol }
-      });
-      leaf = _leaf;
-      note = Note.deserialize(_note);
-    } else {
-      const { note: _note, leaf: _leaf } = await this.postMessage('generateNoteAndLeaf', {
-        note: noteOrAsset.serialize()
-      });
-      leaf = _leaf;
-      note = Note.deserialize(_note);
-    }
-
-    return [note, leaf];
+    const { note, leaf } = await this.postMessage('generateNote', {
+      id: asset.id,
+      tokenSymbol: asset.tokenSymbol
+    });
+    return [Note.deserialize(note), leaf];
   }
 
   /**
@@ -147,18 +106,12 @@ export class Mixer {
    * So you can freely call this method at any point in time.
    *
    **/
-  public async withdraw(note: Note, root: Uint8Array, leaves: Array<Uint8Array>): Promise<ZKProof> {
+  public async generateZK(note: Note, root: Uint8Array, leaves: Array<Uint8Array>): Promise<ZKProof> {
     await this.destroyGuard();
-    const mixerGroup: Array<[TokenSymbol, number, number]> = this.assetGroups.map((v) => [
-      v.tokenSymbol,
-      v.gid,
-      v.treeDepth
-    ]);
     const { leafIndexCommitments, commitments, proofCommitments, proof, nullifierHash } = await this.postMessage(
       'createProof',
       {
         note: note.serialize(),
-        mixerGroup,
         leaves,
         root,
         bulletproofGens: this.bulletproofGens
