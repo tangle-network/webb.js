@@ -4,11 +4,11 @@ use std::str::FromStr;
 
 use bulletproofs::r1cs::Prover;
 use bulletproofs::{BulletproofGens, PedersenGens};
+use bulletproofs_gadgets::fixed_deposit_tree::builder::{FixedDepositTree, FixedDepositTreeBuilder};
+use bulletproofs_gadgets::poseidon::builder::{Poseidon, PoseidonBuilder};
+use bulletproofs_gadgets::poseidon::{PoseidonSbox, Poseidon_hash_2};
 use curve25519_dalek::ristretto::CompressedRistretto;
 use curve25519_dalek::scalar::Scalar;
-use curve25519_gadgets::fixed_deposit_tree::builder::{FixedDepositTree, FixedDepositTreeBuilder};
-use curve25519_gadgets::poseidon::builder::{Poseidon, PoseidonBuilder};
-use curve25519_gadgets::poseidon::{PoseidonSbox, Poseidon_hash_2};
 use js_sys::{Array, JsString, Uint8Array};
 use merlin::Transcript;
 use rand::rngs::OsRng;
@@ -102,7 +102,7 @@ pub struct Note {
 #[wasm_bindgen]
 pub struct ZkProof {
 	#[wasm_bindgen(skip)]
-	pub comms: CompressedRistretto,
+	pub comms: Vec<CompressedRistretto>,
 	#[wasm_bindgen(skip)]
 	pub nullifier_hash: Scalar,
 	#[wasm_bindgen(skip)]
@@ -228,9 +228,15 @@ impl ZkProof {
 	}
 
 	#[wasm_bindgen(getter)]
-	pub fn comms(&self) -> Uint8Array {
-		let bytes = self.comms.to_bytes().to_vec();
-		Uint8Array::from(bytes.as_slice())
+	pub fn comms(&self) -> Commitments {
+		let list: Array = self
+			.comms
+			.clone()
+			.into_iter()
+			.map(|v| Uint8Array::from(v.as_bytes().to_vec().as_slice()))
+			.collect();
+		let js = JsValue::from(list);
+		Commitments::from(js)
 	}
 
 	#[wasm_bindgen(getter)]
@@ -451,18 +457,36 @@ impl MerkleTree {
 		Uint8Array::from(root.to_bytes().to_vec().as_slice())
 	}
 
-	pub fn create_zk_proof(&self, root: Uint8Array, note: &Note) -> Result<ZkProof, JsValue> {
+	pub fn create_zk_proof(
+		&self,
+		root: Uint8Array,
+		recipient: Uint8Array,
+		relayer: Uint8Array,
+		note: &Note,
+	) -> Result<ZkProof, JsValue> {
 		let leaf = Poseidon_hash_2(note.r, note.nullifier, &self.hasher);
 		let root_bytes: [u8; 32] = root.to_vec().try_into().map_err(|_| OpStatusCode::InvalidArrayLength)?;
 		let root = Scalar::from_bytes_mod_order(root_bytes);
+
+		let recipient_bytes: [u8; 32] = recipient
+			.to_vec()
+			.try_into()
+			.map_err(|_| OpStatusCode::InvalidArrayLength)?;
+		let recipient = Scalar::from_bytes_mod_order(recipient_bytes);
+
+		let relayer_bytes: [u8; 32] = relayer
+			.to_vec()
+			.try_into()
+			.map_err(|_| OpStatusCode::InvalidArrayLength)?;
+		let relayer = Scalar::from_bytes_mod_order(relayer_bytes);
 
 		let pc_gens = PedersenGens::default();
 		let bp_gens = self.hasher.bp_gens.clone();
 		let mut prover_transcript = Transcript::new(b"zk_membership_proof");
 		let prover = Prover::new(&pc_gens, &mut prover_transcript);
 
-		let (proof, (comms, leaf_index_comms, proof_comms)) = self.inner.tree.prove_zk(root, leaf, &bp_gens, prover);
-		let nullifier_hash = Poseidon_hash_2(note.nullifier, note.nullifier, &self.hasher);
+		let (proof, (comms, nullifier_hash, leaf_index_comms, proof_comms)) =
+			self.inner.prove_zk(root, leaf, recipient, relayer, &bp_gens, prover);
 		let zkproof = ZkProof {
 			proof: proof.to_bytes(),
 			comms,
