@@ -21,6 +21,7 @@
     "@webb-tools/mixer-client": "^0.0.8",
     "@webb-tools/sdk-core": "^0.1.2-56",
     "@webb-tools/sdk-merkle": "^0.1.2-56",
+    "@webb-tools/wasm-utils": "^0.1.2-56",
     "lodash": "^4.17.20"
   },
   "devDependencies": {

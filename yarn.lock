@@ -4781,6 +4781,7 @@ __metadata:
     "@webb-tools/mixer-client": ^0.0.8
     "@webb-tools/sdk-core": ^0.1.2-56
     "@webb-tools/sdk-merkle": ^0.1.2-56
+    "@webb-tools/wasm-utils": ^0.1.2-56
     lodash: ^4.17.20
   languageName: unknown
   linkType: soft
@@ -4809,7 +4810,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webb-tools/wasm-utils@workspace:packages/wasm-utils":
+"@webb-tools/wasm-utils@^0.1.2-56, @webb-tools/wasm-utils@workspace:packages/wasm-utils":
   version: 0.0.0-use.local
   resolution: "@webb-tools/wasm-utils@workspace:packages/wasm-utils"
   dependencies:

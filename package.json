@@ -14,8 +14,9 @@
     "@webb-tools/mixer-client": "^0.0.12"
   },
   "scripts": {
-    "build": "yarn build:interfaces && polkadot-dev-build-ts",
-    "build:release": "polkadot-ci-ghact-build",
+    "build": "yarn build:interfaces && yarn build-ts:dev",
+    "build-ts:dev": "node ./scripts/webb-build-dev.js",
+    "build:release": "node ./scripts/webb-build-release.js",
     "build:interfaces": "ts-node-script -r tsconfig-paths/register packages/types/scripts/generate.ts && ts-node-script -r tsconfig-paths/register packages/type-definitions/scripts/generate.ts",
     "lint": "polkadot-dev-run-lint",
     "clean": "polkadot-dev-clean-build",

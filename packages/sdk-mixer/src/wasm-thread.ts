@@ -1,27 +1,22 @@
-import type { Mixer } from '@webb-tools/mixer-client';
-import { MixerGroups } from '@webb-tools/mixer-client';
 import type { TokenSymbol } from '@webb-tools/sdk-mixer';
-import { Note } from '@webb-tools/sdk-mixer';
 import { LoggerService } from '@webb-tools/app-util';
+import type { PoseidonHasher } from '@webb-tools/wasm-utils';
 
 type Asset = {
   id: number;
   tokenSymbol: TokenSymbol;
 };
-export type Events = 'init' | 'generateNote' | 'generateNoteAndLeaf' | 'createProof' | 'preGenerateBulletproofGens';
+export type Events = 'generateNote' | 'setBulletProofGens' | 'createProof' | 'preGenerateBulletproofGens';
 export type WasmMessage = Record<Events, unknown>;
 
 export interface WasmWorkerMessageTX extends WasmMessage {
-  init: void;
+  setBulletProofGens: void;
   preGenerateBulletproofGens: {
     bulletproofGens: Uint8Array;
   };
   generateNote: {
     note: string;
-  };
-  generateNoteAndLeaf: {
     leaf: Uint8Array;
-    note: string;
   };
   createProof: {
     leafIndexCommitments: Array<Uint8Array>;
@@ -34,17 +29,11 @@ export interface WasmWorkerMessageTX extends WasmMessage {
 
 export interface WasmWorkerMessageRX extends WasmMessage {
   generateNote: Asset;
-  init: {
-    mixerGroup: Array<[TokenSymbol, number, number]>;
-    bulletproofGens?: Uint8Array;
+  setBulletProofGens: {
+    bulletProofGens: Uint8Array;
   };
   preGenerateBulletproofGens: void;
-  generateNoteAndLeaf: {
-    note?: string;
-    asset?: Asset;
-  };
   createProof: {
-    mixerGroup: Array<[TokenSymbol, number, number]>;
     leaves: Array<Uint8Array>;
     root: Uint8Array;
     note: string;
@@ -64,8 +53,8 @@ export type EventRX<T extends keyof WasmWorkerMessageRX = any> = {
 };
 
 export class WasmMixer {
-  private mixer: Mixer | null = null;
   private logger = LoggerService.new('WasmMixer');
+  private _hasher: PoseidonHasher | null = null;
 
   constructor() {
     self.addEventListener('message', (event) => {
@@ -73,158 +62,99 @@ export class WasmMixer {
     });
   }
 
-  public preGenerateBulletproofGens(): void {
-    import('@webb-tools/mixer-client')
-      .then((wasm) => {
-        const opts = new wasm.PoseidonHasherOptions();
-        const bulletproofGens = opts.bp_gens;
-        this.emit('preGenerateBulletproofGens', { bulletproofGens }, false);
-      })
-      .catch((e) => {
-        this.logger.error(`Failed to initialized the poseidon hasher`, e);
-        this.emit('preGenerateBulletproofGens', e, true);
-      });
-  }
+  /**
+   *
+   *  preGenerateBulletproofGens
+   *  @description generates Bulletproof should be cached to faster future init
+   * */
 
-  public init(mixerGroup: Array<[TokenSymbol, number, number]>, bulletproofGens?: Uint8Array): void {
-    import('@webb-tools/mixer-client')
-      .then((wasm) => {
-        const opts = new wasm.PoseidonHasherOptions();
-        if (bulletproofGens && bulletproofGens.length !== 0) {
-          opts.bp_gens = bulletproofGens;
-        }
-        const hasher = new wasm.PoseidonHasher(opts);
-        const mixerGroups: MixerGroups = mixerGroup.map(([asset, groupId, treeDepth]) => ({
-          asset,
-          group_id: groupId,
-          tree_depth: treeDepth
-        }));
-        this.logger.debug('Mixer initialized with mixerGroup ', mixerGroups);
-        this.mixer = new wasm.Mixer(mixerGroups, hasher);
-        this.emit('init', undefined);
-      })
-      .catch((e) => {
-        this.logger.error(`Failed to initialized the mixer`, e);
-        this.emit('init', e, true);
-      });
-  }
-
-  public generateNote(asset: Asset): void {
-    if (!this.mixer) {
-      this.emit('generateNote', 'Mixer is not initialized', true);
-      return;
-    }
+  public async preGenerateBulletproofGens(): Promise<void> {
     try {
-      const note = this.mixer.generate_note(asset.tokenSymbol, asset.id);
+      const wasm = await WasmMixer.wasm;
+      const opts = new wasm.PoseidonHasherOptions();
+      const bulletproofGens = opts.bp_gens;
+      this._hasher = new wasm.PoseidonHasher(opts);
+      this.emit('preGenerateBulletproofGens', { bulletproofGens }, false);
+    } catch (e) {
+      this.logger.error(`Failed to initialized the poseidon hasher`, e);
+      this.emit('preGenerateBulletproofGens', e, true);
+    }
+  }
+
+  /**
+   *
+   *  setBulletProofGens
+   *  @description Setts the PoseidonHasher on the wasm mixer for future usage
+   *  this should be called one time
+   * */
+
+  public setBulletProofGens(bulletProofGens: Uint8Array) {
+    import('@webb-tools/wasm-utils').then((wasm) => {
+      const opts = new wasm.PoseidonHasherOptions();
+      opts.bp_gens = bulletProofGens;
+      this._hasher = new wasm.PoseidonHasher(opts);
+    });
+    this.emit('setBulletProofGens', undefined);
+  }
+
+  private get hasher() {
+    if (!this._hasher) {
+      throw new Error('Not PoseidonHasher present, please call `setBulletProofGens` ');
+    }
+    return this._hasher;
+  }
+
+  /**
+   *
+   *  generateNote
+   *  @description Generates a note from , this will create two random numbers R wish is the secret and Nullifer both are random
+   *  @param {Asset}
+   *  this should be called one time
+   * */
+
+  public async generateNote(asset: Asset): Promise<void> {
+    try {
+      const wasm = await WasmMixer.wasm;
+      const noteGenerator = new wasm.NoteGenerator(this.hasher);
+      const note = noteGenerator.generate(asset.tokenSymbol, asset.id);
+      const leaf = noteGenerator.leaf_of(note);
       this.emit('generateNote', {
-        note
+        note: note.serialize(),
+        leaf
       });
     } catch (e) {
       this.emit('generateNote', e, true);
     }
   }
 
-  public generateNoteAndLeaf(noteSerialized?: string, assetSerialized?: Asset): void {
-    if (!this.mixer) {
-      this.emit('generateNoteAndLeaf', 'Mixer is not initialized', true);
-      return;
-    }
-    try {
-      if (noteSerialized) {
-        const leaf = this.mixer.save_note(noteSerialized);
-        return this.emit('generateNoteAndLeaf', {
-          leaf,
-          note: noteSerialized
-        });
-      } else if (assetSerialized) {
-        const note = this.mixer.generate_note(assetSerialized.tokenSymbol, assetSerialized.id);
-        const leaf = this.mixer.save_note(note);
-        return this.emit('generateNoteAndLeaf', {
-          leaf,
-          note
-        });
-      }
-    } catch (e) {
-      this.emit('generateNoteAndLeaf', e, true);
-    }
+  private static get wasm() {
+    return import('@webb-tools/wasm-utils');
   }
 
-  public createProof(
-    mixerGroup: Array<[TokenSymbol, number, number]>,
-    note: string,
-    root: Uint8Array,
-    leaves: Array<Uint8Array>,
-    bulletproofGens?: Uint8Array
-  ): void {
-    if (!this.mixer) {
-      this.emit('createProof', 'Mixer is not initialized', true);
-      return;
-    }
+  /**
+   *  createProof
+   *  @description Generates a note from , this will create two random numbers R wish is the secret and Nullifer both are random
+   *  @param {string} note - Note serialized
+   *  @Param {Uint8Array}  root - Merkle root for verifying against
+   *  @Param {Uint8Array[]} leaves - Adding the leaves in the merkle tree, for generating intermediate hashes
+   * */
+  public async createProof(note: string, root: Uint8Array, leaves: Array<Uint8Array>): Promise<void> {
     try {
-      type ZKProofMap = Map<'comms' | 'nullifier_hash' | 'leaf_index_comms' | 'proof_comms' | 'proof', unknown>;
-      const mynote = Note.deserialize(note);
-      import('@webb-tools/mixer-client')
-        .then((wasm) => {
-          this.logger.debug('Created a new Mixer for createProofal..');
-          this.logger.trace(`Generating poseidon hash options`);
-          const opts = new wasm.PoseidonHasherOptions();
-          this.logger.trace(`Generating poseidon hash options`, opts);
-          if (bulletproofGens && bulletproofGens.length !== 0) {
-            this.logger.trace(`Setting bulletproofGens with length `, bulletproofGens.length);
-            opts.bp_gens = bulletproofGens;
-          }
-          this.logger.trace(`Creating poseidon hasher`);
-          const hasher = new wasm.PoseidonHasher(opts);
-          this.logger.trace(`Created poseidon hasher`);
-          this.logger.trace(`Init new mixer with hasher `, hasher, 'mixerGroup', mixerGroup);
-          const mixerGroups: MixerGroups = mixerGroup
-            .filter(([asset, groupId, treeDepth]) => asset === mynote.asAsset().tokenSymbol)
-            .map(([asset, groupId, treeDepth]) => ({
-              asset,
-              group_id: groupId,
-              tree_depth: treeDepth
-            }));
-          const mixer = new wasm.Mixer(mixerGroups, hasher);
-          this.logger.debug(
-            `adding [mynote.tokenSymbol, mynote.id, leaves, root]`,
-            mynote.tokenSymbol,
-            mynote.id,
-            leaves,
-            root
-          );
-
-          this.logger.trace(`Saving note`);
-          const leaf = mixer.save_note(note);
-          this.logger.trace(`Saved  note`);
-          leaves.push(leaf);
-          mixer.add_leaves(mynote.tokenSymbol, mynote.id, leaves, root);
-          this.logger.trace(`Added leaves`);
-
-          this.logger.debug(`Got leaf from  saved note`, leaf);
-          this.logger.trace(`Generating Zero knowledge proof`);
-          this.logger.debug(
-            `GZKP args [mynote.tokenSymbol, mynote.id, root, leaf] `,
-            mynote.tokenSymbol,
-            mynote.id,
-            root,
-            leaf
-          );
-
-          const zkProofMap = mixer.generate_proof(mynote.tokenSymbol, mynote.id, root, leaf) as ZKProofMap;
-          this.logger.trace(`Generated zKProof`);
-          this.emit('createProof', {
-            leafIndexCommitments: zkProofMap.get('leaf_index_comms') as Array<Uint8Array>,
-            commitments: zkProofMap.get('comms') as Array<Uint8Array>,
-            proofCommitments: zkProofMap.get('proof_comms') as Array<Uint8Array>,
-            proof: zkProofMap.get('proof') as Uint8Array,
-            nullifierHash: zkProofMap.get('nullifier_hash') as Uint8Array
-          });
-        })
-        .catch((e) => {
-          this.logger.error(`Failed to initialize the mixer for createProofer`, e);
-          this.emit('createProof', e, true);
-        });
+      const hasher = this.hasher;
+      const wasm = await WasmMixer.wasm;
+      const myNote = wasm.Note.deserialize(note);
+      const merkleTree = new wasm.MerkleTree(32, hasher);
+      merkleTree.add_leaves(leaves, root);
+      const zkProof = merkleTree.create_zk_proof(root, myNote);
+      this.emit('createProof', {
+        commitments: [zkProof.comms],
+        leafIndexCommitments: zkProof.leaf_index_comms,
+        proof: zkProof.proof,
+        nullifierHash: zkProof.nullifier_hash,
+        proofCommitments: zkProof.proof_comms
+      });
     } catch (e) {
+      this.logger.error(`Failed to initialize the mixer for createProofer`, e);
       this.emit('createProof', e, true);
     }
   }
@@ -250,20 +180,11 @@ export class WasmMixer {
       case 'generateNote':
         this.generateNote(event[name]);
         break;
-      case 'init':
-        this.init(event[name].mixerGroup, event[name].bulletproofGens);
-        break;
-      case 'generateNoteAndLeaf':
-        this.generateNoteAndLeaf(event[name].note, event[name].asset);
+      case 'setBulletProofGens':
+        this.setBulletProofGens(event[name].bulletProofGens);
         break;
       case 'createProof':
-        this.createProof(
-          event[name].mixerGroup,
-          event[name].note,
-          event[name].root,
-          event[name].leaves,
-          event[name].bulletproofGens
-        );
+        this.createProof(event[name].note, event[name].root, event[name].leaves);
         break;
       case 'preGenerateBulletproofGens':
         this.preGenerateBulletproofGens();
