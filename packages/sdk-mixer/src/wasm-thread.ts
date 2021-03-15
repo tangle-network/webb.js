@@ -130,6 +130,7 @@ export class WasmMixer {
   private static get wasm() {
     return import('@webb-tools/wasm-utils');
   }
+
   /**
    *  createProof
    *  @description Generates a note from , this will create two random numbers R wish is the secret and Nullifer both are random
@@ -142,18 +143,15 @@ export class WasmMixer {
       const hasher = this.hasher;
       const wasm = await WasmMixer.wasm;
       const myNote = wasm.Note.deserialize(note);
-      const noteGenerate = new wasm.NoteGenerator(hasher);
-      const leaf = noteGenerate.leaf_of(myNote);
       const merkleTree = new wasm.MerkleTree(32, hasher);
-      merkleTree.push_leaf(leaf);
       merkleTree.add_leaves(leaves, root);
-      const { comms, nullifier_hash, leaf_index_comms, proof, proof_comms } = merkleTree.create_zk_proof(root, myNote);
+      const zkProof = merkleTree.create_zk_proof(root, myNote);
       this.emit('createProof', {
-        commitments: [comms],
-        leafIndexCommitments: leaf_index_comms,
-        proof,
-        nullifierHash: nullifier_hash,
-        proofCommitments: proof_comms
+        commitments: [zkProof.comms],
+        leafIndexCommitments: zkProof.leaf_index_comms,
+        proof: zkProof.proof,
+        nullifierHash: zkProof.nullifier_hash,
+        proofCommitments: zkProof.proof_comms
       });
     } catch (e) {
       this.logger.error(`Failed to initialize the mixer for createProofer`, e);
