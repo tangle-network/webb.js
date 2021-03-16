@@ -1,5 +1,6 @@
 import type { TokenSymbol } from '@webb-tools/sdk-mixer';
 import { LoggerService } from '@webb-tools/app-util';
+//@ts-ignore
 import type { PoseidonHasher } from '@webb-tools/wasm-utils';
 
 type Asset = {
@@ -100,7 +101,7 @@ export class WasmMixer {
    * */
 
   public setBulletProofGens(bulletProofGens: Uint8Array) {
-    import('@webb-tools/wasm-utils').then((wasm) => {
+    WasmMixer.wasm.then((wasm) => {
       const opts = new wasm.PoseidonHasherOptions();
       opts.bp_gens = bulletProofGens;
       this._hasher = new wasm.PoseidonHasher(opts);
@@ -139,6 +140,7 @@ export class WasmMixer {
   }
 
   private static get wasm() {
+    //@ts-ignore
     return import('@webb-tools/wasm-utils');
   }
 
