@@ -458,7 +458,7 @@ impl MerkleTree {
 	}
 
 	pub fn create_zk_proof(
-		&self,
+		&mut self,
 		root: Uint8Array,
 		recipient: Uint8Array,
 		relayer: Uint8Array,
@@ -479,6 +479,10 @@ impl MerkleTree {
 			.try_into()
 			.map_err(|_| OpStatusCode::InvalidArrayLength)?;
 		let relayer = Scalar::from_bytes_mod_order(relayer_bytes);
+
+		// add the current leaf we need to prove to the secrets.
+		let nullifier_hash = Poseidon_hash_2(note.nullifier, note.nullifier, &self.hasher);
+		self.inner.add_secrets(leaf, note.r, note.nullifier, nullifier_hash);
 
 		let pc_gens = PedersenGens::default();
 		let bp_gens = self.hasher.bp_gens.clone();
