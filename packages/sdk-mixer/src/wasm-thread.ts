@@ -1,6 +1,6 @@
 import type { TokenSymbol } from '@webb-tools/sdk-mixer';
 import { LoggerService } from '@webb-tools/app-util';
-//@ts-ignore
+// @ts-ignore
 import type { PoseidonHasher } from '@webb-tools/wasm-utils';
 
 type Asset = {
@@ -140,7 +140,7 @@ export class WasmMixer {
   }
 
   private static get wasm() {
-    //@ts-ignore
+    // @ts-ignore
     return import('@webb-tools/wasm-utils');
   }
 
