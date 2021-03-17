@@ -1,12 +1,12 @@
 import { Asset, Event, Note, WasmMessage, WasmWorkerMessageRX, WasmWorkerMessageTX } from '@webb-tools/sdk-mixer';
 import { LoggerService } from '@webb-tools/app-util';
 import { ZKProof } from './zkproof';
-
+import type { CreateWithdrawZKProofArgs } from './wasm-thread';
 export class Mixer {
   private readonly logger = LoggerService.new('Mixer');
   private destroyed = false;
 
-  private constructor(private readonly worker: Worker, private readonly bulletproofGens?: Uint8Array) {}
+  private constructor(private readonly worker: Worker) {}
 
   public destroy(): void {
     this.logger.info(`Worker destroyed`);
@@ -44,7 +44,7 @@ export class Mixer {
   }
 
   public static async init(worker: Worker, bulletproofGens?: Uint8Array): Promise<Mixer> {
-    const mixer = new Mixer(worker, bulletproofGens);
+    const mixer = new Mixer(worker);
     if (bulletproofGens) {
       await mixer.postMessage('setBulletProofGens', {
         bulletProofGens: bulletproofGens
@@ -106,16 +106,11 @@ export class Mixer {
    * So you can freely call this method at any point in time.
    *
    **/
-  public async generateZK(note: Note, root: Uint8Array, leaves: Array<Uint8Array>): Promise<ZKProof> {
+  public async generateZK(createWithdrawZKProofArgs: CreateWithdrawZKProofArgs): Promise<ZKProof> {
     await this.destroyGuard();
     const { leafIndexCommitments, commitments, proofCommitments, proof, nullifierHash } = await this.postMessage(
       'createProof',
-      {
-        note: note.serialize(),
-        leaves,
-        root,
-        bulletproofGens: this.bulletproofGens
-      }
+      createWithdrawZKProofArgs
     );
 
     return new ZKProof(leafIndexCommitments, commitments, proofCommitments, nullifierHash, proof);

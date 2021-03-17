@@ -1,5 +1,6 @@
 import type { TokenSymbol } from '@webb-tools/sdk-mixer';
 import { LoggerService } from '@webb-tools/app-util';
+//@ts-ignore
 import type { PoseidonHasher } from '@webb-tools/wasm-utils';
 
 type Asset = {
@@ -37,7 +38,8 @@ export interface WasmWorkerMessageRX extends WasmMessage {
     leaves: Array<Uint8Array>;
     root: Uint8Array;
     note: string;
-    bulletproofGens?: Uint8Array;
+    relayer: Uint8Array;
+    recipient: Uint8Array;
   };
 }
 
@@ -50,6 +52,16 @@ export type Event<T extends keyof WasmWorkerMessageTX = any> = {
 export type EventRX<T extends keyof WasmWorkerMessageRX = any> = {
   name: T;
   value: WasmWorkerMessageRX[T];
+};
+export type CreateWithdrawZKProofArgs = {
+  /// Deposit note string
+  note: string;
+  /// Deposit note root
+  root: Uint8Array;
+  /// tree leaves
+  leaves: Array<Uint8Array>;
+  relayer: Uint8Array;
+  recipient: Uint8Array;
 };
 
 export class WasmMixer {
@@ -89,7 +101,7 @@ export class WasmMixer {
    * */
 
   public setBulletProofGens(bulletProofGens: Uint8Array) {
-    import('@webb-tools/wasm-utils').then((wasm) => {
+    WasmMixer.wasm.then((wasm) => {
       const opts = new wasm.PoseidonHasherOptions();
       opts.bp_gens = bulletProofGens;
       this._hasher = new wasm.PoseidonHasher(opts);
@@ -128,6 +140,7 @@ export class WasmMixer {
   }
 
   private static get wasm() {
+    //@ts-ignore
     return import('@webb-tools/wasm-utils');
   }
 
@@ -138,16 +151,16 @@ export class WasmMixer {
    *  @Param {Uint8Array}  root - Merkle root for verifying against
    *  @Param {Uint8Array[]} leaves - Adding the leaves in the merkle tree, for generating intermediate hashes
    * */
-  public async createProof(note: string, root: Uint8Array, leaves: Array<Uint8Array>): Promise<void> {
+  public async createProof({ leaves, note, recipient, relayer, root }: CreateWithdrawZKProofArgs): Promise<void> {
     try {
       const hasher = this.hasher;
       const wasm = await WasmMixer.wasm;
-      const myNote = wasm.Note.deserialize(note);
+      const depositNote = wasm.Note.deserialize(note);
       const merkleTree = new wasm.MerkleTree(32, hasher);
       merkleTree.add_leaves(leaves, root);
-      const zkProof = merkleTree.create_zk_proof(root, myNote);
+      const zkProof = merkleTree.create_zk_proof(root, recipient, relayer, depositNote);
       this.emit('createProof', {
-        commitments: [zkProof.comms],
+        commitments: zkProof.comms,
         leafIndexCommitments: zkProof.leaf_index_comms,
         proof: zkProof.proof,
         nullifierHash: zkProof.nullifier_hash,
@@ -184,7 +197,7 @@ export class WasmMixer {
         this.setBulletProofGens(event[name].bulletProofGens);
         break;
       case 'createProof':
-        this.createProof(event[name].note, event[name].root, event[name].leaves);
+        this.createProof(event[name]);
         break;
       case 'preGenerateBulletproofGens':
         this.preGenerateBulletproofGens();
