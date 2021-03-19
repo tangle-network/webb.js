@@ -2,14 +2,23 @@ import { Asset, Event, Note, WasmMessage, WasmWorkerMessageRX, WasmWorkerMessage
 import { LoggerService } from '@webb-tools/app-util';
 import { ZKProof } from './zkproof';
 import type { CreateWithdrawZKProofArgs } from './wasm-thread';
-export class Mixer {
+import { EventBus } from '@webb-tools/app-util/shared/event-bus.class';
+
+type MixerEventMap = {
+  restart: undefined;
+};
+
+export class Mixer extends EventBus<MixerEventMap> {
   private readonly logger = LoggerService.new('Mixer');
   private destroyed = false;
 
-  private constructor(private readonly worker: Worker) {}
+  private constructor(private worker: Worker, private bulletproofGens?: Uint8Array) {
+    super();
+  }
 
   public destroy(): void {
     this.logger.info(`Worker destroyed`);
+    // terminate the worker
     this.worker.terminate();
     this.destroyed = true;
   }
@@ -28,7 +37,12 @@ export class Mixer {
     this.worker.postMessage({ [name]: value });
 
     return new Promise((resolve, reject) => {
+      let off: (() => void) | null | void = null;
       const handler = ({ data: result }: { data: Event<T> }) => {
+        // if this is triggered that means the job is done and most likely this promise is resolved
+        if (off) {
+          off();
+        }
         if (result.name === name && !result.error) {
           this.logger.debug(`Data for event ${name} is`, result.value);
           this.worker.removeEventListener('message', handler);
@@ -39,21 +53,45 @@ export class Mixer {
           reject(result.value);
         }
       };
+      // this will be triggered if the worker rasid the event restart so we can  reject the promises
+      off = this.on('restart', () => {
+        reject();
+        // if this is called that means the worker has events (work)that aren't resolved
+        this.worker.removeEventListener('message', handler);
+      });
       this.worker.addEventListener('message', handler);
     });
   }
 
   public static async init(worker: Worker, bulletproofGens?: Uint8Array): Promise<Mixer> {
-    const mixer = new Mixer(worker);
+    const mixer = new Mixer(worker, bulletproofGens);
     if (bulletproofGens) {
       await mixer.postMessage('setBulletProofGens', {
         bulletProofGens: bulletproofGens
       });
     } else {
-      await mixer.postMessage('preGenerateBulletproofGens', undefined);
+      const be = await mixer.postMessage('preGenerateBulletproofGens', undefined);
+      mixer.bulletproofGens = be.bulletproofGens;
     }
 
     return mixer;
+  }
+
+  /*
+   * Restart the Mixer wont create a new call but will kill the underlying `WebWorker`
+   * Reject all tasks
+   *
+   * */
+  async restart(worker: Worker) {
+    this.logger.info(`Restarting`);
+    this.emit('restart', undefined);
+    this.worker.terminate();
+    this.worker = worker;
+    if (this.bulletproofGens) {
+      await this.postMessage('setBulletProofGens', {
+        bulletProofGens: this.bulletproofGens
+      });
+    }
   }
 
   /**
