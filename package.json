@@ -26,6 +26,7 @@
     "check-deps": "./node_modules/@open-web3/util/scripts/check-deps.js yarn.lock @polkadot/ @open-web3/",
     "update-metadata": "ts-node-script -r tsconfig-paths/register packages/types/scripts/updateMetadata.ts",
     "example:sdk-mixer": "cd ./examples/sdk-mixer && yarn dev",
+    "script": "ts-node-script -r tsconfig-paths/register",
     "format": "prettier --write \"packages/**/*.{ts,js,jsx,tsx}\" && cargo fmt --manifest-path packages/wasm-utils/Cargo.toml"
   },
   "devDependencies": {
