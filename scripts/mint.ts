@@ -1,10 +1,8 @@
 import { options } from '@webb-tools/api';
-import { timeout } from 'rxjs/operators';
-import { ApiRx, WsProvider, Keyring } from '@polkadot/api';
+import { ApiPromise, WsProvider, Keyring } from '@polkadot/api';
 import { LoggerService } from '@webb-tools/app-util';
 import BN from 'bn.js';
 
-const MAX_CONNECT_TIME = 1000 * 60; // one minute
 const ENDPOINT = 'ws://localhost:9944';
 const apiLogger = LoggerService.get('Api');
 
@@ -12,8 +10,8 @@ async function main() {
   apiLogger.info('Connecting to ', ENDPOINT);
   const provider = new WsProvider([ENDPOINT]);
   const opts = options({ provider });
-  const api = await ApiRx.create(opts).pipe(timeout(MAX_CONNECT_TIME)).toPromise();
-  const result = await api.rpc.system.chain().toPromise();
+  const api = await ApiPromise.create(opts);
+  const result = await api.rpc.system.chain();
   apiLogger.info('🎉 Connected to ', result.toHuman());
   const targetAccount = process.argv[2];
   if (!targetAccount) {
@@ -21,16 +19,33 @@ async function main() {
     process.exit(1);
   }
   const dem = new BN(10).pow(new BN(12));
+  const amount = new BN(100_000).mul(dem);
   const keyring = new Keyring({ type: 'sr25519' });
   const alice = keyring.addFromUri('//Alice', { name: 'Alice default' });
-  const target = keyring.decodeAddress(targetAccount);
-  const tx = await api.tx.sudo
-    .sudo(api.tx.balances.setBalance(target, new BN(1_000_000).pow(dem), 0))
-    .signAndSend(alice)
-    .toPromise();
+  apiLogger.info(`Sending ${amount.div(dem)} to ${targetAccount}`);
+  await api.tx.balances
+    .transferKeepAlive(targetAccount, amount)
+    .signAndSend(alice, async ({ status, dispatchError }) => {
+      // status would still be set, but in the case of error we can shortcut
+      // to just check it (so an error would indicate InBlock or Finalized)
+      if (dispatchError) {
+        if (dispatchError.isModule) {
+          // for module errors, we have the section indexed, lookup
+          const decoded = api.registry.findMetaError(dispatchError.asModule);
+          const { documentation, name, section } = decoded;
 
-  apiLogger.info('TX: ', tx.toHuman());
-  await api.disconnect();
+          console.log(`${section}.${name}: ${documentation.join(' ')}`);
+        } else {
+          // Other, CannotLookup, BadOrigin, no extra info
+          console.log(dispatchError.toString());
+        }
+      }
+      if (status.isInBlock || status.isFinalized) {
+        const info = await api.query.system.account(targetAccount);
+        apiLogger.info('Your Current balance: ', info.data.free.toHuman());
+        await api.disconnect();
+      }
+    });
 }
 
 main().catch(apiLogger.error);
