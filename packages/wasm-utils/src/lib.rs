@@ -422,7 +422,7 @@ impl MerkleTree {
 		}
 	}
 
-	pub fn push_leaf(&mut self, index: u64, leaf: Uint8Array) -> Result<(), JsValue> {
+	pub fn add_leaf(&mut self, index: u64, leaf: Uint8Array) -> Result<(), JsValue> {
 		let idx = Scalar::from(index);
 		let leaf = ScalarWrapper::try_from(leaf)?;
 		self.inner.tree.update(idx, *leaf);
