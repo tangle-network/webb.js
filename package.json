@@ -18,7 +18,7 @@
     "build-ts:dev": "node ./scripts/webb-build-dev.js",
     "build:release": "node ./scripts/webb-build-release.js",
     "build:interfaces": "ts-node-script -r tsconfig-paths/register packages/types/scripts/generate.ts && ts-node-script -r tsconfig-paths/register packages/type-definitions/scripts/generate.ts",
-    "lint": "polkadot-dev-run-lint",
+    "lint": "polkadot-dev-run-lint --skip-tsc",
     "clean": "polkadot-dev-clean-build",
     "postinstall": "polkadot-dev-yarn-only",
     "test": "polkadot-dev-run-test --coverage",
