@@ -1,7 +1,14 @@
 import { LoggerService } from '@webb-tools/app-util';
 import type { PoseidonHasher, MerkleTree } from '@webb-tools/wasm-utils';
 
-export type Events = 'createMerkleTree' | 'setBulletProofGens' | 'createProof' | 'preGenerateBulletproofGens';
+export type Events =
+  | 'createMerkleTree'
+  | 'setBulletProofGens'
+  | 'createProof'
+  | 'preGenerateBulletproofGens'
+  | 'addLeaf'
+  | 'addLeaves'
+  | 'root';
 export type WasmMessage = Record<Events, unknown>;
 
 export interface WasmWorkerMessageTX extends WasmMessage {
@@ -10,6 +17,9 @@ export interface WasmWorkerMessageTX extends WasmMessage {
     bulletproofGens: Uint8Array;
   };
   createMerkleTree: void;
+  addLeaf: void;
+  addLeaves: void;
+  root: Uint8Array;
   createProof: {
     leafIndexCommitments: Array<Uint8Array>;
     commitments: Array<Uint8Array>;
@@ -27,6 +37,15 @@ export interface WasmWorkerMessageRX extends WasmMessage {
   createMerkleTree: {
     depth: number;
   };
+  addLeaf: {
+    index: bigint;
+    leaf: Uint8Array;
+  };
+  addLeaves: {
+    leaves: Array<Uint8Array>;
+    targetRoot?: Uint8Array;
+  };
+  root: undefined;
   createProof: {
     root: Uint8Array;
     note: string;
@@ -66,41 +85,6 @@ export class WasmMerkle {
     });
   }
 
-  /**
-   *
-   *  preGenerateBulletproofGens
-   *  @description generates Bulletproof should be cached to faster future init
-   * */
-
-  public async preGenerateBulletproofGens(): Promise<void> {
-    try {
-      const wasm = await WasmMerkle.wasm;
-      const opts = new wasm.PoseidonHasherOptions();
-      const bulletproofGens = opts.bp_gens;
-      this._hasher = new wasm.PoseidonHasher(opts);
-      this.emit('preGenerateBulletproofGens', { bulletproofGens }, false);
-    } catch (e) {
-      this.logger.error(`Failed to initialized the poseidon hasher`, e);
-      this.emit('preGenerateBulletproofGens', e, true);
-    }
-  }
-
-  /**
-   *
-   *  setBulletProofGens
-   *  @description Setts the PoseidonHasher on the wasm mixer for future usage
-   *  this should be called one time
-   * */
-
-  public setBulletProofGens(bulletProofGens: Uint8Array): void {
-    WasmMerkle.wasm.then((wasm) => {
-      const opts = new wasm.PoseidonHasherOptions();
-      opts.bp_gens = bulletProofGens;
-      this._hasher = new wasm.PoseidonHasher(opts);
-    });
-    this.emit('setBulletProofGens', undefined);
-  }
-
   private get hasher() {
     if (!this._hasher) {
       throw new Error('Not PoseidonHasher present, please call `setBulletProofGens` ');
@@ -120,6 +104,38 @@ export class WasmMerkle {
   }
 
   /**
+   *  preGenerateBulletproofGens
+   *  @description generates Bulletproof should be cached to faster future init
+   * */
+  public async preGenerateBulletproofGens(): Promise<void> {
+    try {
+      const wasm = await WasmMerkle.wasm;
+      const opts = new wasm.PoseidonHasherOptions();
+      const bulletproofGens = opts.bp_gens;
+      this._hasher = new wasm.PoseidonHasher(opts);
+      this.emit('preGenerateBulletproofGens', { bulletproofGens }, false);
+    } catch (e) {
+      this.logger.error(`Failed to initialized the poseidon hasher`, e);
+      this.emit('preGenerateBulletproofGens', e, true);
+    }
+  }
+
+  /**
+   *  setBulletProofGens
+   *  @description Setts the PoseidonHasher on the wasm mixer for future usage
+   *  this should be called one time
+   * */
+
+  public setBulletProofGens(bulletProofGens: Uint8Array): void {
+    WasmMerkle.wasm.then((wasm) => {
+      const opts = new wasm.PoseidonHasherOptions();
+      opts.bp_gens = bulletProofGens;
+      this._hasher = new wasm.PoseidonHasher(opts);
+    });
+    this.emit('setBulletProofGens', undefined);
+  }
+
+  /**
    * createMerkleTree
    * @description Create a MerkleTree, this should be called once after calling `setBulletProofGens`.
    * @param {number} depth - Tree depth (usually to 32).
@@ -132,6 +148,39 @@ export class WasmMerkle {
       this.emit('createMerkleTree', undefined);
     } catch (e) {
       this.emit('createMerkleTree', e, true);
+    }
+  }
+
+  /**
+   *  addLeaf
+   *  @description Adds a new leaf to the merkle tree add index.
+   *  @param {bigint} index - the index of the new leaf.
+   *  @param {Uint8Array} leaf - the new leaf to be added.
+   * */
+  public async addLeaf(index: bigint, leaf: Uint8Array): Promise<void> {
+    try {
+      this.merkleTree.add_leaf(index, leaf);
+      this.emit('addLeaf', undefined);
+    } catch (e) {
+      this.emit('addLeaf', e, true);
+    }
+  }
+
+  public async addLeaves(leaves: Uint8Array[], targetRoot?: Uint8Array): Promise<void> {
+    try {
+      this.merkleTree.add_leaves(leaves, targetRoot);
+      this.emit('addLeaves', undefined);
+    } catch (e) {
+      this.emit('addLeaves', e, true);
+    }
+  }
+
+  public async root(): Promise<void> {
+    try {
+      const root = this.merkleTree.root();
+      this.emit('root', root);
+    } catch (e) {
+      this.emit('root', e, true);
     }
   }
 
@@ -182,6 +231,15 @@ export class WasmMerkle {
         break;
       case 'createMerkleTree':
         this.createMerkleTree(event[name].depth);
+        break;
+      case 'root':
+        this.root();
+        break;
+      case 'addLeaf':
+        this.addLeaf(event[name].index, event[name].leaf);
+        break;
+      case 'addLeaves':
+        this.addLeaves(event[name].leaves, event[name].targetRoot);
         break;
       case 'createProof':
         this.createProof(event[name]);
