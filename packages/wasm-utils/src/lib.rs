@@ -561,54 +561,21 @@ mod tests {
 		assert_eq!(note.token_symbol, "EDG");
 	}
 
-	#[test]
-	fn build_merkle_tree_incrementally() {
-		let depth: usize = 3;
-		let leaves = vec![
-			Scalar::zero(),
-			Scalar::one(),
-			Scalar::from(2u8),
-			Scalar::from(3u8),
-			Scalar::from(4u8),
-			Scalar::from(5u8),
-			Scalar::from(6u8),
-			Scalar::from(7u8),
-		];
-		let mut mt1 = MerkleTree::new(depth as u8, &HASHER);
-		mt1.inner
-			.tree
-			.add_leaves(leaves.iter().map(Scalar::to_bytes).collect(), None);
-		let target_root = mt1.inner.tree.root;
-
-		let path = generate_proof_path(3, depth);
-		eprintln!("{:?}", path);
-		let mut mt2 = MerkleTree::new(depth as u8, &HASHER);
-
-		for i in path {
-			let leaf = mt1.inner.tree.get(Scalar::from(i as u64), target_root, &mut None);
-			mt2.inner.tree.update(Scalar::from(i as u64), leaf);
-		}
-		let my_root = mt2.inner.tree.root;
-		assert_eq!(my_root, target_root);
-	}
-
 	#[wasm_bindgen_test]
-	fn zk_proof() {}
+	fn zk_proof() {
+		let mut rng = OsRng::default();
+		let mut ng = NoteGenerator::new(&HASHER);
+		let note = ng.generate(JsString::from("EDG"), 0);
+		let my_leaf = ScalarWrapper::try_from(ng.leaf_of(&note)).unwrap();
 
-	fn generate_proof_path(index: usize, depth: usize) -> Vec<usize> {
-		let mut current_index = index;
-		let mut path = vec![];
-		for _ in 0..depth {
-			// if current_index is divisible by 2, that means we are on the left side.
-			if current_index % 2 == 0 {
-				// so we should select the right side node/leaf.
-				path.push(current_index + 1);
-			} else {
-				// otherwise, we should select the left side node/leaf.
-				path.push(current_index - 1);
-			}
-			current_index /= 2; // div by two to go up level.
-		}
-		path
+		let mut mt = MerkleTree::new(32, &HASHER);
+		let mut leaves: Vec<_> = vec![Scalar::random(&mut rng); 7].iter().map(Scalar::to_bytes).collect();
+		leaves[3] = my_leaf.to_bytes();
+		mt.inner.tree.add_leaves(leaves, None);
+
+		let recipient = ScalarWrapper(Scalar::zero());
+		let relayer = ScalarWrapper(Scalar::zero());
+		let zk_proof = mt.create_zk_proof(mt.root(), recipient.into(), relayer.into(), &note);
+		assert!(zk_proof.is_ok());
 	}
 }
