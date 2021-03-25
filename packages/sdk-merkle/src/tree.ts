@@ -112,9 +112,9 @@ export default class MerkleTree extends EventBus<MerkleTreeEvents> {
     return this.postMessage('root', undefined);
   }
 
-  public async addLeaf(index: bigint, leaf: Uint8Array): Promise<void> {
+  public async addLeafAtIndex(leaf: Uint8Array, index: bigint): Promise<void> {
     await this.destroyGuard();
-    this.postMessage('addLeaf', { index, leaf });
+    this.postMessage('addLeafAtIndex', { leaf, index });
   }
 
   public async addLeaves(leaves: Uint8Array[], targetRoot?: Uint8Array): Promise<void> {

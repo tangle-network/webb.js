@@ -6,7 +6,7 @@ export type Events =
   | 'setBulletProofGens'
   | 'createProof'
   | 'preGenerateBulletproofGens'
-  | 'addLeaf'
+  | 'addLeafAtIndex'
   | 'addLeaves'
   | 'root';
 export type WasmMessage = Record<Events, unknown>;
@@ -17,7 +17,7 @@ export interface WasmWorkerMessageTX extends WasmMessage {
     bulletproofGens: Uint8Array;
   };
   createMerkleTree: void;
-  addLeaf: void;
+  addLeafAtIndex: void;
   addLeaves: void;
   root: Uint8Array;
   createProof: {
@@ -37,9 +37,9 @@ export interface WasmWorkerMessageRX extends WasmMessage {
   createMerkleTree: {
     depth: number;
   };
-  addLeaf: {
-    index: bigint;
+  addLeafAtIndex: {
     leaf: Uint8Array;
+    index: bigint;
   };
   addLeaves: {
     leaves: Array<Uint8Array>;
@@ -154,15 +154,15 @@ export class WasmMerkle {
   /**
    *  addLeaf
    *  @description Adds a new leaf to the merkle tree add index.
-   *  @param {bigint} index - the index of the new leaf.
    *  @param {Uint8Array} leaf - the new leaf to be added.
+   *  @param {bigint} index - the index of the new leaf.
    * */
-  public async addLeaf(index: bigint, leaf: Uint8Array): Promise<void> {
+  public async addLeafAtIndex(leaf: Uint8Array, index: bigint): Promise<void> {
     try {
-      this.merkleTree.add_leaf(index, leaf);
-      this.emit('addLeaf', undefined);
+      this.merkleTree.add_leaf_at_index(leaf, index);
+      this.emit('addLeafAtIndex', undefined);
     } catch (e) {
-      this.emit('addLeaf', e, true);
+      this.emit('addLeafAtIndex', e, true);
     }
   }
 
@@ -235,8 +235,8 @@ export class WasmMerkle {
       case 'root':
         this.root();
         break;
-      case 'addLeaf':
-        this.addLeaf(event[name].index, event[name].leaf);
+      case 'addLeafAtIndex':
+        this.addLeafAtIndex(event[name].leaf, event[name].index);
         break;
       case 'addLeaves':
         this.addLeaves(event[name].leaves, event[name].targetRoot);
