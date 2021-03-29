@@ -8,10 +8,9 @@
     "build": "webpack --config ./webpack.config.js "
   },
   "dependencies": {
-    "@polkadot/api": "^3.4",
+    "@polkadot/api": "^3.4.1",
     "@webb-tools/api": "^0.1.2-44",
     "@webb-tools/app-util": "^0.1.2-44",
-    "@webb-tools/mixer-client": "^0.0.7",
     "@webb-tools/sdk-core": "^0.1.2-44",
     "@webb-tools/sdk-mixer": "^0.1.2-44",
     "@webb-tools/types": "^0.1.2-44"
