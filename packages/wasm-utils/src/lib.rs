@@ -1,5 +1,6 @@
 use core::fmt;
-use std::convert::TryInto;
+use std::convert::{TryFrom, TryInto};
+use std::ops::Deref;
 use std::str::FromStr;
 
 use bulletproofs::r1cs::Prover;
@@ -265,8 +266,7 @@ impl ZkProof {
 
 	#[wasm_bindgen(getter)]
 	pub fn nullifier_hash(&self) -> Uint8Array {
-		let bytes = self.nullifier_hash.to_bytes().to_vec();
-		Uint8Array::from(bytes.as_slice())
+		ScalarWrapper(self.nullifier_hash).into()
 	}
 }
 
@@ -354,17 +354,10 @@ impl PoseidonHasher {
 	}
 
 	pub fn hash(&self, left: Uint8Array, right: Uint8Array) -> Result<Uint8Array, JsValue> {
-		let xl: [u8; 32] = left.to_vec().try_into().map_err(|_| OpStatusCode::InvalidArrayLength)?;
-		let xr: [u8; 32] = right
-			.to_vec()
-			.try_into()
-			.map_err(|_| OpStatusCode::InvalidArrayLength)?;
-		let hash = Poseidon_hash_2(
-			Scalar::from_bytes_mod_order(xl),
-			Scalar::from_bytes_mod_order(xr),
-			&self.inner,
-		);
-		Ok(Uint8Array::from(hash.to_bytes().to_vec().as_slice()))
+		let xl = ScalarWrapper::try_from(left)?;
+		let xr = ScalarWrapper::try_from(right)?;
+		let hash = Poseidon_hash_2(*xl, *xr, &self.inner);
+		Ok(ScalarWrapper(hash).into())
 	}
 }
 
@@ -400,12 +393,12 @@ impl NoteGenerator {
 
 	pub fn leaf_of(&self, note: &Note) -> Uint8Array {
 		let leaf = Poseidon_hash_2(note.r, note.nullifier, &self.hasher);
-		Uint8Array::from(leaf.to_bytes().to_vec().as_slice())
+		ScalarWrapper(leaf).into()
 	}
 
 	pub fn nullifier_hash_of(&self, note: &Note) -> Uint8Array {
 		let hash = Poseidon_hash_2(note.nullifier, note.nullifier, &self.hasher);
-		Uint8Array::from(hash.to_bytes().to_vec().as_slice())
+		ScalarWrapper(hash).into()
 	}
 }
 
@@ -429,9 +422,10 @@ impl MerkleTree {
 		}
 	}
 
-	pub fn push_leaf(&mut self, leaf: Uint8Array) -> Result<(), JsValue> {
-		let xf: [u8; 32] = leaf.to_vec().try_into().map_err(|_| OpStatusCode::InvalidArrayLength)?;
-		self.inner.tree.add_leaves(vec![xf], None);
+	pub fn add_leaf_at_index(&mut self, leaf: Uint8Array, index: u64) -> Result<(), JsValue> {
+		let idx = Scalar::from(index);
+		let leaf = ScalarWrapper::try_from(leaf)?;
+		self.inner.tree.update(idx, *leaf);
 		Ok(())
 	}
 
@@ -440,14 +434,15 @@ impl MerkleTree {
 			.to_vec()
 			.into_iter()
 			.map(|v| Uint8Array::new_with_byte_offset_and_length(&v, 0, 32))
-			.map(|v| v.to_vec().try_into())
-			.collect::<Result<Vec<_>, _>>()
-			.map_err(|_| OpStatusCode::InvalidArrayLength)?;
-
+			.map(ScalarWrapper::try_from)
+			.collect::<Result<Vec<_>, _>>()?
+			.into_iter()
+			.map(|v| v.to_bytes())
+			.collect();
 		let root = target_root
-			.map(|v| v.to_vec().try_into())
-			.transpose()
-			.map_err(|_| OpStatusCode::InvalidArrayLength)?;
+			.map(ScalarWrapper::try_from)
+			.transpose()?
+			.map(|v| v.to_bytes());
 		self.inner.tree.add_leaves(xs, root);
 		Ok(())
 	}
@@ -465,21 +460,9 @@ impl MerkleTree {
 		note: &Note,
 	) -> Result<ZkProof, JsValue> {
 		let leaf = Poseidon_hash_2(note.r, note.nullifier, &self.hasher);
-		let root_bytes: [u8; 32] = root.to_vec().try_into().map_err(|_| OpStatusCode::InvalidArrayLength)?;
-		let root = Scalar::from_bytes_mod_order(root_bytes);
-
-		let recipient_bytes: [u8; 32] = recipient
-			.to_vec()
-			.try_into()
-			.map_err(|_| OpStatusCode::InvalidArrayLength)?;
-		let recipient = Scalar::from_bytes_mod_order(recipient_bytes);
-
-		let relayer_bytes: [u8; 32] = relayer
-			.to_vec()
-			.try_into()
-			.map_err(|_| OpStatusCode::InvalidArrayLength)?;
-		let relayer = Scalar::from_bytes_mod_order(relayer_bytes);
-
+		let root = ScalarWrapper::try_from(root)?;
+		let recipient = ScalarWrapper::try_from(recipient)?;
+		let relayer = ScalarWrapper::try_from(relayer)?;
 		// add the current leaf we need to prove to the secrets.
 		let nullifier_hash = Poseidon_hash_2(note.nullifier, note.nullifier, &self.hasher);
 		self.inner.add_secrets(leaf, note.r, note.nullifier, nullifier_hash);
@@ -490,7 +473,7 @@ impl MerkleTree {
 		let prover = Prover::new(&pc_gens, &mut prover_transcript);
 
 		let (proof, (comms, nullifier_hash, leaf_index_comms, proof_comms)) =
-			self.inner.prove_zk(root, leaf, recipient, relayer, &bp_gens, prover);
+			self.inner.prove_zk(*root, leaf, *recipient, *relayer, &bp_gens, prover);
 		let zkproof = ZkProof {
 			proof: proof.to_bytes(),
 			comms,
@@ -503,6 +486,36 @@ impl MerkleTree {
 	}
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct ScalarWrapper(Scalar);
+
+impl Deref for ScalarWrapper {
+	type Target = Scalar;
+
+	fn deref(&self) -> &Self::Target {
+		&self.0
+	}
+}
+
+impl TryFrom<Uint8Array> for ScalarWrapper {
+	type Error = OpStatusCode;
+
+	fn try_from(value: Uint8Array) -> Result<Self, Self::Error> {
+		let bytes: [u8; 32] = value
+			.to_vec()
+			.try_into()
+			.map_err(|_| OpStatusCode::InvalidArrayLength)?;
+		Ok(Self(Scalar::from_bytes_mod_order(bytes)))
+	}
+}
+
+#[allow(clippy::from_over_into)]
+impl Into<Uint8Array> for ScalarWrapper {
+	fn into(self) -> Uint8Array {
+		Uint8Array::from(self.0.to_bytes().to_vec().as_slice())
+	}
+}
+
 #[wasm_bindgen(start)]
 pub fn wasm_init() -> Result<(), JsValue> {
 	console_error_panic_hook::set_once();
@@ -512,19 +525,22 @@ pub fn wasm_init() -> Result<(), JsValue> {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use lazy_static::lazy_static;
 	use rand::rngs::OsRng;
 	use wasm_bindgen_test::*;
 
 	wasm_bindgen_test_configure!(run_in_browser);
 
+	lazy_static! {
+		static ref HASHER: PoseidonHasher = PoseidonHasher::default();
+	}
+
 	#[wasm_bindgen_test]
 	fn init_hasher() {
 		let mut rng = OsRng::default();
-		let opts = PoseidonHasherOptions::new();
-		let hasher = PoseidonHasher::with_options(opts);
 		let a = Scalar::random(&mut rng);
 		let b = Scalar::random(&mut rng);
-		let hash = hasher.hash(
+		let hash = HASHER.hash(
 			Uint8Array::from(a.to_bytes().to_vec().as_slice()),
 			Uint8Array::from(b.to_bytes().to_vec().as_slice()),
 		);
@@ -533,7 +549,33 @@ mod tests {
 
 		let x = Uint8Array::from(Vec::new().as_slice());
 		let y = Uint8Array::from(Vec::new().as_slice());
-		let hash = hasher.hash(x, y);
+		let hash = HASHER.hash(x, y);
 		assert_eq!(hash.err(), Some(OpStatusCode::InvalidArrayLength.into()));
+	}
+
+	#[wasm_bindgen_test]
+	fn generate_note() {
+		let mut ng = NoteGenerator::new(&HASHER);
+		let note = ng.generate(JsString::from("EDG"), 0);
+		assert_eq!(note.group_id, 0);
+		assert_eq!(note.token_symbol, "EDG");
+	}
+
+	#[wasm_bindgen_test]
+	fn zk_proof() {
+		let mut rng = OsRng::default();
+		let mut ng = NoteGenerator::new(&HASHER);
+		let note = ng.generate(JsString::from("EDG"), 0);
+		let my_leaf = ScalarWrapper::try_from(ng.leaf_of(&note)).unwrap();
+
+		let mut mt = MerkleTree::new(32, &HASHER);
+		let mut leaves: Vec<_> = vec![Scalar::random(&mut rng); 7].iter().map(Scalar::to_bytes).collect();
+		leaves[3] = my_leaf.to_bytes();
+		mt.inner.tree.add_leaves(leaves, None);
+
+		let recipient = ScalarWrapper(Scalar::zero());
+		let relayer = ScalarWrapper(Scalar::zero());
+		let zk_proof = mt.create_zk_proof(mt.root(), recipient.into(), relayer.into(), &note);
+		assert!(zk_proof.is_ok());
 	}
 }

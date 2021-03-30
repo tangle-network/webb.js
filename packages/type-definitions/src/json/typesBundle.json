@@ -17,13 +17,18 @@
                                 "ERC20": "EvmAddress"
                             }
                         },
+                        "Amount": "i128",
+                        "AmountOf": "Amount",
+                        "BlockLength": "u64",
+                        "CurrencyIdOf": "CurrencyId",
                         "ScalarData": "[u8; 32]",
                         "Nullifier": "ScalarData",
                         "Commitment": "ScalarData",
                         "MixerInfo": {
                             "minimum_deposit_length_for_reward": "BlockNumber",
                             "fixed_deposit_size": "Balance",
-                            "leaves": "Vec<ScalarData>"
+                            "leaves": "Vec<ScalarData>",
+                            "currency_id": "CurrencyIdOf"
                         },
                         "WithdrawProof": {
                             "mixer_id": "GroupId",

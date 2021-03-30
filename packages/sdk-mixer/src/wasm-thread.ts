@@ -1,13 +1,12 @@
 import type { TokenSymbol } from '@webb-tools/sdk-mixer';
 import { LoggerService } from '@webb-tools/app-util';
-// @ts-ignore
 import type { PoseidonHasher } from '@webb-tools/wasm-utils';
 
 type Asset = {
   id: number;
   tokenSymbol: TokenSymbol;
 };
-export type Events = 'generateNote' | 'setBulletProofGens' | 'createProof' | 'preGenerateBulletproofGens';
+export type Events = 'generateNote' | 'setBulletProofGens' | 'preGenerateBulletproofGens';
 export type WasmMessage = Record<Events, unknown>;
 
 export interface WasmWorkerMessageTX extends WasmMessage {
@@ -19,13 +18,6 @@ export interface WasmWorkerMessageTX extends WasmMessage {
     note: string;
     leaf: Uint8Array;
   };
-  createProof: {
-    leafIndexCommitments: Array<Uint8Array>;
-    commitments: Array<Uint8Array>;
-    proofCommitments: Array<Uint8Array>;
-    nullifierHash: Uint8Array;
-    proof: Uint8Array;
-  };
 }
 
 export interface WasmWorkerMessageRX extends WasmMessage {
@@ -34,13 +26,6 @@ export interface WasmWorkerMessageRX extends WasmMessage {
     bulletProofGens: Uint8Array;
   };
   preGenerateBulletproofGens: void;
-  createProof: {
-    leaves: Array<Uint8Array>;
-    root: Uint8Array;
-    note: string;
-    relayer: Uint8Array;
-    recipient: Uint8Array;
-  };
 }
 
 export type Event<T extends keyof WasmWorkerMessageTX = any> = {
@@ -52,16 +37,6 @@ export type Event<T extends keyof WasmWorkerMessageTX = any> = {
 export type EventRX<T extends keyof WasmWorkerMessageRX = any> = {
   name: T;
   value: WasmWorkerMessageRX[T];
-};
-export type CreateWithdrawZKProofArgs = {
-  /// Deposit note string
-  note: string;
-  /// Deposit note root
-  root: Uint8Array;
-  /// tree leaves
-  leaves: Array<Uint8Array>;
-  relayer: Uint8Array;
-  recipient: Uint8Array;
 };
 
 export class WasmMixer {
@@ -75,11 +50,9 @@ export class WasmMixer {
   }
 
   /**
-   *
    *  preGenerateBulletproofGens
    *  @description generates Bulletproof should be cached to faster future init
    * */
-
   public async preGenerateBulletproofGens(): Promise<void> {
     try {
       const wasm = await WasmMixer.wasm;
@@ -94,13 +67,11 @@ export class WasmMixer {
   }
 
   /**
-   *
    *  setBulletProofGens
    *  @description Setts the PoseidonHasher on the wasm mixer for future usage
    *  this should be called one time
    * */
-
-  public setBulletProofGens(bulletProofGens: Uint8Array) {
+  public setBulletProofGens(bulletProofGens: Uint8Array): void {
     WasmMixer.wasm.then((wasm) => {
       const opts = new wasm.PoseidonHasherOptions();
       opts.bp_gens = bulletProofGens;
@@ -117,13 +88,11 @@ export class WasmMixer {
   }
 
   /**
-   *
    *  generateNote
    *  @description Generates a note from , this will create two random numbers R wish is the secret and Nullifer both are random
    *  @param {Asset}
    *  this should be called one time
    * */
-
   public async generateNote(asset: Asset): Promise<void> {
     try {
       const wasm = await WasmMixer.wasm;
@@ -140,36 +109,7 @@ export class WasmMixer {
   }
 
   private static get wasm() {
-    // @ts-ignore
     return import('@webb-tools/wasm-utils');
-  }
-
-  /**
-   *  createProof
-   *  @description Generates a note from , this will create two random numbers R wish is the secret and Nullifer both are random
-   *  @param {string} note - Note serialized
-   *  @Param {Uint8Array}  root - Merkle root for verifying against
-   *  @Param {Uint8Array[]} leaves - Adding the leaves in the merkle tree, for generating intermediate hashes
-   * */
-  public async createProof({ leaves, note, recipient, relayer, root }: CreateWithdrawZKProofArgs): Promise<void> {
-    try {
-      const hasher = this.hasher;
-      const wasm = await WasmMixer.wasm;
-      const depositNote = wasm.Note.deserialize(note);
-      const merkleTree = new wasm.MerkleTree(32, hasher);
-      merkleTree.add_leaves(leaves, root);
-      const zkProof = merkleTree.create_zk_proof(root, recipient, relayer, depositNote);
-      this.emit('createProof', {
-        commitments: zkProof.comms,
-        leafIndexCommitments: zkProof.leaf_index_comms,
-        proof: zkProof.proof,
-        nullifierHash: zkProof.nullifier_hash,
-        proofCommitments: zkProof.proof_comms
-      });
-    } catch (e) {
-      this.logger.error(`Failed to initialize the mixer for createProofer`, e);
-      this.emit('createProof', e, true);
-    }
   }
 
   protected emit<T extends keyof WasmWorkerMessageTX, V extends WasmWorkerMessageTX[T] | string>(
@@ -195,9 +135,6 @@ export class WasmMixer {
         break;
       case 'setBulletProofGens':
         this.setBulletProofGens(event[name].bulletProofGens);
-        break;
-      case 'createProof':
-        this.createProof(event[name]);
         break;
       case 'preGenerateBulletproofGens':
         this.preGenerateBulletproofGens();

@@ -15,11 +15,11 @@ export abstract class EventBus<T extends Event> {
     return () => this.off(event, cb);
   };
 
-  emit = <E extends keyof T>(event: E, data: T[E]) => {
+  emit = <E extends keyof T>(event: E, data: T[E]): void | Promise<void> => {
     this.subscriptions[event]?.forEach((cb) => cb(data));
   };
 
-  off = <E extends keyof T>(event: E, cb: (val: T[E]) => void) => {
+  off = <E extends keyof T>(event: E, cb: (val: T[E]) => void): void | Promise<void> => {
     const listeners = this.subscriptions[event];
 
     this.subscriptions[event] = listeners ? [] : this.subscriptions[event].filter((c) => c !== cb);

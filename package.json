@@ -18,7 +18,7 @@
     "build-ts:dev": "node ./scripts/webb-build-dev.js",
     "build:release": "node ./scripts/webb-build-release.js",
     "build:interfaces": "ts-node-script -r tsconfig-paths/register packages/types/scripts/generate.ts && ts-node-script -r tsconfig-paths/register packages/type-definitions/scripts/generate.ts",
-    "lint": "polkadot-dev-run-lint",
+    "lint": "polkadot-dev-run-lint --skip-tsc",
     "clean": "polkadot-dev-clean-build",
     "postinstall": "polkadot-dev-yarn-only",
     "test": "polkadot-dev-run-test --coverage",
@@ -26,6 +26,7 @@
     "check-deps": "./node_modules/@open-web3/util/scripts/check-deps.js yarn.lock @polkadot/ @open-web3/",
     "update-metadata": "ts-node-script -r tsconfig-paths/register packages/types/scripts/updateMetadata.ts",
     "example:sdk-mixer": "cd ./examples/sdk-mixer && yarn dev",
+    "script": "ts-node-script -r tsconfig-paths/register",
     "format": "prettier --write \"packages/**/*.{ts,js,jsx,tsx}\" && cargo fmt --manifest-path packages/wasm-utils/Cargo.toml"
   },
   "devDependencies": {
@@ -46,8 +47,5 @@
     "tsconfig-paths": "^3.9.0",
     "worker-loader": "^3.0.7",
     "workerloader-jest-transformer": "^0.0.2"
-  },
-  "dependencies": {
-    "@guildofweavers/merkle": "^0.3.12"
   }
 }

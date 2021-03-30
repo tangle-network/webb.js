@@ -1,8 +1,5 @@
 import { Asset, Event, Note, WasmMessage, WasmWorkerMessageRX, WasmWorkerMessageTX } from '@webb-tools/sdk-mixer';
-import { LoggerService } from '@webb-tools/app-util';
-import { ZKProof } from './zkproof';
-import type { CreateWithdrawZKProofArgs } from './wasm-thread';
-import { EventBus } from '@webb-tools/app-util/shared/event-bus.class';
+import { LoggerService, EventBus } from '@webb-tools/app-util';
 
 type MixerEventMap = {
   restart: undefined;
@@ -55,7 +52,7 @@ export class Mixer extends EventBus<MixerEventMap> {
       };
       // this will be triggered if the worker rasid the event restart so we can  reject the promises
       off = this.on('restart', () => {
-        reject();
+        reject(new Error('Restarted'));
         // if this is called that means the worker has events (work)that aren't resolved
         this.worker.removeEventListener('message', handler);
       });
@@ -82,7 +79,7 @@ export class Mixer extends EventBus<MixerEventMap> {
    * Reject all tasks
    *
    * */
-  async restart(worker: Worker) {
+  async restart(worker: Worker): Promise<void> {
     this.logger.info(`Restarting`);
     this.emit('restart', undefined);
     this.worker.terminate();
@@ -133,24 +130,5 @@ export class Mixer extends EventBus<MixerEventMap> {
       tokenSymbol: asset.tokenSymbol
     });
     return [Note.deserialize(note), leaf];
-  }
-
-  /**
-   * Withdraw a note with the specified root and leaves.
-   * generate a zkproof and then do the withdraw operation using this ZKProof.
-   * the `fn` callback should do the withdraw operation.
-   *
-   * Note: This will create a new mixer under the hood, these `leaves` will not be added to the current Mixer.
-   * So you can freely call this method at any point in time.
-   *
-   **/
-  public async generateZK(createWithdrawZKProofArgs: CreateWithdrawZKProofArgs): Promise<ZKProof> {
-    await this.destroyGuard();
-    const { leafIndexCommitments, commitments, proofCommitments, proof, nullifierHash } = await this.postMessage(
-      'createProof',
-      createWithdrawZKProofArgs
-    );
-
-    return new ZKProof(leafIndexCommitments, commitments, proofCommitments, nullifierHash, proof);
   }
 }

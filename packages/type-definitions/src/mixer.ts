@@ -12,6 +12,10 @@ export default {
         ERC20: 'EvmAddress'
       }
     },
+    Amount: 'i128',
+    AmountOf: 'Amount',
+    BlockLength: 'u64',
+    CurrencyIdOf: 'CurrencyId',
     /// Scalar data type for field elements, 32 bytes are needed
     ScalarData: '[u8; 32]',
     /// Nullifiers for mixer deposits
@@ -24,7 +28,9 @@ export default {
       /// Deposit size for the mixer
       fixed_deposit_size: 'Balance',
       /// All the leaves/deposits of the mixer
-      leaves: 'Vec<ScalarData>'
+      leaves: 'Vec<ScalarData>',
+      /// Id of the currency in the mixer
+      currency_id: 'CurrencyIdOf'
     },
     WithdrawProof: {
       /// The mixer id this withdraw proof corresponds to

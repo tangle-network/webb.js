@@ -1,10 +1,19 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import type { Bytes, Enum, Option, Struct, U8aFixed, Vec } from '@polkadot/types';
+import type { Bytes, Enum, Option, Struct, U8aFixed, Vec, i128, u64 } from '@polkadot/types';
 import type { ITuple } from '@polkadot/types/types';
 import type { GroupId } from '@webb-tools/types/interfaces/merkle';
 import type { AccountId, Balance, BlockNumber, H160 } from '@webb-tools/types/interfaces/runtime';
+
+/** @name Amount */
+export interface Amount extends i128 {}
+
+/** @name AmountOf */
+export interface AmountOf extends Amount {}
+
+/** @name BlockLength */
+export interface BlockLength extends u64 {}
 
 /** @name Commitment */
 export interface Commitment extends ScalarData {}
@@ -19,6 +28,9 @@ export interface CurrencyId extends Enum {
   readonly asErc20: EvmAddress;
 }
 
+/** @name CurrencyIdOf */
+export interface CurrencyIdOf extends CurrencyId {}
+
 /** @name EvmAddress */
 export interface EvmAddress extends H160 {}
 
@@ -27,6 +39,7 @@ export interface MixerInfo extends Struct {
   readonly minimum_deposit_length_for_reward: BlockNumber;
   readonly fixed_deposit_size: Balance;
   readonly leaves: Vec<ScalarData>;
+  readonly currency_id: CurrencyIdOf;
 }
 
 /** @name Nullifier */
