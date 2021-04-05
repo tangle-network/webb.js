@@ -126,12 +126,11 @@ export class WasmMerkle {
    *  this should be called one time
    * */
 
-  public setBulletProofGens(bulletProofGens: Uint8Array): void {
-    WasmMerkle.wasm.then((wasm) => {
-      const opts = new wasm.PoseidonHasherOptions();
-      opts.bp_gens = bulletProofGens;
-      this._hasher = new wasm.PoseidonHasher(opts);
-    });
+  public async setBulletProofGens(bulletProofGens: Uint8Array): Promise<void> {
+    const wasm = await WasmMerkle.wasm;
+    const opts = new wasm.PoseidonHasherOptions();
+    opts.bp_gens = bulletProofGens;
+    this._hasher = new wasm.PoseidonHasher(opts);
     this.emit('setBulletProofGens', undefined);
   }
 

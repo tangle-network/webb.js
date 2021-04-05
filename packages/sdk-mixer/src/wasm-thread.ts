@@ -71,12 +71,11 @@ export class WasmMixer {
    *  @description Setts the PoseidonHasher on the wasm mixer for future usage
    *  this should be called one time
    * */
-  public setBulletProofGens(bulletProofGens: Uint8Array): void {
-    WasmMixer.wasm.then((wasm) => {
-      const opts = new wasm.PoseidonHasherOptions();
-      opts.bp_gens = bulletProofGens;
-      this._hasher = new wasm.PoseidonHasher(opts);
-    });
+  public async setBulletProofGens(bulletProofGens: Uint8Array): Promise<void> {
+    const wasm = await WasmMixer.wasm;
+    const opts = new wasm.PoseidonHasherOptions();
+    opts.bp_gens = bulletProofGens;
+    this._hasher = new wasm.PoseidonHasher(opts);
     this.emit('setBulletProofGens', undefined);
   }
 
