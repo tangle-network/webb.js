@@ -1,10 +1,9 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import type { Bytes, Enum, Option, Struct, U8aFixed, Vec, i128, u64 } from '@polkadot/types';
-import type { ITuple } from '@polkadot/types/types';
-import type { GroupId } from '@webb-tools/types/interfaces/merkle';
-import type { AccountId, Balance, BlockNumber, H160 } from '@webb-tools/types/interfaces/runtime';
+import type { Bytes, Option, Struct, U8aFixed, Vec, i128, u64 } from '@polkadot/types';
+import type { TreeId } from '@webb-tools/types/interfaces/merkle';
+import type { AccountId, Balance, BlockNumber } from '@webb-tools/types/interfaces/runtime';
 
 /** @name Amount */
 export interface Amount extends i128 {}
@@ -19,26 +18,15 @@ export interface BlockLength extends u64 {}
 export interface Commitment extends ScalarData {}
 
 /** @name CurrencyId */
-export interface CurrencyId extends Enum {
-  readonly isToken: boolean;
-  readonly asToken: TokenSymbol;
-  readonly isDexShare: boolean;
-  readonly asDexShare: ITuple<[TokenSymbol, TokenSymbol]>;
-  readonly isErc20: boolean;
-  readonly asErc20: EvmAddress;
-}
+export interface CurrencyId extends u64 {}
 
 /** @name CurrencyIdOf */
 export interface CurrencyIdOf extends CurrencyId {}
-
-/** @name EvmAddress */
-export interface EvmAddress extends H160 {}
 
 /** @name MixerInfo */
 export interface MixerInfo extends Struct {
   readonly minimum_deposit_length_for_reward: BlockNumber;
   readonly fixed_deposit_size: Balance;
-  readonly leaves: Vec<ScalarData>;
   readonly currency_id: CurrencyIdOf;
 }
 
@@ -48,14 +36,9 @@ export interface Nullifier extends ScalarData {}
 /** @name ScalarData */
 export interface ScalarData extends U8aFixed {}
 
-/** @name TokenSymbol */
-export interface TokenSymbol extends Enum {
-  readonly isEdg: boolean;
-}
-
 /** @name WithdrawProof */
 export interface WithdrawProof extends Struct {
-  readonly mixer_id: GroupId;
+  readonly mixer_id: TreeId;
   readonly cached_block: BlockNumber;
   readonly cached_root: ScalarData;
   readonly comms: Vec<Commitment>;

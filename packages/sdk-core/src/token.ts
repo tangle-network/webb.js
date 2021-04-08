@@ -121,6 +121,8 @@ const TOKEN_SORT: Record<string, number> = {
   WEBB: 0
 };
 
+const Tokens: Array<PresetToken> = ['EDG', 'WEBB'];
+
 export function sortTokens(token1: Token, token2: Token, ...other: Token[]): Token[] {
   const result = [token1, token2, ...other];
 
@@ -132,5 +134,5 @@ export function token2CurrencyId(api: ApiPromise | ApiRx, token: Token): Currenc
 }
 
 export function currencyId2Token(token: CurrencyId): Token {
-  return getPresetToken(token.asToken.toString() as PresetToken);
+  return getPresetToken(Tokens[token.toNumber()] as PresetToken);
 }

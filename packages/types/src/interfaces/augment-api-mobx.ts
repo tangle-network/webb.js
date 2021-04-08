@@ -4,21 +4,46 @@
 import type { Bytes, Option, Vec, bool, u32, u64 } from '@polkadot/types';
 import type { AnyNumber, ITuple } from '@polkadot/types/types';
 import type { AccountData, BalanceLock } from '@polkadot/types/interfaces/balances';
-import type { CodeHash, ContractInfo, DeletedContract, PrefabWasmModule, Schedule } from '@polkadot/types/interfaces/contracts';
+import type {
+  CodeHash,
+  ContractInfo,
+  DeletedContract,
+  PrefabWasmModule,
+  Schedule
+} from '@polkadot/types/interfaces/contracts';
 import type { EthBlock, EthReceipt, EthTransaction, EthTransactionStatus } from '@polkadot/types/interfaces/eth';
 import type { SetId, StoredPendingChange, StoredState } from '@polkadot/types/interfaces/grandpa';
 import type { SessionIndex } from '@polkadot/types/interfaces/session';
-import type { AccountInfo, ConsumedWeight, DigestOf, EventIndex, EventRecord, LastRuntimeUpgradeInfo, Phase } from '@polkadot/types/interfaces/system';
+import type {
+  AccountInfo,
+  ConsumedWeight,
+  DigestOf,
+  EventIndex,
+  EventRecord,
+  LastRuntimeUpgradeInfo,
+  Phase
+} from '@polkadot/types/interfaces/system';
 import type { Multiplier } from '@polkadot/types/interfaces/txpayment';
-import type { GroupId, GroupTree, Manager } from '@webb-tools/types/interfaces/merkle';
+import type { Manager, MerkleTree, TreeId } from '@webb-tools/types/interfaces/merkle';
 import type { CurrencyId, MixerInfo, ScalarData } from '@webb-tools/types/interfaces/mixer';
-import type { AccountId, Balance, BalanceOf, BlockNumber, H160, H256, Hash, Moment, Releases } from '@webb-tools/types/interfaces/runtime';
+import type {
+  AccountId,
+  Balance,
+  BalanceOf,
+  BlockNumber,
+  H160,
+  H256,
+  Hash,
+  Moment,
+  Releases
+} from '@webb-tools/types/interfaces/runtime';
 import type { BaseStorageType, StorageDoubleMap, StorageMap } from '@open-web3/api-mobx';
 
 export interface StorageType extends BaseStorageType {
-  balances: {    /**
+  balances: {
+    /**
      * The balance of an account.
-     * 
+     *
      * NOTE: This is only used in the case that this pallet is used to store balances.
      **/
     account: StorageMap<AccountId | string, AccountData>;
@@ -29,7 +54,7 @@ export interface StorageType extends BaseStorageType {
     locks: StorageMap<AccountId | string, Vec<BalanceLock>>;
     /**
      * Storage version of the pallet.
-     * 
+     *
      * This is set to v2.0.0 for new networks.
      **/
     storageVersion: Releases | null;
@@ -38,7 +63,8 @@ export interface StorageType extends BaseStorageType {
      **/
     totalIssuance: Balance | null;
   };
-  contracts: {    /**
+  contracts: {
+    /**
      * The subtrie counter.
      **/
     accountCounter: u64 | null;
@@ -48,7 +74,7 @@ export interface StorageType extends BaseStorageType {
     codeStorage: StorageMap<CodeHash | string, Option<PrefabWasmModule>>;
     /**
      * The code associated with a given account.
-     * 
+     *
      * TWOX-NOTE: SAFE since `AccountId` is a secure hash.
      **/
     contractInfoOf: StorageMap<AccountId | string, Option<ContractInfo>>;
@@ -58,7 +84,7 @@ export interface StorageType extends BaseStorageType {
     currentSchedule: Schedule | null;
     /**
      * Evicted contracts that await child trie deletion.
-     * 
+     *
      * Child trie deletion is a heavy operation depending on the amount of storage items
      * stored in said trie. Therefore this operation is performed lazily in `on_initialize`.
      **/
@@ -68,8 +94,9 @@ export interface StorageType extends BaseStorageType {
      **/
     pristineCode: StorageMap<CodeHash | string, Option<Bytes>>;
   };
-  currencies: {  };
-  ethereum: {    /**
+  currencies: {};
+  ethereum: {
+    /**
      * The current Ethereum block.
      **/
     currentBlock: Option<EthBlock> | null;
@@ -86,10 +113,12 @@ export interface StorageType extends BaseStorageType {
      **/
     pending: Vec<ITuple<[EthTransaction, EthTransactionStatus, EthReceipt]>> | null;
   };
-  evm: {    accountCodes: StorageMap<H160 | string, Bytes>;
+  evm: {
+    accountCodes: StorageMap<H160 | string, Bytes>;
     accountStorages: StorageDoubleMap<H160 | string, H256 | string, H256>;
   };
-  grandpa: {    /**
+  grandpa: {
+    /**
      * The number of changes (both in terms of keys and underlying economic responsibilities)
      * in the "set" of Grandpa validators from genesis.
      **/
@@ -105,7 +134,7 @@ export interface StorageType extends BaseStorageType {
     /**
      * A mapping from grandpa set ID to the index of the *most recent* session for which its
      * members were responsible.
-     * 
+     *
      * TWOX-NOTE: `SetId` is not under user control.
      **/
     setIdSession: StorageMap<SetId | AnyNumber, Option<SessionIndex>>;
@@ -118,21 +147,22 @@ export interface StorageType extends BaseStorageType {
      **/
     state: StoredState | null;
   };
-  merkle: {    /**
+  merkle: {
+    /**
      * Map of cached/past Merkle roots at each block number and group. There
      * can be more than one root update in a single block. Allows for easy
      * pruning since we can remove all keys of the first map past a certain
      * point.
      **/
-    cachedRoots: StorageDoubleMap<BlockNumber | AnyNumber, GroupId | AnyNumber, Vec<ScalarData>>;
-    /**
-     * The map of groups to their metadata
-     **/
-    groups: StorageMap<GroupId | AnyNumber, Option<GroupTree>>;
+    cachedRoots: StorageDoubleMap<BlockNumber | AnyNumber, TreeId | AnyNumber, Vec<ScalarData>>;
     /**
      * Block number of the newest set of roots that we are caching
      **/
     highestCachedBlock: BlockNumber | null;
+    /**
+     * The map of (tree_id, index) to the leaf commitment
+     **/
+    leaves: StorageDoubleMap<TreeId | AnyNumber, u32 | AnyNumber, ScalarData>;
     /**
      * Block number of the oldest set of roots that we are caching
      **/
@@ -140,22 +170,27 @@ export interface StorageType extends BaseStorageType {
     /**
      * Maps tree id to the manager of the tree
      **/
-    managers: StorageMap<GroupId | AnyNumber, Option<Manager>>;
+    managers: StorageMap<TreeId | AnyNumber, Option<Manager>>;
     /**
      * Old name generated by `decl_event`.
-     * The next group identifier up for grabs
+     * The next tree identifier up for grabs
      **/
-    nextGroupId: GroupId | null;
+    nextTreeId: TreeId | null;
     /**
      * Indicates whether the group tree is stopped or not
      **/
-    stopped: StorageMap<GroupId | AnyNumber, bool>;
+    stopped: StorageMap<TreeId | AnyNumber, bool>;
+    /**
+     * The map of trees to their metadata
+     **/
+    trees: StorageMap<TreeId | AnyNumber, Option<MerkleTree>>;
     /**
      * Map of used nullifiers for each tree.
      **/
-    usedNullifiers: StorageMap<ITuple<[GroupId, ScalarData]> | [GroupId | AnyNumber, ScalarData | string], bool>;
+    usedNullifiers: StorageMap<ITuple<[TreeId, ScalarData]> | [TreeId | AnyNumber, ScalarData | string], bool>;
   };
-  mixer: {    /**
+  mixer: {
+    /**
      * Administrator of the mixer pallet.
      * This account that can stop/start operations of the mixer
      **/
@@ -167,29 +202,32 @@ export interface StorageType extends BaseStorageType {
     /**
      * The vector of group ids
      **/
-    mixerGroupIds: Vec<GroupId> | null;
+    mixerTreeIds: Vec<TreeId> | null;
     /**
-     * The map of mixer groups to their metadata
+     * The map of mixer treess to their metadata
      **/
-    mixerGroups: StorageMap<GroupId | AnyNumber, MixerInfo>;
+    mixerTrees: StorageMap<TreeId | AnyNumber, MixerInfo>;
     /**
      * The TVL per group
      **/
-    totalValueLocked: StorageMap<GroupId | AnyNumber, BalanceOf>;
+    totalValueLocked: StorageMap<TreeId | AnyNumber, BalanceOf>;
   };
-  randomnessCollectiveFlip: {    /**
+  randomnessCollectiveFlip: {
+    /**
      * Series of block headers from the last 81 blocks that acts as random seed material. This
      * is arranged as a ring buffer with `block_number % 81` being the index into the `Vec` of
      * the oldest hash.
      **/
     randomMaterial: Vec<Hash> | null;
   };
-  sudo: {    /**
+  sudo: {
+    /**
      * The `AccountId` of the sudo key.
      **/
     key: AccountId | null;
   };
-  system: {    /**
+  system: {
+    /**
      * The full account information for a particular account ID.
      **/
     account: StorageMap<AccountId | string, AccountInfo>;
@@ -220,11 +258,11 @@ export interface StorageType extends BaseStorageType {
     /**
      * Mapping between a topic (represented by T::Hash) and a vector of indexes
      * of events in the `<Events<T>>` list.
-     * 
+     *
      * All topic vectors have deterministic storage locations depending on the topic. This
      * allows light-clients to leverage the changes trie storage tracking mechanism and
      * in case of changes fetch the list of events of interest.
-     * 
+     *
      * The value has the type `(T::BlockNumber, EventIndex)` because if we used only just
      * the `EventIndex` then in case if the topic has the same contents on the next block
      * no notification will be triggered thus the event might be lost.
@@ -264,7 +302,8 @@ export interface StorageType extends BaseStorageType {
      **/
     upgradedToU32RefCount: bool | null;
   };
-  timestamp: {    /**
+  timestamp: {
+    /**
      * Did the timestamp get updated in this block?
      **/
     didUpdate: bool | null;
@@ -273,26 +312,25 @@ export interface StorageType extends BaseStorageType {
      **/
     now: Moment | null;
   };
-  tokens: {    /**
+  tokens: {
+    /**
      * The balance of a token type under an account.
-     * 
+     *
      * NOTE: If the total is ever zero, decrease account ref account.
-     * 
+     *
      * NOTE: This is only used in the case that this module is used to store
      * balances.
      **/
-    accounts: StorageDoubleMap<AccountId | string, CurrencyId | { Token: any } | { DEXShare: any } | { ERC20: any } | string, AccountData>;
+    accounts: StorageDoubleMap<AccountId | string, CurrencyId | AnyNumber, AccountData>;
     /**
      * Any liquidity locks of a token type under an account.
      * NOTE: Should only be accessed when setting, changing and freeing a lock.
      **/
-    locks: StorageDoubleMap<AccountId | string, CurrencyId | { Token: any } | { DEXShare: any } | { ERC20: any } | string, Vec<BalanceLock>>;
+    locks: StorageDoubleMap<AccountId | string, CurrencyId | AnyNumber, Vec<BalanceLock>>;
     /**
      * The total issuance of a token type.
      **/
-    totalIssuance: StorageMap<CurrencyId | { Token: any } | { DEXShare: any } | { ERC20: any } | string, Balance>;
+    totalIssuance: StorageMap<CurrencyId | AnyNumber, Balance>;
   };
-  transactionPayment: {    nextFeeMultiplier: Multiplier | null;
-    storageVersion: Releases | null;
-  };
+  transactionPayment: { nextFeeMultiplier: Multiplier | null; storageVersion: Releases | null };
 }

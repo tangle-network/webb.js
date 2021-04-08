@@ -1,17 +1,5 @@
 {
-    "EvmAddress": "H160",
-    "TokenSymbol": {
-        "_enum": [
-            "EDG"
-        ]
-    },
-    "CurrencyId": {
-        "_enum": {
-            "Token": "TokenSymbol",
-            "DEXShare": "(TokenSymbol, TokenSymbol)",
-            "ERC20": "EvmAddress"
-        }
-    },
+    "CurrencyId": "u64",
     "Amount": "i128",
     "AmountOf": "Amount",
     "BlockLength": "u64",
@@ -22,11 +10,10 @@
     "MixerInfo": {
         "minimum_deposit_length_for_reward": "BlockNumber",
         "fixed_deposit_size": "Balance",
-        "leaves": "Vec<ScalarData>",
         "currency_id": "CurrencyIdOf"
     },
     "WithdrawProof": {
-        "mixer_id": "GroupId",
+        "mixer_id": "TreeId",
         "cached_block": "BlockNumber",
         "cached_root": "ScalarData",
         "comms": "Vec<Commitment>",
@@ -37,17 +24,30 @@
         "recipient": "Option<AccountId>",
         "relayer": "Option<AccountId>"
     },
-    "GroupId": "u32",
+    "HashFunction": {
+        "_enum": [
+            "PoseidonDefault",
+            "PoseidonExp3",
+            "PoseidonExp5",
+            "PoseidonExp17",
+            "MiMC",
+            "Blake2",
+            "Sha256"
+        ]
+    },
+    "TreeId": "u32",
     "Manager": {
         "accountId": "AccountId",
         "required": "bool"
     },
-    "GroupTree": {
+    "MerkleTree": {
         "leaf_count": "u32",
         "max_leaves": "u32",
         "depth": "u8",
         "root_hash": "ScalarData",
-        "edge_nodes": "Vec<ScalarData>"
+        "edge_nodes": "Vec<ScalarData>",
+        "hasher": "HashFunction",
+        "should_store_leaves": "bool"
     },
     "Address": "AccountId",
     "LookupSource": "AccountId",
