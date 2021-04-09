@@ -1,17 +1,7 @@
 export default {
   rpc: {},
   types: {
-    EvmAddress: 'H160',
-    TokenSymbol: {
-      _enum: ['EDG']
-    },
-    CurrencyId: {
-      _enum: {
-        Token: 'TokenSymbol',
-        DEXShare: '(TokenSymbol, TokenSymbol)',
-        ERC20: 'EvmAddress'
-      }
-    },
+    CurrencyId: 'u64',
     Amount: 'i128',
     AmountOf: 'Amount',
     BlockLength: 'u64',
@@ -27,14 +17,12 @@ export default {
       minimum_deposit_length_for_reward: 'BlockNumber',
       /// Deposit size for the mixer
       fixed_deposit_size: 'Balance',
-      /// All the leaves/deposits of the mixer
-      leaves: 'Vec<ScalarData>',
       /// Id of the currency in the mixer
       currency_id: 'CurrencyIdOf'
     },
     WithdrawProof: {
       /// The mixer id this withdraw proof corresponds to
-      mixer_id: 'GroupId',
+      mixer_id: 'TreeId',
       /// The cached block for the cached root being proven against
       cached_block: 'BlockNumber',
       /// The cached root being proven against
