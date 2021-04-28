@@ -22,12 +22,18 @@ function buildWebpack() {
 }
 
 async function buildBabel(dir) {
+  // Get Root Configs
   const configs = CONFIGS.map((c) => path.join(process.cwd(), `../../${c}`));
   const babelConfig = configs.find((f) => fs.existsSync(f)) || configs[0];
+  // Get local configs
+  const localConfigs = CONFIGS.map((c) => path.join(process.cwd(), c));
+  const localBabelConfig = localConfigs.find((f) => fs.existsSync(f));
+  // Prefer to use local config over the root one.
+  const conf = localBabelConfig || babelConfig;
 
   await babel({
     babelOptions: {
-      configFile: babelConfig
+      configFile: conf
     },
     cliOptions: {
       extensions: ['.ts', '.tsx'],
