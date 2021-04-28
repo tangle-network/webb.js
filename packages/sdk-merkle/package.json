@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/sdk-merkle",
-  "version": "0.1.2-63",
+  "version": "0.1.2-64",
   "description": "the merkle submodule in webb tools sdk",
   "main": "index.js",
   "author": "Webb Developers <drew@webb.tools>",
@@ -16,7 +16,7 @@
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
     "@polkadot/util": "^3.4.1",
-    "@webb-tools/sdk-core": "^0.1.2-63",
+    "@webb-tools/sdk-core": "^0.1.2-64",
     "lodash": "^4.17.20"
   },
   "devDependencies": {
