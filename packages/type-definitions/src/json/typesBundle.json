@@ -7,7 +7,6 @@
                         "CurrencyId": "u64",
                         "Amount": "i128",
                         "AmountOf": "Amount",
-                        "BlockLength": "u64",
                         "CurrencyIdOf": "CurrencyId",
                         "ScalarData": "[u8; 32]",
                         "Nullifier": "ScalarData",

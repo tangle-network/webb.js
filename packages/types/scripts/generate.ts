@@ -26,9 +26,11 @@ function filterModules(names: string[], defs: any): string {
   // hack https://github.com/polkadot-js/api/issues/2687#issuecomment-705342442
   metadata.asLatest.toJSON();
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const filtered = metadata.toJSON() as any;
 
-  filtered.metadata.V12.modules = filtered.metadata.V12.modules.filter(({ name }: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  filtered.metadata.v12.modules = filtered?.metadata?.v12?.modules?.filter(({ name }: any) => {
     return names.includes(name);
   });
   return new Metadata(registry, filtered).toHex();

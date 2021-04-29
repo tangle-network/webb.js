@@ -4,7 +4,6 @@ export default {
     CurrencyId: 'u64',
     Amount: 'i128',
     AmountOf: 'Amount',
-    BlockLength: 'u64',
     CurrencyIdOf: 'CurrencyId',
     /// Scalar data type for field elements, 32 bytes are needed
     ScalarData: '[u8; 32]',

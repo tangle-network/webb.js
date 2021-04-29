@@ -11,9 +11,6 @@ export interface Amount extends i128 {}
 /** @name AmountOf */
 export interface AmountOf extends Amount {}
 
-/** @name BlockLength */
-export interface BlockLength extends u64 {}
-
 /** @name Commitment */
 export interface Commitment extends ScalarData {}
 
