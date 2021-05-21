@@ -16,6 +16,7 @@
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
     "@babel/runtime": "^7.10.2",
+    "@edgeware/node-types": "^3.4.0-erup-4.2",
     "@polkadot/api": "^4.7.2",
     "@polkadot/rpc-core": "^4.7.2",
     "@webb-tools/types": "0.1.2-66"

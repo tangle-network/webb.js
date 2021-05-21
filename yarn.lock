@@ -3160,6 +3160,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@edgeware/node-types@npm:3.4.0-erup-4.2":
+  version: 3.4.0-erup-4.2
+  resolution: "@edgeware/node-types@npm:3.4.0-erup-4.2"
+  checksum: ddee8fcfedb0f836808e100fa42913adc0c0bcf16c490103964916a14318254f53fc1e876ca058328f775972dd8c09e1d77846622036b090c63ca6ceb7e52c99
+  languageName: node
+  linkType: hard
+
 "@eslint/eslintrc@npm:^0.3.0":
   version: 0.3.0
   resolution: "@eslint/eslintrc@npm:0.3.0"
@@ -4623,6 +4630,7 @@ __metadata:
   resolution: "@webb-tools/api@workspace:packages/api"
   dependencies:
     "@babel/runtime": ^7.10.2
+    "@edgeware/node-types": ^3.4.0-erup-4.2
     "@polkadot/api": ^4.7.2
     "@polkadot/rpc-core": ^4.7.2
     "@webb-tools/types": 0.1.2-66
@@ -4637,13 +4645,6 @@ __metadata:
     bignumber.js: ^9.0.0
   languageName: unknown
   linkType: soft
-
-"@webb-tools/mixer-client@npm:^0.0.12":
-  version: 0.0.12
-  resolution: "@webb-tools/mixer-client@npm:0.0.12"
-  checksum: 4bf59c712ec6b0eff766140411bf520678698fb7bc2fe5dd91b8b2fc52156cafd905880ec4d6d4d73eeaf817a581e3d718756d9056eb79b7983c58098c2ae501
-  languageName: node
-  linkType: hard
 
 "@webb-tools/sdk-core@^0.1.2-44, @webb-tools/sdk-core@^0.1.2-66, @webb-tools/sdk-core@workspace:packages/sdk-core":
   version: 0.0.0-use.local
@@ -4678,7 +4679,6 @@ __metadata:
     "@polkadot/util": ^6.3.1
     "@types/lodash": ^4.14.161
     "@webb-tools/app-util": ^0.1.2-66
-    "@webb-tools/mixer-client": ^0.0.8
     "@webb-tools/sdk-core": ^0.1.2-66
     "@webb-tools/sdk-merkle": ^0.1.2-66
     "@webb-tools/wasm-utils": ^0.1.2-66

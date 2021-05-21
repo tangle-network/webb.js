@@ -11,7 +11,7 @@
   ],
   "resolutions": {
     "typescript": "3.8.3",
-    "@webb-tools/mixer-client": "^0.0.12"
+    "@edgeware/node-types": "3.4.0-erup-4.2"
   },
   "scripts": {
     "build": "yarn build:interfaces && yarn build-ts:dev",
