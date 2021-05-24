@@ -9,7 +9,6 @@ import { generateDefaultConsts } from '@polkadot/typegen/generate/consts';
 import { generateDefaultQuery } from '@polkadot/typegen/generate/query';
 import { generateDefaultTx } from '@polkadot/typegen/generate/tx';
 import { registerDefinitions } from '@polkadot/typegen/util';
-import generateMobx from '@open-web3/api-mobx/scripts/mobx';
 import metaHex from '../src/metadata/static-latest';
 import fs from 'fs';
 import * as defaultDefinitions from '@polkadot/types/interfaces/definitions';
@@ -22,7 +21,6 @@ function filterModules(names: string[], defs: any): string {
   const registry = new TypeRegistry();
   registerDefinitions(registry, defs);
   const metadata = new Metadata(registry, metaHex);
-
   // hack https://github.com/polkadot-js/api/issues/2687#issuecomment-705342442
   metadata.asLatest.toJSON();
 
@@ -30,7 +28,7 @@ function filterModules(names: string[], defs: any): string {
   const filtered = metadata.toJSON() as any;
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  filtered.metadata.v12.modules = filtered?.metadata?.v12?.modules?.filter(({ name }: any) => {
+  filtered.metadata.v13.modules = filtered?.metadata?.v13?.modules?.filter(({ name }: any) => {
     return names.includes(name);
   });
   return new Metadata(registry, filtered).toHex();
@@ -51,7 +49,6 @@ const augmentApiIndex = `
 export * from './augment-api-consts';
 export * from './augment-api-tx';
 export * from './augment-api-query';
-export * from './augment-api-mobx';
 export * from './augment-types';
 `.trim();
 generateTsDef(definitions, 'packages/types/src/interfaces', '@webb-tools/types/interfaces');
@@ -61,5 +58,4 @@ generateDefaultConsts('packages/types/src/interfaces/augment-api-consts.ts', met
 generateDefaultTx('packages/types/src/interfaces/augment-api-tx.ts', metadata, definitions);
 generateDefaultQuery('packages/types/src/interfaces/augment-api-query.ts', metadata, definitions);
 
-generateMobx('packages/types/src/interfaces/augment-api-mobx.ts', metaHex, definitions);
 fs.writeFileSync('packages/types/src/interfaces/augment-api.ts', augmentApiIndex);
