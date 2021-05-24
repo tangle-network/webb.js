@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/types",
-  "version": "0.1.2-66",
+  "version": "0.1.2-67",
   "description": "Polkadot.js type definations for Webb Network",
   "main": "index.js",
   "author": "Webb Developers <drew@webb.tools>",
@@ -20,7 +20,7 @@
     "@polkadot/api": "^4.11.2",
     "@polkadot/typegen": "^4.11.2",
     "@polkadot/types": "^4.11.2",
-    "@webb-tools/type-definitions": "0.1.2-66"
+    "@webb-tools/type-definitions": "0.1.2-67"
   },
   "devDependencies": {
     "@types/websocket": "^1.0.0",
