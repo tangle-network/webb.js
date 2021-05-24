@@ -16,11 +16,10 @@
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
     "@babel/runtime": "^7.10.2",
-    "@open-web3/api-mobx": "^0.8.2-6",
     "@open-web3/orml-types": "^0.8.2-6",
-    "@polkadot/api": "^4.7.2",
-    "@polkadot/typegen": "^4.7.2",
-    "@polkadot/types": "^4.7.2",
+    "@polkadot/api": "^4.11.2",
+    "@polkadot/typegen": "^4.11.2",
+    "@polkadot/types": "^4.11.2",
     "@webb-tools/type-definitions": "0.1.2-66"
   },
   "devDependencies": {

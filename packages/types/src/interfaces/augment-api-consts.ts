@@ -3,13 +3,12 @@
 
 import type { Codec } from '@polkadot/types/types';
 import type { CurrencyIdOf } from '@webb-tools/types/interfaces/mixer';
-import type { AccountId, BlockNumber, ModuleId } from '@webb-tools/types/interfaces/runtime';
+import type { AccountId, BlockNumber, PalletId } from '@webb-tools/types/interfaces/runtime';
 import type { ApiTypes } from '@polkadot/api/types';
 
 declare module '@polkadot/api/types/consts' {
   export interface AugmentedConsts<ApiType> {
     mixer: {
-      [key: string]: Codec;
       /**
        * Default admin key
        **/
@@ -18,11 +17,15 @@ declare module '@polkadot/api/types/consts' {
        * The small deposit length
        **/
       depositLength: BlockNumber & AugmentedConst<ApiType>;
-      moduleId: ModuleId & AugmentedConst<ApiType>;
       /**
        * Native currency id
        **/
       nativeCurrencyId: CurrencyIdOf & AugmentedConst<ApiType>;
+      palletId: PalletId & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
     };
   }
 

@@ -1,7 +1,31 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import type { Bytes, Compact, DoNotConstruct, Enum, GenericAccountId, GenericAccountIndex, GenericBlock, GenericCall, GenericConsensusEngineId, GenericLookupSource, GenericMultiAddress, Int, Null, Option, StorageKey, Struct, U8aFixed, UInt, Vec, u16, u32, u64, u8 } from '@polkadot/types';
+import type {
+  Bytes,
+  Compact,
+  DoNotConstruct,
+  Enum,
+  GenericAccountId,
+  GenericAccountIndex,
+  GenericBlock,
+  GenericCall,
+  GenericConsensusEngineId,
+  GenericLookupSource,
+  GenericMultiAddress,
+  Int,
+  Null,
+  Option,
+  StorageKey,
+  Struct,
+  U8aFixed,
+  UInt,
+  Vec,
+  u16,
+  u32,
+  u64,
+  u8
+} from '@polkadot/types';
 import type { ITuple } from '@polkadot/types/types';
 import type { AuthorityId } from '@polkadot/types/interfaces/consensus';
 import type { Signature } from '@polkadot/types/interfaces/extrinsics';
@@ -52,6 +76,12 @@ export interface ChangesTrieConfiguration extends Struct {
   readonly digestLevels: u32;
 }
 
+/** @name ChangesTrieSignal */
+export interface ChangesTrieSignal extends Enum {
+  readonly isNewConfiguration: boolean;
+  readonly asNewConfiguration: Option<ChangesTrieConfiguration>;
+}
+
 /** @name CodecHash */
 export interface CodecHash extends Hash {}
 
@@ -82,6 +112,8 @@ export interface DigestItem extends Enum {
   readonly asSeal: Seal;
   readonly isPreRuntime: boolean;
   readonly asPreRuntime: PreRuntime;
+  readonly isChangesTrieSignal: boolean;
+  readonly asChangesTrieSignal: ChangesTrieSignal;
 }
 
 /** @name EncodedJustification */
@@ -145,6 +177,12 @@ export interface Header extends Struct {
   readonly stateRoot: Hash;
   readonly extrinsicsRoot: Hash;
   readonly digest: Digest;
+}
+
+/** @name HeaderPartial */
+export interface HeaderPartial extends Struct {
+  readonly parentHash: Hash;
+  readonly number: BlockNumber;
 }
 
 /** @name I32F32 */
