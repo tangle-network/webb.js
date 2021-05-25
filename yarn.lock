@@ -4656,7 +4656,7 @@ __metadata:
   resolution: "@webb-tools/api@workspace:packages/api"
   dependencies:
     "@babel/runtime": ^7.10.2
-    "@edgeware/node-types": ^3.4.0-erup-4.2
+    "@edgeware/node-types": ^3.4.0-erup-4.3
     "@polkadot/api": ^4.11.2
     "@polkadot/rpc-core": ^4.11.2
     "@webb-tools/types": 0.1.2-66
