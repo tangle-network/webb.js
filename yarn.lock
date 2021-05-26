@@ -3233,10 +3233,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@edgeware/node-types@npm:3.4.0-erup-4.3":
-  version: 3.4.0-erup-4.3
-  resolution: "@edgeware/node-types@npm:3.4.0-erup-4.3"
-  checksum: fd20ec5bab3a538b1a30d58c8edd5d834997b978f0151ec52909a10134f77abe7530ca300a6c2dd09feddff30c25d747cafd65932f8fcfee7dafac7ac123c311
+"@edgeware/node-types@npm:3.5.0-erup-4.1":
+  version: 3.5.0-erup-4.1
+  resolution: "@edgeware/node-types@npm:3.5.0-erup-4.1"
+  checksum: 15d202249d5185e959ffe3b1f235124e8d95d6728683e0e65e2f3aee2dcb3cc4b056c0aacdcd291ed98ec19dce9d64a6bb0c80de6f37d7dc586f99891902827b
   languageName: node
   linkType: hard
 
