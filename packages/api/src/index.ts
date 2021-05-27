@@ -6,6 +6,9 @@ import {
 } from '@webb-tools/types';
 import { spec as edgewareTypes } from '@edgeware/node-types';
 import { ApiOptions } from '@polkadot/api/types';
+import * as edgewareDefinitions from '@edgeware/node-types/dist/src/interfaces/definitions';
+
+const edgTypes = Object.values(edgewareDefinitions).reduce((res, { types }) => ({ ...res, ...types }), {});
 
 export const defaultOptions: ApiOptions = {
   types: webbTypes,
@@ -53,11 +56,15 @@ export const optionsWithEdgeware = ({
 }: ApiOptions = {}): ApiOptions => ({
   types: {
     ...webbTypes,
-    ...types
+    ...edgTypes,
+    ...types,
+    "Address": "MultiAddress",
+    "LookupSource": "MultiAddress"
   },
   rpc: {
     ...webbRpc,
-    ...rpc
+    ...rpc,
+
   },
   typesAlias: {
     ...webbTypesAlias,
