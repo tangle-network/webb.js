@@ -3233,10 +3233,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@edgeware/node-types@npm:3.5.0-erup-4.1":
-  version: 3.5.0-erup-4.1
-  resolution: "@edgeware/node-types@npm:3.5.0-erup-4.1"
-  checksum: 15d202249d5185e959ffe3b1f235124e8d95d6728683e0e65e2f3aee2dcb3cc4b056c0aacdcd291ed98ec19dce9d64a6bb0c80de6f37d7dc586f99891902827b
+"@edgeware/node-types@npm:3.5.1-erup-4":
+  version: 3.5.1-erup-4
+  resolution: "@edgeware/node-types@npm:3.5.1-erup-4"
+  checksum: 9a2808f7ebbf75b512d1ccacf413c154a76cd5498c19701bc7c9dceb22b546f88e28fd20623de8a289bcc08490ccbb6076fe576936ab2b21608235fe688fa98a
   languageName: node
   linkType: hard
 
@@ -4656,7 +4656,7 @@ __metadata:
   resolution: "@webb-tools/api@workspace:packages/api"
   dependencies:
     "@babel/runtime": ^7.10.2
-    "@edgeware/node-types": ^3.5.0-erup-4.1
+    "@edgeware/node-types": 3.5.1-erup-4
     "@polkadot/api": ^4.11.2
     "@polkadot/rpc-core": ^4.11.2
     "@webb-tools/types": 0.1.2-70

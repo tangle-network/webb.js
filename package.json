@@ -11,7 +11,7 @@
   ],
   "resolutions": {
     "typescript": "3.8.3",
-    "@edgeware/node-types": "3.5.0-erup-4.1"
+    "@edgeware/node-types": "3.5.1-erup-4"
   },
   "scripts": {
     "build": "yarn build:interfaces && yarn build-ts:dev",
