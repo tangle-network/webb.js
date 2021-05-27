@@ -58,13 +58,12 @@ export const optionsWithEdgeware = ({
     ...webbTypes,
     ...edgTypes,
     ...types,
-    "Address": "MultiAddress",
-    "LookupSource": "MultiAddress"
+    Address: 'MultiAddress',
+    LookupSource: 'MultiAddress'
   },
   rpc: {
     ...webbRpc,
-    ...rpc,
-
+    ...rpc
   },
   typesAlias: {
     ...webbTypesAlias,
