@@ -6,14 +6,14 @@ const ENDPOINT = 'ws://localhost:9944';
 const apiLogger = LoggerService.get('Api');
 
 async function main() {
-    apiLogger.info('Connecting to ', ENDPOINT);
-    const provider = new WsProvider([ENDPOINT]);
-    const opts = optionsWithEdgeware({ provider });
-    const api = await ApiPromise.create(opts);
-    await api.isReady;
-    let queries = await api.query.mixer;
-    apiLogger.info('mixer queries: ' + JSON.stringify(queries));
-    await api.disconnect();
+  apiLogger.info('Connecting to ', ENDPOINT);
+  const provider = new WsProvider([ENDPOINT]);
+  const opts = optionsWithEdgeware({ provider });
+  const api = await ApiPromise.create(opts);
+  await api.isReady;
+  let queries = await api.query.mixer;
+  apiLogger.info('mixer queries: ' + JSON.stringify(queries));
+  await api.disconnect();
 }
 
 main().catch(apiLogger.error);
