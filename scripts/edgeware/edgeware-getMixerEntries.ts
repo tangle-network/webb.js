@@ -12,7 +12,7 @@ async function main() {
   const api = await ApiPromise.create(opts);
   await api.isReady;
   // parameter for the asset id
-  let mixerTrees = await api.query.mixer.mixerTreeIds();
+  const mixerTrees = await api.query.mixer.mixerTreeIds();
   apiLogger.info('mixer tree ids: ' + mixerTrees);
   await api.disconnect();
 }
