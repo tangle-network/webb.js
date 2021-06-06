@@ -4,7 +4,7 @@ import { AccountInfo, AccountData } from '@polkadot/types/interfaces';
 import { LoggerService } from '@webb-tools/app-util';
 import BN from 'bn.js';
 import BigNumber from 'bignumber.js';
-// import fs from 'fs';
+import fs from 'fs';
 
 const ENDPOINT = 'ws://localhost:9944';
 const apiLogger = LoggerService.get('Api');
@@ -38,13 +38,11 @@ async function main() {
       // multiply by 5,000,000 tokens w/ 18 decimals -> 24 zeros
       .mul(new BN('5000000000000000000000000'))
       .div(quadSum);
-    const newAccountInfoJSON = entry[1].toJSON();
-    // @ts-ignore
-    newAccountInfoJSON.data.free = quadraticAllocation;
-    const newAccountInfo = api.createType('AccountInfo', newAccountInfoJSON);
-    return [entry[0], newAccountInfo];
+
+    return [entry[0].toString().substr(entry[0].toString().length - 64), quadraticAllocation.toString()];
   });
 
+  fs.writeFileSync('./distribution.json', JSON.stringify({ balances: distribution }, null, 4));
   await api.disconnect();
 }
 
