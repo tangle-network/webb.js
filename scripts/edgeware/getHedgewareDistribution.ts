@@ -36,7 +36,7 @@ async function main() {
     const sqrtOfFree = new BigNumber(accountData.free.toString()).sqrt();
     const quadraticAllocation = new BN(sqrtOfFree.toString())
       // multiply by 5,000,000 tokens w/ 18 decimals -> 24 zeros
-      .mul(new BN('5000000000000000000000000'))
+      .mul(new BN('2500000000000000000000000'))
       .div(quadSum);
 
     return [entry[0].toString().substr(entry[0].toString().length - 64), quadraticAllocation.toString()];
