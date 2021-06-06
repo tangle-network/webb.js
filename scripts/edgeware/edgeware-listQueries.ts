@@ -11,7 +11,7 @@ async function main() {
   const opts = optionsWithEdgeware({ provider });
   const api = await ApiPromise.create(opts);
   await api.isReady;
-  let queries = await api.query.mixer;
+  const queries = await api.query.mixer;
   apiLogger.info('mixer queries: ' + JSON.stringify(queries));
   await api.disconnect();
 }

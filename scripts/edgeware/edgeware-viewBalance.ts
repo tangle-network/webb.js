@@ -7,14 +7,14 @@ const apiLogger = LoggerService.get('Api');
 const inputSubstrateAddress = process.argv[2];
 
 async function main() {
-    apiLogger.info('Connecting to ', ENDPOINT);
-    const provider = new WsProvider([ENDPOINT]);
-    const opts = optionsWithEdgeware({ provider });
-    const api = await ApiPromise.create(opts);
-    await api.isReady;
-    let systemAccount = await api.query.system.account(inputSubstrateAddress);
-    apiLogger.info('Balance of account is: ' + systemAccount.data);
-    await api.disconnect();
+  apiLogger.info('Connecting to ', ENDPOINT);
+  const provider = new WsProvider([ENDPOINT]);
+  const opts = optionsWithEdgeware({ provider });
+  const api = await ApiPromise.create(opts);
+  await api.isReady;
+  const systemAccount = await api.query.system.account(inputSubstrateAddress);
+  apiLogger.info('Balance of account is: ' + systemAccount.data);
+  await api.disconnect();
 }
 
 main().catch(apiLogger.error);
