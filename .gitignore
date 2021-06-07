@@ -65,6 +65,7 @@ typings/
 .npmrc
 
 build/
+distribution.json
 
 /.yarn/cache
 /.yarn/versions
