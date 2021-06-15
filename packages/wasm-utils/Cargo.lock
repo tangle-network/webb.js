@@ -58,9 +58,9 @@ checksum = "8d696c370c750c948ada61c69a0ee2cbbb9c50b1019ddb86d9317157a99c2cae"
 
 [[package]]
 name = "bulletproofs-gadgets"
-version = "2.0.0"
+version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f730544daa13f48320a9be1bf804dd3544193f20a4194901317fd3ec354861fb"
+checksum = "94aea73d25b120dc50af0196f944e5df2e1e6aab93d8793e810b6b42c4d52b3e"
 dependencies = [
  "bencher",
  "curve25519-dalek",
@@ -68,6 +68,7 @@ dependencies = [
  "merlin",
  "num-bigint",
  "parity-scale-codec",
+ "rand_chacha",
  "rand_core",
  "sp-std",
  "webb-bulletproofs",
@@ -655,7 +656,6 @@ dependencies = [
  "lazy_static",
  "merlin",
  "rand",
- "serde",
  "wasm-bindgen",
  "wasm-bindgen-test",
  "web-sys",
@@ -675,9 +675,9 @@ dependencies = [
 
 [[package]]
 name = "webb-bulletproofs"
-version = "2.0.0"
+version = "2.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3dcc103f95a2509aea2ca010f7f06b137bc4693cf57f39947937ae00d487266"
+checksum = "fab7788f5651d9df9225919e5a487ac1f522cc57e5c58ff03911eeec597259f6"
 dependencies = [
  "byteorder",
  "clear_on_drop",

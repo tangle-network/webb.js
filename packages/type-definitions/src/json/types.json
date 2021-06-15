@@ -35,6 +35,7 @@
         ]
     },
     "TreeId": "u32",
+    "KeyId": "u32",
     "Manager": {
         "accountId": "AccountId",
         "required": "bool"

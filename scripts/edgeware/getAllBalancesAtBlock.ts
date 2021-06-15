@@ -15,6 +15,7 @@ async function main() {
 
   const entries = await api.query.system.account.entriesAt(DISTRIBUTION_HASH);
   // do something with entries
+  apiLogger.info('Entries: ', entries);
   await api.disconnect();
 }
 

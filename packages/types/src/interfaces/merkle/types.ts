@@ -16,6 +16,9 @@ export interface HashFunction extends Enum {
   readonly isSha256: boolean;
 }
 
+/** @name KeyId */
+export interface KeyId extends u32 {}
+
 /** @name Manager */
 export interface Manager extends Struct {
   readonly accountId: AccountId;

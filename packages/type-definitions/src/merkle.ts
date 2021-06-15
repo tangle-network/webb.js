@@ -32,6 +32,7 @@ export default {
       _enum: ['PoseidonDefault', 'PoseidonExp3', 'PoseidonExp5', 'PoseidonExp17', 'MiMC', 'Blake2', 'Sha256']
     },
     TreeId: 'u32',
+    KeyId: 'u32',
     Manager: {
       accountId: 'AccountId',
       required: 'bool'
