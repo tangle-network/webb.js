@@ -14,12 +14,11 @@ export abstract class EventBus<T extends Event> {
    * @description register an event and pass a callback
    * @return Void|Function  , Void if the handler is already registered or Function if the handler is registered
    * */
-  on<E extends keyof T>(event: E, cb: (val: T[E]) => void): (() => void) | void {
+  on<E extends keyof T>(event: E, cb: (val: T[E]) => void): () => void {
     const listeners = this.subscriptions[event];
-    if (listeners && listeners.indexOf(cb) > -1) {
-      return;
+    if (listeners && listeners.indexOf(cb) === -1) {
+      this.subscriptions[event] = [...(this.subscriptions[event] || []), cb];
     }
-    this.subscriptions[event] = [...(this.subscriptions[event] || []), cb];
     return () => this.off(event, cb);
   }
 
@@ -52,6 +51,7 @@ export abstract class EventBus<T extends Event> {
   unsubscribeAll() {
     this.subscriptions = {} as Subscription<T>;
   }
+
   unsubscribeAllForEvent<E extends keyof T>(event: E) {
     this.subscriptions[event] = [];
   }
