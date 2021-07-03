@@ -35,7 +35,7 @@ export class LoggerService {
     } catch (e) {
       m = 'Cant show message';
     }
-    LoggerService.eventBus.emit('log', {
+    LoggerService.eventBus.sendEvent?.('log', {
       level,
       ctx: this.ctx,
       log: m
