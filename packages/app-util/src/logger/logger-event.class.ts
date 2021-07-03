@@ -8,4 +8,10 @@ export type LogEvent = {
     level: LogLevel;
   };
 };
-export class LoggerEvent extends EventBus<LogEvent> {}
+
+export class LoggerEvent extends EventBus<LogEvent> {
+  constructor() {
+    super();
+    this.sendEvent = this.emit;
+  }
+}

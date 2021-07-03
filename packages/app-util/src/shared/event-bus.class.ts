@@ -36,7 +36,7 @@ export abstract class EventBus<T extends Event> {
   protected off<E extends keyof T>(event: E, cb: (val: T[E]) => void): void {
     const listeners = this.subscriptions[event];
 
-    this.subscriptions[event] = listeners ? [] : this.subscriptions[event].filter((c) => c !== cb);
+    this.subscriptions[event] = listeners?.filter((c) => c !== cb) ?? [];
   }
 
   once<E extends keyof T>(event: E, cb: (val: T[E]) => void): () => void {
