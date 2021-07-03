@@ -1,4 +1,4 @@
-import {EventBus} from '../shared/event-bus.class';
+import { EventBus } from '../shared/event-bus.class';
 
 class TestEvent extends EventBus<{ log: number }> {
   readonly sendEvent: EventBus<{ log: number }>['emit'];
