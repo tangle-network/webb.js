@@ -1,6 +1,6 @@
 type Event = Record<string, unknown>;
 export type Subscription<T extends Event = Event> = {
-  [Key in keyof T]: Array<(val: T[Key]) => any>;
+  [Key in keyof T]?: Array<(val: T[Key]) => any>;
 };
 
 export abstract class EventBus<T extends Event> {
@@ -8,7 +8,7 @@ export abstract class EventBus<T extends Event> {
    * Optionally expose the `emit` functionality outside the implementor
    * */
   sendEvent: undefined | (<E extends keyof T>(event: E, data: T[E]) => void) = undefined;
-  protected subscriptions: Subscription<T> = {} as Subscription<T>;
+  protected subscriptions: Subscription<T> = {};
 
   /**
    * @description register an event and pass a callback
@@ -16,8 +16,8 @@ export abstract class EventBus<T extends Event> {
    * */
   on<E extends keyof T>(event: E, cb: (val: T[E]) => void): () => void {
     const listeners = this.subscriptions[event];
-    if (listeners && listeners.indexOf(cb) === -1) {
-      this.subscriptions[event] = [...(this.subscriptions[event] || []), cb];
+    if (!listeners || listeners.indexOf(cb) === -1) {
+      this.subscriptions[event] = [...(this.subscriptions?.[event] ?? []), cb];
     }
     return () => this.off(event, cb);
   }
@@ -44,7 +44,7 @@ export abstract class EventBus<T extends Event> {
       cb(val);
       this.off(event, hookedCb);
     };
-    this.subscriptions[event] = [...(this.subscriptions[event] || []), hookedCb];
+    this.subscriptions[event] = [...(this.subscriptions?.[event] ?? []), hookedCb];
     return () => this.off(event, hookedCb);
   }
 

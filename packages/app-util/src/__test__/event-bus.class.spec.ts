@@ -11,16 +11,15 @@ class TestEvent extends EventBus<{ log: number }> {
 
 describe('event emitting', () => {
   const testEvent = new TestEvent();
-  test('event should be  emitted', () => {
+  test('event should be  emitted', async () => {
     let a = 0;
     const unsubscribe = testEvent.on('log', () => {
       a = a + 1;
     });
     expect(a).toEqual(0);
     testEvent.sendEvent('log', 5);
-    setTimeout(() => {
-      expect(a).toEqual(1);
-    }, 1);
+    await 0;
+    expect(a).toEqual(1);
     if (unsubscribe) {
       unsubscribe();
     }
