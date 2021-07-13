@@ -3,11 +3,11 @@ use std::convert::{TryFrom, TryInto};
 use std::ops::Deref;
 use std::str::FromStr;
 
-use bulletproofs::r1cs::Prover;
 use bulletproofs::{BulletproofGens, PedersenGens};
+use bulletproofs::r1cs::Prover;
 use bulletproofs_gadgets::fixed_deposit_tree::builder::{FixedDepositTree, FixedDepositTreeBuilder};
+use bulletproofs_gadgets::poseidon::{Poseidon_hash_2, PoseidonSbox};
 use bulletproofs_gadgets::poseidon::builder::{Poseidon, PoseidonBuilder};
-use bulletproofs_gadgets::poseidon::{PoseidonSbox, Poseidon_hash_2};
 use curve25519_dalek::ristretto::CompressedRistretto;
 use curve25519_dalek::scalar::Scalar;
 use js_sys::{Array, JsString, Uint8Array};
@@ -316,7 +316,7 @@ impl FromStr for Note {
         })
       }
       false => {
-        let bn:u32 = parts[4].parse().map_err(|_| OpStatusCode::InvalidNoteBlockNumber)?;
+        let bn: u32 = parts[4].parse().map_err(|_| OpStatusCode::InvalidNoteBlockNumber)?;
         let curve: Curve = parts[6].parse()?;
         let hash_function: HashFunction = parts[7].parse()?;
         let backend: Backend = parts[8].parse()?;
@@ -326,7 +326,7 @@ impl FromStr for Note {
           version,
           token_symbol,
           group_id,
-          block_number:Some(bn),
+          block_number: Some(bn),
           r,
           nullifier,
           curve,
@@ -498,13 +498,75 @@ impl PoseidonHasher {
 }
 
 #[wasm_bindgen]
-pub struct NoteGenerator {
+pub struct PoseidonNoteGenerator {
   hasher: Poseidon,
   rng: OsRng,
 }
 
+
+trait NoteGen {
+  fn nullifier_hash_of(&self, note: &Note) -> Uint8Array;
+  fn generate(&mut self, token_symbol: String, group_id: u32) -> Note;
+  fn leaf_of(&self, note: &Note) -> Uint8Array;
+}
+
 #[wasm_bindgen]
-impl NoteGenerator {
+struct NoteGenerator<T: NoteGen> {
+  inner: T,
+}
+
+
+#[wasm_bindgen]
+impl NoteGenerator<T> {
+  #[wasm_bindgen(constructor)]
+  pub fn new(inner: T) -> NoteGenerator<T> {
+    NoteGenerator {
+      inner
+    }
+  }
+  pub fn nullifier_hash_of(&self, note: &Note) -> Uint8Array {
+    T::nullifier_hash_of(self, note)
+  }
+  pub fn generate(&mut self, token_symbol: JsValue, group_id: u32) -> Uint8Array {
+    T::generate(self, token_symbol.into(), group_id)
+  }
+  pub fn leaf_of(&self, note: &Note) -> Uint8Array {
+    T::leaf_of(self, note)
+  }
+}
+
+impl NoteGen for PoseidonNoteGenerator {
+  fn generate(&mut self, token_symbol: String, group_id: u32) -> Note {
+    let r = Scalar::random(&mut self.rng);
+    let nullifier = Scalar::random(&mut self.rng);
+    Note {
+      prefix: NOTE_PREFIX.to_string(),
+      version: NoteVersion::V1,
+      token_symbol: token_symbol.into(),
+      block_number: None,
+      group_id,
+      r,
+      nullifier,
+
+      curve: Curve::Bls381,
+      hash_function: HashFunction::Poseidon3,
+      backend: Backend::Bulletproofs,
+      denomination: 16,
+    }
+  }
+  fn leaf_of(&self, note: &Note) -> Uint8Array {
+    let leaf = Poseidon_hash_2(note.r, note.nullifier, &self.hasher);
+    ScalarWrapper(leaf).into()
+  }
+
+  fn nullifier_hash_of(&self, note: &Note) -> Uint8Array {
+    let hash = Poseidon_hash_2(note.nullifier, note.nullifier, &self.hasher);
+    ScalarWrapper(hash).into()
+  }
+}
+
+#[wasm_bindgen]
+impl PoseidonNoteGenerator {
   #[wasm_bindgen(constructor)]
   pub fn new(hasher: &PoseidonHasher) -> Self {
     Self {
@@ -697,7 +759,7 @@ mod tests {
 
   #[wasm_bindgen_test]
   fn generate_note() {
-    let mut ng = NoteGenerator::new(&HASHER);
+    let mut ng = PoseidonNoteGenerator::new(&HASHER);
     let note = ng.generate(JsString::from("EDG"), 0);
     assert_eq!(note.group_id, 0);
     assert_eq!(note.token_symbol, "EDG");
@@ -706,7 +768,7 @@ mod tests {
   #[wasm_bindgen_test]
   fn zk_proof() {
     let mut rng = OsRng::default();
-    let mut ng = NoteGenerator::new(&HASHER);
+    let mut ng = PoseidonNoteGenerator::new(&HASHER);
     let note = ng.generate(JsString::from("EDG"), 0);
     let my_leaf = ScalarWrapper::try_from(ng.leaf_of(&note)).unwrap();
 
