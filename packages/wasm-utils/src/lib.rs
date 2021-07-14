@@ -36,8 +36,8 @@ const LEAVES: &str = "type Leaves = Array<Uint8Array>;";
 #[wasm_bindgen(typescript_custom_section)]
 const COMMITMENTS: &str = "type Commitments = Array<Uint8Array>;";
 
-const FULL_NOTE_LENGTH: u32 = 8;
-const PARIETAL_NOTE_LENGTH: u32 = 10;
+const FULL_NOTE_LENGTH: usize = 8;
+const PARIETAL_NOTE_LENGTH: usize = 10;
 /// Returns a Status Code for the operation.
 #[wasm_bindgen]
 #[derive(Debug, Eq, PartialEq)]
@@ -163,8 +163,8 @@ impl FromStr for Backend {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
-			"Arkworks" => OK(Backend::Arkworks),
-			"Bulletproofs" => OK(Backend::Bulletproofs),
+			"Arkworks" => Ok(Backend::Arkworks),
+			"Bulletproofs" => Ok(Backend::Bulletproofs),
 			_ => Err(OpStatusCode::InvalidBackend),
 		}
 	}
@@ -184,10 +184,10 @@ impl FromStr for HashFunction {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
-			"Poseidon3" => OK(HashFunction::Poseidon3),
-			"Poseidon5" => OK(HashFunction::Poseidon5),
-			"Poseidon17" => OK(HashFunction::Poseidon17),
-			"MiMCTornado" => OK(HashFunction::MiMCTornado),
+			"Poseidon3" => Ok(HashFunction::Poseidon3),
+			"Poseidon5" => Ok(HashFunction::Poseidon5),
+			"Poseidon17" => Ok(HashFunction::Poseidon17),
+			"MiMCTornado" => Ok(HashFunction::MiMCTornado),
 			_ => Err(OpStatusCode::InvalidHasFunction),
 		}
 	}
@@ -308,7 +308,7 @@ impl FromStr for Note {
 				})
 			}
 			false => {
-				let block_number = parts[4].parse().map_err(|_| OpStatusCode::InvalidNoteBlockNumber)?;
+				let block_number:u32 = parts[4].parse().map_err(|_| OpStatusCode::InvalidNoteBlockNumber)?;
 				let curve: Curve = parts[6].parse()?;
 				let hash_function: HashFunction = parts[7].parse()?;
 				let backend: Backend = parts[8].parse()?;
@@ -318,7 +318,7 @@ impl FromStr for Note {
 					version,
 					token_symbol,
 					group_id,
-					block_number,
+					block_number:Some(block_number),
 					r,
 					nullifier,
 					curve,
