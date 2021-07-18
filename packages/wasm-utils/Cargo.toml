@@ -20,6 +20,7 @@ lto = true
 #default = ["wee_alloc"]
 
 [dependencies]
+pedersen-hash = { version = "0.1.0", git = "https://github.com/webb-tools/webb-rs.git", package = "pedersen-hash" }
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 js-sys = "0.3"
 rand = { version = "0.7", features = ["wasm-bindgen"] }
