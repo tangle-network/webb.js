@@ -1,16 +1,21 @@
 use core::fmt;
-use std::convert::TryInto;
+use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
 use std::str::FromStr;
 
-use crate::PoseidonHasher;
+use ark_crypto_primitives::crh::injective_map::{PedersenCRHCompressor, TECompressor};
+use ark_ed_on_bn254::EdwardsProjective;
+use arkworks_gadgets::leaf::mixer::MixerLeaf;
+use arkworks_gadgets::prelude::ark_bls12_381::Fq;
 use bulletproofs::{BulletproofGens, PedersenGens};
 use bulletproofs_gadgets::poseidon::builder::{Poseidon, PoseidonBuilder};
 use bulletproofs_gadgets::poseidon::{PoseidonSbox, Poseidon_hash_2};
 use curve25519_dalek::scalar::Scalar;
+use pedersen_hash::PedersenWindow;
 use rand::rngs::OsRng;
 use rand::Rng;
-use std::convert::TryFrom;
+
+use crate::PoseidonHasher;
 
 const FULL_NOTE_LENGTH: usize = 11;
 const NOTE_PREFIX: &str = "webb.mix";
@@ -61,6 +66,7 @@ impl fmt::Display for Backend {
 		match self {
 			Backend::Arkworks => write!(f, "Arkworks"),
 			Backend::Bulletproofs => write!(f, "Bulletproofs"),
+			Backend::Circom => write!(f, "Circom"),
 		}
 	}
 }
@@ -72,6 +78,7 @@ impl FromStr for Backend {
 		match s {
 			"Arkworks" => Ok(Backend::Arkworks),
 			"Bulletproofs" => Ok(Backend::Bulletproofs),
+			"Circom" => Ok(Backend::Circom),
 			_ => Err(OpStatusCode::InvalidBackend),
 		}
 	}
@@ -148,6 +155,7 @@ impl FromStr for NoteVersion {
 pub enum Backend {
 	Bulletproofs,
 	Arkworks,
+	Circom,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -170,7 +178,7 @@ pub enum NoteVersion {
 	V1,
 }
 pub trait NoteGenerator {
-	fn generate_secrets(&self, r: &mut OsRng) -> Result<Vec<u8>, ()>;
+	fn generate_secrets(&self, r: &mut OsRng) -> Result<Vec<u8>, OpStatusCode>;
 	fn generate(&self, note_builder: &NoteBuilder, r: &mut OsRng) -> Result<Note, OpStatusCode> {
 		let secrets = Self::generate_secrets(self, r).map_err(|_| OpStatusCode::SecretGenFailed)?;
 		Ok(Note {
@@ -208,6 +216,39 @@ pub struct NoteBuilder {
 	pub denomination: String,
 	pub group_id: u32,
 }
+
+impl NoteBuilder {
+	/*	fn get_net_generator(&self) -> Result<dyn Hasher + NoteGenerator, ()> {
+		match (self.backend, self.curve, self.hash_function) {
+			(Backend::Bulletproofs, ..) => {
+				let opts = PoseidonHasherOptions::default();
+				let pc_gens = PedersenGens::default();
+				let bp_gens = opts.bp_gens.clone().unwrap_or_else(|| BulletproofGens::new(16_400, 1));
+
+				let poseidon_hasher = PoseidonBuilder::new(opts.width)
+					.sbox(PoseidonSbox::Exponentiation3)
+					.bulletproof_gens(bp_gens)
+					.pedersen_gens(pc_gens)
+					.build();
+
+				let poseidon_note_generator = PoseidonNoteGeneratorCurve25519 {
+					hasher: poseidon_hasher,
+				};
+				Ok(poseidon_note_generator)
+			}
+			(Backend::Circom, ..) => {
+				unimplemented!();
+			}
+			(Backend::Arkworks, Curve::Bn254) => {
+				unimplemented!();
+			}
+			(Backend::Arkworks, Curve::Bls381) => {
+				unimplemented!();
+			}
+		}
+	}*/
+}
+
 impl Default for NoteBuilder {
 	fn default() -> Self {
 		Self {
@@ -243,6 +284,12 @@ pub struct Note {
 	pub denomination: String,
 
 	group_id: u32,
+}
+
+impl Note {
+	pub fn deserialize(note: &str) -> Result<Note, OpStatusCode> {
+		note.parse().map_err(Into::into)
+	}
 }
 
 impl fmt::Display for Note {
@@ -295,8 +342,6 @@ impl FromStr for Note {
 		let token_symbol = parts[2].to_owned();
 		let group_id = parts[3].parse().map_err(|_| OpStatusCode::InvalidNoteId)?;
 		let note_val = parts[4];
-		// Todo change this 128 62
-
 		if note_val.len() == 0 {
 			return Err(OpStatusCode::InvalidNoteSecrets);
 		}
@@ -328,7 +373,7 @@ impl FromStr for Note {
 
 pub struct PoseidonHasherOptions {
 	/// The size of the permutation, in field elements.
-	width: usize,
+	pub width: usize,
 	/// Number of full SBox rounds in beginning
 	pub full_rounds_beginning: Option<usize>,
 	/// Number of full SBox rounds in end
@@ -340,6 +385,7 @@ pub struct PoseidonHasherOptions {
 	/// Bulletproof generators for proving/verifying (serialized)
 	pub bp_gens: Option<BulletproofGens>,
 }
+
 impl Default for PoseidonHasherOptions {
 	fn default() -> Self {
 		Self {
@@ -352,67 +398,24 @@ impl Default for PoseidonHasherOptions {
 		}
 	}
 }
-struct PoseidonNoteGeneratorCurve25519 {
-	hasher: Poseidon,
-}
-impl Hasher for PoseidonNoteGeneratorCurve25519 {
-	type HasherOptions = ();
 
-	const SECRET_LENGTH: usize = 128;
-
-	fn hash(&self, input: &[u8], _: Self::HasherOptions) -> Result<Vec<u8>, OpStatusCode> {
-		if input.len() != 64 {
-			return Err(OpStatusCode::InvalidNoteLength);
-		}
-		let mut r: [u8; 32] = [0; 32];
-		r.clone_from_slice(&input[..32]);
-		let secret = Scalar::from_bytes_mod_order(r);
-		r.clone_from_slice(&input[32..]);
-		let nullifier = Scalar::from_bytes_mod_order(r);
-		let leaf = Poseidon_hash_2(secret, nullifier, &self.hasher);
-		let leaf_bytes = leaf.to_bytes();
-		let mut leaf = Vec::new();
-		leaf.extend_from_slice(&leaf_bytes);
-		Ok(leaf)
-	}
-}
-
-impl NoteGenerator for PoseidonNoteGeneratorCurve25519 {
-	fn generate_secrets(&self, rng: &mut OsRng) -> Result<Vec<u8>, ()> {
-		let mut r: [u8; 32] = [0; 32];
-		let mut nullifier = [0u8; 32];
-		rng.fill(&mut r);
-		rng.fill(&mut nullifier);
-		let full = [r, nullifier].concat();
-		let mut full_secret: Vec<u8> = Vec::new();
-		full_secret.extend_from_slice(&full);
-		Ok(full_secret)
-	}
-}
 #[cfg(test)]
-mod tests {
-	use super::{NoteGenerator, *};
-	use crate::PoseidonHasher;
+mod test {
+	use super::*;
 
 	#[test]
-	fn init_hasher() {
-		let opts = PoseidonHasherOptions::default();
-		let pc_gens = PedersenGens::default();
-		let bp_gens = opts.bp_gens.clone().unwrap_or_else(|| BulletproofGens::new(16_400, 1));
-
-		let poseidon_hasher = PoseidonBuilder::new(opts.width)
-			.sbox(PoseidonSbox::Exponentiation3)
-			.bulletproof_gens(bp_gens)
-			.pedersen_gens(pc_gens)
-			.build();
-
-		let poseidon_note_generator = PoseidonNoteGeneratorCurve25519 {
-			hasher: poseidon_hasher,
-		};
-		let mut rng = OsRng::default();
-		let note = poseidon_note_generator
-			.generate(&NoteBuilder::default(), &mut rng)
-			.unwrap();
-		println!("{:?}", note.to_string());
+	fn deserialize() {
+		let note  = "webb.mix-v1-EDG-0-185c1090215e9a66ed3ef8594a7403060df60ac2159537acb10684592d45eb2b16de70eff19a1f80828cf47a5d16502702ff3262acf54cd0b0d0dd7cc67ad415-Curve25519-Poseidon3-Bulletproofs-18-any-0";
+		let note = Note::deserialize(note).unwrap();
+		assert_eq!(note.prefix.to_string(), "webb.mix".to_string());
+		assert_eq!(note.version.to_string(), "v1".to_string());
+		assert_eq!(note.token_symbol.to_string(), "EDG".to_string());
+		assert_eq!(note.amount.to_string(), "0".to_string());
+		assert_eq!(note.hash_function.to_string(), "Poseidon3".to_string());
+		assert_eq!(note.backend.to_string(), "Bulletproofs".to_string());
+		assert_eq!(note.denomination.to_string(), "18".to_string());
+		assert_eq!(note.chain.to_string(), "any".to_string());
+		assert_eq!(note.group_id.to_string(), "0".to_string());
+		assert_eq!(note.curve.to_string(), "Curve25519".to_string());
 	}
 }

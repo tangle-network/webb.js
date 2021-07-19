@@ -1,3 +1,5 @@
+mod arcworks_poseidon_bls12_381;
+mod bulletproof_posidon_25519;
 mod note;
 
 use core::fmt;
