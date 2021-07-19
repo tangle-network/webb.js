@@ -3,7 +3,7 @@ use ark_crypto_primitives::crh::injective_map::{PedersenCRHCompressor, TECompres
 use arkworks_gadgets::leaf::mixer::MixerLeaf;
 use arkworks_gadgets::leaf::LeafCreation;
 use arkworks_gadgets::poseidon::sbox::PoseidonSbox;
-use arkworks_gadgets::poseidon::{Rounds, CRH};
+use arkworks_gadgets::poseidon::{PoseidonParameters, Rounds, CRH};
 use arkworks_gadgets::prelude::ark_ed_on_bls12_381::{EdwardsProjective, Fq};
 use arkworks_gadgets::prelude::ark_std::rand::SeedableRng;
 use arkworks_gadgets::prelude::*;
@@ -30,8 +30,9 @@ impl NoteGenerator for ArcworksPoseidonBls12_381NoteGenerator {
 		use arkworks_gadgets::ark_std::rand;
 		let mut r = rand::rngs::StdRng::from_seed(*SEED);
 		let secrets = Leaf::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?;
-
-		unimplemented!();
+		let nullifier = Leaf::create_nullifier(&secrets, &PoseidonParameters::default())
+			.map_err(|_| OpStatusCode::SecretGenFailed)?;
+		let rio = unimplemented!();
 	}
 }
 
