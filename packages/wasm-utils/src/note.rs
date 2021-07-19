@@ -1,5 +1,8 @@
 use core::fmt;
+use rand::rngs::OsRng;
+use rand::Rng;
 use std::convert::TryInto;
+use std::marker::PhantomData;
 use std::str::FromStr;
 
 const FULL_NOTE_LENGTH: usize = 11;
@@ -42,6 +45,8 @@ pub enum OpStatusCode {
 	InvalidBackend = 15,
 	/// Invalid denomination id when parsing
 	InvalidDenomination = 16,
+	/// Failed to generate secrets
+	SecretGenFailed = 17,
 }
 
 impl fmt::Display for Backend {
@@ -157,6 +162,60 @@ pub enum Curve {
 pub enum NoteVersion {
 	V1,
 }
+pub trait NoteGenerator {
+	fn generate_secrets(r: &mut OsRng) -> Result<Vec<u8>, ()>;
+	fn generate(note_builder: &NoteBuilder, r: &mut OsRng) -> Result<Note, OpStatusCode> {
+		let secrets = Self::generate_secrets(r).map_err(|_| OpStatusCode::SecretGenFailed)?;
+		Ok(Note {
+			prefix: note_builder.prefix.clone(),
+			version: note_builder.version.clone(),
+			chain: note_builder.chain.clone(),
+			backend: note_builder.backend.clone(),
+			hash_function: note_builder.hash_function.clone(),
+			curve: note_builder.curve.clone(),
+			token_symbol: note_builder.token_symbol.clone(),
+			amount: note_builder.amount.clone(),
+			denomination: note_builder.denomination.clone(),
+			group_id: note_builder.group_id.clone(),
+			secret: secrets,
+		})
+	}
+}
+
+pub trait Hasher {
+	const SECRET_LENGTH: usize;
+	fn hash(input: &[u8], params: &[u8]) -> Result<Vec<u8>, ()>;
+}
+
+pub struct NoteBuilder {
+	pub prefix: String,
+	pub version: NoteVersion,
+	pub chain: String,
+	/// zkp related items
+	pub backend: Backend,
+	pub hash_function: HashFunction,
+	pub curve: Curve,
+	pub token_symbol: String,
+	pub amount: String,
+	pub denomination: String,
+	pub group_id: u32,
+}
+impl Default for NoteBuilder {
+	fn default() -> Self {
+		Self {
+			amount: "0".to_string(),
+			chain: "any".to_string(),
+			backend: Backend::Bulletproofs,
+			denomination: "18".to_string(),
+			version: NoteVersion::V1,
+			prefix: NOTE_PREFIX.to_owned(),
+			group_id: 0,
+			curve: Curve::Curve25519,
+			token_symbol: "EDG".to_string(),
+			hash_function: HashFunction::Poseidon3,
+		}
+	}
+}
 
 pub struct Note {
 	pub prefix: String,
@@ -229,10 +288,11 @@ impl FromStr for Note {
 		let group_id = parts[3].parse().map_err(|_| OpStatusCode::InvalidNoteId)?;
 		let note_val = parts[4];
 		// Todo change this 128 62
-		if note_val.len() != 128 {
+
+		if note_val.len() == 0 {
 			return Err(OpStatusCode::InvalidNoteSecrets);
 		}
-		let secret: Vec<u8> = hex::decode(&note_val[..64])
+		let secret: Vec<u8> = hex::decode(&note_val)
 			.map(|v| v.try_into())
 			.map_err(|_| OpStatusCode::InvalidHexLength)?
 			.map_err(|_| OpStatusCode::HexParsingFailed)?;
