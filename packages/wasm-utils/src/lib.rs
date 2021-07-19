@@ -286,6 +286,7 @@ impl FromStr for Note {
 			true => parts[4],
 			false => parts[5],
 		};
+
 		if note_val.len() != 128 {
 			return Err(OpStatusCode::InvalidNoteSecrets);
 		}

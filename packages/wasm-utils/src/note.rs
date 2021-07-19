@@ -1,9 +1,16 @@
 use core::fmt;
-use rand::rngs::OsRng;
-use rand::Rng;
 use std::convert::TryInto;
 use std::marker::PhantomData;
 use std::str::FromStr;
+
+use crate::PoseidonHasher;
+use bulletproofs::{BulletproofGens, PedersenGens};
+use bulletproofs_gadgets::poseidon::builder::{Poseidon, PoseidonBuilder};
+use bulletproofs_gadgets::poseidon::{PoseidonSbox, Poseidon_hash_2};
+use curve25519_dalek::scalar::Scalar;
+use rand::rngs::OsRng;
+use rand::Rng;
+use std::convert::TryFrom;
 
 const FULL_NOTE_LENGTH: usize = 11;
 const NOTE_PREFIX: &str = "webb.mix";
@@ -163,9 +170,9 @@ pub enum NoteVersion {
 	V1,
 }
 pub trait NoteGenerator {
-	fn generate_secrets(r: &mut OsRng) -> Result<Vec<u8>, ()>;
-	fn generate(note_builder: &NoteBuilder, r: &mut OsRng) -> Result<Note, OpStatusCode> {
-		let secrets = Self::generate_secrets(r).map_err(|_| OpStatusCode::SecretGenFailed)?;
+	fn generate_secrets(&self, r: &mut OsRng) -> Result<Vec<u8>, ()>;
+	fn generate(&self, note_builder: &NoteBuilder, r: &mut OsRng) -> Result<Note, OpStatusCode> {
+		let secrets = Self::generate_secrets(self, r).map_err(|_| OpStatusCode::SecretGenFailed)?;
 		Ok(Note {
 			prefix: note_builder.prefix.clone(),
 			version: note_builder.version.clone(),
@@ -184,7 +191,8 @@ pub trait NoteGenerator {
 
 pub trait Hasher {
 	const SECRET_LENGTH: usize;
-	fn hash(input: &[u8], params: &[u8]) -> Result<Vec<u8>, ()>;
+	type HasherOptions: Clone;
+	fn hash(&self, secrets: &[u8], options: Self::HasherOptions) -> Result<Vec<u8>, OpStatusCode>;
 }
 
 pub struct NoteBuilder {
@@ -315,5 +323,96 @@ impl FromStr for Note {
 			chain,
 			amount,
 		})
+	}
+}
+
+pub struct PoseidonHasherOptions {
+	/// The size of the permutation, in field elements.
+	width: usize,
+	/// Number of full SBox rounds in beginning
+	pub full_rounds_beginning: Option<usize>,
+	/// Number of full SBox rounds in end
+	pub full_rounds_end: Option<usize>,
+	/// Number of partial rounds
+	pub partial_rounds: Option<usize>,
+	/// The desired (classical) security level, in bits.
+	pub security_bits: Option<usize>,
+	/// Bulletproof generators for proving/verifying (serialized)
+	pub bp_gens: Option<BulletproofGens>,
+}
+impl Default for PoseidonHasherOptions {
+	fn default() -> Self {
+		Self {
+			width: 6,
+			full_rounds_beginning: None,
+			full_rounds_end: None,
+			partial_rounds: None,
+			security_bits: None,
+			bp_gens: None,
+		}
+	}
+}
+struct PoseidonNoteGeneratorCurve25519 {
+	hasher: Poseidon,
+}
+impl Hasher for PoseidonNoteGeneratorCurve25519 {
+	type HasherOptions = ();
+
+	const SECRET_LENGTH: usize = 128;
+
+	fn hash(&self, input: &[u8], _: Self::HasherOptions) -> Result<Vec<u8>, OpStatusCode> {
+		if input.len() != 64 {
+			return Err(OpStatusCode::InvalidNoteLength);
+		}
+		let mut r: [u8; 32] = [0; 32];
+		r.clone_from_slice(&input[..32]);
+		let secret = Scalar::from_bytes_mod_order(r);
+		r.clone_from_slice(&input[32..]);
+		let nullifier = Scalar::from_bytes_mod_order(r);
+		let leaf = Poseidon_hash_2(secret, nullifier, &self.hasher);
+		let leaf_bytes = leaf.to_bytes();
+		let mut leaf = Vec::new();
+		leaf.extend_from_slice(&leaf_bytes);
+		Ok(leaf)
+	}
+}
+
+impl NoteGenerator for PoseidonNoteGeneratorCurve25519 {
+	fn generate_secrets(&self, rng: &mut OsRng) -> Result<Vec<u8>, ()> {
+		let mut r: [u8; 32] = [0; 32];
+		let mut nullifier = [0u8; 32];
+		rng.fill(&mut r);
+		rng.fill(&mut nullifier);
+		let full = [r, nullifier].concat();
+		let mut full_secret: Vec<u8> = Vec::new();
+		full_secret.extend_from_slice(&full);
+		Ok(full_secret)
+	}
+}
+#[cfg(test)]
+mod tests {
+	use super::{NoteGenerator, *};
+	use crate::PoseidonHasher;
+
+	#[test]
+	fn init_hasher() {
+		let opts = PoseidonHasherOptions::default();
+		let pc_gens = PedersenGens::default();
+		let bp_gens = opts.bp_gens.clone().unwrap_or_else(|| BulletproofGens::new(16_400, 1));
+
+		let poseidon_hasher = PoseidonBuilder::new(opts.width)
+			.sbox(PoseidonSbox::Exponentiation3)
+			.bulletproof_gens(bp_gens)
+			.pedersen_gens(pc_gens)
+			.build();
+
+		let poseidon_note_generator = PoseidonNoteGeneratorCurve25519 {
+			hasher: poseidon_hasher,
+		};
+		let mut rng = OsRng::default();
+		let note = poseidon_note_generator
+			.generate(&NoteBuilder::default(), &mut rng)
+			.unwrap();
+		println!("{:?}", note.to_string());
 	}
 }
