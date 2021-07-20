@@ -3,7 +3,7 @@ use std::convert::TryInto;
 use ark_crypto_primitives::crh::injective_map::{PedersenCRHCompressor, TECompressor};
 use ark_crypto_primitives::CRH as CRHTrait;
 use ark_ff::fields::PrimeField;
-use ark_ff::{to_bytes, ToBytes};
+use ark_ff::{to_bytes, BigInteger, ToBytes};
 use arkworks_gadgets::leaf::mixer::{MixerLeaf, Private};
 use arkworks_gadgets::leaf::LeafCreation;
 use arkworks_gadgets::poseidon::sbox::PoseidonSbox;
@@ -56,17 +56,9 @@ impl Hasher for ArcworksPoseidonBls12_381NoteGenerator {
 		if secrets.len() != 96 {
 			return Err(OpStatusCode::InvalidNoteLength);
 		}
-		let mut r: [u8; 32] = [0; 32];
-		let mut nullifier: [u8; 32] = [0; 32];
-		let mut rho: [u8; 32] = [0; 32];
-		r.clone_from_slice(&secrets[..32]);
-		nullifier.clone_from_slice(&secrets[32..64]);
-		rho.clone_from_slice(&secrets[64..]);
-		let leaf_inputs = to_bytes![r, nullifier, rho].unwrap();
-		let leaf_res = PoseidonCRH5::evaluate(&params, &leaf_inputs).unwrap();
-		let leaf_bytes = leaf_res.0.as_byte_slice();
-		let mut leaf = Vec::new();
-		leaf.extend_from_slice(&leaf_bytes);
+
+		let leaf_res = PoseidonCRH5::evaluate(&params, &secrets).unwrap();
+		let leaf = leaf_res.into_repr().to_bytes_be();
 		Ok(leaf)
 	}
 }
