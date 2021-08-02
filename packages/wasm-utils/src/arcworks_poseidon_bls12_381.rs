@@ -34,16 +34,32 @@ type PoseidonCRH5 = CRH<Fq, PoseidonRounds5>;
 const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 impl NoteGenerator for ArcworksPoseidonBls12_381NoteGenerator {
 	fn generate_secrets(&self, rng: &mut OsRng) -> Result<Vec<u8>, OpStatusCode> {
-		let mut r: [u8; 32] = [0; 32];
-		let mut nullifier: [u8; 32] = [0; 32];
-		let mut rho: [u8; 32] = [0; 32];
-		rng.fill(&mut r);
-		rng.fill(&mut nullifier);
-		rng.fill(&mut rho);
-		let full = [r, nullifier, rho].concat();
-		let mut full_secret: Vec<u8> = Vec::new();
-		full_secret.extend_from_slice(&full);
-		Ok(full_secret)
+		use arkworks_gadgets::ark_std::rand;
+		let mut r = rand::rngs::StdRng::from_seed(*SEED);
+		let leaf = Leaf::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?;
+		let rho: [u8; 32] = leaf
+			.rho()
+			.into_repr()
+			.to_bytes_be() // always use big-endian for bignumbers!!
+			.try_into()
+			.expect("Hash is always 32 bytes!");
+		let nullifier: [u8; 32] = leaf
+			.nullifier()
+			.into_repr()
+			.to_bytes_be() // always use big-endian for bignumbers!!
+			.try_into()
+			.expect("Hash is always 32 bytes!");
+		let r: [u8; 32] = leaf
+			.r()
+			.into_repr()
+			.to_bytes_be() // always use big-endian for bignumbers!!
+			.try_into()
+			.expect("Hash is always 32 bytes!");
+		let all = [rho, nullifier, r].concat();
+		let mut all_secrets: Vec<u8> = Vec::new();
+		all_secrets.extend_from_slice(&all);
+		dbg!(all_secrets.len());
+		Ok(all_secrets)
 	}
 }
 
@@ -56,8 +72,7 @@ impl Hasher for ArcworksPoseidonBls12_381NoteGenerator {
 		if secrets.len() != 96 {
 			return Err(OpStatusCode::InvalidNoteLength);
 		}
-
-		let leaf_res = PoseidonCRH5::evaluate(&params, &secrets).unwrap();
+		let leaf_res = PoseidonCRH5::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?;
 		let leaf = leaf_res.into_repr().to_bytes_be();
 		Ok(leaf)
 	}
