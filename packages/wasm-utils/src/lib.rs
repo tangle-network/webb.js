@@ -1,6 +1,7 @@
-mod arcworks_poseidon_bls12_381;
+mod arkworks_poseidon_bls12_381;
 mod bulletproof_posidon_25519;
 mod note;
+mod types;
 
 use core::fmt;
 use std::convert::{TryFrom, TryInto};

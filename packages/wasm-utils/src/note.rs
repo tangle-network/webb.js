@@ -186,8 +186,8 @@ pub trait NoteGenerator {
 			version: note_builder.version.clone(),
 			chain: note_builder.chain.clone(),
 			backend: note_builder.backend.clone(),
-			hash_function: note_builder.hash_function.clone(),
 			curve: note_builder.curve.clone(),
+			hash_function: note_builder.hash_function.clone(),
 			token_symbol: note_builder.token_symbol.clone(),
 			amount: note_builder.amount.clone(),
 			denomination: note_builder.denomination.clone(),
@@ -197,7 +197,7 @@ pub trait NoteGenerator {
 	}
 }
 
-pub trait Hasher {
+pub trait LeafHasher {
 	const SECRET_LENGTH: usize;
 	type HasherOptions: Clone;
 	fn hash(&self, secrets: &[u8], options: Self::HasherOptions) -> Result<Vec<u8>, OpStatusCode>;

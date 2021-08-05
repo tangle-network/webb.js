@@ -1,14 +1,16 @@
-use crate::note::{Hasher, NoteGenerator, OpStatusCode};
+use crate::note::{LeafHasher, NoteGenerator, OpStatusCode};
 use bulletproofs::{BulletproofGens, PedersenGens};
 use bulletproofs_gadgets::poseidon::builder::{Poseidon, PoseidonBuilder};
 use bulletproofs_gadgets::poseidon::Poseidon_hash_2;
 use curve25519_dalek::scalar::Scalar;
 use rand::rngs::OsRng;
 use rand::Rng;
+
 pub struct PoseidonNoteGeneratorCurve25519 {
 	pub hasher: Poseidon,
 }
-impl Hasher for PoseidonNoteGeneratorCurve25519 {
+
+impl LeafHasher for PoseidonNoteGeneratorCurve25519 {
 	type HasherOptions = ();
 
 	const SECRET_LENGTH: usize = 128;
