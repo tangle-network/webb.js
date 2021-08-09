@@ -11,43 +11,92 @@ use arkworks_gadgets::poseidon::{PoseidonParameters, Rounds, CRH};
 use arkworks_gadgets::prelude::ark_bls12_381::{Bls12_381, Fr};
 use arkworks_gadgets::prelude::ark_std::rand::SeedableRng;
 use arkworks_gadgets::prelude::*;
-use arkworks_gadgets::utils::{get_mds_poseidon_bls381_x5_3, get_rounds_poseidon_bls381_x5_3};
+use arkworks_gadgets::utils::{
+	get_mds_poseidon_bls381_x5_3, get_mds_poseidon_bls381_x5_5, get_rounds_poseidon_bls381_x5_3,
+	get_rounds_poseidon_bls381_x5_5,
+};
 use pedersen_hash::PedersenWindow;
 use rand::rngs::OsRng;
-
-use crate::note::{LeafHasher, NoteGenerator, OpStatusCode};
 use rand::Rng;
 
-pub struct ArkworksPoseidonBls12_381NoteGenerator();
-type Leaf = MixerLeaf<Fr, PoseidonCRH3>;
-impl Rounds for PoseidonRounds3 {
+use crate::note::{LeafHasher, NoteGenerator, OpStatusCode};
+
+pub struct ArkworksPoseidonBls12_381NoteGenerator<T: Rounds> {
+	rounds: T,
+}
+/// Poseidon width 3
+
+/// 5 3
+#[derive(Default, Clone)]
+struct PoseidonRounds5_3;
+impl Rounds for PoseidonRounds5_3 {
 	const FULL_ROUNDS: usize = 8;
 	const PARTIAL_ROUNDS: usize = 57;
 	const SBOX: PoseidonSbox = PoseidonSbox::Exponentiation(5);
 	const WIDTH: usize = 3;
 }
+type PoseidonCRH5_3 = CRH<Fr, PoseidonRounds5_3>;
+
+type Leaf5_3 = MixerLeaf<Fr, PoseidonCRH5_3>;
+
+/// 3 3
 
 #[derive(Default, Clone)]
-struct PoseidonRounds3;
+struct PoseidonRounds3_3;
 
-type PoseidonCRH3 = CRH<Fr, PoseidonRounds3>;
+impl Rounds for PoseidonRounds3_3 {
+	const FULL_ROUNDS: usize = 8;
+	const PARTIAL_ROUNDS: usize = 84;
+	const SBOX: PoseidonSbox = PoseidonSbox::Exponentiation(3);
+	const WIDTH: usize = 3;
+}
+type PoseidonCRH3_3 = CRH<Fr, PoseidonRounds3_3>;
+
+type Leaf3_3 = MixerLeaf<Fr, PoseidonCRH3_3>;
+
+/// Poseidon width 5
+
+// 5 5
+#[derive(Default, Clone)]
+struct PoseidonRounds5_5;
+
+impl Rounds for PoseidonRounds5_5 {
+	const FULL_ROUNDS: usize = 8;
+	const PARTIAL_ROUNDS: usize = 60;
+	const SBOX: PoseidonSbox = PoseidonSbox::Exponentiation(5);
+	const WIDTH: usize = 5;
+}
+type PoseidonCRH5_5 = CRH<Fr, PoseidonRounds5_5>;
+
+type Leaf5_5 = MixerLeaf<Fr, PoseidonCRH5_5>;
+
+// 3 5
+#[derive(Default, Clone)]
+struct PoseidonRounds3_5;
+
+impl Rounds for PoseidonRounds3_5 {
+	const FULL_ROUNDS: usize = 8;
+	const PARTIAL_ROUNDS: usize = 85;
+	const SBOX: PoseidonSbox = PoseidonSbox::Exponentiation(3);
+	const WIDTH: usize = 5;
+}
+type PoseidonCRH3_5 = CRH<Fr, PoseidonRounds3_5>;
+
+type Leaf3_5 = MixerLeaf<Fr, PoseidonCRH3_5>;
+
 const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
-impl NoteGenerator for ArkworksPoseidonBls12_381NoteGenerator {
-	fn generate_secrets(&self, rng: &mut OsRng) -> Result<Vec<u8>, OpStatusCode> {
+impl<T: Rounds> NoteGenerator for ArkworksPoseidonBls12_381NoteGenerator<T> {
+	fn generate_secrets(&self, _rng: &mut OsRng) -> Result<Vec<u8>, OpStatusCode> {
 		use arkworks_gadgets::ark_std::rand;
 		let mut r = rand::rngs::StdRng::from_seed(*SEED);
-		let secrets = Leaf::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?;
-		let leaf_inputs = to_bytes![
-			secrets.r(),
-			secrets.nullifier(),
-			secrets.rho()
-		].unwrap();
+		let secrets = Leaf5_3::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?;
+		let leaf_inputs = to_bytes![secrets.r(), secrets.nullifier(), secrets.rho()].unwrap();
 		dbg!(leaf_inputs.len());
 		Ok(leaf_inputs)
 	}
 }
 
-impl LeafHasher for ArkworksPoseidonBls12_381NoteGenerator {
+impl<T: Rounds> LeafHasher for ArkworksPoseidonBls12_381NoteGenerator<T> {
 	type HasherOptions = PoseidonParameters<Fr>;
 
 	const SECRET_LENGTH: usize = 0;
@@ -56,32 +105,53 @@ impl LeafHasher for ArkworksPoseidonBls12_381NoteGenerator {
 		if secrets.len() != 96 {
 			return Err(OpStatusCode::InvalidNoteLength);
 		}
-		let leaf_res = PoseidonCRH3::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?;
+		let leaf_res = PoseidonCRH5_3::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?;
 		let leaf = leaf_res.into_repr().to_bytes_be();
 		Ok(leaf)
 	}
 }
 
-impl ArkworksPoseidonBls12_381NoteGenerator {
-	fn getDefaultParams() -> PoseidonParameters<Fr> {
-		let rounds = get_rounds_poseidon_bls381_x5_3::<Fr>();
-		let mds = get_mds_poseidon_bls381_x5_3::<Fr>();
-		PoseidonParameters::<Fr>::new(rounds, mds)
+impl<T: Rounds> ArkworksPoseidonBls12_381NoteGenerator<T> {
+	fn get_params(&self) -> PoseidonParameters<Fr> {
+		match (T::SBOX, T::WIDTH) {
+			(PoseidonSbox::Exponentiation(5), 3) => {
+				let rounds = get_rounds_poseidon_bls381_x5_3::<Fr>();
+				let mds = get_mds_poseidon_bls381_x5_3::<Fr>();
+				PoseidonParameters::<Fr>::new(rounds, mds)
+			}
+			(PoseidonSbox::Exponentiation(5), 5) => {
+				let rounds = get_rounds_poseidon_bls381_x5_5::<Fr>();
+				let mds = get_mds_poseidon_bls381_x5_5::<Fr>();
+				PoseidonParameters::<Fr>::new(rounds, mds)
+			}
+			(PoseidonSbox::Exponentiation(3), 3) => {
+				unimplemented!()
+			}
+			(PoseidonSbox::Exponentiation(3), 5) => {
+				unimplemented!()
+			}
+			_ => {
+				unreachable!()
+			}
+		}
+	}
+
+	fn set_up(rounds: T) -> Self {
+		Self { rounds }
 	}
 }
 
 #[cfg(test)]
 mod test {
-	use super::*;
 	use crate::note::NoteBuilder;
+
+	use super::*;
 
 	#[test]
 	fn test_arch() {
-		let note_generator = ArkworksPoseidonBls12_381NoteGenerator {};
+		let note_generator = ArkworksPoseidonBls12_381NoteGenerator::set_up(PoseidonRounds5_3);
 		let secrets = note_generator.generate_secrets(&mut OsRng::default()).unwrap();
-		let leaf = note_generator
-			.hash(&secrets, ArkworksPoseidonBls12_381NoteGenerator::getDefaultParams())
-			.unwrap();
+		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
 		let note = note_generator
 			.generate(&NoteBuilder::default(), &mut OsRng::default())
 			.unwrap();
