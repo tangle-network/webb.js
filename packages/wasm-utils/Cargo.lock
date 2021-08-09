@@ -287,9 +287,9 @@ dependencies = [
 
 [[package]]
 name = "arkworks-gadgets"
-version = "0.3.3"
+version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8cf7fc0d1d0e99ad421d4c55a64150fb4d4bb6ee47fcdecaa70c5261dc85fbcf"
+checksum = "0c86a7f65a36d0d36d948e56e075bd01e0bb918ff56b8ca14719a652cf8e7006"
 dependencies = [
  "ark-bls12-381",
  "ark-bn254",

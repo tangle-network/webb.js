@@ -12,8 +12,10 @@ use arkworks_gadgets::prelude::ark_bls12_381::{Bls12_381, Fr};
 use arkworks_gadgets::prelude::ark_std::rand::SeedableRng;
 use arkworks_gadgets::prelude::*;
 use arkworks_gadgets::utils::{
-	get_mds_poseidon_bls381_x5_3, get_mds_poseidon_bls381_x5_5, get_rounds_poseidon_bls381_x5_3,
-	get_rounds_poseidon_bls381_x5_5,
+	get_mds_poseidon_bls381_x17_3, get_mds_poseidon_bls381_x3_3, get_mds_poseidon_bls381_x3_5,
+	get_mds_poseidon_bls381_x5_3, get_mds_poseidon_bls381_x5_5, get_mds_poseidon_bn254_x17_5,
+	get_rounds_poseidon_bls381_x17_3, get_rounds_poseidon_bls381_x17_5, get_rounds_poseidon_bls381_x3_3,
+	get_rounds_poseidon_bls381_x3_5, get_rounds_poseidon_bls381_x5_3, get_rounds_poseidon_bls381_x5_5,
 };
 use pedersen_hash::PedersenWindow;
 use rand::rngs::OsRng;
@@ -83,6 +85,32 @@ impl Rounds for PoseidonRounds3_5 {
 type PoseidonCRH3_5 = CRH<Fr, PoseidonRounds3_5>;
 
 type Leaf3_5 = MixerLeaf<Fr, PoseidonCRH3_5>;
+// 17 3
+#[derive(Default, Clone)]
+struct PoseidonRounds17_3;
+
+impl Rounds for PoseidonRounds17_3 {
+	const FULL_ROUNDS: usize = 8;
+	const PARTIAL_ROUNDS: usize = 33;
+	const SBOX: PoseidonSbox = PoseidonSbox::Exponentiation(17);
+	const WIDTH: usize = 3;
+}
+type PoseidonCRH17_3 = CRH<Fr, PoseidonRounds17_3>;
+
+type Leaf17_3 = MixerLeaf<Fr, PoseidonCRH17_3>;
+// 17 5
+#[derive(Default, Clone)]
+struct PoseidonRounds17_5;
+
+impl Rounds for PoseidonRounds17_5 {
+	const FULL_ROUNDS: usize = 8;
+	const PARTIAL_ROUNDS: usize = 35;
+	const SBOX: PoseidonSbox = PoseidonSbox::Exponentiation(17);
+	const WIDTH: usize = 5;
+}
+type PoseidonCRH17_5 = CRH<Fr, PoseidonRounds17_5>;
+
+type Leaf17_5 = MixerLeaf<Fr, PoseidonCRH17_5>;
 
 const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 impl<T: Rounds> NoteGenerator for ArkworksPoseidonBls12_381NoteGenerator<T> {
@@ -125,10 +153,24 @@ impl<T: Rounds> ArkworksPoseidonBls12_381NoteGenerator<T> {
 				PoseidonParameters::<Fr>::new(rounds, mds)
 			}
 			(PoseidonSbox::Exponentiation(3), 3) => {
-				unimplemented!()
+				let rounds = get_rounds_poseidon_bls381_x3_3::<Fr>();
+				let mds = get_mds_poseidon_bls381_x3_3::<Fr>();
+				PoseidonParameters::<Fr>::new(rounds, mds)
 			}
 			(PoseidonSbox::Exponentiation(3), 5) => {
-				unimplemented!()
+				let rounds = get_rounds_poseidon_bls381_x3_5::<Fr>();
+				let mds = get_mds_poseidon_bls381_x3_5::<Fr>();
+				PoseidonParameters::<Fr>::new(rounds, mds)
+			}
+			(PoseidonSbox::Exponentiation(17), 3) => {
+				let rounds = get_rounds_poseidon_bls381_x17_3::<Fr>();
+				let mds = get_mds_poseidon_bls381_x17_3::<Fr>();
+				PoseidonParameters::<Fr>::new(rounds, mds)
+			}
+			(PoseidonSbox::Exponentiation(17), 5) => {
+				let rounds = get_rounds_poseidon_bls381_x17_5::<Fr>();
+				let mds = get_mds_poseidon_bn254_x17_5::<Fr>();
+				PoseidonParameters::<Fr>::new(rounds, mds)
 			}
 			_ => {
 				unreachable!()

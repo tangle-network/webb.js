@@ -12,8 +12,11 @@ use arkworks_gadgets::prelude::ark_bn254::{Bn254, Fr};
 use arkworks_gadgets::prelude::ark_std::rand::SeedableRng;
 use arkworks_gadgets::prelude::*;
 use arkworks_gadgets::utils::{
-	get_mds_poseidon_bn254_x5_3, get_mds_poseidon_bn254_x5_5, get_rounds_poseidon_bn254_x5_3,
-	get_rounds_poseidon_bn254_x5_5,
+	get_mds_poseidon_bn254_x17_3, get_mds_poseidon_bn254_x17_5, get_mds_poseidon_bn254_x3_3,
+	get_mds_poseidon_bn254_x3_5, get_mds_poseidon_bn254_x5_3, get_mds_poseidon_bn254_x5_5,
+	get_rounds_poseidon_bls381_x3_3, get_rounds_poseidon_bls381_x3_5, get_rounds_poseidon_bn254_x17_3,
+	get_rounds_poseidon_bn254_x17_5, get_rounds_poseidon_bn254_x3_3, get_rounds_poseidon_bn254_x3_5,
+	get_rounds_poseidon_bn254_x5_3, get_rounds_poseidon_bn254_x5_5,
 };
 use pedersen_hash::PedersenWindow;
 use rand::rngs::OsRng;
@@ -125,10 +128,24 @@ impl<T: Rounds> ArkworksPoseidonBn254NoteGenerator<T> {
 				PoseidonParameters::<Fr>::new(rounds, mds)
 			}
 			(PoseidonSbox::Exponentiation(3), 3) => {
-				unimplemented!()
+				let rounds = get_rounds_poseidon_bn254_x3_3::<Fr>();
+				let mds = get_mds_poseidon_bn254_x3_3::<Fr>();
+				PoseidonParameters::<Fr>::new(rounds, mds)
 			}
 			(PoseidonSbox::Exponentiation(3), 5) => {
-				unimplemented!()
+				let rounds = get_rounds_poseidon_bn254_x3_5::<Fr>();
+				let mds = get_mds_poseidon_bn254_x3_5::<Fr>();
+				PoseidonParameters::<Fr>::new(rounds, mds)
+			}
+			(PoseidonSbox::Exponentiation(17), 3) => {
+				let rounds = get_rounds_poseidon_bn254_x17_3::<Fr>();
+				let mds = get_mds_poseidon_bn254_x17_3::<Fr>();
+				PoseidonParameters::<Fr>::new(rounds, mds)
+			}
+			(PoseidonSbox::Exponentiation(17), 5) => {
+				let rounds = get_rounds_poseidon_bn254_x17_5::<Fr>();
+				let mds = get_mds_poseidon_bn254_x17_5::<Fr>();
+				PoseidonParameters::<Fr>::new(rounds, mds)
 			}
 			_ => {
 				unreachable!()
