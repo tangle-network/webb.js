@@ -1,21 +1,7 @@
 use core::fmt;
-use std::convert::{TryFrom, TryInto};
-use std::marker::PhantomData;
 use std::str::FromStr;
 
-use ark_crypto_primitives::crh::injective_map::{PedersenCRHCompressor, TECompressor};
-use ark_ed_on_bn254::EdwardsProjective;
-use arkworks_gadgets::leaf::mixer::MixerLeaf;
-use arkworks_gadgets::prelude::ark_bls12_381::Fq;
-use bulletproofs::{BulletproofGens, PedersenGens};
-use bulletproofs_gadgets::poseidon::builder::{Poseidon, PoseidonBuilder};
-use bulletproofs_gadgets::poseidon::{PoseidonSbox, Poseidon_hash_2};
-use curve25519_dalek::scalar::Scalar;
-use pedersen_hash::PedersenWindow;
-use rand::rngs::OsRng;
-use rand::Rng;
-
-use crate::PoseidonHasher;
+use bulletproofs::BulletproofGens;
 
 const FULL_NOTE_LENGTH: usize = 11;
 const NOTE_PREFIX: &str = "webb.mix";
@@ -178,20 +164,21 @@ pub enum NoteVersion {
 	V1,
 }
 pub trait NoteGenerator {
-	fn generate_secrets(&self, r: &mut OsRng) -> Result<Vec<u8>, OpStatusCode>;
-	fn generate(&self, note_builder: &NoteBuilder, r: &mut OsRng) -> Result<Note, OpStatusCode> {
+	type Rng;
+	fn generate_secrets(&self, r: &mut Self::Rng) -> Result<Vec<u8>, OpStatusCode>;
+	fn generate(&self, note_builder: &NoteBuilder, r: &mut Self::Rng) -> Result<Note, OpStatusCode> {
 		let secrets = Self::generate_secrets(self, r).map_err(|_| OpStatusCode::SecretGenFailed)?;
 		Ok(Note {
 			prefix: note_builder.prefix.clone(),
-			version: note_builder.version.clone(),
+			version: note_builder.version,
 			chain: note_builder.chain.clone(),
-			backend: note_builder.backend.clone(),
-			curve: note_builder.curve.clone(),
-			hash_function: note_builder.hash_function.clone(),
+			backend: note_builder.backend,
+			curve: note_builder.curve,
+			hash_function: note_builder.hash_function,
 			token_symbol: note_builder.token_symbol.clone(),
 			amount: note_builder.amount.clone(),
 			denomination: note_builder.denomination.clone(),
-			group_id: note_builder.group_id.clone(),
+			group_id: note_builder.group_id,
 			secret: secrets,
 		})
 	}
@@ -295,7 +282,7 @@ impl Note {
 impl fmt::Display for Note {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		let secrets = hex::encode(&self.secret);
-		let mut parts: Vec<String> = vec![
+		let parts: Vec<String> = vec![
 			//0 => prefix
 			self.prefix.clone(),
 			//1 => version
@@ -305,7 +292,7 @@ impl fmt::Display for Note {
 			//3 => group_id
 			format!("{}", self.group_id),
 			//4
-			format!("{}", secrets),
+			secrets,
 			//5 => curve
 			self.curve.to_string(),
 			//6 => hash_function
@@ -342,13 +329,10 @@ impl FromStr for Note {
 		let token_symbol = parts[2].to_owned();
 		let group_id = parts[3].parse().map_err(|_| OpStatusCode::InvalidNoteId)?;
 		let note_val = parts[4];
-		if note_val.len() == 0 {
+		if note_val.is_empty() {
 			return Err(OpStatusCode::InvalidNoteSecrets);
 		}
-		let secret: Vec<u8> = hex::decode(&note_val)
-			.map(|v| v.try_into())
-			.map_err(|_| OpStatusCode::InvalidHexLength)?
-			.map_err(|_| OpStatusCode::HexParsingFailed)?;
+		let secret: Vec<u8> = hex::decode(&note_val).map_err(|_| OpStatusCode::HexParsingFailed)?;
 		let curve: Curve = parts[5].parse()?;
 		let hash_function: HashFunction = parts[6].parse()?;
 		let backend: Backend = parts[7].parse()?;

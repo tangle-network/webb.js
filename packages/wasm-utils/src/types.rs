@@ -1,7 +1,5 @@
 use super::*;
 use core::fmt;
-use std::convert::{TryFrom, TryInto};
-use std::marker::PhantomData;
 use std::str::FromStr;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -39,7 +37,6 @@ pub enum HashFunction {
 	Poseidon17,
 	MiMCTornado,
 }
-
 
 impl fmt::Display for Backend {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

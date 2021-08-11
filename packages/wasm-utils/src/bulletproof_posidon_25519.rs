@@ -1,6 +1,5 @@
 use crate::note::{LeafHasher, NoteGenerator, OpStatusCode};
-use bulletproofs::{BulletproofGens, PedersenGens};
-use bulletproofs_gadgets::poseidon::builder::{Poseidon, PoseidonBuilder};
+use bulletproofs_gadgets::poseidon::builder::Poseidon;
 use bulletproofs_gadgets::poseidon::Poseidon_hash_2;
 use curve25519_dalek::scalar::Scalar;
 use rand::rngs::OsRng;
@@ -33,7 +32,9 @@ impl LeafHasher for PoseidonNoteGeneratorCurve25519 {
 }
 
 impl NoteGenerator for PoseidonNoteGeneratorCurve25519 {
-	fn generate_secrets(&self, rng: &mut OsRng) -> Result<Vec<u8>, OpStatusCode> {
+	type Rng = OsRng;
+
+	fn generate_secrets(&self, rng: &mut Self::Rng) -> Result<Vec<u8>, OpStatusCode> {
 		let mut r: [u8; 32] = [0; 32];
 		let mut nullifier = [0u8; 32];
 		rng.fill(&mut r);
