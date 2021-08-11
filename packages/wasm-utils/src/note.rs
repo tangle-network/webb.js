@@ -1,11 +1,8 @@
 use core::fmt;
-use std::convert::{TryFrom, TryInto};
-use std::marker::PhantomData;
+use std::convert::TryInto;
 use std::str::FromStr;
 
-use bulletproofs::{BulletproofGens, PedersenGens};
-
-use crate::PoseidonHasher;
+use bulletproofs::BulletproofGens;
 
 const FULL_NOTE_LENGTH: usize = 11;
 const NOTE_PREFIX: &str = "webb.mix";

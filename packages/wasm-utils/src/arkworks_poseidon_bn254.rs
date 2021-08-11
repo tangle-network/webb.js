@@ -1,4 +1,3 @@
-use ark_crypto_primitives::crh::injective_map::{PedersenCRHCompressor, TECompressor};
 use ark_crypto_primitives::CRH as CRHTrait;
 use ark_ff::fields::PrimeField;
 use ark_ff::{to_bytes, BigInteger};
@@ -14,8 +13,6 @@ use arkworks_gadgets::setup::common::{
 	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x3_5, setup_params_x5_5, Curve,
 	PoseidonCRH_x17_3, PoseidonCRH_x17_5, PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
 };
-
-use pedersen_hash::PedersenWindow;
 
 use crate::note::{LeafHasher, NoteGenerator, OpStatusCode};
 

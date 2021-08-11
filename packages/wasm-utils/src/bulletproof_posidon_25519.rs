@@ -1,6 +1,5 @@
 use crate::note::{LeafHasher, NoteGenerator, OpStatusCode};
-use bulletproofs::{BulletproofGens, PedersenGens};
-use bulletproofs_gadgets::poseidon::builder::{Poseidon, PoseidonBuilder};
+use bulletproofs_gadgets::poseidon::builder::Poseidon;
 use bulletproofs_gadgets::poseidon::Poseidon_hash_2;
 use curve25519_dalek::scalar::Scalar;
 use rand::rngs::OsRng;
