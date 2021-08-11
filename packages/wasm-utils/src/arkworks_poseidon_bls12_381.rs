@@ -23,8 +23,9 @@ use rand::Rng;
 
 use crate::note::{LeafHasher, NoteGenerator, OpStatusCode};
 
-pub struct ArkworksPoseidonBls12_381NoteGenerator<T: Rounds> {
-	rounds: T,
+pub struct ArkworksPoseidonBls12_381NoteGenerator {
+	exponentiation: usize,
+	width: usize,
 }
 /// Poseidon width 3
 
@@ -113,33 +114,21 @@ type PoseidonCRH17_5 = CRH<Fr, PoseidonRounds17_5>;
 type Leaf17_5 = MixerLeaf<Fr, PoseidonCRH17_5>;
 
 const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
-impl<T: Rounds> NoteGenerator for ArkworksPoseidonBls12_381NoteGenerator<T> {
+impl NoteGenerator for ArkworksPoseidonBls12_381NoteGenerator {
 	fn generate_secrets(&self, _rng: &mut OsRng) -> Result<Vec<u8>, OpStatusCode> {
 		use arkworks_gadgets::ark_std::rand;
 		let mut r = rand::rngs::StdRng::from_seed(*SEED);
-		let secrets = match (T::SBOX, T::WIDTH) {
-			(PoseidonSbox::Exponentiation(5), 3) => {
-				Leaf5_3::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?
-			}
-			(PoseidonSbox::Exponentiation(5), 5) => {
-				Leaf5_5::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?
-			}
+		let secrets = match (self.exponentiation, self.width) {
+			(5, 3) => Leaf5_3::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?,
+			(5, 5) => Leaf5_5::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?,
 
-			(PoseidonSbox::Exponentiation(3), 3) => {
-				Leaf3_3::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?
-			}
+			(3, 3) => Leaf3_3::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?,
 
-			(PoseidonSbox::Exponentiation(3), 5) => {
-				Leaf3_5::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?
-			}
+			(3, 5) => Leaf3_5::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?,
 
-			(PoseidonSbox::Exponentiation(17), 3) => {
-				Leaf17_3::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?
-			}
+			(17, 3) => Leaf17_3::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?,
 
-			(PoseidonSbox::Exponentiation(17), 5) => {
-				Leaf17_5::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?
-			}
+			(17, 5) => Leaf17_5::generate_secrets(&mut r).map_err(|_| OpStatusCode::SecretGenFailed)?,
 			_ => {
 				unimplemented!()
 			}
@@ -150,7 +139,7 @@ impl<T: Rounds> NoteGenerator for ArkworksPoseidonBls12_381NoteGenerator<T> {
 	}
 }
 
-impl<T: Rounds> LeafHasher for ArkworksPoseidonBls12_381NoteGenerator<T> {
+impl LeafHasher for ArkworksPoseidonBls12_381NoteGenerator {
 	type HasherOptions = PoseidonParameters<Fr>;
 
 	const SECRET_LENGTH: usize = 0;
@@ -159,29 +148,17 @@ impl<T: Rounds> LeafHasher for ArkworksPoseidonBls12_381NoteGenerator<T> {
 		if secrets.len() != 96 {
 			return Err(OpStatusCode::InvalidNoteLength);
 		}
-		let leaf_res = match (T::SBOX, T::WIDTH) {
-			(PoseidonSbox::Exponentiation(5), 3) => {
-				PoseidonCRH5_3::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?
-			}
-			(PoseidonSbox::Exponentiation(5), 5) => {
-				PoseidonCRH5_5::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?
-			}
+		let leaf_res = match (self.exponentiation, self.width) {
+			(5, 3) => PoseidonCRH5_3::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?,
+			(5, 5) => PoseidonCRH5_5::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?,
 
-			(PoseidonSbox::Exponentiation(3), 3) => {
-				PoseidonCRH3_3::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?
-			}
+			(3, 3) => PoseidonCRH3_3::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?,
 
-			(PoseidonSbox::Exponentiation(3), 5) => {
-				PoseidonCRH3_5::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?
-			}
+			(3, 5) => PoseidonCRH3_5::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?,
 
-			(PoseidonSbox::Exponentiation(17), 3) => {
-				PoseidonCRH17_3::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?
-			}
+			(17, 3) => PoseidonCRH17_3::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?,
 
-			(PoseidonSbox::Exponentiation(17), 5) => {
-				PoseidonCRH17_5::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?
-			}
+			(17, 5) => PoseidonCRH17_5::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?,
 			_ => {
 				unimplemented!()
 			}
@@ -191,35 +168,35 @@ impl<T: Rounds> LeafHasher for ArkworksPoseidonBls12_381NoteGenerator<T> {
 	}
 }
 
-impl<T: Rounds> ArkworksPoseidonBls12_381NoteGenerator<T> {
+impl ArkworksPoseidonBls12_381NoteGenerator {
 	fn get_params(&self) -> PoseidonParameters<Fr> {
-		match (T::SBOX, T::WIDTH) {
-			(PoseidonSbox::Exponentiation(5), 3) => {
+		match (self.exponentiation, self.width) {
+			(5, 3) => {
 				let rounds = get_rounds_poseidon_bls381_x5_3::<Fr>();
 				let mds = get_mds_poseidon_bls381_x5_3::<Fr>();
 				PoseidonParameters::<Fr>::new(rounds, mds)
 			}
-			(PoseidonSbox::Exponentiation(5), 5) => {
+			(5, 5) => {
 				let rounds = get_rounds_poseidon_bls381_x5_5::<Fr>();
 				let mds = get_mds_poseidon_bls381_x5_5::<Fr>();
 				PoseidonParameters::<Fr>::new(rounds, mds)
 			}
-			(PoseidonSbox::Exponentiation(3), 3) => {
+			(3, 3) => {
 				let rounds = get_rounds_poseidon_bls381_x3_3::<Fr>();
 				let mds = get_mds_poseidon_bls381_x3_3::<Fr>();
 				PoseidonParameters::<Fr>::new(rounds, mds)
 			}
-			(PoseidonSbox::Exponentiation(3), 5) => {
+			(3, 5) => {
 				let rounds = get_rounds_poseidon_bls381_x3_5::<Fr>();
 				let mds = get_mds_poseidon_bls381_x3_5::<Fr>();
 				PoseidonParameters::<Fr>::new(rounds, mds)
 			}
-			(PoseidonSbox::Exponentiation(17), 3) => {
+			(17, 3) => {
 				let rounds = get_rounds_poseidon_bls381_x17_3::<Fr>();
 				let mds = get_mds_poseidon_bls381_x17_3::<Fr>();
 				PoseidonParameters::<Fr>::new(rounds, mds)
 			}
-			(PoseidonSbox::Exponentiation(17), 5) => {
+			(17, 5) => {
 				let rounds = get_rounds_poseidon_bls381_x17_5::<Fr>();
 				let mds = get_mds_poseidon_bn254_x17_5::<Fr>();
 				PoseidonParameters::<Fr>::new(rounds, mds)
@@ -230,8 +207,17 @@ impl<T: Rounds> ArkworksPoseidonBls12_381NoteGenerator<T> {
 		}
 	}
 
-	fn set_up(rounds: T) -> Self {
-		Self { rounds }
+	fn set_up<T: Rounds>(_: T) -> Self {
+		let exponentiation = match T::SBOX {
+			PoseidonSbox::Exponentiation(e) => e,
+			PoseidonSbox::Inverse => {
+				unreachable!()
+			}
+		};
+		Self {
+			width: T::WIDTH,
+			exponentiation,
+		}
 	}
 }
 
