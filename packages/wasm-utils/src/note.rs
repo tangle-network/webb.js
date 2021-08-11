@@ -13,7 +13,7 @@ use bulletproofs_gadgets::poseidon::{PoseidonSbox, Poseidon_hash_2};
 use curve25519_dalek::scalar::Scalar;
 use pedersen_hash::PedersenWindow;
 use rand::rngs::OsRng;
-use rand::Rng;
+use rand::{CryptoRng, Rng};
 
 use crate::PoseidonHasher;
 
@@ -178,8 +178,9 @@ pub enum NoteVersion {
 	V1,
 }
 pub trait NoteGenerator {
-	fn generate_secrets(&self, r: &mut OsRng) -> Result<Vec<u8>, OpStatusCode>;
-	fn generate(&self, note_builder: &NoteBuilder, r: &mut OsRng) -> Result<Note, OpStatusCode> {
+	type Rng;
+	fn generate_secrets(&self, r: &mut Self::Rng) -> Result<Vec<u8>, OpStatusCode>;
+	fn generate(&self, note_builder: &NoteBuilder, r: &mut Self::Rng) -> Result<Note, OpStatusCode> {
 		let secrets = Self::generate_secrets(self, r).map_err(|_| OpStatusCode::SecretGenFailed)?;
 		Ok(Note {
 			prefix: note_builder.prefix.clone(),
