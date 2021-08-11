@@ -7,7 +7,6 @@ use arkworks_gadgets::leaf::LeafCreation;
 use arkworks_gadgets::poseidon::sbox::PoseidonSbox;
 use arkworks_gadgets::poseidon::{PoseidonParameters, Rounds};
 use arkworks_gadgets::prelude::ark_bn254::Fr;
-use arkworks_gadgets::prelude::ark_std::rand::SeedableRng;
 use arkworks_gadgets::prelude::*;
 use arkworks_gadgets::setup::common::{
 	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x3_5, setup_params_x5_5, Curve,
