@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 mod arkworks_poseidon_bls12_381;
 mod arkworks_poseidon_bn254;
 mod bulletproof_posidon_25519;
@@ -560,7 +562,7 @@ impl PedersonNoteGenerator {
 		}
 	}
 
-	pub fn leaf_of(&self, note: &Note) -> Uint8Array {
+	pub fn leaf_of(&self, _note: &Note) -> Uint8Array {
 		unimplemented!()
 	}
 

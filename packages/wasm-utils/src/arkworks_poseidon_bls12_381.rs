@@ -26,7 +26,6 @@ type Leaf3_5 = MixerLeaf<Fr, PoseidonCRH_x3_5<Fr>>;
 type Leaf17_5 = MixerLeaf<Fr, PoseidonCRH_x17_5<Fr>>;
 type Leaf17_3 = MixerLeaf<Fr, PoseidonCRH_x17_3<Fr>>;
 
-const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 impl NoteGenerator for ArkworksPoseidonBls12_381NoteGenerator {
 	type Rng = rand::rngs::StdRng;
 
@@ -109,6 +108,7 @@ impl ArkworksPoseidonBls12_381NoteGenerator {
 #[cfg(test)]
 mod test {
 	use crate::note::NoteBuilder;
+	const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 
 	use super::*;
 	use arkworks_gadgets::ark_std::rand;
