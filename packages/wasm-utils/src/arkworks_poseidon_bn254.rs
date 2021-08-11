@@ -1,30 +1,20 @@
-use std::convert::TryInto;
-
 use ark_crypto_primitives::crh::injective_map::{PedersenCRHCompressor, TECompressor};
 use ark_crypto_primitives::CRH as CRHTrait;
 use ark_ff::fields::PrimeField;
-use ark_ff::{to_bytes, BigInteger, ToBytes};
+use ark_ff::{to_bytes, BigInteger};
 use arkworks_gadgets::ark_std::rand;
-use arkworks_gadgets::leaf::mixer::{MixerLeaf, Private};
+use arkworks_gadgets::leaf::mixer::MixerLeaf;
 use arkworks_gadgets::leaf::LeafCreation;
 use arkworks_gadgets::poseidon::sbox::PoseidonSbox;
-use arkworks_gadgets::poseidon::{PoseidonParameters, Rounds, CRH};
-use arkworks_gadgets::prelude::ark_bn254::{Bn254, Fr};
+use arkworks_gadgets::poseidon::{PoseidonParameters, Rounds};
+use arkworks_gadgets::prelude::ark_bn254::Fr;
 use arkworks_gadgets::prelude::ark_std::rand::SeedableRng;
 use arkworks_gadgets::prelude::*;
 use arkworks_gadgets::setup::common::{
 	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x3_5, setup_params_x5_5, Curve,
 	PoseidonCRH_x17_3, PoseidonCRH_x17_5, PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
-	PoseidonRounds_x17_3, PoseidonRounds_x17_5, PoseidonRounds_x3_3, PoseidonRounds_x3_5, PoseidonRounds_x5_3,
-	PoseidonRounds_x5_5,
 };
-use arkworks_gadgets::utils::{
-	get_mds_poseidon_bn254_x17_3, get_mds_poseidon_bn254_x17_5, get_mds_poseidon_bn254_x3_3,
-	get_mds_poseidon_bn254_x3_5, get_mds_poseidon_bn254_x5_3, get_mds_poseidon_bn254_x5_5,
-	get_rounds_poseidon_bls381_x3_3, get_rounds_poseidon_bls381_x3_5, get_rounds_poseidon_bn254_x17_3,
-	get_rounds_poseidon_bn254_x17_5, get_rounds_poseidon_bn254_x3_3, get_rounds_poseidon_bn254_x3_5,
-	get_rounds_poseidon_bn254_x5_3, get_rounds_poseidon_bn254_x5_5,
-};
+
 use pedersen_hash::PedersenWindow;
 
 use crate::note::{LeafHasher, NoteGenerator, OpStatusCode};
@@ -128,6 +118,10 @@ mod test {
 	use crate::note::NoteBuilder;
 
 	use super::*;
+	use arkworks_gadgets::setup::common::{
+		PoseidonRounds_x17_3, PoseidonRounds_x17_5, PoseidonRounds_x3_3, PoseidonRounds_x3_5, PoseidonRounds_x5_3,
+		PoseidonRounds_x5_5,
+	};
 
 	#[test]
 	fn arkworks_poseidon_bn254note_generator_5x_3() {

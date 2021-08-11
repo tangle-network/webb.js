@@ -3,17 +3,7 @@ use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
 use std::str::FromStr;
 
-use ark_crypto_primitives::crh::injective_map::{PedersenCRHCompressor, TECompressor};
-use ark_ed_on_bn254::EdwardsProjective;
-use arkworks_gadgets::leaf::mixer::MixerLeaf;
-use arkworks_gadgets::prelude::ark_bls12_381::Fq;
 use bulletproofs::{BulletproofGens, PedersenGens};
-use bulletproofs_gadgets::poseidon::builder::{Poseidon, PoseidonBuilder};
-use bulletproofs_gadgets::poseidon::{PoseidonSbox, Poseidon_hash_2};
-use curve25519_dalek::scalar::Scalar;
-use pedersen_hash::PedersenWindow;
-use rand::rngs::OsRng;
-use rand::{CryptoRng, Rng};
 
 use crate::PoseidonHasher;
 
