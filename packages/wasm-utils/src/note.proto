@@ -1,0 +1,52 @@
+syntax = "proto3";
+package webbnote;
+
+enum Curve {
+  Bls381 = 0;
+  Bn254 = 1;
+  Curve25519 = 2;
+}
+enum Snark {
+  Groth16 = 0;
+  Marlin = 1;
+}
+message Poseidon {
+  uint32 with = 1;
+  uint32  exponentiation = 2;
+}
+message  Arcworks {
+  Curve curve = 1 ;
+  Snark snark = 2;
+}
+message  Bulletproofs {
+  Curve curve = 1 ;
+}
+message HashFunction {
+  oneof hash{
+    uint32 PoseidonDefault = 1;
+    Poseidon Poseidon = 2;
+    uint32  MiMC = 3;
+    uint32  Blake2 = 4;
+    uint32  Sha256 = 5;
+  }
+}
+message Backend{
+  oneof backend {
+    Arcworks Arkworks = 1;
+    Bulletproofs Bulletproofs = 2;
+  }
+}
+enum NoteVersion {
+  v1 = 0;
+}
+message  Note {
+  string prefix = 1;
+  NoteVersion version = 2;
+  string  tokenSymbol = 3;
+  uint32  groupId = 4;
+  optional uint32 block_number = 5;
+  bytes scalar = 6;
+  bytes nullifier = 7;
+  Backend backend =8;
+  HashFunction hashFunction = 9;
+}

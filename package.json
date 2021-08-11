@@ -47,5 +47,8 @@
     "tsconfig-paths": "^3.9.0",
     "worker-loader": "^3.0.7",
     "workerloader-jest-transformer": "^0.0.2"
+  },
+  "dependencies": {
+    "ts-proto": "^1.82.2"
   }
 }

@@ -1,3 +1,9 @@
+mod arkworks_poseidon_bls12_381;
+mod arkworks_poseidon_bn254;
+mod bulletproof_posidon_25519;
+mod note;
+mod types;
+
 use core::fmt;
 use std::convert::{TryFrom, TryInto};
 use std::ops::Deref;
@@ -12,7 +18,9 @@ use curve25519_dalek::ristretto::CompressedRistretto;
 use curve25519_dalek::scalar::Scalar;
 use js_sys::{Array, JsString, Uint8Array};
 use merlin::Transcript;
+use pedersen_hash::hash as pedersen_hash;
 use rand::rngs::OsRng;
+use rand::Rng;
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, this uses `wee_alloc` as the global
@@ -35,6 +43,9 @@ extern "C" {
 const LEAVES: &str = "type Leaves = Array<Uint8Array>;";
 #[wasm_bindgen(typescript_custom_section)]
 const COMMITMENTS: &str = "type Commitments = Array<Uint8Array>;";
+
+const FULL_NOTE_LENGTH: usize = 8;
+const PARIETAL_NOTE_LENGTH: usize = 10;
 
 /// Returns a Status Code for the operation.
 #[wasm_bindgen]
@@ -67,6 +78,14 @@ pub enum OpStatusCode {
 	DeserializationFailed = 11,
 	/// Invalid Array of 32 bytes.
 	InvalidArrayLength = 12,
+	/// Invalid curve  when parsing
+	InvalidCurve = 13,
+	/// Invalid hashFunction id when parsing
+	InvalidHasFunction = 14,
+	/// Invalid backend id when parsing
+	InvalidBackend = 15,
+	/// Invalid denomination id when parsing
+	InvalidDenomination = 16,
 }
 
 impl From<OpStatusCode> for JsValue {
@@ -77,6 +96,30 @@ impl From<OpStatusCode> for JsValue {
 
 const BULLETPROOF_GENS_SIZE: usize = 16_400;
 const NOTE_PREFIX: &str = "webb.mix";
+
+#[wasm_bindgen]
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum Backend {
+	Bulletproofs,
+	Arkworks,
+}
+
+#[wasm_bindgen]
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum HashFunction {
+	Poseidon3,
+	Poseidon5,
+	Poseidon17,
+	MiMCTornado,
+}
+
+#[wasm_bindgen]
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum Curve {
+	Bls381,
+	Bn254,
+	Curve25519,
+}
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -98,6 +141,10 @@ pub struct Note {
 	pub r: Scalar,
 	#[wasm_bindgen(skip)]
 	pub nullifier: Scalar,
+	pub curve: Curve,
+	pub hash_function: HashFunction,
+	pub backend: Backend,
+	pub denomination: u32,
 }
 
 #[wasm_bindgen]
@@ -112,6 +159,75 @@ pub struct ZkProof {
 	pub leaf_index_comms: Vec<CompressedRistretto>,
 	#[wasm_bindgen(skip)]
 	pub proof_comms: Vec<CompressedRistretto>,
+}
+
+impl fmt::Display for Backend {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match self {
+			Backend::Arkworks => write!(f, "Arkworks"),
+			Backend::Bulletproofs => write!(f, "Bulletproofs"),
+		}
+	}
+}
+
+impl FromStr for Backend {
+	type Err = OpStatusCode;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"Arkworks" => Ok(Backend::Arkworks),
+			"Bulletproofs" => Ok(Backend::Bulletproofs),
+			_ => Err(OpStatusCode::InvalidBackend),
+		}
+	}
+}
+
+impl fmt::Display for HashFunction {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match self {
+			HashFunction::Poseidon3 => write!(f, "Poseidon3"),
+			HashFunction::Poseidon5 => write!(f, "Poseidon5"),
+			HashFunction::Poseidon17 => write!(f, "Poseidon17"),
+			HashFunction::MiMCTornado => write!(f, "MiMCTornado"),
+		}
+	}
+}
+
+impl FromStr for HashFunction {
+	type Err = OpStatusCode;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"Poseidon3" => Ok(HashFunction::Poseidon3),
+			"Poseidon5" => Ok(HashFunction::Poseidon5),
+			"Poseidon17" => Ok(HashFunction::Poseidon17),
+			"MiMCTornado" => Ok(HashFunction::MiMCTornado),
+			_ => Err(OpStatusCode::InvalidHasFunction),
+		}
+	}
+}
+
+impl fmt::Display for Curve {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match self {
+			Curve::Curve25519 => write!(f, "Curve25519"),
+			Curve::Bls381 => write!(f, "Bls381"),
+			Curve::Bn254 => write!(f, "Bn254"),
+		}
+	}
+}
+
+impl FromStr for Curve {
+	type Err = OpStatusCode;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"Curve25519" => Ok(Curve::Curve25519),
+			"Bls381" => Ok(Curve::Bls381),
+			"Bn254" => Ok(Curve::Bn254),
+			_ => Err(OpStatusCode::InvalidCurve),
+		}
+	}
 }
 
 impl fmt::Display for NoteVersion {
@@ -157,8 +273,8 @@ impl FromStr for Note {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		let parts: Vec<&str> = s.split('-').collect();
-		let partial = parts.len() == 5;
-		let full = parts.len() == 6;
+		let partial = parts.len() == PARIETAL_NOTE_LENGTH;
+		let full = parts.len() == FULL_NOTE_LENGTH;
 		if !partial && !full {
 			return Err(OpStatusCode::InvalidNoteLength);
 		}
@@ -170,17 +286,14 @@ impl FromStr for Note {
 		let version: NoteVersion = parts[1].parse()?;
 		let token_symbol = parts[2].to_owned();
 		let group_id = parts[3].parse().map_err(|_| OpStatusCode::InvalidNoteId)?;
-		let (block_number, note_val) = match partial {
-			true => (None, parts[4]),
-			false => {
-				let bn = parts[4].parse().map_err(|_| OpStatusCode::InvalidNoteBlockNumber)?;
-				(Some(bn), parts[5])
-			}
+		let note_val = match partial {
+			true => parts[4],
+			false => parts[5],
 		};
+
 		if note_val.len() != 128 {
 			return Err(OpStatusCode::InvalidNoteSecrets);
 		}
-
 		let r = hex::decode(&note_val[..64])
 			.map(|v| v.try_into())
 			.map(|r| r.map(Scalar::from_bytes_mod_order))
@@ -191,15 +304,47 @@ impl FromStr for Note {
 			.map(|r| r.map(Scalar::from_bytes_mod_order))
 			.map_err(|_| OpStatusCode::InvalidHexLength)?
 			.map_err(|_| OpStatusCode::HexParsingFailed)?;
-		Ok(Note {
-			prefix: NOTE_PREFIX.to_owned(),
-			version,
-			token_symbol,
-			group_id,
-			block_number,
-			r,
-			nullifier,
-		})
+		match partial {
+			true => {
+				let curve: Curve = parts[5].parse()?;
+				let hash_function: HashFunction = parts[6].parse()?;
+				let backend: Backend = parts[7].parse()?;
+				let denomination: u32 = parts[8].parse().map_err(|_| OpStatusCode::InvalidDenomination)?;
+				Ok(Note {
+					prefix: NOTE_PREFIX.to_owned(),
+					version,
+					token_symbol,
+					group_id,
+					block_number: None,
+					r,
+					nullifier,
+					curve,
+					hash_function,
+					backend,
+					denomination,
+				})
+			}
+			false => {
+				let block_number: u32 = parts[4].parse().map_err(|_| OpStatusCode::InvalidNoteBlockNumber)?;
+				let curve: Curve = parts[6].parse()?;
+				let hash_function: HashFunction = parts[7].parse()?;
+				let backend: Backend = parts[8].parse()?;
+				let denomination: u32 = parts[9].parse().map_err(|_| OpStatusCode::InvalidDenomination)?;
+				Ok(Note {
+					prefix: NOTE_PREFIX.to_owned(),
+					version,
+					token_symbol,
+					group_id,
+					block_number: Some(block_number),
+					r,
+					nullifier,
+					curve,
+					hash_function,
+					backend,
+					denomination,
+				})
+			}
+		}
 	}
 }
 
@@ -362,6 +507,71 @@ impl PoseidonHasher {
 }
 
 #[wasm_bindgen]
+#[derive(Clone)]
+pub struct CryptoConfig {
+	backend: Backend,
+	hash_function: HashFunction,
+	curve: Curve,
+}
+
+impl Default for CryptoConfig {
+	fn default() -> Self {
+		Self {
+			backend: Backend::Bulletproofs,
+			hash_function: HashFunction::Poseidon3,
+			curve: Curve::Curve25519,
+		}
+	}
+}
+
+#[wasm_bindgen]
+pub struct PedersonNoteGenerator {
+	crypto_config: CryptoConfig,
+	rng: OsRng,
+}
+
+#[wasm_bindgen]
+impl PedersonNoteGenerator {
+	#[wasm_bindgen(constructor)]
+	pub fn new(crypto_config: &CryptoConfig) -> Self {
+		Self {
+			crypto_config: crypto_config.clone(),
+			rng: OsRng::default(),
+		}
+	}
+
+	pub fn generate(&mut self, token_symbol: JsString, group_id: u32) -> Note {
+		let mut preimage: [u8; 62] = [0; 62];
+		self.rng.fill(&mut preimage[..31]);
+		let nullifier = Scalar::one();
+		let r = Scalar::one();
+		Note {
+			prefix: NOTE_PREFIX.to_string(),
+			version: NoteVersion::V1,
+			token_symbol: token_symbol.into(),
+			block_number: None,
+			group_id,
+			r,
+			nullifier,
+			curve: self.crypto_config.curve,
+			backend: self.crypto_config.backend,
+			hash_function: self.crypto_config.hash_function,
+			denomination: 16,
+		}
+	}
+
+	pub fn leaf_of(&self, note: &Note) -> Uint8Array {
+		unimplemented!()
+	}
+
+	pub fn nullifier_hash_of(&self, note: &Note) -> Uint8Array {
+		let hash = pedersen_hash(note.nullifier.as_bytes()).unwrap();
+		let hash = Scalar::from_bits(hash);
+		ScalarWrapper(hash).into()
+	}
+}
+
+#[wasm_bindgen]
 pub struct NoteGenerator {
 	hasher: Poseidon,
 	rng: OsRng,
@@ -388,6 +598,10 @@ impl NoteGenerator {
 			group_id,
 			r,
 			nullifier,
+			curve: Curve::Bls381,
+			hash_function: HashFunction::Poseidon3,
+			backend: Backend::Bulletproofs,
+			denomination: 16,
 		}
 	}
 
@@ -524,10 +738,11 @@ pub fn wasm_init() -> Result<(), JsValue> {
 
 #[cfg(test)]
 mod tests {
-	use super::*;
 	use lazy_static::lazy_static;
 	use rand::rngs::OsRng;
 	use wasm_bindgen_test::*;
+
+	use super::*;
 
 	wasm_bindgen_test_configure!(run_in_browser);
 
