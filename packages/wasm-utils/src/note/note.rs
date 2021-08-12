@@ -513,6 +513,5 @@ mod test {
 		assert_eq!(note.backend, Backend::Arkworks);
 		assert_eq!(note.denomination, "17".to_string());
 		assert_eq!(note.hash_function, HashFunction::Poseidon17);
-		dbg!(note.secret.len());
 	}
 }
