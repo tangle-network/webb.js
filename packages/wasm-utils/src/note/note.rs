@@ -6,8 +6,7 @@ use bulletproofs_gadgets::poseidon::{PoseidonBuilder, PoseidonSbox};
 
 use crate::note::arkworks_poseidon_bls12_381::ArkworksPoseidonBls12_381NoteGenerator;
 use crate::note::arkworks_poseidon_bn254::ArkworksPoseidonBn254NoteGenerator;
-use crate::note::bulletproof_posidon_25519::PoseidonNoteGeneratorCurve25519;
-use rand::CryptoRng;
+// use crate::note::bulletproof_posidon_25519::PoseidonNoteGeneratorCurve25519;
 
 const FULL_NOTE_LENGTH: usize = 11;
 const NOTE_PREFIX: &str = "webb.mix";
@@ -197,7 +196,7 @@ pub trait LeafHasher {
 	type HasherOptions: Clone;
 	fn hash(&self, secrets: &[u8], options: Self::HasherOptions) -> Result<Vec<u8>, OpStatusCode>;
 }
-
+#[derive(Debug)]
 pub struct NoteBuilder {
 	pub prefix: String,
 	pub version: NoteVersion,
@@ -214,9 +213,10 @@ pub struct NoteBuilder {
 
 impl NoteBuilder {
 	fn generate_note(&self) -> Result<Note, ()> {
+		dbg!(((self.backend, self.curve)));
 		match (self.backend, self.curve) {
 			(Backend::Bulletproofs, Curve::Curve25519) => {
-				let opts = PoseidonHasherOptions::default();
+				/*				let opts = PoseidonHasherOptions::default();
 				let pc_gens = PedersenGens::default();
 				let bp_gens = opts.bp_gens.clone().unwrap_or_else(|| BulletproofGens::new(16_400, 1));
 
@@ -229,7 +229,8 @@ impl NoteBuilder {
 				let note_generator = PoseidonNoteGeneratorCurve25519 {
 					hasher: poseidon_hasher,
 				};
-				Ok(note_generator.generate(&self, &mut note_generator.get_rng()).unwrap())
+				Ok(note_generator.generate(&self, &mut note_generator.get_rng()).unwrap())*/
+				unimplemented!()
 			}
 			(Backend::Circom, ..) => {
 				unimplemented!();
@@ -257,6 +258,7 @@ impl NoteBuilder {
 				Ok(note_generator.generate(&self, &mut note_generator.get_rng()).unwrap())
 			}
 			_ => {
+				dbg!(self);
 				unimplemented!()
 			}
 		}
@@ -268,7 +270,7 @@ impl Default for NoteBuilder {
 		Self {
 			amount: "0".to_string(),
 			chain: "any".to_string(),
-			backend: Backend::Bulletproofs,
+			backend: Backend::Arkworks,
 			denomination: "18".to_string(),
 			version: NoteVersion::V1,
 			prefix: NOTE_PREFIX.to_owned(),
@@ -433,10 +435,16 @@ mod test {
 	#[test]
 	fn generate_note() {
 		let mut note_builder = NoteBuilder::default();
-		note_builder.hash_function = HashFunction::Poseidon5;
-		note_builder.backend == Backend::Arkworks;
+		note_builder.backend = Backend::Arkworks;
+
+		note_builder.hash_function = HashFunction::Poseidon17;
+		note_builder.curve = Curve::Bn254;
 		note_builder.denomination = "17".to_string();
 		let note = note_builder.generate_note().unwrap();
-		dbg!(note);
+		assert_eq!(note.curve, Curve::Bn254);
+		assert_eq!(note.backend, Backend::Arkworks);
+		assert_eq!(note.denomination, "17".to_string());
+		assert_eq!(note.hash_function, HashFunction::Poseidon17);
+		dbg!(note.secret.len());
 	}
 }
