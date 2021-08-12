@@ -84,7 +84,7 @@ impl LeafHasher for ArkworksPoseidonBn254NoteGenerator {
 }
 
 impl ArkworksPoseidonBn254NoteGenerator {
-	fn get_params(&self) -> PoseidonParameters<Fr> {
+	pub fn get_params(&self) -> PoseidonParameters<Fr> {
 		match (self.exponentiation, self.width) {
 			(5, 3) => setup_params_x3_3::<Fr>(Curve::Bn254),
 			(5, 5) => setup_params_x5_5::<Fr>(Curve::Bn254),
