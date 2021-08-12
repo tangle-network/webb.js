@@ -13,7 +13,7 @@ use arkworks_gadgets::setup::common::{
 	PoseidonCRH_x17_3, PoseidonCRH_x17_5, PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
 };
 
-use crate::note::{LeafHasher, NoteGenerator, OpStatusCode};
+use crate::note::note::{LeafHasher, NoteGenerator, OpStatusCode};
 
 pub struct ArkworksPoseidonBn254NoteGenerator {
 	exponentiation: usize,
@@ -111,9 +111,9 @@ mod test {
 	use arkworks_gadgets::ark_std::rand;
 	const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 
-	use crate::note::NoteBuilder;
-
 	use super::*;
+	use crate::note::note::NoteBuilder;
+	use arkworks_gadgets::ark_std::rand::SeedableRng;
 	use arkworks_gadgets::setup::common::{
 		PoseidonRounds_x17_3, PoseidonRounds_x17_5, PoseidonRounds_x3_3, PoseidonRounds_x3_5, PoseidonRounds_x5_3,
 		PoseidonRounds_x5_5,

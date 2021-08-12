@@ -1,4 +1,4 @@
-use crate::note::{LeafHasher, NoteGenerator, OpStatusCode};
+use crate::note::note::{LeafHasher, NoteGenerator, OpStatusCode};
 use bulletproofs_gadgets::poseidon::builder::Poseidon;
 use bulletproofs_gadgets::poseidon::Poseidon_hash_2;
 use curve25519_dalek::scalar::Scalar;
@@ -50,8 +50,8 @@ mod tests {
 
 	use crate::PoseidonHasher;
 
-	use crate::bulletproof_posidon_25519::PoseidonNoteGeneratorCurve25519;
-	use crate::note::{NoteBuilder, NoteGenerator, PoseidonHasherOptions};
+	use crate::note::bulletproof_posidon_25519::PoseidonNoteGeneratorCurve25519;
+	use crate::note::note::{NoteBuilder, NoteGenerator, PoseidonHasherOptions};
 	use bulletproofs::{BulletproofGens, PedersenGens};
 	use bulletproofs_gadgets::poseidon::{PoseidonBuilder, PoseidonSbox};
 	use rand::rngs::OsRng;
