@@ -14,7 +14,8 @@ use arkworks_gadgets::setup::common::{
 };
 const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 
-use crate::note::note::{LeafHasher, NoteGenerator, OpStatusCode};
+use crate::note::note::{LeafHasher, NoteGenerator};
+use crate::types::OpStatusCode;
 use arkworks_gadgets::ark_std::rand::SeedableRng;
 
 pub struct ArkworksPoseidonBn254NoteGenerator {

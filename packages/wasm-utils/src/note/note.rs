@@ -6,52 +6,12 @@ use bulletproofs_gadgets::poseidon::{PoseidonBuilder, PoseidonSbox};
 
 use crate::note::arkworks_poseidon_bls12_381::ArkworksPoseidonBls12_381NoteGenerator;
 use crate::note::arkworks_poseidon_bn254::ArkworksPoseidonBn254NoteGenerator;
+use crate::types::OpStatusCode;
 
 // use crate::note::bulletproof_posidon_25519::PoseidonNoteGeneratorCurve25519;
 
 const FULL_NOTE_LENGTH: usize = 11;
 const NOTE_PREFIX: &str = "webb.mix";
-
-#[derive(Debug, Eq, PartialEq)]
-#[repr(u32)]
-pub enum OpStatusCode {
-	Unknown = 0,
-	/// Invalid hex string length when decoding
-	InvalidHexLength = 1,
-	/// Failed to parse hex string
-	HexParsingFailed = 2,
-	/// Invalid number of note parts when decoding
-	InvalidNoteLength = 3,
-	/// Invalid note prefix
-	InvalidNotePrefix = 4,
-	/// Invalid note version
-	InvalidNoteVersion = 5,
-	/// Invalid note id when parsing
-	InvalidNoteId = 6,
-	/// Invalid note block number when parsing
-	InvalidNoteBlockNumber = 7,
-	/// Invalid note secrets
-	InvalidNoteSecrets = 8,
-	/// Unable to find merkle tree
-	MerkleTreeNotFound = 9,
-	/// Failed serialization of passed params
-	/// Error for failing to parse rust type into JsValue
-	SerializationFailed = 10,
-	/// Failed deserialization of JsValue into rust type
-	DeserializationFailed = 11,
-	/// Invalid Array of 32 bytes.
-	InvalidArrayLength = 12,
-	/// Invalid curve  when parsing
-	InvalidCurve = 13,
-	/// Invalid hashFunction id when parsing
-	InvalidHasFunction = 14,
-	/// Invalid backend id when parsing
-	InvalidBackend = 15,
-	/// Invalid denomination id when parsing
-	InvalidDenomination = 16,
-	/// Failed to generate secrets
-	SecretGenFailed = 17,
-}
 
 impl fmt::Display for Backend {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -320,7 +280,6 @@ impl NoteManager {
 				Ok(note_generator.hash(secrets, note_generator.get_params()).unwrap())
 			}
 			_ => {
-				dbg!(note_builder);
 				unimplemented!()
 			}
 		}
