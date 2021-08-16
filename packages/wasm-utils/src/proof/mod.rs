@@ -34,16 +34,16 @@ const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 impl ZkProof {
 	pub fn generate_proof(&self) -> Proof<Bls12_381> {
 		let mut rng = test_rng();
-		let input = [0u8; 32];
-		PrimeField::from_be_bytes_mod_order(&input);
+
 		let recipient = FrBls381::from_be_bytes_mod_order(self.recipient.as_bytes());
 		let relayer = FrBls381::from_be_bytes_mod_order(self.relayer.as_bytes());
 		let params5 = setup_params_x5_5::<FrBls381>(ArkCurve::Bls381);
 		let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer);
 		let (leaf_private, leaf, nullifier_hash) = setup_leaf_x5::<_, FrBls381>(&params5, &mut rng);
 
-		let mut leaves_new = self
+		let mut leaves_new: Vec<FrBls381> = self
 			.leaves
+			.to_vec()
 			.into_iter()
 			.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
 			.collect();
