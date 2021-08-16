@@ -1,4 +1,3 @@
-use crate::types::Curve;
 use ark_crypto_primitives::CRH;
 use ark_ff::PrimeField;
 use arkworks_gadgets::ark_std::rand;
@@ -15,6 +14,8 @@ use arkworks_gadgets::setup::mixer::{
 	get_public_inputs, prove_groth16_x5, setup_arbitrary_data, setup_leaf_x5, setup_random_groth16_x5, Circuit_x5,
 };
 
+use crate::types::Curve;
+
 pub fn test_rng() -> StdRng {
 	// arbitrary seed
 	let seed = [
@@ -23,22 +24,20 @@ pub fn test_rng() -> StdRng {
 	rand::rngs::StdRng::from_seed(seed)
 }
 
-pub struct ZkProof {
+pub struct ZkProofInput {
 	curve: Curve,
-	recipient: String,
-	relayer: String,
-	leaves: Vec<Vec<u8>>,
+	recipient: Vec<u8>,
+	relayer: Vec<u8>,
+	leaves: Vec<[u8; 32]>,
 }
 const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 
-impl ZkProof {
+impl ZkProofInput {
 	pub fn generate_proof(&self) -> Proof<Bls12_381> {
 		let mut rng = test_rng();
 
-		let recipient = hex::decode(self.recipient.replace("0x", "")).unwrap();
-		let recipient = FrBls381::from_be_bytes_mod_order(&recipient);
-		let relayer = hex::decode(self.relayer.replace("0x", "")).unwrap();
-		let relayer = FrBls381::from_be_bytes_mod_order(&relayer);
+		let recipient = FrBls381::from_be_bytes_mod_order(&self.recipient);
+		let relayer = FrBls381::from_be_bytes_mod_order(&self.relayer);
 		let params5 = setup_params_x5_5::<FrBls381>(ArkCurve::Bls381);
 		let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer);
 		let (leaf_private, leaf, nullifier_hash) = setup_leaf_x5::<_, FrBls381>(&params5, &mut rng);
@@ -49,7 +48,9 @@ impl ZkProof {
 			.into_iter()
 			.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
 			.collect();
-		let (tree, path) = setup_tree_and_create_path_x5::<FrBls381>(&leaves_new, 0, &params5);
+		leaves_new.push(leaf);
+		let (tree, path) =
+			setup_tree_and_create_path_x5::<FrBls381>(&leaves_new, (leaves_new.len() - 1) as u64, &params5);
 		let root = tree.root().inner();
 		dbg!(&root);
 
@@ -71,6 +72,8 @@ impl ZkProof {
 
 #[cfg(test)]
 mod test {
+	use std::convert::TryInto;
+
 	use super::*;
 
 	#[test]
@@ -108,14 +111,16 @@ mod test {
 			"0x18ff90d73fce2ccc8ee0133af9d44cf41fd6d5f9236267b2b3ab544ad53812c0",
 			"0x1498ad993ec57cc62702bf5d03ec618fa87d408855ffc77efb6245f8f8abd4d3",
 		];
-		let leaves_bytes: Vec<_> = leaves
+		let leaves_bytes: Vec<[u8; 32]> = leaves
 			.iter()
-			.map(|item| hex::decode(item.replace("0x", "")).unwrap())
+			.map(|item| hex::decode(item.replace("0x", "")).unwrap().try_into().unwrap())
 			.collect();
 		dbg!(leaves_bytes[0].len());
-		let zkp_input = ZkProof {
-			relayer: "0x929E7eb6997408C196828773db642D76e79bda93".to_string(),
-			recipient: "0x929E7eb6997408C196828773db642D76e79bda93".to_string(),
+		let relayer = hex::decode("929E7eb6997408C196828773db642D76e79bda93".replace("0x", "")).unwrap();
+		let recipient = hex::decode("929E7eb6997408C196828773db642D76e79bda93".replace("0x", "")).unwrap();
+		let zkp_input = ZkProofInput {
+			relayer,
+			recipient,
 			leaves: leaves_bytes,
 			curve: Curve::Bls381,
 		};
