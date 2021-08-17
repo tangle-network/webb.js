@@ -27,6 +27,7 @@ pub fn get_rng() -> StdRng {
 	rand::rngs::StdRng::from_seed(seed)
 }
 
+#[derive(Debug, Eq, PartialEq)]
 pub struct ZkProofBuilder {
 	curve: Curve,
 	recipient: Vec<u8>,
@@ -225,34 +226,28 @@ impl ZkProofBuilder {
 		Self::default()
 	}
 
-	pub fn set_leaves(mut self, leaves: &[[u8; 32]]) -> Self {
+	pub fn set_leaves(&mut self, leaves: &[[u8; 32]]) -> () {
 		self.leaves = leaves.to_vec();
-		self
 	}
 
-	pub fn push_leaf(mut self, leaf: [u8; 32]) -> Self {
+	pub fn push_leaf(&mut self, leaf: [u8; 32]) -> () {
 		self.leaves.push(leaf);
-		self
 	}
 
-	pub fn set_curve(mut self, curve: Curve) -> Self {
+	pub fn set_curve(&mut self, curve: Curve) -> () {
 		self.curve = curve;
-		self
 	}
 
-	pub fn set_relayer(mut self, relayer: &[u8]) -> Self {
+	pub fn set_relayer(&mut self, relayer: &[u8]) -> () {
 		self.relayer = relayer.to_vec();
-		self
 	}
 
-	pub fn set_recipient(mut self, recipient: &[u8]) -> Self {
+	pub fn set_recipient(&mut self, recipient: &[u8]) -> () {
 		self.recipient = recipient.to_vec();
-		self
 	}
 
-	pub fn set_exponentiation(mut self, exponentiation: &str) -> Self {
+	pub fn set_exponentiation(&mut self, exponentiation: &str) -> () {
 		self.exponentiation = exponentiation.to_string();
-		self
 	}
 
 	pub fn build(self) -> ZKProof {
@@ -307,13 +302,13 @@ mod test {
 			.collect();
 		let relayer = hex::decode("929E7eb6997408C196828773db642D76e79bda93".replace("0x", "")).unwrap();
 		let recipient = hex::decode("929E7eb6997408C196828773db642D76e79bda93".replace("0x", "")).unwrap();
-		let proof = ZkProofBuilder::new()
-			.set_curve(Curve::Bn254)
-			.set_exponentiation("5")
-			.set_leaves(&leaves_bytes)
-			.set_relayer(&relayer)
-			.set_recipient(&recipient)
-			.build();
+		let mut proof_builder = ZkProofBuilder::new();
+		proof_builder.set_curve(Curve::Bn254);
+		proof_builder.set_exponentiation("5");
+		proof_builder.set_leaves(&leaves_bytes);
+		proof_builder.set_relayer(&relayer);
+		proof_builder.set_recipient(&recipient);
+		let proof = proof_builder.build();
 
 		match proof {
 			ZKProof::Bls12_381(proof) => {

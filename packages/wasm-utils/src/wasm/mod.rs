@@ -1,10 +1,12 @@
 use std::convert::{TryFrom, TryInto};
 
-use js_sys::{Array, JsString, SharedArrayBuffer};
+use js_sys::{Array, JsString, SharedArrayBuffer, Uint8Array};
 use wasm_bindgen::prelude::*;
 
-use crate::note::note::{Backend, Curve as NoteCurve, HashFunction, Note, NoteBuilder, NoteVersion};
-use crate::types::OpStatusCode;
+use crate::note::note::{Note, NoteBuilder};
+use crate::proof::ZkProofBuilder;
+use crate::types::{Backend, Curve as NoteCurve, HashFunction, NoteVersion, OpStatusCode};
+use std::ops::Deref;
 
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
@@ -23,7 +25,13 @@ extern "C" {
 
 	#[wasm_bindgen(typescript_type = "Backend")]
 	pub type BE;
+
+	#[wasm_bindgen(typescript_type = "Leaves")]
+	pub type Leaves;
 }
+
+#[wasm_bindgen(typescript_custom_section)]
+const LEAVES: &str = "type Leaves = Array<Uint8Array>;";
 
 #[wasm_bindgen(typescript_custom_section)]
 const HF: &str = "type HashFunction = 'Poseidon3'|'Poseidon5'|'Poseidon17 '|'MiMCTornado'";
@@ -202,5 +210,88 @@ impl DepositNote {
 	#[wasm_bindgen(getter)]
 	pub fn denomination(&self) -> JsString {
 		self.note.denomination.clone().into()
+	}
+}
+
+#[wasm_bindgen]
+#[derive(Debug, Eq, PartialEq)]
+pub struct ProvingManager {
+	builder: ZkProofBuilder,
+}
+
+struct Uint8Arrayx32([u8; 32]);
+
+impl Deref for Uint8Arrayx32 {
+	type Target = [u8; 32];
+
+	fn deref(&self) -> &Self::Target {
+		&self.0
+	}
+}
+
+impl TryFrom<Uint8Array> for Uint8Arrayx32 {
+	type Error = OpStatusCode;
+
+	fn try_from(value: Uint8Array) -> Result<Self, Self::Error> {
+		let bytes: [u8; 32] = value
+			.to_vec()
+			.try_into()
+			.map_err(|_| OpStatusCode::InvalidArrayLength)?;
+		Ok(Self(bytes))
+	}
+}
+
+#[wasm_bindgen]
+impl ProvingManager {
+	#[wasm_bindgen(constructor)]
+	pub fn new() -> ProvingManager {
+		ProvingManager {
+			builder: ZkProofBuilder::default(),
+		}
+	}
+
+	pub fn set_curve(&mut self, curve: Curve) -> Result<(), JsValue> {
+		let curve_string = JsValue::from(&curve).as_string().ok_or(OpStatusCode::InvalidCurve)?;
+		let curve: NoteCurve = curve_string.parse()?;
+		self.builder.set_curve(curve);
+		Ok(())
+	}
+
+	pub fn set_exponentiation(&mut self, exponentiation: JsString) -> Result<(), JsValue> {
+		let e: String = exponentiation.into();
+		self.builder.set_exponentiation(&e);
+		Ok(())
+	}
+
+	pub fn set_recipient(&mut self, recipient: JsString) -> Result<(), JsValue> {
+		let r: String = recipient.into();
+		let r = hex::decode(r).unwrap();
+		self.builder.set_recipient(&r);
+		Ok(())
+	}
+
+	pub fn set_relayer(&mut self, relayer: JsString) -> Result<(), JsValue> {
+		let r: String = relayer.into();
+		let r = hex::decode(r).unwrap();
+		self.builder.set_relayer(&r);
+		Ok(())
+	}
+
+	pub fn set_leaves(mut self, leaves: Leaves) -> Result<(), JsValue> {
+		let ls: Vec<_> = Array::from(&leaves)
+			.to_vec()
+			.into_iter()
+			.map(|v| Uint8Array::new_with_byte_offset_and_length(&v, 0, 32))
+			.map(Uint8Arrayx32::try_from)
+			.collect::<Result<Vec<_>, _>>()?
+			.into_iter()
+			.map(|v| v.0)
+			.collect();
+		self.builder.set_leaves(&ls);
+		Ok(())
+	}
+
+	pub fn proof(&self) -> () {
+		let proof = self.builder.build();
 	}
 }
