@@ -3,3 +3,4 @@
 mod note;
 mod proof;
 mod types;
+mod wasm;

@@ -16,7 +16,6 @@ use arkworks_gadgets::setup::mixer::{
 	get_public_inputs, prove_groth16_x17, prove_groth16_x5, setup_arbitrary_data, setup_leaf_x17, setup_leaf_x5,
 	setup_random_groth16_x17, setup_random_groth16_x5, Circuit_x17, Circuit_x5,
 };
-use wasm_bindgen::__rt::core::marker::PhantomData;
 
 use crate::types::Curve;
 
