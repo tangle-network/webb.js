@@ -4,15 +4,19 @@ use arkworks_gadgets::ark_std::rand;
 use arkworks_gadgets::ark_std::rand::distributions::{Distribution, Standard};
 use arkworks_gadgets::ark_std::rand::rngs::StdRng;
 use arkworks_gadgets::ark_std::rand::{Rng, SeedableRng};
+use arkworks_gadgets::poseidon::PoseidonParameters;
 use arkworks_gadgets::prelude::ark_bls12_381::{Bls12_381, Fr as FrBls381};
 use arkworks_gadgets::prelude::ark_bn254::{Bn254, Fr as FrBn254};
-use arkworks_gadgets::prelude::ark_groth16::Proof;
+use arkworks_gadgets::prelude::ark_groth16::{Proof, ProvingKey, VerifyingKey};
 use arkworks_gadgets::setup::common::{
-	setup_params_x5_3, setup_params_x5_5, setup_tree_and_create_path_x5, Curve as ArkCurve,
+	setup_params_x17_5, setup_params_x5_3, setup_params_x5_5, setup_tree_and_create_path_x17,
+	setup_tree_and_create_path_x5, Curve as ArkCurve,
 };
 use arkworks_gadgets::setup::mixer::{
-	get_public_inputs, prove_groth16_x5, setup_arbitrary_data, setup_leaf_x5, setup_random_groth16_x5, Circuit_x5,
+	get_public_inputs, prove_groth16_x17, prove_groth16_x5, setup_arbitrary_data, setup_leaf_x17, setup_leaf_x5,
+	setup_random_groth16_x17, setup_random_groth16_x5, Circuit_x17, Circuit_x5,
 };
+use wasm_bindgen::__rt::core::marker::PhantomData;
 
 use crate::types::Curve;
 
@@ -29,8 +33,183 @@ pub struct ZkProofInput {
 	recipient: Vec<u8>,
 	relayer: Vec<u8>,
 	leaves: Vec<[u8; 32]>,
+	exponentiation: String,
 }
 const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
+pub struct ZKP {
+	proof: ZKProof,
+}
+
+pub enum ZKProof {
+	Bls12_381(Proof<Bls12_381>),
+	Bn254(Proof<Bn254>),
+}
+
+impl ZKProof {
+	fn new(proof_input: &ZkProofInput) -> Self {
+		let mut rng = test_rng();
+
+		match proof_input.curve {
+			Curve::Bn254 => {
+				let recipient = FrBn254::from_be_bytes_mod_order(&proof_input.recipient);
+				let relayer = FrBn254::from_be_bytes_mod_order(&proof_input.relayer);
+				match proof_input.exponentiation.as_str() {
+					"3" => {
+						unimplemented!();
+					}
+					"5" => {
+						let params5 = setup_params_x5_5::<FrBn254>(ArkCurve::Bn254);
+						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer);
+						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x5::<_, FrBn254>(&params5, &mut rng);
+						let mut leaves_new: Vec<FrBn254> = proof_input
+							.leaves
+							.to_vec()
+							.into_iter()
+							.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
+							.collect();
+						leaves_new.push(leaf);
+						let (tree, path) = setup_tree_and_create_path_x5::<FrBn254>(
+							&leaves_new,
+							(leaves_new.len() - 1) as u64,
+							&params5,
+						);
+						let root = tree.root().inner();
+						let mc = Circuit_x5::<FrBn254>::new(
+							arbitrary_input.clone(),
+							leaf_private,
+							(),
+							params5,
+							path,
+							root.clone(),
+							nullifier_hash,
+						);
+
+						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
+						let (pk, vk) = setup_random_groth16_x5::<_, Bn254>(&mut rng, ArkCurve::Bn254);
+						let proof = prove_groth16_x5::<_, Bn254>(&pk, mc.clone(), &mut rng);
+						Self::Bn254(proof)
+					}
+					"17" => {
+						let params17 = setup_params_x17_5::<FrBn254>(ArkCurve::Bn254);
+						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer);
+						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x17::<_, FrBn254>(&params17, &mut rng);
+						let mut leaves_new: Vec<FrBn254> = proof_input
+							.leaves
+							.to_vec()
+							.into_iter()
+							.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
+							.collect();
+						leaves_new.push(leaf);
+						let (tree, path) = setup_tree_and_create_path_x17::<FrBn254>(
+							&leaves_new,
+							(leaves_new.len() - 1) as u64,
+							&params5,
+						);
+						let root = tree.root().inner();
+						let mc = Circuit_x17::<FrBn254>::new(
+							arbitrary_input.clone(),
+							leaf_private,
+							(),
+							params5,
+							path,
+							root.clone(),
+							nullifier_hash,
+						);
+
+						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
+						let (pk, vk) = setup_random_groth16_x5::<_, Bn254>(&mut rng, ArkCurve::Bn254);
+						let proof = prove_groth16_x17::<_, Bn254>(&pk, mc.clone(), &mut rng);
+						Self::Bn254(proof)
+					}
+					_ => {
+						unreachable!()
+					}
+				}
+			}
+			Curve::Bls381 => {
+				let recipient = FrBls381::from_be_bytes_mod_order(&proof_input.recipient);
+				let relayer = FrBls381::from_be_bytes_mod_order(&proof_input.relayer);
+
+				match proof_input.exponentiation.as_str() {
+					"3" => {
+						unimplemented!();
+					}
+					"5" => {
+						let params5 = setup_params_x5_5::<FrBls381>(ArkCurve::Bls381);
+						let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer);
+						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x5::<_, FrBls381>(&params5, &mut rng);
+						let mut leaves_new: Vec<FrBls381> = proof_input
+							.leaves
+							.to_vec()
+							.into_iter()
+							.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
+							.collect();
+						leaves_new.push(leaf);
+						let (tree, path) = setup_tree_and_create_path_x5::<FrBls381>(
+							&leaves_new,
+							(leaves_new.len() - 1) as u64,
+							&params5,
+						);
+						let root = tree.root().inner();
+						let mc = Circuit_x5::<FrBls381>::new(
+							arbitrary_input.clone(),
+							leaf_private,
+							(),
+							params5,
+							path,
+							root.clone(),
+							nullifier_hash,
+						);
+
+						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
+						let (pk, vk) = setup_random_groth16_x5::<_, Bls12_381>(&mut rng, ArkCurve::Bls381);
+						let proof = prove_groth16_x5::<_, Bls12_381>(&pk, mc.clone(), &mut rng);
+						Self::Bls12_381(proof)
+					}
+					"17" => {
+						let params5 = setup_params_x17_5::<FrBls381>(ArkCurve::Bls381);
+						let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer);
+						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x17::<_, FrBls381>(&params5, &mut rng);
+						let mut leaves_new: Vec<FrBls381> = proof_input
+							.leaves
+							.to_vec()
+							.into_iter()
+							.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
+							.collect();
+						leaves_new.push(leaf);
+						let (tree, path) = setup_tree_and_create_path_x17::<FrBls381>(
+							&leaves_new,
+							(leaves_new.len() - 1) as u64,
+							&params5,
+						);
+						let root = tree.root().inner();
+						let mc = Circuit_x17::<FrBls381>::new(
+							arbitrary_input.clone(),
+							leaf_private,
+							(),
+							params5,
+							path,
+							root.clone(),
+							nullifier_hash,
+						);
+
+						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
+						let (pk, vk) = setup_random_groth16_x17::<_, Bls12_381>(&mut rng, ArkCurve::Bls381);
+						let proof = prove_groth16_x17::<_, Bls12_381>(&pk, mc.clone(), &mut rng);
+						Self::Bls12_381(proof)
+					}
+					_ => {
+						unreachable!()
+					}
+				}
+			}
+			Curve::Curve25519 => {
+				// using bullet proof
+				unimplemented!();
+			}
+		}
+	}
+}
 
 impl ZkProofInput {
 	pub fn generate_proof(&self) -> Proof<Bls12_381> {
@@ -38,6 +217,7 @@ impl ZkProofInput {
 
 		let recipient = FrBls381::from_be_bytes_mod_order(&self.recipient);
 		let relayer = FrBls381::from_be_bytes_mod_order(&self.relayer);
+
 		let params5 = setup_params_x5_5::<FrBls381>(ArkCurve::Bls381);
 		let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer);
 		let (leaf_private, leaf, nullifier_hash) = setup_leaf_x5::<_, FrBls381>(&params5, &mut rng);
@@ -123,8 +303,17 @@ mod test {
 			recipient,
 			leaves: leaves_bytes,
 			curve: Curve::Bls381,
+			exponentiation: "5".to_string(),
 		};
 
-		let proof = zkp_input.generate_proof();
+		let proof = ZKProof::new(&zkp_input);
+		match proof {
+			ZKProof::Bls12_381(proof) => {
+				dbg!(proof);
+			}
+			ZKProof::Bn254(proof) => {
+				dbg!(proof);
+			}
+		}
 	}
 }
