@@ -20,7 +20,7 @@ use wasm_bindgen::__rt::core::marker::PhantomData;
 
 use crate::types::Curve;
 
-pub fn test_rng() -> StdRng {
+pub fn get_rng() -> StdRng {
 	// arbitrary seed
 	let seed = [
 		1, 0, 0, 0, 23, 0, 0, 0, 200, 1, 0, 0, 210, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -28,7 +28,7 @@ pub fn test_rng() -> StdRng {
 	rand::rngs::StdRng::from_seed(seed)
 }
 
-pub struct ZkProofInput {
+pub struct ZkProofBuilder {
 	curve: Curve,
 	recipient: Vec<u8>,
 	relayer: Vec<u8>,
@@ -46,9 +46,8 @@ pub enum ZKProof {
 }
 
 impl ZKProof {
-	fn new(proof_input: &ZkProofInput) -> Self {
-		let mut rng = test_rng();
-
+	pub(crate) fn new(proof_input: &ZkProofBuilder) -> Self {
+		let mut rng = get_rng();
 		match proof_input.curve {
 			Curve::Bn254 => {
 				let recipient = FrBn254::from_be_bytes_mod_order(&proof_input.recipient);
@@ -103,14 +102,14 @@ impl ZKProof {
 						let (tree, path) = setup_tree_and_create_path_x17::<FrBn254>(
 							&leaves_new,
 							(leaves_new.len() - 1) as u64,
-							&params5,
+							&params17,
 						);
 						let root = tree.root().inner();
 						let mc = Circuit_x17::<FrBn254>::new(
 							arbitrary_input.clone(),
 							leaf_private,
 							(),
-							params5,
+							params17,
 							path,
 							root.clone(),
 							nullifier_hash,
@@ -211,42 +210,54 @@ impl ZKProof {
 	}
 }
 
-impl ZkProofInput {
-	pub fn generate_proof(&self) -> Proof<Bls12_381> {
-		let mut rng = test_rng();
+impl Default for ZkProofBuilder {
+	fn default() -> Self {
+		Self {
+			curve: Curve::Bn254,
+			relayer: Vec::new(),
+			recipient: Vec::new(),
+			exponentiation: "5".to_string(),
+			leaves: Vec::new(),
+		}
+	}
+}
+impl ZkProofBuilder {
+	pub fn new() -> Self {
+		Self::default()
+	}
 
-		let recipient = FrBls381::from_be_bytes_mod_order(&self.recipient);
-		let relayer = FrBls381::from_be_bytes_mod_order(&self.relayer);
+	pub fn set_leaves(mut self, leaves: &[[u8; 32]]) -> Self {
+		self.leaves = leaves.to_vec();
+		self
+	}
 
-		let params5 = setup_params_x5_5::<FrBls381>(ArkCurve::Bls381);
-		let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer);
-		let (leaf_private, leaf, nullifier_hash) = setup_leaf_x5::<_, FrBls381>(&params5, &mut rng);
+	pub fn push_leaf(mut self, leaf: [u8; 32]) -> Self {
+		self.leaves.push(leaf);
+		self
+	}
 
-		let mut leaves_new: Vec<FrBls381> = self
-			.leaves
-			.to_vec()
-			.into_iter()
-			.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
-			.collect();
-		leaves_new.push(leaf);
-		let (tree, path) =
-			setup_tree_and_create_path_x5::<FrBls381>(&leaves_new, (leaves_new.len() - 1) as u64, &params5);
-		let root = tree.root().inner();
-		dbg!(&root);
+	pub fn set_curve(mut self, curve: Curve) -> Self {
+		self.curve = curve;
+		self
+	}
 
-		let mc = Circuit_x5::<FrBls381>::new(
-			arbitrary_input.clone(),
-			leaf_private,
-			(),
-			params5,
-			path,
-			root.clone(),
-			nullifier_hash,
-		);
+	pub fn set_relayer(mut self, relayer: &[u8]) -> Self {
+		self.relayer = relayer.to_vec();
+		self
+	}
 
-		// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-		let (pk, vk) = setup_random_groth16_x5::<_, Bls12_381>(&mut rng, ArkCurve::Bls381);
-		prove_groth16_x5::<_, Bls12_381>(&pk, mc.clone(), &mut rng)
+	pub fn set_recipient(mut self, recipient: &[u8]) -> Self {
+		self.recipient = recipient.to_vec();
+		self
+	}
+
+	pub fn set_exponentiation(mut self, exponentiation: &str) -> Self {
+		self.exponentiation = exponentiation.to_string();
+		self
+	}
+
+	pub fn build(self) -> ZKProof {
+		ZKProof::new(&self)
 	}
 }
 
@@ -295,18 +306,16 @@ mod test {
 			.iter()
 			.map(|item| hex::decode(item.replace("0x", "")).unwrap().try_into().unwrap())
 			.collect();
-		dbg!(leaves_bytes[0].len());
 		let relayer = hex::decode("929E7eb6997408C196828773db642D76e79bda93".replace("0x", "")).unwrap();
 		let recipient = hex::decode("929E7eb6997408C196828773db642D76e79bda93".replace("0x", "")).unwrap();
-		let zkp_input = ZkProofInput {
-			relayer,
-			recipient,
-			leaves: leaves_bytes,
-			curve: Curve::Bls381,
-			exponentiation: "5".to_string(),
-		};
+		let proof = ZkProofBuilder::new()
+			.set_curve(Curve::Bn254)
+			.set_exponentiation("5")
+			.set_leaves(&leaves_bytes)
+			.set_relayer(&relayer)
+			.set_recipient(&recipient)
+			.build();
 
-		let proof = ZKProof::new(&zkp_input);
 		match proof {
 			ZKProof::Bls12_381(proof) => {
 				dbg!(proof);
