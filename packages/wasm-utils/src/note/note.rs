@@ -287,7 +287,7 @@ impl NoteManager {
 }
 
 impl NoteBuilder {
-	fn generate_note(&self) -> Result<Note, ()> {
+	pub fn generate_note(&self) -> Result<Note, ()> {
 		NoteManager::generate(self)
 	}
 }
