@@ -250,8 +250,8 @@ impl ZkProofBuilder {
 		self.exponentiation = exponentiation.to_string();
 	}
 
-	pub fn build(self) -> ZKProof {
-		ZKProof::new(&self)
+	pub fn build(&self) -> ZKProof {
+		ZKProof::new(self)
 	}
 }
 
@@ -259,7 +259,10 @@ impl ZkProofBuilder {
 mod test {
 	use std::convert::TryInto;
 
+	use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+
 	use super::*;
+	use ark_ff::ToBytes;
 
 	#[test]
 	fn should_create_zkp() {
@@ -309,14 +312,15 @@ mod test {
 		proof_builder.set_relayer(&relayer);
 		proof_builder.set_recipient(&recipient);
 		let proof = proof_builder.build();
-
+		let mut proof_bytes = Vec::new();
 		match proof {
 			ZKProof::Bls12_381(proof) => {
-				dbg!(proof);
+				proof.write(&mut proof_bytes);
 			}
 			ZKProof::Bn254(proof) => {
-				dbg!(proof);
+				proof.write(&mut proof_bytes);
 			}
 		}
+		dbg!(proof_bytes);
 	}
 }
