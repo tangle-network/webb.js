@@ -1,8 +1,8 @@
-use crate::note::note::{LeafHasher, NoteGenerator, OpStatusCode};
 use ark_crypto_primitives::CRH as CRHTrait;
 use ark_ff::fields::PrimeField;
 use ark_ff::{to_bytes, BigInteger};
 use arkworks_gadgets::ark_std::rand;
+use arkworks_gadgets::ark_std::rand::SeedableRng;
 use arkworks_gadgets::leaf::mixer::MixerLeaf;
 use arkworks_gadgets::leaf::LeafCreation;
 use arkworks_gadgets::poseidon::sbox::PoseidonSbox;
@@ -13,6 +13,11 @@ use arkworks_gadgets::setup::common::{
 	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x3_5, setup_params_x5_5, Curve,
 	PoseidonCRH_x17_3, PoseidonCRH_x17_5, PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
 };
+
+use crate::note::note::{LeafHasher, NoteGenerator};
+use crate::types::OpStatusCode;
+
+const SEED: &[u8; 32] = b"WebbToolsPoseidonHasherSeed00000";
 
 pub struct ArkworksPoseidonBls12_381NoteGenerator {
 	exponentiation: usize,
@@ -27,6 +32,10 @@ type Leaf17_3 = MixerLeaf<Fr, PoseidonCRH_x17_3<Fr>>;
 
 impl NoteGenerator for ArkworksPoseidonBls12_381NoteGenerator {
 	type Rng = rand::rngs::StdRng;
+
+	fn get_rng(&self) -> Self::Rng {
+		rand::rngs::StdRng::from_seed(*SEED)
+	}
 
 	fn generate_secrets(&self, r: &mut Self::Rng) -> Result<Vec<u8>, OpStatusCode> {
 		let secrets = match (self.exponentiation, self.width) {
@@ -76,7 +85,7 @@ impl LeafHasher for ArkworksPoseidonBls12_381NoteGenerator {
 }
 
 impl ArkworksPoseidonBls12_381NoteGenerator {
-	fn get_params(&self) -> PoseidonParameters<Fr> {
+	pub fn get_params(&self) -> PoseidonParameters<Fr> {
 		match (self.exponentiation, self.width) {
 			(5, 3) => setup_params_x3_3::<Fr>(Curve::Bls381),
 			(5, 5) => setup_params_x5_5::<Fr>(Curve::Bls381),
@@ -90,7 +99,11 @@ impl ArkworksPoseidonBls12_381NoteGenerator {
 		}
 	}
 
-	fn set_up<T: Rounds>(_: T) -> Self {
+	pub fn new(exponentiation: usize, width: usize) -> Self {
+		Self { exponentiation, width }
+	}
+
+	pub fn set_up<T: Rounds>(_: T) -> Self {
 		let exponentiation = match T::SBOX {
 			PoseidonSbox::Exponentiation(e) => e,
 			PoseidonSbox::Inverse => {
@@ -106,16 +119,18 @@ impl ArkworksPoseidonBls12_381NoteGenerator {
 
 #[cfg(test)]
 mod test {
-	const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
-
-	use super::*;
-	use crate::note::note::NoteBuilder;
 	use arkworks_gadgets::ark_std::rand;
 	use arkworks_gadgets::ark_std::rand::SeedableRng;
 	use arkworks_gadgets::setup::common::{
 		PoseidonRounds_x17_3, PoseidonRounds_x17_5, PoseidonRounds_x3_3, PoseidonRounds_x3_5, PoseidonRounds_x5_3,
 		PoseidonRounds_x5_5,
 	};
+
+	use crate::note::note::NoteBuilder;
+
+	use super::*;
+
+	const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 
 	#[test]
 	fn arkworks_poseidon_bls12_381_note_generator_5x_3() {
