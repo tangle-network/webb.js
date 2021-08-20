@@ -61,7 +61,7 @@ struct NoteManager;
 impl NoteManager {
 	fn generate(note_builder: &NoteBuilder) -> Result<Note, ()> {
 		match (note_builder.backend, note_builder.curve) {
-			(Backend::Bulletproofs, Curve::Curve25519) => {
+			(_, Curve::Curve25519) => {
 				/*				let opts = PoseidonHasherOptions::default();
 				let pc_gens = PedersenGens::default();
 				let bp_gens = opts.bp_gens.clone().unwrap_or_else(|| BulletproofGens::new(16_400, 1));
@@ -121,7 +121,7 @@ impl NoteManager {
 		secrets: &[u8],
 	) -> Result<Vec<u8>, ()> {
 		match (backend, curve) {
-			(Backend::Bulletproofs, Curve::Curve25519) => {
+			(_, Curve::Curve25519) => {
 				/*				let opts = PoseidonHasherOptions::default();
 				let pc_gens = PedersenGens::default();
 				let bp_gens = opts.bp_gens.clone().unwrap_or_else(|| BulletproofGens::new(16_400, 1));
@@ -186,7 +186,7 @@ impl Default for NoteBuilder {
 			version: NoteVersion::V1,
 			prefix: NOTE_PREFIX.to_owned(),
 			group_id: 0,
-			curve: Curve::Curve25519,
+			curve: Curve::Bn254,
 			token_symbol: "EDG".to_string(),
 			hash_function: HashFunction::Poseidon3,
 		}
@@ -330,18 +330,18 @@ mod test {
 
 	#[test]
 	fn deserialize() {
-		let note  = "webb.mix-v1-EDG-0-185c1090215e9a66ed3ef8594a7403060df60ac2159537acb10684592d45eb2b16de70eff19a1f80828cf47a5d16502702ff3262acf54cd0b0d0dd7cc67ad415-Curve25519-Poseidon3-Bulletproofs-18-any-0";
+		let note  = "webb.mix-v1-EDG-0-185c1090215e9a66ed3ef8594a7403060df60ac2159537acb10684592d45eb2b16de70eff19a1f80828cf47a5d16502702ff3262acf54cd0b0d0dd7cc67ad415-Bn254-Poseidon3-Arkworks-18-any-0";
 		let note = Note::deserialize(note).unwrap();
 		assert_eq!(note.prefix.to_string(), "webb.mix".to_string());
 		assert_eq!(note.version.to_string(), "v1".to_string());
 		assert_eq!(note.token_symbol.to_string(), "EDG".to_string());
 		assert_eq!(note.amount.to_string(), "0".to_string());
 		assert_eq!(note.hash_function.to_string(), "Poseidon3".to_string());
-		assert_eq!(note.backend.to_string(), "Bulletproofs".to_string());
+		assert_eq!(note.backend.to_string(), "Arkworks".to_string());
 		assert_eq!(note.denomination.to_string(), "18".to_string());
 		assert_eq!(note.chain.to_string(), "any".to_string());
 		assert_eq!(note.group_id.to_string(), "0".to_string());
-		assert_eq!(note.curve.to_string(), "Curve25519".to_string());
+		assert_eq!(note.curve.to_string(), "Bn254".to_string());
 	}
 	#[test]
 	fn generate_note() {

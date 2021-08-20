@@ -25,7 +25,7 @@ ark-serialize = "0.3.0"
 ark-crypto-primitives = { version = "^0.3.0", default-features = true, features = ["r1cs"] }
 ark-ed-on-bn254 = { version = "^0.3.0", default-features = true, features = ["r1cs"] }
 pedersen-hash = { version = "0.1.0", git = "https://github.com/webb-tools/webb-rs.git", package = "pedersen-hash" }
-arkworks-gadgets = {path = "../../../arkworks-gadgets"}
+arkworks-gadgets = {version = "0.3.10"}
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 js-sys = "0.3"
 rand = { version = "0.7", features = ["wasm-bindgen"] }

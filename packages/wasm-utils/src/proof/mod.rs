@@ -1,5 +1,5 @@
 use ark_crypto_primitives::CRH;
-use ark_ff::{to_bytes, BigInteger, PrimeField};
+use ark_ff::{to_bytes, BigInteger, PrimeField, Zero};
 use arkworks_gadgets::ark_std::rand;
 use arkworks_gadgets::ark_std::rand::distributions::{Distribution, Standard};
 use arkworks_gadgets::ark_std::rand::rngs::StdRng;
@@ -67,6 +67,9 @@ impl ZKProof {
 			Curve::Bn254 => {
 				let recipient = FrBn254::from_be_bytes_mod_order(&proof_input.recipient);
 				let relayer = FrBn254::from_be_bytes_mod_order(&proof_input.relayer);
+
+				let fee = FrBn254::from_be_bytes_mod_order(&proof_input.fee.to_be_bytes());
+				let refund = FrBn254::from_be_bytes_mod_order(&proof_input.refund.to_be_bytes());
 				// todo fix this
 				match "5" {
 					"3" => {
@@ -74,7 +77,7 @@ impl ZKProof {
 					}
 					"5" => {
 						let params5 = setup_params_x5_5::<FrBn254>(ArkCurve::Bn254);
-						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer);
+						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer, fee, refund);
 						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x5::<_, FrBn254>(&params5, &mut rng);
 						let mut leaves_new: Vec<FrBn254> = proof_input
 							.leaves
@@ -106,7 +109,8 @@ impl ZKProof {
 					}
 					"17" => {
 						let params17 = setup_params_x17_5::<FrBn254>(ArkCurve::Bn254);
-						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer);
+						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer, fee, refund);
+
 						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x17::<_, FrBn254>(&params17, &mut rng);
 						let mut leaves_new: Vec<FrBn254> = proof_input
 							.leaves
@@ -144,6 +148,8 @@ impl ZKProof {
 			Curve::Bls381 => {
 				let recipient = FrBls381::from_be_bytes_mod_order(&proof_input.recipient);
 				let relayer = FrBls381::from_be_bytes_mod_order(&proof_input.relayer);
+				let fee = FrBls381::from_be_bytes_mod_order(&proof_input.fee.to_be_bytes());
+				let refund = FrBls381::from_be_bytes_mod_order(&proof_input.refund.to_be_bytes());
 
 				match "5" {
 					"3" => {
@@ -151,7 +157,7 @@ impl ZKProof {
 					}
 					"5" => {
 						let params5 = setup_params_x5_5::<FrBls381>(ArkCurve::Bls381);
-						let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer);
+						let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer, fee, refund);
 						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x5::<_, FrBls381>(&params5, &mut rng);
 						let mut leaves_new: Vec<FrBls381> = proof_input
 							.leaves
@@ -173,7 +179,7 @@ impl ZKProof {
 							rho: PrimeField::from_be_bytes_mod_order(&note.secret[64..]),
 						};
 						let leaf_private = private.build();
-						let nullifier_hash = Leaf_x5::create_nullifier(&leaf_private, params).unwrap();
+						let nullifier_hash = Leaf_x5::create_nullifier(&leaf_private, &params5).unwrap();
 
 						let mc = Circuit_x5::<FrBls381>::new(
 							arbitrary_input.clone(),
@@ -192,7 +198,7 @@ impl ZKProof {
 					}
 					"17" => {
 						let params5 = setup_params_x17_5::<FrBls381>(ArkCurve::Bls381);
-						let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer);
+						let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer, fee, refund);
 						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x17::<_, FrBls381>(&params5, &mut rng);
 						let mut leaves_new: Vec<FrBls381> = proof_input
 							.leaves
@@ -345,8 +351,8 @@ mod test {
 			"0x229cf5e35735f033bdc0b2ebce475836358146fc52b34057a1d5d663c80ce64d",
 		];
 
-		let note  = "webb.mix-v1-EDG-0-0x06e3ce829bd9fbe473f03afc439a62803f928b06dc3136b84d02375f05c4b4bf0f4f9ad247bace02ce65f9a129c4b2111c90e07e46c257983443a9413b45-Bls381-Poseidon3-Arkworks-18-any-0";
-		let note  = "webb.mix-v1-EDG-0-0xaafdf01e2254faa17fde2ce2a1b9051d4871537d6f24d8eb95ed4582f178ffaf31dde9b8e3a641155d0f1379f021428bad5480872c922dbad1ad10f67c3f-Bls381-Poseidon3-Arkworks-18-any-0";
+		let note  = "webb.mix-v1-EDG-0-185c1090215e9a66ed3ef8594a7403060df60ac2159537acb10684592d45eb2b16de70eff19a1f80828cf47a5d16502702ff3262acf54cd0b0d0dd7cc67ad415-Bls381-Poseidon3-Arkworks-18-any-0";
+		let note  = "webb.mix-v1-EDG-0-185c1090215e9a66ed3ef8594a7403060df60ac2159537acb10684592d45eb2b16de70eff19a1f80828cf47a5d16502702ff3262acf54cd0b0d0dd7cc67ad415-Bls381-Poseidon3-Arkworks-18-any-0";
 
 		let leaves_bytes: Vec<[u8; 32]> = leaves
 			.iter()
