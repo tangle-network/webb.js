@@ -273,7 +273,7 @@ impl FromStr for Note {
 		if note_val.is_empty() {
 			return Err(OpStatusCode::InvalidNoteSecrets);
 		}
-		let secret: Vec<u8> = hex::decode(&note_val).map_err(|_| OpStatusCode::HexParsingFailed)?;
+		let secret: Vec<u8> = hex::decode(&note_val.replace("0x", "")).map_err(|_| OpStatusCode::HexParsingFailed)?;
 		let curve: Curve = parts[5].parse()?;
 		let hash_function: HashFunction = parts[6].parse()?;
 		let backend: Backend = parts[7].parse()?;

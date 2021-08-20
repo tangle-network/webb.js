@@ -252,19 +252,6 @@ impl ProvingManager {
 		}
 	}
 
-	pub fn set_curve(&mut self, curve: Curve) -> Result<(), JsValue> {
-		let curve_string = JsValue::from(&curve).as_string().ok_or(OpStatusCode::InvalidCurve)?;
-		let curve: NoteCurve = curve_string.parse()?;
-		self.builder.set_curve(curve);
-		Ok(())
-	}
-
-	pub fn set_exponentiation(&mut self, exponentiation: JsString) -> Result<(), JsValue> {
-		let e: String = exponentiation.into();
-		self.builder.set_exponentiation(&e);
-		Ok(())
-	}
-
 	pub fn set_recipient(&mut self, recipient: JsString) -> Result<(), JsValue> {
 		let r: String = recipient.into();
 		let r = hex::decode(r).unwrap();
@@ -354,7 +341,6 @@ mod tests {
 			.unwrap();
 		pm.set_recipient(JsString::from("929E7eb6997408C196828773db642D76e79bda93"))
 			.unwrap();
-		pm.set_curve(Curve::from(JsValue::from(("Bls381")))).unwrap();
 		let leaves_ua: Array = leaves
 			.to_vec()
 			.iter()
