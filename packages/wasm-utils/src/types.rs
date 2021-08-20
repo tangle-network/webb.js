@@ -18,7 +18,6 @@ pub enum Chain {
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Backend {
-	Bulletproofs,
 	Arkworks,
 	Circom,
 }
@@ -42,7 +41,6 @@ impl fmt::Display for Backend {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
 			Backend::Arkworks => write!(f, "Arkworks"),
-			Backend::Bulletproofs => write!(f, "Bulletproofs"),
 			Backend::Circom => write!(f, "Circom"),
 		}
 	}
@@ -54,7 +52,6 @@ impl FromStr for Backend {
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
 			"Arkworks" => Ok(Backend::Arkworks),
-			"Bulletproofs" => Ok(Backend::Bulletproofs),
 			"Circom" => Ok(Backend::Circom),
 			_ => Err(OpStatusCode::InvalidBackend),
 		}

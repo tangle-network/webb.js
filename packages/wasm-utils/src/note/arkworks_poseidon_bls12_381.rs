@@ -17,7 +17,7 @@ use arkworks_gadgets::setup::common::{
 use crate::note::note::{LeafHasher, NoteGenerator};
 use crate::types::OpStatusCode;
 
-const SEED: &[u8; 32] = b"WebbToolsPoseidonHasherSeed";
+const SEED: &[u8; 32] = b"WebbToolsPoseidonHasherSeed00000";
 
 pub struct ArkworksPoseidonBls12_381NoteGenerator {
 	exponentiation: usize,
