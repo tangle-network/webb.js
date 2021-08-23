@@ -1,8 +1,8 @@
 use core::fmt;
 use std::str::FromStr;
 
-use bulletproofs::{BulletproofGens, PedersenGens};
-use bulletproofs_gadgets::poseidon::{PoseidonBuilder, PoseidonSbox};
+// use bulletproofs::{BulletproofGens, PedersenGens};
+// use bulletproofs_gadgets::poseidon::{PoseidonBuilder, PoseidonSbox};
 
 use crate::note::arkworks_poseidon_bls12_381::ArkworksPoseidonBls12_381NoteGenerator;
 use crate::note::arkworks_poseidon_bn254::ArkworksPoseidonBn254NoteGenerator;
@@ -301,7 +301,7 @@ impl FromStr for Note {
 		})
 	}
 }
-
+type BulletproofGens = u32;
 pub struct PoseidonHasherOptions {
 	/// The size of the permutation, in field elements.
 	pub width: usize,
