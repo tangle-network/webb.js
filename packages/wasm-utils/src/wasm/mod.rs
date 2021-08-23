@@ -266,6 +266,19 @@ impl ProvingManager {
 		Ok(())
 	}
 
+	pub fn set_note(&mut self, deposit_note: &DepositNote) -> Result<(), JsValue> {
+		let note = deposit_note.note.clone();
+		self.builder.set_note(note);
+		Ok(())
+	}
+
+	pub fn set_note_from_str(&mut self, note_str: JsString) -> Result<(), JsValue> {
+		let r: String = note_str.into();
+		let note = Note::deserialize(&r)?;
+		self.builder.set_note(note);
+		Ok(())
+	}
+
 	pub fn set_leaves(&mut self, leaves: Leaves) -> Result<(), JsValue> {
 		let ls: Vec<_> = Array::from(&leaves)
 			.to_vec()

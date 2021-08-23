@@ -48,10 +48,11 @@ export async function main() {
   const note = new wasm.DepositNote(noteBuilderInput);
   console.log(note.serialize());
   const pm = new wasm.ProvingManager();
+  pm.set_note(note);
   pm.set_relayer('929E7eb6997408C196828773db642D76e79bda93');
   pm.set_recipient('929E7eb6997408C196828773db642D76e79bda93');
-  pm.set_curve('Bls381');
   pm.set_leaves(leaves.map((hex) => hexToU8a(hex)));
+
   console.log(pm);
   let proof = pm.proof();
   console.log(proof);
