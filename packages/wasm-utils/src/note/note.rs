@@ -245,7 +245,7 @@ impl fmt::Display for Note {
 			//10
 			secrets,
 		];
-		let note = parts.join("-");
+		let note = parts.join(":");
 		write!(f, "{}", note)
 	}
 }
@@ -254,7 +254,7 @@ impl FromStr for Note {
 	type Err = OpStatusCode;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		let parts: Vec<&str> = s.split('-').collect();
+		let parts: Vec<&str> = s.split(':').collect();
 		let full = parts.len() == FULL_NOTE_LENGTH;
 		if !full {
 			return Err(OpStatusCode::InvalidNoteLength);
@@ -328,7 +328,7 @@ mod test {
 
 	#[test]
 	fn deserialize() {
-		let note  = "webb.mix-v1-any-Arkworks-Bn254-Poseidon17-EDG-18-0-5-7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let note  = "webb.mix:v1:any:Arkworks:Bn254:Poseidon17:EDG:18:0:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let note = Note::deserialize(note).unwrap();
 		assert_eq!(note.prefix.to_string(), "webb.mix".to_string());
 		assert_eq!(note.version.to_string(), "v1".to_string());
