@@ -30,8 +30,8 @@ pub trait NoteGenerator {
 			token_symbol: note_builder.token_symbol.clone(),
 			amount: note_builder.amount.clone(),
 			denomination: note_builder.denomination.clone(),
-			group_id: note_builder.group_id,
 			secret: secrets,
+			exponentiation: note_builder.exponentiation.clone(),
 		})
 	}
 }
@@ -53,7 +53,7 @@ pub struct NoteBuilder {
 	pub token_symbol: String,
 	pub amount: String,
 	pub denomination: String,
-	pub group_id: u32,
+	pub exponentiation: String,
 }
 
 struct NoteManager;
@@ -185,7 +185,7 @@ impl Default for NoteBuilder {
 			denomination: "18".to_string(),
 			version: NoteVersion::V1,
 			prefix: NOTE_PREFIX.to_owned(),
-			group_id: 0,
+			exponentiation: "5".to_string(),
 			curve: Curve::Bn254,
 			token_symbol: "EDG".to_string(),
 			hash_function: HashFunction::Poseidon3,
@@ -203,15 +203,13 @@ pub struct Note {
 	pub backend: Backend,
 	pub hash_function: HashFunction,
 	pub curve: Curve,
-
+	pub exponentiation: String,
 	/// mixer related items
 	pub secret: Vec<u8>,
 
 	pub token_symbol: String,
 	pub amount: String,
 	pub denomination: String,
-
-	group_id: u32,
 }
 
 impl Note {
@@ -228,24 +226,24 @@ impl fmt::Display for Note {
 			self.prefix.clone(),
 			//1 => version
 			self.version.to_string(),
-			//2 => token_symbol
-			self.token_symbol.clone(),
-			//3 => group_id
-			format!("{}", self.group_id),
-			//4
-			secrets,
-			//5 => curve
-			self.curve.to_string(),
-			//6 => hash_function
-			self.hash_function.to_string(),
-			//7 => backend
-			self.backend.to_string(),
-			//8 => denomination
-			self.denomination.clone(),
-			//9 => chain
+			//2 => chain
 			self.chain.clone(),
-			//10 => amount
+			//3 => backend
+			self.backend.to_string(),
+			//4 => curve
+			self.curve.to_string(),
+			//5 => hash_function
+			self.hash_function.to_string(),
+			//6 => token_symbol
+			self.token_symbol.clone(),
+			//7 => denomination
+			self.denomination.clone(),
+			//8 => amount
 			self.amount.clone(),
+			// 9
+			self.exponentiation.clone(),
+			//10
+			secrets,
 		];
 		let note = parts.join("-");
 		write!(f, "{}", note)
@@ -267,24 +265,23 @@ impl FromStr for Note {
 		}
 
 		let version: NoteVersion = parts[1].parse()?;
-		let token_symbol = parts[2].to_owned();
-		let group_id = parts[3].parse().map_err(|_| OpStatusCode::InvalidNoteId)?;
-		let note_val = parts[4];
+		let token_symbol = parts[6].to_owned();
+		let note_val = parts[10];
 		if note_val.is_empty() {
 			return Err(OpStatusCode::InvalidNoteSecrets);
 		}
 		let secret: Vec<u8> = hex::decode(&note_val.replace("0x", "")).map_err(|_| OpStatusCode::HexParsingFailed)?;
-		let curve: Curve = parts[5].parse()?;
-		let hash_function: HashFunction = parts[6].parse()?;
-		let backend: Backend = parts[7].parse()?;
-		let denomination = parts[8].to_string();
-		let chain = parts[9].to_string();
-		let amount = parts[10].to_string();
+		let curve: Curve = parts[4].parse()?;
+		let hash_function: HashFunction = parts[5].parse()?;
+		let backend: Backend = parts[3].parse()?;
+		let denomination = parts[7].to_string();
+		let chain = parts[2].to_string();
+		let amount = parts[8].to_string();
+		let exponentiation = parts[9].to_string();
 		Ok(Note {
 			prefix: NOTE_PREFIX.to_owned(),
 			version,
 			token_symbol,
-			group_id,
 			secret,
 			curve,
 			hash_function,
@@ -292,6 +289,7 @@ impl FromStr for Note {
 			denomination,
 			chain,
 			amount,
+			exponentiation,
 		})
 	}
 }
@@ -330,17 +328,16 @@ mod test {
 
 	#[test]
 	fn deserialize() {
-		let note  = "webb.mix-v1-EDG-0-185c1090215e9a66ed3ef8594a7403060df60ac2159537acb10684592d45eb2b16de70eff19a1f80828cf47a5d16502702ff3262acf54cd0b0d0dd7cc67ad415-Bn254-Poseidon3-Arkworks-18-any-0";
+		let note  = "webb.mix-v1-any-Arkworks-Bn254-Poseidon17-EDG-18-0-5-7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let note = Note::deserialize(note).unwrap();
 		assert_eq!(note.prefix.to_string(), "webb.mix".to_string());
 		assert_eq!(note.version.to_string(), "v1".to_string());
 		assert_eq!(note.token_symbol.to_string(), "EDG".to_string());
 		assert_eq!(note.amount.to_string(), "0".to_string());
-		assert_eq!(note.hash_function.to_string(), "Poseidon3".to_string());
+		assert_eq!(note.hash_function.to_string(), "Poseidon17".to_string());
 		assert_eq!(note.backend.to_string(), "Arkworks".to_string());
 		assert_eq!(note.denomination.to_string(), "18".to_string());
 		assert_eq!(note.chain.to_string(), "any".to_string());
-		assert_eq!(note.group_id.to_string(), "0".to_string());
 		assert_eq!(note.curve.to_string(), "Bn254".to_string());
 	}
 	#[test]
@@ -356,5 +353,6 @@ mod test {
 		assert_eq!(note.backend, Backend::Arkworks);
 		assert_eq!(note.denomination, "18".to_string());
 		assert_eq!(note.hash_function, HashFunction::Poseidon17);
+		dbg!(note.to_string());
 	}
 }
