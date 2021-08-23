@@ -12224,9 +12224,9 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"note-genertor-example@workspace:examples/note-generator":
+"note-generator-example@workspace:examples/note-generator":
   version: 0.0.0-use.local
-  resolution: "note-genertor-example@workspace:examples/note-generator"
+  resolution: "note-generator-example@workspace:examples/note-generator"
   dependencies:
     "@babel/core": ^7.12.10
     "@babel/preset-env": ^7.7.4

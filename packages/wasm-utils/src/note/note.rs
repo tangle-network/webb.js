@@ -193,7 +193,7 @@ impl Default for NoteBuilder {
 	}
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Note {
 	pub prefix: String,
 	pub version: NoteVersion,
