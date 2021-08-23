@@ -10,7 +10,7 @@ use crate::types::{Backend, Curve, HashFunction, NoteVersion, OpStatusCode};
 
 // use crate::note::bulletproof_posidon_25519::PoseidonNoteGeneratorCurve25519;
 
-const FULL_NOTE_LENGTH: usize = 11;
+const FULL_NOTE_LENGTH: usize = 12;
 const NOTE_PREFIX: &str = "webb.mix";
 
 pub trait NoteGenerator {
@@ -32,6 +32,7 @@ pub trait NoteGenerator {
 			denomination: note_builder.denomination.clone(),
 			secret: secrets,
 			exponentiation: note_builder.exponentiation.clone(),
+			width: note_builder.width.clone(),
 		})
 	}
 }
@@ -54,6 +55,7 @@ pub struct NoteBuilder {
 	pub amount: String,
 	pub denomination: String,
 	pub exponentiation: String,
+	pub width: String,
 }
 
 struct NoteManager;
@@ -189,6 +191,7 @@ impl Default for NoteBuilder {
 			curve: Curve::Bn254,
 			token_symbol: "EDG".to_string(),
 			hash_function: HashFunction::Poseidon3,
+			width: "5".to_string(),
 		}
 	}
 }
@@ -204,6 +207,7 @@ pub struct Note {
 	pub hash_function: HashFunction,
 	pub curve: Curve,
 	pub exponentiation: String,
+	pub width: String,
 	/// mixer related items
 	pub secret: Vec<u8>,
 
@@ -242,7 +246,9 @@ impl fmt::Display for Note {
 			self.amount.clone(),
 			// 9
 			self.exponentiation.clone(),
-			//10
+			// 10
+			self.width.clone(),
+			//11
 			secrets,
 		];
 		let note = parts.join(":");
@@ -266,7 +272,7 @@ impl FromStr for Note {
 
 		let version: NoteVersion = parts[1].parse()?;
 		let token_symbol = parts[6].to_owned();
-		let note_val = parts[10];
+		let note_val = parts[11];
 		if note_val.is_empty() {
 			return Err(OpStatusCode::InvalidNoteSecrets);
 		}
@@ -278,6 +284,7 @@ impl FromStr for Note {
 		let chain = parts[2].to_string();
 		let amount = parts[8].to_string();
 		let exponentiation = parts[9].to_string();
+		let width = parts[10].to_string();
 		Ok(Note {
 			prefix: NOTE_PREFIX.to_owned(),
 			version,
@@ -289,6 +296,7 @@ impl FromStr for Note {
 			denomination,
 			chain,
 			amount,
+			width,
 			exponentiation,
 		})
 	}
@@ -328,7 +336,8 @@ mod test {
 
 	#[test]
 	fn deserialize() {
-		let note  = "webb.mix:v1:any:Arkworks:Bn254:Poseidon17:EDG:18:0:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let note  =  "webb.mix:v1:any:Arkworks:Bn254:Poseidon17:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+
 		let note = Note::deserialize(note).unwrap();
 		assert_eq!(note.prefix.to_string(), "webb.mix".to_string());
 		assert_eq!(note.version.to_string(), "v1".to_string());
