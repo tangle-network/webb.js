@@ -1,23 +1,27 @@
 use ark_crypto_primitives::CRH;
-use ark_ff::PrimeField;
+use ark_ff::{to_bytes, BigInteger, PrimeField, Zero};
 use arkworks_gadgets::ark_std::rand;
 use arkworks_gadgets::ark_std::rand::distributions::{Distribution, Standard};
 use arkworks_gadgets::ark_std::rand::rngs::StdRng;
 use arkworks_gadgets::ark_std::rand::{Rng, SeedableRng};
+use arkworks_gadgets::leaf::mixer::{Private, PrivateBuilder};
 use arkworks_gadgets::poseidon::PoseidonParameters;
-use arkworks_gadgets::prelude::ark_bls12_381::{Bls12_381, Fr as FrBls381};
+use arkworks_gadgets::prelude::ark_bls12_381::{Bls12_381, Fr as FrBls381, Fr};
 use arkworks_gadgets::prelude::ark_bn254::{Bn254, Fr as FrBn254};
 use arkworks_gadgets::prelude::ark_groth16::{Proof, ProvingKey, VerifyingKey};
+use arkworks_gadgets::prelude::ark_std::convert::TryInto;
 use arkworks_gadgets::setup::common::{
 	setup_params_x17_5, setup_params_x5_3, setup_params_x5_5, setup_tree_and_create_path_x17,
-	setup_tree_and_create_path_x5, Curve as ArkCurve,
+	setup_tree_and_create_path_x5, Curve as ArkCurve, PoseidonCRH_x5_3,
 };
 use arkworks_gadgets::setup::mixer::{
 	get_public_inputs, prove_groth16_x17, prove_groth16_x5, setup_arbitrary_data, setup_leaf_x17, setup_leaf_x5,
-	setup_random_groth16_x17, setup_random_groth16_x5, Circuit_x17, Circuit_x5,
+	setup_random_groth16_x17, setup_random_groth16_x5, Circuit_x17, Circuit_x5, Leaf_x5,
 };
 
+use crate::note::note::{Note, NoteBuilder};
 use crate::types::Curve;
+use arkworks_gadgets::leaf::LeafCreation;
 
 pub fn get_rng() -> StdRng {
 	// arbitrary seed
@@ -27,13 +31,19 @@ pub fn get_rng() -> StdRng {
 	rand::rngs::StdRng::from_seed(seed)
 }
 
+#[derive(Debug, Eq, PartialEq)]
 pub struct ZkProofBuilder {
-	curve: Curve,
 	recipient: Vec<u8>,
 	relayer: Vec<u8>,
 	leaves: Vec<[u8; 32]>,
-	exponentiation: String,
+
+	leaf_index: u32,
+	fee: u32,
+	refund: u32,
+	note: Option<Note>,
 }
+type PrivateFr = Private<Fr>;
+
 const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 pub struct ZKP {
 	proof: ZKProof,
@@ -47,17 +57,27 @@ pub enum ZKProof {
 impl ZKProof {
 	pub(crate) fn new(proof_input: &ZkProofBuilder) -> Self {
 		let mut rng = get_rng();
-		match proof_input.curve {
+		let note = match &proof_input.note {
+			None => {
+				panic!();
+			}
+			Some(note) => note,
+		};
+		match note.curve {
 			Curve::Bn254 => {
 				let recipient = FrBn254::from_be_bytes_mod_order(&proof_input.recipient);
 				let relayer = FrBn254::from_be_bytes_mod_order(&proof_input.relayer);
-				match proof_input.exponentiation.as_str() {
+
+				let fee = FrBn254::from_be_bytes_mod_order(&proof_input.fee.to_be_bytes());
+				let refund = FrBn254::from_be_bytes_mod_order(&proof_input.refund.to_be_bytes());
+				// todo fix this
+				match "5" {
 					"3" => {
 						unimplemented!();
 					}
 					"5" => {
 						let params5 = setup_params_x5_5::<FrBn254>(ArkCurve::Bn254);
-						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer);
+						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer, fee, refund);
 						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x5::<_, FrBn254>(&params5, &mut rng);
 						let mut leaves_new: Vec<FrBn254> = proof_input
 							.leaves
@@ -89,7 +109,8 @@ impl ZKProof {
 					}
 					"17" => {
 						let params17 = setup_params_x17_5::<FrBn254>(ArkCurve::Bn254);
-						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer);
+						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer, fee, refund);
+
 						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x17::<_, FrBn254>(&params17, &mut rng);
 						let mut leaves_new: Vec<FrBn254> = proof_input
 							.leaves
@@ -127,14 +148,16 @@ impl ZKProof {
 			Curve::Bls381 => {
 				let recipient = FrBls381::from_be_bytes_mod_order(&proof_input.recipient);
 				let relayer = FrBls381::from_be_bytes_mod_order(&proof_input.relayer);
+				let fee = FrBls381::from_be_bytes_mod_order(&proof_input.fee.to_be_bytes());
+				let refund = FrBls381::from_be_bytes_mod_order(&proof_input.refund.to_be_bytes());
 
-				match proof_input.exponentiation.as_str() {
+				match "5" {
 					"3" => {
 						unimplemented!();
 					}
 					"5" => {
 						let params5 = setup_params_x5_5::<FrBls381>(ArkCurve::Bls381);
-						let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer);
+						let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer, fee, refund);
 						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x5::<_, FrBls381>(&params5, &mut rng);
 						let mut leaves_new: Vec<FrBls381> = proof_input
 							.leaves
@@ -142,13 +165,22 @@ impl ZKProof {
 							.into_iter()
 							.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
 							.collect();
-						leaves_new.push(leaf);
+						dbg!("here");
+
 						let (tree, path) = setup_tree_and_create_path_x5::<FrBls381>(
 							&leaves_new,
-							(leaves_new.len() - 1) as u64,
+							proof_input.leaf_index as u64,
 							&params5,
 						);
 						let root = tree.root().inner();
+						let mut private: PrivateBuilder<FrBls381> = PrivateBuilder {
+							r: PrimeField::from_be_bytes_mod_order(&note.secret[..32]),
+							nullifier: PrimeField::from_be_bytes_mod_order(&note.secret[32..64]),
+							rho: PrimeField::from_be_bytes_mod_order(&note.secret[64..]),
+						};
+						let leaf_private = private.build();
+						let nullifier_hash = Leaf_x5::create_nullifier(&leaf_private, &params5).unwrap();
+
 						let mc = Circuit_x5::<FrBls381>::new(
 							arbitrary_input.clone(),
 							leaf_private,
@@ -166,7 +198,7 @@ impl ZKProof {
 					}
 					"17" => {
 						let params5 = setup_params_x17_5::<FrBls381>(ArkCurve::Bls381);
-						let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer);
+						let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer, fee, refund);
 						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x17::<_, FrBls381>(&params5, &mut rng);
 						let mut leaves_new: Vec<FrBls381> = proof_input
 							.leaves
@@ -181,6 +213,7 @@ impl ZKProof {
 							&params5,
 						);
 						let root = tree.root().inner();
+
 						let mc = Circuit_x17::<FrBls381>::new(
 							arbitrary_input.clone(),
 							leaf_private,
@@ -212,11 +245,13 @@ impl ZKProof {
 impl Default for ZkProofBuilder {
 	fn default() -> Self {
 		Self {
-			curve: Curve::Bn254,
 			relayer: Vec::new(),
 			recipient: Vec::new(),
-			exponentiation: "5".to_string(),
 			leaves: Vec::new(),
+			note: None,
+			fee: 0,
+			refund: 0,
+			leaf_index: 0,
 		}
 	}
 }
@@ -225,44 +260,49 @@ impl ZkProofBuilder {
 		Self::default()
 	}
 
-	pub fn set_leaves(mut self, leaves: &[[u8; 32]]) -> Self {
+	pub fn set_leaves(&mut self, leaves: &[[u8; 32]]) -> () {
 		self.leaves = leaves.to_vec();
-		self
 	}
 
-	pub fn push_leaf(mut self, leaf: [u8; 32]) -> Self {
+	pub fn push_leaf(&mut self, leaf: [u8; 32]) -> () {
 		self.leaves.push(leaf);
-		self
 	}
 
-	pub fn set_curve(mut self, curve: Curve) -> Self {
-		self.curve = curve;
-		self
-	}
-
-	pub fn set_relayer(mut self, relayer: &[u8]) -> Self {
+	pub fn set_relayer(&mut self, relayer: &[u8]) -> () {
 		self.relayer = relayer.to_vec();
-		self
 	}
 
-	pub fn set_recipient(mut self, recipient: &[u8]) -> Self {
+	pub fn set_recipient(&mut self, recipient: &[u8]) -> () {
 		self.recipient = recipient.to_vec();
-		self
 	}
 
-	pub fn set_exponentiation(mut self, exponentiation: &str) -> Self {
-		self.exponentiation = exponentiation.to_string();
-		self
+	pub fn set_note(&mut self, note: Note) -> () {
+		self.note = Some(note);
 	}
 
-	pub fn build(self) -> ZKProof {
-		ZKProof::new(&self)
+	pub fn set_fee(&mut self, fee: u32) -> () {
+		self.fee = fee
+	}
+
+	pub fn set_leaf_index(&mut self, leaf_index: u32) -> () {
+		self.leaf_index = leaf_index
+	}
+
+	pub fn set_refund(&mut self, refund: u32) -> () {
+		self.refund = refund
+	}
+
+	pub fn build(&self) -> ZKProof {
+		ZKProof::new(self)
 	}
 }
 
 #[cfg(test)]
 mod test {
 	use std::convert::TryInto;
+
+	use ark_ff::ToBytes;
+	use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 
 	use super::*;
 
@@ -300,28 +340,45 @@ mod test {
 			"0x16bac9eacf126d54956794571e279532db94b38e89fba15ff029357cbb5b252c",
 			"0x18ff90d73fce2ccc8ee0133af9d44cf41fd6d5f9236267b2b3ab544ad53812c0",
 			"0x1498ad993ec57cc62702bf5d03ec618fa87d408855ffc77efb6245f8f8abd4d3",
+			"0x077c98195221f48536c2fddaa5ba6c055fa44766323058a1428f2bd6b87e7ca8",
+			"0x0aef6d7f2f3de51e2c1c5d2650d09173079cff32ef69258948719c1f12f36655",
+			"0x08206f9f6cf282fd9e63b0f6a30cbace3e2516254ed80102a21b540da6c93e09",
+			"0x111e01dbd40d63a05513225b22c4f44c2b6e9cd2eec326fee9a2567935e1b231",
+			"0x280e0ed146d74164467513bb32bce545aa85af73b183cf94d97bbce669093020",
+			"0x13354539bb66a9319688498071c9e2f21c68381185a7b78320182ae3531effe0",
+			"0x1b501b67b5770443b07229d18e0f1d06f2f2a663079b5f498dae56a2bcfb8004",
+			"0x229cf5e35735f033bdc0b2ebce475836358146fc52b34057a1d5d663c80ce64d",
+			"0x229cf5e35735f033bdc0b2ebce475836358146fc52b34057a1d5d663c80ce64d",
 		];
+
+		let note  = "webb.mix-v1-EDG-0-185c1090215e9a66ed3ef8594a7403060df60ac2159537acb10684592d45eb2b16de70eff19a1f80828cf47a5d16502702ff3262acf54cd0b0d0dd7cc67ad415-Bls381-Poseidon3-Arkworks-18-any-0";
+		let note  = "webb.mix-v1-EDG-0-185c1090215e9a66ed3ef8594a7403060df60ac2159537acb10684592d45eb2b16de70eff19a1f80828cf47a5d16502702ff3262acf54cd0b0d0dd7cc67ad415-Bls381-Poseidon3-Arkworks-18-any-0";
+
 		let leaves_bytes: Vec<[u8; 32]> = leaves
 			.iter()
 			.map(|item| hex::decode(item.replace("0x", "")).unwrap().try_into().unwrap())
 			.collect();
 		let relayer = hex::decode("929E7eb6997408C196828773db642D76e79bda93".replace("0x", "")).unwrap();
 		let recipient = hex::decode("929E7eb6997408C196828773db642D76e79bda93".replace("0x", "")).unwrap();
-		let proof = ZkProofBuilder::new()
-			.set_curve(Curve::Bn254)
-			.set_exponentiation("5")
-			.set_leaves(&leaves_bytes)
-			.set_relayer(&relayer)
-			.set_recipient(&recipient)
-			.build();
+		let mut proof_builder = ZkProofBuilder::new();
+		proof_builder.set_leaves(&leaves_bytes);
+		proof_builder.set_relayer(&relayer);
+		proof_builder.set_recipient(&recipient);
+		let note = Note::deserialize(note).unwrap();
+		proof_builder.set_leaf_index(40);
+		proof_builder.set_note(note);
 
+		let proof = proof_builder.build();
+
+		let mut proof_bytes = Vec::new();
 		match proof {
 			ZKProof::Bls12_381(proof) => {
-				dbg!(proof);
+				proof.write(&mut proof_bytes);
 			}
 			ZKProof::Bn254(proof) => {
-				dbg!(proof);
+				proof.write(&mut proof_bytes);
 			}
 		}
+		dbg!(proof_bytes);
 	}
 }

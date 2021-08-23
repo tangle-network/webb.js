@@ -2,12 +2,12 @@ use super::*;
 use core::fmt;
 use std::str::FromStr;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum NoteVersion {
 	V1,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Chain {
 	Edgeware,
 	Ganache,
@@ -16,20 +16,20 @@ pub enum Chain {
 	Rinkeby,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Backend {
 	Arkworks,
 	Circom,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Curve {
 	Bls381,
 	Bn254,
 	Curve25519,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum HashFunction {
 	Poseidon3,
 	Poseidon5,

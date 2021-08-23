@@ -6,129 +6,13 @@ use bulletproofs_gadgets::poseidon::{PoseidonBuilder, PoseidonSbox};
 
 use crate::note::arkworks_poseidon_bls12_381::ArkworksPoseidonBls12_381NoteGenerator;
 use crate::note::arkworks_poseidon_bn254::ArkworksPoseidonBn254NoteGenerator;
-use crate::types::OpStatusCode;
+use crate::types::{Backend, Curve, HashFunction, NoteVersion, OpStatusCode};
 
 // use crate::note::bulletproof_posidon_25519::PoseidonNoteGeneratorCurve25519;
 
 const FULL_NOTE_LENGTH: usize = 11;
 const NOTE_PREFIX: &str = "webb.mix";
 
-impl fmt::Display for Backend {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		match self {
-			Backend::Arkworks => write!(f, "Arkworks"),
-			Backend::Bulletproofs => write!(f, "Bulletproofs"),
-			Backend::Circom => write!(f, "Circom"),
-		}
-	}
-}
-
-impl FromStr for Backend {
-	type Err = OpStatusCode;
-
-	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		match s {
-			"Arkworks" => Ok(Backend::Arkworks),
-			"Bulletproofs" => Ok(Backend::Bulletproofs),
-			"Circom" => Ok(Backend::Circom),
-			_ => Err(OpStatusCode::InvalidBackend),
-		}
-	}
-}
-
-impl fmt::Display for HashFunction {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		match self {
-			HashFunction::Poseidon3 => write!(f, "Poseidon3"),
-			HashFunction::Poseidon5 => write!(f, "Poseidon5"),
-			HashFunction::Poseidon17 => write!(f, "Poseidon17"),
-			HashFunction::MiMCTornado => write!(f, "MiMCTornado"),
-		}
-	}
-}
-
-impl FromStr for HashFunction {
-	type Err = OpStatusCode;
-
-	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		match s {
-			"Poseidon3" => Ok(HashFunction::Poseidon3),
-			"Poseidon5" => Ok(HashFunction::Poseidon5),
-			"Poseidon17" => Ok(HashFunction::Poseidon17),
-			"MiMCTornado" => Ok(HashFunction::MiMCTornado),
-			_ => Err(OpStatusCode::InvalidHasFunction),
-		}
-	}
-}
-
-impl fmt::Display for Curve {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		match self {
-			Curve::Curve25519 => write!(f, "Curve25519"),
-			Curve::Bls381 => write!(f, "Bls381"),
-			Curve::Bn254 => write!(f, "Bn254"),
-		}
-	}
-}
-
-impl FromStr for Curve {
-	type Err = OpStatusCode;
-
-	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		match s {
-			"Curve25519" => Ok(Curve::Curve25519),
-			"Bls381" => Ok(Curve::Bls381),
-			"Bn254" => Ok(Curve::Bn254),
-			_ => Err(OpStatusCode::InvalidCurve),
-		}
-	}
-}
-
-impl fmt::Display for NoteVersion {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		match self {
-			NoteVersion::V1 => write!(f, "v1"),
-		}
-	}
-}
-
-impl FromStr for NoteVersion {
-	type Err = OpStatusCode;
-
-	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		match s {
-			"v1" => Ok(NoteVersion::V1),
-			_ => Err(OpStatusCode::InvalidNoteVersion),
-		}
-	}
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Backend {
-	Bulletproofs,
-	Arkworks,
-	Circom,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum HashFunction {
-	Poseidon3,
-	Poseidon5,
-	Poseidon17,
-	MiMCTornado,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Curve {
-	Bls381,
-	Bn254,
-	Curve25519,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum NoteVersion {
-	V1,
-}
 pub trait NoteGenerator {
 	type Rng;
 	fn get_rng(&self) -> Self::Rng;
@@ -177,7 +61,7 @@ struct NoteManager;
 impl NoteManager {
 	fn generate(note_builder: &NoteBuilder) -> Result<Note, ()> {
 		match (note_builder.backend, note_builder.curve) {
-			(Backend::Bulletproofs, Curve::Curve25519) => {
+			(_, Curve::Curve25519) => {
 				/*				let opts = PoseidonHasherOptions::default();
 				let pc_gens = PedersenGens::default();
 				let bp_gens = opts.bp_gens.clone().unwrap_or_else(|| BulletproofGens::new(16_400, 1));
@@ -237,7 +121,7 @@ impl NoteManager {
 		secrets: &[u8],
 	) -> Result<Vec<u8>, ()> {
 		match (backend, curve) {
-			(Backend::Bulletproofs, Curve::Curve25519) => {
+			(_, Curve::Curve25519) => {
 				/*				let opts = PoseidonHasherOptions::default();
 				let pc_gens = PedersenGens::default();
 				let bp_gens = opts.bp_gens.clone().unwrap_or_else(|| BulletproofGens::new(16_400, 1));
@@ -287,7 +171,7 @@ impl NoteManager {
 }
 
 impl NoteBuilder {
-	fn generate_note(&self) -> Result<Note, ()> {
+	pub fn generate_note(&self) -> Result<Note, ()> {
 		NoteManager::generate(self)
 	}
 }
@@ -302,14 +186,14 @@ impl Default for NoteBuilder {
 			version: NoteVersion::V1,
 			prefix: NOTE_PREFIX.to_owned(),
 			group_id: 0,
-			curve: Curve::Curve25519,
+			curve: Curve::Bn254,
 			token_symbol: "EDG".to_string(),
 			hash_function: HashFunction::Poseidon3,
 		}
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Note {
 	pub prefix: String,
 	pub version: NoteVersion,
@@ -389,7 +273,7 @@ impl FromStr for Note {
 		if note_val.is_empty() {
 			return Err(OpStatusCode::InvalidNoteSecrets);
 		}
-		let secret: Vec<u8> = hex::decode(&note_val).map_err(|_| OpStatusCode::HexParsingFailed)?;
+		let secret: Vec<u8> = hex::decode(&note_val.replace("0x", "")).map_err(|_| OpStatusCode::HexParsingFailed)?;
 		let curve: Curve = parts[5].parse()?;
 		let hash_function: HashFunction = parts[6].parse()?;
 		let backend: Backend = parts[7].parse()?;
@@ -446,18 +330,18 @@ mod test {
 
 	#[test]
 	fn deserialize() {
-		let note  = "webb.mix-v1-EDG-0-185c1090215e9a66ed3ef8594a7403060df60ac2159537acb10684592d45eb2b16de70eff19a1f80828cf47a5d16502702ff3262acf54cd0b0d0dd7cc67ad415-Curve25519-Poseidon3-Bulletproofs-18-any-0";
+		let note  = "webb.mix-v1-EDG-0-185c1090215e9a66ed3ef8594a7403060df60ac2159537acb10684592d45eb2b16de70eff19a1f80828cf47a5d16502702ff3262acf54cd0b0d0dd7cc67ad415-Bn254-Poseidon3-Arkworks-18-any-0";
 		let note = Note::deserialize(note).unwrap();
 		assert_eq!(note.prefix.to_string(), "webb.mix".to_string());
 		assert_eq!(note.version.to_string(), "v1".to_string());
 		assert_eq!(note.token_symbol.to_string(), "EDG".to_string());
 		assert_eq!(note.amount.to_string(), "0".to_string());
 		assert_eq!(note.hash_function.to_string(), "Poseidon3".to_string());
-		assert_eq!(note.backend.to_string(), "Bulletproofs".to_string());
+		assert_eq!(note.backend.to_string(), "Arkworks".to_string());
 		assert_eq!(note.denomination.to_string(), "18".to_string());
 		assert_eq!(note.chain.to_string(), "any".to_string());
 		assert_eq!(note.group_id.to_string(), "0".to_string());
-		assert_eq!(note.curve.to_string(), "Curve25519".to_string());
+		assert_eq!(note.curve.to_string(), "Bn254".to_string());
 	}
 	#[test]
 	fn generate_note() {

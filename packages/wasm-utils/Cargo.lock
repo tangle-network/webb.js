@@ -287,9 +287,9 @@ dependencies = [
 
 [[package]]
 name = "arkworks-gadgets"
-version = "0.3.7"
+version = "0.3.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5362297eb49be265d0f87d63ef983a168af65252a59d21be325c3a7e0291b544"
+checksum = "cdd3103817714935d4a1a1b6c3a0cbfb030535ead854244d8f144160d76a26b8"
 dependencies = [
  "ark-bls12-381",
  "ark-bn254",
@@ -1158,6 +1158,7 @@ dependencies = [
  "ark-crypto-primitives",
  "ark-ed-on-bn254",
  "ark-ff",
+ "ark-serialize",
  "arkworks-gadgets",
  "bincode",
  "bulletproofs-gadgets",
