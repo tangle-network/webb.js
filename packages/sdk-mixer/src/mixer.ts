@@ -1,3 +1,6 @@
+export {};
+
+/*
 import { Asset, Event, Note, WasmMessage, WasmWorkerMessageRX, WasmWorkerMessageTX } from '@webb-tools/sdk-mixer';
 import { LoggerService, EventBus } from '@webb-tools/app-util';
 
@@ -74,11 +77,11 @@ export class Mixer extends EventBus<MixerEventMap> {
     return mixer;
   }
 
-  /*
+  /!*
    * Restart the Mixer wont create a new call but will kill the underlying `WebWorker`
    * Reject all tasks
    *
-   * */
+   * *!/
   async restart(worker: Worker): Promise<void> {
     this.logger.info(`Restarting`);
     this.emit('restart', undefined);
@@ -91,22 +94,22 @@ export class Mixer extends EventBus<MixerEventMap> {
     }
   }
 
-  /**
+  /!**
    * Calculates the `BulletproofsGens` beforehand.
    * so it can be easily cached and reused whenever you need the mixer.
    *
-   * */
+   * *!/
   public static async preGenerateBulletproofGens(worker: Worker): Promise<Uint8Array> {
     const mixer = new Mixer(worker); // just to get the postMessage.
     const { bulletproofGens } = await mixer.postMessage('preGenerateBulletproofGens', undefined);
     return bulletproofGens;
   }
 
-  /**
+  /!**
    * Geneate a new Note without sending any TX.
    *
    * The generated note can be used later to do a deposit.
-   **/
+   **!/
   public async generateNote(asset: Asset): Promise<Note> {
     await this.destroyGuard();
     const { note: noteSerialized } = await this.postMessage('generateNote', {
@@ -115,14 +118,14 @@ export class Mixer extends EventBus<MixerEventMap> {
     return Note.deserialize(noteSerialized);
   }
 
-  /**
+  /!**
    * Prepare the Note and generate a `leaf` to be sent when doing the deposit TX.
    *
    * the `fn` callback should do the deposit operation and return the Transaction `BlockNumber`.
    *
    * This method also could be called by using only the `Asset` and if so this method will generate
    * a new `Note` and prepare it for the deposit TX.
-   **/
+   **!/
   public async generateNoteAndLeaf(asset: Asset): Promise<[Note, Uint8Array]> {
     await this.destroyGuard();
     const { note, leaf } = await this.postMessage('generateNote', {
@@ -132,3 +135,4 @@ export class Mixer extends EventBus<MixerEventMap> {
     return [Note.deserialize(note), leaf];
   }
 }
+*/

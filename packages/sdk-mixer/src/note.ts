@@ -1,6 +1,5 @@
 import { Asset } from '@webb-tools/sdk-mixer';
-import type { Backend, Curve, DepositNote, HashFunction } from '@webb-tools/wasm-utils';
-
+import type { DepositNote, Backend, Curve, HashFunction } from '@webb-tools/wasm-utils';
 export type NoteGenInput = {
   prefix: string;
   version: string;
@@ -25,6 +24,11 @@ export class Note {
     const wasm = await Note.wasm;
     const depositNote = wasm.DepositNote.deserialize(value);
     return new Note(depositNote);
+  }
+
+  async toDepositNote(): Promise<DepositNote> {
+    const wasm = await Note.wasm;
+    return wasm.DepositNote.deserialize(this.serialize());
   }
 
   public serialize(): string {

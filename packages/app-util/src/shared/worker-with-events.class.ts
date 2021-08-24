@@ -1,5 +1,6 @@
 import { LoggerService } from '../logger';
 
+type Obj = Record<string, unknown>;
 export type EventRX<T extends Record<string, unknown>> = {
   name: keyof T;
   value: T[keyof T];
@@ -11,8 +12,7 @@ export type EventTX<T extends Record<string, unknown>> = {
   error: boolean;
 };
 
-type RX<RxPayload> = EventTX<RxPayload>;
-type TX<TxPayload> = EventRX<TxPayload>;
+type TX<TxPayload extends Obj> = EventTX<TxPayload>;
 
 export abstract class WorkerWithEvents<
   EventNames extends keyof any,
@@ -23,25 +23,26 @@ export abstract class WorkerWithEvents<
 
   constructor() {
     ((self as unknown) as Worker).addEventListener('message', (event) => {
-      this.on((event.data as unknown) as RX<RxPayload>);
+      this.on((event.data as unknown) as RxPayload);
     });
   }
 
   protected abstract eventHandler<Name extends keyof RxPayload>(name: Name, value: RxPayload[Name]): void;
 
-  protected on(event: RX<RxPayload>): void {
-    const name = Object.keys(event)[0] as EventNames;
+  protected on(event: RxPayload): void {
+    const name = Object.keys(event)[0] as keyof RxPayload;
     this.Logger.trace(`Got message  ${name} `, event);
-    this.eventHandler(name, event.value);
+    this.eventHandler(name, event[name]);
   }
 
   protected emit<Name extends keyof TxPayload>(name: Name, value: TxPayload[Name], error = false): void {
     this.Logger.trace(`Got message ${name}`, value);
     const worker = (self as unknown) as Worker;
-    worker.postMessage({
+    const message: TX<TxPayload> = {
       name,
       value,
       error
-    });
+    };
+    worker.postMessage(message);
   }
 }

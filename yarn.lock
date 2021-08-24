@@ -4787,16 +4787,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webb-tools/sdk-merkle@^0.1.2-75, @webb-tools/sdk-merkle@workspace:packages/sdk-merkle":
-  version: 0.0.0-use.local
-  resolution: "@webb-tools/sdk-merkle@workspace:packages/sdk-merkle"
+"@webb-tools/sdk-merkle@npm:^0.1.2-75":
+  version: 0.1.2-75
+  resolution: "@webb-tools/sdk-merkle@npm:0.1.2-75"
   dependencies:
     "@polkadot/util": ^6.5.1
-    "@types/lodash": ^4.14.161
     "@webb-tools/sdk-core": ^0.1.2-75
     lodash: ^4.17.20
-  languageName: unknown
-  linkType: soft
+  checksum: 92ca43a7b1250527fcbd9d4070f34cf5198029be9939372a38d33e45ce0e38677d777313b41a2f95507fd26985b529c9f3fb0b721a52220be4634a6afe218c64
+  languageName: node
+  linkType: hard
 
 "@webb-tools/sdk-mixer@^0.1.2-44, @webb-tools/sdk-mixer@workspace:packages/sdk-mixer":
   version: 0.0.0-use.local

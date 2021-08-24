@@ -1,3 +1,5 @@
+export {};
+/*
 import type { TokenSymbol } from '@webb-tools/sdk-mixer';
 import { LoggerService } from '@webb-tools/app-util';
 import type { PoseidonHasher } from '@webb-tools/wasm-utils';
@@ -49,10 +51,10 @@ export class WasmMixer {
     });
   }
 
-  /**
+  /!**
    *  preGenerateBulletproofGens
    *  @description generates Bulletproof should be cached to faster future init
-   * */
+   * *!/
   public async preGenerateBulletproofGens(): Promise<void> {
     try {
       const wasm = await WasmMixer.wasm;
@@ -66,11 +68,11 @@ export class WasmMixer {
     }
   }
 
-  /**
+  /!**
    *  setBulletProofGens
    *  @description Setts the PoseidonHasher on the wasm mixer for future usage
    *  this should be called one time
-   * */
+   * *!/
   public async setBulletProofGens(bulletProofGens: Uint8Array): Promise<void> {
     const wasm = await WasmMixer.wasm;
     const opts = new wasm.PoseidonHasherOptions();
@@ -86,12 +88,12 @@ export class WasmMixer {
     return this._hasher;
   }
 
-  /**
+  /!**
    *  generateNote
    *  @description Generates a note from , this will create two random numbers R wish is the secret and Nullifer both are random
    *  @param {Asset}
    *  this should be called one time
-   * */
+   * *!/
   public async generateNote(asset: Asset): Promise<void> {
     try {
       const wasm = await WasmMixer.wasm;
@@ -141,3 +143,4 @@ export class WasmMixer {
     }
   }
 }
+*/

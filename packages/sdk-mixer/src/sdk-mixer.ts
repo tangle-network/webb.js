@@ -1,12 +1,12 @@
 import { WorkerWithEvents } from '@webb-tools/app-util/shared/worker-with-events.class';
 import { LoggerService } from '@webb-tools/app-util';
-import type { DepositNote, Leaves } from '@webb-tools/wasm-utils';
+import type { Leaves } from '@webb-tools/wasm-utils';
 
 type Events = 'generateZkp' | 'addLeaves';
 
 type Rx = {
   generateZkp: {
-    note: DepositNote;
+    noteString: string;
     leaves: Leaves;
     relayer: string;
     recipient: string;
@@ -17,7 +17,9 @@ type Rx = {
 };
 
 type Tx = {
-  generateZkp: '';
+  generateZkp: {
+    proof: string;
+  };
   addLeaves: undefined;
 };
 
@@ -30,17 +32,23 @@ export class SdkMixer extends WorkerWithEvents<Events, Tx, Rx> {
 
   private async generateZKP(paylaod: Rx['generateZkp']) {
     const wasm = await SdkMixer.wasm();
+    this.Logger.trace('Init proving manager');
     const pm = new wasm.ProvingManager();
-    pm.set_note(paylaod.note);
+    const note = wasm.DepositNote.deserialize(paylaod.noteString);
+    this.Logger.trace('Note Deserialize');
+    pm.set_note(note);
     pm.set_leaves(paylaod.leaves);
     pm.set_recipient(paylaod.recipient);
     pm.set_recipient(paylaod.relayer);
-    pm.set_note(paylaod.note);
     pm.set_fee(paylaod.fee);
     pm.set_refund(paylaod.refund);
 
     const proof = pm.proof();
-    return proof;
+    this.Logger.trace('Proof generation done ', proof);
+
+    this.emit('generateZkp', {
+      proof
+    });
   }
   eventHandler<Name extends keyof Rx>(name: Name, value: Rx[Name]) {
     switch (name) {
