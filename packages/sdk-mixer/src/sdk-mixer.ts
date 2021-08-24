@@ -2,7 +2,7 @@ import { WorkerWithEvents } from '@webb-tools/app-util/shared/worker-with-events
 import { LoggerService } from '@webb-tools/app-util';
 import type { Leaves } from '@webb-tools/wasm-utils';
 
-type Events = 'generateZkp' | 'addLeaves';
+type Events = 'generateZkp';
 
 type Rx = {
   generateZkp: {
@@ -13,14 +13,12 @@ type Rx = {
     fee: number;
     refund: number;
   };
-  addLeaves: [];
 };
 
 type Tx = {
   generateZkp: {
     proof: string;
   };
-  addLeaves: undefined;
 };
 
 export class SdkMixer extends WorkerWithEvents<Events, Tx, Rx> {
@@ -42,10 +40,9 @@ export class SdkMixer extends WorkerWithEvents<Events, Tx, Rx> {
     pm.set_recipient(paylaod.relayer);
     pm.set_fee(paylaod.fee);
     pm.set_refund(paylaod.refund);
-
     const proof = pm.proof();
     this.Logger.trace('Proof generation done ', proof);
-
+    // emit the event to the Worker
     this.emit('generateZkp', {
       proof
     });
@@ -54,8 +51,6 @@ export class SdkMixer extends WorkerWithEvents<Events, Tx, Rx> {
     switch (name) {
       case 'generateZkp':
         this.generateZKP(value as Rx['generateZkp']);
-      case 'addLeaves':
-        break;
     }
   }
 }

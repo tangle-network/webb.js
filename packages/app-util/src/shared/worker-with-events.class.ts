@@ -12,7 +12,7 @@ export type EventTX<T extends Record<string, unknown>> = {
   error: boolean;
 };
 
-type TX<TxPayload extends Obj> = EventTX<TxPayload>;
+export type TX<TxPayload extends Obj> = EventTX<TxPayload>;
 
 export abstract class WorkerWithEvents<
   EventNames extends keyof any,

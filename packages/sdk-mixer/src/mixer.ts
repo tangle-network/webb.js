@@ -1,8 +1,6 @@
-export {};
-
-/*
-import { Asset, Event, Note, WasmMessage, WasmWorkerMessageRX, WasmWorkerMessageTX } from '@webb-tools/sdk-mixer';
-import { LoggerService, EventBus } from '@webb-tools/app-util';
+import { EventBus, LoggerService } from '@webb-tools/app-util';
+import { Rx, Tx } from '@webb-tools/sdk-mixer/wasm-thread';
+import { TX as WorkerTx } from '@webb-tools/app-util/shared/worker-with-events.class';
 
 type MixerEventMap = {
   restart: undefined;
@@ -12,7 +10,7 @@ export class Mixer extends EventBus<MixerEventMap> {
   private readonly logger = LoggerService.new('Mixer');
   private destroyed = false;
 
-  private constructor(private worker: Worker, private bulletproofGens?: Uint8Array) {
+  private constructor(private worker: Worker) {
     super();
   }
 
@@ -29,16 +27,13 @@ export class Mixer extends EventBus<MixerEventMap> {
     }
   }
 
-  private postMessage<T extends keyof WasmMessage>(
-    name: T,
-    value: WasmWorkerMessageRX[T]
-  ): Promise<WasmWorkerMessageTX[T]> {
+  private postMessage<T extends keyof Rx>(name: T, value: Rx[T]): Promise<Tx[T]> {
     this.logger.debug(`Posting event ${name}`, value);
     this.worker.postMessage({ [name]: value });
 
     return new Promise((resolve, reject) => {
       let off: (() => void) | null | void = null;
-      const handler = ({ data: result }: { data: Event<T> }) => {
+      const handler = ({ data: result }: { data: WorkerTx<Tx> }) => {
         // if this is triggered that means the job is done and most likely this promise is resolved
         if (off) {
           off();
@@ -63,76 +58,25 @@ export class Mixer extends EventBus<MixerEventMap> {
     });
   }
 
-  public static async init(worker: Worker, bulletproofGens?: Uint8Array): Promise<Mixer> {
-    const mixer = new Mixer(worker, bulletproofGens);
-    if (bulletproofGens) {
-      await mixer.postMessage('setBulletProofGens', {
-        bulletProofGens: bulletproofGens
-      });
-    } else {
-      const be = await mixer.postMessage('preGenerateBulletproofGens', undefined);
-      mixer.bulletproofGens = be.bulletproofGens;
-    }
-
+  public static async init(worker: Worker): Promise<Mixer> {
+    const mixer = new Mixer(worker);
     return mixer;
   }
 
-  /!*
+  /*
    * Restart the Mixer wont create a new call but will kill the underlying `WebWorker`
    * Reject all tasks
    *
-   * *!/
+   * */
   async restart(worker: Worker): Promise<void> {
     this.logger.info(`Restarting`);
     this.emit('restart', undefined);
     this.worker.terminate();
     this.worker = worker;
-    if (this.bulletproofGens) {
-      await this.postMessage('setBulletProofGens', {
-        bulletProofGens: this.bulletproofGens
-      });
-    }
   }
 
-  /!**
-   * Calculates the `BulletproofsGens` beforehand.
-   * so it can be easily cached and reused whenever you need the mixer.
-   *
-   * *!/
-  public static async preGenerateBulletproofGens(worker: Worker): Promise<Uint8Array> {
-    const mixer = new Mixer(worker); // just to get the postMessage.
-    const { bulletproofGens } = await mixer.postMessage('preGenerateBulletproofGens', undefined);
-    return bulletproofGens;
-  }
-
-  /!**
-   * Geneate a new Note without sending any TX.
-   *
-   * The generated note can be used later to do a deposit.
-   **!/
-  public async generateNote(asset: Asset): Promise<Note> {
+  async generateZKP(data: Rx['generateZkp']) {
     await this.destroyGuard();
-    const { note: noteSerialized } = await this.postMessage('generateNote', {
-      ...asset
-    });
-    return Note.deserialize(noteSerialized);
-  }
-
-  /!**
-   * Prepare the Note and generate a `leaf` to be sent when doing the deposit TX.
-   *
-   * the `fn` callback should do the deposit operation and return the Transaction `BlockNumber`.
-   *
-   * This method also could be called by using only the `Asset` and if so this method will generate
-   * a new `Note` and prepare it for the deposit TX.
-   **!/
-  public async generateNoteAndLeaf(asset: Asset): Promise<[Note, Uint8Array]> {
-    await this.destroyGuard();
-    const { note, leaf } = await this.postMessage('generateNote', {
-      id: asset.id,
-      tokenSymbol: asset.tokenSymbol
-    });
-    return [Note.deserialize(note), leaf];
+    return await this.postMessage('generateZkp', data);
   }
 }
-*/
