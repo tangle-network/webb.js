@@ -279,6 +279,21 @@ impl ProvingManager {
 		Ok(())
 	}
 
+	pub fn set_leave_index(&mut self, index: u32) -> Result<(), JsValue> {
+		self.builder.set_leaf_index(index);
+		Ok(())
+	}
+
+	pub fn set_fee(&mut self, fee: u32) -> Result<(), JsValue> {
+		self.builder.set_fee(fee);
+		Ok(())
+	}
+
+	pub fn set_refund(&mut self, refund: u32) -> Result<(), JsValue> {
+		self.builder.set_refund(refund);
+		Ok(())
+	}
+
 	pub fn set_leaves(&mut self, leaves: Leaves) -> Result<(), JsValue> {
 		let ls: Vec<_> = Array::from(&leaves)
 			.to_vec()

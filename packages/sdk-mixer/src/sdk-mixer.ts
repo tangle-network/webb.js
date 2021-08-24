@@ -1,4 +1,4 @@
-import { EventTX, WorkerWithEvents } from '@webb-tools/app-util/shared/worker-with-events.class';
+import { WorkerWithEvents } from '@webb-tools/app-util/shared/worker-with-events.class';
 import { LoggerService } from '@webb-tools/app-util';
 import type { DepositNote, Leaves } from '@webb-tools/wasm-utils';
 
@@ -10,6 +10,8 @@ type Rx = {
     leaves: Leaves;
     relayer: string;
     recipient: string;
+    fee: number;
+    refund: number;
   };
   addLeaves: [];
 };
@@ -18,6 +20,7 @@ type Tx = {
   generateZkp: '';
   addLeaves: undefined;
 };
+
 export class SdkMixer extends WorkerWithEvents<Events, Tx, Rx> {
   protected Logger = LoggerService.get('sdk-mixer');
 
@@ -32,12 +35,17 @@ export class SdkMixer extends WorkerWithEvents<Events, Tx, Rx> {
     pm.set_leaves(paylaod.leaves);
     pm.set_recipient(paylaod.recipient);
     pm.set_recipient(paylaod.relayer);
+    pm.set_note(paylaod.note);
+    pm.set_fee(paylaod.fee);
+    pm.set_refund(paylaod.refund);
+
+    const proof = pm.proof();
+    return proof;
   }
-  protected eventHandler<Name extends Events>(name: Name, value ): void {
+  eventHandler<Name extends keyof Rx>(name: Name, value: Rx[Name]) {
     switch (name) {
       case 'generateZkp':
-        this.generateZKP(value)
-        break;
+        this.generateZKP(value as Rx['generateZkp']);
       case 'addLeaves':
         break;
     }
