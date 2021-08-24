@@ -4,4 +4,3 @@ export * from './mixer';
 export * from './types';
 export * from './zkproof';
 export * from './wasm-thread';
-export * from './sdk-mixer';

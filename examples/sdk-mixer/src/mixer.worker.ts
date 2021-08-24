@@ -1,4 +1,4 @@
 // @ts-ignore
-import { SdkMixer } from '@webb-tools/sdk-mixer';
+import { MixerWorker } from '@webb-tools/sdk-mixer';
 
-new SdkMixer();
+new MixerWorker();
