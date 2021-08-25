@@ -1,12 +1,14 @@
 use core::fmt;
 use std::str::FromStr;
 
-// use bulletproofs::{BulletproofGens, PedersenGens};
-// use bulletproofs_gadgets::poseidon::{PoseidonBuilder, PoseidonSbox};
+use wasm_bindgen::__rt::core::fmt::{Debug, Formatter};
 
 use crate::note::arkworks_poseidon_bls12_381::ArkworksPoseidonBls12_381NoteGenerator;
 use crate::note::arkworks_poseidon_bn254::ArkworksPoseidonBn254NoteGenerator;
 use crate::types::{Backend, Curve, HashFunction, NoteVersion, OpStatusCode};
+
+// use bulletproofs::{BulletproofGens, PedersenGens};
+// use bulletproofs_gadgets::poseidon::{PoseidonBuilder, PoseidonSbox};
 
 // use crate::note::bulletproof_posidon_25519::PoseidonNoteGeneratorCurve25519;
 
@@ -42,6 +44,22 @@ pub trait LeafHasher {
 	type HasherOptions: Clone;
 	fn hash(&self, secrets: &[u8], options: Self::HasherOptions) -> Result<Vec<u8>, OpStatusCode>;
 }
+
+pub trait CircomPolyfill {
+	fn hash(&self, secrets: &[u8]) -> Result<Vec<u8>, OpStatusCode>;
+	fn generate_secrets(&self) -> Result<Vec<u8>, OpStatusCode>;
+}
+
+pub struct CP {
+	inner: Box<dyn CircomPolyfill>,
+}
+
+impl Debug for CP {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+		write!(f, "-",)
+	}
+}
+
 #[derive(Debug)]
 pub struct NoteBuilder {
 	pub prefix: String,
@@ -56,6 +74,7 @@ pub struct NoteBuilder {
 	pub denomination: String,
 	pub exponentiation: String,
 	pub width: String,
+	circom_polyfill: Option<CP>,
 }
 
 struct NoteManager;
@@ -63,26 +82,28 @@ struct NoteManager;
 impl NoteManager {
 	fn generate(note_builder: &NoteBuilder) -> Result<Note, ()> {
 		match (note_builder.backend, note_builder.curve) {
-			(_, Curve::Curve25519) => {
-				/*				let opts = PoseidonHasherOptions::default();
-				let pc_gens = PedersenGens::default();
-				let bp_gens = opts.bp_gens.clone().unwrap_or_else(|| BulletproofGens::new(16_400, 1));
-
-				let poseidon_hasher = PoseidonBuilder::new(opts.width)
-				  .sbox(PoseidonSbox::Exponentiation3)
-				  .bulletproof_gens(bp_gens)
-				  .pedersen_gens(pc_gens)
-				  .build();
-
-				let note_generator = PoseidonNoteGeneratorCurve25519 {
-				  hasher: poseidon_hasher,
-				};
-				Ok(note_generator.generate(&self, &mut note_generator.get_rng()).unwrap())*/
-				unimplemented!()
-			}
-			(Backend::Circom, ..) => {
-				unimplemented!();
-			}
+			(Backend::Circom, ..) => match &note_builder.circom_polyfill {
+				None => {
+					unreachable!()
+				}
+				Some(cp) => {
+					let secrets = cp.inner.generate_secrets().map_err(|_| ())?;
+					Ok(Note {
+						prefix: note_builder.prefix.clone(),
+						version: note_builder.version,
+						chain: note_builder.chain.clone(),
+						backend: note_builder.backend,
+						curve: note_builder.curve,
+						hash_function: note_builder.hash_function,
+						token_symbol: note_builder.token_symbol.clone(),
+						amount: note_builder.amount.clone(),
+						denomination: note_builder.denomination.clone(),
+						secret: secrets,
+						exponentiation: note_builder.exponentiation.clone(),
+						width: note_builder.width.clone(),
+					})
+				}
+			},
 			(Backend::Arkworks, Curve::Bn254) => {
 				let note_generator = match note_builder.hash_function {
 					HashFunction::Poseidon3 => ArkworksPoseidonBn254NoteGenerator::new(3, 3),
@@ -121,28 +142,18 @@ impl NoteManager {
 		curve: Curve,
 		hash_function: HashFunction,
 		secrets: &[u8],
+		cp: Option<CP>,
 	) -> Result<Vec<u8>, ()> {
 		match (backend, curve) {
-			(_, Curve::Curve25519) => {
-				/*				let opts = PoseidonHasherOptions::default();
-				let pc_gens = PedersenGens::default();
-				let bp_gens = opts.bp_gens.clone().unwrap_or_else(|| BulletproofGens::new(16_400, 1));
-
-				let poseidon_hasher = PoseidonBuilder::new(opts.width)
-				  .sbox(PoseidonSbox::Exponentiation3)
-				  .bulletproof_gens(bp_gens)
-				  .pedersen_gens(pc_gens)
-				  .build();
-
-				let note_generator = PoseidonNoteGeneratorCurve25519 {
-				  hasher: poseidon_hasher,
-				};
-				Ok(note_generator.generate(&self, &mut note_generator.get_rng()).unwrap())*/
-				unimplemented!()
-			}
-			(Backend::Circom, ..) => {
-				unimplemented!();
-			}
+			(Backend::Circom, ..) => match &cp {
+				None => {
+					unreachable!()
+				}
+				Some(cp) => {
+					let leaf = cp.inner.hash(secrets).map_err(|_| ())?;
+					Ok(leaf)
+				}
+			},
 			(Backend::Arkworks, Curve::Bn254) => {
 				let note_generator = match hash_function {
 					HashFunction::Poseidon3 => ArkworksPoseidonBn254NoteGenerator::new(3, 3),
@@ -176,6 +187,10 @@ impl NoteBuilder {
 	pub fn generate_note(&self) -> Result<Note, ()> {
 		NoteManager::generate(self)
 	}
+
+	pub fn set_circom_polyfill(&mut self, circom_polyfill: CP) {
+		self.circom_polyfill = Some(circom_polyfill);
+	}
 }
 
 impl Default for NoteBuilder {
@@ -192,6 +207,7 @@ impl Default for NoteBuilder {
 			token_symbol: "EDG".to_string(),
 			hash_function: HashFunction::Poseidon3,
 			width: "5".to_string(),
+			circom_polyfill: None,
 		}
 	}
 }
