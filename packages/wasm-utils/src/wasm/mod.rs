@@ -1,3 +1,5 @@
+mod circom;
+
 use std::convert::{TryFrom, TryInto};
 use std::ops::Deref;
 
@@ -6,7 +8,7 @@ use ark_serialize::CanonicalSerialize;
 use js_sys::{Array, JsString, SharedArrayBuffer, Uint8Array};
 use wasm_bindgen::prelude::*;
 
-use crate::note::note::{Note, NoteBuilder};
+use crate::note::note::{CircomPolyfill, Note, NoteBuilder, CP};
 use crate::proof::{ZKProof, ZkProofBuilder};
 use crate::types::{Backend, Curve as NoteCurve, HashFunction, NoteVersion, OpStatusCode};
 
@@ -59,9 +61,11 @@ pub struct NoteBuilderInput {
 
 impl Default for NoteBuilderInput {
 	fn default() -> Self {
-		Self {
-			note_builder: NoteBuilder::default(),
-		}
+		let mut builder = NoteBuilder::default();
+		builder.set_circom_polyfill(CP {
+			inner: Box::new(circom::CircomPF::new()),
+		});
+		Self { note_builder: builder }
 	}
 }
 #[wasm_bindgen]
@@ -335,8 +339,9 @@ impl ProvingManager {
 
 #[cfg(test)]
 mod tests {
-	use super::*;
 	use wasm_bindgen_test::*;
+
+	use super::*;
 
 	wasm_bindgen_test_configure!(run_in_browser);
 

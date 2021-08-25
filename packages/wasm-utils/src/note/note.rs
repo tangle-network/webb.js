@@ -51,7 +51,7 @@ pub trait CircomPolyfill {
 }
 
 pub struct CP {
-	inner: Box<dyn CircomPolyfill>,
+	pub inner: Box<dyn CircomPolyfill>,
 }
 
 impl Debug for CP {
