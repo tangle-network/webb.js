@@ -35,7 +35,7 @@ export class MixerWorker extends WorkerWithEvents<Events, Tx, Rx> {
     const note = wasm.DepositNote.deserialize(paylaod.noteString);
     this.Logger.trace('Note Deserialize');
     pm.set_note(note);
-    pm.set_leaves(paylaod.leaves);
+    pm.set_leaves(payload.leaves);
     pm.set_recipient(paylaod.recipient);
     pm.set_recipient(paylaod.relayer);
     pm.set_fee(paylaod.fee);
