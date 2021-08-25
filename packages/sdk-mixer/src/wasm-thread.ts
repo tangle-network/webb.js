@@ -2,10 +2,10 @@ import { WorkerWithEvents } from '@webb-tools/app-util/shared/worker-with-events
 import { LoggerService } from '@webb-tools/app-util';
 import type { Leaves } from '@webb-tools/wasm-utils';
 
-type Events = 'generateZkp';
+type Events = 'generateZKP';
 
 export type Rx = {
-  generateZkp: {
+  generateZKP: {
     noteString: string;
     leaves: Leaves;
     relayer: string;
@@ -16,7 +16,7 @@ export type Rx = {
 };
 
 export type Tx = {
-  generateZkp: {
+  generateZKP: {
     proof: string;
   };
 };
@@ -28,7 +28,7 @@ export class MixerWorker extends WorkerWithEvents<Events, Tx, Rx> {
     return import('@webb-tools/wasm-utils');
   }
 
-  private async generateZKP(payload: Rx['generateZkp']) {
+  private async generateZKP(payload: Rx['generateZKP']) {
     const wasm = await MixerWorker.wasm();
     this.Logger.trace('Init proving manager');
     const pm = new wasm.ProvingManager();
@@ -43,14 +43,14 @@ export class MixerWorker extends WorkerWithEvents<Events, Tx, Rx> {
     const proof = pm.proof();
     this.Logger.trace('Proof generation done ', proof);
     // emit the event to the Worker
-    this.emit('generateZkp', {
+    this.emit('generateZKP', {
       proof
     });
   }
   eventHandler<Name extends keyof Rx>(name: Name, value: Rx[Name]) {
     switch (name) {
-      case 'generateZkp':
-        this.generateZKP(value as Rx['generateZkp']);
+      case 'generateZKP':
+        this.generateZKP(value as Rx['generateZKP']);
     }
   }
 }

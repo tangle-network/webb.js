@@ -75,8 +75,8 @@ export class Mixer extends EventBus<MixerEventMap> {
     this.worker = worker;
   }
 
-  async generateZKP(data: Rx['generateZkp']) {
+  async generateZKP(data: Rx['generateZKP']) {
     await this.destroyGuard();
-    return await this.postMessage('generateZkp', data);
+    return await this.postMessage('generateZKP', data);
   }
 }
