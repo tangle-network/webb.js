@@ -28,18 +28,18 @@ export class MixerWorker extends WorkerWithEvents<Events, Tx, Rx> {
     return import('@webb-tools/wasm-utils');
   }
 
-  private async generateZKP(paylaod: Rx['generateZkp']) {
+  private async generateZKP(payload: Rx['generateZkp']) {
     const wasm = await MixerWorker.wasm();
     this.Logger.trace('Init proving manager');
     const pm = new wasm.ProvingManager();
-    const note = wasm.DepositNote.deserialize(paylaod.noteString);
+    const note = wasm.DepositNote.deserialize(payload.noteString);
     this.Logger.trace('Note Deserialize');
-    pm.set_note(note);
-    pm.set_leaves(payload.leaves);
-    pm.set_recipient(paylaod.recipient);
-    pm.set_recipient(paylaod.relayer);
-    pm.set_fee(paylaod.fee);
-    pm.set_refund(paylaod.refund);
+    pm.setNote(note);
+    pm.setLeaves(payload.leaves);
+    pm.setRecipient(payload.recipient);
+    pm.setRelayer(payload.relayer);
+    pm.setFee(payload.fee);
+    pm.setRefund(payload.refund);
     const proof = pm.proof();
     this.Logger.trace('Proof generation done ', proof);
     // emit the event to the Worker

@@ -7,7 +7,7 @@ export type NoteGenInput = {
   backend: Backend;
   hashFunction: HashFunction;
   curve: Curve;
-  token_symbol: string;
+  tokenSymbol: string;
   amount: string;
   denomination: string;
 };
@@ -42,9 +42,9 @@ export class Note {
     noteBuilderInput.version('v1');
     noteBuilderInput.chain(noteGenInput.chain);
     noteBuilderInput.backend(noteGenInput.backend);
-    noteBuilderInput.hash_function(noteGenInput.hashFunction);
+    noteBuilderInput.hashFunction(noteGenInput.hashFunction);
     noteBuilderInput.curve(noteGenInput.curve);
-    noteBuilderInput.token_symbol(noteGenInput.token_symbol);
+    noteBuilderInput.tokenSymbol(noteGenInput.tokenSymbol);
     noteBuilderInput.amount(noteGenInput.amount);
     noteBuilderInput.denomination(noteGenInput.denomination);
     const depositNote = new wasm.DepositNote(noteBuilderInput);
