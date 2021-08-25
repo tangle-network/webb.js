@@ -279,7 +279,7 @@ impl ProvingManager {
 		Ok(())
 	}
 
-	pub fn set_leave_index(&mut self, index: u32) -> Result<(), JsValue> {
+	pub fn set_leaf_index(&mut self, index: u32) -> Result<(), JsValue> {
 		self.builder.set_leaf_index(index);
 		Ok(())
 	}
