@@ -35,23 +35,24 @@ export async function main() {
     '0x18ff90d73fce2ccc8ee0133af9d44cf41fd6d5f9236267b2b3ab544ad53812c0',
     '0x1498ad993ec57cc62702bf5d03ec618fa87d408855ffc77efb6245f8f8abd4d3'
   ];
-  const noteString =
-    'webb.mix-v1-EDG-0-185c1090215e9a66ed3ef8594a7403060df60ac2159537acb10684592d45eb2b16de70eff19a1f80828cf47a5d16502702ff3262acf54cd0b0d0dd7cc67ad415-Curve25519-Poseidon3-Bulletproofs-18-any-0';
+  // const noteString =
+  //   'webb.mix-v1-EDG-0-185c1090215e9a66ed3ef8594a7403060df60ac2159537acb10684592d45eb2b16de70eff19a1f80828cf47a5d16502702ff3262acf54cd0b0d0dd7cc67ad415-Curve25519-Poseidon3-Bulletproofs-18-any-0';
   const noteBuilderInput = new wasm.NoteBuilderInput();
+
   noteBuilderInput.amount('.1');
   noteBuilderInput.curve('Bls381');
   noteBuilderInput.backend('Arkworks');
   noteBuilderInput.version('v1');
   noteBuilderInput.denomination('5');
-  noteBuilderInput.hash_function('Poseidon5');
-  noteBuilderInput.token_symbol('ETH');
+  noteBuilderInput.hashFunction('Poseidon5');
+  noteBuilderInput.tokenSymbol('ETH');
+  noteBuilderInput.prefix('webb.mix');
   const note = new wasm.DepositNote(noteBuilderInput);
-  console.log(note.serialize());
   const pm = new wasm.ProvingManager();
-  pm.set_note(note);
-  pm.set_relayer('929E7eb6997408C196828773db642D76e79bda93');
-  pm.set_recipient('929E7eb6997408C196828773db642D76e79bda93');
-  pm.set_leaves(leaves.map((hex) => hexToU8a(hex)));
+  pm.setNote(note);
+  pm.setRelayer('929E7eb6997408C196828773db642D76e79bda93');
+  pm.setRecipient('929E7eb6997408C196828773db642D76e79bda93');
+  pm.setLeaves(leaves.map((hex) => hexToU8a(hex)));
 
   console.log(pm);
   let proof = pm.proof();

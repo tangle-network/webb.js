@@ -89,6 +89,7 @@ impl NoteBuilderInput {
 		self.note_builder.backend = c.parse().unwrap();
 	}
 
+	#[wasm_bindgen(js_name = hashFunction)]
 	pub fn hash_function(&mut self, hash_function: HF) -> () {
 		let c: String = JsValue::from(&hash_function).as_string().unwrap();
 		self.note_builder.hash_function = c.parse().unwrap();
@@ -99,6 +100,7 @@ impl NoteBuilderInput {
 		self.note_builder.curve = c.parse().unwrap();
 	}
 
+	#[wasm_bindgen(js_name = tokenSymbol)]
 	pub fn token_symbol(&mut self, token_symbol: JsString) -> () {
 		self.note_builder.token_symbol = token_symbol.into();
 	}
@@ -184,6 +186,7 @@ impl DepositNote {
 	}
 
 	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name = hashFunction)]
 	pub fn hash_function(&self) -> JsString {
 		self.note.hash_function.into()
 	}
@@ -200,6 +203,7 @@ impl DepositNote {
 	}
 
 	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name = tokenSymbol)]
 	pub fn token_symbol(&self) -> JsString {
 		self.note.token_symbol.clone().into()
 	}
@@ -252,6 +256,7 @@ impl ProvingManager {
 		}
 	}
 
+	#[wasm_bindgen(js_name = setRecipient)]
 	pub fn set_recipient(&mut self, recipient: JsString) -> Result<(), JsValue> {
 		let r: String = recipient.into();
 		let r = hex::decode(r).unwrap();
@@ -259,6 +264,7 @@ impl ProvingManager {
 		Ok(())
 	}
 
+	#[wasm_bindgen(js_name = setRelayer)]
 	pub fn set_relayer(&mut self, relayer: JsString) -> Result<(), JsValue> {
 		let r: String = relayer.into();
 		let r = hex::decode(r).unwrap();
@@ -266,12 +272,14 @@ impl ProvingManager {
 		Ok(())
 	}
 
+	#[wasm_bindgen(js_name = setNote)]
 	pub fn set_note(&mut self, deposit_note: &DepositNote) -> Result<(), JsValue> {
 		let note = deposit_note.note.clone();
 		self.builder.set_note(note);
 		Ok(())
 	}
 
+	#[wasm_bindgen(js_name = setNoteStr)]
 	pub fn set_note_from_str(&mut self, note_str: JsString) -> Result<(), JsValue> {
 		let r: String = note_str.into();
 		let note = Note::deserialize(&r)?;
@@ -279,6 +287,25 @@ impl ProvingManager {
 		Ok(())
 	}
 
+	#[wasm_bindgen(js_name = setLeafIndex)]
+	pub fn set_leaf_index(&mut self, index: u32) -> Result<(), JsValue> {
+		self.builder.set_leaf_index(index);
+		Ok(())
+	}
+
+	#[wasm_bindgen(js_name = setFee)]
+	pub fn set_fee(&mut self, fee: u32) -> Result<(), JsValue> {
+		self.builder.set_fee(fee);
+		Ok(())
+	}
+
+	#[wasm_bindgen(js_name = setRefund)]
+	pub fn set_refund(&mut self, refund: u32) -> Result<(), JsValue> {
+		self.builder.set_refund(refund);
+		Ok(())
+	}
+
+	#[wasm_bindgen(js_name = setLeaves)]
 	pub fn set_leaves(&mut self, leaves: Leaves) -> Result<(), JsValue> {
 		let ls: Vec<_> = Array::from(&leaves)
 			.to_vec()

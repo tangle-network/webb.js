@@ -1,8 +1,8 @@
 use core::fmt;
 use std::str::FromStr;
 
-use bulletproofs::{BulletproofGens, PedersenGens};
-use bulletproofs_gadgets::poseidon::{PoseidonBuilder, PoseidonSbox};
+// use bulletproofs::{BulletproofGens, PedersenGens};
+// use bulletproofs_gadgets::poseidon::{PoseidonBuilder, PoseidonSbox};
 
 use crate::note::arkworks_poseidon_bls12_381::ArkworksPoseidonBls12_381NoteGenerator;
 use crate::note::arkworks_poseidon_bn254::ArkworksPoseidonBn254NoteGenerator;
@@ -299,34 +299,6 @@ impl FromStr for Note {
 			width,
 			exponentiation,
 		})
-	}
-}
-
-pub struct PoseidonHasherOptions {
-	/// The size of the permutation, in field elements.
-	pub width: usize,
-	/// Number of full SBox rounds in beginning
-	pub full_rounds_beginning: Option<usize>,
-	/// Number of full SBox rounds in end
-	pub full_rounds_end: Option<usize>,
-	/// Number of partial rounds
-	pub partial_rounds: Option<usize>,
-	/// The desired (classical) security level, in bits.
-	pub security_bits: Option<usize>,
-	/// Bulletproof generators for proving/verifying (serialized)
-	pub bp_gens: Option<BulletproofGens>,
-}
-
-impl Default for PoseidonHasherOptions {
-	fn default() -> Self {
-		Self {
-			width: 6,
-			full_rounds_beginning: None,
-			full_rounds_end: None,
-			partial_rounds: None,
-			security_bits: None,
-			bp_gens: None,
-		}
 	}
 }
 

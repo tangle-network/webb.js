@@ -1,5 +1,4 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "lib": [
       "dom",
@@ -20,47 +19,41 @@
     "skipDefaultLibCheck": true,
     "paths": {
       "@webb-tools/api": [
-        "../../packages/api/src"
+        "../../packages/api/api"
       ],
 
       "@webb-tools/api/*": [
-        "../../packages/api/src/*"
+        "../../packages/api/build/*"
       ],
       "@webb-tools/types": [
-        "../../packages/types/src"
+        "../../packages/types/build"
       ],
       "@webb-tools/types/*": [
-        "../../packages/types/src/*"
+        "../../packages/types/build/*"
       ],
       "@webb-tools/type-definitions": [
-        "../../packages/type-definitions/src"
+        "../../packages/type-definitions/build"
       ],
       "@webb-tools/type-definitions/*": [
-        "../../packages/type-definitions/src/*"
+        "../../packages/type-definitions/build/*"
       ],
       "@webb-tools/sdk-core": [
-        "../../packages/sdk-core/src"
+        "../../packages/sdk-core/build"
       ],
       "@webb-tools/sdk-core/*": [
-        "../../packages/sdk-core/src/*"
-      ],
-      "@webb-tools/sdk-merkle": [
-        "../../packages/sdk-merkle/src"
-      ],
-      "@webb-tools/sdk-merkle/*": [
-        "../../packages/sdk-merkle/src/*"
+        "../../packages/sdk-core/build/*"
       ],
       "@webb-tools/sdk-mixer": [
-        "../../packages/sdk-mixer/src"
+        "../../packages/sdk-mixer/build"
       ],
       "@webb-tools/sdk-mixer/*": [
-        "../../packages/sdk-mixer/src/*"
+        "../../packages/sdk-mixer/build/*"
       ],
       "@webb-tools/app-util": [
-        "../../packages/app-util/src"
+        "../../packages/app-util/build"
       ],
       "@webb-tools/app-util/*": [
-        "../../packages/app-util/src/*"
+        "../../packages/app-util/build/*"
       ],
       "@webb-tools/wasm-utils": [
         "../../packages/wasm-utils/build"
