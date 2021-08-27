@@ -16,6 +16,9 @@
   "module": "wasm-utils.js",
   "types": "wasm-utils.d.ts",
   "sideEffects": false,
+  "dependencies": {
+    "@weeb-tools/app-utils": "0.1.2-75"
+  },
   "devDependencies": {
     "@open-web3/dev-config": "^0.1.10",
     "@wasm-tool/wasm-pack-plugin": "^1.3",

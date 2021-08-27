@@ -41,7 +41,7 @@ export async function main() {
 
   noteBuilderInput.amount('.1');
   noteBuilderInput.curve('Bls381');
-  noteBuilderInput.backend('Arkworks');
+  noteBuilderInput.backend('Circom');
   noteBuilderInput.version('v1');
   noteBuilderInput.denomination('5');
   noteBuilderInput.hashFunction('Poseidon5');
@@ -49,6 +49,7 @@ export async function main() {
   noteBuilderInput.prefix('webb.mix');
   const note = new wasm.DepositNote(noteBuilderInput);
   const pm = new wasm.ProvingManager();
+  console.log(note.serialize());
   pm.setNote(note);
   pm.setRelayer('929E7eb6997408C196828773db642D76e79bda93');
   pm.setRecipient('929E7eb6997408C196828773db642D76e79bda93');

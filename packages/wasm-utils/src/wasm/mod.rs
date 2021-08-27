@@ -1,5 +1,3 @@
-mod circom;
-
 use std::convert::{TryFrom, TryInto};
 use std::ops::Deref;
 
@@ -11,6 +9,8 @@ use wasm_bindgen::prelude::*;
 use crate::note::note::{CircomPolyfill, Note, NoteBuilder, CP};
 use crate::proof::{ZKProof, ZkProofBuilder};
 use crate::types::{Backend, Curve as NoteCurve, HashFunction, NoteVersion, OpStatusCode};
+
+mod circom;
 
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
@@ -255,6 +255,10 @@ impl TryFrom<Uint8Array> for Uint8Arrayx32 {
 impl ProvingManager {
 	#[wasm_bindgen(constructor)]
 	pub fn new() -> ProvingManager {
+		let mut builder = ZkProofBuilder::default();
+		builder.set_circom_polyfill(crate::proof::CP {
+			inner: Box::new(circom::CircomPF::new()),
+		});
 		ProvingManager {
 			builder: ZkProofBuilder::default(),
 		}
@@ -344,7 +348,14 @@ mod tests {
 	use super::*;
 
 	wasm_bindgen_test_configure!(run_in_browser);
-
+	#[wasm_bindgen_test]
+	fn tornado_note() {
+		let mut note_builder = NoteBuilderInput::default();
+		note_builder.backend(BE::from(JsValue::from("Circom")));
+		let dn = DepositNote::new(note_builder).unwrap();
+		let note = dn.serialize();
+		web_sys::console::log_1(&note.into());
+	}
 	#[wasm_bindgen_test]
 	fn generate_proof() {
 		let leaves = [
@@ -392,7 +403,9 @@ mod tests {
 			.map(|leaf_str| hex::decode(leaf_str.replace("0x", "")).unwrap())
 			.map(|v| Uint8Array::from(v.as_slice()))
 			.collect();
+		let note:JsString = JsString::from("webb.mix:v1:any:Circom:Bn254:Poseidon3:EDG:18:0:5:5:998c12e6304acd6e25f0a6acf60507ab3829118515a746ea792a820a58c3d733644827aa7c161447e7f7df676020b0b53dbbcb3f43a949f4dc3334b7a1c0");
 		pm.set_leaves(Leaves::from(JsValue::from(leaves_ua))).unwrap();
+		pm.set_note_from_str(note);
 		let proof = pm.proof().unwrap();
 		dbg!(proof);
 	}

@@ -1,3 +1,6 @@
+use std::fmt;
+use std::fmt::{Debug, Formatter};
+
 use ark_crypto_primitives::CRH;
 use ark_ff::{to_bytes, BigInteger, PrimeField, Zero};
 use arkworks_gadgets::ark_std::rand;
@@ -5,6 +8,7 @@ use arkworks_gadgets::ark_std::rand::distributions::{Distribution, Standard};
 use arkworks_gadgets::ark_std::rand::rngs::StdRng;
 use arkworks_gadgets::ark_std::rand::{Rng, SeedableRng};
 use arkworks_gadgets::leaf::mixer::{Private, PrivateBuilder};
+use arkworks_gadgets::leaf::LeafCreation;
 use arkworks_gadgets::poseidon::PoseidonParameters;
 use arkworks_gadgets::prelude::ark_bls12_381::{Bls12_381, Fr as FrBls381, Fr};
 use arkworks_gadgets::prelude::ark_bn254::{Bn254, Fr as FrBn254};
@@ -20,8 +24,7 @@ use arkworks_gadgets::setup::mixer::{
 };
 
 use crate::note::note::{Note, NoteBuilder};
-use crate::types::Curve;
-use arkworks_gadgets::leaf::LeafCreation;
+use crate::types::{Backend, Curve};
 
 pub fn get_rng() -> StdRng {
 	// arbitrary seed
@@ -29,6 +32,28 @@ pub fn get_rng() -> StdRng {
 		1, 0, 0, 0, 23, 0, 0, 0, 200, 1, 0, 0, 210, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	];
 	rand::rngs::StdRng::from_seed(seed)
+}
+pub struct ZKPInput {
+	pub recipient: Vec<u8>,
+	pub relayer: Vec<u8>,
+	pub leaves: Vec<[u8; 32]>,
+
+	pub leaf_index: u32,
+	pub fee: u32,
+	pub refund: u32,
+}
+pub trait CricomZKPPolyFill {
+	fn generate_zkp(&self, input: ZKPInput) -> Vec<u8>;
+}
+
+pub struct CP {
+	pub inner: Box<dyn CricomZKPPolyFill>,
+}
+
+impl Debug for CP {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+		write!(f, "-",)
+	}
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -41,6 +66,8 @@ pub struct ZkProofBuilder {
 	fee: u32,
 	refund: u32,
 	note: Option<Note>,
+
+	circom_polyfill: Option<CP>,
 }
 type PrivateFr = Private<Fr>;
 
@@ -63,8 +90,24 @@ impl ZKProof {
 			}
 			Some(note) => note,
 		};
-		match note.curve {
-			Curve::Bn254 => {
+		match (note.backend, note.curve) {
+			(Backend::Circom) => match &proof_input.circom_polyfill {
+				None => {
+					unreachable!();
+				}
+				Some(cp) => {
+					let proof_byes = cp.inner.generate_zkp(ZKPInput {
+						recipient: proof_input.recipient.clone(),
+						relayer: proof_input.relayer.clone(),
+						leaves: proof_input.leaves.clone(),
+						leaf_index: proof_input.leaf_index,
+						fee: proof_input.fee,
+						refund: proof_input.refund,
+					});
+					Self::Bls12_381(Proof::<Bls12_381>::default())
+				}
+			},
+			(Backend::Arkworks, Curve::Bn254) => {
 				let recipient = FrBn254::from_be_bytes_mod_order(&proof_input.recipient);
 				let relayer = FrBn254::from_be_bytes_mod_order(&proof_input.relayer);
 
@@ -156,7 +199,7 @@ impl ZKProof {
 					}
 				}
 			}
-			Curve::Bls381 => {
+			(Backend::Arkworks, Curve::Bls381) => {
 				let recipient = FrBls381::from_be_bytes_mod_order(&proof_input.recipient);
 				let relayer = FrBls381::from_be_bytes_mod_order(&proof_input.relayer);
 				let fee = FrBls381::from_be_bytes_mod_order(&proof_input.fee.to_be_bytes());
@@ -251,7 +294,7 @@ impl ZKProof {
 					}
 				}
 			}
-			Curve::Curve25519 => {
+			(Backend::Arkworks, Curve::Curve25519) => {
 				// using bullet proof
 				unimplemented!();
 			}
@@ -269,10 +312,15 @@ impl Default for ZkProofBuilder {
 			fee: 0,
 			refund: 0,
 			leaf_index: 0,
+			circom_polyfill: None,
 		}
 	}
 }
 impl ZkProofBuilder {
+	pub fn set_circom_polyfill(&mut self, circom_polyfill: CP) {
+		self.circom_polyfill = Some(circom_polyfill);
+	}
+
 	pub fn new() -> Self {
 		Self::default()
 	}
