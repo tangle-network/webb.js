@@ -1,18 +1,29 @@
 use core::fmt;
 use std::str::FromStr;
 
-// use bulletproofs::{BulletproofGens, PedersenGens};
-// use bulletproofs_gadgets::poseidon::{PoseidonBuilder, PoseidonSbox};
-
 use crate::note::arkworks_poseidon_bls12_381::ArkworksPoseidonBls12_381NoteGenerator;
 use crate::note::arkworks_poseidon_bn254::ArkworksPoseidonBn254NoteGenerator;
 use crate::types::{Backend, Curve, HashFunction, NoteVersion, OpStatusCode};
 
-// use crate::note::bulletproof_posidon_25519::PoseidonNoteGeneratorCurve25519;
-
 const FULL_NOTE_LENGTH: usize = 12;
 const NOTE_PREFIX: &str = "webb.mix";
 
+fn generate_with_secrets(note_builder: &NoteBuilder, secrets: &[u8]) -> Result<Note, OpStatusCode> {
+	Ok(Note {
+		prefix: note_builder.prefix.clone(),
+		version: note_builder.version,
+		chain: note_builder.chain.clone(),
+		backend: note_builder.backend,
+		curve: note_builder.curve,
+		hash_function: note_builder.hash_function,
+		token_symbol: note_builder.token_symbol.clone(),
+		amount: note_builder.amount.clone(),
+		denomination: note_builder.denomination.clone(),
+		secret: secrets.to_vec(),
+		exponentiation: note_builder.exponentiation.clone(),
+		width: note_builder.width.clone(),
+	})
+}
 pub trait NoteGenerator {
 	type Rng;
 	fn get_rng(&self) -> Self::Rng;
@@ -20,20 +31,7 @@ pub trait NoteGenerator {
 	fn generate_secrets(&self, r: &mut Self::Rng) -> Result<Vec<u8>, OpStatusCode>;
 	fn generate(&self, note_builder: &NoteBuilder, r: &mut Self::Rng) -> Result<Note, OpStatusCode> {
 		let secrets = Self::generate_secrets(self, r).map_err(|_| OpStatusCode::SecretGenFailed)?;
-		Ok(Note {
-			prefix: note_builder.prefix.clone(),
-			version: note_builder.version,
-			chain: note_builder.chain.clone(),
-			backend: note_builder.backend,
-			curve: note_builder.curve,
-			hash_function: note_builder.hash_function,
-			token_symbol: note_builder.token_symbol.clone(),
-			amount: note_builder.amount.clone(),
-			denomination: note_builder.denomination.clone(),
-			secret: secrets,
-			exponentiation: note_builder.exponentiation.clone(),
-			width: note_builder.width.clone(),
-		})
+		generate_with_secrets(note_builder, &secrets)
 	}
 }
 
@@ -56,6 +54,7 @@ pub struct NoteBuilder {
 	pub denomination: String,
 	pub exponentiation: String,
 	pub width: String,
+	pub secrets: Option<Vec<u8>>,
 }
 
 struct NoteManager;
@@ -63,26 +62,18 @@ struct NoteManager;
 impl NoteManager {
 	fn generate(note_builder: &NoteBuilder) -> Result<Note, ()> {
 		match (note_builder.backend, note_builder.curve) {
-			(_, Curve::Curve25519) => {
-				/*				let opts = PoseidonHasherOptions::default();
-				let pc_gens = PedersenGens::default();
-				let bp_gens = opts.bp_gens.clone().unwrap_or_else(|| BulletproofGens::new(16_400, 1));
-
-				let poseidon_hasher = PoseidonBuilder::new(opts.width)
-				  .sbox(PoseidonSbox::Exponentiation3)
-				  .bulletproof_gens(bp_gens)
-				  .pedersen_gens(pc_gens)
-				  .build();
-
-				let note_generator = PoseidonNoteGeneratorCurve25519 {
-				  hasher: poseidon_hasher,
-				};
-				Ok(note_generator.generate(&self, &mut note_generator.get_rng()).unwrap())*/
-				unimplemented!()
-			}
-			(Backend::Circom, ..) => {
-				unimplemented!();
-			}
+			(_, Curve::Curve25519) => match &note_builder.secrets {
+				None => {
+					unimplemented!();
+				}
+				Some(secrets) => return generate_with_secrets(note_builder, secrets.as_slice()).map_err(|_| ()),
+			},
+			(Backend::Circom, ..) => match &note_builder.secrets {
+				None => {
+					unimplemented!();
+				}
+				Some(secrets) => return generate_with_secrets(note_builder, secrets.as_slice()).map_err(|_| ()),
+			},
 			(Backend::Arkworks, Curve::Bn254) => {
 				let note_generator = match note_builder.hash_function {
 					HashFunction::Poseidon3 => ArkworksPoseidonBn254NoteGenerator::new(3, 3),
@@ -124,20 +115,6 @@ impl NoteManager {
 	) -> Result<Vec<u8>, ()> {
 		match (backend, curve) {
 			(_, Curve::Curve25519) => {
-				/*				let opts = PoseidonHasherOptions::default();
-				let pc_gens = PedersenGens::default();
-				let bp_gens = opts.bp_gens.clone().unwrap_or_else(|| BulletproofGens::new(16_400, 1));
-
-				let poseidon_hasher = PoseidonBuilder::new(opts.width)
-				  .sbox(PoseidonSbox::Exponentiation3)
-				  .bulletproof_gens(bp_gens)
-				  .pedersen_gens(pc_gens)
-				  .build();
-
-				let note_generator = PoseidonNoteGeneratorCurve25519 {
-				  hasher: poseidon_hasher,
-				};
-				Ok(note_generator.generate(&self, &mut note_generator.get_rng()).unwrap())*/
 				unimplemented!()
 			}
 			(Backend::Circom, ..) => {
@@ -192,6 +169,7 @@ impl Default for NoteBuilder {
 			token_symbol: "EDG".to_string(),
 			hash_function: HashFunction::Poseidon3,
 			width: "5".to_string(),
+			secrets: None,
 		}
 	}
 }

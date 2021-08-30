@@ -112,6 +112,13 @@ impl NoteBuilderInput {
 	pub fn denomination(&mut self, denomination: JsString) -> () {
 		self.note_builder.denomination = denomination.into();
 	}
+
+	#[wasm_bindgen(js_name= setSecrets)]
+	pub fn set_secrets(&mut self, secrets: JsString) -> () {
+		let secrets_string: String = secrets.into();
+		let sec = hex::decode(secrets_string.replace("0x", "")).unwrap();
+		self.note_builder.secrets = Some(sec);
+	}
 }
 
 impl From<OpStatusCode> for JsValue {
