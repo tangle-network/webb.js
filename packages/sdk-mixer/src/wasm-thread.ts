@@ -47,6 +47,7 @@ export class MixerWorker extends WorkerWithEvents<Events, Tx, Rx> {
       proof
     });
   }
+
   eventHandler<Name extends keyof Rx>(name: Name, value: Rx[Name]) {
     switch (name) {
       case 'generateZKP':
