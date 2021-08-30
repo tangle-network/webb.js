@@ -1,11 +1,12 @@
-mod arkworks_poseidon_bls12_381;
-mod arkworks_poseidon_bn254;
 use core::fmt;
 use std::str::FromStr;
 
 use crate::note::arkworks_poseidon_bls12_381::ArkworksPoseidonBls12_381NoteGenerator;
 use crate::note::arkworks_poseidon_bn254::ArkworksPoseidonBn254NoteGenerator;
 use crate::types::{Backend, Curve, HashFunction, NoteVersion, OpStatusCode};
+
+mod arkworks_poseidon_bls12_381;
+mod arkworks_poseidon_bn254;
 
 const FULL_NOTE_LENGTH: usize = 12;
 const NOTE_PREFIX: &str = "webb.mix";
@@ -139,9 +140,6 @@ impl NoteManager {
 					}
 				};
 				Ok(note_generator.hash(secrets, note_generator.get_params()).unwrap())
-			}
-			_ => {
-				unimplemented!()
 			}
 		}
 	}

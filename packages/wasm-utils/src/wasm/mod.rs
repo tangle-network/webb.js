@@ -259,13 +259,18 @@ impl TryFrom<Uint8Array> for Uint8Arrayx32 {
 	}
 }
 
+impl Default for ProvingManager {
+	fn default() -> Self {
+		Self {
+			builder: ZkProofBuilder::default(),
+		}
+	}
+}
 #[wasm_bindgen]
 impl ProvingManager {
 	#[wasm_bindgen(constructor)]
 	pub fn new() -> ProvingManager {
-		ProvingManager {
-			builder: ZkProofBuilder::default(),
-		}
+		ProvingManager::default()
 	}
 
 	#[wasm_bindgen(js_name = setRecipient)]
