@@ -1,5 +1,6 @@
 import { Asset } from '@webb-tools/sdk-mixer';
-import type { DepositNote, Backend, Curve, HashFunction } from '@webb-tools/wasm-utils';
+import type { Backend, Curve, DepositNote, HashFunction } from '@webb-tools/wasm-utils';
+
 export type NoteGenInput = {
   prefix: string;
   version: string;
@@ -10,6 +11,7 @@ export type NoteGenInput = {
   tokenSymbol: string;
   amount: string;
   denomination: string;
+  secrets?: string;
 };
 
 export class Note {
@@ -35,6 +37,10 @@ export class Note {
     return this.note.serialize();
   }
 
+  getLeaf(): Uint8Array {
+    return this.note.getLeafCommitment();
+  }
+
   public static async generateNote(noteGenInput: NoteGenInput): Promise<Note> {
     const wasm = await Note.wasm;
     const noteBuilderInput = new wasm.NoteBuilderInput();
@@ -47,6 +53,9 @@ export class Note {
     noteBuilderInput.tokenSymbol(noteGenInput.tokenSymbol);
     noteBuilderInput.amount(noteGenInput.amount);
     noteBuilderInput.denomination(noteGenInput.denomination);
+    if (noteGenInput.secrets) {
+      noteBuilderInput.setSecrets(noteGenInput.secrets);
+    }
     const depositNote = new wasm.DepositNote(noteBuilderInput);
     return new Note(depositNote);
   }
