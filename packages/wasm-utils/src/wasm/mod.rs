@@ -168,6 +168,12 @@ impl DepositNote {
 		Ok(DepositNote { note: n })
 	}
 
+	#[wasm_bindgen(js_name = getLeafCommitment)]
+	pub fn get_leaf_commitment(&self) -> Result<Uint8Array, JsValue> {
+		let leaf: Vec<u8> = NoteBuilder::get_leaf(&self.note).map_err(|_| OpStatusCode::Unknown)?;
+		Ok(Uint8Array::from(leaf.as_slice()))
+	}
+
 	pub fn serialize(&self) -> JsString {
 		JsString::from(self.note.to_string())
 	}
@@ -342,8 +348,9 @@ impl ProvingManager {
 
 #[cfg(test)]
 mod tests {
-	use super::*;
 	use wasm_bindgen_test::*;
+
+	use super::*;
 
 	wasm_bindgen_test_configure!(run_in_browser);
 

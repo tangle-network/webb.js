@@ -153,6 +153,10 @@ impl NoteBuilder {
 	pub fn generate_note(&self) -> Result<Note, ()> {
 		NoteManager::generate(self)
 	}
+
+	pub fn get_leaf(note: &Note) -> Result<Vec<u8>, ()> {
+		NoteManager::get_leaf_commitment(note.backend, note.curve, note.hash_function, &note.secret)
+	}
 }
 
 impl Default for NoteBuilder {
