@@ -15,137 +15,211 @@ declare module '@polkadot/api/types/submittable' {
       /**
        * Adds an array of leaf data into the tree and adds calculated root to
        * the cache.
-       * 
+       *
        * Can only be called by the manager if a manager is set.
-       * 
+       *
        * Weights:
        * - Dependent on argument: `members`
-       * 
+       *
        * - Base weight: 384_629_956_000
        * - DB weights: 3 reads, 2 writes
        * - Additional weights: 20_135_984_000 * members.len()
        **/
-      addMembers: AugmentedSubmittable<(treeId: TreeId | AnyNumber | Uint8Array, members: Vec<ScalarData> | (ScalarData | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [TreeId, Vec<ScalarData>]>;
+      addMembers: AugmentedSubmittable<
+        (
+          treeId: TreeId | AnyNumber | Uint8Array,
+          members: Vec<ScalarData> | (ScalarData | string | Uint8Array)[]
+        ) => SubmittableExtrinsic<ApiType>,
+        [TreeId, Vec<ScalarData>]
+      >;
       /**
        * Adds a verifying key to the storage.
-       * 
+       *
        * Can only be called by the root.
        **/
-      addVerifyingKey: AugmentedSubmittable<(key: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Bytes]>;
+      addVerifyingKey: AugmentedSubmittable<
+        (key: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>,
+        [Bytes]
+      >;
       /**
        * Creates a new tree and sets a new manager for that tree. The
        * initial manager is the sender. Also increments the mixer id counter
        * in the storage. If _depth is not provided, max tree depth is
        * assumed.
-       * 
+       *
        * Weights:
        * - Dependent on arguments: _depth
-       * 
+       *
        * - Base weight: 8_356_000
        * - DB weights: 1 read, 3 writes
        * - Additional weights: 151_000 * _depth
        **/
-      createTree: AugmentedSubmittable<(mgrRequired: bool | boolean | Uint8Array, depth: Option<u8> | null | object | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [bool, Option<u8>]>;
+      createTree: AugmentedSubmittable<
+        (
+          mgrRequired: bool | boolean | Uint8Array,
+          depth: Option<u8> | null | object | string | Uint8Array
+        ) => SubmittableExtrinsic<ApiType>,
+        [bool, Option<u8>]
+      >;
       /**
        * Initializes the merkle tree
-       * 
+       *
        * Can only be called by the manager or root.
        **/
-      initializeTree: AugmentedSubmittable<(treeId: TreeId | AnyNumber | Uint8Array, keyId: KeyId | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [TreeId, KeyId]>;
+      initializeTree: AugmentedSubmittable<
+        (
+          treeId: TreeId | AnyNumber | Uint8Array,
+          keyId: KeyId | AnyNumber | Uint8Array
+        ) => SubmittableExtrinsic<ApiType>,
+        [TreeId, KeyId]
+      >;
       /**
        * Sets manager account id.
-       * 
+       *
        * Can only be called by the root or the current manager.
-       * 
+       *
        * Weights:
        * - Independent of the arguments.
-       * 
+       *
        * - Base weight: 8_000_000
        * - DB weights: 1 read, 1 write
        **/
-      setManager: AugmentedSubmittable<(treeId: TreeId | AnyNumber | Uint8Array, newManager: AccountId | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TreeId, AccountId]>;
+      setManager: AugmentedSubmittable<
+        (
+          treeId: TreeId | AnyNumber | Uint8Array,
+          newManager: AccountId | string | Uint8Array
+        ) => SubmittableExtrinsic<ApiType>,
+        [TreeId, AccountId]
+      >;
       /**
        * Sets if a manager is required for specific actions like adding
        * nullifiers or leaves into the tree.
-       * 
+       *
        * Can only be called by the root or the current manager.
-       * 
+       *
        * Weights:
        * - Independend of the arguments.
-       * 
+       *
        * - Base weight: 7_000_000
        * - DB weights: 1 read, 1 write
        **/
-      setManagerRequired: AugmentedSubmittable<(treeId: TreeId | AnyNumber | Uint8Array, managerRequired: bool | boolean | Uint8Array) => SubmittableExtrinsic<ApiType>, [TreeId, bool]>;
+      setManagerRequired: AugmentedSubmittable<
+        (
+          treeId: TreeId | AnyNumber | Uint8Array,
+          managerRequired: bool | boolean | Uint8Array
+        ) => SubmittableExtrinsic<ApiType>,
+        [TreeId, bool]
+      >;
       /**
        * Set stopped flag inside the storage.
-       * 
+       *
        * Can only be called by the root or the current manager.
-       * 
+       *
        * Weights:
        * - Independent of the arguments.
-       * 
+       *
        * - Base weight: 8_000_000
        * - DB weights: 1 read, 1 write
        **/
-      setStopped: AugmentedSubmittable<(treeId: TreeId | AnyNumber | Uint8Array, stopped: bool | boolean | Uint8Array) => SubmittableExtrinsic<ApiType>, [TreeId, bool]>;
+      setStopped: AugmentedSubmittable<
+        (
+          treeId: TreeId | AnyNumber | Uint8Array,
+          stopped: bool | boolean | Uint8Array
+        ) => SubmittableExtrinsic<ApiType>,
+        [TreeId, bool]
+      >;
       /**
        * Adds a verifying key to the storage.
-       * 
+       *
        * Can only be called by the root.
        **/
-      setVerifyingKey: AugmentedSubmittable<(keyId: KeyId | AnyNumber | Uint8Array, key: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [KeyId, Bytes]>;
+      setVerifyingKey: AugmentedSubmittable<
+        (keyId: KeyId | AnyNumber | Uint8Array, key: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>,
+        [KeyId, Bytes]
+      >;
       /**
        * Sets the verifying key for a tree.
-       * 
+       *
        * Can only be called by the manager if a manager is set.
        **/
-      setVerifyingKeyForTree: AugmentedSubmittable<(keyId: KeyId | AnyNumber | Uint8Array, treeId: TreeId | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [KeyId, TreeId]>;
+      setVerifyingKeyForTree: AugmentedSubmittable<
+        (
+          keyId: KeyId | AnyNumber | Uint8Array,
+          treeId: TreeId | AnyNumber | Uint8Array
+        ) => SubmittableExtrinsic<ApiType>,
+        [KeyId, TreeId]
+      >;
       /**
        * Verification stub for testing, these verification functions should
        * not need to be used directly as extrinsics. Rather, higher-order
        * modules should use the module functions to verify and execute
        * further logic.
-       * 
+       *
        * Verifies the membership proof.
-       * 
+       *
        * Weights:
        * - Dependent on the argument: `path`
        * - Base weight: 383_420_867_000
        * - DB weights: 1 read
        * - Additional weights: 814_291_000 * path.len()
        **/
-      verify: AugmentedSubmittable<(treeId: TreeId | AnyNumber | Uint8Array, leaf: ScalarData | string | Uint8Array, path: Vec<ITuple<[bool, ScalarData]>> | ([bool | boolean | Uint8Array, ScalarData | string | Uint8Array])[]) => SubmittableExtrinsic<ApiType>, [TreeId, ScalarData, Vec<ITuple<[bool, ScalarData]>>]>;
+      verify: AugmentedSubmittable<
+        (
+          treeId: TreeId | AnyNumber | Uint8Array,
+          leaf: ScalarData | string | Uint8Array,
+          path: Vec<ITuple<[bool, ScalarData]>> | [bool | boolean | Uint8Array, ScalarData | string | Uint8Array][]
+        ) => SubmittableExtrinsic<ApiType>,
+        [TreeId, ScalarData, Vec<ITuple<[bool, ScalarData]>>]
+      >;
       /**
        * Generic tx
        **/
       [key: string]: SubmittableExtrinsicFunction<ApiType>;
     };
     mixer: {
-      createNew: AugmentedSubmittable<(currencyId: CurrencyIdOf | AnyNumber | Uint8Array, size: BalanceOf | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [CurrencyIdOf, BalanceOf]>;
-      createNewAndInitialize: AugmentedSubmittable<(currencyId: CurrencyIdOf | AnyNumber | Uint8Array, size: BalanceOf | AnyNumber | Uint8Array, keyId: KeyId | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [CurrencyIdOf, BalanceOf, KeyId]>;
+      createNew: AugmentedSubmittable<
+        (
+          currencyId: CurrencyIdOf | AnyNumber | Uint8Array,
+          size: BalanceOf | AnyNumber | Uint8Array
+        ) => SubmittableExtrinsic<ApiType>,
+        [CurrencyIdOf, BalanceOf]
+      >;
+      createNewAndInitialize: AugmentedSubmittable<
+        (
+          currencyId: CurrencyIdOf | AnyNumber | Uint8Array,
+          size: BalanceOf | AnyNumber | Uint8Array,
+          keyId: KeyId | AnyNumber | Uint8Array
+        ) => SubmittableExtrinsic<ApiType>,
+        [CurrencyIdOf, BalanceOf, KeyId]
+      >;
       /**
        * Deposits the fixed amount into the mixer with id of `mixer_id`
        * Multiple deposits can be inserted together since `data_points` is an
        * array.
-       * 
+       *
        * Fails in case the mixer is stopped or not initialized.
-       * 
+       *
        * Weights:
        * - Dependent on argument: `data_points`
-       * 
+       *
        * - Base weight: 417_168_400_000
        * - DB weights: 8 reads, 5 writes
        * - Additional weights: 21_400_442_000 * data_points.len()
        **/
-      deposit: AugmentedSubmittable<(mixerId: TreeId | AnyNumber | Uint8Array, dataPoints: Vec<ScalarData> | (ScalarData | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [TreeId, Vec<ScalarData>]>;
+      deposit: AugmentedSubmittable<
+        (
+          mixerId: TreeId | AnyNumber | Uint8Array,
+          dataPoints: Vec<ScalarData> | (ScalarData | string | Uint8Array)[]
+        ) => SubmittableExtrinsic<ApiType>,
+        [TreeId, Vec<ScalarData>]
+      >;
       /**
        * Stops the operation of all the mixers managed by the pallet.
        * Can only be called by the admin or the root origin.
-       * 
+       *
        * Weights:
        * - Independent of the arguments.
-       * 
+       *
        * - Base weight: 36_000_000
        * - DB weights: 6 reads, 4 writes
        **/
@@ -153,27 +227,50 @@ declare module '@polkadot/api/types/submittable' {
       /**
        * Transfers the admin from the caller to the specified `to` account.
        * Can only be called by the current admin or the root origin.
-       * 
+       *
        * Weights:
        * - Independent of the arguments.
-       * 
+       *
        * - Base weight: 7_000_000
        * - DB weights: 1 read, 1 write
        **/
-      transferAdmin: AugmentedSubmittable<(to: AccountId | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId]>;
+      transferAdmin: AugmentedSubmittable<
+        (to: AccountId | string | Uint8Array) => SubmittableExtrinsic<ApiType>,
+        [AccountId]
+      >;
       /**
        * Withdraws a deposited amount from the mixer. Can only withdraw one
        * deposit. Accepts proof of membership along with the mixer id.
-       * 
+       *
        * Fails if the mixer is stopped or not initialized.
-       * 
+       *
        * Weights:
        * - Independent of the arguments.
-       * 
+       *
        * - Base weight: 1_078_562_000_000
        * - DB weights: 9 reads, 3 writes
        **/
-      withdraw: AugmentedSubmittable<(withdrawProof: WithdrawProof | { mixer_id?: any; cached_block?: any; cached_root?: any; comms?: any; nullifier_hash?: any; proof_bytes?: any; leaf_index_commitments?: any; proof_commitments?: any; recipient?: any; relayer?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [WithdrawProof]>;
+      withdraw: AugmentedSubmittable<
+        (
+          withdrawProof:
+            | WithdrawProof
+            | {
+                mixer_id?: any;
+                cached_block?: any;
+                cached_root?: any;
+                comms?: any;
+                nullifier_hash?: any;
+                proof_bytes?: any;
+                leaf_index_commitments?: any;
+                proof_commitments?: any;
+                recipient?: any;
+                relayer?: any;
+              }
+            | string
+            | Uint8Array
+        ) => SubmittableExtrinsic<ApiType>,
+        [WithdrawProof]
+      >;
       /**
        * Generic tx
        **/

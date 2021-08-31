@@ -1,12 +1,11 @@
 use std::convert::{TryFrom, TryInto};
 use std::ops::Deref;
 
-use ark_ff::ToBytes;
 use ark_serialize::CanonicalSerialize;
-use js_sys::{Array, JsString, SharedArrayBuffer, Uint8Array};
+use js_sys::{Array, JsString, Uint8Array};
 use wasm_bindgen::prelude::*;
 
-use crate::note::note::{Note, NoteBuilder};
+use crate::note::{Note, NoteBuilder};
 use crate::proof::{ZKProof, ZkProofBuilder};
 use crate::types::{Backend, Curve as NoteCurve, HashFunction, NoteVersion, OpStatusCode};
 
@@ -71,46 +70,53 @@ impl NoteBuilderInput {
 		Self::default()
 	}
 
-	pub fn prefix(&mut self, prefix: JsString) -> () {
+	pub fn prefix(&mut self, prefix: JsString) {
 		self.note_builder.prefix = prefix.into();
 	}
 
-	pub fn version(&mut self, version: Version) -> () {
+	pub fn version(&mut self, version: Version) {
 		let c: String = JsValue::from(&version).as_string().unwrap();
 		self.note_builder.version = c.parse().unwrap();
 	}
 
-	pub fn chain(&mut self, chain: JsString) -> () {
+	pub fn chain(&mut self, chain: JsString) {
 		self.note_builder.chain = chain.into();
 	}
 
-	pub fn backend(&mut self, backend: BE) -> () {
+	pub fn backend(&mut self, backend: BE) {
 		let c: String = JsValue::from(&backend).as_string().unwrap();
 		self.note_builder.backend = c.parse().unwrap();
 	}
 
 	#[wasm_bindgen(js_name = hashFunction)]
-	pub fn hash_function(&mut self, hash_function: HF) -> () {
+	pub fn hash_function(&mut self, hash_function: HF) {
 		let c: String = JsValue::from(&hash_function).as_string().unwrap();
 		self.note_builder.hash_function = c.parse().unwrap();
 	}
 
-	pub fn curve(&mut self, curve: Curve) -> () {
+	pub fn curve(&mut self, curve: Curve) {
 		let c: String = JsValue::from(&curve).as_string().unwrap();
 		self.note_builder.curve = c.parse().unwrap();
 	}
 
 	#[wasm_bindgen(js_name = tokenSymbol)]
-	pub fn token_symbol(&mut self, token_symbol: JsString) -> () {
+	pub fn token_symbol(&mut self, token_symbol: JsString) {
 		self.note_builder.token_symbol = token_symbol.into();
 	}
 
-	pub fn amount(&mut self, amount: JsString) -> () {
+	pub fn amount(&mut self, amount: JsString) {
 		self.note_builder.amount = amount.into();
 	}
 
-	pub fn denomination(&mut self, denomination: JsString) -> () {
+	pub fn denomination(&mut self, denomination: JsString) {
 		self.note_builder.denomination = denomination.into();
+	}
+
+	#[wasm_bindgen(js_name= setSecrets)]
+	pub fn set_secrets(&mut self, secrets: JsString) {
+		let secrets_string: String = secrets.into();
+		let sec = hex::decode(secrets_string.replace("0x", "")).unwrap();
+		self.note_builder.secrets = Some(sec);
 	}
 }
 
@@ -159,6 +165,12 @@ impl DepositNote {
 		let n: String = note.into();
 		let n = Note::deserialize(&n)?;
 		Ok(DepositNote { note: n })
+	}
+
+	#[wasm_bindgen(js_name = getLeafCommitment)]
+	pub fn get_leaf_commitment(&self) -> Result<Uint8Array, JsValue> {
+		let leaf: Vec<u8> = NoteBuilder::get_leaf(&self.note).map_err(|_| OpStatusCode::Unknown)?;
+		Ok(Uint8Array::from(leaf.as_slice()))
 	}
 
 	pub fn serialize(&self) -> JsString {
@@ -247,13 +259,18 @@ impl TryFrom<Uint8Array> for Uint8Arrayx32 {
 	}
 }
 
+impl Default for ProvingManager {
+	fn default() -> Self {
+		Self {
+			builder: ZkProofBuilder::default(),
+		}
+	}
+}
 #[wasm_bindgen]
 impl ProvingManager {
 	#[wasm_bindgen(constructor)]
 	pub fn new() -> ProvingManager {
-		ProvingManager {
-			builder: ZkProofBuilder::default(),
-		}
+		ProvingManager::default()
 	}
 
 	#[wasm_bindgen(js_name = setRecipient)]
@@ -335,8 +352,9 @@ impl ProvingManager {
 
 #[cfg(test)]
 mod tests {
-	use super::*;
 	use wasm_bindgen_test::*;
+
+	use super::*;
 
 	wasm_bindgen_test_configure!(run_in_browser);
 

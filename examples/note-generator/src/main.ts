@@ -41,22 +41,26 @@ export async function main() {
 
   noteBuilderInput.amount('.1');
   noteBuilderInput.curve('Bls381');
-  noteBuilderInput.backend('Arkworks');
+  noteBuilderInput.backend('Circom');
   noteBuilderInput.version('v1');
   noteBuilderInput.denomination('5');
   noteBuilderInput.hashFunction('Poseidon5');
   noteBuilderInput.tokenSymbol('ETH');
   noteBuilderInput.prefix('webb.mix');
+  noteBuilderInput.setSecrets(
+    `0x185c1090215e9a66ed3ef8594a7403060df60ac2159537acb10684592d45eb2b16de70eff19a1f80828cf47a5d16502702ff3262acf54cd0b0d0dd7cc67ad415`
+  );
   const note = new wasm.DepositNote(noteBuilderInput);
   const pm = new wasm.ProvingManager();
+  console.log(note.serialize());
   pm.setNote(note);
   pm.setRelayer('929E7eb6997408C196828773db642D76e79bda93');
   pm.setRecipient('929E7eb6997408C196828773db642D76e79bda93');
   pm.setLeaves(leaves.map((hex) => hexToU8a(hex)));
 
   console.log(pm);
-  let proof = pm.proof();
-  console.log(proof);
+  // let proof = pm.proof();
+  // console.log(proof);
 }
 console.log('sleep');
 main();

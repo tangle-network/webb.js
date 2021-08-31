@@ -14,7 +14,7 @@ use arkworks_gadgets::setup::common::{
 	PoseidonCRH_x17_3, PoseidonCRH_x17_5, PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
 };
 
-use crate::note::note::{LeafHasher, NoteGenerator};
+use crate::note::{LeafHasher, NoteGenerator};
 use crate::types::OpStatusCode;
 
 const SEED: &[u8; 32] = b"WebbToolsPoseidonHasherSeed00000";
@@ -129,6 +129,8 @@ mod test {
 	use crate::note::note::NoteBuilder;
 
 	use super::*;
+	use crate::note::NoteBuilder;
+	use ark_serialize::CanonicalSerializeHashExt;
 
 	const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 

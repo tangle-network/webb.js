@@ -1,27 +1,23 @@
-use ark_crypto_primitives::CRH;
-use ark_ff::{to_bytes, BigInteger, PrimeField, Zero};
+use ark_ff::PrimeField;
 use arkworks_gadgets::ark_std::rand;
-use arkworks_gadgets::ark_std::rand::distributions::{Distribution, Standard};
 use arkworks_gadgets::ark_std::rand::rngs::StdRng;
-use arkworks_gadgets::ark_std::rand::{Rng, SeedableRng};
+use arkworks_gadgets::ark_std::rand::SeedableRng;
 use arkworks_gadgets::leaf::mixer::{Private, PrivateBuilder};
-use arkworks_gadgets::poseidon::PoseidonParameters;
+use arkworks_gadgets::leaf::LeafCreation;
 use arkworks_gadgets::prelude::ark_bls12_381::{Bls12_381, Fr as FrBls381, Fr};
 use arkworks_gadgets::prelude::ark_bn254::{Bn254, Fr as FrBn254};
-use arkworks_gadgets::prelude::ark_groth16::{Proof, ProvingKey, VerifyingKey};
-use arkworks_gadgets::prelude::ark_std::convert::TryInto;
+use arkworks_gadgets::prelude::ark_groth16::Proof;
 use arkworks_gadgets::setup::common::{
 	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x5_3, setup_params_x5_5,
-	setup_tree_and_create_path_x17, setup_tree_and_create_path_x5, Curve as ArkCurve, PoseidonCRH_x5_3,
+	setup_tree_and_create_path_x17, setup_tree_and_create_path_x5, Curve as ArkCurve,
 };
 use arkworks_gadgets::setup::mixer::{
-	get_public_inputs, prove_groth16_x17, prove_groth16_x5, setup_arbitrary_data, setup_leaf_x17, setup_leaf_x5,
-	setup_random_groth16_x17, setup_random_groth16_x5, Circuit_x17, Circuit_x5, Leaf_x5,
+	prove_groth16_x17, prove_groth16_x5, setup_arbitrary_data, setup_random_groth16_x17, setup_random_groth16_x5,
+	Circuit_x17, Circuit_x5, Leaf_x17, Leaf_x5,
 };
 
-use crate::note::note::{Note, NoteBuilder};
+use crate::note::Note;
 use crate::types::Curve;
-use arkworks_gadgets::leaf::LeafCreation;
 
 pub fn get_rng() -> StdRng {
 	// arbitrary seed
@@ -45,7 +41,7 @@ pub struct ZkProofBuilder {
 type PrivateFr = Private<Fr>;
 
 const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
-pub struct ZKP {
+pub struct Zkp {
 	proof: ZKProof,
 }
 
@@ -71,7 +67,7 @@ impl ZKProof {
 				let fee = FrBn254::from_be_bytes_mod_order(&proof_input.fee.to_be_bytes());
 				let refund = FrBn254::from_be_bytes_mod_order(&proof_input.refund.to_be_bytes());
 				// todo fix this
-				match "5" {
+				match note.exponentiation.as_str() {
 					"3" => {
 						unimplemented!();
 					}
@@ -84,37 +80,42 @@ impl ZKProof {
 							}
 						};
 						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer, fee, refund);
-						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x5::<_, FrBn254>(&params5, &mut rng);
-						let mut leaves_new: Vec<FrBn254> = proof_input
+						let leaves_new: Vec<FrBn254> = proof_input
 							.leaves
 							.to_vec()
 							.into_iter()
 							.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
 							.collect();
-						leaves_new.push(leaf);
 						let (tree, path) = setup_tree_and_create_path_x5::<FrBn254>(
 							&leaves_new,
-							(leaves_new.len() - 1) as u64,
+							proof_input.leaf_index as u64,
 							&params5,
 						);
+						let private: PrivateBuilder<FrBn254> = PrivateBuilder {
+							r: PrimeField::from_be_bytes_mod_order(&note.secret[..32]),
+							nullifier: PrimeField::from_be_bytes_mod_order(&note.secret[32..64]),
+							rho: PrimeField::from_be_bytes_mod_order(&note.secret[64..]),
+						};
+						let leaf_private = private.build();
+						let nullifier_hash = Leaf_x5::create_nullifier(&leaf_private, &params5).unwrap();
 						let root = tree.root().inner();
 						let mc = Circuit_x5::<FrBn254>::new(
-							arbitrary_input.clone(),
+							arbitrary_input,
 							leaf_private,
 							(),
 							params5,
 							path,
-							root.clone(),
+							root,
 							nullifier_hash,
 						);
 
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-						let (pk, vk) = setup_random_groth16_x5::<_, Bn254>(&mut rng, ArkCurve::Bn254);
-						let proof = prove_groth16_x5::<_, Bn254>(&pk, mc.clone(), &mut rng);
+						let (pk, _) = setup_random_groth16_x5::<_, Bn254>(&mut rng, ArkCurve::Bn254);
+						let proof = prove_groth16_x5::<_, Bn254>(&pk, mc, &mut rng);
 						Self::Bn254(proof)
 					}
 					"17" => {
-						let params17 = match note.exponentiation.as_str() {
+						let params17 = match note.width.as_str() {
 							"5" => setup_params_x17_5::<FrBn254>(ArkCurve::Bn254),
 							"3" => setup_params_x17_3::<FrBn254>(ArkCurve::Bn254),
 							_ => {
@@ -122,33 +123,38 @@ impl ZKProof {
 							}
 						};
 						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer, fee, refund);
-						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x17::<_, FrBn254>(&params17, &mut rng);
-						let mut leaves_new: Vec<FrBn254> = proof_input
+						let leaves_new: Vec<FrBn254> = proof_input
 							.leaves
 							.to_vec()
 							.into_iter()
 							.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
 							.collect();
-						leaves_new.push(leaf);
 						let (tree, path) = setup_tree_and_create_path_x17::<FrBn254>(
 							&leaves_new,
-							(leaves_new.len() - 1) as u64,
+							proof_input.leaf_index as u64,
 							&params17,
 						);
+						let private: PrivateBuilder<FrBn254> = PrivateBuilder {
+							r: PrimeField::from_be_bytes_mod_order(&note.secret[..32]),
+							nullifier: PrimeField::from_be_bytes_mod_order(&note.secret[32..64]),
+							rho: PrimeField::from_be_bytes_mod_order(&note.secret[64..]),
+						};
+						let leaf_private = private.build();
+						let nullifier_hash = Leaf_x17::create_nullifier(&leaf_private, &params17).unwrap();
 						let root = tree.root().inner();
 						let mc = Circuit_x17::<FrBn254>::new(
-							arbitrary_input.clone(),
+							arbitrary_input,
 							leaf_private,
 							(),
 							params17,
 							path,
-							root.clone(),
+							root,
 							nullifier_hash,
 						);
 
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-						let (pk, vk) = setup_random_groth16_x5::<_, Bn254>(&mut rng, ArkCurve::Bn254);
-						let proof = prove_groth16_x17::<_, Bn254>(&pk, mc.clone(), &mut rng);
+						let (pk, _vk) = setup_random_groth16_x5::<_, Bn254>(&mut rng, ArkCurve::Bn254);
+						let proof = prove_groth16_x17::<_, Bn254>(&pk, mc, &mut rng);
 						Self::Bn254(proof)
 					}
 					_ => {
@@ -162,35 +168,36 @@ impl ZKProof {
 				let fee = FrBls381::from_be_bytes_mod_order(&proof_input.fee.to_be_bytes());
 				let refund = FrBls381::from_be_bytes_mod_order(&proof_input.refund.to_be_bytes());
 
-				match "5" {
+				match note.exponentiation.as_str() {
 					"3" => {
 						unimplemented!();
 					}
 					"5" => {
-						let params5 = match note.exponentiation.as_str() {
+						// Setup Params
+						let params5 = match note.width.as_str() {
 							"5" => setup_params_x5_5::<FrBls381>(ArkCurve::Bls381),
 							"3" => setup_params_x5_3::<FrBls381>(ArkCurve::Bls381),
 							_ => {
 								unreachable!();
 							}
 						};
+						// Setup Arbitrary iput
 						let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer, fee, refund);
-						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x5::<_, FrBls381>(&params5, &mut rng);
-						let mut leaves_new: Vec<FrBls381> = proof_input
+						// getting `PrimeField` of leaves
+						let leaves_new: Vec<FrBls381> = proof_input
 							.leaves
 							.to_vec()
 							.into_iter()
 							.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
 							.collect();
-						dbg!("here");
-
+						//setup tree with the leaves and parameters to get the path
 						let (tree, path) = setup_tree_and_create_path_x5::<FrBls381>(
 							&leaves_new,
 							proof_input.leaf_index as u64,
 							&params5,
 						);
 						let root = tree.root().inner();
-						let mut private: PrivateBuilder<FrBls381> = PrivateBuilder {
+						let private: PrivateBuilder<FrBls381> = PrivateBuilder {
 							r: PrimeField::from_be_bytes_mod_order(&note.secret[..32]),
 							nullifier: PrimeField::from_be_bytes_mod_order(&note.secret[32..64]),
 							rho: PrimeField::from_be_bytes_mod_order(&note.secret[64..]),
@@ -199,51 +206,63 @@ impl ZKProof {
 						let nullifier_hash = Leaf_x5::create_nullifier(&leaf_private, &params5).unwrap();
 
 						let mc = Circuit_x5::<FrBls381>::new(
-							arbitrary_input.clone(),
+							arbitrary_input,
 							leaf_private,
 							(),
 							params5,
 							path,
-							root.clone(),
+							root,
 							nullifier_hash,
 						);
 
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-						let (pk, vk) = setup_random_groth16_x5::<_, Bls12_381>(&mut rng, ArkCurve::Bls381);
-						let proof = prove_groth16_x5::<_, Bls12_381>(&pk, mc.clone(), &mut rng);
+						let (pk, _vk) = setup_random_groth16_x5::<_, Bls12_381>(&mut rng, ArkCurve::Bls381);
+						let proof = prove_groth16_x5::<_, Bls12_381>(&pk, mc, &mut rng);
 						Self::Bls12_381(proof)
 					}
 					"17" => {
-						let params5 = setup_params_x17_5::<FrBls381>(ArkCurve::Bls381);
+						let params17 = match note.width.as_str() {
+							"5" => setup_params_x17_5::<FrBls381>(ArkCurve::Bls381),
+							"3" => setup_params_x17_3::<FrBls381>(ArkCurve::Bls381),
+							_ => {
+								unreachable!();
+							}
+						};
 						let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer, fee, refund);
-						let (leaf_private, leaf, nullifier_hash) = setup_leaf_x17::<_, FrBls381>(&params5, &mut rng);
-						let mut leaves_new: Vec<FrBls381> = proof_input
+						let leaves_new: Vec<FrBls381> = proof_input
 							.leaves
 							.to_vec()
 							.into_iter()
 							.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
 							.collect();
-						leaves_new.push(leaf);
 						let (tree, path) = setup_tree_and_create_path_x17::<FrBls381>(
 							&leaves_new,
-							(leaves_new.len() - 1) as u64,
-							&params5,
+							proof_input.leaf_index as u64,
+							&params17,
 						);
 						let root = tree.root().inner();
 
+						let private: PrivateBuilder<FrBls381> = PrivateBuilder {
+							r: PrimeField::from_be_bytes_mod_order(&note.secret[..32]),
+							nullifier: PrimeField::from_be_bytes_mod_order(&note.secret[32..64]),
+							rho: PrimeField::from_be_bytes_mod_order(&note.secret[64..]),
+						};
+
+						let leaf_private = private.build();
+						let nullifier_hash = Leaf_x17::create_nullifier(&leaf_private, &params17).unwrap();
 						let mc = Circuit_x17::<FrBls381>::new(
-							arbitrary_input.clone(),
+							arbitrary_input,
 							leaf_private,
 							(),
-							params5,
+							params17,
 							path,
-							root.clone(),
+							root,
 							nullifier_hash,
 						);
 
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-						let (pk, vk) = setup_random_groth16_x17::<_, Bls12_381>(&mut rng, ArkCurve::Bls381);
-						let proof = prove_groth16_x17::<_, Bls12_381>(&pk, mc.clone(), &mut rng);
+						let (pk, _vk) = setup_random_groth16_x17::<_, Bls12_381>(&mut rng, ArkCurve::Bls381);
+						let proof = prove_groth16_x17::<_, Bls12_381>(&pk, mc, &mut rng);
 						Self::Bls12_381(proof)
 					}
 					_ => {
@@ -277,36 +296,36 @@ impl ZkProofBuilder {
 		Self::default()
 	}
 
-	pub fn set_leaves(&mut self, leaves: &[[u8; 32]]) -> () {
+	pub fn set_leaves(&mut self, leaves: &[[u8; 32]]) {
 		self.leaves = leaves.to_vec();
 	}
 
-	pub fn push_leaf(&mut self, leaf: [u8; 32]) -> () {
+	pub fn push_leaf(&mut self, leaf: [u8; 32]) {
 		self.leaves.push(leaf);
 	}
 
-	pub fn set_relayer(&mut self, relayer: &[u8]) -> () {
+	pub fn set_relayer(&mut self, relayer: &[u8]) {
 		self.relayer = relayer.to_vec();
 	}
 
-	pub fn set_recipient(&mut self, recipient: &[u8]) -> () {
+	pub fn set_recipient(&mut self, recipient: &[u8]) {
 		self.recipient = recipient.to_vec();
 	}
 
-	pub fn set_note(&mut self, note: Note) -> () {
+	pub fn set_note(&mut self, note: Note) {
 		self.note = Some(note);
 	}
 
-	pub fn set_fee(&mut self, fee: u32) -> () {
-		self.fee = fee
+	pub fn set_fee(&mut self, fee: u32) {
+		self.fee = fee;
 	}
 
-	pub fn set_leaf_index(&mut self, leaf_index: u32) -> () {
-		self.leaf_index = leaf_index
+	pub fn set_leaf_index(&mut self, leaf_index: u32) {
+		self.leaf_index = leaf_index;
 	}
 
-	pub fn set_refund(&mut self, refund: u32) -> () {
-		self.refund = refund
+	pub fn set_refund(&mut self, refund: u32) {
+		self.refund = refund;
 	}
 
 	pub fn build(&self) -> ZKProof {

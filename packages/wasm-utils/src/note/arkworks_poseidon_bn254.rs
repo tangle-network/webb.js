@@ -14,7 +14,7 @@ use arkworks_gadgets::setup::common::{
 };
 const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 
-use crate::note::note::{LeafHasher, NoteGenerator};
+use crate::note::{LeafHasher, NoteGenerator};
 use crate::types::OpStatusCode;
 use arkworks_gadgets::ark_std::rand::SeedableRng;
 
@@ -124,6 +124,8 @@ mod test {
 
 	use super::*;
 	use crate::note::note::NoteBuilder;
+	use crate::note::NoteBuilder;
+	use ark_serialize::CanonicalSerializeHashExt;
 	use arkworks_gadgets::ark_std::rand::SeedableRng;
 	use arkworks_gadgets::setup::common::{
 		PoseidonRounds_x17_3, PoseidonRounds_x17_5, PoseidonRounds_x3_3, PoseidonRounds_x3_5, PoseidonRounds_x5_3,
