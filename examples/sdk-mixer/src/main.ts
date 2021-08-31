@@ -1,7 +1,7 @@
 import { options } from '@webb-tools/api';
-import { ApiPromise, WsProvider, Keyring } from '@polkadot/api';
+import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { LoggerService } from '@webb-tools/app-util';
-import { Mixer } from '@webb-tools/sdk-mixer';
+import { Mixer, Note } from '@webb-tools/sdk-mixer/index';
 
 // @ts-ignore
 import Worker from './mixer.worker';
@@ -44,4 +44,19 @@ async function main() {
   });
 }
 
-main().catch(apiLogger.error);
+const setup = async () => {
+  const worker = new Worker();
+  const mixer = await Mixer.init(worker);
+  let noteStr =
+    'webb.mix:v1:any:Arkworks:Bn254:Poseidon17:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717';
+  const proof = await mixer.generateZKP({
+    noteString: noteStr,
+    leaves: [],
+    relayer: '929E7eb6997408C196828773db642D76e79bda93',
+    recipient: '929E7eb6997408C196828773db642D76e79bda93',
+    fee: 0,
+    refund: 0
+  });
+  console.log(proof);
+};
+setup();

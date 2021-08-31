@@ -2,7 +2,8 @@
   "extends": "@open-web3/dev-config/config/tsconfig.json",
   "exclude": [
     "build/**/*",
-    "**/build/**/*"
+    "**/build/**/*",
+    "examples/**"
   ],
   "compilerOptions": {
     "target": "ES2020",
@@ -33,12 +34,6 @@
       ],
       "@webb-tools/sdk-core/*": [
         "packages/sdk-core/src/*"
-      ],
-      "@webb-tools/sdk-merkle": [
-        "packages/sdk-merkle/src"
-      ],
-      "@webb-tools/sdk-merkle/*": [
-        "packages/sdk-merkle/src/*"
       ],
       "@webb-tools/sdk-mixer": [
         "packages/sdk-mixer/src"
