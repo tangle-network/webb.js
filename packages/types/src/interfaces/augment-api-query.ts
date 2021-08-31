@@ -17,43 +17,23 @@ declare module '@polkadot/api/types/storage' {
        * pruning since we can remove all keys of the first map past a certain
        * point.
        **/
-      cachedRoots: AugmentedQuery<
-        ApiType,
-        (
-          arg1: BlockNumber | AnyNumber | Uint8Array,
-          arg2: TreeId | AnyNumber | Uint8Array
-        ) => Observable<Vec<ScalarData>>,
-        [BlockNumber, TreeId]
-      > &
-        QueryableStorageEntry<ApiType, [BlockNumber, TreeId]>;
+      cachedRoots: AugmentedQuery<ApiType, (arg1: BlockNumber | AnyNumber | Uint8Array, arg2: TreeId | AnyNumber | Uint8Array) => Observable<Vec<ScalarData>>, [BlockNumber, TreeId]> & QueryableStorageEntry<ApiType, [BlockNumber, TreeId]>;
       /**
        * Block number of the newest set of roots that we are caching
        **/
-      highestCachedBlock: AugmentedQuery<ApiType, () => Observable<BlockNumber>, []> &
-        QueryableStorageEntry<ApiType, []>;
+      highestCachedBlock: AugmentedQuery<ApiType, () => Observable<BlockNumber>, []> & QueryableStorageEntry<ApiType, []>;
       /**
        * The map of (tree_id, index) to the leaf commitment
        **/
-      leaves: AugmentedQuery<
-        ApiType,
-        (arg1: TreeId | AnyNumber | Uint8Array, arg2: u32 | AnyNumber | Uint8Array) => Observable<ScalarData>,
-        [TreeId, u32]
-      > &
-        QueryableStorageEntry<ApiType, [TreeId, u32]>;
+      leaves: AugmentedQuery<ApiType, (arg1: TreeId | AnyNumber | Uint8Array, arg2: u32 | AnyNumber | Uint8Array) => Observable<ScalarData>, [TreeId, u32]> & QueryableStorageEntry<ApiType, [TreeId, u32]>;
       /**
        * Block number of the oldest set of roots that we are caching
        **/
-      lowestCachedBlock: AugmentedQuery<ApiType, () => Observable<BlockNumber>, []> &
-        QueryableStorageEntry<ApiType, []>;
+      lowestCachedBlock: AugmentedQuery<ApiType, () => Observable<BlockNumber>, []> & QueryableStorageEntry<ApiType, []>;
       /**
        * Maps tree id to the manager of the tree
        **/
-      managers: AugmentedQuery<
-        ApiType,
-        (arg: TreeId | AnyNumber | Uint8Array) => Observable<Option<Manager>>,
-        [TreeId]
-      > &
-        QueryableStorageEntry<ApiType, [TreeId]>;
+      managers: AugmentedQuery<ApiType, (arg: TreeId | AnyNumber | Uint8Array) => Observable<Option<Manager>>, [TreeId]> & QueryableStorageEntry<ApiType, [TreeId]>;
       /**
        * The next tree identifier up for grabs
        **/
@@ -66,46 +46,23 @@ declare module '@polkadot/api/types/storage' {
       /**
        * Indicates whether the group tree is stopped or not
        **/
-      stopped: AugmentedQuery<ApiType, (arg: TreeId | AnyNumber | Uint8Array) => Observable<bool>, [TreeId]> &
-        QueryableStorageEntry<ApiType, [TreeId]>;
+      stopped: AugmentedQuery<ApiType, (arg: TreeId | AnyNumber | Uint8Array) => Observable<bool>, [TreeId]> & QueryableStorageEntry<ApiType, [TreeId]>;
       /**
        * The map of trees to their metadata
        **/
-      trees: AugmentedQuery<
-        ApiType,
-        (arg: TreeId | AnyNumber | Uint8Array) => Observable<Option<MerkleTree>>,
-        [TreeId]
-      > &
-        QueryableStorageEntry<ApiType, [TreeId]>;
+      trees: AugmentedQuery<ApiType, (arg: TreeId | AnyNumber | Uint8Array) => Observable<Option<MerkleTree>>, [TreeId]> & QueryableStorageEntry<ApiType, [TreeId]>;
       /**
        * Map of used nullifiers for each tree.
        **/
-      usedNullifiers: AugmentedQuery<
-        ApiType,
-        (
-          arg: ITuple<[TreeId, ScalarData]> | [TreeId | AnyNumber | Uint8Array, ScalarData | string | Uint8Array]
-        ) => Observable<bool>,
-        [ITuple<[TreeId, ScalarData]>]
-      > &
-        QueryableStorageEntry<ApiType, [ITuple<[TreeId, ScalarData]>]>;
+      usedNullifiers: AugmentedQuery<ApiType, (arg: ITuple<[TreeId, ScalarData]> | [TreeId | AnyNumber | Uint8Array, ScalarData | string | Uint8Array]) => Observable<bool>, [ITuple<[TreeId, ScalarData]>]> & QueryableStorageEntry<ApiType, [ITuple<[TreeId, ScalarData]>]>;
       /**
        * The map of trees to their metadata
        **/
-      verifyingKeyForTree: AugmentedQuery<
-        ApiType,
-        (arg: TreeId | AnyNumber | Uint8Array) => Observable<KeyId>,
-        [TreeId]
-      > &
-        QueryableStorageEntry<ApiType, [TreeId]>;
+      verifyingKeyForTree: AugmentedQuery<ApiType, (arg: TreeId | AnyNumber | Uint8Array) => Observable<KeyId>, [TreeId]> & QueryableStorageEntry<ApiType, [TreeId]>;
       /**
        * The map of verifying keys for each backend
        **/
-      verifyingKeys: AugmentedQuery<
-        ApiType,
-        (arg: KeyId | AnyNumber | Uint8Array) => Observable<Option<Bytes>>,
-        [KeyId]
-      > &
-        QueryableStorageEntry<ApiType, [KeyId]>;
+      verifyingKeys: AugmentedQuery<ApiType, (arg: KeyId | AnyNumber | Uint8Array) => Observable<Option<Bytes>>, [KeyId]> & QueryableStorageEntry<ApiType, [KeyId]>;
       /**
        * Generic query
        **/
@@ -128,8 +85,7 @@ declare module '@polkadot/api/types/storage' {
       /**
        * The map of mixer trees to their metadata
        **/
-      mixerTrees: AugmentedQuery<ApiType, (arg: TreeId | AnyNumber | Uint8Array) => Observable<MixerInfo>, [TreeId]> &
-        QueryableStorageEntry<ApiType, [TreeId]>;
+      mixerTrees: AugmentedQuery<ApiType, (arg: TreeId | AnyNumber | Uint8Array) => Observable<MixerInfo>, [TreeId]> & QueryableStorageEntry<ApiType, [TreeId]>;
       /**
        * Flag indicating if the mixers are initialized
        **/
@@ -137,12 +93,7 @@ declare module '@polkadot/api/types/storage' {
       /**
        * The TVL per group
        **/
-      totalValueLocked: AugmentedQuery<
-        ApiType,
-        (arg: TreeId | AnyNumber | Uint8Array) => Observable<BalanceOf>,
-        [TreeId]
-      > &
-        QueryableStorageEntry<ApiType, [TreeId]>;
+      totalValueLocked: AugmentedQuery<ApiType, (arg: TreeId | AnyNumber | Uint8Array) => Observable<BalanceOf>, [TreeId]> & QueryableStorageEntry<ApiType, [TreeId]>;
       /**
        * Generic query
        **/
