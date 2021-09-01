@@ -64,6 +64,8 @@ struct NoteManager;
 
 impl NoteManager {
 	fn generate(note_builder: &NoteBuilder) -> Result<Note, ()> {
+		let width = get_usize_from_string(&note_builder.width);
+		let exponentiation = get_usize_from_string(&note_builder.exponentiation);
 		match (note_builder.backend, note_builder.curve) {
 			(_, Curve::Curve25519) => match &note_builder.secrets {
 				None => {
@@ -79,9 +81,7 @@ impl NoteManager {
 			},
 			(Backend::Arkworks, Curve::Bn254) => {
 				let note_generator = match note_builder.hash_function {
-					HashFunction::Poseidon3 => ArkworksPoseidonBn254NoteGenerator::new(3, 3),
-					HashFunction::Poseidon5 => ArkworksPoseidonBn254NoteGenerator::new(5, 3),
-					HashFunction::Poseidon17 => ArkworksPoseidonBn254NoteGenerator::new(17, 3),
+					HashFunction::Poseidon => ArkworksPoseidonBn254NoteGenerator::new(width, exponentiation),
 					HashFunction::MiMCTornado => {
 						unreachable!()
 					}
@@ -92,9 +92,7 @@ impl NoteManager {
 			}
 			(Backend::Arkworks, Curve::Bls381) => {
 				let note_generator = match note_builder.hash_function {
-					HashFunction::Poseidon3 => ArkworksPoseidonBls12_381NoteGenerator::new(3, 3),
-					HashFunction::Poseidon5 => ArkworksPoseidonBls12_381NoteGenerator::new(5, 3),
-					HashFunction::Poseidon17 => ArkworksPoseidonBls12_381NoteGenerator::new(17, 3),
+					HashFunction::Poseidon => ArkworksPoseidonBls12_381NoteGenerator::new(width, exponentiation),
 					HashFunction::MiMCTornado => {
 						unreachable!()
 					}
@@ -106,12 +104,18 @@ impl NoteManager {
 		}
 	}
 
-	fn get_leaf_commitment(
-		backend: Backend,
-		curve: Curve,
-		hash_function: HashFunction,
-		secrets: &[u8],
-	) -> Result<Vec<u8>, ()> {
+	fn get_leaf_commitment(note: &Note) -> Result<Vec<u8>, ()> {
+		let Note {
+			secret: secrets,
+			backend,
+			curve,
+			hash_function,
+			width,
+			exponentiation,
+			..
+		} = note;
+		let width = get_usize_from_string(width);
+		let exponentiation = get_usize_from_string(exponentiation);
 		match (backend, curve) {
 			(_, Curve::Curve25519) => {
 				unimplemented!()
@@ -121,9 +125,7 @@ impl NoteManager {
 			}
 			(Backend::Arkworks, Curve::Bn254) => {
 				let note_generator = match hash_function {
-					HashFunction::Poseidon3 => ArkworksPoseidonBn254NoteGenerator::new(3, 3),
-					HashFunction::Poseidon5 => ArkworksPoseidonBn254NoteGenerator::new(5, 3),
-					HashFunction::Poseidon17 => ArkworksPoseidonBn254NoteGenerator::new(17, 3),
+					HashFunction::Poseidon => ArkworksPoseidonBls12_381NoteGenerator::new(width, exponentiation),
 					HashFunction::MiMCTornado => {
 						unreachable!()
 					}
@@ -132,9 +134,7 @@ impl NoteManager {
 			}
 			(Backend::Arkworks, Curve::Bls381) => {
 				let note_generator = match hash_function {
-					HashFunction::Poseidon3 => ArkworksPoseidonBls12_381NoteGenerator::new(3, 3),
-					HashFunction::Poseidon5 => ArkworksPoseidonBls12_381NoteGenerator::new(5, 3),
-					HashFunction::Poseidon17 => ArkworksPoseidonBls12_381NoteGenerator::new(17, 3),
+					HashFunction::Poseidon => ArkworksPoseidonBls12_381NoteGenerator::new(width, exponentiation),
 					HashFunction::MiMCTornado => {
 						unreachable!()
 					}
@@ -145,13 +145,17 @@ impl NoteManager {
 	}
 }
 
+fn get_usize_from_string(s: &str) -> usize {
+	s.parse().unwrap()
+}
+
 impl NoteBuilder {
 	pub fn generate_note(&self) -> Result<Note, ()> {
 		NoteManager::generate(self)
 	}
 
 	pub fn get_leaf(note: &Note) -> Result<Vec<u8>, ()> {
-		NoteManager::get_leaf_commitment(note.backend, note.curve, note.hash_function, &note.secret)
+		NoteManager::get_leaf_commitment(note)
 	}
 }
 
@@ -167,7 +171,7 @@ impl Default for NoteBuilder {
 			exponentiation: "5".to_string(),
 			curve: Curve::Bn254,
 			token_symbol: "EDG".to_string(),
-			hash_function: HashFunction::Poseidon3,
+			hash_function: HashFunction::Poseidon,
 			width: "5".to_string(),
 			secrets: None,
 		}
@@ -286,14 +290,14 @@ mod test {
 
 	#[test]
 	fn deserialize() {
-		let note  =  "webb.mix:v1:any:Arkworks:Bn254:Poseidon17:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let note  =  "webb.mix:v1:any:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 
 		let note = Note::deserialize(note).unwrap();
 		assert_eq!(note.prefix.to_string(), "webb.mix".to_string());
 		assert_eq!(note.version.to_string(), "v1".to_string());
 		assert_eq!(note.token_symbol.to_string(), "EDG".to_string());
 		assert_eq!(note.amount.to_string(), "0".to_string());
-		assert_eq!(note.hash_function.to_string(), "Poseidon17".to_string());
+		assert_eq!(note.hash_function.to_string(), "Poseidon".to_string());
 		assert_eq!(note.backend.to_string(), "Arkworks".to_string());
 		assert_eq!(note.denomination.to_string(), "18".to_string());
 		assert_eq!(note.chain.to_string(), "any".to_string());

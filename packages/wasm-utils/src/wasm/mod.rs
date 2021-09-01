@@ -112,6 +112,14 @@ impl NoteBuilderInput {
 		self.note_builder.denomination = denomination.into();
 	}
 
+	pub fn exponentiation(&mut self, exponentiation: JsString) {
+		self.note_builder.exponentiation = exponentiation.into();
+	}
+
+	pub fn width(&mut self, width: JsString) {
+		self.note_builder.width = width.into();
+	}
+
 	#[wasm_bindgen(js_name= setSecrets)]
 	pub fn set_secrets(&mut self, secrets: JsString) {
 		let secrets_string: String = secrets.into();

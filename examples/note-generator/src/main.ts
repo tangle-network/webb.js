@@ -44,8 +44,10 @@ export async function main() {
   noteBuilderInput.backend('Circom');
   noteBuilderInput.version('v1');
   noteBuilderInput.denomination('5');
-  noteBuilderInput.hashFunction('Poseidon5');
+  noteBuilderInput.hashFunction('Poseidon');
   noteBuilderInput.tokenSymbol('ETH');
+  noteBuilderInput.width('3');
+  noteBuilderInput.width('5');
   noteBuilderInput.prefix('webb.mix');
   noteBuilderInput.setSecrets(
     `0x185c1090215e9a66ed3ef8594a7403060df60ac2159537acb10684592d45eb2b16de70eff19a1f80828cf47a5d16502702ff3262acf54cd0b0d0dd7cc67ad415`

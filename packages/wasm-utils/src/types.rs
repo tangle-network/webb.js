@@ -30,9 +30,7 @@ pub enum Curve {
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum HashFunction {
-	Poseidon3,
-	Poseidon5,
-	Poseidon17,
+	Poseidon,
 	MiMCTornado,
 }
 
@@ -60,9 +58,7 @@ impl FromStr for Backend {
 impl fmt::Display for HashFunction {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
-			HashFunction::Poseidon3 => write!(f, "Poseidon3"),
-			HashFunction::Poseidon5 => write!(f, "Poseidon5"),
-			HashFunction::Poseidon17 => write!(f, "Poseidon17"),
+			HashFunction::Poseidon => write!(f, "Poseidon"),
 			HashFunction::MiMCTornado => write!(f, "MiMCTornado"),
 		}
 	}
@@ -73,9 +69,7 @@ impl FromStr for HashFunction {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
-			"Poseidon3" => Ok(HashFunction::Poseidon3),
-			"Poseidon5" => Ok(HashFunction::Poseidon5),
-			"Poseidon17" => Ok(HashFunction::Poseidon17),
+			"Poseidon" => Ok(HashFunction::Poseidon),
 			"MiMCTornado" => Ok(HashFunction::MiMCTornado),
 			_ => Err(OpStatusCode::InvalidHasFunction),
 		}
