@@ -35,7 +35,7 @@ extern "C" {
 const LEAVES: &str = "type Leaves = Array<Uint8Array>;";
 
 #[wasm_bindgen(typescript_custom_section)]
-const HF: &str = "type HashFunction = 'Poseidon3'|'Poseidon5'|'Poseidon17 '|'MiMCTornado'";
+const HF: &str = "type HashFunction = 'Poseidon3'|'MiMCTornado'";
 
 #[wasm_bindgen(typescript_custom_section)]
 const CURVE: &str = "type Curve = 'Bls381'|'Bn254' |'Curve25519'";
