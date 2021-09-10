@@ -58,4 +58,4 @@ yarn script scripts/edgeware/getQuadraticDistribution.ts
 - [app-util](./packages/app-util)
   - Utilities to work with Webb Network
 - [types](./packages/types)
-  - Polkadot.js type definations for Webb Network
+  - Polkadot.js type definations for Webb Network.
