@@ -126,10 +126,9 @@ mod test {
 		PoseidonRounds_x5_5,
 	};
 
-	use crate::note::note::NoteBuilder;
+	use crate::note::NoteBuilder;
 
 	use super::*;
-	use crate::note::NoteBuilder;
 	use ark_serialize::CanonicalSerializeHashExt;
 
 	const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
