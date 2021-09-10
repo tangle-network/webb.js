@@ -9,11 +9,11 @@
   },
   "dependencies": {
     "@polkadot/api": "^4.11.2",
-    "@webb-tools/api": "^0.1.2-44",
-    "@webb-tools/app-util": "^0.1.2-44",
-    "@webb-tools/sdk-core": "^0.1.2-44",
-    "@webb-tools/sdk-mixer": "^0.1.2-44",
-    "@webb-tools/types": "^0.1.2-44"
+    "@webb-tools/api": "^0.1.2-81",
+    "@webb-tools/app-util": "^0.1.2-81",
+    "@webb-tools/sdk-core": "^0.1.2-81",
+    "@webb-tools/sdk-mixer": "^0.1.2-81",
+    "@webb-tools/types": "^0.1.2-81"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",

@@ -33,7 +33,7 @@
     "@babel/core": "^7.10.2",
     "@babel/register": "^7.10.1",
     "@babel/runtime": "^7.10.2",
-    "@open-web3/dev-config": "^0.1.10",
+    "@open-web3/dev-config": "^0.1.13",
     "@open-web3/util": "^0.8.2-6",
     "@types/jest": "^26.0.20",
     "@types/source-map-support": "^0.5.3",

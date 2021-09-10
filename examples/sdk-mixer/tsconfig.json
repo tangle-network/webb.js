@@ -21,7 +21,6 @@
       "@webb-tools/api": [
         "../../packages/api/api"
       ],
-
       "@webb-tools/api/*": [
         "../../packages/api/build/*"
       ],
