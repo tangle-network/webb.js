@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/api",
-  "version": "0.1.2-80",
+  "version": "0.1.2-81",
   "description": "Webb JS API",
   "main": "index.js",
   "author": "Webb Developers <drew@webb.tools>",
@@ -19,6 +19,6 @@
     "@edgeware/node-types": "3.5.1-erup-4",
     "@polkadot/api": "^4.11.2",
     "@polkadot/rpc-core": "^4.11.2",
-    "@webb-tools/types": "0.1.2-80"
+    "@webb-tools/types": "0.1.2-81"
   }
 }
