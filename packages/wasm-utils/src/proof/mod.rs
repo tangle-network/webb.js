@@ -395,7 +395,6 @@ mod test {
 			.collect();
 		let relayer = hex::decode("929E7eb6997408C196828773db642D76e79bda93".replace("0x", "")).unwrap();
 		let recipient = hex::decode("929E7eb6997408C196828773db642D76e79bda93".replace("0x", "")).unwrap();
-		let mut zkp_builder = ZkProofBuilder::new();
 		let mut proof_builder = ZkProofBuilder::new();
 		proof_builder.set_leaves(&leaves_bytes);
 		proof_builder.set_relayer(&relayer);
