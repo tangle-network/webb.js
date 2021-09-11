@@ -33,25 +33,9 @@ async function main() {
 
   const leaf = note.getLeaf();
   apiLogger.info(`Your Note: ${note.serialize()}`);
-  await api.tx.mixer.deposit(0, [leaf]).signAndSend(alice, async ({ status, dispatchError }) => {
-    // status would still be set, but in the case of error we can shortcut
-    // to just check it (so an error would indicate InBlock or Finalized)
-    if (dispatchError) {
-      if (dispatchError.isModule) {
-        // for module errors, we have the section indexed, lookup
-        const decoded = api.registry.findMetaError(dispatchError.asModule);
-        const { documentation, name, section } = decoded;
-
-        console.log(`${section}.${name}: ${documentation.join(' ')}`);
-      } else {
-        // Other, CannotLookup, BadOrigin, no extra info
-        apiLogger.error(dispatchError.toString());
-      }
-    }
-    if (status.isInBlock || status.isFinalized) {
-      apiLogger.info('Done!');
-      await api.disconnect();
-    }
+  console.log(api.query, api.tx);
+  api.query.system.account(alice.address).then((account) => {
+    console.log(account);
   });
 }
 

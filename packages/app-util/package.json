@@ -3,7 +3,7 @@
   "version": "0.1.2-81",
   "description": "Utilities to work with Webb",
   "author": "Webb Developers <drew@webb.tools>",
-  "main": "build/index.js",
+  "main": "index.js",
   "license": "Apache-2.0",
   "publishConfig": {
     "access": "public",
