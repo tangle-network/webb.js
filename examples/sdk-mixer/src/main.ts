@@ -1,7 +1,7 @@
 import { options } from '@webb-tools/api';
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { LoggerService } from '@webb-tools/app-util';
-import { Mixer, Note } from '@webb-tools/sdk-mixer/index';
+import { Note } from '@webb-tools/sdk-mixer';
 
 // @ts-ignore
 import Worker from './mixer.worker';
@@ -19,8 +19,19 @@ async function main() {
   const keyring = new Keyring({ type: 'sr25519' });
   const alice = keyring.addFromUri('//Alice', { name: 'Alice default' });
 
-  const mixer = await Mixer.init(new Worker());
-  const [note, leaf] = await mixer.generateNoteAndLeaf({ id: 0, tokenSymbol: 'EDG' });
+  const note = await Note.generateNote({
+    prefix: 'webb.mix',
+    version: 'v1',
+    chain: 'ETH',
+    backend: 'Arkworks',
+    hashFunction: 'Poseidon',
+    curve: 'Bn254',
+    tokenSymbol: 'webbETH-edg-eth-opt-arb-1',
+    amount: '10',
+    denomination: '18',
+  });
+
+  const leaf = note.getLeaf();
   apiLogger.info(`Your Note: ${note.serialize()}`);
   await api.tx.mixer.deposit(0, [leaf]).signAndSend(alice, async ({ status, dispatchError }) => {
     // status would still be set, but in the case of error we can shortcut
@@ -44,18 +55,22 @@ async function main() {
   });
 }
 
-const setup = async () => {
-  const worker = new Worker();
-  const mixer = await Mixer.init(worker);
-  let noteStr =
-    'webb.mix:v1:any:Arkworks:Bn254:Poseidon17:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717';
-  const proof = await mixer.generateZK({
-    note: noteStr,
-    root: new Uint8Array(Buffer.from('0x0000000000000000000000000000000000000000000000000000000000000000', 'hex')),
-    leaves: [],
-    relayer: new Uint8Array(Buffer.from('0x929E7eb6997408C196828773db642D76e79bda93', 'hex')),
-    recipient: new Uint8Array(Buffer.from('0x929E7eb6997408C196828773db642D76e79bda93', 'hex')),
-  });
-  console.log(proof);
-};
-setup();
+// const setup = async () => {
+//   const worker = new Worker();
+//   const mixer = await Mixer.init(worker);
+//   let noteStr =
+//     'webb.mix:v1:any:Arkworks:Bn254:Poseidon17:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717';
+//   const leaves = [];
+//   const proof = await mixer.generateZKP({
+//     noteString: noteStr,
+//     leaves,
+//     relayer: '0x929E7eb6997408C196828773db642D76e79bda93',
+//     recipient: '0x929E7eb6997408C196828773db642D76e79bda93',
+//     fee: 0,
+//     refund: 0
+//   });
+//   console.log(proof);
+// };
+
+// setup();
+main();
