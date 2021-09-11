@@ -412,9 +412,13 @@ mod test {
 	fn generate_proof_wasm() {
 		let note  =  "webb.mix:v1:any:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 
-		let note = DepositNote::deserialize(JsString::from(note)).unwrap();
-
 		let mut pm = ProvingManager::new();
+		// let relayer: [u8; 20] = [
+		// 	146, 158, 126, 182, 153, 116, 8, 193, 150, 130, 135, 115, 219, 100, 45, 118,
+		// 231, 155, 218, 147, ];
+		// let recipient: [u8; 20] = [
+		// 	146, 158, 126, 182, 153, 116, 8, 193, 150, 130, 135, 115, 219, 100, 45, 118,
+		// 231, 155, 218, 147, ];
 		pm.set_relayer(JsString::from("929E7eb6997408C196828773db642D76e79bda93"))
 			.unwrap();
 		pm.set_recipient(JsString::from("929E7eb6997408C196828773db642D76e79bda93"))
@@ -426,6 +430,7 @@ mod test {
 			.map(|v| Uint8Array::from(v.as_slice()))
 			.collect();
 		pm.set_leaves(Leaves::from(JsValue::from(leaves_ua))).unwrap();
+		let note = DepositNote::deserialize(JsString::from(note)).unwrap();
 		pm.set_note(&note);
 		pm.set_leaf_index(40);
 		let proof = pm.proof().unwrap();
