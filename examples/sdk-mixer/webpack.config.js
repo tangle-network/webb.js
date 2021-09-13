@@ -23,7 +23,8 @@ module.exports = {
   mode: 'development',
   output: {
     path: path.join(__dirname, '.', 'build'),
-    publicPath: '/'
+    publicPath: '/',
+    globalObject: 'this'
   },
   resolve: {
     extensions: ['.js', '.ts'],

@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "webpack-dev-server --config ./webpack.config.js --hot --inline",
-    "build": "webpack --config ./webpack.config.js "
+    "build": "webpack --config ./webpack.config.js",
+    "start": "yarn build && node ./build/main.js"
   },
   "dependencies": {
     "@polkadot/api": "^4.11.2",

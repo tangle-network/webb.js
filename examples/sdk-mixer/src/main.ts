@@ -1,24 +1,27 @@
-import { options } from '@webb-tools/api';
-import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
-import { LoggerService } from '@webb-tools/app-util';
-import { Note } from '@webb-tools/sdk-mixer';
+const api = require('@polkadot/api');
+const { ApiPromise, Keyring, WsProvider } = api;
+const options = require('@webb-tools/api').options;
+const LoggerService = require('@webb-tools/app-util');
+const sdk = require('@webb-tools/sdk-mixer');
+const { Note } = sdk;
 
 // @ts-ignore
-import Worker from './mixer.worker';
+const Worker = require('./mixer.worker');
 
 const ENDPOINT = 'ws://localhost:9944';
-const apiLogger = LoggerService.get('Api');
+const apiLogger = new LoggerService.LoggerService('Api');
 
 async function main() {
   apiLogger.info('Connecting to ', ENDPOINT);
   const provider = new WsProvider([ENDPOINT]);
+  console.log(options);
   const opts = options({ provider });
   const api = await ApiPromise.create(opts);
   const result = await api.rpc.system.chain();
   apiLogger.info('🎉 Connected to ', result.toHuman());
   const keyring = new Keyring({ type: 'sr25519' });
   const alice = keyring.addFromUri('//Alice', { name: 'Alice default' });
-
+  console.log(Note);
   const note = await Note.generateNote({
     prefix: 'webb.mix',
     version: 'v1',
@@ -33,7 +36,9 @@ async function main() {
 
   const leaf = note.getLeaf();
   apiLogger.info(`Your Note: ${note.serialize()}`);
+  apiLogger.info(`Your leaf: ${leaf}`);
   console.log(api.query, api.tx);
+  // @ts-ignore
   api.query.system.account(alice.address).then((account) => {
     console.log(account);
   });
