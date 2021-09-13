@@ -248,8 +248,9 @@ impl FromStr for Note {
 		if !full {
 			return Err(OpStatusCode::InvalidNoteLength);
 		}
+		let prefix = parts[0];
 
-		if parts[0] != NOTE_PREFIX && parts[0] != BRIDGE_NOTE_PREFIX {
+		if prefix != NOTE_PREFIX && prefix != BRIDGE_NOTE_PREFIX {
 			return Err(OpStatusCode::InvalidNotePrefix);
 		}
 
@@ -269,7 +270,7 @@ impl FromStr for Note {
 		let exponentiation = parts[9].to_string();
 		let width = parts[10].to_string();
 		Ok(Note {
-			prefix: NOTE_PREFIX.to_owned(),
+			prefix: prefix.to_owned(),
 			version,
 			token_symbol,
 			secret,
