@@ -17,6 +17,7 @@ fn generate_with_secrets(note_builder: &NoteBuilder, secrets: &[u8]) -> Result<N
 		prefix: note_builder.prefix.clone(),
 		version: note_builder.version,
 		chain: note_builder.chain.clone(),
+		source_chain: note_builder.source_chain.clone(),
 		backend: note_builder.backend,
 		curve: note_builder.curve,
 		hash_function: note_builder.hash_function,
@@ -28,6 +29,7 @@ fn generate_with_secrets(note_builder: &NoteBuilder, secrets: &[u8]) -> Result<N
 		width: note_builder.width.clone(),
 	})
 }
+
 pub trait NoteGenerator {
 	type Rng;
 	fn get_rng(&self) -> Self::Rng;
@@ -44,11 +46,13 @@ pub trait LeafHasher {
 	type HasherOptions: Clone;
 	fn hash(&self, secrets: &[u8], options: Self::HasherOptions) -> Result<Vec<u8>, OpStatusCode>;
 }
+
 #[derive(Debug)]
 pub struct NoteBuilder {
 	pub prefix: String,
 	pub version: NoteVersion,
 	pub chain: String,
+	pub source_chain: String,
 	/// zkp related items
 	pub backend: Backend,
 	pub hash_function: HashFunction,
@@ -165,6 +169,7 @@ impl Default for NoteBuilder {
 		Self {
 			amount: "0".to_string(),
 			chain: "any".to_string(),
+			source_chain: "any".to_string(),
 			backend: Backend::Arkworks,
 			denomination: "18".to_string(),
 			version: NoteVersion::V1,
@@ -184,6 +189,7 @@ pub struct Note {
 	pub prefix: String,
 	pub version: NoteVersion,
 	pub chain: String,
+	pub source_chain: String,
 
 	/// zkp related items
 	pub backend: Backend,
@@ -215,23 +221,25 @@ impl fmt::Display for Note {
 			self.version.to_string(),
 			//2 => chain
 			self.chain.clone(),
-			//3 => backend
+			//3 => chain
+			self.source_chain.clone(),
+			//4 => backend
 			self.backend.to_string(),
-			//4 => curve
+			//5 => curve
 			self.curve.to_string(),
-			//5 => hash_function
+			//6 => hash_function
 			self.hash_function.to_string(),
-			//6 => token_symbol
+			//7 => token_symbol
 			self.token_symbol.clone(),
-			//7 => denomination
+			//8 => denomination
 			self.denomination.clone(),
-			//8 => amount
+			//9 => amount
 			self.amount.clone(),
-			// 9
-			self.exponentiation.clone(),
 			// 10
+			self.exponentiation.clone(),
+			// 11
 			self.width.clone(),
-			//11
+			//12
 			secrets,
 		];
 		let note = parts.join(":");
@@ -255,33 +263,38 @@ impl FromStr for Note {
 		}
 
 		let version: NoteVersion = parts[1].parse()?;
-		let token_symbol = parts[6].to_owned();
-		let note_val = parts[11];
+		let chain = parts[2].to_string();
+		let source_chain = parts[3].to_string();
+		let backend: Backend = parts[4].parse()?;
+		let curve: Curve = parts[5].parse()?;
+		let hash_function: HashFunction = parts[6].parse()?;
+		let token_symbol = parts[7].to_owned();
+		let denomination = parts[8].to_string();
+		let amount = parts[9].to_string();
+		let exponentiation = parts[10].to_string();
+		let width = parts[11].to_string();
+		let note_val = parts[12];
+
 		if note_val.is_empty() {
 			return Err(OpStatusCode::InvalidNoteSecrets);
 		}
 		let secret: Vec<u8> = hex::decode(&note_val.replace("0x", "")).map_err(|_| OpStatusCode::HexParsingFailed)?;
-		let curve: Curve = parts[4].parse()?;
-		let hash_function: HashFunction = parts[5].parse()?;
-		let backend: Backend = parts[3].parse()?;
-		let denomination = parts[7].to_string();
-		let chain = parts[2].to_string();
-		let amount = parts[8].to_string();
-		let exponentiation = parts[9].to_string();
-		let width = parts[10].to_string();
+
 		Ok(Note {
 			prefix: prefix.to_owned(),
 			version,
+			chain,
+			source_chain,
 			token_symbol,
-			secret,
+
 			curve,
 			hash_function,
 			backend,
 			denomination,
-			chain,
 			amount,
-			width,
 			exponentiation,
+			width,
+			secret,
 		})
 	}
 }
@@ -292,7 +305,7 @@ mod test {
 
 	#[test]
 	fn deserialize() {
-		let note  =  "webb.bridge:v1:any:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let note = "webb.bridge:v1:any:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 
 		let note = Note::deserialize(note).unwrap();
 		assert_eq!(note.version.to_string(), "v1".to_string());
@@ -304,6 +317,7 @@ mod test {
 		assert_eq!(note.chain.to_string(), "any".to_string());
 		assert_eq!(note.curve.to_string(), "Bn254".to_string());
 	}
+
 	#[test]
 	fn generate_note() {
 		let mut note_builder = NoteBuilder::default();

@@ -5,6 +5,7 @@ export type NoteGenInput = {
   prefix: string;
   version: string;
   chain: string;
+  sourceChain: string;
   backend: Backend;
   hashFunction: HashFunction;
   curve: Curve;
@@ -47,6 +48,7 @@ export class Note {
     noteBuilderInput.prefix(noteGenInput.prefix);
     noteBuilderInput.version('v1');
     noteBuilderInput.chain(noteGenInput.chain);
+    noteBuilderInput.sourceChain(noteGenInput.sourceChain);
     noteBuilderInput.backend(noteGenInput.backend);
     noteBuilderInput.hashFunction(noteGenInput.hashFunction);
     noteBuilderInput.curve(noteGenInput.curve);
