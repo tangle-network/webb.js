@@ -8,7 +8,7 @@ use crate::types::{Backend, Curve, HashFunction, NoteVersion, OpStatusCode};
 mod arkworks_poseidon_bls12_381;
 mod arkworks_poseidon_bn254;
 
-const FULL_NOTE_LENGTH: usize = 12;
+const FULL_NOTE_LENGTH: usize = 13;
 const NOTE_PREFIX: &str = "webb.mix";
 const BRIDGE_NOTE_PREFIX: &str = "webb.bridge";
 
@@ -274,7 +274,7 @@ impl FromStr for Note {
 		let exponentiation = parts[10].to_string();
 		let width = parts[11].to_string();
 		let note_val = parts[12];
-
+		dbg!(note_val);
 		if note_val.is_empty() {
 			return Err(OpStatusCode::InvalidNoteSecrets);
 		}
@@ -305,29 +305,33 @@ mod test {
 
 	#[test]
 	fn deserialize() {
-		let note = "webb.bridge:v1:any:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let note = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 
 		let note = Note::deserialize(note).unwrap();
-		assert_eq!(note.version.to_string(), "v1".to_string());
-		assert_eq!(note.token_symbol.to_string(), "EDG".to_string());
-		assert_eq!(note.amount.to_string(), "0".to_string());
-		assert_eq!(note.hash_function.to_string(), "Poseidon".to_string());
-		assert_eq!(note.backend.to_string(), "Arkworks".to_string());
-		assert_eq!(note.denomination.to_string(), "18".to_string());
-		assert_eq!(note.chain.to_string(), "any".to_string());
-		assert_eq!(note.curve.to_string(), "Bn254".to_string());
+		assert_eq!(note.curve, Curve::Bn254);
+		assert_eq!(note.prefix, BRIDGE_NOTE_PREFIX);
+		assert_eq!(&note.chain, "3");
+		assert_eq!(&note.source_chain, "2");
+		assert_eq!(note.backend, Backend::Arkworks);
+		assert_eq!(note.denomination, "18".to_string());
+		assert_eq!(note.hash_function, HashFunction::Poseidon);
 	}
 
 	#[test]
 	fn generate_note() {
 		let mut note_builder = NoteBuilder::default();
 		note_builder.backend = Backend::Arkworks;
-
+		note_builder.prefix = BRIDGE_NOTE_PREFIX.to_string();
 		note_builder.hash_function = HashFunction::Poseidon;
 		note_builder.curve = Curve::Bn254;
 		note_builder.denomination = "18".to_string();
+		note_builder.chain = "3".to_string();
+		note_builder.source_chain = "2".to_string();
 		let note = note_builder.generate_note().unwrap();
 		assert_eq!(note.curve, Curve::Bn254);
+		assert_eq!(note.prefix, BRIDGE_NOTE_PREFIX);
+		assert_eq!(&note.chain, "3");
+		assert_eq!(&note.source_chain, "2");
 		assert_eq!(note.backend, Backend::Arkworks);
 		assert_eq!(note.denomination, "18".to_string());
 		assert_eq!(note.hash_function, HashFunction::Poseidon);
