@@ -83,6 +83,9 @@ impl NoteBuilderInput {
 		self.note_builder.chain = chain.into();
 	}
 
+  #[wasm_bindgen(js_name = sourceChain)]
+  pub fn soruce_chain(&mut self, source_chain:JsString) {self.note_builder.source_chain = source_chain.into()}
+
 	pub fn backend(&mut self, backend: BE) {
 		let c: String = JsValue::from(&backend).as_string().unwrap();
 		self.note_builder.backend = c.parse().unwrap();
