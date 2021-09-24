@@ -205,6 +205,12 @@ impl DepositNote {
 		self.note.chain.clone().into()
 	}
 
+	#[wasm_bindgen(js_name = sourceChain)]
+	#[wasm_bindgen(getter)]
+	pub fn source_chain(&self) -> JsString {
+		self.note.source_chain.clone().into()
+	}
+
 	#[wasm_bindgen(getter)]
 	pub fn backend(&self) -> JsString {
 		self.note.backend.into()

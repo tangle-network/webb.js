@@ -333,7 +333,7 @@ mod test {
 		assert_eq!(&note.chain, "3");
 		assert_eq!(&note.source_chain, "2");
 		assert_eq!(note.backend, Backend::Arkworks);
-		assert_eq!(note.denomination, "18".to_string());
+		assert_eq!(note.denominatiqon, "18".to_string());
 		assert_eq!(note.hash_function, HashFunction::Poseidon);
 		dbg!(note.to_string());
 	}
