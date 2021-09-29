@@ -10,7 +10,7 @@
     "examples/*"
   ],
   "resolutions": {
-    "typescript": "3.8.3",
+    "typescript": "4.4.3",
     "@edgeware/node-types": "3.5.1-erup-4"
   },
   "scripts": {
@@ -45,6 +45,7 @@
     "ts-jest": "^26.5.2",
     "ts-node": "^9.1.1",
     "tsconfig-paths": "^3.9.0",
+    "typescript": "4.4.3",
     "worker-loader": "^3.0.7",
     "workerloader-jest-transformer": "^0.0.2"
   },
