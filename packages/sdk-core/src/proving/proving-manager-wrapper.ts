@@ -24,9 +24,7 @@ export class ProvingManagerWrapper {
           }
           break;
         case 'destroy':
-          {
-            ((self as unknown) as Worker).terminate();
-          }
+          ((self as unknown) as Worker).terminate();
           break;
       }
     });
