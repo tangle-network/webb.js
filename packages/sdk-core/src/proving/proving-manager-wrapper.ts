@@ -7,7 +7,7 @@ type PMEvents = {
   destroy: undefined;
 };
 
-export class ProvingManager {
+export class ProvingManagerWrapper {
   private constructor() {
     self.addEventListener('message', async (event) => {
       const message = event.data as Partial<PMEvents>;
@@ -39,7 +39,7 @@ export class ProvingManager {
   }
 
   async proof(pmSetupInput: ProvingManagerSetupInput) {
-    const Manager = await ProvingManager.manager;
+    const Manager = await ProvingManagerWrapper.manager;
     const pm = new Manager();
     pm.setNoteStr(pmSetupInput.note);
     pm.setLeaves(pmSetupInput.leaves);

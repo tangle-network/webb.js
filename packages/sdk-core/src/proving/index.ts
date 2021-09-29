@@ -1,1 +1,1 @@
-export * from './proving-manager';
+export * from './proving-manager-wrapper';
