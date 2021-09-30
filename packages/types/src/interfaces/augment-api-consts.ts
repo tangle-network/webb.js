@@ -1,27 +1,19 @@
 // Auto-generated via `yarn polkadot-types-from-chain`, do not edit
 /* eslint-disable */
 
-import type { Codec } from '@polkadot/types/types';
-import type { CurrencyIdOf } from '@webb-tools/types/interfaces/mixer';
-import type { AccountId, BlockNumber, PalletId } from '@webb-tools/types/interfaces/runtime';
 import type { ApiTypes } from '@polkadot/api/types';
+import type { u32 } from '@polkadot/types';
+import type { FrameSupportPalletId } from '@polkadot/types/lookup';
+import type { Codec } from '@polkadot/types/types';
 
 declare module '@polkadot/api/types/consts' {
   export interface AugmentedConsts<ApiType> {
     mixer: {
       /**
-       * Default admin key
-       **/
-      defaultAdmin: AccountId & AugmentedConst<ApiType>;
-      /**
-       * The small deposit length
-       **/
-      depositLength: BlockNumber & AugmentedConst<ApiType>;
-      /**
        * Native currency id
        **/
-      nativeCurrencyId: CurrencyIdOf & AugmentedConst<ApiType>;
-      palletId: PalletId & AugmentedConst<ApiType>;
+      nativeCurrencyId: u32 & AugmentedConst<ApiType>;
+      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/

@@ -15,7 +15,6 @@
   },
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
-    "@polkadot/api": "^4.11.2",
     "@polkadot/util": "^6.5.1",
     "@webb-tools/app-util": "^0.1.2-87",
     "@webb-tools/sdk-core": "^0.1.2-87",
