@@ -22,8 +22,8 @@ export abstract class WorkerWithEvents<
   protected abstract Logger: LoggerService;
 
   constructor() {
-    ((self as unknown) as Worker).addEventListener('message', (event) => {
-      this.on((event.data as unknown) as RxPayload);
+    (self as unknown as Worker).addEventListener('message', (event) => {
+      this.on(event.data as unknown as RxPayload);
     });
   }
 
@@ -37,7 +37,7 @@ export abstract class WorkerWithEvents<
 
   protected emit<Name extends keyof TxPayload>(name: Name, value: TxPayload[Name], error = false): void {
     this.Logger.trace(`Got message ${name}`, value);
-    const worker = (self as unknown) as Worker;
+    const worker = self as unknown as Worker;
     const message: TX<TxPayload> = {
       name,
       value,

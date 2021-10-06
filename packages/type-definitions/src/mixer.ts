@@ -42,7 +42,7 @@ export default {
       relayer: 'Option<AccountId>'
     },
 
-    ///////
+    /// ////
     Element: 'Vec<u8>',
     NodeTemplateRuntimeElement: 'Vec<u8>',
     // Anchor

@@ -23,4 +23,4 @@ export const rpc: Record<string, Record<string, DefinitionRpc | DefinitionRpcSub
 
 export const typesAlias: Record<string, OverrideModuleType> = webbTypeAlias;
 
-export const typesBundle = (webbTypesBundle as unknown) as OverrideBundleType;
+export const typesBundle = webbTypesBundle as unknown as OverrideBundleType;
