@@ -17,14 +17,14 @@ export class ProvingManagerWrapper {
           {
             const input = message as PMEvents['proof'];
             const proof = await this.proof(input);
-            ((self as unknown) as Worker).postMessage({
+            (self as unknown as Worker).postMessage({
               name: key,
               data: proof
             });
           }
           break;
         case 'destroy':
-          ((self as unknown) as Worker).terminate();
+          (self as unknown as Worker).terminate();
           break;
       }
     });

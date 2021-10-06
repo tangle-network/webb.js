@@ -32,7 +32,7 @@ async function main() {
         if (dispatchError.isModule) {
           // for module errors, we have the section indexed, lookup
           const decoded = api.registry.findMetaError(dispatchError.asModule);
-          const { documentation, name, section } = decoded;
+          const { docs: documentation, name, section } = decoded;
 
           console.log(`${section}.${name}: ${documentation.join(' ')}`);
         } else {

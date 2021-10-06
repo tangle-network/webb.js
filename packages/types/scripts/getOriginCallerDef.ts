@@ -1,6 +1,6 @@
 import { TypeRegistry } from '@polkadot/types/create';
 import metaHex from '../src/metadata/static-latest';
-import { Metadata } from '@polkadot/metadata';
+import { Metadata } from '@polkadot/types';
 
 const POLKADOT_KNOWN_ORIGINS: Record<string, string> = {
   Council: 'CollectiveOrigin',
@@ -21,7 +21,7 @@ const KNOWN_ORIGINS = {
 function getOriginCallerDef(): void {
   const registry = new TypeRegistry();
   const metadata = new Metadata(registry, metaHex);
-  const modules = metadata.asLatest.modules;
+  const modules = metadata.asLatest.pallets;
 
   const isIndexed = modules.some(({ index }) => !index.eqn(255));
 

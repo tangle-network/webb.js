@@ -10,7 +10,6 @@
     "examples/*"
   ],
   "resolutions": {
-    "typescript": "3.8.3",
     "@edgeware/node-types": "3.5.1-erup-4"
   },
   "scripts": {
@@ -27,7 +26,8 @@
     "update-metadata": "ts-node-script -r tsconfig-paths/register packages/types/scripts/updateMetadata.ts",
     "example:sdk-mixer": "cd ./examples/sdk-mixer && yarn dev",
     "script": "ts-node-script -r tsconfig-paths/register",
-    "format": "prettier --write \"packages/**/*.{ts,js,jsx,tsx}\" && cargo fmt --manifest-path packages/wasm-utils/Cargo.toml"
+    "format": "prettier --write \"packages/**/*.{ts,js,jsx,tsx}\" && cargo fmt --manifest-path packages/wasm-utils/Cargo.toml",
+    "generate:meta": "ts-node --skip-project node_modules/.bin/polkadot-ty…pes-from-chain --package sample-polkadotjs-typegen/interfaces --endpoint ./packages/types/src/metadata/edgware.json --output ./interfaces --strict"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
@@ -45,6 +45,7 @@
     "ts-jest": "^26.5.2",
     "ts-node": "^9.1.1",
     "tsconfig-paths": "^3.9.0",
+    "typescript": "^4.4.3",
     "worker-loader": "^3.0.7",
     "workerloader-jest-transformer": "^0.0.2"
   },

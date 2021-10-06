@@ -2,6 +2,7 @@ import { jsonrpcFromDefs, typesAliasFromDefs, typesFromDefs } from '@open-web3/o
 
 import mixer from './mixer';
 import merkle from './merkle';
+import pallets from './pallets';
 import versioned from './types-known/versioned';
 
 // FIXME: currently we cannot override this in runtime definations because the code generation script cannot handle overrides
@@ -43,7 +44,8 @@ const additionalOverride = {
 
 const webbDefs = {
   mixer,
-  merkle
+  merkle,
+  pallets
 };
 
 export const types = {

@@ -8,7 +8,6 @@
     "build": "webpack --config ./webpack.config.js "
   },
   "dependencies": {
-    "@polkadot/api": "^4.11.2",
     "@webb-tools/api": "^0.1.2-44",
     "@webb-tools/app-util": "^0.1.2-44",
     "@webb-tools/sdk-core": "^0.1.2-44",
@@ -29,7 +28,6 @@
     "prettier": "^2.2.1",
     "ts-loader": "^8.0.14",
     "tsconfig-paths-webpack-plugin": "^3.3.0",
-    "typescript": "^4.1.3",
     "uglifyjs-webpack-plugin": "^2.2.0",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10",

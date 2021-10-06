@@ -1,14 +1,20 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import type { Bytes, Compact, DoNotConstruct, Enum, GenericAccountId, GenericAccountIndex, GenericBlock, GenericCall, GenericConsensusEngineId, GenericLookupSource, GenericMultiAddress, Int, Null, Option, StorageKey, Struct, U8aFixed, UInt, Vec, u16, u32, u64, u8 } from '@polkadot/types';
-import type { ITuple } from '@polkadot/types/types';
+import type { Bytes, Compact, DoNotConstruct, Enum, GenericAccountId, GenericAccountIndex, GenericBlock, GenericCall, GenericConsensusEngineId, GenericEthereumAccountId, GenericLookupSource, GenericMultiAddress, Int, Null, Option, StorageKey, Struct, U8aFixed, UInt, Vec, u16, u32, u64, u8 } from '@polkadot/types';
 import type { AuthorityId } from '@polkadot/types/interfaces/consensus';
 import type { Signature } from '@polkadot/types/interfaces/extrinsics';
 import type { SystemOrigin } from '@polkadot/types/interfaces/system';
+import type { ITuple } from '@polkadot/types/types';
 
 /** @name AccountId */
-export interface AccountId extends GenericAccountId {}
+export interface AccountId extends AccountId32 {}
+
+/** @name AccountId20 */
+export interface AccountId20 extends GenericEthereumAccountId {}
+
+/** @name AccountId32 */
+export interface AccountId32 extends GenericAccountId {}
 
 /** @name AccountIdOf */
 export interface AccountIdOf extends AccountId {}
@@ -33,6 +39,12 @@ export interface Block extends GenericBlock {}
 
 /** @name BlockNumber */
 export interface BlockNumber extends u32 {}
+
+/** @name BlockNumberFor */
+export interface BlockNumberFor extends BlockNumber {}
+
+/** @name BlockNumberOf */
+export interface BlockNumberOf extends BlockNumber {}
 
 /** @name Call */
 export interface Call extends GenericCall {}
@@ -90,6 +102,7 @@ export interface DigestItem extends Enum {
   readonly asPreRuntime: PreRuntime;
   readonly isChangesTrieSignal: boolean;
   readonly asChangesTrieSignal: ChangesTrieSignal;
+  readonly isRuntimeEnvironmentUpdated: boolean;
 }
 
 /** @name EncodedJustification */
@@ -317,8 +330,22 @@ export interface StorageProof extends Struct {
   readonly trieNodes: Vec<Bytes>;
 }
 
+/** @name TransactionInfo */
+export interface TransactionInfo extends Struct {
+  readonly chunkRoot: H256;
+  readonly contentHash: H256;
+  readonly dataSize: u32;
+  readonly blockChunks: u32;
+}
+
 /** @name TransactionPriority */
 export interface TransactionPriority extends u64 {}
+
+/** @name TransactionStorageProof */
+export interface TransactionStorageProof extends Struct {
+  readonly chunk: Bytes;
+  readonly proof: Vec<Bytes>;
+}
 
 /** @name U32F32 */
 export interface U32F32 extends UInt {}

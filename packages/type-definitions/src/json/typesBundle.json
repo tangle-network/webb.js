@@ -54,6 +54,48 @@
                             "hasher": "HashFunction",
                             "should_store_leaves": "bool"
                         },
+                        "Element": "Vec<u8>",
+                        "NodeTemplateRuntimeElement": "Vec<u8>",
+                        "PalletMixerMixerMetadata": {
+                            "creator": "AccountId",
+                            "deposit_size": "Balance",
+                            "asset": "AssetId"
+                        },
+                        "PalletAnchorAnchorMetadata": {
+                            "creator": "AccountId",
+                            "deposit_size": "Balance"
+                        },
+                        "PalletAnchorEdgeMetadata": {
+                            "src_chain_id": "ChainId",
+                            "root": "Element",
+                            "height": "BlockNumber"
+                        },
+                        "PalletAnchorHandlerUpdateRecord": {
+                            "tree_id": "TreeId",
+                            "resource_id": "ResourceId",
+                            "edge_metadata": "PalletAnchorEdgeMetadata"
+                        },
+                        "PalletAssetRegistryAssetType": {
+                            "_enum": [
+                                "Token",
+                                "PoolShare"
+                            ]
+                        },
+                        "PalletAssetRegistryAssetMetadata": {
+                            "symbol": "Vec<u8>",
+                            "decimals": "u8"
+                        },
+                        "ResourceId": "[u8; 32]",
+                        "PalletAssetRegistryAssetDetails": {
+                            "name": "Vec<u8>",
+                            "asset_type": "PalletAssetRegistryAssetType",
+                            "existential_deposit": "Balance",
+                            "locked": "bool"
+                        },
+                        "DarkwebbPrimitivesDepositDetails": {
+                            "depositor": "AccountId",
+                            "deposit": "Balance"
+                        },
                         "Address": "AccountId",
                         "LookupSource": "AccountId",
                         "Keys": "SessionKeys2",

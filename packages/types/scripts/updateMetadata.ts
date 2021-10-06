@@ -11,8 +11,13 @@ const main = (): void => {
     ws.send('{"id":"1","jsonrpc":"2.0","method":"state_getMetadata","params":[]}');
   };
   ws.onmessage = (msg: any): void => {
-    const metadata = JSON.parse(msg.data).result;
+    const fullData = JSON.parse(msg.data);
+
+    const metadata = fullData.result;
+
     fs.writeFileSync('packages/types/src/metadata/static-latest.ts', `export default '${metadata}'`);
+    fs.writeFileSync('packages/types/src/metadata/edgware.json', JSON.stringify(fullData, null, 2));
+
     console.log('Done');
     process.exit(0);
   };

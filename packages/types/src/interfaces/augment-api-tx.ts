@@ -1,179 +1,57 @@
 // Auto-generated via `yarn polkadot-types-from-chain`, do not edit
 /* eslint-disable */
 
-import type { Bytes, Option, Vec, bool, u8 } from '@polkadot/types';
-import type { AnyNumber, ITuple } from '@polkadot/types/types';
-import type { Extrinsic } from '@polkadot/types/interfaces/extrinsics';
-import type { KeyId, TreeId } from '@webb-tools/types/interfaces/merkle';
-import type { CurrencyIdOf, ScalarData, WithdrawProof } from '@webb-tools/types/interfaces/mixer';
-import type { AccountId, BalanceOf, Call } from '@webb-tools/types/interfaces/runtime';
 import type { ApiTypes, SubmittableExtrinsic } from '@polkadot/api/types';
+import type { Bytes, U8aFixed, u128, u32, u8 } from '@polkadot/types';
+import type { Extrinsic } from '@polkadot/types/interfaces/extrinsics';
+import type { AnyNumber } from '@polkadot/types/types';
+import type { NodeTemplateRuntimeElement, PalletAnchorEdgeMetadata } from '@webb-tools/types/interfaces/pallets';
+import type { AccountId32, Call } from '@webb-tools/types/interfaces/runtime';
 
 declare module '@polkadot/api/types/submittable' {
   export interface AugmentedSubmittables<ApiType> {
-    merkle: {
+    anchor: {
+      create: AugmentedSubmittable<(maxEdges: u32 | AnyNumber | Uint8Array, depth: u8 | AnyNumber | Uint8Array, asset: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, u8, u32]>;
+      deposit: AugmentedSubmittable<(treeId: u32 | AnyNumber | Uint8Array, leaf: NodeTemplateRuntimeElement | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, NodeTemplateRuntimeElement]>;
+      forceSetMaintainer: AugmentedSubmittable<(newMaintainer: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32]>;
+      setMaintainer: AugmentedSubmittable<(newMaintainer: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32]>;
       /**
-       * Adds an array of leaf data into the tree and adds calculated root to
-       * the cache.
-       * 
-       * Can only be called by the manager if a manager is set.
-       * 
-       * Weights:
-       * - Dependent on argument: `members`
-       * 
-       * - Base weight: 384_629_956_000
-       * - DB weights: 3 reads, 2 writes
-       * - Additional weights: 20_135_984_000 * members.len()
+       * Generic tx
        **/
-      addMembers: AugmentedSubmittable<(treeId: TreeId | AnyNumber | Uint8Array, members: Vec<ScalarData> | (ScalarData | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [TreeId, Vec<ScalarData>]>;
+      [key: string]: SubmittableExtrinsicFunction<ApiType>;
+    };
+    anchorHandler: {
       /**
-       * Adds a verifying key to the storage.
-       * 
-       * Can only be called by the root.
+       * This will be called by bridge when proposal to create an
+       * anchor has been successfully voted on.
        **/
-      addVerifyingKey: AugmentedSubmittable<(key: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Bytes]>;
+      executeAnchorCreateProposal: AugmentedSubmittable<(srcChainId: u32 | AnyNumber | Uint8Array, rId: U8aFixed | string | Uint8Array, maxEdges: u32 | AnyNumber | Uint8Array, treeDepth: u8 | AnyNumber | Uint8Array, asset: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, U8aFixed, u32, u8, u32]>;
       /**
-       * Creates a new tree and sets a new manager for that tree. The
-       * initial manager is the sender. Also increments the mixer id counter
-       * in the storage. If _depth is not provided, max tree depth is
-       * assumed.
-       * 
-       * Weights:
-       * - Dependent on arguments: _depth
-       * 
-       * - Base weight: 8_356_000
-       * - DB weights: 1 read, 3 writes
-       * - Additional weights: 151_000 * _depth
+       * This will be called by bridge when proposal to add/update edge of an
+       * anchor has been successfully voted on.
        **/
-      createTree: AugmentedSubmittable<(mgrRequired: bool | boolean | Uint8Array, depth: Option<u8> | null | object | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [bool, Option<u8>]>;
-      /**
-       * Initializes the merkle tree
-       * 
-       * Can only be called by the manager or root.
-       **/
-      initializeTree: AugmentedSubmittable<(treeId: TreeId | AnyNumber | Uint8Array, keyId: KeyId | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [TreeId, KeyId]>;
-      /**
-       * Sets manager account id.
-       * 
-       * Can only be called by the root or the current manager.
-       * 
-       * Weights:
-       * - Independent of the arguments.
-       * 
-       * - Base weight: 8_000_000
-       * - DB weights: 1 read, 1 write
-       **/
-      setManager: AugmentedSubmittable<(treeId: TreeId | AnyNumber | Uint8Array, newManager: AccountId | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TreeId, AccountId]>;
-      /**
-       * Sets if a manager is required for specific actions like adding
-       * nullifiers or leaves into the tree.
-       * 
-       * Can only be called by the root or the current manager.
-       * 
-       * Weights:
-       * - Independend of the arguments.
-       * 
-       * - Base weight: 7_000_000
-       * - DB weights: 1 read, 1 write
-       **/
-      setManagerRequired: AugmentedSubmittable<(treeId: TreeId | AnyNumber | Uint8Array, managerRequired: bool | boolean | Uint8Array) => SubmittableExtrinsic<ApiType>, [TreeId, bool]>;
-      /**
-       * Set stopped flag inside the storage.
-       * 
-       * Can only be called by the root or the current manager.
-       * 
-       * Weights:
-       * - Independent of the arguments.
-       * 
-       * - Base weight: 8_000_000
-       * - DB weights: 1 read, 1 write
-       **/
-      setStopped: AugmentedSubmittable<(treeId: TreeId | AnyNumber | Uint8Array, stopped: bool | boolean | Uint8Array) => SubmittableExtrinsic<ApiType>, [TreeId, bool]>;
-      /**
-       * Adds a verifying key to the storage.
-       * 
-       * Can only be called by the root.
-       **/
-      setVerifyingKey: AugmentedSubmittable<(keyId: KeyId | AnyNumber | Uint8Array, key: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [KeyId, Bytes]>;
-      /**
-       * Sets the verifying key for a tree.
-       * 
-       * Can only be called by the manager if a manager is set.
-       **/
-      setVerifyingKeyForTree: AugmentedSubmittable<(keyId: KeyId | AnyNumber | Uint8Array, treeId: TreeId | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [KeyId, TreeId]>;
-      /**
-       * Verification stub for testing, these verification functions should
-       * not need to be used directly as extrinsics. Rather, higher-order
-       * modules should use the module functions to verify and execute
-       * further logic.
-       * 
-       * Verifies the membership proof.
-       * 
-       * Weights:
-       * - Dependent on the argument: `path`
-       * - Base weight: 383_420_867_000
-       * - DB weights: 1 read
-       * - Additional weights: 814_291_000 * path.len()
-       **/
-      verify: AugmentedSubmittable<(treeId: TreeId | AnyNumber | Uint8Array, leaf: ScalarData | string | Uint8Array, path: Vec<ITuple<[bool, ScalarData]>> | ([bool | boolean | Uint8Array, ScalarData | string | Uint8Array])[]) => SubmittableExtrinsic<ApiType>, [TreeId, ScalarData, Vec<ITuple<[bool, ScalarData]>>]>;
+      executeAnchorUpdateProposal: AugmentedSubmittable<(rId: U8aFixed | string | Uint8Array, anchorMetadata: PalletAnchorEdgeMetadata | { srcChainId?: any; root?: any; height?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [U8aFixed, PalletAnchorEdgeMetadata]>;
       /**
        * Generic tx
        **/
       [key: string]: SubmittableExtrinsicFunction<ApiType>;
     };
     mixer: {
-      createNew: AugmentedSubmittable<(currencyId: CurrencyIdOf | AnyNumber | Uint8Array, size: BalanceOf | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [CurrencyIdOf, BalanceOf]>;
-      createNewAndInitialize: AugmentedSubmittable<(currencyId: CurrencyIdOf | AnyNumber | Uint8Array, size: BalanceOf | AnyNumber | Uint8Array, keyId: KeyId | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [CurrencyIdOf, BalanceOf, KeyId]>;
+      create: AugmentedSubmittable<(depositSize: u128 | AnyNumber | Uint8Array, depth: u8 | AnyNumber | Uint8Array, asset: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u8, u32]>;
+      deposit: AugmentedSubmittable<(treeId: u32 | AnyNumber | Uint8Array, leaf: NodeTemplateRuntimeElement | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, NodeTemplateRuntimeElement]>;
+      forceSetMaintainer: AugmentedSubmittable<(newMaintainer: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32]>;
+      setMaintainer: AugmentedSubmittable<(newMaintainer: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32]>;
+      withdraw: AugmentedSubmittable<(id: u32 | AnyNumber | Uint8Array, proofBytes: Bytes | string | Uint8Array, root: NodeTemplateRuntimeElement | string | Uint8Array, nullifierHash: NodeTemplateRuntimeElement | string | Uint8Array, recipient: AccountId32 | string | Uint8Array, relayer: AccountId32 | string | Uint8Array, fee: u128 | AnyNumber | Uint8Array, refund: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, Bytes, NodeTemplateRuntimeElement, NodeTemplateRuntimeElement, AccountId32, AccountId32, u128, u128]>;
       /**
-       * Deposits the fixed amount into the mixer with id of `mixer_id`
-       * Multiple deposits can be inserted together since `data_points` is an
-       * array.
-       * 
-       * Fails in case the mixer is stopped or not initialized.
-       * 
-       * Weights:
-       * - Dependent on argument: `data_points`
-       * 
-       * - Base weight: 417_168_400_000
-       * - DB weights: 8 reads, 5 writes
-       * - Additional weights: 21_400_442_000 * data_points.len()
+       * Generic tx
        **/
-      deposit: AugmentedSubmittable<(mixerId: TreeId | AnyNumber | Uint8Array, dataPoints: Vec<ScalarData> | (ScalarData | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [TreeId, Vec<ScalarData>]>;
-      /**
-       * Stops the operation of all the mixers managed by the pallet.
-       * Can only be called by the admin or the root origin.
-       * 
-       * Weights:
-       * - Independent of the arguments.
-       * 
-       * - Base weight: 36_000_000
-       * - DB weights: 6 reads, 4 writes
-       **/
-      setStopped: AugmentedSubmittable<(stopped: bool | boolean | Uint8Array) => SubmittableExtrinsic<ApiType>, [bool]>;
-      /**
-       * Transfers the admin from the caller to the specified `to` account.
-       * Can only be called by the current admin or the root origin.
-       * 
-       * Weights:
-       * - Independent of the arguments.
-       * 
-       * - Base weight: 7_000_000
-       * - DB weights: 1 read, 1 write
-       **/
-      transferAdmin: AugmentedSubmittable<(to: AccountId | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId]>;
-      /**
-       * Withdraws a deposited amount from the mixer. Can only withdraw one
-       * deposit. Accepts proof of membership along with the mixer id.
-       * 
-       * Fails if the mixer is stopped or not initialized.
-       * 
-       * Weights:
-       * - Independent of the arguments.
-       * 
-       * - Base weight: 1_078_562_000_000
-       * - DB weights: 9 reads, 3 writes
-       **/
-      withdraw: AugmentedSubmittable<(withdrawProof: WithdrawProof | { mixer_id?: any; cached_block?: any; cached_root?: any; comms?: any; nullifier_hash?: any; proof_bytes?: any; leaf_index_commitments?: any; proof_commitments?: any; recipient?: any; relayer?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [WithdrawProof]>;
+      [key: string]: SubmittableExtrinsicFunction<ApiType>;
+    };
+    verifier: {
+      forceSetMaintainer: AugmentedSubmittable<(newMaintainer: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32]>;
+      forceSetParameters: AugmentedSubmittable<(parameters: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Bytes]>;
+      setMaintainer: AugmentedSubmittable<(newMaintainer: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32]>;
+      setParameters: AugmentedSubmittable<(parameters: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Bytes]>;
       /**
        * Generic tx
        **/
