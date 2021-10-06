@@ -4,7 +4,7 @@
 import type { ApiTypes } from '@polkadot/api/types';
 import type { Bytes, Option, U8aFixed, bool, u32, u64 } from '@polkadot/types';
 import type { AnyNumber, ITuple, Observable } from '@polkadot/types/types';
-import type { DarkwebbPrimitivesDepositDetails, NodeTemplateRuntimeElement, PalletAnchorAnchorMetadata, PalletAnchorEdgeMetadata, PalletAnchorHandlerUpdateRecord, PalletMixerMixerMetadata } from '@webb-tools/types/interfaces/mixer';
+import type { DarkwebbPrimitivesDepositDetails, NodeTemplateRuntimeElement, PalletAnchorAnchorMetadata, PalletAnchorEdgeMetadata, PalletAnchorHandlerUpdateRecord, PalletMixerMixerMetadata } from '@webb-tools/types/interfaces/pallets';
 import type { AccountId32 } from '@webb-tools/types/interfaces/runtime';
 
 declare module '@polkadot/api/types/storage' {

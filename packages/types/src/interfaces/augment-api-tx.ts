@@ -5,7 +5,7 @@ import type { ApiTypes, SubmittableExtrinsic } from '@polkadot/api/types';
 import type { Bytes, U8aFixed, u128, u32, u8 } from '@polkadot/types';
 import type { Extrinsic } from '@polkadot/types/interfaces/extrinsics';
 import type { AnyNumber } from '@polkadot/types/types';
-import type { NodeTemplateRuntimeElement, PalletAnchorEdgeMetadata } from '@webb-tools/types/interfaces/mixer';
+import type { NodeTemplateRuntimeElement, PalletAnchorEdgeMetadata } from '@webb-tools/types/interfaces/pallets';
 import type { AccountId32, Call } from '@webb-tools/types/interfaces/runtime';
 
 declare module '@polkadot/api/types/submittable' {
