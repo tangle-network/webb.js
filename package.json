@@ -1,5 +1,5 @@
 {
-  "version": "0.1.2-88",
+  "version": "0.1.2-89",
   "private": true,
   "engines": {
     "yarn": "^1.10.1",
@@ -13,7 +13,7 @@
     "@edgeware/node-types": "3.5.1-erup-4"
   },
   "scripts": {
-    "pumbp": "yarn polkadot-dev-version pre",
+    "pumbp": "./scripts/update-version.js prerelease",
     "build": "yarn build:interfaces && yarn build-ts:dev",
     "build-ts:dev": "node ./scripts/webb-build-dev.js",
     "build:release": "node ./scripts/webb-build-release.js",
