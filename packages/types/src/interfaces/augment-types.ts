@@ -58,7 +58,7 @@ import type { Multisig, Timepoint } from '@polkadot/types/interfaces/utility';
 import type { VestingInfo } from '@polkadot/types/interfaces/vesting';
 import type { AssetInstance, AssetInstanceV0, AssetInstanceV1, BodyId, BodyPart, DoubleEncodedCall, Fungibility, InboundStatus, InstructionV2, InteriorMultiLocation, Junction, JunctionV0, JunctionV1, JunctionV2, Junctions, JunctionsV1, JunctionsV2, MultiAsset, MultiAssetFilter, MultiAssetFilterV1, MultiAssetFilterV2, MultiAssetV0, MultiAssetV1, MultiAssetV2, MultiAssets, MultiAssetsV1, MultiAssetsV2, MultiLocation, MultiLocationV0, MultiLocationV1, MultiLocationV2, NetworkId, OriginKindV0, OriginKindV1, OriginKindV2, OutboundStatus, Outcome, QueryId, QueryStatus, QueueConfigData, Response, ResponseV0, ResponseV1, ResponseV2, ResponseV2Error, ResponseV2Result, VersionMigrationStage, VersionedMultiAsset, VersionedMultiAssets, VersionedMultiLocation, VersionedResponse, VersionedXcm, WeightLimitV2, WildFungibility, WildMultiAsset, WildMultiAssetV1, Xcm, XcmAssetId, XcmError, XcmErrorV0, XcmErrorV1, XcmErrorV2, XcmOrder, XcmOrderV0, XcmOrderV1, XcmOrigin, XcmOriginKind, XcmV0, XcmV1, XcmV2, XcmVersion, XcmpMessageFormat } from '@polkadot/types/interfaces/xcm';
 import type { HashFunction, KeyId, Manager, MerkleTree, TreeId } from '@webb-tools/types/interfaces/merkle';
-import type { Amount, AmountOf, Commitment, CurrencyId, CurrencyIdOf, MixerInfo, Nullifier, ScalarData, WithdrawProof } from '@webb-tools/types/interfaces/mixer';
+import type { Amount, AmountOf, Commitment, CurrencyId, CurrencyIdOf, DarkwebbPrimitivesDepositDetails, Element, MixerInfo, NodeTemplateRuntimeElement, Nullifier, PalletAnchorAnchorMetadata, PalletAnchorEdgeMetadata, PalletAnchorHandlerUpdateRecord, PalletAssetRegistryAssetDetails, PalletAssetRegistryAssetMetadata, PalletAssetRegistryAssetType, PalletMixerMixerMetadata, ResourceId, ScalarData, WithdrawProof } from '@webb-tools/types/interfaces/mixer';
 import type { AccountId, AccountId20, AccountId32, AccountIdOf, AccountIndex, Address, AssetId, Balance, BalanceOf, Block, BlockNumber, BlockNumberFor, BlockNumberOf, Call, CallHash, CallHashOf, ChangesTrieConfiguration, ChangesTrieSignal, CodecHash, Consensus, ConsensusEngineId, Digest, DigestItem, EncodedJustification, ExtrinsicsWeight, Fixed128, Fixed64, FixedI128, FixedI64, FixedU128, FixedU64, H1024, H128, H160, H2048, H256, H32, H512, H64, Hash, Header, HeaderPartial, I32F32, Index, IndicesLookupSource, Justification, Justifications, KeyTypeId, KeyValue, LockIdentifier, LookupSource, LookupTarget, ModuleId, Moment, MultiAddress, MultiSigner, OpaqueCall, Origin, OriginCaller, PalletId, PalletVersion, PalletsOrigin, Pays, PerU16, Perbill, Percent, Permill, Perquintill, Phantom, PhantomData, PreRuntime, Releases, RuntimeDbWeight, Seal, SealV0, SignedBlock, SignedBlockWithJustification, SignedBlockWithJustifications, Slot, StorageData, StorageProof, TransactionInfo, TransactionPriority, TransactionStorageProof, U32F32, ValidatorId, ValidatorIdOf, Weight, WeightMultiplier } from '@webb-tools/types/interfaces/runtime';
 
 declare module '@polkadot/types/types/registry' {
@@ -256,6 +256,7 @@ declare module '@polkadot/types/types/registry' {
     CreatedBlock: CreatedBlock;
     CurrencyId: CurrencyId;
     CurrencyIdOf: CurrencyIdOf;
+    DarkwebbPrimitivesDepositDetails: DarkwebbPrimitivesDepositDetails;
     Data: Data;
     DeferredOffenceOf: DeferredOffenceOf;
     DefunctVoter: DefunctVoter;
@@ -298,6 +299,7 @@ declare module '@polkadot/types/types/registry' {
     ElectionScore: ElectionScore;
     ElectionSize: ElectionSize;
     ElectionStatus: ElectionStatus;
+    Element: Element;
     EncodedFinalityProofs: EncodedFinalityProofs;
     EncodedJustification: EncodedJustification;
     EpochAuthorship: EpochAuthorship;
@@ -597,6 +599,7 @@ declare module '@polkadot/types/types/registry' {
     NextConfigDescriptor: NextConfigDescriptor;
     NextConfigDescriptorV1: NextConfigDescriptorV1;
     NodeRole: NodeRole;
+    NodeTemplateRuntimeElement: NodeTemplateRuntimeElement;
     Nominations: Nominations;
     NominatorIndex: NominatorIndex;
     NominatorIndexCompact: NominatorIndexCompact;
@@ -632,6 +635,12 @@ declare module '@polkadot/types/types/registry' {
     Owner: Owner;
     PageCounter: PageCounter;
     PageIndexData: PageIndexData;
+    PalletAnchorAnchorMetadata: PalletAnchorAnchorMetadata;
+    PalletAnchorEdgeMetadata: PalletAnchorEdgeMetadata;
+    PalletAnchorHandlerUpdateRecord: PalletAnchorHandlerUpdateRecord;
+    PalletAssetRegistryAssetDetails: PalletAssetRegistryAssetDetails;
+    PalletAssetRegistryAssetMetadata: PalletAssetRegistryAssetMetadata;
+    PalletAssetRegistryAssetType: PalletAssetRegistryAssetType;
     PalletCallMetadataLatest: PalletCallMetadataLatest;
     PalletCallMetadataV14: PalletCallMetadataV14;
     PalletConstantMetadataLatest: PalletConstantMetadataLatest;
@@ -643,6 +652,7 @@ declare module '@polkadot/types/types/registry' {
     PalletId: PalletId;
     PalletMetadataLatest: PalletMetadataLatest;
     PalletMetadataV14: PalletMetadataV14;
+    PalletMixerMixerMetadata: PalletMixerMixerMetadata;
     PalletsOrigin: PalletsOrigin;
     PalletStorageMetadataLatest: PalletStorageMetadataLatest;
     PalletStorageMetadataV14: PalletStorageMetadataV14;
@@ -762,6 +772,7 @@ declare module '@polkadot/types/types/registry' {
     ReportIdOf: ReportIdOf;
     ReserveData: ReserveData;
     ReserveIdentifier: ReserveIdentifier;
+    ResourceId: ResourceId;
     Response: Response;
     ResponseV0: ResponseV0;
     ResponseV1: ResponseV1;

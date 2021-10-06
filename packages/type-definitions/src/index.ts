@@ -3,6 +3,7 @@ import { jsonrpcFromDefs, typesAliasFromDefs, typesFromDefs } from '@open-web3/o
 import mixer from './mixer';
 import merkle from './merkle';
 import versioned from './types-known/versioned';
+import pallets from '@webb-tools/type-definitions/pallets';
 
 // FIXME: currently we cannot override this in runtime definations because the code generation script cannot handle overrides
 // This will make it behave correctly in runtime, but wrong types in TS defination.
@@ -43,7 +44,8 @@ const additionalOverride = {
 
 const webbDefs = {
   mixer,
-  merkle
+  merkle,
+  pallets
 };
 
 export const types = {

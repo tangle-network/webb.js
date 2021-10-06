@@ -26,7 +26,8 @@
     "update-metadata": "ts-node-script -r tsconfig-paths/register packages/types/scripts/updateMetadata.ts",
     "example:sdk-mixer": "cd ./examples/sdk-mixer && yarn dev",
     "script": "ts-node-script -r tsconfig-paths/register",
-    "format": "prettier --write \"packages/**/*.{ts,js,jsx,tsx}\" && cargo fmt --manifest-path packages/wasm-utils/Cargo.toml"
+    "format": "prettier --write \"packages/**/*.{ts,js,jsx,tsx}\" && cargo fmt --manifest-path packages/wasm-utils/Cargo.toml",
+    "generate:meta": "ts-node --skip-project node_modules/.bin/polkadot-ty…pes-from-chain --package sample-polkadotjs-typegen/interfaces --endpoint ./packages/types/src/metadata/edgware.json --output ./interfaces --strict"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
