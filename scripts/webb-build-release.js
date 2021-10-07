@@ -61,6 +61,7 @@ function npmPublish() {
 
   rimraf.sync('build/package.json');
   ['LICENSE', 'README.md', 'package.json'].forEach((file) => copySync(file, 'build'));
+  console.log('args', process.argv);
 
   process.chdir('build');
 
@@ -73,6 +74,7 @@ function npmPublish() {
 
       break;
     } catch (error) {
+      console.error(error);
       if (count < 5) {
         const end = Date.now() + 15000;
 
