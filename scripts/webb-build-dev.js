@@ -79,7 +79,7 @@ async function buildMonorepo() {
 
   process.chdir('packages');
 
-  execSync('yarn polkadot-exec-tsc --emitDeclarationOnly --outdir ../build');
+  execSync('tsc --emitDeclarationOnly --outdir ../build');
 
   const dirs = fs
     .readdirSync('.')
