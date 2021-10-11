@@ -2720,7 +2720,7 @@
     "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
 
-"@webb-tools/api@^0.1.2-44", "@webb-tools/api@^0.1.2-91":
+"@webb-tools/api@^0.1.2-91":
   version "0.1.2-91"
   resolved "https://registry.yarnpkg.com/@webb-tools/api/-/api-0.1.2-91.tgz#d28ab47f45c16a9f9bba42c5fcd4efc7b7aa965f"
   integrity sha512-e4OJJoEVgUQfYc2yGNShgDTUD8dwWiBeroJE+HMBU1xx6yad+Yj1IehaA7iP3VE3FlpcU9VtpSb+vzCqjlDsAg==
@@ -2731,15 +2731,7 @@
     "@polkadot/rpc-core" "^6.1.2"
     "@webb-tools/types" "0.1.2-91"
 
-"@webb-tools/app-util@^0.1.2-44", "@webb-tools/app-util@^0.1.2-91":
-  version "0.1.2-91"
-  resolved "https://registry.yarnpkg.com/@webb-tools/app-util/-/app-util-0.1.2-91.tgz#9d1502e91c7c18e9a4f7f2f089bb1672c12d3341"
-  integrity sha512-oFT/1w5LD1rFSPiMP8u5lAzNr9s/w70gfN1vzpVynUFxv7u9Vf7b+UfGWkjDkIs+vKkQ7+8bkuKaHvSLC6ZAxQ==
-  dependencies:
-    "@babel/runtime" "^7.10.2"
-    bignumber.js "^9.0.0"
-
-"@webb-tools/sdk-core@^0.1.2-44", "@webb-tools/sdk-core@^0.1.2-75", "@webb-tools/sdk-core@^0.1.2-91":
+"@webb-tools/sdk-core@^0.1.2-75":
   version "0.1.2-91"
   resolved "https://registry.yarnpkg.com/@webb-tools/sdk-core/-/sdk-core-0.1.2-91.tgz#79cb1b8b849bc98356f225eac0ecc535c13dcf59"
   integrity sha512-VT8FeI1ZUMZYtaSVHv+BBUaqB8Gklx2UQ6RQo140RD71Wki3ot1L4K3I1JkzohctW1TOyTfnLVAULezSURXtzQ==
@@ -2759,18 +2751,6 @@
     "@webb-tools/sdk-core" "^0.1.2-75"
     lodash "^4.17.20"
 
-"@webb-tools/sdk-mixer@^0.1.2-44":
-  version "0.1.2-91"
-  resolved "https://registry.yarnpkg.com/@webb-tools/sdk-mixer/-/sdk-mixer-0.1.2-91.tgz#c805d7a934f5f85549de49d1c2e28e30f4846bba"
-  integrity sha512-ZiuYdpe0BSoBiXbUe+JXD3J7luBwoTbeHTFXNZmNj5fIN8b6L+kGPZmq54KS0zp2jCaazvGbKf8CGxdVe3JfBQ==
-  dependencies:
-    "@polkadot/util" "^6.5.1"
-    "@webb-tools/app-util" "^0.1.2-91"
-    "@webb-tools/sdk-core" "^0.1.2-91"
-    "@webb-tools/sdk-merkle" "^0.1.2-75"
-    "@webb-tools/wasm-utils" "^0.1.2-91"
-    lodash "^4.17.20"
-
 "@webb-tools/type-definitions@0.1.2-91":
   version "0.1.2-91"
   resolved "https://registry.yarnpkg.com/@webb-tools/type-definitions/-/type-definitions-0.1.2-91.tgz#ce5d81b05eafe21069c5b181c30c298bafcae28f"
@@ -2778,7 +2758,7 @@
   dependencies:
     "@open-web3/orml-type-definitions" "^0.8.2-6"
 
-"@webb-tools/types@0.1.2-91", "@webb-tools/types@^0.1.2-44":
+"@webb-tools/types@0.1.2-91":
   version "0.1.2-91"
   resolved "https://registry.yarnpkg.com/@webb-tools/types/-/types-0.1.2-91.tgz#6824ea42364b79d1a5ab9bc51ed0927ca74a4c25"
   integrity sha512-Ae6yZ+3J2tvRpYyu1ABqyZZFdfTYrHpgZcdATE3JnLFDXCmbW0mT9fBaOoJjvGw9WI2d/ahLePH1XahSrVuuMA==
@@ -2789,9 +2769,6 @@
     "@polkadot/typegen" "^6.1.2"
     "@polkadot/types" "^6.1.2"
     "@webb-tools/type-definitions" "0.1.2-91"
-
-"@webb-tools/wasm-utils@^0.1.2-91":
-  version "0.1.3-9"
 
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
