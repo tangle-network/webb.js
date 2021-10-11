@@ -1,6 +1,6 @@
 {
   "name": "sdk-mixer-exmaple",
-  "version": "1.0.0",
+  "version": "0.1.4-2",
   "main": "src/main.ts",
   "license": "MIT",
   "scripts": {
