@@ -37,7 +37,32 @@ if (fs.existsSync('packages')) {
     .map((pkgPath) => [pkgPath, JSON.parse(fs.readFileSync(pkgPath, 'utf8'))]);
   const others = packages.map(([, json]) => json.name);
   const { version } = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
-  console.log(packages);
+  packages.forEach(([pkgPath, json]) => {
+    const updated = Object.keys(json).reduce((result, key) => {
+      if (key === 'version') {
+        result[key] = version;
+      } else if (
+        ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies', 'resolutions'].includes(key)
+      ) {
+        result[key] = updateDependencies(json[key], others, version);
+      } else {
+        result[key] = json[key];
+      }
+
+      return result;
+    }, {});
+
+    fs.writeFileSync(pkgPath, `${JSON.stringify(updated, null, 2)}\n`);
+  });
+}
+if (fs.existsSync('examples')) {
+  const packages = fs
+    .readdirSync('examples')
+    .map((dir) => path.join(process.cwd(), 'examples', dir, 'package.json'))
+    .filter((pkgPath) => fs.existsSync(pkgPath))
+    .map((pkgPath) => [pkgPath, JSON.parse(fs.readFileSync(pkgPath, 'utf8'))]);
+  const others = packages.map(([, json]) => json.name);
+  const { version } = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
   packages.forEach(([pkgPath, json]) => {
     const updated = Object.keys(json).reduce((result, key) => {
       if (key === 'version') {

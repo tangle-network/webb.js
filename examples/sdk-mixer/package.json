@@ -8,11 +8,11 @@
     "build": "webpack --config ./webpack.config.js "
   },
   "dependencies": {
-    "@webb-tools/api": "^0.1.2-44",
-    "@webb-tools/app-util": "^0.1.2-44",
-    "@webb-tools/sdk-core": "^0.1.2-44",
-    "@webb-tools/sdk-mixer": "^0.1.2-44",
-    "@webb-tools/types": "^0.1.2-44"
+    "@webb-tools/api": "^0.1.3-9",
+    "@webb-tools/app-util": "^0.1.3-9",
+    "@webb-tools/sdk-core": "^0.1.3-9",
+    "@webb-tools/sdk-mixer": "^0.1.3-9",
+    "@webb-tools/types": "^0.1.3-9"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
