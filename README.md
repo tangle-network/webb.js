@@ -28,6 +28,7 @@ async function main() {
     await api.isReady;
 
     // use the api
+    //..
 }
 
 main()
