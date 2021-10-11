@@ -6,6 +6,8 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const rimraf = require('rimraf');
+const { execSync: _execSync } = require('child_process');
+
 const argv = require('yargs')
   .options({
     'skip-beta': {
@@ -16,7 +18,8 @@ const argv = require('yargs')
   .strict().argv;
 
 const copySync = require('@open-web3/dev-config/scripts/copySync.cjs');
-const execSync = require('@open-web3/dev-config/scripts/execSync.cjs');
+
+const execSync = (cmd) => _execSync(cmd, { stdio: 'inherit' });
 
 const repo = `https://${process.env.GH_PAT}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
 

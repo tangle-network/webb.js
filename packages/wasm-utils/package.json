@@ -7,6 +7,10 @@
     "start": "rimraf build pkg && webpack-dev-server --open -d",
     "test": "wasm-pack test --release --chrome --headless"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "files": [
     "wasm-utils_bg.wasm",
     "wasm-utils.js",
