@@ -7,7 +7,7 @@ This library provides additional typing information for user to access Webb's mo
 
 # Getting Started
 
-More documentation and examples on [wiki](https://github.com/webb-tools/webb.js/wiki).
+More documentation and examples on [wiki](https://github.com/webb-tools/webb.js/wiki)
 
 - Install dependencies
 
