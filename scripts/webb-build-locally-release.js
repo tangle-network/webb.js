@@ -181,7 +181,7 @@ function loopFunc(fn) {
   }
 }
 
-gitBump();
+// gitBump();
 
 runClean();
 runCheck();
