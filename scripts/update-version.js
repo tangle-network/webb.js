@@ -25,7 +25,7 @@ function updateDependencies(dependencies, others, version) {
 }
 
 console.log('$ update versions', process.argv.slice(2).join(' '));
-
+console.log(`yarn version --${type}`);
 execSync(`yarn version --${type}`);
 
 // yarn workspaces does an OOM, manual looping takes ages
@@ -37,7 +37,7 @@ if (fs.existsSync('packages')) {
     .map((pkgPath) => [pkgPath, JSON.parse(fs.readFileSync(pkgPath, 'utf8'))]);
   const others = packages.map(([, json]) => json.name);
   const { version } = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
-
+  console.log(packages);
   packages.forEach(([pkgPath, json]) => {
     const updated = Object.keys(json).reduce((result, key) => {
       if (key === 'version') {
@@ -56,5 +56,8 @@ if (fs.existsSync('packages')) {
     fs.writeFileSync(pkgPath, `${JSON.stringify(updated, null, 2)}\n`);
   });
 }
-
-execSync('yarn');
+try {
+  execSync('yarn');
+} catch (e) {
+  console.log('! $YARN failed');
+}
