@@ -1,7 +1,6 @@
 use ark_crypto_primitives::CRH as CRHTrait;
 use ark_ff::fields::PrimeField;
 use ark_ff::{to_bytes, BigInteger};
-use arkworks_gadgets::ark_std::rand;
 use arkworks_gadgets::leaf::mixer::MixerLeaf;
 use arkworks_gadgets::leaf::LeafCreation;
 use arkworks_gadgets::poseidon::sbox::PoseidonSbox;
@@ -13,6 +12,7 @@ use arkworks_gadgets::setup::common::{
 	PoseidonCRH_x17_3, PoseidonCRH_x17_5, PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
 };
 const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
+use ark_std::rand::rngs::OsRng;
 
 use crate::note::{LeafHasher, NoteGenerator};
 use crate::types::OpStatusCode;
@@ -30,10 +30,10 @@ type Leaf17_5 = MixerLeaf<Fr, PoseidonCRH_x17_5<Fr>>;
 type Leaf17_3 = MixerLeaf<Fr, PoseidonCRH_x17_3<Fr>>;
 
 impl NoteGenerator for ArkworksPoseidonBn254NoteGenerator {
-	type Rng = rand::rngs::StdRng;
+	type Rng = OsRng;
 
 	fn get_rng(&self) -> Self::Rng {
-		rand::rngs::StdRng::from_seed(*SEED)
+		OsRng
 	}
 
 	fn generate_secrets(&self, r: &mut Self::Rng) -> Result<Vec<u8>, OpStatusCode> {
@@ -119,13 +119,12 @@ impl ArkworksPoseidonBn254NoteGenerator {
 
 #[cfg(test)]
 mod test {
-	use arkworks_gadgets::ark_std::rand;
 	const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 
 	use super::*;
 	use crate::note::NoteBuilder;
 	use ark_serialize::CanonicalSerializeHashExt;
-	use arkworks_gadgets::ark_std::rand::SeedableRng;
+	use ark_std::rand::rngs::OsRng;
 	use arkworks_gadgets::setup::common::{
 		PoseidonRounds_x17_3, PoseidonRounds_x17_5, PoseidonRounds_x3_3, PoseidonRounds_x3_5, PoseidonRounds_x5_3,
 		PoseidonRounds_x5_5,
@@ -133,7 +132,7 @@ mod test {
 
 	#[test]
 	fn arkworks_poseidon_bn254note_generator_5x_3() {
-		let mut r = rand::rngs::StdRng::from_seed(*SEED);
+		let mut r = OsRng;
 		let note_generator = ArkworksPoseidonBn254NoteGenerator::set_up(PoseidonRounds_x5_3);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
@@ -142,7 +141,7 @@ mod test {
 	}
 	#[test]
 	fn arkworks_poseidon_bn254note_generator_5x_5() {
-		let mut r = rand::rngs::StdRng::from_seed(*SEED);
+		let mut r = OsRng;
 		let note_generator = ArkworksPoseidonBn254NoteGenerator::set_up(PoseidonRounds_x5_5);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
@@ -151,7 +150,7 @@ mod test {
 	}
 	#[test]
 	fn arkworks_poseidon_bn254note_generator_3x_3() {
-		let mut r = rand::rngs::StdRng::from_seed(*SEED);
+		let mut r = OsRng;
 		let note_generator = ArkworksPoseidonBn254NoteGenerator::set_up(PoseidonRounds_x3_3);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
@@ -160,7 +159,7 @@ mod test {
 	}
 	#[test]
 	fn arkworks_poseidon_bn254note_generator_3x_5() {
-		let mut r = rand::rngs::StdRng::from_seed(*SEED);
+		let mut r = OsRng;
 		let note_generator = ArkworksPoseidonBn254NoteGenerator::set_up(PoseidonRounds_x3_5);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
@@ -170,7 +169,7 @@ mod test {
 	}
 	#[test]
 	fn arkworks_poseidon_bn254note_generator_17x_3() {
-		let mut r = rand::rngs::StdRng::from_seed(*SEED);
+		let mut r = OsRng;
 		let note_generator = ArkworksPoseidonBn254NoteGenerator::set_up(PoseidonRounds_x17_3);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
@@ -180,7 +179,7 @@ mod test {
 
 	#[test]
 	fn arkworks_poseidon_bn254note_generator_17x_5() {
-		let mut r = rand::rngs::StdRng::from_seed(*SEED);
+		let mut r = OsRng;
 		let note_generator = ArkworksPoseidonBn254NoteGenerator::set_up(PoseidonRounds_x17_5);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
