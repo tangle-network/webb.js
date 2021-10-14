@@ -16,7 +16,6 @@ use ark_std::rand::rngs::OsRng;
 
 use crate::note::{LeafHasher, NoteGenerator};
 use crate::types::OpStatusCode;
-use arkworks_gadgets::ark_std::rand::SeedableRng;
 
 pub struct ArkworksPoseidonBn254NoteGenerator {
 	exponentiation: usize,

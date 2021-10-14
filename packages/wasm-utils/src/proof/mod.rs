@@ -1,7 +1,5 @@
 use ark_ff::PrimeField;
 use arkworks_gadgets::ark_std::rand;
-use arkworks_gadgets::ark_std::rand::rngs::StdRng;
-use arkworks_gadgets::ark_std::rand::SeedableRng;
 use arkworks_gadgets::leaf::mixer::{Private, PrivateBuilder};
 use arkworks_gadgets::leaf::LeafCreation;
 use arkworks_gadgets::prelude::ark_bls12_381::{Bls12_381, Fr as FrBls381, Fr};
@@ -19,12 +17,8 @@ use arkworks_gadgets::setup::mixer::{
 use crate::note::Note;
 use crate::types::Curve;
 
-pub fn get_rng() -> StdRng {
-	// arbitrary seed
-	let seed = [
-		1, 0, 0, 0, 23, 0, 0, 0, 200, 1, 0, 0, 210, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	];
-	rand::rngs::StdRng::from_seed(seed)
+pub fn get_rng() -> rand::rngs::OsRng {
+	rand::rngs::OsRng
 }
 
 #[derive(Debug, Eq, PartialEq)]
