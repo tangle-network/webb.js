@@ -15,7 +15,7 @@ export class ProvingManagerWrapper {
       switch (key) {
         case 'proof':
           {
-            const input = message as PMEvents['proof'];
+            const input = message.proof!;
             const proof = await this.proof(input);
             (self as unknown as Worker).postMessage({
               name: key,

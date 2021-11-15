@@ -39,12 +39,11 @@ async function main() {
   ];
   const pm = new ProvingManger(new Worker());
   const proof = await pm.proof({
-      relayer:"0x929E7eb6997408C196828773db642D76e79bda93",
-    recipient:"0x929E7eb6997408C196828773db642D76e79bda93",
+      relayer:"929E7eb6997408C196828773db642D76e79bda93",
+    recipient:"929E7eb6997408C196828773db642D76e79bda93",
     note:"webb.mix:v1:1:1:Arkworks:Bn254:Poseidon:EDG:18:1:5:5:933bd84d0b7ed9fa9b216797f787d16898c0d489c7461dc3ff8fdcd34453362bb6a1379362205f3bf2a05ae2bfa7023ad01997db8acc404ecc81293f5de02022bcf08f6d2576af2577cd61b2d2aa0d94c2814084d4c3913a4ee4beb76ba9171c",
-    leaves:leaves.map(hexToU8a)
+    leaves:leaves.map(a => hexToU8a(a))
   })
-  console.log(proof);
 }
 main().then(a =>{
   console.log(a);

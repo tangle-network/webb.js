@@ -425,6 +425,7 @@ mod tests {
 			.map(|v| Uint8Array::from(v.as_slice()))
 			.collect();
 		pm.set_leaves(Leaves::from(JsValue::from(leaves_ua))).unwrap();
+		pm.set_note_from_str(JsString::from("webb.mix:v1:1:1:Arkworks:Bn254:Poseidon:EDG:18:1:5:5:933bd84d0b7ed9fa9b216797f787d16898c0d489c7461dc3ff8fdcd34453362bb6a1379362205f3bf2a05ae2bfa7023ad01997db8acc404ecc81293f5de02022bcf08f6d2576af2577cd61b2d2aa0d94c2814084d4c3913a4ee4beb76ba9171c"));
 		let proof = pm.proof().unwrap();
 		dbg!(proof);
 	}

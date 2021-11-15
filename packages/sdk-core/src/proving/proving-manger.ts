@@ -7,11 +7,11 @@ export class ProvingManger {
     return new Promise<string>((resolve, reject) => {
       try {
         this.worker.addEventListener('message', (e) => {
-          const payload = e.data as string;
+          const payload = e.data.data as string;
           resolve(payload);
         });
         this.worker.postMessage({
-          setup: input
+          proof: input
         });
       } catch (e) {
         reject(e);
