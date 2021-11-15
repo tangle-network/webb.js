@@ -8,7 +8,7 @@ type PMEvents = {
 };
 
 export class ProvingManagerWrapper {
-  private constructor() {
+   constructor() {
     self.addEventListener('message', async (event) => {
       const message = event.data as Partial<PMEvents>;
       const key = Object.keys(message)[0] as keyof PMEvents;
