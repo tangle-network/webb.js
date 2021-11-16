@@ -1,4 +1,6 @@
-use ark_ff::PrimeField;
+use crate::note::Note;
+use crate::types::Curve;
+use ark_ff::{PrimeField, ToBytes};
 use arkworks_gadgets::ark_std::rand;
 use arkworks_gadgets::leaf::mixer::{Private, PrivateBuilder};
 use arkworks_gadgets::leaf::LeafCreation;
@@ -13,9 +15,6 @@ use arkworks_gadgets::setup::mixer::{
 	prove_groth16_x17, prove_groth16_x5, setup_arbitrary_data, setup_random_groth16_x17, setup_random_groth16_x5,
 	Circuit_x17, Circuit_x5, Leaf_x17, Leaf_x5,
 };
-
-use crate::note::Note;
-use crate::types::Curve;
 
 pub fn get_rng() -> rand::rngs::OsRng {
 	rand::rngs::OsRng
@@ -38,10 +37,13 @@ const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 pub struct Zkp {
 	proof: ZKProof,
 }
-
+pub struct ProofMeta {
+	pub root: Vec<u8>,
+	pub nullified_hash: Vec<u8>,
+}
 pub enum ZKProof {
-	Bls12_381(Proof<Bls12_381>),
-	Bn254(Proof<Bn254>),
+	Bls12_381(Proof<Bls12_381>, ProofMeta),
+	Bn254(Proof<Bn254>, ProofMeta),
 }
 
 impl ZKProof {
@@ -92,7 +94,11 @@ impl ZKProof {
 						};
 						let leaf_private = private.build();
 						let nullifier_hash = Leaf_x5::create_nullifier(&leaf_private, &params5).unwrap();
+						let mut nh_bytes: Vec<u8> = vec![];
+						nullifier_hash.write(&mut nh_bytes);
 						let root = tree.root().inner();
+						let mut root_bytes: Vec<u8> = vec![];
+						root.write(&mut root_bytes);
 						let mc = Circuit_x5::<FrBn254>::new(
 							arbitrary_input,
 							leaf_private,
@@ -106,7 +112,10 @@ impl ZKProof {
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
 						let (pk, _) = setup_random_groth16_x5::<_, Bn254>(&mut rng, ArkCurve::Bn254);
 						let proof = prove_groth16_x5::<_, Bn254>(&pk, mc, &mut rng);
-						Self::Bn254(proof)
+						Self::Bn254(proof, ProofMeta {
+							nullified_hash: nh_bytes,
+							root: root_bytes,
+						})
 					}
 					"17" => {
 						let params17 = match note.width.as_str() {
@@ -136,6 +145,13 @@ impl ZKProof {
 						let leaf_private = private.build();
 						let nullifier_hash = Leaf_x17::create_nullifier(&leaf_private, &params17).unwrap();
 						let root = tree.root().inner();
+
+						let mut nh_bytes: Vec<u8> = vec![];
+						nullifier_hash.write(&mut nh_bytes);
+						let root = tree.root().inner();
+						let mut root_bytes: Vec<u8> = vec![];
+						root.write(&mut root_bytes);
+
 						let mc = Circuit_x17::<FrBn254>::new(
 							arbitrary_input,
 							leaf_private,
@@ -149,7 +165,10 @@ impl ZKProof {
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
 						let (pk, _vk) = setup_random_groth16_x5::<_, Bn254>(&mut rng, ArkCurve::Bn254);
 						let proof = prove_groth16_x17::<_, Bn254>(&pk, mc, &mut rng);
-						Self::Bn254(proof)
+						Self::Bn254(proof, ProofMeta {
+							root: root_bytes,
+							nullified_hash: nh_bytes,
+						})
 					}
 					_ => {
 						unreachable!()
@@ -199,6 +218,12 @@ impl ZKProof {
 						let leaf_private = private.build();
 						let nullifier_hash = Leaf_x5::create_nullifier(&leaf_private, &params5).unwrap();
 
+						let mut nh_bytes: Vec<u8> = vec![];
+						nullifier_hash.write(&mut nh_bytes);
+						let root = tree.root().inner();
+						let mut root_bytes: Vec<u8> = vec![];
+						root.write(&mut root_bytes);
+
 						let mc = Circuit_x5::<FrBls381>::new(
 							arbitrary_input,
 							leaf_private,
@@ -212,7 +237,10 @@ impl ZKProof {
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
 						let (pk, _vk) = setup_random_groth16_x5::<_, Bls12_381>(&mut rng, ArkCurve::Bls381);
 						let proof = prove_groth16_x5::<_, Bls12_381>(&pk, mc, &mut rng);
-						Self::Bls12_381(proof)
+						Self::Bls12_381(proof, ProofMeta {
+							root: root_bytes,
+							nullified_hash: nh_bytes,
+						})
 					}
 					"17" => {
 						let params17 = match note.width.as_str() {
@@ -244,6 +272,13 @@ impl ZKProof {
 
 						let leaf_private = private.build();
 						let nullifier_hash = Leaf_x17::create_nullifier(&leaf_private, &params17).unwrap();
+
+						let mut nh_bytes: Vec<u8> = vec![];
+						nullifier_hash.write(&mut nh_bytes);
+						let root = tree.root().inner();
+						let mut root_bytes: Vec<u8> = vec![];
+						root.write(&mut root_bytes);
+
 						let mc = Circuit_x17::<FrBls381>::new(
 							arbitrary_input,
 							leaf_private,
@@ -257,7 +292,10 @@ impl ZKProof {
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
 						let (pk, _vk) = setup_random_groth16_x17::<_, Bls12_381>(&mut rng, ArkCurve::Bls381);
 						let proof = prove_groth16_x17::<_, Bls12_381>(&pk, mc, &mut rng);
-						Self::Bls12_381(proof)
+						Self::Bls12_381(proof, ProofMeta {
+							root: root_bytes,
+							nullified_hash: nh_bytes,
+						})
 					}
 					_ => {
 						unreachable!()
@@ -402,10 +440,10 @@ mod test {
 
 		let mut proof_bytes = Vec::new();
 		match proof {
-			ZKProof::Bls12_381(proof) => {
+			ZKProof::Bls12_381(proof, _) => {
 				proof.write(&mut proof_bytes);
 			}
-			ZKProof::Bn254(proof) => {
+			ZKProof::Bn254(proof, _) => {
 				proof.write(&mut proof_bytes);
 			}
 		}

@@ -256,6 +256,34 @@ pub struct ProvingManager {
 	builder: ZkProofBuilder,
 }
 
+#[wasm_bindgen]
+#[derive(Debug, Eq, PartialEq)]
+pub struct Proof {
+	#[wasm_bindgen(skip)]
+	pub proof: String,
+	#[wasm_bindgen(skip)]
+	pub nullifier_hash: String,
+	#[wasm_bindgen(skip)]
+	pub root: String,
+}
+
+#[wasm_bindgen]
+impl Proof {
+	#[wasm_bindgen(getter)]
+	pub fn proof(&self) -> JsString {
+		self.proof.clone().into()
+	}
+
+	#[wasm_bindgen(getter)]
+	pub fn nullifier_hash(&self) -> JsString {
+		self.nullifier_hash.clone().into()
+	}
+
+	#[wasm_bindgen(getter)]
+	pub fn root(&self) -> JsString {
+		self.root.clone().into()
+	}
+}
 struct Uint8Arrayx32([u8; 32]);
 
 impl Deref for Uint8Arrayx32 {
@@ -356,16 +384,25 @@ impl ProvingManager {
 		Ok(())
 	}
 
-	pub fn proof(&self) -> Result<JsString, JsValue> {
+	pub fn proof(&self) -> Result<Proof, JsValue> {
 		let proof = self.builder.build();
 		let mut proof_bytes = Vec::new();
-		match proof {
-			ZKProof::Bls12_381(proof) => CanonicalSerialize::serialize(&proof, &mut proof_bytes),
-
-			ZKProof::Bn254(proof) => CanonicalSerialize::serialize(&proof, &mut proof_bytes),
-		}
-		.map_err(|_| OpStatusCode::Unknown)?;
-		Ok(JsString::from(hex::encode(proof_bytes)))
+		let meta = match proof {
+			ZKProof::Bls12_381(proof, meta) => {
+				CanonicalSerialize::serialize(&proof, &mut proof_bytes).map_err(|_| OpStatusCode::Unknown)?;
+				meta
+			}
+			ZKProof::Bn254(proof, meta) => {
+				CanonicalSerialize::serialize(&proof, &mut proof_bytes).map_err(|_| OpStatusCode::Unknown)?;
+				meta
+			}
+		};
+		let proof = Proof {
+			proof: hex::encode(proof_bytes),
+			root: hex::encode(meta.root),
+			nullifier_hash: hex::encode(meta.nullified_hash),
+		};
+		Ok(proof)
 	}
 }
 
@@ -427,6 +464,7 @@ mod tests {
 		pm.set_leaves(Leaves::from(JsValue::from(leaves_ua))).unwrap();
 		pm.set_note_from_str(JsString::from("webb.mix:v1:1:1:Arkworks:Bn254:Poseidon:EDG:18:1:5:5:933bd84d0b7ed9fa9b216797f787d16898c0d489c7461dc3ff8fdcd34453362bb6a1379362205f3bf2a05ae2bfa7023ad01997db8acc404ecc81293f5de02022bcf08f6d2576af2577cd61b2d2aa0d94c2814084d4c3913a4ee4beb76ba9171c"));
 		let proof = pm.proof().unwrap();
+
 		dbg!(proof);
 	}
 }
