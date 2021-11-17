@@ -1,4 +1,4 @@
-import { Leaves } from "@webb-tools/wasm-utils";
+import type { Leaves, Proof } from '@webb-tools/wasm-utils';
 
 export type ProvingManagerSetupInput = { note: string; relayer: string; recipient: string; leaves: Leaves };
 
@@ -9,20 +9,21 @@ type PMEvents = {
 
 export class ProvingManagerWrapper {
   constructor() {
-    self.addEventListener("message", async (event) => {
+    self.addEventListener('message', async (event) => {
       const message = event.data as Partial<PMEvents>;
       const key = Object.keys(message)[0] as keyof PMEvents;
       switch (key) {
-        case "proof": {
-          const input = message.proof!;
-          const proof = await this.proof(input);
-          (self as unknown as Worker).postMessage({
-            name: key,
-            data: proof
-          });
-        }
+        case 'proof':
+          {
+            const input = message.proof!;
+            const proof = await this.proof(input);
+            (self as unknown as Worker).postMessage({
+              name: key,
+              data: proof
+            });
+          }
           break;
-        case "destroy":
+        case 'destroy':
           (self as unknown as Worker).terminate();
           break;
       }
@@ -30,7 +31,7 @@ export class ProvingManagerWrapper {
   }
 
   private static get manager() {
-    return import("@webb-tools/wasm-utils").then((wasm) => {
+    return import('@webb-tools/wasm-utils').then((wasm) => {
       return wasm.ProvingManager;
     });
   }
@@ -42,12 +43,7 @@ export class ProvingManagerWrapper {
     pm.setLeaves(pmSetupInput.leaves);
     pm.setRelayer(pmSetupInput.relayer);
     pm.setRelayer(pmSetupInput.recipient);
-    const proof = await pm.proof();
-    console.log({
-      proof: proof.proof,
-      root: proof.root,
-      nullifier: proof.nullifier_hash
-    });
+    const proof: Proof = await pm.proof();
     return {
       proof: proof.proof,
       root: proof.root,
