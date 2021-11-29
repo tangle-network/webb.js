@@ -47,7 +47,7 @@ impl NoteGenerator for ArkworksPoseidonBn254NoteGenerator {
 				unimplemented!()
 			}
 		};
-		let leaf_inputs = to_bytes![secrets.r(), secrets.nullifier(), secrets.rho()].unwrap();
+		let leaf_inputs = to_bytes![secrets.secret(), secrets.nullifier()].unwrap();
 		dbg!(leaf_inputs.len());
 		Ok(leaf_inputs)
 	}

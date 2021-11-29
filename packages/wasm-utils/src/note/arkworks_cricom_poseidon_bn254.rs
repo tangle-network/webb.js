@@ -5,20 +5,19 @@ use arkworks_gadgets::leaf::mixer::MixerLeaf;
 use arkworks_gadgets::leaf::LeafCreation;
 use arkworks_gadgets::poseidon::sbox::PoseidonSbox;
 use arkworks_gadgets::poseidon::{PoseidonParameters, Rounds};
-use arkworks_gadgets::prelude::ark_bls12_381::Fr;
+use arkworks_gadgets::prelude::ark_bn254::Fr;
 use arkworks_gadgets::prelude::*;
 use arkworks_gadgets::setup::common::{
 	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x3_5, setup_params_x5_5, Curve,
 	PoseidonCRH_x17_3, PoseidonCRH_x17_5, PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
 };
+const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
+use ark_std::rand::rngs::OsRng;
 
 use crate::note::{LeafHasher, NoteGenerator};
 use crate::types::OpStatusCode;
-use ark_std::rand::rngs::OsRng;
 
-const SEED: &[u8; 32] = b"WebbToolsPoseidonHasherSeed00000";
-
-pub struct ArkworksPoseidonBls12_381NoteGenerator {
+pub struct ArkworksCircomPoseidonBn254 {
 	exponentiation: usize,
 	width: usize,
 }
@@ -29,7 +28,7 @@ type Leaf3_5 = MixerLeaf<Fr, PoseidonCRH_x3_5<Fr>>;
 type Leaf17_5 = MixerLeaf<Fr, PoseidonCRH_x17_5<Fr>>;
 type Leaf17_3 = MixerLeaf<Fr, PoseidonCRH_x17_3<Fr>>;
 
-impl NoteGenerator for ArkworksPoseidonBls12_381NoteGenerator {
+impl NoteGenerator for ArkworksCircomPoseidonBn254 {
 	type Rng = OsRng;
 
 	fn get_rng(&self) -> Self::Rng {
@@ -54,12 +53,13 @@ impl NoteGenerator for ArkworksPoseidonBls12_381NoteGenerator {
 	}
 }
 
-impl LeafHasher for ArkworksPoseidonBls12_381NoteGenerator {
+impl LeafHasher for ArkworksCircomPoseidonBn254 {
 	type HasherOptions = PoseidonParameters<Fr>;
 
 	const SECRET_LENGTH: usize = 0;
 
 	fn hash(&self, secrets: &[u8], params: Self::HasherOptions) -> Result<Vec<u8>, OpStatusCode> {
+		dbg!(secrets.len());
 		if secrets.len() != 96 {
 			return Err(OpStatusCode::InvalidNoteLength);
 		}
@@ -83,15 +83,15 @@ impl LeafHasher for ArkworksPoseidonBls12_381NoteGenerator {
 	}
 }
 
-impl ArkworksPoseidonBls12_381NoteGenerator {
+impl ArkworksCircomPoseidonBn254 {
 	pub fn get_params(&self) -> PoseidonParameters<Fr> {
 		match (self.exponentiation, self.width) {
-			(5, 3) => setup_params_x3_3::<Fr>(Curve::Bls381),
-			(5, 5) => setup_params_x5_5::<Fr>(Curve::Bls381),
-			(3, 3) => setup_params_x3_3::<Fr>(Curve::Bls381),
-			(3, 5) => setup_params_x3_5::<Fr>(Curve::Bls381),
-			(17, 3) => setup_params_x17_3::<Fr>(Curve::Bls381),
-			(17, 5) => setup_params_x17_5::<Fr>(Curve::Bls381),
+			(5, 3) => setup_params_x3_3::<Fr>(Curve::Bn254),
+			(5, 5) => setup_params_x5_5::<Fr>(Curve::Bn254),
+			(3, 3) => setup_params_x3_3::<Fr>(Curve::Bn254),
+			(3, 5) => setup_params_x3_5::<Fr>(Curve::Bn254),
+			(17, 3) => setup_params_x17_3::<Fr>(Curve::Bn254),
+			(17, 5) => setup_params_x17_5::<Fr>(Curve::Bn254),
 			_ => {
 				unreachable!()
 			}
@@ -110,71 +110,66 @@ impl ArkworksPoseidonBls12_381NoteGenerator {
 			}
 		};
 		Self {
-			width: T::WIDTH,
 			exponentiation,
+			width: T::WIDTH,
 		}
 	}
 }
 
 #[cfg(test)]
 mod test {
+	const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
+
+	use super::*;
+	use crate::note::NoteBuilder;
+	use ark_serialize::CanonicalSerializeHashExt;
+	use ark_std::rand::rngs::OsRng;
 	use arkworks_gadgets::setup::common::{
 		PoseidonRounds_x17_3, PoseidonRounds_x17_5, PoseidonRounds_x3_3, PoseidonRounds_x3_5, PoseidonRounds_x5_3,
 		PoseidonRounds_x5_5,
 	};
 
-	use crate::note::NoteBuilder;
-
-	use super::*;
-	use ark_serialize::CanonicalSerializeHashExt;
-
-	const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
-
 	#[test]
-	fn arkworks_poseidon_bls12_381_note_generator_5x_3() {
+	fn arkworks_poseidon_bn254note_generator_5x_3() {
 		let mut r = OsRng;
-
-		let note_generator = ArkworksPoseidonBls12_381NoteGenerator::set_up(PoseidonRounds_x5_3);
+		let note_generator = ArkworksCircomPoseidonBn254::set_up(PoseidonRounds_x5_3);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
 		let note = note_generator.generate(&NoteBuilder::default(), &mut r).unwrap();
 		dbg!(note.to_string());
 	}
 	#[test]
-	fn arkworks_poseidon_bls12_381_note_generator_5x_5() {
+	fn arkworks_poseidon_bn254note_generator_5x_5() {
 		let mut r = OsRng;
-
-		let note_generator = ArkworksPoseidonBls12_381NoteGenerator::set_up(PoseidonRounds_x5_5);
+		let note_generator = ArkworksCircomPoseidonBn254::set_up(PoseidonRounds_x5_5);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
 		let note = note_generator.generate(&NoteBuilder::default(), &mut r).unwrap();
 		dbg!(note.to_string());
 	}
 	#[test]
-	fn arkworks_poseidon_bls12_381_note_generator_3x_3() {
+	fn arkworks_poseidon_bn254note_generator_3x_3() {
 		let mut r = OsRng;
-
-		let note_generator = ArkworksPoseidonBls12_381NoteGenerator::set_up(PoseidonRounds_x3_3);
+		let note_generator = ArkworksCircomPoseidonBn254::set_up(PoseidonRounds_x3_3);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
 		let note = note_generator.generate(&NoteBuilder::default(), &mut r).unwrap();
 		dbg!(note.to_string());
 	}
 	#[test]
-	fn arkworks_poseidon_bls12_381_note_generator_3x_5() {
+	fn arkworks_poseidon_bn254note_generator_3x_5() {
 		let mut r = OsRng;
-
-		let note_generator = ArkworksPoseidonBls12_381NoteGenerator::set_up(PoseidonRounds_x3_5);
+		let note_generator = ArkworksCircomPoseidonBn254::set_up(PoseidonRounds_x3_5);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
+		dbg!(&leaf);
 		let note = note_generator.generate(&NoteBuilder::default(), &mut r).unwrap();
 		dbg!(note.to_string());
 	}
 	#[test]
-	fn arkworks_poseidon_bls12_381_note_generator_17x_3() {
+	fn arkworks_poseidon_bn254note_generator_17x_3() {
 		let mut r = OsRng;
-
-		let note_generator = ArkworksPoseidonBls12_381NoteGenerator::set_up(PoseidonRounds_x17_3);
+		let note_generator = ArkworksCircomPoseidonBn254::set_up(PoseidonRounds_x17_3);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
 		let note = note_generator.generate(&NoteBuilder::default(), &mut r).unwrap();
@@ -182,10 +177,9 @@ mod test {
 	}
 
 	#[test]
-	fn arkworks_poseidon_bls12_381_note_generator_17x_5() {
+	fn arkworks_poseidon_bn254note_generator_17x_5() {
 		let mut r = OsRng;
-
-		let note_generator = ArkworksPoseidonBls12_381NoteGenerator::set_up(PoseidonRounds_x17_5);
+		let note_generator = ArkworksCircomPoseidonBn254::set_up(PoseidonRounds_x17_5);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
 		let note = note_generator.generate(&NoteBuilder::default(), &mut r).unwrap();

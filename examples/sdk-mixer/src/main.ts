@@ -5,8 +5,8 @@ import { hexToU8a, u8aToHex, stringToU8a, u8aConcat } from '@polkadot/util';
 import { Note } from '@webb-tools/sdk-mixer';
 import { NoteGenInput } from '../../../packages/sdk-mixer/build';
 
-async function generate_leaf() {
-  const noteInput: NoteGenInput = {
+async function generateLeaf() {
+  const noteInput = {
     prefix: 'webb.mix',
     version: 'v1',
     exponentiation: '5',
@@ -62,7 +62,9 @@ async function main() {
   console.log(proof.proof);
   console.log(proof.nullifier_hash);
 }
-
+generateLeaf()
+/*
 main().then((a) => {
   console.log(a);
 });
+*/

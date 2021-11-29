@@ -5,6 +5,7 @@ use crate::note::arkworks_poseidon_bls12_381::ArkworksPoseidonBls12_381NoteGener
 use crate::note::arkworks_poseidon_bn254::ArkworksPoseidonBn254NoteGenerator;
 use crate::types::{Backend, Curve, HashFunction, NoteVersion, OpStatusCode};
 
+mod arkworks_cricom_poseidon_bn254;
 mod arkworks_poseidon_bls12_381;
 mod arkworks_poseidon_bn254;
 
