@@ -18,8 +18,8 @@
     "@babel/runtime": "^7.10.2",
     "@open-web3/orml-types": "^0.8.2-6",
     "@polkadot/metadata": "^4.17.1",
-    "@polkadot/typegen": "^6.1.2",
-    "@polkadot/types": "^6.1.2",
+    "@polkadot/typegen": "^6.9.2",
+    "@polkadot/types": "^6.9.2",
     "@webb-tools/type-definitions": "0.1.4-7"
   },
   "devDependencies": {

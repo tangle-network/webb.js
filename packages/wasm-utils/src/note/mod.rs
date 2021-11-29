@@ -130,7 +130,7 @@ impl NoteManager {
 			}
 			(Backend::Arkworks, Curve::Bn254) => {
 				let note_generator = match hash_function {
-					HashFunction::Poseidon => ArkworksPoseidonBls12_381NoteGenerator::new(width, exponentiation),
+					HashFunction::Poseidon => ArkworksPoseidonBn254NoteGenerator::new(width, exponentiation),
 					HashFunction::MiMCTornado => {
 						unreachable!()
 					}

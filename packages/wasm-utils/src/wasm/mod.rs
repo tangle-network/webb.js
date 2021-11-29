@@ -253,6 +253,11 @@ impl DepositNote {
 	pub fn width(&self) -> JsString {
 		self.note.width.clone().into()
 	}
+
+	#[wasm_bindgen(getter)]
+	pub fn exponentiation(&self) -> JsString {
+		self.note.exponentiation.clone().into()
+	}
 }
 
 #[wasm_bindgen]
