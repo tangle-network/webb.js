@@ -1,18 +1,19 @@
 use ark_ff::PrimeField;
 use arkworks_gadgets::ark_std::rand;
-use arkworks_gadgets::leaf::mixer::{Private, PrivateBuilder};
-use arkworks_gadgets::leaf::LeafCreation;
+use arkworks_gadgets::leaf::mixer::Private;
 use arkworks_gadgets::prelude::ark_bls12_381::{Bls12_381, Fr as FrBls381, Fr};
 use arkworks_gadgets::prelude::ark_bn254::{Bn254, Fr as FrBn254};
 use arkworks_gadgets::prelude::ark_groth16::Proof;
-use arkworks_gadgets::setup::common::{
-	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x5_3, setup_params_x5_5,
-	setup_tree_and_create_path_x17, setup_tree_and_create_path_x5, Curve as ArkCurve,
-};
-use arkworks_gadgets::setup::mixer::{
-	prove_groth16_x17, prove_groth16_x5, setup_arbitrary_data, setup_random_groth16_x17, setup_random_groth16_x5,
+
+use arkworks_circuits::setup::mixer::{
+	prove_groth16_circuit_x17, prove_groth16_circuit_x5, setup_arbitrary_data, setup_groth16_random_circuit_x17 , setup_groth16_random_circuit_x5,
 	Circuit_x17, Circuit_x5, Leaf_x17, Leaf_x5,
 };
+use arkworks_circuits::setup::common::{setup_tree_and_create_path_tree_x17, setup_tree_and_create_path_tree_x5};
+use arkworks_utils::poseidon::sbox::PoseidonSbox;
+use arkworks_utils::poseidon::PoseidonParameters;
+use arkworks_utils::utils::common::{setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x3_5, setup_params_x5_5, Curve as ArkCurve,};
+use arkworks_circuits::setup::common::{PoseidonCRH_x17_3, PoseidonCRH_x17_5, PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,};
 
 use crate::note::Note;
 use crate::types::Curve;
