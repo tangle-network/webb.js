@@ -425,6 +425,13 @@ mod tests {
 	wasm_bindgen_test_configure!(run_in_browser);
 
 	#[wasm_bindgen_test]
+	fn generate_leaf() {
+		let note = DepositNote::deserialize(JsString::from("webb.mix:v1:1:1:Arkworks:Bn254:Poseidon:WEBB:18:10:5:5:a1feeba98193583d3fb0304b456676976ff379ef54f3749419741d9b6eec2b20e059e20847ba94f6b78fcacb2e6b8b6dd1f40e65c6b0d15eb3b40a4fc600431797c787b40e6ead35527a299786411a19731ba909c3ab2e242b4abefb023f072a")).unwrap();
+		let leaf = (NoteBuilder::get_leaf(&note.note)).unwrap();
+		console_log!("{}", hex::encode(leaf));
+	}
+
+	#[wasm_bindgen_test]
 	fn generate_proof() {
 		let leaves = [
 			"0x2e5c62af48845c095bfa9b90b8ec9f6b7bd98fb3ac2dd3039050a64b919951dd",

@@ -6,22 +6,26 @@ import { Note } from '@webb-tools/sdk-mixer';
 import { NoteGenInput } from '../../../packages/sdk-mixer/build';
 
 async function generateLeaf() {
+  const depositNote = await Note.deserialize("webb.mix:v1:1:1:Arkworks:Bn254:Poseidon:WEBB:18:10:5:5:a1feeba98193583d3fb0304b456676976ff379ef54f3749419741d9b6eec2b20e059e20847ba94f6b78fcacb2e6b8b6dd1f40e65c6b0d15eb3b40a4fc600431797c787b40e6ead35527a299786411a19731ba909c3ab2e242b4abefb023f072a");
+  console.log(depositNote.note.curve ,depositNote.note.width ,depositNote.note.exponentiation , depositNote.note.denomination  ,depositNote.note.amount);
   const noteInput = {
     prefix: 'webb.mix',
     version: 'v1',
     exponentiation: '5',
-    width: '3',
+    width: '5',
     backend: 'Arkworks',
     hashFunction: 'Poseidon',
     curve: 'Bn254',
-    denomination: '18',
+    denomination: '5',
 
     amount: '1',
     chain: '1',
     sourceChain: '1',
-    tokenSymbol: 'EDG'
+    tokenSymbol: 'WEBB'
   };
-  const depositNote = await Note.generateNote(noteInput);
+  const note = await  Note.generateNote(noteInput);
+  console.log(note.serialize());
+  const leafUint = depositNote.getLeaf();
   const leaf = depositNote.getLeaf();
   console.log(u8aToHex(leaf));
 }

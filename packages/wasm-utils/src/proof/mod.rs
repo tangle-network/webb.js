@@ -8,14 +8,15 @@ use arkworks_gadgets::prelude::ark_bn254::{Bn254, Fr as FrBn254};
 use arkworks_gadgets::prelude::ark_ff::{PrimeField, ToBytes};
 use arkworks_gadgets::prelude::ark_groth16::Proof;
 use arkworks_gadgets::setup::common::{
-	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x5_3, setup_params_x5_5,
-	setup_tree_and_create_path_tree_circomx5, setup_tree_and_create_path_tree_x17, setup_tree_and_create_path_tree_x5,
-	Curve as ArkCurve,
+	setup_circom_params_x5_3, setup_circom_params_x5_5, setup_params_x17_3, setup_params_x17_5, setup_params_x3_3,
+	setup_params_x5_3, setup_params_x5_5, setup_tree_and_create_path_tree_circomx5,
+	setup_tree_and_create_path_tree_x17, setup_tree_and_create_path_tree_x5, Curve as ArkCurve,
 };
 use arkworks_gadgets::setup::mixer::{
 	prove_groth16_circuit_circomx5, prove_groth16_circuit_x17, prove_groth16_circuit_x5, setup_arbitrary_data,
-	setup_groth16_random_circuit_circomx5, setup_groth16_random_circuit_x17, setup_groth16_random_circuit_x5,
-	setup_leaf_circomx5, setup_random_circuit_x17, Circuit_Circomx5, Circuit_x17, Circuit_x5, Leaf_x17, Leaf_x5,
+	setup_circuit_circomx5, setup_groth16_circuit_circomx5, setup_groth16_random_circuit_circomx5,
+	setup_groth16_random_circuit_x17, setup_groth16_random_circuit_x5, setup_leaf_circomx5, setup_random_circuit_x17,
+	Circuit_Circomx5, Circuit_x17, Circuit_x5, Leaf_x17, Leaf_x5,
 };
 
 pub fn get_rng() -> rand::rngs::OsRng {
@@ -68,14 +69,14 @@ impl ZKProof {
 				// todo fix this
 				match note.exponentiation.as_str() {
 					"3" => {
-						unimplemented!();
+						unimplemented!("exponentiation of 3 unsupported");
 					}
 					"5" => {
 						let params5 = match note.width.as_str() {
-							"5" => setup_params_x5_5::<FrBn254>(ArkCurve::Bn254),
-							"3" => setup_params_x3_3::<FrBn254>(ArkCurve::Bn254),
-							_ => {
-								unreachable!()
+							"5" => setup_circom_params_x5_5::<FrBn254>(ArkCurve::Bn254),
+							"3" => setup_circom_params_x5_3::<FrBn254>(ArkCurve::Bn254),
+							w => {
+								unreachable!("with {}", w)
 							}
 						};
 						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer, fee, refund);
@@ -85,7 +86,7 @@ impl ZKProof {
 							.into_iter()
 							.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
 							.collect();
-						let (tree, path) = setup_tree_and_create_path_tree_x5::<FrBn254, LEN>(
+						let (tree, path) = setup_tree_and_create_path_tree_circomx5::<FrBn254, LEN>(
 							&leaves_new,
 							proof_input.leaf_index as u64,
 							&params5,
@@ -101,7 +102,7 @@ impl ZKProof {
 						let root = tree.root().inner();
 						let mut root_bytes: Vec<u8> = vec![];
 						root.write(&mut root_bytes);
-						let mc = Circuit_x5::<FrBn254, LEN>::new(
+						let mc = Circuit_Circomx5::<FrBn254, LEN>::new(
 							arbitrary_input,
 							leaf_private,
 							(),
@@ -112,8 +113,8 @@ impl ZKProof {
 						);
 
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-						let (pk, _) = setup_groth16_random_circuit_x5::<_, Bn254, LEN>(&mut rng, ArkCurve::Bn254);
-						let proof = prove_groth16_circuit_x5::<_, Bn254, LEN>(&pk, mc, &mut rng);
+						let (pk, _) = setup_groth16_random_circuit_circomx5::<_, Bn254, LEN>(&mut rng, ArkCurve::Bn254);
+						let proof = prove_groth16_circuit_circomx5::<_, Bn254, LEN>(&pk, mc, &mut rng);
 						Self::Bn254(proof, ProofMeta {
 							nullified_hash: nh_bytes,
 							root: root_bytes,
@@ -121,10 +122,10 @@ impl ZKProof {
 					}
 					"17" => {
 						let params17 = match note.width.as_str() {
-							"5" => setup_params_x17_5::<FrBn254>(ArkCurve::Bn254),
-							"3" => setup_params_x17_3::<FrBn254>(ArkCurve::Bn254),
+							// "5" => setup_circom_params_x17_5::<FrBn254>(ArkCurve::Bn254),
+							// "3" => setup_params_x17_3::<FrBn254>(ArkCurve::Bn254),
 							_ => {
-								unreachable!()
+								unreachable!("exponentiation 17 unsupported")
 							}
 						};
 						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer, fee, refund);
@@ -171,8 +172,8 @@ impl ZKProof {
 							nullified_hash: nh_bytes,
 						})
 					}
-					_ => {
-						unreachable!()
+					e => {
+						unreachable!("exponentiation {} unsupported", e)
 					}
 				}
 			}
@@ -184,15 +185,16 @@ impl ZKProof {
 
 				match note.exponentiation.as_str() {
 					"3" => {
-						unimplemented!();
+						unimplemented!("unsupported exponentiation 3");
 					}
 					"5" => {
 						// Setup Params
+						//setup_circom_params_x5_3
 						let params5 = match note.width.as_str() {
-							"5" => setup_params_x5_5::<FrBls381>(ArkCurve::Bls381),
-							"3" => setup_params_x5_3::<FrBls381>(ArkCurve::Bls381),
-							_ => {
-								unreachable!();
+							"5" => setup_circom_params_x5_5::<FrBls381>(ArkCurve::Bls381),
+							"3" => setup_circom_params_x5_3::<FrBls381>(ArkCurve::Bls381),
+							w => {
+								unimplemented!("width of {} unsupported", w);
 							}
 						};
 						// Setup Arbitrary iput
@@ -245,10 +247,10 @@ impl ZKProof {
 					}
 					"17" => {
 						let params17 = match note.width.as_str() {
-							"5" => setup_params_x17_5::<FrBls381>(ArkCurve::Bls381),
-							"3" => setup_params_x17_3::<FrBls381>(ArkCurve::Bls381),
+							// "5" => setup_params_x17_5::<FrBls381>(ArkCurve::Bls381),
+							// "3" => setup_params_x17_3::<FrBls381>(ArkCurve::Bls381),
 							_ => {
-								unreachable!();
+								unreachable!("exponentiation of 3 unsupported");
 							}
 						};
 						let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer, fee, refund);

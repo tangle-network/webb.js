@@ -326,6 +326,8 @@ mod test {
 		note_builder.hash_function = HashFunction::Poseidon;
 		note_builder.curve = Curve::Bn254;
 		note_builder.denomination = "18".to_string();
+		note_builder.exponentiation = "5".to_string();
+		note_builder.width = "5".to_string();
 		note_builder.chain = "3".to_string();
 		note_builder.source_chain = "2".to_string();
 		let note = note_builder.generate_note().unwrap();
