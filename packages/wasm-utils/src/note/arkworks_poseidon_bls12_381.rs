@@ -2,19 +2,21 @@ use ark_crypto_primitives::CRH as CRHTrait;
 use ark_ff::fields::PrimeField;
 use ark_ff::{to_bytes, BigInteger};
 use arkworks_gadgets::leaf::mixer::MixerLeaf;
-use arkworks_gadgets::leaf::LeafCreation;
-use arkworks_gadgets::poseidon::sbox::PoseidonSbox;
-use arkworks_gadgets::poseidon::{PoseidonParameters, Rounds};
 use arkworks_gadgets::prelude::ark_bls12_381::Fr;
 use arkworks_gadgets::prelude::*;
-use arkworks_gadgets::setup::common::{
-	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x3_5, setup_params_x5_5, Curve,
-	PoseidonCRH_x17_3, PoseidonCRH_x17_5, PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
-};
 
 use crate::note::{LeafHasher, NoteGenerator};
-use crate::types::OpStatusCode;
+use crate::types::{Curve, OpStatusCode};
+use ark_crypto_primitives::crh::poseidon::sbox::PoseidonSbox;
 use ark_std::rand::rngs::OsRng;
+use arkworks_circuits::setup::common::{
+	PoseidonCRH_x17_3, PoseidonCRH_x17_5, PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
+};
+use arkworks_utils::poseidon::PoseidonParameters;
+use arkworks_utils::utils::common::{
+	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x3_5, setup_params_x5_5,
+};
+use arkworks_utils::Rounds;
 
 const SEED: &[u8; 32] = b"WebbToolsPoseidonHasherSeed00000";
 
@@ -118,10 +120,6 @@ impl ArkworksPoseidonBls12_381NoteGenerator {
 
 #[cfg(test)]
 mod test {
-	use arkworks_gadgets::setup::common::{
-		PoseidonRounds_x17_3, PoseidonRounds_x17_5, PoseidonRounds_x3_3, PoseidonRounds_x3_5, PoseidonRounds_x5_3,
-		PoseidonRounds_x5_5,
-	};
 
 	use crate::note::NoteBuilder;
 
