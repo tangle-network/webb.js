@@ -12,7 +12,7 @@ async function generateLeaf() {
     prefix: 'webb.mix',
     version: 'v1',
     exponentiation: '5',
-    width: '5',
+    width: '3',
     backend: 'Arkworks',
     hashFunction: 'Poseidon',
     curve: 'Bn254',
@@ -25,8 +25,7 @@ async function generateLeaf() {
   };
   const note = await  Note.generateNote(noteInput);
   console.log(note.serialize());
-  const leafUint = depositNote.getLeaf();
-  const leaf = depositNote.getLeaf();
+  const leaf = note.getLeaf();
   console.log(u8aToHex(leaf));
 }
 

@@ -1,17 +1,23 @@
-use crate::note::Note;
-use crate::types::Curve;
+use arkworks_circuits::setup::common::{
+	setup_tree_and_create_path_tree_x17, setup_tree_and_create_path_tree_x5, PoseidonCRH_x17_3, PoseidonCRH_x17_5,
+	PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
+};
+use arkworks_circuits::setup::mixer::{
+	prove_groth16_circuit_x17, prove_groth16_circuit_x5, setup_arbitrary_data, setup_groth16_circuit_x17,
+	setup_groth16_circuit_x5, Circuit_x17, Circuit_x5,
+};
 use arkworks_gadgets::ark_std::rand;
 use arkworks_gadgets::leaf::mixer::{MixerLeaf, Private};
 use arkworks_gadgets::prelude::ark_bls12_381::{Bls12_381, Fr as FrBls381, Fr};
 use arkworks_gadgets::prelude::ark_bn254::{Bn254, Fr as FrBn254};
 use arkworks_gadgets::prelude::ark_ff::{PrimeField, ToBytes};
 use arkworks_gadgets::prelude::ark_groth16::Proof;
-
-use arkworks_circuits::setup::common::{
-	PoseidonCRH_x17_3, PoseidonCRH_x17_5, PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
+use arkworks_utils::utils::common::{
+	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x5_3, setup_params_x5_5, Curve as ArkCurve,
 };
-use arkworks_circuits::setup::mixer::{setup_arbitrary_data, Circuit_x17, Circuit_x5};
-use arkworks_utils::utils::common::{setup_params_x3_5, setup_params_x5_3, setup_params_x5_5, Curve as ArkCurve};
+
+use crate::note::Note;
+use crate::types::Curve;
 
 pub type Leaf_x5<F> = MixerLeaf<F, PoseidonCRH_x5_5<F>>;
 pub type Leaf_x3<F> = MixerLeaf<F, PoseidonCRH_x3_3<F>>;
@@ -93,7 +99,7 @@ impl ZKProof {
 							PrimeField::from_be_bytes_mod_order(&note.secret[..32]),
 							PrimeField::from_be_bytes_mod_order(&note.secret[32..64]),
 						);
-						let nullifier_hash = Leaf_x5::create_nullifier_hash(&leaf_private, &params5).unwrap();
+						let nullifier_hash = Leaf_x5::create_nullifier(&leaf_private, &params5).unwrap();
 						let mut nh_bytes: Vec<u8> = vec![];
 						nullifier_hash.write(&mut nh_bytes);
 						let root = tree.root().inner();
@@ -102,7 +108,6 @@ impl ZKProof {
 						let mc = Circuit_x5::<FrBn254, LEN>::new(
 							arbitrary_input,
 							leaf_private,
-							(),
 							params5,
 							path,
 							root,
@@ -110,8 +115,8 @@ impl ZKProof {
 						);
 
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-						let (pk, _) = setup_groth16_random_circuit_circomx5::<_, Bn254, LEN>(&mut rng, ArkCurve::Bn254);
-						let proof = prove_groth16_circuit_circomx5::<_, Bn254, LEN>(&pk, mc, &mut rng);
+						let (pk, _) = setup_groth16_circuit_x5::<_, Bn254, LEN>(&mut rng, mc.clone());
+						let proof = prove_groth16_circuit_x5::<_, Bn254, LEN>(&pk, mc, &mut rng);
 						Self::Bn254(proof, ProofMeta {
 							nullified_hash: nh_bytes,
 							root: root_bytes,
@@ -119,8 +124,8 @@ impl ZKProof {
 					}
 					"17" => {
 						let params17 = match note.width.as_str() {
-							// "5" => setup_circom_params_x17_5::<FrBn254>(ArkCurve::Bn254),
-							// "3" => setup_params_x17_3::<FrBn254>(ArkCurve::Bn254),
+							"5" => setup_params_x17_5::<FrBn254>(ArkCurve::Bn254),
+							"3" => setup_params_x17_3::<FrBn254>(ArkCurve::Bn254),
 							_ => {
 								unreachable!("exponentiation 17 unsupported")
 							}
@@ -137,12 +142,11 @@ impl ZKProof {
 							proof_input.leaf_index as u64,
 							&params17,
 						);
-						let private: PrivateBuilder<FrBn254> = PrivateBuilder {
-							secret: PrimeField::from_be_bytes_mod_order(&note.secret[..32]),
-							nullifier: PrimeField::from_be_bytes_mod_order(&note.secret[32..64]),
-						};
-						let leaf_private = private.build();
-						let nullifier_hash = Leaf_x17::create_nullifier_hash(&leaf_private, &params17).unwrap();
+						let leaf_private: Private<FrBn254> = Private::new(
+							PrimeField::from_be_bytes_mod_order(&note.secret[..32]),
+							PrimeField::from_be_bytes_mod_order(&note.secret[32..64]),
+						);
+						let nullifier_hash = Leaf_x17::create_nullifier(&leaf_private, &params17).unwrap();
 						let root = tree.root().inner();
 
 						let mut nh_bytes: Vec<u8> = vec![];
@@ -154,7 +158,6 @@ impl ZKProof {
 						let mc = Circuit_x17::<FrBn254, LEN>::new(
 							arbitrary_input,
 							leaf_private,
-							(),
 							params17,
 							path,
 							root,
@@ -162,7 +165,7 @@ impl ZKProof {
 						);
 
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-						let (pk, _vk) = setup_groth16_random_circuit_x17::<_, Bn254, LEN>(&mut rng, ArkCurve::Bn254);
+						let (pk, _vk) = setup_groth16_circuit_x17::<_, Bn254, LEN>(&mut rng, mc.clone());
 						let proof = prove_groth16_circuit_x17::<_, Bn254, LEN>(&pk, mc, &mut rng);
 						Self::Bn254(proof, ProofMeta {
 							root: root_bytes,
@@ -188,8 +191,8 @@ impl ZKProof {
 						// Setup Params
 						//setup_circom_params_x5_3
 						let params5 = match note.width.as_str() {
-							"5" => setup_circom_params_x5_5::<FrBls381>(ArkCurve::Bls381),
-							"3" => setup_circom_params_x5_3::<FrBls381>(ArkCurve::Bls381),
+							"5" => setup_params_x5_5::<FrBls381>(ArkCurve::Bls381),
+							"3" => setup_params_x5_3::<FrBls381>(ArkCurve::Bls381),
 							w => {
 								unimplemented!("width of {} unsupported", w);
 							}
@@ -215,7 +218,7 @@ impl ZKProof {
 							PrimeField::from_be_bytes_mod_order(&note.secret[..32]),
 							PrimeField::from_be_bytes_mod_order(&note.secret[32..64]),
 						);
-						let nullifier_hash = Leaf_x5::create_nullifier_hash(&leaf_private, &params5).unwrap();
+						let nullifier_hash = Leaf_x5::create_nullifier(&leaf_private, &params5).unwrap();
 
 						let mut nh_bytes: Vec<u8> = vec![];
 						nullifier_hash.write(&mut nh_bytes);
@@ -226,7 +229,6 @@ impl ZKProof {
 						let mc = Circuit_x5::<FrBls381, LEN>::new(
 							arbitrary_input,
 							leaf_private,
-							(),
 							params5,
 							path,
 							root,
@@ -234,8 +236,7 @@ impl ZKProof {
 						);
 
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-						let (pk, _vk) =
-							setup_groth16_random_circuit_x5::<_, Bls12_381, LEN>(&mut rng, ArkCurve::Bls381);
+						let (pk, _vk) = setup_groth16_circuit_x5::<_, Bls12_381, LEN>(&mut rng, mc.clone());
 						let proof = prove_groth16_circuit_x5::<_, Bls12_381, LEN>(&pk, mc, &mut rng);
 						Self::Bls12_381(proof, ProofMeta {
 							root: root_bytes,
@@ -244,8 +245,8 @@ impl ZKProof {
 					}
 					"17" => {
 						let params17 = match note.width.as_str() {
-							// "5" => setup_params_x17_5::<FrBls381>(ArkCurve::Bls381),
-							// "3" => setup_params_x17_3::<FrBls381>(ArkCurve::Bls381),
+							"5" => setup_params_x17_5::<FrBls381>(ArkCurve::Bls381),
+							"3" => setup_params_x17_3::<FrBls381>(ArkCurve::Bls381),
 							_ => {
 								unreachable!("exponentiation of 3 unsupported");
 							}
@@ -269,7 +270,7 @@ impl ZKProof {
 							PrimeField::from_be_bytes_mod_order(&note.secret[32..64]),
 						);
 
-						let nullifier_hash = Leaf_x17::create_nullifier_hash(&leaf_private, &params17).unwrap();
+						let nullifier_hash = Leaf_x17::create_nullifier(&leaf_private, &params17).unwrap();
 
 						let mut nh_bytes: Vec<u8> = vec![];
 						nullifier_hash.write(&mut nh_bytes);
@@ -280,7 +281,6 @@ impl ZKProof {
 						let mc = Circuit_x17::<FrBls381, LEN>::new(
 							arbitrary_input,
 							leaf_private,
-							(),
 							params17,
 							path,
 							root,
@@ -288,8 +288,7 @@ impl ZKProof {
 						);
 
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-						let (pk, _vk) =
-							setup_groth16_random_circuit_x17::<_, Bls12_381, LEN>(&mut rng, ArkCurve::Bls381);
+						let (pk, _vk) = setup_groth16_circuit_x17::<_, Bls12_381, LEN>(&mut rng, mc.clone());
 						let proof = prove_groth16_circuit_x17::<_, Bls12_381, LEN>(&pk, mc, &mut rng);
 						Self::Bls12_381(proof, ProofMeta {
 							root: root_bytes,
