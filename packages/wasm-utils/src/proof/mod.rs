@@ -381,7 +381,7 @@ mod test {
 		use arkworks_circuits::setup::common::setup_tree_and_create_path_tree_x5;
 		let params = setup_params_x5_3::<FrBn254>(ArkCurve::Bn254);
 		// root on the node
-		let root_hex = "847d98ebb9cfaec879fe17b153ffc0fcaecdec5cd1b741be1778d8770025fa2a";
+		let root_hex = "7b23a2906223c7a9d6948754ae0a40b8048c4faad4b989ea25428826a5899e2e";
 		let leaves: Vec<FrBn254> = ["de1983b0d54b3a003ba58bf878e244112e5f373e9768a0a7a940ec7df5e37d03"]
 			.to_vec()
 			.into_iter()
