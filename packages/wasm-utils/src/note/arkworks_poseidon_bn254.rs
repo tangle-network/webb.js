@@ -109,6 +109,18 @@ mod test {
 	use ark_std::rand::rngs::OsRng;
 
 	#[test]
+	fn arkworks_poseidon_bn254note_generator_5x_3_leaf() {
+		let mut r = OsRng;
+		let note_generator = ArkworksPoseidonBn254NoteGenerator::new(5, 3);
+		let secrets = note_generator.generate_secrets(&mut r).unwrap();
+		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
+		let note = note_generator.generate(&NoteBuilder::default(), &mut r).unwrap();
+		dbg!(note.to_string());
+		let has = note_generator.hash(&note.secret, note_generator.get_params()).unwrap();
+		dbg!(hex::encode(has));
+	}
+
+	#[test]
 	fn arkworks_poseidon_bn254note_generator_5x_3() {
 		let mut r = OsRng;
 		let note_generator = ArkworksPoseidonBn254NoteGenerator::new(5, 3);

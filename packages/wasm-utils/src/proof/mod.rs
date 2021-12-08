@@ -373,6 +373,29 @@ mod test {
 	use super::*;
 
 	#[test]
+	fn create_valid_root() {
+		use arkworks_gadgets::prelude::ark_bn254::{Bn254, Fr as FrBn254};
+		use arkworks_utils::utils::common::{setup_params_x5_3, Curve as ArkCurve};
+
+		use ark_serialize::CanonicalSerialize;
+		use arkworks_circuits::setup::common::setup_tree_and_create_path_tree_x5;
+		let params = setup_params_x5_3::<FrBn254>(ArkCurve::Bn254);
+		// root on the node
+		let root_hex = "847d98ebb9cfaec879fe17b153ffc0fcaecdec5cd1b741be1778d8770025fa2a";
+		let leaves: Vec<FrBn254> = ["de1983b0d54b3a003ba58bf878e244112e5f373e9768a0a7a940ec7df5e37d03"]
+			.to_vec()
+			.into_iter()
+			.map(|i| hex::decode(i).unwrap())
+			.map(|leaf| FrBn254::from_le_bytes_mod_order(&leaf))
+			.collect();
+		let (tree, path) = setup_tree_and_create_path_tree_x5::<FrBn254, LEN>(&leaves, 0 as u64, &params);
+		let root = tree.root().inner();
+		let mut root_bytes = Vec::new();
+		CanonicalSerialize::serialize(&root, &mut root_bytes);
+		assert_eq!(hex::encode(&root_bytes), root_hex);
+	}
+
+	#[test]
 	fn should_create_zkp() {
 		let leaves = [
 			"0x2e5c62af48845c095bfa9b90b8ec9f6b7bd98fb3ac2dd3039050a64b919951dd",
