@@ -253,10 +253,10 @@ impl FromStr for Note {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		let parts: Vec<&str> = s.split(':').collect();
-		let full = parts.len() == FULL_NOTE_LENGTH;
-		if !full {
-			return Err(OpStatusCode::InvalidNoteLength);
-		}
+		// let full = parts.len() == FULL_NOTE_LENGTH;
+		// if !full {
+		// 	return Err(OpStatusCode::InvalidNoteLength);
+		// }
 		let prefix = parts[0];
 
 		if prefix != NOTE_PREFIX && prefix != BRIDGE_NOTE_PREFIX {

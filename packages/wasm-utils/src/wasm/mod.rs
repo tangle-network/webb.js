@@ -2,6 +2,7 @@ use std::convert::{TryFrom, TryInto};
 use std::ops::Deref;
 
 use ark_serialize::CanonicalSerialize;
+use console_error_panic_hook;
 use js_sys::{Array, JsString, Uint8Array};
 use wasm_bindgen::prelude::*;
 
@@ -468,10 +469,14 @@ mod tests {
 		];
 
 		let mut pm = ProvingManager::new();
-		pm.set_relayer(JsString::from("929E7eb6997408C196828773db642D76e79bda93"))
-			.unwrap();
-		pm.set_recipient(JsString::from("929E7eb6997408C196828773db642D76e79bda93"))
-			.unwrap();
+		pm.set_relayer(JsString::from(
+			"644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129",
+		))
+		.unwrap();
+		pm.set_recipient(JsString::from(
+			"644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129",
+		))
+		.unwrap();
 		let leaves_ua: Array = leaves
 			.to_vec()
 			.iter()
@@ -484,4 +489,9 @@ mod tests {
 
 		dbg!(proof);
 	}
+}
+
+#[wasm_bindgen(start)]
+pub fn main() {
+	console_error_panic_hook::set_once();
 }
