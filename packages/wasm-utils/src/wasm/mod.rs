@@ -2,6 +2,7 @@ use std::convert::{TryFrom, TryInto};
 use std::ops::Deref;
 
 use ark_serialize::CanonicalSerialize;
+use console_error_panic_hook;
 use js_sys::{Array, JsString, Uint8Array};
 use wasm_bindgen::prelude::*;
 
@@ -248,6 +249,16 @@ impl DepositNote {
 	pub fn denomination(&self) -> JsString {
 		self.note.denomination.clone().into()
 	}
+
+	#[wasm_bindgen(getter)]
+	pub fn width(&self) -> JsString {
+		self.note.width.clone().into()
+	}
+
+	#[wasm_bindgen(getter)]
+	pub fn exponentiation(&self) -> JsString {
+		self.note.exponentiation.clone().into()
+	}
 }
 
 #[wasm_bindgen]
@@ -256,6 +267,34 @@ pub struct ProvingManager {
 	builder: ZkProofBuilder,
 }
 
+#[wasm_bindgen]
+#[derive(Debug, Eq, PartialEq)]
+pub struct Proof {
+	#[wasm_bindgen(skip)]
+	pub proof: String,
+	#[wasm_bindgen(skip)]
+	pub nullifier_hash: String,
+	#[wasm_bindgen(skip)]
+	pub root: String,
+}
+
+#[wasm_bindgen]
+impl Proof {
+	#[wasm_bindgen(getter)]
+	pub fn proof(&self) -> JsString {
+		self.proof.clone().into()
+	}
+
+	#[wasm_bindgen(getter)]
+	pub fn nullifier_hash(&self) -> JsString {
+		self.nullifier_hash.clone().into()
+	}
+
+	#[wasm_bindgen(getter)]
+	pub fn root(&self) -> JsString {
+		self.root.clone().into()
+	}
+}
 struct Uint8Arrayx32([u8; 32]);
 
 impl Deref for Uint8Arrayx32 {
@@ -356,16 +395,25 @@ impl ProvingManager {
 		Ok(())
 	}
 
-	pub fn proof(&self) -> Result<JsString, JsValue> {
+	pub fn proof(&self) -> Result<Proof, JsValue> {
 		let proof = self.builder.build();
 		let mut proof_bytes = Vec::new();
-		match proof {
-			ZKProof::Bls12_381(proof) => CanonicalSerialize::serialize(&proof, &mut proof_bytes),
-
-			ZKProof::Bn254(proof) => CanonicalSerialize::serialize(&proof, &mut proof_bytes),
-		}
-		.map_err(|_| OpStatusCode::Unknown)?;
-		Ok(JsString::from(hex::encode(proof_bytes)))
+		let meta = match proof {
+			ZKProof::Bls12_381(proof, meta) => {
+				CanonicalSerialize::serialize(&proof, &mut proof_bytes).map_err(|_| OpStatusCode::Unknown)?;
+				meta
+			}
+			ZKProof::Bn254(proof, meta) => {
+				CanonicalSerialize::serialize(&proof, &mut proof_bytes).map_err(|_| OpStatusCode::Unknown)?;
+				meta
+			}
+		};
+		let proof = Proof {
+			proof: hex::encode(proof_bytes),
+			root: hex::encode(meta.root),
+			nullifier_hash: hex::encode(meta.nullified_hash),
+		};
+		Ok(proof)
 	}
 }
 
@@ -376,6 +424,13 @@ mod tests {
 	use super::*;
 
 	wasm_bindgen_test_configure!(run_in_browser);
+
+	#[wasm_bindgen_test]
+	fn generate_leaf() {
+		let note = DepositNote::deserialize(JsString::from("webb.mix:v1:1:1:Arkworks:Bn254:Poseidon:WEBB:18:10:5:5:a1feeba98193583d3fb0304b456676976ff379ef54f3749419741d9b6eec2b20e059e20847ba94f6b78fcacb2e6b8b6dd1f40e65c6b0d15eb3b40a4fc600431797c787b40e6ead35527a299786411a19731ba909c3ab2e242b4abefb023f072a")).unwrap();
+		let leaf = (NoteBuilder::get_leaf(&note.note)).unwrap();
+		console_log!("{}", hex::encode(leaf));
+	}
 
 	#[wasm_bindgen_test]
 	fn generate_proof() {
@@ -414,10 +469,14 @@ mod tests {
 		];
 
 		let mut pm = ProvingManager::new();
-		pm.set_relayer(JsString::from("929E7eb6997408C196828773db642D76e79bda93"))
-			.unwrap();
-		pm.set_recipient(JsString::from("929E7eb6997408C196828773db642D76e79bda93"))
-			.unwrap();
+		pm.set_relayer(JsString::from(
+			"644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129",
+		))
+		.unwrap();
+		pm.set_recipient(JsString::from(
+			"644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129",
+		))
+		.unwrap();
 		let leaves_ua: Array = leaves
 			.to_vec()
 			.iter()
@@ -425,7 +484,14 @@ mod tests {
 			.map(|v| Uint8Array::from(v.as_slice()))
 			.collect();
 		pm.set_leaves(Leaves::from(JsValue::from(leaves_ua))).unwrap();
+		pm.set_note_from_str(JsString::from("webb.mix:v1:1:1:Arkworks:Bn254:Poseidon:EDG:18:1:5:5:933bd84d0b7ed9fa9b216797f787d16898c0d489c7461dc3ff8fdcd34453362bb6a1379362205f3bf2a05ae2bfa7023ad01997db8acc404ecc81293f5de02022bcf08f6d2576af2577cd61b2d2aa0d94c2814084d4c3913a4ee4beb76ba9171c"));
 		let proof = pm.proof().unwrap();
+
 		dbg!(proof);
 	}
+}
+
+#[wasm_bindgen(start)]
+pub fn main() {
+	console_error_panic_hook::set_once();
 }

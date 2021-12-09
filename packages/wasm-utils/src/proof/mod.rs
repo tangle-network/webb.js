@@ -1,25 +1,33 @@
-use ark_ff::PrimeField;
+use arkworks_circuits::setup::common::{
+	setup_tree_and_create_path_tree_x17, setup_tree_and_create_path_tree_x5, PoseidonCRH_x17_3, PoseidonCRH_x17_5,
+	PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
+};
+use arkworks_circuits::setup::mixer::{
+	prove_groth16_circuit_x17, prove_groth16_circuit_x5, setup_arbitrary_data, setup_groth16_circuit_x17,
+	setup_groth16_circuit_x5, Circuit_x17, Circuit_x5,
+};
 use arkworks_gadgets::ark_std::rand;
-use arkworks_gadgets::leaf::mixer::{Private, PrivateBuilder};
-use arkworks_gadgets::leaf::LeafCreation;
+use arkworks_gadgets::leaf::mixer::{MixerLeaf, Private};
 use arkworks_gadgets::prelude::ark_bls12_381::{Bls12_381, Fr as FrBls381, Fr};
 use arkworks_gadgets::prelude::ark_bn254::{Bn254, Fr as FrBn254};
+use arkworks_gadgets::prelude::ark_ff::{PrimeField, ToBytes};
 use arkworks_gadgets::prelude::ark_groth16::Proof;
-use arkworks_gadgets::setup::common::{
-	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x5_3, setup_params_x5_5,
-	setup_tree_and_create_path_x17, setup_tree_and_create_path_x5, Curve as ArkCurve,
-};
-use arkworks_gadgets::setup::mixer::{
-	prove_groth16_x17, prove_groth16_x5, setup_arbitrary_data, setup_random_groth16_x17, setup_random_groth16_x5,
-	Circuit_x17, Circuit_x5, Leaf_x17, Leaf_x5,
+use arkworks_utils::utils::common::{
+	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x5_3, setup_params_x5_5, Curve as ArkCurve,
 };
 
 use crate::note::Note;
 use crate::types::Curve;
+use ark_ff::FromBytes;
+
+pub type Leaf_x5<F> = MixerLeaf<F, PoseidonCRH_x5_5<F>>;
+pub type Leaf_x3<F> = MixerLeaf<F, PoseidonCRH_x3_3<F>>;
+pub type Leaf_x17<F> = MixerLeaf<F, PoseidonCRH_x17_5<F>>;
 
 pub fn get_rng() -> rand::rngs::OsRng {
 	rand::rngs::OsRng
 }
+pub const LEN: usize = 30;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct ZkProofBuilder {
@@ -38,10 +46,13 @@ const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 pub struct Zkp {
 	proof: ZKProof,
 }
-
+pub struct ProofMeta {
+	pub root: Vec<u8>,
+	pub nullified_hash: Vec<u8>,
+}
 pub enum ZKProof {
-	Bls12_381(Proof<Bls12_381>),
-	Bn254(Proof<Bn254>),
+	Bls12_381(Proof<Bls12_381>, ProofMeta),
+	Bn254(Proof<Bn254>, ProofMeta),
 }
 
 impl ZKProof {
@@ -49,28 +60,30 @@ impl ZKProof {
 		let mut rng = get_rng();
 		let note = match &proof_input.note {
 			None => {
-				panic!();
+				panic!("No note found");
 			}
 			Some(note) => note,
 		};
 		match note.curve {
 			Curve::Bn254 => {
-				let recipient = FrBn254::from_be_bytes_mod_order(&proof_input.recipient);
-				let relayer = FrBn254::from_be_bytes_mod_order(&proof_input.relayer);
+				let recipient_bytes = truncate_and_pad(&proof_input.recipient);
+				let relayer_bytes = truncate_and_pad(&proof_input.relayer);
+				let recipient = FrBn254::read(&recipient_bytes[..]).expect("Failed to read recipient_bytes");
+				let relayer = FrBn254::read(&relayer_bytes[..]).expect("Failed to read relayer_bytes");
 
-				let fee = FrBn254::from_be_bytes_mod_order(&proof_input.fee.to_be_bytes());
-				let refund = FrBn254::from_be_bytes_mod_order(&proof_input.refund.to_be_bytes());
+				let fee = FrBn254::from(proof_input.fee);
+				let refund = FrBn254::from(proof_input.refund);
 				// todo fix this
 				match note.exponentiation.as_str() {
 					"3" => {
-						unimplemented!();
+						unimplemented!("exponentiation of 3 unsupported");
 					}
 					"5" => {
 						let params5 = match note.width.as_str() {
 							"5" => setup_params_x5_5::<FrBn254>(ArkCurve::Bn254),
-							"3" => setup_params_x3_3::<FrBn254>(ArkCurve::Bn254),
-							_ => {
-								unreachable!()
+							"3" => setup_params_x5_3::<FrBn254>(ArkCurve::Bn254),
+							w => {
+								unreachable!("with {}", w)
 							}
 						};
 						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer, fee, refund);
@@ -78,25 +91,26 @@ impl ZKProof {
 							.leaves
 							.to_vec()
 							.into_iter()
-							.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
+							.map(|leaf| PrimeField::from_le_bytes_mod_order(&leaf))
 							.collect();
-						let (tree, path) = setup_tree_and_create_path_x5::<FrBn254>(
+						let (tree, path) = setup_tree_and_create_path_tree_x5::<FrBn254, LEN>(
 							&leaves_new,
 							proof_input.leaf_index as u64,
 							&params5,
 						);
-						let private: PrivateBuilder<FrBn254> = PrivateBuilder {
-							r: PrimeField::from_be_bytes_mod_order(&note.secret[..32]),
-							nullifier: PrimeField::from_be_bytes_mod_order(&note.secret[32..64]),
-							rho: PrimeField::from_be_bytes_mod_order(&note.secret[64..]),
-						};
-						let leaf_private = private.build();
+						let leaf_private: Private<FrBn254> = Private::new(
+							PrimeField::from_le_bytes_mod_order(&note.secret[..32]),
+							PrimeField::from_le_bytes_mod_order(&note.secret[32..64]),
+						);
 						let nullifier_hash = Leaf_x5::create_nullifier(&leaf_private, &params5).unwrap();
+						let mut nh_bytes: Vec<u8> = vec![];
+						nullifier_hash.write(&mut nh_bytes);
 						let root = tree.root().inner();
-						let mc = Circuit_x5::<FrBn254>::new(
+						let mut root_bytes: Vec<u8> = vec![];
+						root.write(&mut root_bytes);
+						let mc = Circuit_x5::<FrBn254, LEN>::new(
 							arbitrary_input,
 							leaf_private,
-							(),
 							params5,
 							path,
 							root,
@@ -104,16 +118,19 @@ impl ZKProof {
 						);
 
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-						let (pk, _) = setup_random_groth16_x5::<_, Bn254>(&mut rng, ArkCurve::Bn254);
-						let proof = prove_groth16_x5::<_, Bn254>(&pk, mc, &mut rng);
-						Self::Bn254(proof)
+						let (pk, _) = setup_groth16_circuit_x5::<_, Bn254, LEN>(&mut rng, mc.clone());
+						let proof = prove_groth16_circuit_x5::<_, Bn254, LEN>(&pk, mc, &mut rng);
+						Self::Bn254(proof, ProofMeta {
+							nullified_hash: nh_bytes,
+							root: root_bytes,
+						})
 					}
 					"17" => {
 						let params17 = match note.width.as_str() {
 							"5" => setup_params_x17_5::<FrBn254>(ArkCurve::Bn254),
 							"3" => setup_params_x17_3::<FrBn254>(ArkCurve::Bn254),
 							_ => {
-								unreachable!()
+								unreachable!("exponentiation 17 unsupported")
 							}
 						};
 						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer, fee, refund);
@@ -121,25 +138,29 @@ impl ZKProof {
 							.leaves
 							.to_vec()
 							.into_iter()
-							.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
+							.map(|leaf| PrimeField::from_le_bytes_mod_order(&leaf))
 							.collect();
-						let (tree, path) = setup_tree_and_create_path_x17::<FrBn254>(
+						let (tree, path) = setup_tree_and_create_path_tree_x17::<FrBn254, LEN>(
 							&leaves_new,
 							proof_input.leaf_index as u64,
 							&params17,
 						);
-						let private: PrivateBuilder<FrBn254> = PrivateBuilder {
-							r: PrimeField::from_be_bytes_mod_order(&note.secret[..32]),
-							nullifier: PrimeField::from_be_bytes_mod_order(&note.secret[32..64]),
-							rho: PrimeField::from_be_bytes_mod_order(&note.secret[64..]),
-						};
-						let leaf_private = private.build();
+						let leaf_private: Private<FrBn254> = Private::new(
+							PrimeField::from_le_bytes_mod_order(&note.secret[..32]),
+							PrimeField::from_le_bytes_mod_order(&note.secret[32..64]),
+						);
 						let nullifier_hash = Leaf_x17::create_nullifier(&leaf_private, &params17).unwrap();
 						let root = tree.root().inner();
-						let mc = Circuit_x17::<FrBn254>::new(
+
+						let mut nh_bytes: Vec<u8> = vec![];
+						nullifier_hash.write(&mut nh_bytes);
+						let root = tree.root().inner();
+						let mut root_bytes: Vec<u8> = vec![];
+						root.write(&mut root_bytes);
+
+						let mc = Circuit_x17::<FrBn254, LEN>::new(
 							arbitrary_input,
 							leaf_private,
-							(),
 							params17,
 							path,
 							root,
@@ -147,32 +168,38 @@ impl ZKProof {
 						);
 
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-						let (pk, _vk) = setup_random_groth16_x5::<_, Bn254>(&mut rng, ArkCurve::Bn254);
-						let proof = prove_groth16_x17::<_, Bn254>(&pk, mc, &mut rng);
-						Self::Bn254(proof)
+						let (pk, _vk) = setup_groth16_circuit_x17::<_, Bn254, LEN>(&mut rng, mc.clone());
+						let proof = prove_groth16_circuit_x17::<_, Bn254, LEN>(&pk, mc, &mut rng);
+						Self::Bn254(proof, ProofMeta {
+							root: root_bytes,
+							nullified_hash: nh_bytes,
+						})
 					}
-					_ => {
-						unreachable!()
+					e => {
+						unreachable!("exponentiation {} unsupported", e)
 					}
 				}
 			}
 			Curve::Bls381 => {
-				let recipient = FrBls381::from_be_bytes_mod_order(&proof_input.recipient);
-				let relayer = FrBls381::from_be_bytes_mod_order(&proof_input.relayer);
-				let fee = FrBls381::from_be_bytes_mod_order(&proof_input.fee.to_be_bytes());
-				let refund = FrBls381::from_be_bytes_mod_order(&proof_input.refund.to_be_bytes());
+				let recipient_bytes = truncate_and_pad(&proof_input.recipient);
+				let relayer_bytes = truncate_and_pad(&proof_input.relayer);
+				let recipient = FrBls381::read(&recipient_bytes[..]).unwrap();
+				let relayer = FrBls381::read(&relayer_bytes[..]).unwrap();
+				let fee = FrBls381::from(proof_input.fee);
+				let refund = FrBls381::from(proof_input.refund);
 
 				match note.exponentiation.as_str() {
 					"3" => {
-						unimplemented!();
+						unimplemented!("unsupported exponentiation 3");
 					}
 					"5" => {
 						// Setup Params
+						//setup_circom_params_x5_3
 						let params5 = match note.width.as_str() {
 							"5" => setup_params_x5_5::<FrBls381>(ArkCurve::Bls381),
 							"3" => setup_params_x5_3::<FrBls381>(ArkCurve::Bls381),
-							_ => {
-								unreachable!();
+							w => {
+								unimplemented!("width of {} unsupported", w);
 							}
 						};
 						// Setup Arbitrary iput
@@ -182,27 +209,31 @@ impl ZKProof {
 							.leaves
 							.to_vec()
 							.into_iter()
-							.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
+							.map(|leaf| PrimeField::from_le_bytes_mod_order(&leaf))
 							.collect();
 						//setup tree with the leaves and parameters to get the path
-						let (tree, path) = setup_tree_and_create_path_x5::<FrBls381>(
+						let (tree, path) = setup_tree_and_create_path_tree_x5::<FrBls381, LEN>(
 							&leaves_new,
 							proof_input.leaf_index as u64,
 							&params5,
 						);
 						let root = tree.root().inner();
-						let private: PrivateBuilder<FrBls381> = PrivateBuilder {
-							r: PrimeField::from_be_bytes_mod_order(&note.secret[..32]),
-							nullifier: PrimeField::from_be_bytes_mod_order(&note.secret[32..64]),
-							rho: PrimeField::from_be_bytes_mod_order(&note.secret[64..]),
-						};
-						let leaf_private = private.build();
+
+						let leaf_private: Private<FrBls381> = Private::new(
+							PrimeField::from_le_bytes_mod_order(&note.secret[..32]),
+							PrimeField::from_le_bytes_mod_order(&note.secret[32..64]),
+						);
 						let nullifier_hash = Leaf_x5::create_nullifier(&leaf_private, &params5).unwrap();
 
-						let mc = Circuit_x5::<FrBls381>::new(
+						let mut nh_bytes: Vec<u8> = vec![];
+						nullifier_hash.write(&mut nh_bytes);
+						let root = tree.root().inner();
+						let mut root_bytes: Vec<u8> = vec![];
+						root.write(&mut root_bytes);
+
+						let mc = Circuit_x5::<FrBls381, LEN>::new(
 							arbitrary_input,
 							leaf_private,
-							(),
 							params5,
 							path,
 							root,
@@ -210,16 +241,19 @@ impl ZKProof {
 						);
 
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-						let (pk, _vk) = setup_random_groth16_x5::<_, Bls12_381>(&mut rng, ArkCurve::Bls381);
-						let proof = prove_groth16_x5::<_, Bls12_381>(&pk, mc, &mut rng);
-						Self::Bls12_381(proof)
+						let (pk, _vk) = setup_groth16_circuit_x5::<_, Bls12_381, LEN>(&mut rng, mc.clone());
+						let proof = prove_groth16_circuit_x5::<_, Bls12_381, LEN>(&pk, mc, &mut rng);
+						Self::Bls12_381(proof, ProofMeta {
+							root: root_bytes,
+							nullified_hash: nh_bytes,
+						})
 					}
 					"17" => {
 						let params17 = match note.width.as_str() {
 							"5" => setup_params_x17_5::<FrBls381>(ArkCurve::Bls381),
 							"3" => setup_params_x17_3::<FrBls381>(ArkCurve::Bls381),
 							_ => {
-								unreachable!();
+								unreachable!("exponentiation of 3 unsupported");
 							}
 						};
 						let arbitrary_input = setup_arbitrary_data::<FrBls381>(recipient, relayer, fee, refund);
@@ -227,27 +261,31 @@ impl ZKProof {
 							.leaves
 							.to_vec()
 							.into_iter()
-							.map(|leaf| PrimeField::from_be_bytes_mod_order(&leaf))
+							.map(|leaf| PrimeField::from_le_bytes_mod_order(&leaf))
 							.collect();
-						let (tree, path) = setup_tree_and_create_path_x17::<FrBls381>(
+						let (tree, path) = setup_tree_and_create_path_tree_x17::<FrBls381, LEN>(
 							&leaves_new,
 							proof_input.leaf_index as u64,
 							&params17,
 						);
 						let root = tree.root().inner();
 
-						let private: PrivateBuilder<FrBls381> = PrivateBuilder {
-							r: PrimeField::from_be_bytes_mod_order(&note.secret[..32]),
-							nullifier: PrimeField::from_be_bytes_mod_order(&note.secret[32..64]),
-							rho: PrimeField::from_be_bytes_mod_order(&note.secret[64..]),
-						};
+						let leaf_private: Private<FrBls381> = Private::new(
+							PrimeField::from_le_bytes_mod_order(&note.secret[..32]),
+							PrimeField::from_le_bytes_mod_order(&note.secret[32..64]),
+						);
 
-						let leaf_private = private.build();
 						let nullifier_hash = Leaf_x17::create_nullifier(&leaf_private, &params17).unwrap();
-						let mc = Circuit_x17::<FrBls381>::new(
+
+						let mut nh_bytes: Vec<u8> = vec![];
+						nullifier_hash.write(&mut nh_bytes);
+						let root = tree.root().inner();
+						let mut root_bytes: Vec<u8> = vec![];
+						root.write(&mut root_bytes);
+
+						let mc = Circuit_x17::<FrBls381, LEN>::new(
 							arbitrary_input,
 							leaf_private,
-							(),
 							params17,
 							path,
 							root,
@@ -255,9 +293,12 @@ impl ZKProof {
 						);
 
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-						let (pk, _vk) = setup_random_groth16_x17::<_, Bls12_381>(&mut rng, ArkCurve::Bls381);
-						let proof = prove_groth16_x17::<_, Bls12_381>(&pk, mc, &mut rng);
-						Self::Bls12_381(proof)
+						let (pk, _vk) = setup_groth16_circuit_x17::<_, Bls12_381, LEN>(&mut rng, mc.clone());
+						let proof = prove_groth16_circuit_x17::<_, Bls12_381, LEN>(&pk, mc, &mut rng);
+						Self::Bls12_381(proof, ProofMeta {
+							root: root_bytes,
+							nullified_hash: nh_bytes,
+						})
 					}
 					_ => {
 						unreachable!()
@@ -285,6 +326,12 @@ impl Default for ZkProofBuilder {
 		}
 	}
 }
+pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
+	let mut truncated_bytes = t[..20].to_vec();
+	truncated_bytes.extend_from_slice(&[0u8; 12]);
+	truncated_bytes
+}
+// 2^254 vs 2^256
 impl ZkProofBuilder {
 	pub fn new() -> Self {
 		Self::default()
@@ -337,63 +384,65 @@ mod test {
 	use super::*;
 
 	#[test]
+	fn create_valid_root() {
+		use arkworks_gadgets::prelude::ark_bn254::{Bn254, Fr as FrBn254};
+		use arkworks_utils::utils::common::{setup_params_x5_3, Curve as ArkCurve};
+
+		use ark_serialize::CanonicalSerialize;
+		use arkworks_circuits::setup::common::setup_tree_and_create_path_tree_x5;
+		let params = setup_params_x5_3::<FrBn254>(ArkCurve::Bn254);
+		// root on the node
+		let root_hex = "7b23a2906223c7a9d6948754ae0a40b8048c4faad4b989ea25428826a5899e2e";
+		let leaves: Vec<FrBn254> = ["de1983b0d54b3a003ba58bf878e244112e5f373e9768a0a7a940ec7df5e37d03"]
+			.to_vec()
+			.into_iter()
+			.map(|i| hex::decode(i).unwrap())
+			.map(|leaf| FrBn254::from_le_bytes_mod_order(&leaf))
+			.collect();
+		let (tree, path) = setup_tree_and_create_path_tree_x5::<FrBn254, LEN>(&leaves, 0 as u64, &params);
+		let root = tree.root().inner();
+		let mut root_bytes = Vec::new();
+		CanonicalSerialize::serialize(&root, &mut root_bytes);
+		assert_eq!(hex::encode(&root_bytes), root_hex);
+	}
+
+	#[test]
 	fn should_create_zkp() {
 		let leaves = [
-			"0x2e5c62af48845c095bfa9b90b8ec9f6b7bd98fb3ac2dd3039050a64b919951dd",
-			"0x3007c62f678a503e568534487bc5b0bc651f37bbe1f34668b4c8a360f15ba3c3",
-			"0x1ec12c8b3db99467523b352191a93e206d9193e9ca4e6162828f89f375876fba",
-			"0x235c395fb58781b1e5d2659a2440e3cc4fe2ca274278bc05bcb8860d339e51bb",
-			"0x2cc89541c606482ab5736115f3ca3dd5fcbe150dc50042c27b4653b9428a648f",
-			"0x2f0c62e073b5ef26c44e1e590c1000b0388a234dc73f9ada563737b631cbe870",
-			"0x15c5b95023b2198bad62de0d2b503af4e1febde94896440aba818849981f3145",
-			"0x1181497197f03384d142fa00f88cf731185f886e69560e4ec775e531e9fdaead",
-			"0x1a6599a0bf4c5dce3dd8419c968727e813e296075f7fba98c32704aa5481103a",
-			"0x25f38e7d28648d602b94dd2e3cba2319212035c42a5c5cc528dbea8b34bb2203",
-			"0x204da648df5d62c464bd7b4d88cd2eef4fd3866b12b69f7488c71cf61f0c3b47",
-			"0x1fea40ab1d91aa5dbe2f9d5d829e53d09efc3e5b64484008f09d44058f24c071",
-			"0x134ec9bdeb51bb4adb26a1ac10cbed5f3c381f897f667134657d27cf16cb291f",
-			"0x2e95b88f4caa6c93c7ed1c5736a8a202bf4a24a59d8db5fdd028d88d1097bc8f",
-			"0x03d5d333b260a382125e88560015f6343b48ec9791aed5af61c95e0b9cff1c77",
-			"0x14d520291c9c32e698a1728138d2b1c6cb43ef4841200a4f54c9389301dd62b6",
-			"0x2fce45e16df45d46f637456763b5a80f0e36240122dfa5afe74f5dae6f7e7491",
-			"0x0edf79f56a49b49a204a696260c6257fddb061867ea9d0f68f915f99e9212b3a",
-			"0x1b76df559c5b20d49d3f3c3c25a91d2f6fb457ca947d229f9a6f3e2f9a8ed2d5",
-			"0x0f965c23dd5e2aa59a04edd418173273a55ea34c3c03568346b48f4fa84b9372",
-			"0x211cc84443fcabbea8f9c5b7395fbc77de19511761413a79bb6713429c319e20",
-			"0x1665fe58542013065e8aa459684ed07a2b45a96e20d698099e72b71b0a2dcd39",
-			"0x263caed125777c6ead622bab9935677768f573023490e9a5da01efdb0d535ee9",
-			"0x061390a981907195af69a139877a7794b0807d7f943dd093c6b23772aea6b5e7",
-			"0x13d420c1c07d781c8ad7761a30aa10948f0c1445db5735a17f8b4d213a458f08",
-			"0x08c2088aad0ba3b6b194567779a09efd23f039306b2a1fa177bb9495e5645b5f",
-			"0x2c5ae8bbe6693a853cf617acb8997459b096f1e23990c59165d2d83ca4d5a70e",
-			"0x2686cde4cc3c2718fc98a494691b1090d162d9b6e97d2094e90186e765a0dd3e",
-			"0x16bac9eacf126d54956794571e279532db94b38e89fba15ff029357cbb5b252c",
-			"0x18ff90d73fce2ccc8ee0133af9d44cf41fd6d5f9236267b2b3ab544ad53812c0",
-			"0x1498ad993ec57cc62702bf5d03ec618fa87d408855ffc77efb6245f8f8abd4d3",
-			"0x077c98195221f48536c2fddaa5ba6c055fa44766323058a1428f2bd6b87e7ca8",
-			"0x0aef6d7f2f3de51e2c1c5d2650d09173079cff32ef69258948719c1f12f36655",
-			"0x08206f9f6cf282fd9e63b0f6a30cbace3e2516254ed80102a21b540da6c93e09",
-			"0x111e01dbd40d63a05513225b22c4f44c2b6e9cd2eec326fee9a2567935e1b231",
-			"0x280e0ed146d74164467513bb32bce545aa85af73b183cf94d97bbce669093020",
-			"0x13354539bb66a9319688498071c9e2f21c68381185a7b78320182ae3531effe0",
-			"0x1b501b67b5770443b07229d18e0f1d06f2f2a663079b5f498dae56a2bcfb8004",
-			"0x229cf5e35735f033bdc0b2ebce475836358146fc52b34057a1d5d663c80ce64d",
-			"0x229cf5e35735f033bdc0b2ebce475836358146fc52b34057a1d5d663c80ce64d",
+			"0x1111111000000000000000000000000000000000000000000000000000000000",
+			"0x1111111000000000000000000000000000000000000000000000000000000100",
+			"0x37b7c0b04e6d08f43be1dc6a4080afca5c44c251df473e336fd9f788844b861e",
+			"0x6d9c60a2a9e2b101f86e66382e6b23aec8eb568ec109ba2da985ab433151cd11",
+			"0xf0b0797286ca58ff1217ce18993440811ac00000000000000000000000000000",
+			"0xf0b0797286ca58ff1217ce18993440811ac00000000000000000000000000000",
+			"0x661fee59878756175f4c2af109f81cebeda980c1464e981becd19d3d99fab018",
+			"0x3bdae75dd81ae9869efa7fb2bc99cdb2320d60d26b7a3591f2d8f13b9b148d1e",
+			"0xf0b0797286ca58ff1217ce18993440811ac00000000000000000000000000100",
+			"0xf0b0797286ca58ff1217ce18993440811ac00000000000000000000000000100",
+			"0x149ae0c63caebd66f3d28a7f4bf3c5f22da56c2b6a37648561141ecb7c2abf15",
+			"0x6fa96ad4629490bd126da30c1df65ad37256afaaa0d9fd1856d8c755f377940e",
+			"0x30c9533af24d0feb8c44bdaece49e79886720d3d43c10a8b1b14ac9071c8391d",
+			"0x12dba9517079c0a79fcbdfbf77df8744f4edddf103f72f33787ef19cedf67222",
+			"0x573e3cd36487821cc29d6481e5e7465902d086d11ab95a182834dbb91e93c110",
 		];
 
-		let note  =  "webb.mix:v1:any:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let note  =  "webb.mix:v1:1:1:Arkworks:Bn254:Poseidon:WEBB:18:1:5:3:b508e1099601315c779e3ae9a6f3dededff747ae92b41ebb3841f7a40e97b9182ae2d629b765e689503730525cb0747fd428203119166e7e7788f7b1d2b8ed21";
 
 		let leaves_bytes: Vec<[u8; 32]> = leaves
 			.iter()
 			.map(|item| hex::decode(item.replace("0x", "")).unwrap().try_into().unwrap())
 			.collect();
-		let relayer = hex::decode("929E7eb6997408C196828773db642D76e79bda93".replace("0x", "")).unwrap();
-		let recipient = hex::decode("929E7eb6997408C196828773db642D76e79bda93".replace("0x", "")).unwrap();
+		let relayer =
+			hex::decode("644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129".replace("0x", "")).unwrap();
+		let recipient =
+			hex::decode("644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129".replace("0x", "")).unwrap();
 		let mut zkp_builder = ZkProofBuilder::new();
 		let mut proof_builder = ZkProofBuilder::new();
 		proof_builder.set_leaves(&leaves_bytes);
 		proof_builder.set_relayer(&relayer);
 		proof_builder.set_recipient(&recipient);
+		proof_builder.set_fee(0);
+		proof_builder.set_fee(0);
 		let note = Note::deserialize(note).unwrap();
 		proof_builder.set_leaf_index(40);
 		proof_builder.set_note(note);
@@ -402,10 +451,10 @@ mod test {
 
 		let mut proof_bytes = Vec::new();
 		match proof {
-			ZKProof::Bls12_381(proof) => {
+			ZKProof::Bls12_381(proof, _) => {
 				proof.write(&mut proof_bytes);
 			}
-			ZKProof::Bn254(proof) => {
+			ZKProof::Bn254(proof, _) => {
 				proof.write(&mut proof_bytes);
 			}
 		}

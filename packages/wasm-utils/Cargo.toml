@@ -22,11 +22,15 @@ lto = true
 [dependencies]
 ark-ff = { version = "^0.3.0", default-features = true }
 ark-serialize = "0.3.0"
-ark-crypto-primitives = { version = "^0.3.0", default-features = true, features = ["r1cs"] }
+ark-crypto-primitives = { version = "^0.3.0", defaultcd-features = true, features = ["r1cs"] }
 ark-ed-on-bn254 = { version = "^0.3.0", default-features = true, features = ["r1cs"] }
-pedersen-hash = { version = "0.1.0", git = "https://github.com/webb-tools/webb-rs.git", package = "pedersen-hash" }
+webb-pedersen-hash = { version = "0.1.0", git = "https://github.com/webb-tools/webb-rs.git" }
 ark-std ={ version = "^0.3.0" }
-arkworks-gadgets = { version = "=0.3.10" }
+arkworks-gadgets = { version = "^0.4.5", features = ["std", "r1cs"], default-features = true }
+arkworks-circuits = { version = "^0.4.5", features = ["std", "r1cs"], default-features = false }
+arkworks-utils = { version = "^0.4.5", features = ["std", "r1cs"], default-features = false }
+
+
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 js-sys = "0.3"
 rand = { version = "0.8.3", features = ["getrandom"] }
@@ -68,3 +72,4 @@ features = ["console"]
 wasm-bindgen-test = "0.3"
 js-sys = "0.3"
 lazy_static = "1.4"
+

@@ -85,6 +85,7 @@ impl NoteManager {
 				Some(secrets) => return generate_with_secrets(note_builder, secrets.as_slice()).map_err(|_| ()),
 			},
 			(Backend::Arkworks, Curve::Bn254) => {
+				dbg!("Arkworks , Bn254");
 				let note_generator = match note_builder.hash_function {
 					HashFunction::Poseidon => ArkworksPoseidonBn254NoteGenerator::new(width, exponentiation),
 					HashFunction::MiMCTornado => {
@@ -130,7 +131,7 @@ impl NoteManager {
 			}
 			(Backend::Arkworks, Curve::Bn254) => {
 				let note_generator = match hash_function {
-					HashFunction::Poseidon => ArkworksPoseidonBls12_381NoteGenerator::new(width, exponentiation),
+					HashFunction::Poseidon => ArkworksPoseidonBn254NoteGenerator::new(width, exponentiation),
 					HashFunction::MiMCTornado => {
 						unreachable!()
 					}
@@ -252,10 +253,10 @@ impl FromStr for Note {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		let parts: Vec<&str> = s.split(':').collect();
-		let full = parts.len() == FULL_NOTE_LENGTH;
-		if !full {
-			return Err(OpStatusCode::InvalidNoteLength);
-		}
+		// let full = parts.len() == FULL_NOTE_LENGTH;
+		// if !full {
+		// 	return Err(OpStatusCode::InvalidNoteLength);
+		// }
 		let prefix = parts[0];
 
 		if prefix != NOTE_PREFIX && prefix != BRIDGE_NOTE_PREFIX {
@@ -306,7 +307,6 @@ mod test {
 	#[test]
 	fn deserialize() {
 		let note = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
-
 		let note = Note::deserialize(note).unwrap();
 		assert_eq!(note.curve, Curve::Bn254);
 		assert_eq!(note.prefix, BRIDGE_NOTE_PREFIX);
@@ -325,6 +325,8 @@ mod test {
 		note_builder.hash_function = HashFunction::Poseidon;
 		note_builder.curve = Curve::Bn254;
 		note_builder.denomination = "18".to_string();
+		note_builder.exponentiation = "5".to_string();
+		note_builder.width = "5".to_string();
 		note_builder.chain = "3".to_string();
 		note_builder.source_chain = "2".to_string();
 		let note = note_builder.generate_note().unwrap();
@@ -333,8 +335,24 @@ mod test {
 		assert_eq!(&note.chain, "3");
 		assert_eq!(&note.source_chain, "2");
 		assert_eq!(note.backend, Backend::Arkworks);
-		assert_eq!(note.denominatiqon, "18".to_string());
+		assert_eq!(note.denomination, "18".to_string());
 		assert_eq!(note.hash_function, HashFunction::Poseidon);
 		dbg!(note.to_string());
+	}
+	#[test]
+	fn generate_leaf() {
+		let mut note_builder = NoteBuilder::default();
+		note_builder.backend = Backend::Arkworks;
+		note_builder.prefix = BRIDGE_NOTE_PREFIX.to_string();
+		note_builder.hash_function = HashFunction::Poseidon;
+		note_builder.curve = Curve::Bn254;
+		note_builder.denomination = "18".to_string();
+		note_builder.exponentiation = "5".to_string();
+		note_builder.width = "3".to_string();
+		note_builder.chain = "3".to_string();
+		note_builder.source_chain = "2".to_string();
+		let note = note_builder.generate_note().unwrap();
+		let leaf = NoteManager::get_leaf_commitment(&note).unwrap();
+		dbg!(hex::encode(leaf));
 	}
 }

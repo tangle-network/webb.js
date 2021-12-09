@@ -1,5 +1,5 @@
-import { Asset } from '@webb-tools/sdk-mixer';
-import type { Backend, Curve, DepositNote, HashFunction } from '@webb-tools/wasm-utils';
+import { Asset } from "@webb-tools/sdk-mixer";
+import type { Backend, Curve, DepositNote, HashFunction } from "@webb-tools/wasm-utils";
 
 export type NoteGenInput = {
   prefix: string;
@@ -13,14 +13,17 @@ export type NoteGenInput = {
   amount: string;
   denomination: string;
   secrets?: string;
+  width: string;
+  exponentiation: string;
 };
 
 export class Note {
   // Default constructor
-  private constructor(readonly note: DepositNote) {}
+  private constructor(readonly note: DepositNote) {
+  }
 
   private static get wasm() {
-    return import('@webb-tools/wasm-utils');
+    return import("@webb-tools/wasm-utils");
   }
 
   public static async deserialize(value: string): Promise<Note> {
@@ -46,7 +49,7 @@ export class Note {
     const wasm = await Note.wasm;
     const noteBuilderInput = new wasm.NoteBuilderInput();
     noteBuilderInput.prefix(noteGenInput.prefix);
-    noteBuilderInput.version('v1');
+    noteBuilderInput.version("v1");
     noteBuilderInput.chain(noteGenInput.chain);
     noteBuilderInput.sourceChain(noteGenInput.sourceChain);
     noteBuilderInput.backend(noteGenInput.backend);
@@ -55,6 +58,8 @@ export class Note {
     noteBuilderInput.tokenSymbol(noteGenInput.tokenSymbol);
     noteBuilderInput.amount(noteGenInput.amount);
     noteBuilderInput.denomination(noteGenInput.denomination);
+    noteBuilderInput.width(noteGenInput.width);
+    noteBuilderInput.exponentiation(noteGenInput.exponentiation);
     if (noteGenInput.secrets) {
       noteBuilderInput.setSecrets(noteGenInput.secrets);
     }
@@ -63,6 +68,6 @@ export class Note {
   }
 
   public asAsset(): Asset {
-    throw new Error('not implemented');
+    throw new Error("not implemented");
   }
 }
