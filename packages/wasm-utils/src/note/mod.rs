@@ -65,12 +65,17 @@ pub struct NoteBuilder {
 	pub secrets: Option<Vec<u8>>,
 }
 
-struct NoteManager;
+pub struct NoteManager;
 
 impl NoteManager {
 	fn generate(note_builder: &NoteBuilder) -> Result<Note, ()> {
 		let width = get_usize_from_string(&note_builder.width);
 		let exponentiation = get_usize_from_string(&note_builder.exponentiation);
+
+		if let Some(secrets) = &note_builder.secrets {
+			return generate_with_secrets(note_builder, secrets.as_slice()).map_err(|_| ());
+		};
+
 		match (note_builder.backend, note_builder.curve) {
 			(_, Curve::Curve25519) => match &note_builder.secrets {
 				None => {

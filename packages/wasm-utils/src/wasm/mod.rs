@@ -380,6 +380,13 @@ impl ProvingManager {
 		Ok(())
 	}
 
+	#[wasm_bindgen(js_name = setProvingKey)]
+	pub fn set_proving_key(&mut self, pk: Uint8Array) -> Result<(), JsValue> {
+		let pk: Vec<u8> = pk.to_vec().try_into().map_err(|_| OpStatusCode::InvalidArrayLength)?;
+		self.builder.set_proving_key(&pk);
+		Ok(())
+	}
+
 	#[wasm_bindgen(js_name = setLeaves)]
 	pub fn set_leaves(&mut self, leaves: Leaves) -> Result<(), JsValue> {
 		let ls: Vec<_> = Array::from(&leaves)

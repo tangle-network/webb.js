@@ -7,7 +7,8 @@ export type ProvingManagerSetupInput = {
   leaves: Leaves;
   leafIndex: number;
   fee: number;
-  refund: number
+  refund: number;
+  provingKey: Uint8Array;
 };
 
 type PMEvents = {
@@ -53,6 +54,7 @@ export class ProvingManagerWrapper {
     pm.setLeafIndex(pmSetupInput.leafIndex);
     pm.setFee(pmSetupInput.fee);
     pm.setRefund(pmSetupInput.refund);
+    pm.setProvingKey(pmSetupInput.provingKey)
     const proof: Proof = await pm.proof();
     return {
       proof: proof.proof,
