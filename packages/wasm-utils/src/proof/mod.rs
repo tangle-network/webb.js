@@ -25,7 +25,6 @@ use ark_ff::FromBytes;
 use ark_serialize::CanonicalDeserialize;
 use arkworks_circuits::prelude::ark_groth16::ProvingKey;
 use arkworks_utils::prelude::ark_bn254;
-use bincode::Options;
 
 pub type Leaf_x5<F> = MixerLeaf<F, PoseidonCRH_x5_5<F>>;
 pub type Leaf_x3<F> = MixerLeaf<F, PoseidonCRH_x3_3<F>>;
