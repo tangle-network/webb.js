@@ -383,7 +383,9 @@ impl ProvingManager {
 	#[wasm_bindgen(js_name = setProvingKey)]
 	pub fn set_proving_key(&mut self, pk: Uint8Array) -> Result<(), JsValue> {
 		let pk: Vec<u8> = pk.to_vec().try_into().map_err(|_| OpStatusCode::InvalidArrayLength)?;
+		web_sys::console::log_1(&"Importing the PK".into());
 		self.builder.set_proving_key(&pk);
+		web_sys::console::log_1(&"Imported the PK".into());
 		Ok(())
 	}
 
