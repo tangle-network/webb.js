@@ -308,7 +308,50 @@ impl FromStr for Note {
 #[cfg(test)]
 mod test {
 	use super::*;
+	use ark_ff::{to_bytes, BigInteger, FromBytes, PrimeField};
+	use arkworks_circuits::prelude::ark_bn254;
+	use arkworks_circuits::setup::common::setup_tree_and_create_path_tree_x5;
+	use arkworks_circuits::setup::mixer::setup_leaf_x5;
+	use arkworks_utils::poseidon::PoseidonParameters;
+	use arkworks_utils::utils::common::{setup_params_x5_3, setup_params_x5_5, Curve as ArkCurve};
 
+	type Bn254Fr = ark_bn254::Fr;
+
+	pub fn get_hash_params<T: PrimeField>(curve: ArkCurve) -> (Vec<u8>, Vec<u8>) {
+		(
+			setup_params_x5_3::<T>(curve).to_bytes(),
+			setup_params_x5_5::<T>(curve).to_bytes(),
+		)
+	}
+	pub fn get_leaf() -> (Vec<u8>, Vec<u8>) {
+		let rng = &mut ark_std::test_rng();
+
+		let (_, params5) = get_hash_params::<Bn254Fr>(ArkCurve::Bn254);
+		let params5_deserialized = PoseidonParameters::<Bn254Fr>::from_bytes(&*params5).unwrap();
+		let (leaf_private, leaf, _) = setup_leaf_x5(&params5_deserialized, rng);
+		let private_bytes = to_bytes![leaf_private.secret(), leaf_private.nullifier()].unwrap();
+		let leaf_element = leaf.into_repr().to_bytes_le();
+
+		(private_bytes, leaf_element)
+	}
+
+	#[test]
+	fn should_get_same_leaf() {
+		use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+		let (leaf_private, leaf_el) = get_leaf();
+		let mut note_builder = NoteBuilder::default();
+		note_builder.backend = Backend::Arkworks;
+		note_builder.curve = Curve::Bn254;
+		note_builder.width = "5".to_string();
+		note_builder.exponentiation = "5".to_string();
+		note_builder.amount = "1".to_string();
+		note_builder.hash_function = HashFunction::Poseidon;
+		note_builder.secrets = Some(leaf_private.clone());
+		let deposit_note = note_builder.generate_note().unwrap();
+		let wasm_leaf = NoteBuilder::get_leaf(&deposit_note).unwrap();
+		dbg!(hex::encode(leaf_private));
+		assert_eq!(hex::encode(wasm_leaf), hex::encode(leaf_el.to_vec()));
+	}
 	#[test]
 	fn deserialize() {
 		let note = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";

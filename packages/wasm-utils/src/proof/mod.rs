@@ -1,5 +1,6 @@
-mod utils;
-
+use ark_ff::FromBytes;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+use arkworks_circuits::prelude::ark_groth16::ProvingKey;
 use arkworks_circuits::setup::common::{
 	setup_tree_and_create_path_tree_x17, setup_tree_and_create_path_tree_x5, PoseidonCRH_x17_3, PoseidonCRH_x17_5,
 	PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
@@ -14,18 +15,19 @@ use arkworks_gadgets::prelude::ark_bls12_381::{Bls12_381, Fr as FrBls381, Fr};
 use arkworks_gadgets::prelude::ark_bn254::{Bn254, Fr as FrBn254};
 use arkworks_gadgets::prelude::ark_ff::{PrimeField, ToBytes};
 use arkworks_gadgets::prelude::ark_groth16::Proof;
+use arkworks_utils::prelude::ark_bn254;
 use arkworks_utils::utils::common::{
-	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x5_3, setup_params_x5_5, Curve as ArkCurve,
+	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x5_3, setup_params_x5_5, verify_groth16,
+	Curve as ArkCurve,
 };
+use arkworks_utils::utils::to_field_elements;
+use bincode::Options;
 
 use crate::note::Note;
 use crate::proof::utils::get_hash_params_x5;
 use crate::types::Curve;
-use ark_ff::FromBytes;
-use ark_serialize::CanonicalDeserialize;
-use arkworks_circuits::prelude::ark_groth16::ProvingKey;
-use arkworks_utils::prelude::ark_bn254;
-use bincode::Options;
+
+mod utils;
 
 pub type Leaf_x5<F> = MixerLeaf<F, PoseidonCRH_x5_5<F>>;
 pub type Leaf_x3<F> = MixerLeaf<F, PoseidonCRH_x3_3<F>>;
@@ -64,6 +66,50 @@ pub enum ZKProof {
 }
 
 impl ZKProof {
+	pub fn get_bytes(&self) -> Vec<u8> {
+		let mut bytes = Vec::new();
+		match self {
+			ZKProof::Bls12_381(proof, _) => CanonicalSerialize::serialize(proof, &mut bytes).unwrap(),
+			ZKProof::Bn254(proof, _) => CanonicalSerialize::serialize(proof, &mut bytes).unwrap(),
+		}
+		bytes
+	}
+
+	pub fn get_meta(&self) -> ProofMeta {
+		match self {
+			ZKProof::Bls12_381(_, proof_meta) => ProofMeta {
+				root: proof_meta.root.clone(),
+				nullified_hash: proof_meta.nullified_hash.clone(),
+			},
+			ZKProof::Bn254(_, proof_meta) => ProofMeta {
+				root: proof_meta.root.clone(),
+				nullified_hash: proof_meta.nullified_hash.clone(),
+			},
+		}
+	}
+
+	/*	pub(crate) fn verify(&self, proof_input: &ZkProofBuilder) -> bool {
+		let pk = ProvingKey::<ark_bn254::Bn254>::deserialize_unchecked(&*proof_input.pk).unwrap();
+		let vk = pk.vk;
+		let proof_bytes = self.get_bytes();
+		let meta = self.get_meta();
+		let proof = Proof::<FrBn254>::deserialize(proof_bytes).unwrap();
+		let mut public_inp_bytes = Vec::new();
+		let recipient_bytes = truncate_and_pad(&proof_input.recipient.using_encoded(element_encoder)[..]);
+		let relayer_bytes = truncate_and_pad(&relayer.using_encoded(element_encoder)[..]);
+		public_inp_bytes.extend_from_slice(&truncate_and_pad(&meta.nullified_hash));
+		public_inp_bytes.extend_from_slice(&truncate_and_pad(&meta.root));
+		let element_encoder = |v: &[u8]| {
+			let mut output = [0u8; 32];
+			output.iter_mut().zip(v).for_each(|(b1, b2)| *b1 = *b2);
+			output
+		};
+		let public_input_field_elts = to_field_elements::<FrBn254>(public_inp_bytes).unwrap();
+		let res = verify_groth16::<FrBn254>(&vk, &public_input_field_elts, &proof);
+
+		false
+	}*/
+
 	pub(crate) fn new(proof_input: &ZkProofBuilder) -> Self {
 		let mut rng = get_rng();
 		let note = match &proof_input.note {
@@ -125,7 +171,7 @@ impl ZKProof {
 						);
 
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-						let pk = ProvingKey::<ark_bn254::Bn254>::deserialize(&*proof_input.pk).unwrap();
+						let pk = ProvingKey::<ark_bn254::Bn254>::deserialize_unchecked(&*proof_input.pk).unwrap();
 						let proof = prove_groth16_circuit_x5::<_, Bn254, LEN>(&pk, mc, &mut rng);
 						Self::Bn254(proof, ProofMeta {
 							nullified_hash: nh_bytes,
