@@ -1,6 +1,6 @@
 import { WorkerWithEvents } from '@webb-tools/app-util/shared/worker-with-events.class';
 import { LoggerService } from '@webb-tools/app-util';
-import type { Leaves ,Proof} from '@webb-tools/wasm-utils';
+import type { Leaves, Proof } from '@webb-tools/wasm-utils';
 
 type Events = 'generateZKP';
 
