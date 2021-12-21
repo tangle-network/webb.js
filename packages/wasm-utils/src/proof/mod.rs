@@ -1,13 +1,16 @@
+use crate::note::Note;
+use crate::proof::utils::get_hash_params_x5;
+use crate::types::Curve;
 use ark_ff::FromBytes;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use arkworks_circuits::prelude::ark_groth16::ProvingKey;
 use arkworks_circuits::setup::common::{
-	setup_tree_and_create_path_tree_x17, setup_tree_and_create_path_tree_x5, PoseidonCRH_x17_3, PoseidonCRH_x17_5,
-	PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
+	setup_tree_and_create_path_tree_x17, setup_tree_and_create_path_tree_x5, PoseidonCRH_x17_5, PoseidonCRH_x3_3,
+	PoseidonCRH_x5_5,
 };
 use arkworks_circuits::setup::mixer::{
 	prove_groth16_circuit_x17, prove_groth16_circuit_x5, setup_arbitrary_data, setup_groth16_circuit_x17,
-	setup_groth16_circuit_x5, setup_groth16_random_circuit_x5, Circuit_x17, Circuit_x5,
+	setup_groth16_circuit_x5, Circuit_x17, Circuit_x5,
 };
 use arkworks_gadgets::ark_std::rand;
 use arkworks_gadgets::leaf::mixer::{MixerLeaf, Private};
@@ -17,20 +20,14 @@ use arkworks_gadgets::prelude::ark_ff::{PrimeField, ToBytes};
 use arkworks_gadgets::prelude::ark_groth16::Proof;
 use arkworks_utils::prelude::ark_bn254;
 use arkworks_utils::utils::common::{
-	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x5_3, setup_params_x5_5, verify_groth16,
-	Curve as ArkCurve,
+	setup_params_x17_3, setup_params_x17_5, setup_params_x5_3, setup_params_x5_5, Curve as ArkCurve,
 };
-use arkworks_utils::utils::to_field_elements;
-
-use crate::note::Note;
-use crate::proof::utils::get_hash_params_x5;
-use crate::types::Curve;
 
 mod utils;
 
-pub type Leaf_x5<F> = MixerLeaf<F, PoseidonCRH_x5_5<F>>;
-pub type Leaf_x3<F> = MixerLeaf<F, PoseidonCRH_x3_3<F>>;
-pub type Leaf_x17<F> = MixerLeaf<F, PoseidonCRH_x17_5<F>>;
+pub type LeafX5<F> = MixerLeaf<F, PoseidonCRH_x5_5<F>>;
+pub type LeafX3<F> = MixerLeaf<F, PoseidonCRH_x3_3<F>>;
+pub type LeafX17<F> = MixerLeaf<F, PoseidonCRH_x17_5<F>>;
 
 pub fn get_rng() -> rand::rngs::OsRng {
 	rand::rngs::OsRng
@@ -154,12 +151,12 @@ impl ZKProof {
 							PrimeField::from_le_bytes_mod_order(&note.secret[..32]),
 							PrimeField::from_le_bytes_mod_order(&note.secret[32..64]),
 						);
-						let nullifier_hash = Leaf_x5::create_nullifier(&leaf_private, &params5).unwrap();
+						let nullifier_hash = LeafX5::create_nullifier(&leaf_private, &params5).unwrap();
 						let mut nh_bytes: Vec<u8> = vec![];
-						nullifier_hash.write(&mut nh_bytes);
+						nullifier_hash.write(&mut nh_bytes).unwrap();
 						let root = tree.root().inner();
 						let mut root_bytes: Vec<u8> = vec![];
-						root.write(&mut root_bytes);
+						root.write(&mut root_bytes).unwrap();
 						let mc = Circuit_x5::<FrBn254, LEN>::new(
 							arbitrary_input,
 							leaf_private,
@@ -201,14 +198,13 @@ impl ZKProof {
 							PrimeField::from_le_bytes_mod_order(&note.secret[..32]),
 							PrimeField::from_le_bytes_mod_order(&note.secret[32..64]),
 						);
-						let nullifier_hash = Leaf_x17::create_nullifier(&leaf_private, &params17).unwrap();
-						let root = tree.root().inner();
+						let nullifier_hash = LeafX17::create_nullifier(&leaf_private, &params17).unwrap();
 
 						let mut nh_bytes: Vec<u8> = vec![];
-						nullifier_hash.write(&mut nh_bytes);
+						nullifier_hash.write(&mut nh_bytes).unwrap();
 						let root = tree.root().inner();
 						let mut root_bytes: Vec<u8> = vec![];
-						root.write(&mut root_bytes);
+						root.write(&mut root_bytes).unwrap();
 
 						let mc = Circuit_x17::<FrBn254, LEN>::new(
 							arbitrary_input,
@@ -269,19 +265,18 @@ impl ZKProof {
 							proof_input.leaf_index as u64,
 							&params5,
 						);
-						let root = tree.root().inner();
 
 						let leaf_private: Private<FrBls381> = Private::new(
 							PrimeField::from_le_bytes_mod_order(&note.secret[..32]),
 							PrimeField::from_le_bytes_mod_order(&note.secret[32..64]),
 						);
-						let nullifier_hash = Leaf_x5::create_nullifier(&leaf_private, &params5).unwrap();
+						let nullifier_hash = LeafX5::create_nullifier(&leaf_private, &params5).unwrap();
 
 						let mut nh_bytes: Vec<u8> = vec![];
-						nullifier_hash.write(&mut nh_bytes);
+						nullifier_hash.write(&mut nh_bytes).unwrap();
 						let root = tree.root().inner();
 						let mut root_bytes: Vec<u8> = vec![];
-						root.write(&mut root_bytes);
+						root.write(&mut root_bytes).unwrap();
 
 						let mc = Circuit_x5::<FrBls381, LEN>::new(
 							arbitrary_input,
@@ -320,20 +315,19 @@ impl ZKProof {
 							proof_input.leaf_index as u64,
 							&params17,
 						);
-						let root = tree.root().inner();
 
 						let leaf_private: Private<FrBls381> = Private::new(
 							PrimeField::from_le_bytes_mod_order(&note.secret[..32]),
 							PrimeField::from_le_bytes_mod_order(&note.secret[32..64]),
 						);
 
-						let nullifier_hash = Leaf_x17::create_nullifier(&leaf_private, &params17).unwrap();
+						let nullifier_hash = LeafX17::create_nullifier(&leaf_private, &params17).unwrap();
 
 						let mut nh_bytes: Vec<u8> = vec![];
-						nullifier_hash.write(&mut nh_bytes);
+						nullifier_hash.write(&mut nh_bytes).unwrap();
 						let root = tree.root().inner();
 						let mut root_bytes: Vec<u8> = vec![];
-						root.write(&mut root_bytes);
+						root.write(&mut root_bytes).unwrap();
 
 						let mc = Circuit_x17::<FrBls381, LEN>::new(
 							arbitrary_input,

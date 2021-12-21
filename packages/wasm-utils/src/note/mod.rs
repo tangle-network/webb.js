@@ -98,7 +98,7 @@ impl NoteManager {
 					}
 				};
 				Ok(note_generator
-					.generate(&note_builder, &mut note_generator.get_rng())
+					.generate(note_builder, &mut note_generator.get_rng())
 					.unwrap())
 			}
 			(Backend::Arkworks, Curve::Bls381) => {
@@ -109,7 +109,7 @@ impl NoteManager {
 					}
 				};
 				Ok(note_generator
-					.generate(&note_builder, &mut note_generator.get_rng())
+					.generate(note_builder, &mut note_generator.get_rng())
 					.unwrap())
 			}
 		}
@@ -161,12 +161,12 @@ fn get_usize_from_string(s: &str) -> usize {
 }
 
 impl NoteBuilder {
-	pub fn generate_note(&self) -> Result<Note, ()> {
-		NoteManager::generate(self)
+	pub fn generate_note(&self) -> Note {
+		NoteManager::generate(self).unwrap()
 	}
 
-	pub fn get_leaf(note: &Note) -> Result<Vec<u8>, ()> {
-		NoteManager::get_leaf_commitment(note)
+	pub fn get_leaf(note: &Note) -> Vec<u8> {
+		NoteManager::get_leaf_commitment(note).unwrap()
 	}
 }
 
@@ -347,8 +347,8 @@ mod test {
 		note_builder.amount = "1".to_string();
 		note_builder.hash_function = HashFunction::Poseidon;
 		note_builder.secrets = Some(leaf_private.clone());
-		let deposit_note = note_builder.generate_note().unwrap();
-		let wasm_leaf = NoteBuilder::get_leaf(&deposit_note).unwrap();
+		let deposit_note = note_builder.generate_note();
+		let wasm_leaf = NoteBuilder::get_leaf(&deposit_note);
 		dbg!(hex::encode(leaf_private));
 		assert_eq!(hex::encode(wasm_leaf), hex::encode(leaf_el.to_vec()));
 	}
@@ -377,7 +377,7 @@ mod test {
 		note_builder.width = "5".to_string();
 		note_builder.chain = "3".to_string();
 		note_builder.source_chain = "2".to_string();
-		let note = note_builder.generate_note().unwrap();
+		let note = note_builder.generate_note();
 		assert_eq!(note.curve, Curve::Bn254);
 		assert_eq!(note.prefix, BRIDGE_NOTE_PREFIX);
 		assert_eq!(&note.chain, "3");
@@ -399,7 +399,7 @@ mod test {
 		note_builder.width = "3".to_string();
 		note_builder.chain = "3".to_string();
 		note_builder.source_chain = "2".to_string();
-		let note = note_builder.generate_note().unwrap();
+		let note = note_builder.generate_note();
 		let leaf = NoteManager::get_leaf_commitment(&note).unwrap();
 		dbg!(hex::encode(leaf));
 	}
