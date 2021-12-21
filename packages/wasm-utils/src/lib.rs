@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-mod note;
-mod proof;
-mod types;
-mod wasm;
+pub mod note;
+pub mod proof;
+pub mod types;
+pub mod wasm;

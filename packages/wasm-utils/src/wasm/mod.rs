@@ -168,10 +168,7 @@ impl From<NoteVersion> for JsString {
 impl DepositNote {
 	#[wasm_bindgen(constructor)]
 	pub fn new(builder: NoteBuilderInput) -> Result<DepositNote, JsValue> {
-		let note = builder
-			.note_builder
-			.generate_note()
-			.map_err(|_| OpStatusCode::SecretGenFailed)?;
+		let note = builder.note_builder.generate_note();
 		Ok(DepositNote { note })
 	}
 
@@ -183,7 +180,7 @@ impl DepositNote {
 
 	#[wasm_bindgen(js_name = getLeafCommitment)]
 	pub fn get_leaf_commitment(&self) -> Result<Uint8Array, JsValue> {
-		let leaf: Vec<u8> = NoteBuilder::get_leaf(&self.note).map_err(|_| OpStatusCode::Unknown)?;
+		let leaf: Vec<u8> = NoteBuilder::get_leaf(&self.note);
 		Ok(Uint8Array::from(leaf.as_slice()))
 	}
 
@@ -377,6 +374,15 @@ impl ProvingManager {
 	#[wasm_bindgen(js_name = setRefund)]
 	pub fn set_refund(&mut self, refund: u32) -> Result<(), JsValue> {
 		self.builder.set_refund(refund);
+		Ok(())
+	}
+
+	#[wasm_bindgen(js_name = setProvingKey)]
+	pub fn set_proving_key(&mut self, pk: Uint8Array) -> Result<(), JsValue> {
+		let pk: Vec<u8> = pk.to_vec();
+		web_sys::console::log_1(&"Importing the PK".into());
+		self.builder.set_proving_key(&pk);
+		web_sys::console::log_1(&"Imported the PK".into());
 		Ok(())
 	}
 

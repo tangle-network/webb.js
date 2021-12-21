@@ -1,6 +1,12 @@
+use crate::note::Note;
+use crate::proof::utils::get_hash_params_x5;
+use crate::types::Curve;
+use ark_ff::FromBytes;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+use arkworks_circuits::prelude::ark_groth16::ProvingKey;
 use arkworks_circuits::setup::common::{
-	setup_tree_and_create_path_tree_x17, setup_tree_and_create_path_tree_x5, PoseidonCRH_x17_3, PoseidonCRH_x17_5,
-	PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
+	setup_tree_and_create_path_tree_x17, setup_tree_and_create_path_tree_x5, PoseidonCRH_x17_5, PoseidonCRH_x3_3,
+	PoseidonCRH_x5_5,
 };
 use arkworks_circuits::setup::mixer::{
 	prove_groth16_circuit_x17, prove_groth16_circuit_x5, setup_arbitrary_data, setup_groth16_circuit_x17,
@@ -12,17 +18,16 @@ use arkworks_gadgets::prelude::ark_bls12_381::{Bls12_381, Fr as FrBls381, Fr};
 use arkworks_gadgets::prelude::ark_bn254::{Bn254, Fr as FrBn254};
 use arkworks_gadgets::prelude::ark_ff::{PrimeField, ToBytes};
 use arkworks_gadgets::prelude::ark_groth16::Proof;
+use arkworks_utils::prelude::ark_bn254;
 use arkworks_utils::utils::common::{
-	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x5_3, setup_params_x5_5, Curve as ArkCurve,
+	setup_params_x17_3, setup_params_x17_5, setup_params_x5_3, setup_params_x5_5, Curve as ArkCurve,
 };
 
-use crate::note::Note;
-use crate::types::Curve;
-use ark_ff::FromBytes;
+mod utils;
 
-pub type Leaf_x5<F> = MixerLeaf<F, PoseidonCRH_x5_5<F>>;
-pub type Leaf_x3<F> = MixerLeaf<F, PoseidonCRH_x3_3<F>>;
-pub type Leaf_x17<F> = MixerLeaf<F, PoseidonCRH_x17_5<F>>;
+pub type LeafX5<F> = MixerLeaf<F, PoseidonCRH_x5_5<F>>;
+pub type LeafX3<F> = MixerLeaf<F, PoseidonCRH_x3_3<F>>;
+pub type LeafX17<F> = MixerLeaf<F, PoseidonCRH_x17_5<F>>;
 
 pub fn get_rng() -> rand::rngs::OsRng {
 	rand::rngs::OsRng
@@ -39,6 +44,7 @@ pub struct ZkProofBuilder {
 	fee: u32,
 	refund: u32,
 	note: Option<Note>,
+	pk: Vec<u8>,
 }
 type PrivateFr = Private<Fr>;
 
@@ -56,6 +62,50 @@ pub enum ZKProof {
 }
 
 impl ZKProof {
+	pub fn get_bytes(&self) -> Vec<u8> {
+		let mut bytes = Vec::new();
+		match self {
+			ZKProof::Bls12_381(proof, _) => CanonicalSerialize::serialize(proof, &mut bytes).unwrap(),
+			ZKProof::Bn254(proof, _) => CanonicalSerialize::serialize(proof, &mut bytes).unwrap(),
+		}
+		bytes
+	}
+
+	pub fn get_meta(&self) -> ProofMeta {
+		match self {
+			ZKProof::Bls12_381(_, proof_meta) => ProofMeta {
+				root: proof_meta.root.clone(),
+				nullified_hash: proof_meta.nullified_hash.clone(),
+			},
+			ZKProof::Bn254(_, proof_meta) => ProofMeta {
+				root: proof_meta.root.clone(),
+				nullified_hash: proof_meta.nullified_hash.clone(),
+			},
+		}
+	}
+
+	/*	pub(crate) fn verify(&self, proof_input: &ZkProofBuilder) -> bool {
+		let pk = ProvingKey::<ark_bn254::Bn254>::deserialize_unchecked(&*proof_input.pk).unwrap();
+		let vk = pk.vk;
+		let proof_bytes = self.get_bytes();
+		let meta = self.get_meta();
+		let proof = Proof::<FrBn254>::deserialize(proof_bytes).unwrap();
+		let mut public_inp_bytes = Vec::new();
+		let recipient_bytes = truncate_and_pad(&proof_input.recipient.using_encoded(element_encoder)[..]);
+		let relayer_bytes = truncate_and_pad(&relayer.using_encoded(element_encoder)[..]);
+		public_inp_bytes.extend_from_slice(&truncate_and_pad(&meta.nullified_hash));
+		public_inp_bytes.extend_from_slice(&truncate_and_pad(&meta.root));
+		let element_encoder = |v: &[u8]| {
+			let mut output = [0u8; 32];
+			output.iter_mut().zip(v).for_each(|(b1, b2)| *b1 = *b2);
+			output
+		};
+		let public_input_field_elts = to_field_elements::<FrBn254>(public_inp_bytes).unwrap();
+		let res = verify_groth16::<FrBn254>(&vk, &public_input_field_elts, &proof);
+
+		false
+	}*/
+
 	pub(crate) fn new(proof_input: &ZkProofBuilder) -> Self {
 		let mut rng = get_rng();
 		let note = match &proof_input.note {
@@ -79,9 +129,8 @@ impl ZKProof {
 						unimplemented!("exponentiation of 3 unsupported");
 					}
 					"5" => {
-						let params5 = match note.width.as_str() {
-							"5" => setup_params_x5_5::<FrBn254>(ArkCurve::Bn254),
-							"3" => setup_params_x5_3::<FrBn254>(ArkCurve::Bn254),
+						let (params3, params5) = match note.width.as_str() {
+							"3" | "5" => get_hash_params_x5::<FrBn254>(ArkCurve::Bn254),
 							w => {
 								unreachable!("with {}", w)
 							}
@@ -96,18 +145,18 @@ impl ZKProof {
 						let (tree, path) = setup_tree_and_create_path_tree_x5::<FrBn254, LEN>(
 							&leaves_new,
 							proof_input.leaf_index as u64,
-							&params5,
+							&params3,
 						);
 						let leaf_private: Private<FrBn254> = Private::new(
 							PrimeField::from_le_bytes_mod_order(&note.secret[..32]),
 							PrimeField::from_le_bytes_mod_order(&note.secret[32..64]),
 						);
-						let nullifier_hash = Leaf_x5::create_nullifier(&leaf_private, &params5).unwrap();
+						let nullifier_hash = LeafX5::create_nullifier(&leaf_private, &params5).unwrap();
 						let mut nh_bytes: Vec<u8> = vec![];
-						nullifier_hash.write(&mut nh_bytes);
+						nullifier_hash.write(&mut nh_bytes).unwrap();
 						let root = tree.root().inner();
 						let mut root_bytes: Vec<u8> = vec![];
-						root.write(&mut root_bytes);
+						root.write(&mut root_bytes).unwrap();
 						let mc = Circuit_x5::<FrBn254, LEN>::new(
 							arbitrary_input,
 							leaf_private,
@@ -118,7 +167,7 @@ impl ZKProof {
 						);
 
 						// let (pk, vk) = setup_circuit_groth16(&mut rng, circuit.clone());
-						let (pk, _) = setup_groth16_circuit_x5::<_, Bn254, LEN>(&mut rng, mc.clone());
+						let pk = ProvingKey::<ark_bn254::Bn254>::deserialize_unchecked(&*proof_input.pk).unwrap();
 						let proof = prove_groth16_circuit_x5::<_, Bn254, LEN>(&pk, mc, &mut rng);
 						Self::Bn254(proof, ProofMeta {
 							nullified_hash: nh_bytes,
@@ -149,14 +198,13 @@ impl ZKProof {
 							PrimeField::from_le_bytes_mod_order(&note.secret[..32]),
 							PrimeField::from_le_bytes_mod_order(&note.secret[32..64]),
 						);
-						let nullifier_hash = Leaf_x17::create_nullifier(&leaf_private, &params17).unwrap();
-						let root = tree.root().inner();
+						let nullifier_hash = LeafX17::create_nullifier(&leaf_private, &params17).unwrap();
 
 						let mut nh_bytes: Vec<u8> = vec![];
-						nullifier_hash.write(&mut nh_bytes);
+						nullifier_hash.write(&mut nh_bytes).unwrap();
 						let root = tree.root().inner();
 						let mut root_bytes: Vec<u8> = vec![];
-						root.write(&mut root_bytes);
+						root.write(&mut root_bytes).unwrap();
 
 						let mc = Circuit_x17::<FrBn254, LEN>::new(
 							arbitrary_input,
@@ -217,19 +265,18 @@ impl ZKProof {
 							proof_input.leaf_index as u64,
 							&params5,
 						);
-						let root = tree.root().inner();
 
 						let leaf_private: Private<FrBls381> = Private::new(
 							PrimeField::from_le_bytes_mod_order(&note.secret[..32]),
 							PrimeField::from_le_bytes_mod_order(&note.secret[32..64]),
 						);
-						let nullifier_hash = Leaf_x5::create_nullifier(&leaf_private, &params5).unwrap();
+						let nullifier_hash = LeafX5::create_nullifier(&leaf_private, &params5).unwrap();
 
 						let mut nh_bytes: Vec<u8> = vec![];
-						nullifier_hash.write(&mut nh_bytes);
+						nullifier_hash.write(&mut nh_bytes).unwrap();
 						let root = tree.root().inner();
 						let mut root_bytes: Vec<u8> = vec![];
-						root.write(&mut root_bytes);
+						root.write(&mut root_bytes).unwrap();
 
 						let mc = Circuit_x5::<FrBls381, LEN>::new(
 							arbitrary_input,
@@ -268,20 +315,19 @@ impl ZKProof {
 							proof_input.leaf_index as u64,
 							&params17,
 						);
-						let root = tree.root().inner();
 
 						let leaf_private: Private<FrBls381> = Private::new(
 							PrimeField::from_le_bytes_mod_order(&note.secret[..32]),
 							PrimeField::from_le_bytes_mod_order(&note.secret[32..64]),
 						);
 
-						let nullifier_hash = Leaf_x17::create_nullifier(&leaf_private, &params17).unwrap();
+						let nullifier_hash = LeafX17::create_nullifier(&leaf_private, &params17).unwrap();
 
 						let mut nh_bytes: Vec<u8> = vec![];
-						nullifier_hash.write(&mut nh_bytes);
+						nullifier_hash.write(&mut nh_bytes).unwrap();
 						let root = tree.root().inner();
 						let mut root_bytes: Vec<u8> = vec![];
-						root.write(&mut root_bytes);
+						root.write(&mut root_bytes).unwrap();
 
 						let mc = Circuit_x17::<FrBls381, LEN>::new(
 							arbitrary_input,
@@ -323,6 +369,7 @@ impl Default for ZkProofBuilder {
 			fee: 0,
 			refund: 0,
 			leaf_index: 0,
+			pk: vec![],
 		}
 	}
 }
@@ -367,6 +414,10 @@ impl ZkProofBuilder {
 
 	pub fn set_refund(&mut self, refund: u32) {
 		self.refund = refund;
+	}
+
+	pub fn set_proving_key(&mut self, pk_bytes: &[u8]) {
+		self.pk = pk_bytes.to_vec()
 	}
 
 	pub fn build(&self) -> ZKProof {
@@ -436,6 +487,7 @@ mod test {
 			hex::decode("644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129".replace("0x", "")).unwrap();
 		let recipient =
 			hex::decode("644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129".replace("0x", "")).unwrap();
+		let vk_bytes = include_bytes!("../../../../fixtures/verifying_key.bin");
 		let mut zkp_builder = ZkProofBuilder::new();
 		let mut proof_builder = ZkProofBuilder::new();
 		proof_builder.set_leaves(&leaves_bytes);
@@ -443,6 +495,7 @@ mod test {
 		proof_builder.set_recipient(&recipient);
 		proof_builder.set_fee(0);
 		proof_builder.set_fee(0);
+		proof_builder.set_proving_key(vk_bytes);
 		let note = Note::deserialize(note).unwrap();
 		proof_builder.set_leaf_index(40);
 		proof_builder.set_note(note);
