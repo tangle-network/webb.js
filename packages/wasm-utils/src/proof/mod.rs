@@ -21,7 +21,6 @@ use arkworks_utils::utils::common::{
 	Curve as ArkCurve,
 };
 use arkworks_utils::utils::to_field_elements;
-use bincode::Options;
 
 use crate::note::Note;
 use crate::proof::utils::get_hash_params_x5;
