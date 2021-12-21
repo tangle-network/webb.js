@@ -1,6 +1,5 @@
 use ark_crypto_primitives::CRH as CRHTrait;
-use ark_ff::fields::PrimeField;
-use ark_ff::{to_bytes, BigInteger};
+use ark_ff::to_bytes;
 use ark_serialize::CanonicalSerialize;
 use arkworks_gadgets::leaf::mixer::{MixerLeaf, Private};
 use arkworks_gadgets::prelude::ark_bls12_381::Fq as Fr;
@@ -8,7 +7,6 @@ use arkworks_gadgets::prelude::*;
 
 use crate::note::{LeafHasher, NoteGenerator};
 use crate::types::OpStatusCode;
-use ark_crypto_primitives::crh::poseidon::sbox::PoseidonSbox;
 use ark_std::rand::rngs::OsRng;
 use arkworks_circuits::setup::common::{
 	PoseidonCRH_x17_3, PoseidonCRH_x17_5, PoseidonCRH_x3_3, PoseidonCRH_x3_5, PoseidonCRH_x5_3, PoseidonCRH_x5_5,
@@ -17,7 +15,6 @@ use arkworks_utils::poseidon::PoseidonParameters;
 use arkworks_utils::utils::common::{
 	setup_params_x17_3, setup_params_x17_5, setup_params_x3_3, setup_params_x3_5, setup_params_x5_5, Curve,
 };
-use arkworks_utils::Rounds;
 
 const SEED: &[u8; 32] = b"WebbToolsPoseidonHasherSeed00000";
 
@@ -56,23 +53,25 @@ impl LeafHasher for ArkworksPoseidonBls12_381NoteGenerator {
 		if secrets.len() != 96 {
 			return Err(OpStatusCode::InvalidNoteLength);
 		}
+
 		let leaf = match (self.exponentiation, self.width) {
-			(5, 3) => PoseidonCRH_x5_3::<Fr>::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?,
-			(5, 5) => PoseidonCRH_x5_5::<Fr>::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?,
-			(3, 3) => PoseidonCRH_x3_3::<Fr>::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?,
-			(3, 5) => PoseidonCRH_x3_5::<Fr>::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?,
+			(5, 3) => PoseidonCRH_x5_3::<Fr>::evaluate(&params, secrets).map_err(|_| OpStatusCode::SecretGenFailed)?,
+			(5, 5) => PoseidonCRH_x5_5::<Fr>::evaluate(&params, secrets).map_err(|_| OpStatusCode::SecretGenFailed)?,
+			(3, 3) => PoseidonCRH_x3_3::<Fr>::evaluate(&params, secrets).map_err(|_| OpStatusCode::SecretGenFailed)?,
+			(3, 5) => PoseidonCRH_x3_5::<Fr>::evaluate(&params, secrets).map_err(|_| OpStatusCode::SecretGenFailed)?,
 			(17, 3) => {
-				PoseidonCRH_x17_3::<Fr>::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?
+				PoseidonCRH_x17_3::<Fr>::evaluate(&params, secrets).map_err(|_| OpStatusCode::SecretGenFailed)?
 			}
 			(17, 5) => {
-				PoseidonCRH_x17_3::<Fr>::evaluate(&params, &secrets).map_err(|_| OpStatusCode::SecretGenFailed)?
+				PoseidonCRH_x17_3::<Fr>::evaluate(&params, secrets).map_err(|_| OpStatusCode::SecretGenFailed)?
 			}
 			_ => {
 				unimplemented!()
 			}
 		};
+
 		let mut leaf_bytes = Vec::new();
-		CanonicalSerialize::serialize(&leaf, &mut leaf_bytes);
+		CanonicalSerialize::serialize(&leaf, &mut leaf_bytes).unwrap();
 		Ok(leaf_bytes)
 	}
 }
