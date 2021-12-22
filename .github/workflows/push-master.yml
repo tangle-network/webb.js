@@ -38,6 +38,8 @@ jobs:
       - name: install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh -s -- -f
       - name: ${{ matrix.step }}
+        with:
+          node-version: ${{ matrix.node-version }}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
           GH_PAT: ${{ secrets.GH_PAT }}
