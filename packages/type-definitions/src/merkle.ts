@@ -30,24 +30,8 @@ export default {
     }
   },
   types: {
-    HashFunction: {
-      _enum: ['PoseidonDefault', 'PoseidonExp3', 'PoseidonExp5', 'PoseidonExp17', 'MiMC', 'Blake2', 'Sha256']
-    },
     TreeId: 'u32',
-    KeyId: 'u32',
-    Manager: {
-      accountId: 'AccountId',
-      required: 'bool'
-    },
-    MerkleTree: {
-      leaf_count: 'u32',
-      max_leaves: 'u32',
-      depth: 'u8',
-      root_hash: 'ScalarData',
-      edge_nodes: 'Vec<ScalarData>',
-      hasher: 'HashFunction',
-      should_store_leaves: 'bool'
-    }
+    KeyId: 'u32'
   },
   typesAlias: {}
 };

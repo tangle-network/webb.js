@@ -8,12 +8,62 @@ import type { Codec } from '@polkadot/types/types';
 
 declare module '@polkadot/api/types/consts' {
   export interface AugmentedConsts<ApiType> {
-    mixer: {
+    anchorBls381: {
       /**
        * Native currency id
        **/
       nativeCurrencyId: u32 & AugmentedConst<ApiType>;
       palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    anchorBn254: {
+      /**
+       * Native currency id
+       **/
+      nativeCurrencyId: u32 & AugmentedConst<ApiType>;
+      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    assetRegistry: {
+      /**
+       * Native Asset Id
+       **/
+      nativeAssetId: u32 & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    mixerBls381: {
+      /**
+       * Native currency id
+       **/
+      nativeCurrencyId: u32 & AugmentedConst<ApiType>;
+      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    mixerBn254: {
+      /**
+       * Native currency id
+       **/
+      nativeCurrencyId: u32 & AugmentedConst<ApiType>;
+      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    tokens: {
+      maxLocks: u32 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
