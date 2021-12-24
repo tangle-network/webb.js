@@ -12,11 +12,11 @@ export interface DarkwebbPrimitivesDepositDetails extends Struct {
   readonly deposit: Balance;
 }
 
+/** @name DarkwebbStandaloneRuntimeElement */
+export interface DarkwebbStandaloneRuntimeElement extends U8aFixed {}
+
 /** @name Element */
 export interface Element extends Bytes {}
-
-/** @name NodeTemplateRuntimeElement */
-export interface NodeTemplateRuntimeElement extends Bytes {}
 
 /** @name OrmlTokensAccountData */
 export interface OrmlTokensAccountData extends Struct {

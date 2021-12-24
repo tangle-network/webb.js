@@ -2,31 +2,51 @@
 /* eslint-disable */
 
 import type { ApiTypes, SubmittableExtrinsic } from '@polkadot/api/types';
-import type { Bytes, Compact, Null, Option, U8aFixed, bool, u128, u32, u8 } from '@polkadot/types';
+import type { Bytes, Compact, Null, Option, Vec, bool, u128, u32, u8 } from '@polkadot/types';
 import type { Extrinsic } from '@polkadot/types/interfaces/extrinsics';
 import type { AnyNumber } from '@polkadot/types/types';
-import type { PalletAnchorEdgeMetadata, PalletAssetRegistryAssetType } from '@webb-tools/types/interfaces/pallets';
+import type { DarkwebbStandaloneRuntimeElement, PalletAssetRegistryAssetType } from '@webb-tools/types/interfaces/pallets';
 import type { AccountId32, Call, MultiAddress } from '@webb-tools/types/interfaces/runtime';
 
 declare module '@polkadot/api/types/submittable' {
   export interface AugmentedSubmittables<ApiType> {
-    anchorHandler: {
+    anchorBls381: {
+      create: AugmentedSubmittable<(depositSize: u128 | AnyNumber | Uint8Array, maxEdges: u32 | AnyNumber | Uint8Array, depth: u8 | AnyNumber | Uint8Array, asset: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u32, u8, u32]>;
+      deposit: AugmentedSubmittable<(treeId: u32 | AnyNumber | Uint8Array, leaf: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, DarkwebbStandaloneRuntimeElement]>;
       /**
-       * This will be called by bridge when proposal to create an
-       * anchor has been successfully voted on.
+       * Same as [Self::deposit] but with another call to update the linked
+       * anchors cross-chain (if any).
        **/
-      executeAnchorCreateProposal: AugmentedSubmittable<(srcChainId: u32 | AnyNumber | Uint8Array, rId: U8aFixed | string | Uint8Array, maxEdges: u32 | AnyNumber | Uint8Array, treeDepth: u8 | AnyNumber | Uint8Array, asset: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, U8aFixed, u32, u8, u32]>;
+      depositAndUpdateLinkedAnchors: AugmentedSubmittable<(treeId: u32 | AnyNumber | Uint8Array, leaf: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, DarkwebbStandaloneRuntimeElement]>;
+      withdraw: AugmentedSubmittable<(id: u32 | AnyNumber | Uint8Array, proofBytes: Bytes | string | Uint8Array, chainId: u32 | AnyNumber | Uint8Array, roots: Vec<DarkwebbStandaloneRuntimeElement> | (DarkwebbStandaloneRuntimeElement | string | Uint8Array)[], nullifierHash: DarkwebbStandaloneRuntimeElement | string | Uint8Array, recipient: AccountId32 | string | Uint8Array, relayer: AccountId32 | string | Uint8Array, fee: u128 | AnyNumber | Uint8Array, refund: u128 | AnyNumber | Uint8Array, commitment: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, Bytes, u32, Vec<DarkwebbStandaloneRuntimeElement>, DarkwebbStandaloneRuntimeElement, AccountId32, AccountId32, u128, u128, DarkwebbStandaloneRuntimeElement]>;
       /**
-       * This will be called by bridge when proposal to add/update edge of an
-       * anchor has been successfully voted on.
+       * Generic tx
        **/
-      executeAnchorUpdateProposal: AugmentedSubmittable<(rId: U8aFixed | string | Uint8Array, anchorMetadata: PalletAnchorEdgeMetadata | { srcChainId?: any; root?: any; height?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [U8aFixed, PalletAnchorEdgeMetadata]>;
+      [key: string]: SubmittableExtrinsicFunction<ApiType>;
+    };
+    anchorBn254: {
+      create: AugmentedSubmittable<(depositSize: u128 | AnyNumber | Uint8Array, maxEdges: u32 | AnyNumber | Uint8Array, depth: u8 | AnyNumber | Uint8Array, asset: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u32, u8, u32]>;
+      deposit: AugmentedSubmittable<(treeId: u32 | AnyNumber | Uint8Array, leaf: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, DarkwebbStandaloneRuntimeElement]>;
+      /**
+       * Same as [Self::deposit] but with another call to update the linked
+       * anchors cross-chain (if any).
+       **/
+      depositAndUpdateLinkedAnchors: AugmentedSubmittable<(treeId: u32 | AnyNumber | Uint8Array, leaf: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, DarkwebbStandaloneRuntimeElement]>;
+      withdraw: AugmentedSubmittable<(id: u32 | AnyNumber | Uint8Array, proofBytes: Bytes | string | Uint8Array, chainId: u32 | AnyNumber | Uint8Array, roots: Vec<DarkwebbStandaloneRuntimeElement> | (DarkwebbStandaloneRuntimeElement | string | Uint8Array)[], nullifierHash: DarkwebbStandaloneRuntimeElement | string | Uint8Array, recipient: AccountId32 | string | Uint8Array, relayer: AccountId32 | string | Uint8Array, fee: u128 | AnyNumber | Uint8Array, refund: u128 | AnyNumber | Uint8Array, commitment: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, Bytes, u32, Vec<DarkwebbStandaloneRuntimeElement>, DarkwebbStandaloneRuntimeElement, AccountId32, AccountId32, u128, u128, DarkwebbStandaloneRuntimeElement]>;
       /**
        * Generic tx
        **/
       [key: string]: SubmittableExtrinsicFunction<ApiType>;
     };
     assetRegistry: {
+      /**
+       * Add an asset to an existing pool.
+       **/
+      addAssetToPool: AugmentedSubmittable<(pool: Bytes | string | Uint8Array, assetId: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Bytes, u32]>;
+      /**
+       * Remove an asset from an existing pool.
+       **/
+      deleteAssetFromPool: AugmentedSubmittable<(pool: Bytes | string | Uint8Array, assetId: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Bytes, u32]>;
       /**
        * Register a new asset.
        * 
@@ -74,6 +94,28 @@ declare module '@polkadot/api/types/submittable' {
        * Emits `Updated` event when successful.
        **/
       update: AugmentedSubmittable<(assetId: u32 | AnyNumber | Uint8Array, name: Bytes | string | Uint8Array, assetType: PalletAssetRegistryAssetType | { Token: any } | { PoolShare: any } | string | Uint8Array, existentialDeposit: Option<u128> | null | object | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, Bytes, PalletAssetRegistryAssetType, Option<u128>]>;
+      /**
+       * Generic tx
+       **/
+      [key: string]: SubmittableExtrinsicFunction<ApiType>;
+    };
+    mixerBls381: {
+      create: AugmentedSubmittable<(depositSize: u128 | AnyNumber | Uint8Array, depth: u8 | AnyNumber | Uint8Array, asset: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u8, u32]>;
+      deposit: AugmentedSubmittable<(treeId: u32 | AnyNumber | Uint8Array, leaf: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, DarkwebbStandaloneRuntimeElement]>;
+      forceSetMaintainer: AugmentedSubmittable<(newMaintainer: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32]>;
+      setMaintainer: AugmentedSubmittable<(newMaintainer: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32]>;
+      withdraw: AugmentedSubmittable<(id: u32 | AnyNumber | Uint8Array, proofBytes: Bytes | string | Uint8Array, root: DarkwebbStandaloneRuntimeElement | string | Uint8Array, nullifierHash: DarkwebbStandaloneRuntimeElement | string | Uint8Array, recipient: AccountId32 | string | Uint8Array, relayer: AccountId32 | string | Uint8Array, fee: u128 | AnyNumber | Uint8Array, refund: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, Bytes, DarkwebbStandaloneRuntimeElement, DarkwebbStandaloneRuntimeElement, AccountId32, AccountId32, u128, u128]>;
+      /**
+       * Generic tx
+       **/
+      [key: string]: SubmittableExtrinsicFunction<ApiType>;
+    };
+    mixerBn254: {
+      create: AugmentedSubmittable<(depositSize: u128 | AnyNumber | Uint8Array, depth: u8 | AnyNumber | Uint8Array, asset: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u8, u32]>;
+      deposit: AugmentedSubmittable<(treeId: u32 | AnyNumber | Uint8Array, leaf: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, DarkwebbStandaloneRuntimeElement]>;
+      forceSetMaintainer: AugmentedSubmittable<(newMaintainer: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32]>;
+      setMaintainer: AugmentedSubmittable<(newMaintainer: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32]>;
+      withdraw: AugmentedSubmittable<(id: u32 | AnyNumber | Uint8Array, proofBytes: Bytes | string | Uint8Array, root: DarkwebbStandaloneRuntimeElement | string | Uint8Array, nullifierHash: DarkwebbStandaloneRuntimeElement | string | Uint8Array, recipient: AccountId32 | string | Uint8Array, relayer: AccountId32 | string | Uint8Array, fee: u128 | AnyNumber | Uint8Array, refund: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, Bytes, DarkwebbStandaloneRuntimeElement, DarkwebbStandaloneRuntimeElement, AccountId32, AccountId32, u128, u128]>;
       /**
        * Generic tx
        **/
@@ -155,16 +197,6 @@ declare module '@polkadot/api/types/submittable' {
        * - `amount`: free balance amount to tranfer.
        **/
       transferKeepAlive: AugmentedSubmittable<(dest: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, currencyId: u32 | AnyNumber | Uint8Array, amount: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, u32, Compact<u128>]>;
-      /**
-       * Generic tx
-       **/
-      [key: string]: SubmittableExtrinsicFunction<ApiType>;
-    };
-    verifier: {
-      forceSetMaintainer: AugmentedSubmittable<(newMaintainer: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32]>;
-      forceSetParameters: AugmentedSubmittable<(parameters: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Bytes]>;
-      setMaintainer: AugmentedSubmittable<(newMaintainer: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32]>;
-      setParameters: AugmentedSubmittable<(parameters: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Bytes]>;
       /**
        * Generic tx
        **/

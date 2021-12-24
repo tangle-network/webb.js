@@ -2,7 +2,7 @@ export default {
   rpc: {},
   types: {
     Element: "Vec<u8>",
-    NodeTemplateRuntimeElement: "Vec<u8>",
+    DarkwebbStandaloneRuntimeElement: "[u8;32]",
     OrmlTokensBalanceLock: {
       id: "LockIdentifier",
       balance: "Balance"

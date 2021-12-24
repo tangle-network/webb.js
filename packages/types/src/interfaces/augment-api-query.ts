@@ -2,26 +2,36 @@
 /* eslint-disable */
 
 import type { ApiTypes } from '@polkadot/api/types';
-import type { Bytes, Null, Option, U8aFixed, Vec, u128, u32, u64 } from '@polkadot/types';
+import type { Bytes, Null, Option, Vec, bool, u128, u32 } from '@polkadot/types';
 import type { AnyNumber, Observable } from '@polkadot/types/types';
-import type { DarkwebbPrimitivesDepositDetails, OrmlTokensAccountData, OrmlTokensBalanceLock, PalletAnchorHandlerUpdateRecord, PalletAssetRegistryAssetDetails, PalletAssetRegistryAssetMetadata } from '@webb-tools/types/interfaces/pallets';
+import type { DarkwebbStandaloneRuntimeElement, OrmlTokensAccountData, OrmlTokensBalanceLock, PalletAnchorAnchorMetadata, PalletAssetRegistryAssetDetails, PalletAssetRegistryAssetMetadata, PalletMixerMixerMetadata } from '@webb-tools/types/interfaces/pallets';
 import type { AccountId32 } from '@webb-tools/types/interfaces/runtime';
 
 declare module '@polkadot/api/types/storage' {
   export interface AugmentedQueries<ApiType> {
-    anchorHandler: {
+    anchorBls381: {
       /**
        * The map of trees to their anchor metadata
        **/
-      anchorList: AugmentedQuery<ApiType, (arg: U8aFixed | string | Uint8Array) => Observable<u32>, [U8aFixed]> & QueryableStorageEntry<ApiType, [U8aFixed]>;
+      anchors: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<PalletAnchorAnchorMetadata>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
       /**
-       * The number of updates
+       * The map of trees to their spent nullifier hashes
        **/
-      counts: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<u64>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
+      nullifierHashes: AugmentedQuery<ApiType, (arg1: u32 | AnyNumber | Uint8Array, arg2: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => Observable<bool>, [u32, DarkwebbStandaloneRuntimeElement]> & QueryableStorageEntry<ApiType, [u32, DarkwebbStandaloneRuntimeElement]>;
       /**
-       * sourceChainID => nonce => Update Record
+       * Generic query
        **/
-      updateRecords: AugmentedQuery<ApiType, (arg1: u32 | AnyNumber | Uint8Array, arg2: u64 | AnyNumber | Uint8Array) => Observable<PalletAnchorHandlerUpdateRecord>, [u32, u64]> & QueryableStorageEntry<ApiType, [u32, u64]>;
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    anchorBn254: {
+      /**
+       * The map of trees to their anchor metadata
+       **/
+      anchors: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<PalletAnchorAnchorMetadata>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
+      /**
+       * The map of trees to their spent nullifier hashes
+       **/
+      nullifierHashes: AugmentedQuery<ApiType, (arg1: u32 | AnyNumber | Uint8Array, arg2: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => Observable<bool>, [u32, DarkwebbStandaloneRuntimeElement]> & QueryableStorageEntry<ApiType, [u32, DarkwebbStandaloneRuntimeElement]>;
       /**
        * Generic query
        **/
@@ -58,6 +68,42 @@ declare module '@polkadot/api/types/storage' {
        **/
       [key: string]: QueryableStorageEntry<ApiType>;
     };
+    mixerBls381: {
+      /**
+       * The parameter maintainer who can change the parameters
+       **/
+      maintainer: AugmentedQuery<ApiType, () => Observable<AccountId32>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * The map of trees to their mixer metadata
+       **/
+      mixers: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<PalletMixerMixerMetadata>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
+      /**
+       * The map of trees to their spent nullifier hashes
+       **/
+      nullifierHashes: AugmentedQuery<ApiType, (arg1: u32 | AnyNumber | Uint8Array, arg2: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => Observable<bool>, [u32, DarkwebbStandaloneRuntimeElement]> & QueryableStorageEntry<ApiType, [u32, DarkwebbStandaloneRuntimeElement]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    mixerBn254: {
+      /**
+       * The parameter maintainer who can change the parameters
+       **/
+      maintainer: AugmentedQuery<ApiType, () => Observable<AccountId32>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * The map of trees to their mixer metadata
+       **/
+      mixers: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<PalletMixerMixerMetadata>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
+      /**
+       * The map of trees to their spent nullifier hashes
+       **/
+      nullifierHashes: AugmentedQuery<ApiType, (arg1: u32 | AnyNumber | Uint8Array, arg2: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => Observable<bool>, [u32, DarkwebbStandaloneRuntimeElement]> & QueryableStorageEntry<ApiType, [u32, DarkwebbStandaloneRuntimeElement]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
     tokens: {
       /**
        * The balance of a token type under an account.
@@ -77,24 +123,6 @@ declare module '@polkadot/api/types/storage' {
        * The total issuance of a token type.
        **/
       totalIssuance: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<u128>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
-      /**
-       * Generic query
-       **/
-      [key: string]: QueryableStorageEntry<ApiType>;
-    };
-    verifier: {
-      /**
-       * Details of the module's parameters
-       **/
-      deposit: AugmentedQuery<ApiType, () => Observable<Option<DarkwebbPrimitivesDepositDetails>>, []> & QueryableStorageEntry<ApiType, []>;
-      /**
-       * The parameter maintainer who can change the parameters
-       **/
-      maintainer: AugmentedQuery<ApiType, () => Observable<AccountId32>, []> & QueryableStorageEntry<ApiType, []>;
-      /**
-       * Details of the module's parameters
-       **/
-      parameters: AugmentedQuery<ApiType, () => Observable<Bytes>, []> & QueryableStorageEntry<ApiType, []>;
       /**
        * Generic query
        **/
