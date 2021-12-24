@@ -2,47 +2,13 @@
 /* eslint-disable */
 
 import type { ApiTypes } from '@polkadot/api/types';
-import type { Bytes, Option, U8aFixed, bool, u32, u64 } from '@polkadot/types';
-import type { AnyNumber, ITuple, Observable } from '@polkadot/types/types';
-import type { DarkwebbPrimitivesDepositDetails, NodeTemplateRuntimeElement, PalletAnchorAnchorMetadata, PalletAnchorEdgeMetadata, PalletAnchorHandlerUpdateRecord, PalletMixerMixerMetadata } from '@webb-tools/types/interfaces/pallets';
+import type { Bytes, Null, Option, U8aFixed, Vec, u128, u32, u64 } from '@polkadot/types';
+import type { AnyNumber, Observable } from '@polkadot/types/types';
+import type { DarkwebbPrimitivesDepositDetails, OrmlTokensAccountData, OrmlTokensBalanceLock, PalletAnchorHandlerUpdateRecord, PalletAssetRegistryAssetDetails, PalletAssetRegistryAssetMetadata } from '@webb-tools/types/interfaces/pallets';
 import type { AccountId32 } from '@webb-tools/types/interfaces/runtime';
 
 declare module '@polkadot/api/types/storage' {
   export interface AugmentedQueries<ApiType> {
-    anchor: {
-      /**
-       * A helper map for denoting whether an anchor is bridged to given chain
-       **/
-      anchorHasEdge: AugmentedQuery<ApiType, (arg: ITuple<[u32, u32]> | [u32 | AnyNumber | Uint8Array, u32 | AnyNumber | Uint8Array]) => Observable<bool>, [ITuple<[u32, u32]>]> & QueryableStorageEntry<ApiType, [ITuple<[u32, u32]>]>;
-      /**
-       * The map of trees to their anchor metadata
-       **/
-      anchors: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<PalletAnchorAnchorMetadata>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
-      /**
-       * The map of trees and chain ids to their edge metadata
-       **/
-      edgeList: AugmentedQuery<ApiType, (arg1: u32 | AnyNumber | Uint8Array, arg2: u32 | AnyNumber | Uint8Array) => Observable<PalletAnchorEdgeMetadata>, [u32, u32]> & QueryableStorageEntry<ApiType, [u32, u32]>;
-      /**
-       * The parameter maintainer who can change the parameters
-       **/
-      maintainer: AugmentedQuery<ApiType, () => Observable<AccountId32>, []> & QueryableStorageEntry<ApiType, []>;
-      /**
-       * The map of trees to the maximum number of anchor edges they can have
-       **/
-      maxEdges: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<u32>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
-      /**
-       * The map of (tree, chain id) pairs to their latest recorded merkle root
-       **/
-      neighborRoots: AugmentedQuery<ApiType, (arg1: ITuple<[u32, u32]> | [u32 | AnyNumber | Uint8Array, u32 | AnyNumber | Uint8Array], arg2: u32 | AnyNumber | Uint8Array) => Observable<Option<U8aFixed>>, [ITuple<[u32, u32]>, u32]> & QueryableStorageEntry<ApiType, [ITuple<[u32, u32]>, u32]>;
-      /**
-       * The next neighbor root index to store the merkle root update record
-       **/
-      nextNeighborRootIndex: AugmentedQuery<ApiType, (arg: ITuple<[u32, u32]> | [u32 | AnyNumber | Uint8Array, u32 | AnyNumber | Uint8Array]) => Observable<u32>, [ITuple<[u32, u32]>]> & QueryableStorageEntry<ApiType, [ITuple<[u32, u32]>]>;
-      /**
-       * Generic query
-       **/
-      [key: string]: QueryableStorageEntry<ApiType>;
-    };
     anchorHandler: {
       /**
        * The map of trees to their anchor metadata
@@ -61,19 +27,56 @@ declare module '@polkadot/api/types/storage' {
        **/
       [key: string]: QueryableStorageEntry<ApiType>;
     };
-    mixer: {
+    assetRegistry: {
       /**
-       * The parameter maintainer who can change the parameters
+       * Mapping between asset name and asset id.
        **/
-      maintainer: AugmentedQuery<ApiType, () => Observable<AccountId32>, []> & QueryableStorageEntry<ApiType, []>;
+      assetIds: AugmentedQuery<ApiType, (arg: Bytes | string | Uint8Array) => Observable<Option<u32>>, [Bytes]> & QueryableStorageEntry<ApiType, [Bytes]>;
       /**
-       * The map of trees to their mixer metadata
+       * Native location of an asset.
        **/
-      mixers: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<PalletMixerMixerMetadata>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
+      assetLocations: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<Null>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
       /**
-       * The map of trees to their spent nullifier hashes
+       * Metadata of an asset.
        **/
-      nullifierHashes: AugmentedQuery<ApiType, (arg1: u32 | AnyNumber | Uint8Array, arg2: NodeTemplateRuntimeElement | string | Uint8Array) => Observable<bool>, [u32, NodeTemplateRuntimeElement]> & QueryableStorageEntry<ApiType, [u32, NodeTemplateRuntimeElement]>;
+      assetMetadataMap: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<PalletAssetRegistryAssetMetadata>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
+      /**
+       * Details of an asset.
+       **/
+      assets: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<PalletAssetRegistryAssetDetails>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
+      /**
+       * Local asset for native location.
+       **/
+      locationAssets: AugmentedQuery<ApiType, (arg: Null | null) => Observable<Option<u32>>, [Null]> & QueryableStorageEntry<ApiType, [Null]>;
+      /**
+       * Next available asset id. This is sequential id assigned for each new
+       * registered asset.
+       **/
+      nextAssetId: AugmentedQuery<ApiType, () => Observable<u32>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    tokens: {
+      /**
+       * The balance of a token type under an account.
+       * 
+       * NOTE: If the total is ever zero, decrease account ref account.
+       * 
+       * NOTE: This is only used in the case that this module is used to store
+       * balances.
+       **/
+      accounts: AugmentedQuery<ApiType, (arg1: AccountId32 | string | Uint8Array, arg2: u32 | AnyNumber | Uint8Array) => Observable<OrmlTokensAccountData>, [AccountId32, u32]> & QueryableStorageEntry<ApiType, [AccountId32, u32]>;
+      /**
+       * Any liquidity locks of a token type under an account.
+       * NOTE: Should only be accessed when setting, changing and freeing a lock.
+       **/
+      locks: AugmentedQuery<ApiType, (arg1: AccountId32 | string | Uint8Array, arg2: u32 | AnyNumber | Uint8Array) => Observable<Vec<OrmlTokensBalanceLock>>, [AccountId32, u32]> & QueryableStorageEntry<ApiType, [AccountId32, u32]>;
+      /**
+       * The total issuance of a token type.
+       **/
+      totalIssuance: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<u128>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
       /**
        * Generic query
        **/

@@ -3,17 +3,22 @@
 
 import type { ApiTypes } from '@polkadot/api/types';
 import type { u32 } from '@polkadot/types';
-import type { FrameSupportPalletId } from '@polkadot/types/lookup';
 import type { Codec } from '@polkadot/types/types';
 
 declare module '@polkadot/api/types/consts' {
   export interface AugmentedConsts<ApiType> {
-    mixer: {
+    assetRegistry: {
       /**
-       * Native currency id
+       * Native Asset Id
        **/
-      nativeCurrencyId: u32 & AugmentedConst<ApiType>;
-      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
+      nativeAssetId: u32 & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    tokens: {
+      maxLocks: u32 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/

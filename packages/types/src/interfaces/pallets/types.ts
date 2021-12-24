@@ -4,7 +4,7 @@
 import type { Bytes, Enum, Struct, U8aFixed, bool, u8 } from '@polkadot/types';
 import type { ChainId } from '@polkadot/types/interfaces/bridges';
 import type { TreeId } from '@webb-tools/types/interfaces/merkle';
-import type { AccountId, AssetId, Balance, BlockNumber } from '@webb-tools/types/interfaces/runtime';
+import type { AccountId, AssetId, Balance, BlockNumber, LockIdentifier } from '@webb-tools/types/interfaces/runtime';
 
 /** @name DarkwebbPrimitivesDepositDetails */
 export interface DarkwebbPrimitivesDepositDetails extends Struct {
@@ -17,6 +17,19 @@ export interface Element extends Bytes {}
 
 /** @name NodeTemplateRuntimeElement */
 export interface NodeTemplateRuntimeElement extends Bytes {}
+
+/** @name OrmlTokensAccountData */
+export interface OrmlTokensAccountData extends Struct {
+  readonly free: Balance;
+  readonly frozen: Balance;
+  readonly reserved: Balance;
+}
+
+/** @name OrmlTokensBalanceLock */
+export interface OrmlTokensBalanceLock extends Struct {
+  readonly id: LockIdentifier;
+  readonly balance: Balance;
+}
 
 /** @name PalletAnchorAnchorMetadata */
 export interface PalletAnchorAnchorMetadata extends Struct {

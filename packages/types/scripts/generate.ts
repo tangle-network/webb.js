@@ -28,6 +28,7 @@ function filterModules(names: string[], defs: any): string {
   const filtered = metadata.toJSON() as any;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   filtered.metadata.v14.pallets = filtered?.metadata?.v14?.pallets?.filter(({ name }: any) => {
+    console.log(name);
     return names.includes(name);
   });
   return new Metadata(registry, filtered).toHex();
@@ -42,7 +43,7 @@ const definitions = {
   '@webb-tools/types/interfaces': webbDefinitions
 } as any;
 
-const metadata = filterModules(['Anchor', 'AnchorHandler', 'bridge', 'Hasher', 'Mixer', 'Mt', 'Verifier'], definitions);
+const metadata = filterModules(['AnchorBn254','AnchorBls381', 'AnchorHandler', 'bridge', 'Hasher', 'MixerBn254','MixerBls381', 'AssetRegistry', 'Verifier' ,'Tokens'], definitions);
 const augmentApiIndex = `
 /* eslint-disable */
 export * from './augment-api-consts';
