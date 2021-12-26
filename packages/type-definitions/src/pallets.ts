@@ -30,7 +30,7 @@ export default {
       tree_id: 'TreeId',
       resource_id: 'ResourceId',
       edge_metadata: 'PalletAnchorEdgeMetadata'
-    },y
+    },
     PalletAssetRegistryAssetType: {
       _enum: ['Token', 'PoolShare']
     },
