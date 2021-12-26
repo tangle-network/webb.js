@@ -43,7 +43,18 @@ const definitions = {
   '@webb-tools/types/interfaces': webbDefinitions
 } as any;
 
-const metadata = filterModules(['AnchorBn254','AnchorBls381', 'AnchorHandler', 'bridge', 'Hasher', 'MixerBn254','MixerBls381', 'AssetRegistry', 'Verifier' ,'Tokens'], definitions);
+const metadata = filterModules([
+  'AnchorBn254',
+  'AnchorBls381',
+  'AnchorHandler',
+  'bridge',
+  'Hasher',
+  'MixerBn254',
+  'MixerBls381',
+  'AssetRegistry',
+  'Verifier',
+  'Tokens'
+], definitions);
 const augmentApiIndex = `
 /* eslint-disable */
 export * from './augment-api-consts';

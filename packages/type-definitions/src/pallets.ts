@@ -11,9 +11,7 @@ export default {
       free: 'Balance',
       frozen: 'Balance',
       reserved: 'Balance'
-
     },
-    // Anchor
     PalletMixerMixerMetadata: {
       creator: 'AccountId',
       deposit_size: 'Balance',
@@ -28,13 +26,11 @@ export default {
       root: 'Element',
       height: 'BlockNumber'
     },
-    // Anchor handler
     PalletAnchorHandlerUpdateRecord: {
       tree_id: 'TreeId',
       resource_id: 'ResourceId',
       edge_metadata: 'PalletAnchorEdgeMetadata'
-    },
-    // AssetRegistry
+    },y
     PalletAssetRegistryAssetType: {
       _enum: ['Token', 'PoolShare']
     },
