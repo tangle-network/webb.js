@@ -24,7 +24,7 @@ impl NoteSecretGenerator for ArkworksPoseidonBn254NoteGenerator {
 		let leaf_private: Private<Fr> = match (exponentiation, width) {
 			(5, 3) | (5, 5) => {
 				let (params_5, params_3) = get_hash_params_x5::<Fr>(curve);
-				let (leaf_private, ..) = setup_leaf_x5(&params_5, &mut rng);
+				let (leaf_private, ..) = setup_leaf_x5(&params_5, rng);
 				leaf_private
 			}
 			(..) => {

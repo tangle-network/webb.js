@@ -16,6 +16,9 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 extern "C" {
+	#[wasm_bindgen(typescript_type = "NotePrefix")]
+	pub type NotePrefix;
+
 	#[wasm_bindgen(typescript_type = "Curve")]
 	pub type Curve;
 
@@ -31,6 +34,8 @@ extern "C" {
 	#[wasm_bindgen(typescript_type = "Leaves")]
 	pub type Leaves;
 }
+#[wasm_bindgen(typescript_custom_section)]
+const NOTE_PREFIX: &str = "type NotePrefix = 'webb.mixer'|'webb.bridge' ";
 
 #[wasm_bindgen(typescript_custom_section)]
 const LEAVES: &str = "type Leaves = Array<Uint8Array>;";
@@ -46,91 +51,163 @@ const VERSION: &str = "type Version = 'v1'";
 
 #[wasm_bindgen(typescript_custom_section)]
 const BE: &str = "type Backend = 'Bulletproofs'|'Arkworks'|'Circom'";
+
 #[wasm_bindgen]
 #[derive(Debug, Eq, PartialEq)]
-pub struct DepositNote {
+pub struct JsNote {
 	note: Note,
 }
 
 #[wasm_bindgen]
-pub struct NoteBuilderInput {
-	note_builder: NoteInput,
+pub struct JsNoteBuilder {
+	#[wasm_bindgen(skip)]
+	pub prefix: Option<NotePrefix>,
+	#[wasm_bindgen(skip)]
+	pub version: Option<NoteVersion>,
+	#[wasm_bindgen(skip)]
+	pub chain_id: Option<String>,
+	#[wasm_bindgen(skip)]
+	pub source_chain_id: Option<String>,
+	/// zkp related items
+	#[wasm_bindgen(skip)]
+	pub backend: Option<Backend>,
+	#[wasm_bindgen(skip)]
+	pub hash_function: Option<HashFunction>,
+	#[wasm_bindgen(skip)]
+	pub curve: Option<Curve>,
+	#[wasm_bindgen(skip)]
+	pub token_symbol: Option<String>,
+	#[wasm_bindgen(skip)]
+	pub amount: Option<String>,
+	#[wasm_bindgen(skip)]
+	pub denomination: Option<u8>,
+	#[wasm_bindgen(skip)]
+	pub exponentiation: Option<i8>,
+	#[wasm_bindgen(skip)]
+	pub width: Option<usize>,
+	#[wasm_bindgen(skip)]
+	pub secrets: Option<Vec<u8>>,
 }
 
-impl Default for NoteBuilderInput {
+impl Default for JsNoteBuilder {
 	fn default() -> Self {
 		Self {
-			note_builder: NoteInput::default(),
+			prefix: None,
+			version: None,
+			chain_id: None,
+			source_chain_id: None,
+			backend: None,
+			hash_function: None,
+			curve: None,
+			token_symbol: None,
+			amount: None,
+			denomination: None,
+			exponentiation: None,
+			width: None,
+			secrets: None,
 		}
 	}
 }
 #[wasm_bindgen]
-impl NoteBuilderInput {
+impl JsNoteBuilder {
 	#[wasm_bindgen(constructor)]
 	pub fn new() -> Self {
 		Self::default()
 	}
 
 	pub fn prefix(&mut self, prefix: JsString) {
-		self.note_builder.prefix = prefix.into();
+		let prefix: String = prefix.into();
+		let note_prefix: NotePrefix = prefix.as_str().parse().unwrap();
+		self.prefix = Some(note_prefix);
 	}
 
 	pub fn version(&mut self, version: Version) {
-		let c: String = JsValue::from(&version).as_string().unwrap();
-		self.note_builder.version = c.parse().unwrap();
+		let version: String = version.into();
+		let version: NoteVersion = version.as_str().parse().unwrap();
+		self.version = Some(version);
 	}
 
-	pub fn chain(&mut self, chain: JsString) {
-		self.note_builder.chain = chain.into();
+	#[wasm_bindgen(js_name = chainId)]
+	pub fn chain_id(&mut self, chain_id: JsString) {
+		self.chain_id = chain_id.into();
 	}
 
-	#[wasm_bindgen(js_name = sourceChain)]
-	pub fn soruce_chain(&mut self, source_chain: JsString) {
-		self.note_builder.source_chain = source_chain.into()
+	#[wasm_bindgen(js_name = sourceChainId)]
+	pub fn source_chain_id(&mut self, source_chain_id: JsString) {
+		self.source_chain_id = source_chain_id.into();
 	}
 
 	pub fn backend(&mut self, backend: BE) {
 		let c: String = JsValue::from(&backend).as_string().unwrap();
-		self.note_builder.backend = c.parse().unwrap();
+		let backend: Backend = c.parse().unwrap();
+		self.backend = Some(backend);
 	}
 
 	#[wasm_bindgen(js_name = hashFunction)]
 	pub fn hash_function(&mut self, hash_function: HF) {
-		let c: String = JsValue::from(&hash_function).as_string().unwrap();
-		self.note_builder.hash_function = c.parse().unwrap();
+		let hash_function: String = JsValue::from(&hash_function).as_string().unwrap();
+		let hash_function: HashFunction = hash_function.parse().unwrap();
+		self.hash_function = Some(hash_function);
 	}
 
 	pub fn curve(&mut self, curve: Curve) {
-		let c: String = JsValue::from(&curve).as_string().unwrap();
-		self.note_builder.curve = c.parse().unwrap();
+		let curve: String = JsValue::from(&curve).as_string().unwrap();
+		let curve: Curve = curve.parse().unwrap();
+		self.curve = Some(curve);
 	}
 
 	#[wasm_bindgen(js_name = tokenSymbol)]
 	pub fn token_symbol(&mut self, token_symbol: JsString) {
-		self.note_builder.token_symbol = token_symbol.into();
+		self.token_symbol = Some(token_symbol.into());
 	}
 
 	pub fn amount(&mut self, amount: JsString) {
-		self.note_builder.amount = amount.into();
+		self.amount = Some(amount.into());
 	}
 
 	pub fn denomination(&mut self, denomination: JsString) {
-		self.note_builder.denomination = denomination.into();
+		let denomination = denomination.parse().unwrap();
+		self.denomination = Some(denomination);
 	}
 
 	pub fn exponentiation(&mut self, exponentiation: JsString) {
-		self.note_builder.exponentiation = exponentiation.into();
+		let exponentiation = exponentiation.parse().unwrap();
+		self.exponentiation = Some(exponentiation);
 	}
 
 	pub fn width(&mut self, width: JsString) {
-		self.note_builder.width = width.into();
+		let width = width.parse().unwrap();
+		self.width = Some(width);
 	}
 
 	#[wasm_bindgen(js_name= setSecrets)]
 	pub fn set_secrets(&mut self, secrets: JsString) {
 		let secrets_string: String = secrets.into();
 		let sec = hex::decode(secrets_string.replace("0x", "")).unwrap();
-		self.note_builder.secrets = Some(sec);
+		self.secrets = Some(sec);
+	}
+
+	pub fn build(self) -> Result<JsNote, JsValue> {
+		// todo validate
+		let note_input: NoteInput = NoteInput {
+			prefix: self.prefix.unwrap().to_string(),
+			version: self.version.unwrap(),
+			chain_id: self.chain_id.unwrap(),
+			source_chain_id: self.source_chain_id.unwrap(),
+			backend: self.backend.unwrap(),
+			hash_function: self.hash_function.unwrap(),
+			curve: self.curve.unwrap(),
+			token_symbol: self.token_symbol.unwrap(),
+			amount: self.amount.unwrap(),
+			denomination: self.denomination.unwrap().to_string(),
+			exponentiation: self.exponentiation.unwrap().to_string(),
+			width: self.width.unwrap().to_string(),
+		};
+		let note = match self.secrets {
+			None => Note::generate_note(note_input),
+			Some(secrets) => Note::generate_with_secrets(note_input, secrets),
+		}?;
+		Ok(JsNote { note })
 	}
 }
 
@@ -163,19 +240,23 @@ impl From<NoteVersion> for JsString {
 		JsString::from(e.to_string())
 	}
 }
+impl From<NotePrefix> for JsString {
+	fn from(e: NotePrefix) -> Self {
+		JsString::from(e.to_string())
+	}
+}
 
 #[wasm_bindgen]
-impl DepositNote {
+impl JsNote {
 	#[wasm_bindgen(constructor)]
-	pub fn new(builder: NoteBuilderInput) -> Result<DepositNote, JsValue> {
-		let note = builder.note_builder.generate_note();
-		Ok(DepositNote { note })
+	pub fn new(builder: JsNoteBuilder) -> Result<JsNote, JsValue> {
+		builder.build()
 	}
 
-	pub fn deserialize(note: JsString) -> Result<DepositNote, JsValue> {
+	pub fn deserialize(note: JsString) -> Result<JsNote, JsValue> {
 		let n: String = note.into();
 		let n = Note::deserialize(&n)?;
-		Ok(DepositNote { note: n })
+		Ok(JsNote { note: n })
 	}
 
 	#[wasm_bindgen(js_name = getLeafCommitment)]
@@ -345,7 +426,7 @@ impl ProvingManager {
 	}
 
 	#[wasm_bindgen(js_name = setNote)]
-	pub fn set_note(&mut self, deposit_note: &DepositNote) -> Result<(), JsValue> {
+	pub fn set_note(&mut self, deposit_note: &JsNote) -> Result<(), JsValue> {
 		let note = deposit_note.note.clone();
 		self.builder.set_note(note);
 		Ok(())
@@ -433,9 +514,7 @@ mod tests {
 
 	#[wasm_bindgen_test]
 	fn generate_leaf() {
-		let note = DepositNote::deserialize(JsString::from("webb.mix:v1:1:1:Arkworks:Bn254:Poseidon:WEBB:18:10:5:5:a1feeba98193583d3fb0304b456676976ff379ef54f3749419741d9b6eec2b20e059e20847ba94f6b78fcacb2e6b8b6dd1f40e65c6b0d15eb3b40a4fc600431797c787b40e6ead35527a299786411a19731ba909c3ab2e242b4abefb023f072a")).unwrap();
-		let leaf = (NoteInput::get_leaf(&note.note)).unwrap();
-		console_log!("{}", hex::encode(leaf));
+		let note = JsNote::deserialize(JsString::from("webb.mix:v1:1:1:Arkworks:Bn254:Poseidon:WEBB:18:10:5:5:a1feeba98193583d3fb0304b456676976ff379ef54f3749419741d9b6eec2b20e059e20847ba94f6b78fcacb2e6b8b6dd1f40e65c6b0d15eb3b40a4fc600431797c787b40e6ead35527a299786411a19731ba909c3ab2e242b4abefb023f072a")).unwrap();
 	}
 
 	#[wasm_bindgen_test]
