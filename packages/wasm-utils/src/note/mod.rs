@@ -1,21 +1,20 @@
 use core::fmt;
 use std::str::FromStr;
 
-use crate::note::arkworks_poseidon_bls12_381::ArkworksPoseidonBls12_381NoteGenerator;
-use crate::note::arkworks_poseidon_bn254::ArkworksPoseidonBn254NoteGenerator;
-use crate::types::{Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStatusCode};
-use crate::utils::get_hash_params_x5;
+use ark_ff::to_bytes;
 use arkworks_circuits::setup::mixer::setup_leaf_x5;
 use arkworks_gadgets::leaf::mixer::Private;
-
 use arkworks_utils::prelude::ark_bn254;
 use arkworks_utils::utils::common::Curve as ArkCurve;
 use rand::rngs::OsRng;
 
+use crate::note::arkworks_poseidon_bls12_381::ArkworksPoseidonBls12_381NoteGenerator;
+use crate::note::arkworks_poseidon_bn254::ArkworksPoseidonBn254NoteGenerator;
+use crate::types::{Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStatusCode};
+use crate::utils::get_hash_params_x5;
+
 mod arkworks_poseidon_bls12_381;
 mod arkworks_poseidon_bn254;
-
-use ark_ff::to_bytes;
 
 const FULL_NOTE_LENGTH: usize = 13;
 const NOTE_PREFIX: &str = "webb.mix";
@@ -134,11 +133,14 @@ impl Note {
 		let mut rng = OsRng;
 		let width: usize = note_builder.width.parse().unwrap();
 		let exponentiation: usize = note_builder.exponentiation.parse().unwrap();
-		let backend: Backend = note_builder.backend.parse().unwrap();
-		let secrets = match note_builder.curve {
-			Curve::Bls381 => ArkworksPoseidonBls12_381NoteGenerator::generate_secrets(width, exponentiation, &mut rng),
-			Curve::Bn254 => ArkworksPoseidonBn254NoteGenerator::generate_secrets(width, exponentiation, &mut rng),
-			Curve::Curve25519 => {
+		let secrets = match (note_builder.backend, note_builder.curve) {
+			(Backend::Arkworks, Curve::Bls381) => {
+				ArkworksPoseidonBls12_381NoteGenerator::generate_secrets(width, exponentiation, &mut rng)
+			}
+			(Backend::Arkworks, Curve::Bn254) => {
+				ArkworksPoseidonBn254NoteGenerator::generate_secrets(width, exponentiation, &mut rng)
+			}
+			_ => {
 				unimplemented!("Curve25519 isn't implemented")
 			}
 		}
@@ -227,13 +229,14 @@ impl FromStr for Note {
 
 #[cfg(test)]
 mod test {
-	use super::*;
 	use ark_ff::{to_bytes, BigInteger, FromBytes, PrimeField};
 	use arkworks_circuits::prelude::ark_bn254;
 	use arkworks_circuits::setup::common::setup_tree_and_create_path_tree_x5;
 	use arkworks_circuits::setup::mixer::setup_leaf_x5;
 	use arkworks_utils::poseidon::PoseidonParameters;
 	use arkworks_utils::utils::common::{setup_params_x5_3, setup_params_x5_5, Curve as ArkCurve};
+
+	use super::*;
 
 	type Bn254Fr = ark_bn254::Fr;
 
