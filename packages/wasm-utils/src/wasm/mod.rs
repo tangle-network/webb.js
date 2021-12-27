@@ -521,6 +521,52 @@ mod tests {
 	wasm_bindgen_test_configure!(run_in_browser);
 
 	#[wasm_bindgen_test]
+	fn deserialize_to_js_note() {
+		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let note = JsNote::deserialize(JsString::from(note_str)).unwrap();
+
+		assert_eq!(note.prefix(), JsString::from(NotePrefix::Bridge.to_string()));
+		assert_eq!(note.version(), JsString::from(NoteVersion::V1.to_string()));
+		assert_eq!(note.chain(), JsString::from("3"));
+		assert_eq!(note.source_chain_id(), JsString::from("2"));
+
+		assert_eq!(note.width(), JsString::from("5"));
+		assert_eq!(note.exponentiation(), JsString::from("5"));
+		assert_eq!(note.denomination(), JsString::from("18"));
+		assert_eq!(note.token_symbol(), JsString::from("EDG"));
+
+		assert_eq!(note.backend(), JsString::from(Backend::Arkworks.to_string()));
+		assert_eq!(note.curve(), JsString::from(NoteCurve::Bn254.to_string()));
+		assert_eq!(note.hash_function(), JsString::from(HashFunction::Poseidon.to_string()));
+	}
+	#[wasm_bindgen_test]
+	fn serialize_js_note() {
+		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+
+		let mut note_builder = JsNoteBuilder::new();
+		let prefix: Prefix = JsValue::from(NotePrefix::Bridge.to_string()).into();
+		let version: Version = JsValue::from(NoteVersion::V1.to_string()).into();
+		let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
+		let hash_function: HF = JsValue::from(HashFunction::Poseidon.to_string()).into();
+
+		note_builder.prefix(prefix);
+		note_builder.version(version);
+		note_builder.chain_id(JsString::from("3"));
+		note_builder.source_chain_id(JsString::from("2"));
+
+		note_builder.width(JsString::from("5"));
+		note_builder.exponentiation(JsString::from("5"));
+		note_builder.denomination(JsString::from("18"));
+
+		note_builder.token_symbol(JsString::from("EDG"));
+		note_builder.hash_function(hash_function);
+		note_builder.backend(backend);
+		note_builder.set_secrets(JsString::from("7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717"));
+		let note = note_builder.build().unwrap();
+		assert_eq!(note.serialize(), JsString::from(note_str));
+	}
+
+	#[wasm_bindgen_test]
 	fn generate_leaf() {
 		let note = JsNote::deserialize(JsString::from("webb.mix:v1:1:1:Arkworks:Bn254:Poseidon:WEBB:18:10:5:5:a1feeba98193583d3fb0304b456676976ff379ef54f3749419741d9b6eec2b20e059e20847ba94f6b78fcacb2e6b8b6dd1f40e65c6b0d15eb3b40a4fc600431797c787b40e6ead35527a299786411a19731ba909c3ab2e242b4abefb023f072a")).unwrap();
 	}

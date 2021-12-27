@@ -281,6 +281,7 @@ mod test {
 
 		note_input.token_symbol = "EDG".to_string();
 		note_input.hash_function = HashFunction::Poseidon;
+		note_input.backend = Backend::Arkworks;
 		note_input.curve = Curve::Bn254;
 		let note_value = hex::decode("7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717").unwrap();
 		let note = Note::generate_with_secrets(note_input, note_value).unwrap();
