@@ -38,6 +38,10 @@ pub trait LeafHasher {
 	fn hash(&self, secrets: &[u8], options: Self::HasherOptions) -> Result<Vec<u8>, OpStatusCode>;
 }
 
+pub trait NoteSecretGenerator {
+	fn generate_secrets(width: usize, exponentiation: usize, rng: &mut OsRng) -> Result<Vec<u8>, OpStatusCode>;
+}
+
 #[derive(Debug)]
 pub struct NoteInput {
 	pub prefix: String,
@@ -127,17 +131,18 @@ impl Note {
 	}
 
 	pub fn generate_note(note_builder: NoteInput) -> Result<Self, OpStatusCode> {
-		let curve: ArkCurve = note_builder.curve.into();
 		let mut rng = OsRng;
-		let leaf_private: Private<Bn254Fr> = match note_builder.exponentiation.as_str() {
-			"5" => {
-				let (params_5, params_3) = get_hash_params_x5::<Bn254Fr>(curve);
-				let (leaf_private, leaf, nullifier_hash) = setup_leaf_x5(&params_5, &mut rng);
-				leaf_private
+		let width: usize = note_builder.width.parse().unwrap();
+		let exponentiation: usize = note_builder.exponentiation.parse().unwrap();
+		let backend: Backend = note_builder.backend.parse().unwrap();
+		let secrets = match note_builder.curve {
+			Curve::Bls381 => ArkworksPoseidonBls12_381NoteGenerator::generate_secrets(width, exponentiation, &mut rng),
+			Curve::Bn254 => ArkworksPoseidonBn254NoteGenerator::generate_secrets(width, exponentiation, &mut rng),
+			Curve::Curve25519 => {
+				unimplemented!("Curve25519 isn't implemented")
 			}
-			_ => unimplemented!(),
-		};
-		let secrets = to_bytes![leaf_private.secret(), leaf_private.nullifier()].unwrap();
+		}
+		.map_err(|_| OpStatusCode::SecretGenFailed)?;
 		Self::generate_with_secrets(note_builder, secrets)
 	}
 }
