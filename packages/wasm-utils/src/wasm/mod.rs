@@ -6,7 +6,7 @@ use console_error_panic_hook;
 use js_sys::{Array, JsString, Uint8Array};
 use wasm_bindgen::prelude::*;
 
-use crate::note::{Note, NoteBuilder};
+use crate::note::{Note, NoteInput};
 use crate::proof::{ZKProof, ZkProofBuilder};
 use crate::types::{Backend, Curve as NoteCurve, HashFunction, NoteVersion, OpStatusCode};
 
@@ -54,13 +54,13 @@ pub struct DepositNote {
 
 #[wasm_bindgen]
 pub struct NoteBuilderInput {
-	note_builder: NoteBuilder,
+	note_builder: NoteInput,
 }
 
 impl Default for NoteBuilderInput {
 	fn default() -> Self {
 		Self {
-			note_builder: NoteBuilder::default(),
+			note_builder: NoteInput::default(),
 		}
 	}
 }
@@ -180,7 +180,7 @@ impl DepositNote {
 
 	#[wasm_bindgen(js_name = getLeafCommitment)]
 	pub fn get_leaf_commitment(&self) -> Result<Uint8Array, JsValue> {
-		let leaf: Vec<u8> = NoteBuilder::get_leaf(&self.note);
+		let leaf: Vec<u8> = NoteInput::get_leaf(&self.note);
 		Ok(Uint8Array::from(leaf.as_slice()))
 	}
 
@@ -434,7 +434,7 @@ mod tests {
 	#[wasm_bindgen_test]
 	fn generate_leaf() {
 		let note = DepositNote::deserialize(JsString::from("webb.mix:v1:1:1:Arkworks:Bn254:Poseidon:WEBB:18:10:5:5:a1feeba98193583d3fb0304b456676976ff379ef54f3749419741d9b6eec2b20e059e20847ba94f6b78fcacb2e6b8b6dd1f40e65c6b0d15eb3b40a4fc600431797c787b40e6ead35527a299786411a19731ba909c3ab2e242b4abefb023f072a")).unwrap();
-		let leaf = (NoteBuilder::get_leaf(&note.note)).unwrap();
+		let leaf = (NoteInput::get_leaf(&note.note)).unwrap();
 		console_log!("{}", hex::encode(leaf));
 	}
 

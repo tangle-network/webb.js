@@ -3,41 +3,32 @@ use std::str::FromStr;
 
 use crate::note::arkworks_poseidon_bls12_381::ArkworksPoseidonBls12_381NoteGenerator;
 use crate::note::arkworks_poseidon_bn254::ArkworksPoseidonBn254NoteGenerator;
-use crate::types::{Backend, Curve, HashFunction, NoteVersion, OpStatusCode};
+use crate::types::{Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStatusCode};
+use crate::utils::get_hash_params_x5;
+use arkworks_circuits::setup::mixer::setup_leaf_x5;
+use arkworks_gadgets::leaf::mixer::Private;
+
+use arkworks_utils::prelude::ark_bn254;
+use arkworks_utils::utils::common::Curve as ArkCurve;
+use rand::rngs::OsRng;
 
 mod arkworks_poseidon_bls12_381;
 mod arkworks_poseidon_bn254;
 
+use ark_ff::to_bytes;
+
 const FULL_NOTE_LENGTH: usize = 13;
 const NOTE_PREFIX: &str = "webb.mix";
 const BRIDGE_NOTE_PREFIX: &str = "webb.bridge";
-
-fn generate_with_secrets(note_builder: &NoteBuilder, secrets: &[u8]) -> Result<Note, OpStatusCode> {
-	Ok(Note {
-		prefix: note_builder.prefix.clone(),
-		version: note_builder.version,
-		chain: note_builder.chain.clone(),
-		source_chain: note_builder.source_chain.clone(),
-		backend: note_builder.backend,
-		curve: note_builder.curve,
-		hash_function: note_builder.hash_function,
-		token_symbol: note_builder.token_symbol.clone(),
-		amount: note_builder.amount.clone(),
-		denomination: note_builder.denomination.clone(),
-		secret: secrets.to_vec(),
-		exponentiation: note_builder.exponentiation.clone(),
-		width: note_builder.width.clone(),
-	})
-}
 
 pub trait NoteGenerator {
 	type Rng;
 	fn get_rng(&self) -> Self::Rng;
 
 	fn generate_secrets(&self, r: &mut Self::Rng) -> Result<Vec<u8>, OpStatusCode>;
-	fn generate(&self, note_builder: &NoteBuilder, r: &mut Self::Rng) -> Result<Note, OpStatusCode> {
+	fn generate(&self, note_input: NoteInput, r: &mut Self::Rng) -> Result<Note, OpStatusCode> {
 		let secrets = Self::generate_secrets(self, r).map_err(|_| OpStatusCode::SecretGenFailed)?;
-		generate_with_secrets(note_builder, &secrets)
+		Note::generate_with_secrets(note_input, secrets)
 	}
 }
 
@@ -48,11 +39,11 @@ pub trait LeafHasher {
 }
 
 #[derive(Debug)]
-pub struct NoteBuilder {
+pub struct NoteInput {
 	pub prefix: String,
 	pub version: NoteVersion,
-	pub chain: String,
-	pub source_chain: String,
+	pub chain_id: String,
+	pub source_chain_id: String,
 	/// zkp related items
 	pub backend: Backend,
 	pub hash_function: HashFunction,
@@ -62,120 +53,14 @@ pub struct NoteBuilder {
 	pub denomination: String,
 	pub exponentiation: String,
 	pub width: String,
-	pub secrets: Option<Vec<u8>>,
 }
 
-pub struct NoteManager;
-
-impl NoteManager {
-	fn generate(note_builder: &NoteBuilder) -> Result<Note, ()> {
-		let width = get_usize_from_string(&note_builder.width);
-		let exponentiation = get_usize_from_string(&note_builder.exponentiation);
-
-		if let Some(secrets) = &note_builder.secrets {
-			return generate_with_secrets(note_builder, secrets.as_slice()).map_err(|_| ());
-		};
-
-		match (note_builder.backend, note_builder.curve) {
-			(_, Curve::Curve25519) => match &note_builder.secrets {
-				None => {
-					unimplemented!();
-				}
-				Some(secrets) => return generate_with_secrets(note_builder, secrets.as_slice()).map_err(|_| ()),
-			},
-			(Backend::Circom, ..) => match &note_builder.secrets {
-				None => {
-					unimplemented!();
-				}
-				Some(secrets) => return generate_with_secrets(note_builder, secrets.as_slice()).map_err(|_| ()),
-			},
-			(Backend::Arkworks, Curve::Bn254) => {
-				dbg!("Arkworks , Bn254");
-				let note_generator = match note_builder.hash_function {
-					HashFunction::Poseidon => ArkworksPoseidonBn254NoteGenerator::new(width, exponentiation),
-					HashFunction::MiMCTornado => {
-						unreachable!()
-					}
-				};
-				Ok(note_generator
-					.generate(note_builder, &mut note_generator.get_rng())
-					.unwrap())
-			}
-			(Backend::Arkworks, Curve::Bls381) => {
-				let note_generator = match note_builder.hash_function {
-					HashFunction::Poseidon => ArkworksPoseidonBls12_381NoteGenerator::new(width, exponentiation),
-					HashFunction::MiMCTornado => {
-						unreachable!()
-					}
-				};
-				Ok(note_generator
-					.generate(note_builder, &mut note_generator.get_rng())
-					.unwrap())
-			}
-		}
-	}
-
-	fn get_leaf_commitment(note: &Note) -> Result<Vec<u8>, ()> {
-		let Note {
-			secret: secrets,
-			backend,
-			curve,
-			hash_function,
-			width,
-			exponentiation,
-			..
-		} = note;
-		let width = get_usize_from_string(width);
-		let exponentiation = get_usize_from_string(exponentiation);
-		match (backend, curve) {
-			(_, Curve::Curve25519) => {
-				unimplemented!()
-			}
-			(Backend::Circom, ..) => {
-				unimplemented!();
-			}
-			(Backend::Arkworks, Curve::Bn254) => {
-				let note_generator = match hash_function {
-					HashFunction::Poseidon => ArkworksPoseidonBn254NoteGenerator::new(width, exponentiation),
-					HashFunction::MiMCTornado => {
-						unreachable!()
-					}
-				};
-				Ok(note_generator.hash(secrets, note_generator.get_params()).unwrap())
-			}
-			(Backend::Arkworks, Curve::Bls381) => {
-				let note_generator = match hash_function {
-					HashFunction::Poseidon => ArkworksPoseidonBls12_381NoteGenerator::new(width, exponentiation),
-					HashFunction::MiMCTornado => {
-						unreachable!()
-					}
-				};
-				Ok(note_generator.hash(secrets, note_generator.get_params()).unwrap())
-			}
-		}
-	}
-}
-
-fn get_usize_from_string(s: &str) -> usize {
-	s.parse().unwrap()
-}
-
-impl NoteBuilder {
-	pub fn generate_note(&self) -> Note {
-		NoteManager::generate(self).unwrap()
-	}
-
-	pub fn get_leaf(note: &Note) -> Vec<u8> {
-		NoteManager::get_leaf_commitment(note).unwrap()
-	}
-}
-
-impl Default for NoteBuilder {
+impl Default for NoteInput {
 	fn default() -> Self {
 		Self {
 			amount: "0".to_string(),
-			chain: "any".to_string(),
-			source_chain: "any".to_string(),
+			chain_id: "any".to_string(),
+			source_chain_id: "any".to_string(),
 			backend: Backend::Arkworks,
 			denomination: "18".to_string(),
 			version: NoteVersion::V1,
@@ -185,35 +70,75 @@ impl Default for NoteBuilder {
 			token_symbol: "EDG".to_string(),
 			hash_function: HashFunction::Poseidon,
 			width: "5".to_string(),
-			secrets: None,
 		}
 	}
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Note {
-	pub prefix: String,
+	pub prefix: NotePrefix,
 	pub version: NoteVersion,
-	pub chain: String,
-	pub source_chain: String,
+	pub chain_id: String,
+	pub source_chain_id: String,
 
 	/// zkp related items
 	pub backend: Backend,
 	pub hash_function: HashFunction,
 	pub curve: Curve,
-	pub exponentiation: String,
-	pub width: String,
+	pub exponentiation: i8,
+	pub width: usize,
 	/// mixer related items
 	pub secret: Vec<u8>,
 
 	pub token_symbol: String,
 	pub amount: String,
-	pub denomination: String,
+	pub denomination: u8,
 }
+type Bn254Fr = ark_bn254::Fr;
 
 impl Note {
-	pub fn deserialize(note: &str) -> Result<Note, OpStatusCode> {
+	/// Deseralize note from a string
+	pub fn deserialize(note: &str) -> Result<Self, OpStatusCode> {
 		note.parse().map_err(Into::into)
+	}
+
+	/// generate the note with pre generated secrets
+	pub fn generate_with_secrets(note_input: NoteInput, secrets: Vec<u8>) -> Result<Self, OpStatusCode> {
+		let prefix: NotePrefix = note_input.prefix.parse()?;
+		let exponentiation: i8 = note_input.exponentiation.parse().unwrap();
+		let width: usize = note_input.exponentiation.parse().unwrap();
+		let denomination: u8 = note_input.denomination.parse().unwrap();
+		let note = Self {
+			prefix,
+			exponentiation,
+			width,
+			denomination,
+			secret: secrets,
+			version: note_input.version,
+			chain_id: note_input.chain_id,
+			source_chain_id: note_input.source_chain_id,
+			backend: note_input.backend,
+			hash_function: note_input.hash_function,
+			curve: note_input.curve,
+			token_symbol: note_input.token_symbol,
+			amount: note_input.amount,
+		};
+		Ok(note)
+	}
+
+	pub fn generate_note(note_builder: NoteInput) -> Result<Self, OpStatusCode> {
+		let curve: ArkCurve = note_builder.curve.into();
+		let mut rng = OsRng;
+		let leaf_private: Private<Bn254Fr> = match note_builder.exponentiation.as_str() {
+			"5" => {
+				let (params_5, params_3) = get_hash_params_x5::<Bn254Fr>(curve);
+				let (leaf_private, leaf, nullifier_hash) = setup_leaf_x5(&params_5, &mut rng);
+				leaf_private
+			}
+			_ => unimplemented!(),
+		};
+		let secrets = to_bytes![leaf_private.secret(), leaf_private.nullifier()].unwrap();
+		Self::generate_with_secrets(note_builder, secrets)
 	}
 }
 
@@ -222,13 +147,13 @@ impl fmt::Display for Note {
 		let secrets = hex::encode(&self.secret);
 		let parts: Vec<String> = vec![
 			//0 => prefix
-			self.prefix.clone(),
+			self.prefix.to_string(),
 			//1 => version
 			self.version.to_string(),
 			//2 => chain
-			self.chain.clone(),
+			self.chain_id.to_string(),
 			//3 => chain
-			self.source_chain.clone(),
+			self.source_chain_id.to_string(),
 			//4 => backend
 			self.backend.to_string(),
 			//5 => curve
@@ -238,7 +163,7 @@ impl fmt::Display for Note {
 			//7 => token_symbol
 			self.token_symbol.clone(),
 			//8 => denomination
-			self.denomination.clone(),
+			self.denomination.to_string(),
 			//9 => amount
 			self.amount.clone(),
 			// 10
@@ -258,41 +183,31 @@ impl FromStr for Note {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		let parts: Vec<&str> = s.split(':').collect();
-		// let full = parts.len() == FULL_NOTE_LENGTH;
-		// if !full {
-		// 	return Err(OpStatusCode::InvalidNoteLength);
-		// }
-		let prefix = parts[0];
-
-		if prefix != NOTE_PREFIX && prefix != BRIDGE_NOTE_PREFIX {
-			return Err(OpStatusCode::InvalidNotePrefix);
-		}
-
+		let prefix = parts[0].parse()?;
 		let version: NoteVersion = parts[1].parse()?;
-		let chain = parts[2].to_string();
-		let source_chain = parts[3].to_string();
+		let chain_id = parts[2].to_string();
+		let source_chain_id = parts[3].to_string();
 		let backend: Backend = parts[4].parse()?;
 		let curve: Curve = parts[5].parse()?;
 		let hash_function: HashFunction = parts[6].parse()?;
 		let token_symbol = parts[7].to_owned();
-		let denomination = parts[8].to_string();
+		let denomination = parts[8].parse().unwrap();
 		let amount = parts[9].to_string();
-		let exponentiation = parts[10].to_string();
-		let width = parts[11].to_string();
+		let exponentiation = parts[10].parse().unwrap();
+		let width = parts[11].parse().unwrap();
 		let note_val = parts[12];
-		dbg!(note_val);
+
 		if note_val.is_empty() {
 			return Err(OpStatusCode::InvalidNoteSecrets);
 		}
 		let secret: Vec<u8> = hex::decode(&note_val.replace("0x", "")).map_err(|_| OpStatusCode::HexParsingFailed)?;
 
 		Ok(Note {
-			prefix: prefix.to_owned(),
+			prefix,
 			version,
-			chain,
-			source_chain,
+			chain_id,
+			source_chain_id,
 			token_symbol,
-
 			curve,
 			hash_function,
 			backend,
@@ -339,7 +254,7 @@ mod test {
 	fn should_get_same_leaf() {
 		use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 		let (leaf_private, leaf_el) = get_leaf();
-		let mut note_builder = NoteBuilder::default();
+		let mut note_builder = NoteInput::default();
 		note_builder.backend = Backend::Arkworks;
 		note_builder.curve = Curve::Bn254;
 		note_builder.width = "5".to_string();
@@ -348,7 +263,7 @@ mod test {
 		note_builder.hash_function = HashFunction::Poseidon;
 		note_builder.secrets = Some(leaf_private.clone());
 		let deposit_note = note_builder.generate_note();
-		let wasm_leaf = NoteBuilder::get_leaf(&deposit_note);
+		let wasm_leaf = NoteInput::get_leaf(&deposit_note);
 		dbg!(hex::encode(leaf_private));
 		assert_eq!(hex::encode(wasm_leaf), hex::encode(leaf_el.to_vec()));
 	}
@@ -367,7 +282,7 @@ mod test {
 
 	#[test]
 	fn generate_note() {
-		let mut note_builder = NoteBuilder::default();
+		let mut note_builder = NoteInput::default();
 		note_builder.backend = Backend::Arkworks;
 		note_builder.prefix = BRIDGE_NOTE_PREFIX.to_string();
 		note_builder.hash_function = HashFunction::Poseidon;
@@ -389,7 +304,7 @@ mod test {
 	}
 	#[test]
 	fn generate_leaf() {
-		let mut note_builder = NoteBuilder::default();
+		let mut note_builder = NoteInput::default();
 		note_builder.backend = Backend::Arkworks;
 		note_builder.prefix = BRIDGE_NOTE_PREFIX.to_string();
 		note_builder.hash_function = HashFunction::Poseidon;

@@ -1,3 +1,4 @@
+use arkworks_utils::utils::common::Curve as ArkCurve;
 use core::fmt;
 use std::str::FromStr;
 
@@ -34,6 +35,30 @@ pub enum HashFunction {
 	MiMCTornado,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum NotePrefix {
+	Mixer,
+	Bridge,
+}
+
+impl fmt::Display for NoteVersion {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match self {
+			NoteVersion::V1 => write!(f, "v1"),
+		}
+	}
+}
+
+impl FromStr for NoteVersion {
+	type Err = OpStatusCode;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"v1" => Ok(NoteVersion::V1),
+			_ => Err(OpStatusCode::InvalidNoteVersion),
+		}
+	}
+}
 impl fmt::Display for Backend {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
@@ -51,27 +76,6 @@ impl FromStr for Backend {
 			"Arkworks" => Ok(Backend::Arkworks),
 			"Circom" => Ok(Backend::Circom),
 			_ => Err(OpStatusCode::InvalidBackend),
-		}
-	}
-}
-
-impl fmt::Display for HashFunction {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		match self {
-			HashFunction::Poseidon => write!(f, "Poseidon"),
-			HashFunction::MiMCTornado => write!(f, "MiMCTornado"),
-		}
-	}
-}
-
-impl FromStr for HashFunction {
-	type Err = OpStatusCode;
-
-	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		match s {
-			"Poseidon" => Ok(HashFunction::Poseidon),
-			"MiMCTornado" => Ok(HashFunction::MiMCTornado),
-			_ => Err(OpStatusCode::InvalidHasFunction),
 		}
 	}
 }
@@ -98,22 +102,54 @@ impl FromStr for Curve {
 		}
 	}
 }
-
-impl fmt::Display for NoteVersion {
+impl fmt::Display for HashFunction {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
-			NoteVersion::V1 => write!(f, "v1"),
+			HashFunction::Poseidon => write!(f, "Poseidon"),
+			HashFunction::MiMCTornado => write!(f, "MiMCTornado"),
 		}
 	}
 }
 
-impl FromStr for NoteVersion {
+impl FromStr for NotePrefix {
 	type Err = OpStatusCode;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
-			"v1" => Ok(NoteVersion::V1),
-			_ => Err(OpStatusCode::InvalidNoteVersion),
+			"webb.mixer" => Ok(NotePrefix::Mixer),
+			"webb.bridge" => Ok(NotePrefix::Bridge),
+			_ => Err(OpStatusCode::InvalidHasFunction),
+		}
+	}
+}
+
+impl fmt::Display for NotePrefix {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match self {
+			NotePrefix::Mixer => write!(f, "webb.mixer"),
+			NotePrefix::Bridge => write!(f, "webb.bridge"),
+		}
+	}
+}
+
+impl FromStr for HashFunction {
+	type Err = OpStatusCode;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"Poseidon" => Ok(HashFunction::Poseidon),
+			"MiMCTornado" => Ok(HashFunction::MiMCTornado),
+			_ => Err(OpStatusCode::InvalidHasFunction),
+		}
+	}
+}
+
+impl From<Curve> for ArkCurve {
+	fn from(curve: Curve) -> Self {
+		match curve {
+			Curve::Bls381 => ArkCurve::Bls381,
+			Curve::Bn254 => ArkCurve::Bn254,
+			Curve::Curve25519 => unimplemented!(),
 		}
 	}
 }
@@ -157,4 +193,6 @@ pub enum OpStatusCode {
 	InvalidDenomination = 16,
 	/// Failed to generate secrets
 	SecretGenFailed = 17,
+	/// Invalid Note prefix
+	InvalidNotePrfix = 14,
 }

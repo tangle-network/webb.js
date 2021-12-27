@@ -99,7 +99,7 @@ impl ArkworksPoseidonBls12_381NoteGenerator {
 #[cfg(test)]
 mod test {
 
-	use crate::note::NoteBuilder;
+	use crate::note::NoteInput;
 
 	use super::*;
 	use ark_serialize::CanonicalSerializeHashExt;

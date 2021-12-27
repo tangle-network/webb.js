@@ -104,7 +104,7 @@ mod test {
 	const SEED: &[u8; 32] = b"WebbToolsPedersenHasherSeedBytes";
 
 	use super::*;
-	use crate::note::NoteBuilder;
+	use crate::note::NoteInput;
 	use ark_serialize::CanonicalSerializeHashExt;
 	use ark_std::rand::rngs::OsRng;
 
@@ -114,7 +114,7 @@ mod test {
 		let note_generator = ArkworksPoseidonBn254NoteGenerator::new(5, 3);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
-		let note = note_generator.generate(&NoteBuilder::default(), &mut r).unwrap();
+		let note = note_generator.generate(&NoteInput::default(), &mut r).unwrap();
 		dbg!(note.to_string());
 		let has = note_generator.hash(&note.secret, note_generator.get_params()).unwrap();
 		dbg!(hex::encode(has));
@@ -126,7 +126,7 @@ mod test {
 		let note_generator = ArkworksPoseidonBn254NoteGenerator::new(5, 3);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
-		let note = note_generator.generate(&NoteBuilder::default(), &mut r).unwrap();
+		let note = note_generator.generate(&NoteInput::default(), &mut r).unwrap();
 		dbg!(note.to_string());
 		let has = note_generator.hash(&note.secret, note_generator.get_params()).unwrap();
 		dbg!(hex::encode(has));
@@ -137,7 +137,7 @@ mod test {
 		let note_generator = ArkworksPoseidonBn254NoteGenerator::new(5, 3);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
-		let note = note_generator.generate(&NoteBuilder::default(), &mut r).unwrap();
+		let note = note_generator.generate(&NoteInput::default(), &mut r).unwrap();
 		dbg!(note.to_string());
 		let has = note_generator.hash(&note.secret, note_generator.get_params()).unwrap();
 		dbg!(hex::encode(has));
@@ -148,7 +148,7 @@ mod test {
 		let note_generator = ArkworksPoseidonBn254NoteGenerator::new(3, 3);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
-		let note = note_generator.generate(&NoteBuilder::default(), &mut r).unwrap();
+		let note = note_generator.generate(&NoteInput::default(), &mut r).unwrap();
 		dbg!(note.to_string());
 	}
 	#[test]
@@ -157,7 +157,7 @@ mod test {
 		let note_generator = ArkworksPoseidonBn254NoteGenerator::new(3, 5);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
-		let note = note_generator.generate(&NoteBuilder::default(), &mut r).unwrap();
+		let note = note_generator.generate(&NoteInput::default(), &mut r).unwrap();
 		dbg!(note.to_string());
 	}
 	#[test]
@@ -166,7 +166,7 @@ mod test {
 		let note_generator = ArkworksPoseidonBn254NoteGenerator::new(17, 3);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
-		let note = note_generator.generate(&NoteBuilder::default(), &mut r).unwrap();
+		let note = note_generator.generate(&NoteInput::default(), &mut r).unwrap();
 		dbg!(note.to_string());
 	}
 
@@ -176,7 +176,7 @@ mod test {
 		let note_generator = ArkworksPoseidonBn254NoteGenerator::new(17, 5);
 		let secrets = note_generator.generate_secrets(&mut r).unwrap();
 		let leaf = note_generator.hash(&secrets, note_generator.get_params()).unwrap();
-		let note = note_generator.generate(&NoteBuilder::default(), &mut r).unwrap();
+		let note = note_generator.generate(&NoteInput::default(), &mut r).unwrap();
 		dbg!(note.to_string());
 	}
 }
