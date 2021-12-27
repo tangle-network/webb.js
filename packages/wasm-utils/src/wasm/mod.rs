@@ -8,7 +8,7 @@ use wasm_bindgen::prelude::*;
 
 use crate::note::{Note, NoteInput};
 use crate::proof::{ZKProof, ZkProofBuilder};
-use crate::types::{Backend, Curve as NoteCurve, HashFunction, NoteVersion, OpStatusCode};
+use crate::types::{Backend, Curve as NoteCurve, HashFunction, NotePrefix, NoteVersion, OpStatusCode};
 
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
@@ -17,7 +17,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[wasm_bindgen]
 extern "C" {
 	#[wasm_bindgen(typescript_type = "NotePrefix")]
-	pub type NotePrefix;
+	pub type Prefix;
 
 	#[wasm_bindgen(typescript_type = "Curve")]
 	pub type Curve;
@@ -74,7 +74,7 @@ pub struct JsNoteBuilder {
 	#[wasm_bindgen(skip)]
 	pub hash_function: Option<HashFunction>,
 	#[wasm_bindgen(skip)]
-	pub curve: Option<Curve>,
+	pub curve: Option<NoteCurve>,
 	#[wasm_bindgen(skip)]
 	pub token_symbol: Option<String>,
 	#[wasm_bindgen(skip)]
@@ -115,26 +115,26 @@ impl JsNoteBuilder {
 		Self::default()
 	}
 
-	pub fn prefix(&mut self, prefix: JsString) {
-		let prefix: String = prefix.into();
+	pub fn prefix(&mut self, prefix: Prefix) {
+		let prefix: String = JsValue::from(&prefix).as_string().unwrap();
 		let note_prefix: NotePrefix = prefix.as_str().parse().unwrap();
 		self.prefix = Some(note_prefix);
 	}
 
 	pub fn version(&mut self, version: Version) {
-		let version: String = version.into();
-		let version: NoteVersion = version.as_str().parse().unwrap();
-		self.version = Some(version);
+		let version: String = JsValue::from(&version).as_string().unwrap();
+		let note_version: NoteVersion = version.as_str().parse().unwrap();
+		self.version = Some(note_version);
 	}
 
 	#[wasm_bindgen(js_name = chainId)]
 	pub fn chain_id(&mut self, chain_id: JsString) {
-		self.chain_id = chain_id.into();
+		self.chain_id = Some(chain_id.into());
 	}
 
 	#[wasm_bindgen(js_name = sourceChainId)]
 	pub fn source_chain_id(&mut self, source_chain_id: JsString) {
-		self.source_chain_id = source_chain_id.into();
+		self.source_chain_id = Some(source_chain_id.into());
 	}
 
 	pub fn backend(&mut self, backend: BE) {
@@ -152,7 +152,7 @@ impl JsNoteBuilder {
 
 	pub fn curve(&mut self, curve: Curve) {
 		let curve: String = JsValue::from(&curve).as_string().unwrap();
-		let curve: Curve = curve.parse().unwrap();
+		let curve: NoteCurve = curve.parse().unwrap();
 		self.curve = Some(curve);
 	}
 
@@ -166,16 +166,19 @@ impl JsNoteBuilder {
 	}
 
 	pub fn denomination(&mut self, denomination: JsString) {
-		let denomination = denomination.parse().unwrap();
+		let den: String = denomination.into();
+		let denomination = den.parse().unwrap();
 		self.denomination = Some(denomination);
 	}
 
 	pub fn exponentiation(&mut self, exponentiation: JsString) {
-		let exponentiation = exponentiation.parse().unwrap();
+		let exp: String = exponentiation.into();
+		let exponentiation = exp.parse().unwrap();
 		self.exponentiation = Some(exponentiation);
 	}
 
 	pub fn width(&mut self, width: JsString) {
+		let width: String = width.into();
 		let width = width.parse().unwrap();
 		self.width = Some(width);
 	}
@@ -261,8 +264,9 @@ impl JsNote {
 
 	#[wasm_bindgen(js_name = getLeafCommitment)]
 	pub fn get_leaf_commitment(&self) -> Result<Uint8Array, JsValue> {
-		let leaf: Vec<u8> = NoteInput::get_leaf(&self.note);
-		Ok(Uint8Array::from(leaf.as_slice()))
+		/*	let leaf: Vec<u8> = NoteInput::get_leaf(&self.note);
+		Ok(Uint8Array::from(leaf.as_slice()))*/
+		unimplemented!()
 	}
 
 	pub fn serialize(&self) -> JsString {
@@ -279,15 +283,16 @@ impl JsNote {
 		self.note.version.into()
 	}
 
+	#[wasm_bindgen(js_name = chainId)]
 	#[wasm_bindgen(getter)]
 	pub fn chain(&self) -> JsString {
-		self.note.chain.clone().into()
+		self.note.chain_id.clone().into()
 	}
 
-	#[wasm_bindgen(js_name = sourceChain)]
+	#[wasm_bindgen(js_name = sourceChainId)]
 	#[wasm_bindgen(getter)]
-	pub fn source_chain(&self) -> JsString {
-		self.note.source_chain.clone().into()
+	pub fn source_chain_id(&self) -> JsString {
+		self.note.source_chain_id.clone().into()
 	}
 
 	#[wasm_bindgen(getter)]
@@ -325,17 +330,20 @@ impl JsNote {
 
 	#[wasm_bindgen(getter)]
 	pub fn denomination(&self) -> JsString {
-		self.note.denomination.clone().into()
+		let denomination = self.note.denomination.to_string();
+		denomination.into()
 	}
 
 	#[wasm_bindgen(getter)]
 	pub fn width(&self) -> JsString {
-		self.note.width.clone().into()
+		let width = self.note.width.to_string();
+		width.into()
 	}
 
 	#[wasm_bindgen(getter)]
 	pub fn exponentiation(&self) -> JsString {
-		self.note.exponentiation.clone().into()
+		let exp = self.note.exponentiation.to_string();
+		exp.into()
 	}
 }
 
