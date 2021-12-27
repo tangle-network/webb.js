@@ -11,27 +11,6 @@ use crate::types::{Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStat
 mod arkworks_poseidon_bls12_381;
 mod arkworks_poseidon_bn254;
 
-const FULL_NOTE_LENGTH: usize = 13;
-const NOTE_PREFIX: &str = "webb.mix";
-const BRIDGE_NOTE_PREFIX: &str = "webb.bridge";
-
-pub trait NoteGenerator {
-	type Rng;
-	fn get_rng(&self) -> Self::Rng;
-
-	fn generate_secrets(&self, r: &mut Self::Rng) -> Result<Vec<u8>, OpStatusCode>;
-	fn generate(&self, note_input: NoteInput, r: &mut Self::Rng) -> Result<Note, OpStatusCode> {
-		let secrets = Self::generate_secrets(self, r).map_err(|_| OpStatusCode::SecretGenFailed)?;
-		Note::generate_with_secrets(note_input, secrets)
-	}
-}
-
-pub trait LeafHasher {
-	const SECRET_LENGTH: usize;
-	type HasherOptions: Clone;
-	fn hash(&self, secrets: &[u8], options: Self::HasherOptions) -> Result<Vec<u8>, OpStatusCode>;
-}
-
 pub trait NoteSecretGenerator {
 	fn generate_secrets(width: usize, exponentiation: usize, rng: &mut OsRng) -> Result<Vec<u8>, OpStatusCode>;
 }
@@ -92,7 +71,6 @@ pub struct Note {
 	pub amount: String,
 	pub denomination: u8,
 }
-type Bn254Fr = ark_bn254::Fr;
 
 impl Note {
 	/// Deseralize note from a string
@@ -222,7 +200,6 @@ impl FromStr for Note {
 mod test {
 	use ark_ff::{to_bytes, BigInteger, FromBytes, PrimeField};
 	use arkworks_circuits::prelude::ark_bn254;
-	use arkworks_circuits::setup::common::setup_tree_and_create_path_tree_x5;
 	use arkworks_circuits::setup::mixer::setup_leaf_x5;
 	use arkworks_utils::poseidon::PoseidonParameters;
 	use arkworks_utils::utils::common::{setup_params_x5_3, setup_params_x5_5, Curve as ArkCurve};
@@ -291,5 +268,6 @@ mod test {
 	fn generate_leaf() {
 		let mut note_builder = NoteInput::default();
 		note_builder.backend = Backend::Arkworks;
+		// todo complete the test
 	}
 }
