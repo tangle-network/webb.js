@@ -193,7 +193,7 @@ impl JsNoteBuilder {
 	pub fn build(self) -> Result<JsNote, JsValue> {
 		// todo validate
 		let note_input: NoteInput = NoteInput {
-			prefix: self.prefix.unwrap().to_string(),
+			prefix: self.prefix.unwrap(),
 			version: self.version.unwrap(),
 			chain_id: self.chain_id.unwrap(),
 			source_chain_id: self.source_chain_id.unwrap(),
@@ -202,9 +202,9 @@ impl JsNoteBuilder {
 			curve: self.curve.unwrap(),
 			token_symbol: self.token_symbol.unwrap(),
 			amount: self.amount.unwrap(),
-			denomination: self.denomination.unwrap().to_string(),
-			exponentiation: self.exponentiation.unwrap().to_string(),
-			width: self.width.unwrap().to_string(),
+			denomination: self.denomination.unwrap(),
+			exponentiation: self.exponentiation.unwrap(),
+			width: self.width.unwrap(),
 		};
 		let note = match self.secrets {
 			None => Note::generate_note(note_input),

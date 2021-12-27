@@ -1,17 +1,12 @@
 use core::fmt;
 use std::str::FromStr;
 
-use ark_ff::to_bytes;
-use arkworks_circuits::setup::mixer::setup_leaf_x5;
-use arkworks_gadgets::leaf::mixer::Private;
 use arkworks_utils::prelude::ark_bn254;
-use arkworks_utils::utils::common::Curve as ArkCurve;
 use rand::rngs::OsRng;
 
 use crate::note::arkworks_poseidon_bls12_381::ArkworksPoseidonBls12_381NoteGenerator;
 use crate::note::arkworks_poseidon_bn254::ArkworksPoseidonBn254NoteGenerator;
 use crate::types::{Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStatusCode};
-use crate::utils::get_hash_params_x5;
 
 mod arkworks_poseidon_bls12_381;
 mod arkworks_poseidon_bn254;
@@ -43,7 +38,7 @@ pub trait NoteSecretGenerator {
 
 #[derive(Debug)]
 pub struct NoteInput {
-	pub prefix: String,
+	pub prefix: NotePrefix,
 	pub version: NoteVersion,
 	pub chain_id: String,
 	pub source_chain_id: String,
@@ -53,9 +48,9 @@ pub struct NoteInput {
 	pub curve: Curve,
 	pub token_symbol: String,
 	pub amount: String,
-	pub denomination: String,
-	pub exponentiation: String,
-	pub width: String,
+	pub denomination: u8,
+	pub exponentiation: i8,
+	pub width: usize,
 }
 
 impl Default for NoteInput {
@@ -65,14 +60,14 @@ impl Default for NoteInput {
 			chain_id: "any".to_string(),
 			source_chain_id: "any".to_string(),
 			backend: Backend::Arkworks,
-			denomination: "18".to_string(),
+			denomination: 18,
 			version: NoteVersion::V1,
-			prefix: NOTE_PREFIX.to_owned(),
-			exponentiation: "5".to_string(),
+			prefix: NotePrefix::Mixer,
+			exponentiation: 5,
 			curve: Curve::Bn254,
 			token_symbol: "EDG".to_string(),
 			hash_function: HashFunction::Poseidon,
-			width: "5".to_string(),
+			width: 5,
 		}
 	}
 }
@@ -107,15 +102,11 @@ impl Note {
 
 	/// generate the note with pre generated secrets
 	pub fn generate_with_secrets(note_input: NoteInput, secrets: Vec<u8>) -> Result<Self, OpStatusCode> {
-		let prefix: NotePrefix = note_input.prefix.parse()?;
-		let exponentiation: i8 = note_input.exponentiation.parse().unwrap();
-		let width: usize = note_input.exponentiation.parse().unwrap();
-		let denomination: u8 = note_input.denomination.parse().unwrap();
 		let note = Self {
-			prefix,
-			exponentiation,
-			width,
-			denomination,
+			prefix: note_input.prefix,
+			exponentiation: note_input.exponentiation,
+			width: note_input.width,
+			denomination: note_input.denomination,
 			secret: secrets,
 			version: note_input.version,
 			chain_id: note_input.chain_id,
@@ -131,8 +122,8 @@ impl Note {
 
 	pub fn generate_note(note_builder: NoteInput) -> Result<Self, OpStatusCode> {
 		let mut rng = OsRng;
-		let width: usize = note_builder.width.parse().unwrap();
-		let exponentiation: usize = note_builder.exponentiation.parse().unwrap();
+		let width = note_builder.width;
+		let exponentiation = note_builder.exponentiation as usize;
 		let secrets = match (note_builder.backend, note_builder.curve) {
 			(Backend::Arkworks, Curve::Bls381) => {
 				ArkworksPoseidonBls12_381NoteGenerator::generate_secrets(width, exponentiation, &mut rng)
