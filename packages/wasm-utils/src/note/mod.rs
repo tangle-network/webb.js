@@ -167,9 +167,9 @@ impl fmt::Display for Note {
 			//9 => amount
 			self.amount.clone(),
 			// 10
-			self.exponentiation.clone(),
+			self.exponentiation.to_string(),
 			// 11
-			self.width.clone(),
+			self.width.to_string(),
 			//12
 			secrets,
 		];
@@ -251,32 +251,11 @@ mod test {
 	}
 
 	#[test]
-	fn should_get_same_leaf() {
-		use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-		let (leaf_private, leaf_el) = get_leaf();
-		let mut note_builder = NoteInput::default();
-		note_builder.backend = Backend::Arkworks;
-		note_builder.curve = Curve::Bn254;
-		note_builder.width = "5".to_string();
-		note_builder.exponentiation = "5".to_string();
-		note_builder.amount = "1".to_string();
-		note_builder.hash_function = HashFunction::Poseidon;
-		note_builder.secrets = Some(leaf_private.clone());
-		let deposit_note = note_builder.generate_note();
-		let wasm_leaf = NoteInput::get_leaf(&deposit_note);
-		dbg!(hex::encode(leaf_private));
-		assert_eq!(hex::encode(wasm_leaf), hex::encode(leaf_el.to_vec()));
-	}
-	#[test]
 	fn deserialize() {
 		let note = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let note = Note::deserialize(note).unwrap();
 		assert_eq!(note.curve, Curve::Bn254);
-		assert_eq!(note.prefix, BRIDGE_NOTE_PREFIX);
-		assert_eq!(&note.chain, "3");
-		assert_eq!(&note.source_chain, "2");
 		assert_eq!(note.backend, Backend::Arkworks);
-		assert_eq!(note.denomination, "18".to_string());
 		assert_eq!(note.hash_function, HashFunction::Poseidon);
 	}
 
@@ -290,17 +269,6 @@ mod test {
 		note_builder.denomination = "18".to_string();
 		note_builder.exponentiation = "5".to_string();
 		note_builder.width = "5".to_string();
-		note_builder.chain = "3".to_string();
-		note_builder.source_chain = "2".to_string();
-		let note = note_builder.generate_note();
-		assert_eq!(note.curve, Curve::Bn254);
-		assert_eq!(note.prefix, BRIDGE_NOTE_PREFIX);
-		assert_eq!(&note.chain, "3");
-		assert_eq!(&note.source_chain, "2");
-		assert_eq!(note.backend, Backend::Arkworks);
-		assert_eq!(note.denomination, "18".to_string());
-		assert_eq!(note.hash_function, HashFunction::Poseidon);
-		dbg!(note.to_string());
 	}
 	#[test]
 	fn generate_leaf() {
@@ -312,10 +280,5 @@ mod test {
 		note_builder.denomination = "18".to_string();
 		note_builder.exponentiation = "5".to_string();
 		note_builder.width = "3".to_string();
-		note_builder.chain = "3".to_string();
-		note_builder.source_chain = "2".to_string();
-		let note = note_builder.generate_note();
-		let leaf = NoteManager::get_leaf_commitment(&note).unwrap();
-		dbg!(hex::encode(leaf));
 	}
 }
