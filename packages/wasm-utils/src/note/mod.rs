@@ -7,6 +7,7 @@ use crate::types::{Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStat
 
 mod secrets;
 
+use crate::note::secrets::get_leaf_with_private_raw;
 use secrets::generate_secrets;
 
 #[derive(Debug)]
@@ -98,6 +99,10 @@ impl Note {
 		let secrets = generate_secrets(exponentiation, note_builder.curve, &mut rng)?;
 		Self::generate_with_secrets(note_builder, secrets)
 	}
+
+	pub fn get_leaf_and_nullifier(&self) -> (Vec<u8>, Vec<u8>) {
+		get_leaf_with_private_raw(self.curve, self.exponentiation, &self.secret)
+	}
 }
 
 impl fmt::Display for Note {
@@ -182,7 +187,6 @@ impl FromStr for Note {
 mod test {
 	use ark_ff::{to_bytes, BigInteger, FromBytes, PrimeField};
 	use arkworks_circuits::prelude::ark_bn254;
-	use arkworks_circuits::setup::mixer::setup_leaf_x5;
 	use arkworks_utils::poseidon::PoseidonParameters;
 	use arkworks_utils::utils::common::{setup_params_x5_3, setup_params_x5_5, Curve as ArkCurve};
 
