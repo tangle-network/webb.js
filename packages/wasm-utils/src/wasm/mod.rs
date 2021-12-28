@@ -6,9 +6,11 @@ use console_error_panic_hook;
 use js_sys::{Array, JsString, Uint8Array};
 use wasm_bindgen::prelude::*;
 
-use crate::note::{Note, NoteInput};
+use crate::note::secrets::generate_secrets;
+use crate::note::Note;
 use crate::proof::{ZKProof, ZkProofBuilder};
 use crate::types::{Backend, Curve as NoteCurve, HashFunction, NotePrefix, NoteVersion, OpStatusCode};
+use rand::rngs::OsRng;
 
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
@@ -192,7 +194,14 @@ impl JsNoteBuilder {
 
 	pub fn build(self) -> Result<JsNote, JsValue> {
 		// todo validate
-		let note_input: NoteInput = NoteInput {
+		let exponentiation = self.exponentiation.unwrap();
+		let curve = self.curve.unwrap();
+
+		let secret = match self.secrets {
+			None => generate_secrets(exponentiation as usize, curve, &mut OsRng)?,
+			Some(secrets) => secrets.clone(),
+		};
+		let note: Note = Note {
 			prefix: self.prefix.unwrap(),
 			version: self.version.unwrap(),
 			chain_id: self.chain_id.unwrap(),
@@ -205,11 +214,8 @@ impl JsNoteBuilder {
 			denomination: self.denomination.unwrap(),
 			exponentiation: self.exponentiation.unwrap(),
 			width: self.width.unwrap(),
+			secret,
 		};
-		let note = match self.secrets {
-			None => Note::generate_note(note_input),
-			Some(secrets) => Note::generate_with_secrets(note_input, secrets),
-		}?;
 		Ok(JsNote { note })
 	}
 }

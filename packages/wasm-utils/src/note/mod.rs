@@ -1,50 +1,11 @@
 use core::fmt;
 use std::str::FromStr;
 
-use rand::rngs::OsRng;
-
 use crate::types::{Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStatusCode};
 
-mod secrets;
+pub mod secrets;
 
 use crate::note::secrets::get_leaf_with_private_raw;
-use secrets::generate_secrets;
-
-#[derive(Debug)]
-pub struct NoteInput {
-	pub prefix: NotePrefix,
-	pub version: NoteVersion,
-	pub chain_id: String,
-	pub source_chain_id: String,
-	/// zkp related items
-	pub backend: Backend,
-	pub hash_function: HashFunction,
-	pub curve: Curve,
-	pub token_symbol: String,
-	pub amount: String,
-	pub denomination: u8,
-	pub exponentiation: i8,
-	pub width: usize,
-}
-
-impl Default for NoteInput {
-	fn default() -> Self {
-		Self {
-			amount: "0".to_string(),
-			chain_id: "any".to_string(),
-			source_chain_id: "any".to_string(),
-			backend: Backend::Arkworks,
-			denomination: 18,
-			version: NoteVersion::V1,
-			prefix: NotePrefix::Mixer,
-			exponentiation: 5,
-			curve: Curve::Bn254,
-			token_symbol: "EDG".to_string(),
-			hash_function: HashFunction::Poseidon,
-			width: 5,
-		}
-	}
-}
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Note {
@@ -71,33 +32,6 @@ impl Note {
 	/// Deseralize note from a string
 	pub fn deserialize(note: &str) -> Result<Self, OpStatusCode> {
 		note.parse().map_err(Into::into)
-	}
-
-	/// generate the note with pre generated secrets
-	pub fn generate_with_secrets(note_input: NoteInput, secrets: Vec<u8>) -> Result<Self, OpStatusCode> {
-		let note = Self {
-			prefix: note_input.prefix,
-			exponentiation: note_input.exponentiation,
-			width: note_input.width,
-			denomination: note_input.denomination,
-			secret: secrets,
-			version: note_input.version,
-			chain_id: note_input.chain_id,
-			source_chain_id: note_input.source_chain_id,
-			backend: note_input.backend,
-			hash_function: note_input.hash_function,
-			curve: note_input.curve,
-			token_symbol: note_input.token_symbol,
-			amount: note_input.amount,
-		};
-		Ok(note)
-	}
-
-	pub fn generate_note(note_builder: NoteInput) -> Result<Self, OpStatusCode> {
-		let mut rng = OsRng;
-		let exponentiation = note_builder.exponentiation as usize;
-		let secrets = generate_secrets(exponentiation, note_builder.curve, &mut rng)?;
-		Self::generate_with_secrets(note_builder, secrets)
 	}
 
 	pub fn get_leaf_and_nullifier(&self) -> (Vec<u8>, Vec<u8>) {
@@ -193,25 +127,6 @@ mod test {
 	use super::*;
 
 	type Bn254Fr = ark_bn254::Fr;
-
-	pub fn get_hash_params<T: PrimeField>(curve: ArkCurve) -> (Vec<u8>, Vec<u8>) {
-		(
-			setup_params_x5_3::<T>(curve).to_bytes(),
-			setup_params_x5_5::<T>(curve).to_bytes(),
-		)
-	}
-	pub fn get_leaf() -> (Vec<u8>, Vec<u8>) {
-		let rng = &mut ark_std::test_rng();
-
-		let (_, params5) = get_hash_params::<Bn254Fr>(ArkCurve::Bn254);
-		let params5_deserialized = PoseidonParameters::<Bn254Fr>::from_bytes(&*params5).unwrap();
-		let (leaf_private, leaf, _) = setup_leaf_x5(&params5_deserialized, rng);
-		let private_bytes = to_bytes![leaf_private.secret(), leaf_private.nullifier()].unwrap();
-		let leaf_element = leaf.into_repr().to_bytes_le();
-
-		(private_bytes, leaf_element)
-	}
-
 	#[test]
 	fn deserialize() {
 		let note = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
