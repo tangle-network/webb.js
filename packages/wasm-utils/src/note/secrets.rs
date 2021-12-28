@@ -1,4 +1,3 @@
-use ark_ff::to_bytes;
 use ark_std::rand::rngs::OsRng;
 use arkworks_circuits::setup::mixer::{setup_leaf, setup_leaf_with_privates_raw};
 use arkworks_gadgets::prelude::ark_bls12_381::Fq as BlsFr;
