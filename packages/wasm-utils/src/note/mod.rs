@@ -1,19 +1,13 @@
 use core::fmt;
 use std::str::FromStr;
 
-use arkworks_utils::prelude::ark_bn254;
 use rand::rngs::OsRng;
 
-use crate::note::arkworks_poseidon_bls12_381::ArkworksPoseidonBls12_381NoteGenerator;
-use crate::note::arkworks_poseidon_bn254::ArkworksPoseidonBn254NoteGenerator;
 use crate::types::{Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStatusCode};
 
-mod arkworks_poseidon_bls12_381;
-mod arkworks_poseidon_bn254;
+mod secrets;
 
-pub trait NoteSecretGenerator {
-	fn generate_secrets(width: usize, exponentiation: usize, rng: &mut OsRng) -> Result<Vec<u8>, OpStatusCode>;
-}
+use secrets::generate_secrets;
 
 #[derive(Debug)]
 pub struct NoteInput {
@@ -100,20 +94,8 @@ impl Note {
 
 	pub fn generate_note(note_builder: NoteInput) -> Result<Self, OpStatusCode> {
 		let mut rng = OsRng;
-		let width = note_builder.width;
 		let exponentiation = note_builder.exponentiation as usize;
-		let secrets = match (note_builder.backend, note_builder.curve) {
-			(Backend::Arkworks, Curve::Bls381) => {
-				ArkworksPoseidonBls12_381NoteGenerator::generate_secrets(width, exponentiation, &mut rng)
-			}
-			(Backend::Arkworks, Curve::Bn254) => {
-				ArkworksPoseidonBn254NoteGenerator::generate_secrets(width, exponentiation, &mut rng)
-			}
-			_ => {
-				unimplemented!("Curve25519 isn't implemented")
-			}
-		}
-		.map_err(|_| OpStatusCode::SecretGenFailed)?;
+		let secrets = generate_secrets(exponentiation, note_builder.curve, &mut rng)?;
 		Self::generate_with_secrets(note_builder, secrets)
 	}
 }

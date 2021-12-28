@@ -129,12 +129,7 @@ impl ZKProof {
 						unimplemented!("exponentiation of 3 unsupported");
 					}
 					"5" => {
-						let (params3, params5) = match note.width.to_string().as_str() {
-							"3" | "5" => get_hash_params_x5::<FrBn254>(ArkCurve::Bn254),
-							w => {
-								unreachable!("with {}", w)
-							}
-						};
+						let (params3, params5) = get_hash_params_x5::<FrBn254>(ArkCurve::Bn254);
 						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer, fee, refund);
 						let leaves_new: Vec<FrBn254> = proof_input
 							.leaves

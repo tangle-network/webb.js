@@ -183,7 +183,7 @@ impl JsNoteBuilder {
 		self.width = Some(width);
 	}
 
-	#[wasm_bindgen(js_name= setSecrets)]
+	#[wasm_bindgen(js_name = setSecrets)]
 	pub fn set_secrets(&mut self, secrets: JsString) {
 		let secrets_string: String = secrets.into();
 		let sec = hex::decode(secrets_string.replace("0x", "")).unwrap();
