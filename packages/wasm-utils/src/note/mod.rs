@@ -1,11 +1,10 @@
 use core::fmt;
 use std::str::FromStr;
 
+use crate::note::secrets::get_leaf_with_private_raw;
 use crate::types::{Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStatusCode};
 
 pub mod secrets;
-
-use crate::note::secrets::get_leaf_with_private_raw;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Note {
@@ -119,10 +118,9 @@ impl FromStr for Note {
 
 #[cfg(test)]
 mod test {
-	use ark_ff::{to_bytes, BigInteger, FromBytes, PrimeField};
+	use ark_ff::{BigInteger, FromBytes, PrimeField};
 	use arkworks_circuits::prelude::ark_bn254;
-	use arkworks_utils::poseidon::PoseidonParameters;
-	use arkworks_utils::utils::common::{setup_params_x5_3, setup_params_x5_5, Curve as ArkCurve};
+	use arkworks_utils::utils::common::{setup_params_x5_5, Curve as ArkCurve};
 
 	use super::*;
 
@@ -147,28 +145,24 @@ mod test {
 	#[test]
 	fn generate_note() {
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
-		let mut note_input = NoteInput::default();
-		note_input.prefix = NotePrefix::Bridge;
-		note_input.version = NoteVersion::V1;
-		note_input.chain_id = "3".to_string();
-		note_input.source_chain_id = "2".to_string();
-
-		note_input.width = 5;
-		note_input.exponentiation = 5;
-		note_input.denomination = 18;
-
-		note_input.token_symbol = "EDG".to_string();
-		note_input.hash_function = HashFunction::Poseidon;
-		note_input.backend = Backend::Arkworks;
-		note_input.curve = Curve::Bn254;
 		let note_value = hex::decode("7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717").unwrap();
-		let note = Note::generate_with_secrets(note_input, note_value).unwrap();
+		let note = Note {
+			prefix: NotePrefix::Bridge,
+			version: NoteVersion::V1,
+			chain_id: "3".to_string(),
+			source_chain_id: "2".to_string(),
+			width: 5,
+			exponentiation: 5,
+			denomination: 18,
+			token_symbol: "EDG".to_string(),
+			hash_function: HashFunction::Poseidon,
+			backend: Backend::Arkworks,
+			curve: Curve::Bn254,
+			amount: "1".to_string(),
+			secret: note_value,
+		};
 		assert_eq!(note.to_string(), note_str)
 	}
 	#[test]
-	fn generate_leaf() {
-		let mut note_builder = NoteInput::default();
-		note_builder.backend = Backend::Arkworks;
-		// todo complete the test
-	}
+	fn generate_leaf() {}
 }
