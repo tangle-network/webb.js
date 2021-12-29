@@ -10,7 +10,7 @@ pub mod secrets;
 pub struct Note {
 	pub prefix: NotePrefix,
 	pub version: NoteVersion,
-	pub chain_id: String,
+	pub target_chain_id: String,
 	pub source_chain_id: String,
 
 	/// zkp related items
@@ -47,7 +47,7 @@ impl fmt::Display for Note {
 			//1 => version
 			self.version.to_string(),
 			//2 => chain
-			self.chain_id.to_string(),
+			self.target_chain_id.to_string(),
 			//3 => chain
 			self.source_chain_id.to_string(),
 			//4 => backend
@@ -81,7 +81,7 @@ impl FromStr for Note {
 		let parts: Vec<&str> = s.split(':').collect();
 		let prefix = parts[0].parse()?;
 		let version: NoteVersion = parts[1].parse()?;
-		let chain_id = parts[2].to_string();
+		let target_chain_id = parts[2].to_string();
 		let source_chain_id = parts[3].to_string();
 		let backend: Backend = parts[4].parse()?;
 		let curve: Curve = parts[5].parse()?;
@@ -101,7 +101,7 @@ impl FromStr for Note {
 		Ok(Note {
 			prefix,
 			version,
-			chain_id,
+			target_chain_id,
 			source_chain_id,
 			token_symbol,
 			curve,
@@ -138,7 +138,7 @@ mod test {
 		assert_eq!(note.version, NoteVersion::V1);
 		assert_eq!(note.width, 5);
 		assert_eq!(note.exponentiation, 5);
-		assert_eq!(note.chain_id, "3".to_string());
+		assert_eq!(note.target_chain_id, "3".to_string());
 		assert_eq!(note.source_chain_id, "2".to_string());
 	}
 
@@ -149,7 +149,7 @@ mod test {
 		let note = Note {
 			prefix: NotePrefix::Bridge,
 			version: NoteVersion::V1,
-			chain_id: "3".to_string(),
+			target_chain_id: "3".to_string(),
 			source_chain_id: "2".to_string(),
 			width: 5,
 			exponentiation: 5,

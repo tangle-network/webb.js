@@ -67,7 +67,7 @@ pub struct JsNoteBuilder {
 	#[wasm_bindgen(skip)]
 	pub version: Option<NoteVersion>,
 	#[wasm_bindgen(skip)]
-	pub chain_id: Option<String>,
+	pub target_chain_id: Option<String>,
 	#[wasm_bindgen(skip)]
 	pub source_chain_id: Option<String>,
 	/// zkp related items
@@ -96,7 +96,7 @@ impl Default for JsNoteBuilder {
 		Self {
 			prefix: None,
 			version: None,
-			chain_id: None,
+			target_chain_id: None,
 			source_chain_id: None,
 			backend: None,
 			hash_function: None,
@@ -129,9 +129,9 @@ impl JsNoteBuilder {
 		self.version = Some(note_version);
 	}
 
-	#[wasm_bindgen(js_name = chainId)]
-	pub fn chain_id(&mut self, chain_id: JsString) {
-		self.chain_id = Some(chain_id.into());
+	#[wasm_bindgen(js_name = targetChainId)]
+	pub fn chain_id(&mut self, target_chain_id: JsString) {
+		self.target_chain_id = Some(target_chain_id.into());
 	}
 
 	#[wasm_bindgen(js_name = sourceChainId)]
@@ -205,7 +205,7 @@ impl JsNoteBuilder {
 		let note: Note = Note {
 			prefix: self.prefix.unwrap(),
 			version: self.version.unwrap(),
-			chain_id: self.chain_id.unwrap(),
+			target_chain_id: self.target_chain_id.unwrap(),
 			source_chain_id: self.source_chain_id.unwrap(),
 			backend: self.backend.unwrap(),
 			hash_function: self.hash_function.unwrap(),
@@ -289,10 +289,10 @@ impl JsNote {
 		self.note.version.into()
 	}
 
-	#[wasm_bindgen(js_name = chainId)]
+	#[wasm_bindgen(js_name = targetChainId)]
 	#[wasm_bindgen(getter)]
-	pub fn chain(&self) -> JsString {
-		self.note.chain_id.clone().into()
+	pub fn target_chain_id(&self) -> JsString {
+		self.note.target_chain_id.clone().into()
 	}
 
 	#[wasm_bindgen(js_name = sourceChainId)]
@@ -533,7 +533,7 @@ mod tests {
 
 		assert_eq!(note.prefix(), JsString::from(NotePrefix::Bridge.to_string()));
 		assert_eq!(note.version(), JsString::from(NoteVersion::V1.to_string()));
-		assert_eq!(note.chain(), JsString::from("3"));
+		assert_eq!(note.target_chain_id(), JsString::from("3"));
 		assert_eq!(note.source_chain_id(), JsString::from("2"));
 
 		assert_eq!(note.width(), JsString::from("5"));
