@@ -29,7 +29,7 @@ pub fn generate_secrets(exponentiation: usize, curve: Curve, rng: &mut OsRng) ->
 pub fn get_leaf_with_private_raw(curve: Curve, _exponentiation: i8, raw: &[u8]) -> (Vec<u8>, Vec<u8>) {
 	let secrets = raw[..32].to_vec();
 	let nullifer = raw[32..64].to_vec();
-	// todo consume the exponentiation parameters if needed in the future
+	// TODO: consume the exponentiation parameters if needed in the future
 	return match curve {
 		Curve::Bls381 => {
 			let (params5, ..) = get_hash_params_x5::<BlsFr>(ArkworksCurve::Bls381);
