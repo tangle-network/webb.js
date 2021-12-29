@@ -203,4 +203,6 @@ pub enum OpStatusCode {
 	InvalidExponentiation = 21,
 	/// Invalid Width
 	InvalidWidth = 22,
+	/// Invalid Amount
+	InvalidAmount = 23,
 }
