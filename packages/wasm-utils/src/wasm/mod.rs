@@ -196,7 +196,6 @@ impl JsNoteBuilder {
 		let exponentiation = self.exponentiation.ok_or(OpStatusCode::InvalidExponentiation)?;
 		let width = self.width.ok_or(OpStatusCode::InvalidWidth)?;
 		let curve = self.curve.ok_or(OpStatusCode::InvalidCurve)?;
-		let width = self.width.unwrap();
 
 		let secret = match self.secrets {
 			None => generate_secrets(exponentiation, width, curve, &mut OsRng)?,
