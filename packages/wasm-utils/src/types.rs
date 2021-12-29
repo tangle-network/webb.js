@@ -194,5 +194,5 @@ pub enum OpStatusCode {
 	/// Failed to generate secrets
 	SecretGenFailed = 17,
 	/// Invalid Note prefix
-	InvalidNotePrfix = 18,
+	InvalidNotePrefix = 18,
 }
