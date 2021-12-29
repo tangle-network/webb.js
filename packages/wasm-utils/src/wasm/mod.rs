@@ -196,9 +196,10 @@ impl JsNoteBuilder {
 		// todo validate
 		let exponentiation = self.exponentiation.unwrap();
 		let curve = self.curve.unwrap();
+		let width = self.width.unwrap();
 
 		let secret = match self.secrets {
-			None => generate_secrets(exponentiation as usize, curve, &mut OsRng)?,
+			None => generate_secrets(exponentiation, width, curve, &mut OsRng)?,
 			Some(secrets) => secrets.clone(),
 		};
 		let note: Note = Note {
@@ -270,9 +271,8 @@ impl JsNote {
 
 	#[wasm_bindgen(js_name = getLeafCommitment)]
 	pub fn get_leaf_commitment(&self) -> Result<Uint8Array, JsValue> {
-		/*	let leaf: Vec<u8> = NoteInput::get_leaf(&self.note);
-		Ok(Uint8Array::from(leaf.as_slice()))*/
-		unimplemented!()
+		let (leaf, ..) = self.note.get_leaf_and_nullifier()?;
+		Ok(Uint8Array::from(leaf.as_slice()))
 	}
 
 	pub fn serialize(&self) -> JsString {

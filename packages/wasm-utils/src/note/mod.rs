@@ -33,8 +33,8 @@ impl Note {
 		note.parse().map_err(Into::into)
 	}
 
-	pub fn get_leaf_and_nullifier(&self) -> (Vec<u8>, Vec<u8>) {
-		get_leaf_with_private_raw(self.curve, self.exponentiation, &self.secret)
+	pub fn get_leaf_and_nullifier(&self) -> Result<(Vec<u8>, Vec<u8>), OpStatusCode> {
+		get_leaf_with_private_raw(self.curve, self.width, self.exponentiation, &self.secret)
 	}
 }
 
