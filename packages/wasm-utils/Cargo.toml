@@ -26,9 +26,9 @@ ark-crypto-primitives = { version = "^0.3.0", default-features = true, features 
 ark-ed-on-bn254 = { version = "^0.3.0", default-features = true, features = ["r1cs"] }
 webb-pedersen-hash = { version = "0.1.0", git = "https://github.com/webb-tools/webb-rs.git" }
 ark-std ={ version = "^0.3.0" }
-arkworks-gadgets = { version = "^0.4.5", features = ["std", "r1cs"], default-features = true }
-arkworks-circuits = { version = "^0.4.5", features = ["std", "r1cs"], default-features = false }
-arkworks-utils = { version = "^0.4.5", features = ["std", "r1cs"], default-features = false }
+arkworks-gadgets = { version = "^0.4.8", features = ["std", "r1cs"], default-features = true }
+arkworks-circuits = { version = "^0.4.8", features = ["std", "r1cs"], default-features = false }
+arkworks-utils = { version = "^0.4.8", features = ["std", "r1cs"], default-features = false }
 
 
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }

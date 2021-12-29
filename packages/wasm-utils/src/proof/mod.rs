@@ -124,17 +124,12 @@ impl ZKProof {
 				let fee = FrBn254::from(proof_input.fee);
 				let refund = FrBn254::from(proof_input.refund);
 				// todo fix this
-				match note.exponentiation.as_str() {
+				match note.exponentiation.to_string().as_str() {
 					"3" => {
 						unimplemented!("exponentiation of 3 unsupported");
 					}
 					"5" => {
-						let (params3, params5) = match note.width.as_str() {
-							"3" | "5" => get_hash_params_x5::<FrBn254>(ArkCurve::Bn254),
-							w => {
-								unreachable!("with {}", w)
-							}
-						};
+						let (params3, params5) = get_hash_params_x5::<FrBn254>(ArkCurve::Bn254);
 						let arbitrary_input = setup_arbitrary_data::<FrBn254>(recipient, relayer, fee, refund);
 						let leaves_new: Vec<FrBn254> = proof_input
 							.leaves
@@ -175,7 +170,7 @@ impl ZKProof {
 						})
 					}
 					"17" => {
-						let params17 = match note.width.as_str() {
+						let params17 = match note.width.to_string().as_str() {
 							"5" => setup_params_x17_5::<FrBn254>(ArkCurve::Bn254),
 							"3" => setup_params_x17_3::<FrBn254>(ArkCurve::Bn254),
 							_ => {
@@ -236,14 +231,14 @@ impl ZKProof {
 				let fee = FrBls381::from(proof_input.fee);
 				let refund = FrBls381::from(proof_input.refund);
 
-				match note.exponentiation.as_str() {
+				match note.exponentiation.to_string().as_str() {
 					"3" => {
 						unimplemented!("unsupported exponentiation 3");
 					}
 					"5" => {
 						// Setup Params
 						//setup_circom_params_x5_3
-						let params5 = match note.width.as_str() {
+						let params5 = match note.width.to_string().as_str() {
 							"5" => setup_params_x5_5::<FrBls381>(ArkCurve::Bls381),
 							"3" => setup_params_x5_3::<FrBls381>(ArkCurve::Bls381),
 							w => {
@@ -296,7 +291,7 @@ impl ZKProof {
 						})
 					}
 					"17" => {
-						let params17 = match note.width.as_str() {
+						let params17 = match note.width.to_string().as_str() {
 							"5" => setup_params_x17_5::<FrBls381>(ArkCurve::Bls381),
 							"3" => setup_params_x17_3::<FrBls381>(ArkCurve::Bls381),
 							_ => {
