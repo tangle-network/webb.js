@@ -193,27 +193,25 @@ impl JsNoteBuilder {
 	}
 
 	pub fn build(self) -> Result<JsNote, JsValue> {
-		// todo validate
-		let exponentiation = self.exponentiation.unwrap();
-		let curve = self.curve.unwrap();
+		let exponentiation = self.exponentiation.ok_or(OpStatusCode::InvalidExponentiation)?;
+		let width = self.width.ok_or(OpStatusCode::InvalidWidth)?;
+		let curve = self.curve.ok_or(OpStatusCode::InvalidCurve)?;
 		let width = self.width.unwrap();
 
 		let secret = match self.secrets {
 			None => generate_secrets(exponentiation, width, curve, &mut OsRng)?,
 			Some(secrets) => secrets.clone(),
 		};
+
 		let prefix = self.prefix.ok_or(OpStatusCode::InvalidNotePrefix)?;
 		let version = self.version.ok_or(OpStatusCode::InvalidNoteVersion)?;
 		let target_chain_id = self.target_chain_id.ok_or(OpStatusCode::InvalidTargetChain)?;
 		let source_chain_id = self.source_chain_id.ok_or(OpStatusCode::InvalidSourceChain)?;
 		let backend = self.backend.ok_or(OpStatusCode::InvalidBackend)?;
 		let hash_function = self.hash_function.ok_or(OpStatusCode::InvalidHasFunction)?;
-		let curve = self.curve.ok_or(OpStatusCode::InvalidCurve)?;
 		let token_symbol = self.token_symbol.ok_or(OpStatusCode::InvalidTokenSymbol)?;
 		let amount = self.amount.ok_or(OpStatusCode::InvalidAmount)?;
 		let denomination = self.denomination.ok_or(OpStatusCode::InvalidDenomination)?;
-		let exponentiation = self.exponentiation.ok_or(OpStatusCode::InvalidExponentiation)?;
-		let width = self.width.ok_or(OpStatusCode::InvalidWidth)?;
 
 		let note: Note = Note {
 			prefix,
