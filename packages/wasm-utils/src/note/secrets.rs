@@ -15,7 +15,7 @@ pub fn generate_secrets(
 	rng: &mut OsRng,
 ) -> Result<Vec<u8>, OpStatusCode> {
 	let secrets: Vec<u8> = match (curve, exponentiation, width) {
-		(Curve::Bls381, 5, ..) => {
+		(Curve::Bls381, 5, 5) => {
 			let (params_5, ..) = get_hash_params_x5::<BlsFr>(ArkworksCurve::Bls381);
 			let (secret_bytes, nullifier_bytes, ..) = setup_leaf(&params_5, rng);
 			[secret_bytes, nullifier_bytes].concat()
