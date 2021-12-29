@@ -4,13 +4,13 @@ use std::ops::Deref;
 use ark_serialize::CanonicalSerialize;
 use console_error_panic_hook;
 use js_sys::{Array, JsString, Uint8Array};
+use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
 use crate::note::secrets::generate_secrets;
 use crate::note::Note;
 use crate::proof::{ZKProof, ZkProofBuilder};
 use crate::types::{Backend, Curve as NoteCurve, HashFunction, NotePrefix, NoteVersion, OpStatusCode};
-use rand::rngs::OsRng;
 
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
@@ -202,19 +202,32 @@ impl JsNoteBuilder {
 			None => generate_secrets(exponentiation, width, curve, &mut OsRng)?,
 			Some(secrets) => secrets.clone(),
 		};
+		let prefix = self.prefix.ok_or(OpStatusCode::InvalidNotePrefix)?;
+		let version = self.version.ok_or(OpStatusCode::InvalidNoteVersion)?;
+		let target_chain_id = self.target_chain_id.ok_or(OpStatusCode::InvalidTargetChain)?;
+		let source_chain_id = self.source_chain_id.ok_or(OpStatusCode::InvalidSourceChain)?;
+		let backend = self.backend.ok_or(OpStatusCode::InvalidBackend)?;
+		let hash_function = self.hash_function.ok_or(OpStatusCode::InvalidHasFunction)?;
+		let curve = self.curve.ok_or(OpStatusCode::InvalidCurve)?;
+		let token_symbol = self.token_symbol.ok_or(OpStatusCode::InvalidTokenSymbol)?;
+		let amount = self.amount.ok_or(OpStatusCode::InvalidAmount)?;
+		let denomination = self.denomination.ok_or(OpStatusCode::InvalidDenomination)?;
+		let exponentiation = self.exponentiation.ok_or(OpStatusCode::InvalidExponentiation)?;
+		let width = self.width.ok_or(OpStatusCode::InvalidWidth)?;
+
 		let note: Note = Note {
-			prefix: self.prefix.unwrap(),
-			version: self.version.unwrap(),
-			target_chain_id: self.target_chain_id.unwrap(),
-			source_chain_id: self.source_chain_id.unwrap(),
-			backend: self.backend.unwrap(),
-			hash_function: self.hash_function.unwrap(),
-			curve: self.curve.unwrap(),
-			token_symbol: self.token_symbol.unwrap(),
-			amount: self.amount.unwrap(),
-			denomination: self.denomination.unwrap(),
-			exponentiation: self.exponentiation.unwrap(),
-			width: self.width.unwrap(),
+			prefix,
+			version,
+			target_chain_id,
+			source_chain_id,
+			backend,
+			hash_function,
+			curve,
+			token_symbol,
+			amount,
+			denomination,
+			exponentiation,
+			width,
 			secret,
 		};
 		Ok(JsNote { note })
@@ -635,7 +648,7 @@ mod tests {
 		dbg!(proof);
 	}
 }
-
+#[cfg(not(test))]
 #[wasm_bindgen(start)]
 pub fn main() {
 	console_error_panic_hook::set_once();

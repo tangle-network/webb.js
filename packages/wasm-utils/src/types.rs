@@ -193,6 +193,14 @@ pub enum OpStatusCode {
 	InvalidDenomination = 16,
 	/// Failed to generate secrets
 	SecretGenFailed = 17,
-	/// Invalid Note prefix
-	InvalidNotePrfix = 18,
+	/// Invalid Source chain
+	InvalidSourceChain = 18,
+	/// Invalid target chain
+	InvalidTargetChain = 19,
+	/// Invalid Token Symbol
+	InvalidTokenSymbol = 20,
+	/// Invalid Exponentiation
+	InvalidExponentiation = 21,
+	/// Invalid Width
+	InvalidWidth = 22,
 }
