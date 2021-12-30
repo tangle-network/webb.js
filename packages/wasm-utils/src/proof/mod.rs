@@ -1,4 +1,4 @@
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::ops::Deref;
 
 use js_sys::{Array, JsString, Uint8Array};
@@ -94,7 +94,7 @@ pub struct ProofInput {
 
 #[wasm_bindgen]
 #[derive(Debug, Eq, PartialEq)]
-pub struct ProofInputBuilder {
+pub struct JsProofInputBuilder {
 	#[wasm_bindgen(skip)]
 	pub recipient: Option<Vec<u8>>,
 	#[wasm_bindgen(skip)]
@@ -114,8 +114,8 @@ pub struct ProofInputBuilder {
 }
 
 #[wasm_bindgen]
-impl ProofInputBuilder {
-	#[wasm_bindgen(js_name = setLeaves)]
+impl JsProofInputBuilder {
+	#[wasm_bindgen(js_name = setRecipient)]
 	pub fn set_recipient(&mut self, recipient: JsString) {
 		let r: String = recipient.into();
 		self.recipient = Some(hex::decode(r).unwrap());
@@ -176,8 +176,11 @@ impl ProofInputBuilder {
 }
 
 #[wasm_bindgen]
-fn generate_proof_js(note: JsNote, proof_input: JsProofInput) -> Proof {
+pub fn generate_proof_js(note: JsNote, proof_input: ProofInput) -> Proof {
 	// Get the values from note and proof_input and convert them to rust types
 	// Call generate_proof from arkworks gadgets repo which returns proof
 	// (Vec<u8u>), nullified (Vec<u8>), root (Vec<u8>)
+	unimplemented!();
 }
+#[cfg(test)]
+mod test {}

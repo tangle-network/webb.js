@@ -49,11 +49,11 @@ pub fn get_leaf_with_private_raw(
 	// (leaf_bytes, nullifier_hash_bytes)
 	let sec = match (curve, exponentiation, width) {
 		(Curve::Bls381, 5, 5) => {
-			let (params5, 5) = get_hash_params_x5::<BlsFr>(ArkworksCurve::Bls381);
+			let (params5, ..) = get_hash_params_x5::<BlsFr>(ArkworksCurve::Bls381);
 			setup_leaf_with_privates_raw::<BlsFr, OsRng>(&params5, secrets, nullifer)
 		}
 		(Curve::Bn254, 5, 5) => {
-			let (params5, 5) = get_hash_params_x5::<Bn254Fr>(ArkworksCurve::Bn254);
+			let (params5, ..) = get_hash_params_x5::<Bn254Fr>(ArkworksCurve::Bn254);
 			setup_leaf_with_privates_raw::<Bn254Fr, OsRng>(&params5, secrets, nullifer)
 		}
 		_ => {

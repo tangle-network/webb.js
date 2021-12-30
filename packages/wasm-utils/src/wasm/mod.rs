@@ -9,7 +9,6 @@ use wasm_bindgen::prelude::*;
 
 use crate::note::secrets::generate_secrets;
 use crate::note::Note;
-use crate::proof::{ZKProof, ZkProofBuilder};
 use crate::types::{Backend, Curve as NoteCurve, HashFunction, NotePrefix, NoteVersion, OpStatusCode};
 
 #[cfg(feature = "wee_alloc")]
@@ -363,40 +362,6 @@ impl JsNote {
 	}
 }
 
-#[wasm_bindgen]
-#[derive(Debug, Eq, PartialEq)]
-pub struct ProvingManager {
-	builder: ZkProofBuilder,
-}
-
-#[wasm_bindgen]
-#[derive(Debug, Eq, PartialEq)]
-pub struct Proof {
-	#[wasm_bindgen(skip)]
-	pub proof: String,
-	#[wasm_bindgen(skip)]
-	pub nullifier_hash: String,
-	#[wasm_bindgen(skip)]
-	pub root: String,
-}
-
-#[wasm_bindgen]
-impl Proof {
-	#[wasm_bindgen(getter)]
-	pub fn proof(&self) -> JsString {
-		self.proof.clone().into()
-	}
-
-	#[wasm_bindgen(getter)]
-	pub fn nullifier_hash(&self) -> JsString {
-		self.nullifier_hash.clone().into()
-	}
-
-	#[wasm_bindgen(getter)]
-	pub fn root(&self) -> JsString {
-		self.root.clone().into()
-	}
-}
 struct Uint8Arrayx32([u8; 32]);
 
 impl Deref for Uint8Arrayx32 {
@@ -416,115 +381,6 @@ impl TryFrom<Uint8Array> for Uint8Arrayx32 {
 			.try_into()
 			.map_err(|_| OpStatusCode::InvalidArrayLength)?;
 		Ok(Self(bytes))
-	}
-}
-
-impl Default for ProvingManager {
-	fn default() -> Self {
-		Self {
-			builder: ZkProofBuilder::default(),
-		}
-	}
-}
-#[wasm_bindgen]
-impl ProvingManager {
-	#[wasm_bindgen(constructor)]
-	pub fn new() -> ProvingManager {
-		ProvingManager::default()
-	}
-
-	#[wasm_bindgen(js_name = setRecipient)]
-	pub fn set_recipient(&mut self, recipient: JsString) -> Result<(), JsValue> {
-		let r: String = recipient.into();
-		let r = hex::decode(r).unwrap();
-		self.builder.set_recipient(&r);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setRelayer)]
-	pub fn set_relayer(&mut self, relayer: JsString) -> Result<(), JsValue> {
-		let r: String = relayer.into();
-		let r = hex::decode(r).unwrap();
-		self.builder.set_relayer(&r);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setNote)]
-	pub fn set_note(&mut self, deposit_note: &JsNote) -> Result<(), JsValue> {
-		let note = deposit_note.note.clone();
-		self.builder.set_note(note);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setNoteStr)]
-	pub fn set_note_from_str(&mut self, note_str: JsString) -> Result<(), JsValue> {
-		let r: String = note_str.into();
-		let note = Note::deserialize(&r)?;
-		self.builder.set_note(note);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setLeafIndex)]
-	pub fn set_leaf_index(&mut self, index: u32) -> Result<(), JsValue> {
-		self.builder.set_leaf_index(index);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setFee)]
-	pub fn set_fee(&mut self, fee: u32) -> Result<(), JsValue> {
-		self.builder.set_fee(fee);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setRefund)]
-	pub fn set_refund(&mut self, refund: u32) -> Result<(), JsValue> {
-		self.builder.set_refund(refund);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setProvingKey)]
-	pub fn set_proving_key(&mut self, pk: Uint8Array) -> Result<(), JsValue> {
-		let pk: Vec<u8> = pk.to_vec();
-		web_sys::console::log_1(&"Importing the PK".into());
-		self.builder.set_proving_key(&pk);
-		web_sys::console::log_1(&"Imported the PK".into());
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setLeaves)]
-	pub fn set_leaves(&mut self, leaves: Leaves) -> Result<(), JsValue> {
-		let ls: Vec<_> = Array::from(&leaves)
-			.to_vec()
-			.into_iter()
-			.map(|v| Uint8Array::new_with_byte_offset_and_length(&v, 0, 32))
-			.map(Uint8Arrayx32::try_from)
-			.collect::<Result<Vec<_>, _>>()?
-			.into_iter()
-			.map(|v| v.0)
-			.collect();
-		self.builder.set_leaves(&ls);
-		Ok(())
-	}
-
-	pub fn proof(&self) -> Result<Proof, JsValue> {
-		let proof = self.builder.build();
-		let mut proof_bytes = Vec::new();
-		let meta = match proof {
-			ZKProof::Bls12_381(proof, meta) => {
-				CanonicalSerialize::serialize(&proof, &mut proof_bytes).map_err(|_| OpStatusCode::Unknown)?;
-				meta
-			}
-			ZKProof::Bn254(proof, meta) => {
-				CanonicalSerialize::serialize(&proof, &mut proof_bytes).map_err(|_| OpStatusCode::Unknown)?;
-				meta
-			}
-		};
-		let proof = Proof {
-			proof: hex::encode(proof_bytes),
-			root: hex::encode(meta.root),
-			nullifier_hash: hex::encode(meta.nullified_hash),
-		};
-		Ok(proof)
 	}
 }
 
