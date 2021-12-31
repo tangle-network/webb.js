@@ -205,4 +205,6 @@ pub enum OpStatusCode {
 	InvalidWidth = 22,
 	/// Invalid Amount
 	InvalidAmount = 23,
+	/// Invalied proof pramters
+	InvalidProofParameters,
 }

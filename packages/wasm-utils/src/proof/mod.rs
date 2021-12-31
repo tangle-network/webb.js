@@ -207,7 +207,7 @@ impl JsProofInputBuilder {
 }
 
 #[wasm_bindgen]
-pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Proof {
+pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Result<Proof, JsValue> {
 	let note = js_note.note;
 	let width = note.width;
 	let exponentiation = note.exponentiation;
@@ -253,19 +253,18 @@ pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Proof {
 			pk,
 			&mut rng,
 		),
-		_ => unimplemented!(),
+		_ => return Err(OpStatusCode::InvalidProofParameters),
 	};
-	Proof {
+	Ok(Proof {
 		proof,
 		nullifier_hash,
 		root,
-	}
+	})
 }
 #[cfg(test)]
 mod test {
 	use ark_serialize::CanonicalSerialize;
-	use arkworks_circuits::setup::common::setup_tree_and_create_path_tree_x5;
-	use arkworks_circuits::setup::mixer::setup_groth16_random_circuit_x5;
+
 	use arkworks_utils::prelude::ark_bn254;
 	use js_sys::Uint8Array;
 
@@ -273,13 +272,17 @@ mod test {
 	use crate::wasm::JsNoteBuilder;
 
 	use super::*;
-
+	use wasm_bindgen_test::*;
+	fn verify_proof(proof: Proof) -> bool {
+		// TODO validate the proof
+		return true;
+	}
 	const TREE_DEPTH: u32 = 30;
-	#[test]
+	#[wasm_bindgen_test]
 	fn js_setup() {
-		let (pk, vk) = setup_groth16_random_circuit_x5::<_, ark_bn254::Bn254, TREE_DEPTH>(OsRng, ArkCurve::Bn254);
+		/*		let (pk, vk) = setup_groth16_random_circuit_x5::<_, ark_bn254::Bn254, TREE_DEPTH>(OsRng, ArkCurve::Bn254);
 		let mut pk_uncompressed_bytes = Vec::new();
-		CanonicalSerialize::serialize_uncompressed(&pk, &mut pk_uncompressed_bytes).unwrap();
+		CanonicalSerialize::serialize_uncompressed(&pk, &mut pk_uncompressed_bytes).unwrap();*/
 
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
@@ -298,7 +301,7 @@ mod test {
 		js_builder.set_relayer(JsString::from(decoded_substrate_address));
 		js_builder.set_recipient(JsString::from(decoded_substrate_address));
 
-		js_builder.set_pk(JsString::from(hex::encode(pk_uncompressed_bytes.clone())));
+		js_builder.set_pk(JsString::from(hex::encode(vec![])));
 
 		let proof_input = js_builder.build();
 
@@ -310,7 +313,33 @@ mod test {
 
 		assert_eq!(proof_input.leaf_index, 0);
 		assert_eq!(hex::encode(proof_input.leaves[0]), hex::encode(leave_bytes));
+	}
 
-		assert_eq!(hex::encode(proof_input.pk), hex::encode(pk_uncompressed_bytes))
+	#[wasm_bindgen_test]
+	fn generate_proof() {
+		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
+		let note = JsNote::deserialize(JsString::from(note_str)).unwrap();
+		let mut js_builder = JsProofInputBuilder::new();
+		let leave: Uint8Array = note.get_leaf_commitment().unwrap();
+		let leave_bytes: Vec<u8> = leave.to_vec();
+		let leaves_ua: Array = vec![leave].into_iter().collect();
+
+		js_builder.set_leaf_index(JsString::from("0"));
+		js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua)));
+
+		js_builder.set_fee(JsString::from("5"));
+		js_builder.set_refund(JsString::from("1"));
+
+		js_builder.set_relayer(JsString::from(decoded_substrate_address));
+		js_builder.set_recipient(JsString::from(decoded_substrate_address));
+		// TODO insert the wright PK
+		js_builder.set_pk(JsString::from(hex::encode(vec![])));
+
+		let proof_input = js_builder.build();
+		let proof = generate_proof_js(note, proof_input).unwrap();
+		let is_valied_proof = verify_proof(proof);
+		assert!(is_valied_proof);
+		// TODO verify the proof
 	}
 }
