@@ -9,39 +9,8 @@ use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
-use crate::note::Note;
-use crate::types::{Backend, Curve, OpStatusCode};
-use crate::wasm::JsNote;
-
-#[wasm_bindgen]
-extern "C" {
-	#[wasm_bindgen(typescript_type = "Leaves")]
-	pub type Leaves;
-}
-
-#[wasm_bindgen(typescript_custom_section)]
-const LEAVES: &str = "type Leaves = Array<Uint8Array>;";
-pub struct Uint8Arrayx32([u8; 32]);
-
-impl Deref for Uint8Arrayx32 {
-	type Target = [u8; 32];
-
-	fn deref(&self) -> &Self::Target {
-		&self.0
-	}
-}
-
-impl TryFrom<Uint8Array> for Uint8Arrayx32 {
-	type Error = OpStatusCode;
-
-	fn try_from(value: Uint8Array) -> Result<Self, Self::Error> {
-		let bytes: [u8; 32] = value
-			.to_vec()
-			.try_into()
-			.map_err(|_| OpStatusCode::InvalidArrayLength)?;
-		Ok(Self(bytes))
-	}
-}
+use crate::note::JsNote;
+use crate::types::{Backend, Curve, Leaves, OpStatusCode, Uint8Arrayx32};
 
 #[wasm_bindgen]
 #[derive(Debug, Eq, PartialEq)]
@@ -253,7 +222,7 @@ pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Result<Pro
 			pk,
 			&mut rng,
 		),
-		_ => return Err(OpStatusCode::InvalidProofParameters),
+		_ => return Err(JsValue::from(OpStatusCode::InvalidProofParameters)),
 	};
 	Ok(Proof {
 		proof,
@@ -264,15 +233,14 @@ pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Result<Pro
 #[cfg(test)]
 mod test {
 	use ark_serialize::CanonicalSerialize;
-
 	use arkworks_utils::prelude::ark_bn254;
 	use js_sys::Uint8Array;
+	use wasm_bindgen_test::*;
 
-	use crate::proof::JsProofInputBuilder;
-	use crate::wasm::JsNoteBuilder;
+	use crate::note::JsNote;
 
 	use super::*;
-	use wasm_bindgen_test::*;
+
 	fn verify_proof(proof: Proof) -> bool {
 		// TODO validate the proof
 		return true;

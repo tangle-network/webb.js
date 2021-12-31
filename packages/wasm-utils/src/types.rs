@@ -1,6 +1,10 @@
 use arkworks_utils::utils::common::Curve as ArkCurve;
 use core::fmt;
+use js_sys::{JsString, Uint8Array};
+use std::convert::{TryFrom, TryInto};
+use std::ops::Deref;
 use std::str::FromStr;
+use wasm_bindgen::prelude::*;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum NoteVersion {
@@ -207,4 +211,104 @@ pub enum OpStatusCode {
 	InvalidAmount = 23,
 	/// Invalied proof pramters
 	InvalidProofParameters,
+}
+
+#[wasm_bindgen]
+extern "C" {
+	#[wasm_bindgen(typescript_type = "NotePrefix")]
+	pub type Prefix;
+
+	#[wasm_bindgen(typescript_type = "Curve")]
+	pub type WasmCurve;
+
+	#[wasm_bindgen(typescript_type = "HashFunction")]
+	pub type HF;
+
+	#[wasm_bindgen(typescript_type = "Version")]
+	pub type Version;
+
+	#[wasm_bindgen(typescript_type = "Backend")]
+	pub type BE;
+
+	#[wasm_bindgen(typescript_type = "Leaves")]
+	pub type Leaves;
+}
+#[wasm_bindgen(typescript_custom_section)]
+const NOTE_PREFIX: &str = "type NotePrefix = 'webb.mixer'|'webb.bridge' ";
+
+#[wasm_bindgen(typescript_custom_section)]
+const LEAVES: &str = "type Leaves = Array<Uint8Array>;";
+
+#[wasm_bindgen(typescript_custom_section)]
+const HF: &str = "type HashFunction = 'Poseidon'|'MiMCTornado'";
+
+#[wasm_bindgen(typescript_custom_section)]
+const CURVE: &str = "type Curve = 'Bls381'|'Bn254' |'Curve25519'";
+
+#[wasm_bindgen(typescript_custom_section)]
+const VERSION: &str = "type Version = 'v1'";
+
+#[wasm_bindgen(typescript_custom_section)]
+const BE: &str = "type Backend = 'Bulletproofs'|'Arkworks'|'Circom'";
+pub struct Uint8Arrayx32(pub [u8; 32]);
+
+impl Deref for Uint8Arrayx32 {
+	type Target = [u8; 32];
+
+	fn deref(&self) -> &Self::Target {
+		&self.0
+	}
+}
+
+impl TryFrom<Uint8Array> for Uint8Arrayx32 {
+	type Error = OpStatusCode;
+
+	fn try_from(value: Uint8Array) -> Result<Self, Self::Error> {
+		let bytes: [u8; 32] = value
+			.to_vec()
+			.try_into()
+			.map_err(|_| OpStatusCode::InvalidArrayLength)?;
+		Ok(Self(bytes))
+	}
+}
+
+impl From<OpStatusCode> for JsValue {
+	fn from(e: OpStatusCode) -> Self {
+		JsValue::from(e as u32)
+	}
+}
+
+impl From<Backend> for JsString {
+	fn from(e: Backend) -> Self {
+		JsString::from(e.to_string())
+	}
+}
+
+impl From<Curve> for JsString {
+	fn from(e: Curve) -> Self {
+		JsString::from(e.to_string())
+	}
+}
+
+impl From<HashFunction> for JsString {
+	fn from(e: HashFunction) -> Self {
+		JsString::from(e.to_string())
+	}
+}
+
+impl From<NoteVersion> for JsString {
+	fn from(e: NoteVersion) -> Self {
+		JsString::from(e.to_string())
+	}
+}
+impl From<NotePrefix> for JsString {
+	fn from(e: NotePrefix) -> Self {
+		JsString::from(e.to_string())
+	}
+}
+
+#[cfg(not(test))]
+#[wasm_bindgen(start)]
+pub fn main() {
+	console_error_panic_hook::set_once();
 }
