@@ -1,12 +1,11 @@
 use ark_std::rand::rngs::OsRng;
-use arkworks_circuits::setup::mixer::{setup_leaf, setup_leaf_with_privates_raw};
+use arkworks_circuits::setup::mixer::{setup_leaf_with_privates_raw_x5_5, setup_leaf_x5_5};
 use arkworks_gadgets::prelude::ark_bls12_381::Fq as BlsFr;
 use arkworks_gadgets::prelude::ark_bn254::Fq as Bn254Fr;
 use arkworks_gadgets::prelude::*;
 use arkworks_utils::utils::common::Curve as ArkworksCurve;
 
 use crate::types::{Curve, OpStatusCode};
-use crate::utils::get_hash_params_x5;
 
 pub fn generate_secrets(
 	exponentiation: i8,
@@ -16,21 +15,14 @@ pub fn generate_secrets(
 ) -> Result<Vec<u8>, OpStatusCode> {
 	let secrets: Vec<u8> = match (curve, exponentiation, width) {
 		(Curve::Bls381, 5, 5) => {
-			let (params_5, ..) = get_hash_params_x5::<BlsFr>(ArkworksCurve::Bls381);
-			let (secret_bytes, nullifier_bytes, ..) = setup_leaf(&params_5, rng);
+			let (secret_bytes, nullifier_bytes, ..) = setup_leaf_x5_5::<BlsFr, _>(ArkworksCurve::Bls381, rng);
 			[secret_bytes, nullifier_bytes].concat()
 		}
 		(Curve::Bn254, 5, 5) => {
-			let (params_5, ..) = get_hash_params_x5::<Bn254Fr>(ArkworksCurve::Bn254);
-			let (secret_bytes, nullifier_bytes, ..) = setup_leaf(&params_5, rng);
+			let (secret_bytes, nullifier_bytes, ..) = setup_leaf_x5_5::<Bn254Fr, _>(ArkworksCurve::Bn254, rng);
 			[secret_bytes, nullifier_bytes].concat()
 		}
-		_ => {
-			unreachable!(
-				"unreachable curve {} exponentiation {} width {}",
-				curve, exponentiation, width
-			)
-		}
+		_ => return Err(OpStatusCode::SecretGenFailed),
 	};
 	Ok(secrets)
 }
@@ -48,17 +40,9 @@ pub fn get_leaf_with_private_raw(
 	let nullifer = raw[32..64].to_vec();
 	// (leaf_bytes, nullifier_hash_bytes)
 	let sec = match (curve, exponentiation, width) {
-		(Curve::Bls381, 5, 5) => {
-			let (params5, 5) = get_hash_params_x5::<BlsFr>(ArkworksCurve::Bls381);
-			setup_leaf_with_privates_raw::<BlsFr, OsRng>(&params5, secrets, nullifer)
-		}
-		(Curve::Bn254, 5, 5) => {
-			let (params5, 5) = get_hash_params_x5::<Bn254Fr>(ArkworksCurve::Bn254);
-			setup_leaf_with_privates_raw::<Bn254Fr, OsRng>(&params5, secrets, nullifer)
-		}
-		_ => {
-			unreachable!("unreachable Curve Curve25519")
-		}
+		(Curve::Bls381, 5, 5) => setup_leaf_with_privates_raw_x5_5::<BlsFr>(ArkworksCurve::Bls381, secrets, nullifer),
+		(Curve::Bn254, 5, 5) => setup_leaf_with_privates_raw_x5_5::<Bn254Fr>(ArkworksCurve::Bn254, secrets, nullifer),
+		_ => return Err(OpStatusCode::FailedToGenerateTheLeaf),
 	};
 	Ok(sec)
 }
