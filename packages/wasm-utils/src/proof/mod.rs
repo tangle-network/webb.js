@@ -60,11 +60,11 @@ pub struct ProofInput {
 	#[wasm_bindgen(skip)]
 	pub leaves: Vec<[u8; 32]>,
 	#[wasm_bindgen(skip)]
-	pub leaf_index: u32,
+	pub leaf_index: u64,
 	#[wasm_bindgen(skip)]
-	pub fee: u32,
+	pub fee: u128,
 	#[wasm_bindgen(skip)]
-	pub refund: u32,
+	pub refund: u128,
 	#[wasm_bindgen(skip)]
 	pub pk: Vec<u8>,
 }
@@ -79,13 +79,37 @@ pub struct JsProofInputBuilder {
 	#[wasm_bindgen(skip)]
 	pub leaves: Option<Vec<[u8; 32]>>,
 	#[wasm_bindgen(skip)]
-	pub leaf_index: Option<u32>,
+	pub leaf_index: Option<u64>,
 	#[wasm_bindgen(skip)]
-	pub fee: Option<u32>,
+	pub fee: Option<u128>,
 	#[wasm_bindgen(skip)]
-	pub refund: Option<u32>,
+	pub refund: Option<u128>,
 	#[wasm_bindgen(skip)]
 	pub pk: Option<Vec<u8>>,
+}
+
+impl JsProofInputBuilder {
+	pub fn build(self) -> Result<ProofInput, OpStatusCode> {
+		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
+		let recipient = self.recipient.ok_or(OpStatusCode::InvalidRecipient)?;
+		let relayer = self.relayer.ok_or(OpStatusCode::InvalidRelayer)?;
+
+		let leaf_index = self.leaf_index.ok_or(OpStatusCode::InvalidLeafIndex)?;
+		let leaves = self.leaves.ok_or(OpStatusCode::InvalidLeaves)?;
+
+		let fee = self.fee.ok_or(OpStatusCode::InvalidFee)?;
+		let refund = self.refund.ok_or(OpStatusCode::InvalidRefund)?;
+
+		Ok(ProofInput {
+			pk,
+			relayer: truncate_and_pad(&relayer),
+			recipient: truncate_and_pad(&recipient),
+			refund,
+			fee,
+			leaf_index,
+			leaves,
+		})
+	}
 }
 
 #[wasm_bindgen]
@@ -133,21 +157,21 @@ impl JsProofInputBuilder {
 	#[wasm_bindgen(js_name = setLeafIndex)]
 	pub fn set_leaf_index(&mut self, leaf_index: JsString) {
 		let leaf_index: String = leaf_index.into();
-		let leaf_index: u32 = leaf_index.as_str().parse().unwrap();
+		let leaf_index = leaf_index.as_str().parse().unwrap();
 		self.leaf_index = Some(leaf_index);
 	}
 
 	#[wasm_bindgen(js_name = setFee)]
 	pub fn set_fee(&mut self, fee: JsString) {
 		let fee: String = fee.into();
-		let fee: u32 = fee.as_str().parse().unwrap();
+		let fee = fee.as_str().parse().unwrap();
 		self.fee = Some(fee);
 	}
 
 	#[wasm_bindgen(js_name = setRefund)]
 	pub fn set_refund(&mut self, refund: JsString) {
 		let refund: String = refund.into();
-		let refund: u32 = refund.as_str().parse().unwrap();
+		let refund = refund.as_str().parse().unwrap();
 		self.refund = Some(refund);
 	}
 
@@ -158,26 +182,8 @@ impl JsProofInputBuilder {
 	}
 
 	#[wasm_bindgen]
-	pub fn build(self) -> ProofInput {
-		let pk = self.pk.unwrap();
-		let recipient = self.recipient.unwrap();
-		let relayer = self.relayer.unwrap();
-
-		let leaf_index = self.leaf_index.unwrap();
-		let leaves = self.leaves.unwrap();
-
-		let fee = self.fee.unwrap();
-		let refund = self.refund.unwrap();
-
-		ProofInput {
-			pk,
-			relayer: truncate_and_pad(&relayer),
-			recipient: truncate_and_pad(&recipient),
-			refund,
-			fee,
-			leaf_index,
-			leaves,
-		}
+	pub fn build_js(self) -> Result<ProofInput, JsValue> {
+		self.build().map_err(|e| e.into())
 	}
 }
 
@@ -192,12 +198,12 @@ pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Result<Pro
 	let secrets = note_secrets[..32].to_vec();
 	let nullifier = note_secrets[32..64].to_vec();
 	let leaves: Vec<_> = proof_input.leaves.into_iter().map(|i| i.to_vec()).collect();
-	let leaf_index = proof_input.leaf_index as u64;
+	let leaf_index = proof_input.leaf_index;
 	let recipient_raw = proof_input.recipient;
 	let relayer_raw = proof_input.relayer;
 
-	let fee = proof_input.fee as u128;
-	let refund = proof_input.refund as u128;
+	let fee = proof_input.fee;
+	let refund = proof_input.refund;
 	let pk = proof_input.pk;
 
 	let mut rng = OsRng;
@@ -239,13 +245,13 @@ pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Result<Pro
 #[cfg(test)]
 mod test {
 	use ark_serialize::CanonicalSerialize;
-
+	use arkworks_circuits::setup::mixer::{setup_keys_x5_5, verify_unchecked_raw};
 	use js_sys::Uint8Array;
 	use wasm_bindgen_test::*;
 
-	use super::*;
 	use crate::note::JsNote;
-	use arkworks_circuits::setup::mixer::{setup_keys_x5_5, verify_unchecked_raw};
+
+	use super::*;
 
 	fn verify_proof(proof: Proof, inputs: ProofInput, keys: (Vec<u8>, Vec<u8>)) -> bool {
 		let vk_unchecked_bytes = keys.1;
@@ -300,7 +306,7 @@ mod test {
 
 		js_builder.set_pk(JsString::from(hex::encode(vec![])));
 
-		let proof_input = js_builder.build();
+		let proof_input = js_builder.build().unwrap();
 
 		assert_eq!(
 			hex::encode(proof_input.recipient),
@@ -340,7 +346,7 @@ mod test {
 		js_builder.set_recipient(JsString::from(decoded_substrate_address));
 		js_builder.set_pk(JsString::from(hex::encode(&pk)));
 
-		let proof_input = js_builder.build();
+		let proof_input = js_builder.build().unwrap();
 		let proof = generate_proof_js(note, proof_input.clone()).unwrap();
 		let is_valied_proof = verify_proof(proof, proof_input, (pk, vk));
 		assert!(is_valied_proof);

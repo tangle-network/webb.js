@@ -209,8 +209,22 @@ pub enum OpStatusCode {
 	InvalidWidth = 22,
 	/// Invalid Amount
 	InvalidAmount = 23,
-	/// Invalied proof pramters
+	/// Invalid proof parameters
 	InvalidProofParameters = 24,
+	/// Invalid Proving key
+	InvalidProvingKey = 25,
+	/// Invalid Recipient
+	InvalidRecipient = 26,
+	/// Invalid Relayer
+	InvalidRelayer = 27,
+	/// Invalid LeafIndex
+	InvalidLeafIndex = 28,
+	/// Invalid Fee
+	InvalidFee = 29,
+	/// Invalid Refund
+	InvalidRefund = 30,
+	/// Invalid InvalidLeaves
+	InvalidLeaves = 31,
 }
 
 #[wasm_bindgen]
