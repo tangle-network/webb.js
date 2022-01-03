@@ -210,7 +210,7 @@ pub enum OpStatusCode {
 	/// Invalid Amount
 	InvalidAmount = 23,
 	/// Invalied proof pramters
-	InvalidProofParameters,
+	InvalidProofParameters = 24,
 }
 
 #[wasm_bindgen]
