@@ -171,8 +171,8 @@ impl JsProofInputBuilder {
 
 		ProofInput {
 			pk,
-			relayer,
-			recipient,
+			relayer: truncate_and_pad(&relayer),
+			recipient: truncate_and_pad(&recipient),
 			refund,
 			fee,
 			leaf_index,
@@ -239,17 +239,16 @@ pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Result<Pro
 #[cfg(test)]
 mod test {
 	use ark_serialize::CanonicalSerialize;
-	use arkworks_utils::prelude::ark_bn254;
+
 	use js_sys::Uint8Array;
 	use wasm_bindgen_test::*;
-	wasm_bindgen_test_configure!(run_in_browser);
+
 	use super::*;
 	use crate::note::JsNote;
 	use arkworks_circuits::setup::mixer::{setup_keys_x5_5, verify_unchecked_raw};
 
 	fn verify_proof(proof: Proof, inputs: ProofInput, keys: (Vec<u8>, Vec<u8>)) -> bool {
-		let mut vk_unchecked_bytes = Vec::new();
-		CanonicalSerialize::serialize_uncompressed(&keys.1, &mut vk_unchecked_bytes).unwrap();
+		let vk_unchecked_bytes = keys.1;
 		let proof_bytes = proof.proof.as_slice();
 		let mut public_inputs: Vec<Vec<u8>> = vec![];
 
@@ -259,8 +258,8 @@ mod test {
 			output
 		};
 		// inputs
-		let recipient_bytes = truncate_and_pad(&inputs.recipient[..]);
-		let relayer_bytes = truncate_and_pad(&inputs.relayer[..]);
+		let recipient_bytes = inputs.recipient;
+		let relayer_bytes = inputs.relayer;
 		let fee_bytes = element_encoder(&inputs.fee.to_le_bytes());
 		let refund_bytes = element_encoder(&inputs.refund.to_le_bytes());
 		let nullifier_hash = proof.nullifier_hash;
@@ -279,10 +278,11 @@ mod test {
 	fn js_setup() {
 		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng);
 		let mut pk_uncompressed_bytes = Vec::new();
-		CanonicalSerialize::serialize_uncompressed(&pk, &mut pk_uncompressed_bytes).unwrap();
+		CanonicalSerialize::serialize_unchecked(&pk, &mut pk_uncompressed_bytes).unwrap();
 
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
+		let truncated_substrate_address = truncate_and_pad(&hex::decode(decoded_substrate_address).unwrap());
 		let note = JsNote::deserialize(JsString::from(note_str)).unwrap();
 		let mut js_builder = JsProofInputBuilder::new();
 		let leave: Uint8Array = note.get_leaf_commitment().unwrap();
@@ -302,8 +302,14 @@ mod test {
 
 		let proof_input = js_builder.build();
 
-		assert_eq!(hex::encode(proof_input.recipient), decoded_substrate_address);
-		assert_eq!(hex::encode(proof_input.relayer), decoded_substrate_address);
+		assert_eq!(
+			hex::encode(proof_input.recipient),
+			hex::encode(&truncated_substrate_address)
+		);
+		assert_eq!(
+			hex::encode(proof_input.relayer),
+			hex::encode(&truncated_substrate_address)
+		);
 
 		assert_eq!(proof_input.refund, 1);
 		assert_eq!(proof_input.fee, 5);
@@ -315,8 +321,6 @@ mod test {
 	#[wasm_bindgen_test]
 	fn generate_proof() {
 		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng);
-		let mut pk_uncompressed_bytes = Vec::new();
-		CanonicalSerialize::serialize_uncompressed(&pk, &mut pk_uncompressed_bytes).unwrap();
 
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
@@ -334,7 +338,7 @@ mod test {
 
 		js_builder.set_relayer(JsString::from(decoded_substrate_address));
 		js_builder.set_recipient(JsString::from(decoded_substrate_address));
-		js_builder.set_pk(JsString::from(hex::encode(&pk_uncompressed_bytes)));
+		js_builder.set_pk(JsString::from(hex::encode(&pk)));
 
 		let proof_input = js_builder.build();
 		let proof = generate_proof_js(note, proof_input.clone()).unwrap();
