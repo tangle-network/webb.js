@@ -23,12 +23,7 @@ pub fn generate_secrets(
 			let (secret_bytes, nullifier_bytes, ..) = setup_leaf_x5_5::<Bn254Fr, _>(ArkworksCurve::Bn254, rng);
 			[secret_bytes, nullifier_bytes].concat()
 		}
-		_ => {
-			unreachable!(
-				"unreachable curve {} exponentiation {} width {}",
-				curve, exponentiation, width
-			)
-		}
+		_ => return Err(OpStatusCode::SecretGenFailed),
 	};
 	Ok(secrets)
 }
@@ -48,9 +43,7 @@ pub fn get_leaf_with_private_raw(
 	let sec = match (curve, exponentiation, width) {
 		(Curve::Bls381, 5, 5) => setup_leaf_with_privates_raw_x5_5::<BlsFr>(ArkworksCurve::Bls381, secrets, nullifer),
 		(Curve::Bn254, 5, 5) => setup_leaf_with_privates_raw_x5_5::<Bn254Fr>(ArkworksCurve::Bn254, secrets, nullifer),
-		_ => {
-			unreachable!("unreachable Curve Curve25519")
-		}
+		_ => return Err(OpStatusCode::FailedToGenerateTheLeaf),
 	};
 	Ok(sec)
 }

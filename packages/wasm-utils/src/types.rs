@@ -225,6 +225,8 @@ pub enum OpStatusCode {
 	InvalidRefund = 30,
 	/// Invalid InvalidLeaves
 	InvalidLeaves = 31,
+	/// Failed to  Generating Leaf
+	FailedToGenerateTheLeaf = 32,
 }
 
 #[wasm_bindgen]
