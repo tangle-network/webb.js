@@ -187,16 +187,22 @@ impl JsNoteBuilder {
 		Self::default()
 	}
 
-	pub fn prefix(&mut self, prefix: Prefix) {
-		let prefix: String = JsValue::from(&prefix).as_string().unwrap();
-		let note_prefix: NotePrefix = prefix.as_str().parse().unwrap();
+	pub fn prefix(&mut self, prefix: Prefix) -> Result<(), JsValue> {
+		let prefix: String = JsValue::from(&prefix)
+			.as_string()
+			.ok_or(OpStatusCode::InvalidNotePrefix)?;
+		let note_prefix: NotePrefix = prefix.as_str().parse().map_err(|_| OpStatusCode::InvalidNotePrefix)?;
 		self.prefix = Some(note_prefix);
+		Ok(())
 	}
 
-	pub fn version(&mut self, version: Version) {
-		let version: String = JsValue::from(&version).as_string().unwrap();
-		let note_version: NoteVersion = version.as_str().parse().unwrap();
+	pub fn version(&mut self, version: Version) -> Result<(), JsValue> {
+		let version: String = JsValue::from(&version)
+			.as_string()
+			.ok_or(OpStatusCode::InvalidNoteVersion)?;
+		let note_version: NoteVersion = version.as_str().parse().map_err(|_| OpStatusCode::InvalidNotePrefix)?;
 		self.version = Some(note_version);
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = targetChainId)]
@@ -216,16 +222,20 @@ impl JsNoteBuilder {
 	}
 
 	#[wasm_bindgen(js_name = hashFunction)]
-	pub fn hash_function(&mut self, hash_function: HF) {
-		let hash_function: String = JsValue::from(&hash_function).as_string().unwrap();
-		let hash_function: HashFunction = hash_function.parse().unwrap();
+	pub fn hash_function(&mut self, hash_function: HF) -> Result<(), JsValue> {
+		let hash_function: String = JsValue::from(&hash_function)
+			.as_string()
+			.ok_or(OpStatusCode::InvalidHasFunction)?;
+		let hash_function: HashFunction = hash_function.parse().map_err(|_| OpStatusCode::InvalidHasFunction)?;
 		self.hash_function = Some(hash_function);
+		Ok(())
 	}
 
-	pub fn curve(&mut self, curve: WasmCurve) {
-		let curve: String = JsValue::from(&curve).as_string().unwrap();
-		let curve: Curve = curve.parse().unwrap();
+	pub fn curve(&mut self, curve: WasmCurve) -> Result<(), JsValue> {
+		let curve: String = JsValue::from(&curve).as_string().ok_or(OpStatusCode::InvalidCurve)?;
+		let curve: Curve = curve.parse().map_err(|_| OpStatusCode::InvalidCurve)?;
 		self.curve = Some(curve);
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = tokenSymbol)]
@@ -237,29 +247,33 @@ impl JsNoteBuilder {
 		self.amount = Some(amount.into());
 	}
 
-	pub fn denomination(&mut self, denomination: JsString) {
+	pub fn denomination(&mut self, denomination: JsString) -> Result<(), JsValue> {
 		let den: String = denomination.into();
-		let denomination = den.parse().unwrap();
+		let denomination = den.parse().map_err(|_| OpStatusCode::InvalidDenomination)?;
 		self.denomination = Some(denomination);
+		Ok(())
 	}
 
-	pub fn exponentiation(&mut self, exponentiation: JsString) {
+	pub fn exponentiation(&mut self, exponentiation: JsString) -> Result<(), JsValue> {
 		let exp: String = exponentiation.into();
-		let exponentiation = exp.parse().unwrap();
+		let exponentiation = exp.parse().map_err(|_| OpStatusCode::InvalidExponentiation)?;
 		self.exponentiation = Some(exponentiation);
+		Ok(())
 	}
 
-	pub fn width(&mut self, width: JsString) {
+	pub fn width(&mut self, width: JsString) -> Result<(), JsValue> {
 		let width: String = width.into();
-		let width = width.parse().unwrap();
+		let width = width.parse().map_err(|_| OpStatusCode::InvalidWidth)?;
 		self.width = Some(width);
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setSecrets)]
-	pub fn set_secrets(&mut self, secrets: JsString) {
+	pub fn set_secrets(&mut self, secrets: JsString) -> Result<(), JsValue> {
 		let secrets_string: String = secrets.into();
-		let sec = hex::decode(secrets_string.replace("0x", "")).unwrap();
+		let sec = hex::decode(secrets_string.replace("0x", "")).map_err(|_| OpStatusCode::InvalidNoteSecrets)?;
 		self.secrets = Some(sec);
+		Ok(())
 	}
 
 	pub fn build(self) -> Result<JsNote, JsValue> {
@@ -478,20 +492,22 @@ mod test {
 		let version: Version = JsValue::from(NoteVersion::V1.to_string()).into();
 		let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
 		let hash_function: HF = JsValue::from(HashFunction::Poseidon.to_string()).into();
+		let curve: WasmCurve = JsValue::from(Curve::Bn254.to_string()).into();
 
-		note_builder.prefix(prefix);
-		note_builder.version(version);
+		note_builder.prefix(prefix).unwrap();
+		note_builder.version(version).unwrap();
 		note_builder.chain_id(JsString::from("3"));
 		note_builder.source_chain_id(JsString::from("2"));
 
-		note_builder.width(JsString::from("5"));
-		note_builder.exponentiation(JsString::from("5"));
-		note_builder.denomination(JsString::from("18"));
-
+		note_builder.width(JsString::from("5")).unwrap();
+		note_builder.exponentiation(JsString::from("5")).unwrap();
+		note_builder.denomination(JsString::from("18")).unwrap();
+		note_builder.amount(JsString::from("0"));
 		note_builder.token_symbol(JsString::from("EDG"));
-		note_builder.hash_function(hash_function);
+		note_builder.curve(curve).unwrap();
+		note_builder.hash_function(hash_function).unwrap();
 		note_builder.backend(backend);
-		note_builder.set_secrets(JsString::from("7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717"));
+		note_builder.set_secrets(JsString::from("7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717")).unwrap();
 		let note = note_builder.build().unwrap();
 		assert_eq!(note.serialize(), JsString::from(note_str));
 	}
