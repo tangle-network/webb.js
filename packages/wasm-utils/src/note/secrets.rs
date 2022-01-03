@@ -6,7 +6,6 @@ use arkworks_gadgets::prelude::*;
 use arkworks_utils::utils::common::Curve as ArkworksCurve;
 
 use crate::types::{Curve, OpStatusCode};
-use crate::utils::get_hash_params_x5;
 
 pub fn generate_secrets(
 	exponentiation: i8,

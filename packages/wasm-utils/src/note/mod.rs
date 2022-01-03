@@ -414,9 +414,7 @@ impl JsNote {
 
 #[cfg(test)]
 mod test {
-	use ark_ff::{BigInteger, FromBytes, PrimeField};
 	use arkworks_circuits::prelude::ark_bn254;
-	use arkworks_utils::utils::common::{setup_params_x5_5, Curve as ArkCurve};
 
 	use super::*;
 	use wasm_bindgen_test::*;
