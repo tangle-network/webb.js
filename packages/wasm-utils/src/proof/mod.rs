@@ -128,57 +128,70 @@ impl JsProofInputBuilder {
 	}
 
 	#[wasm_bindgen(js_name = setRecipient)]
-	pub fn set_recipient(&mut self, recipient: JsString) {
+	pub fn set_recipient(&mut self, recipient: JsString) -> Result<(), JsValue> {
 		let r: String = recipient.into();
-		self.recipient = Some(hex::decode(r).unwrap());
+		let recipient = hex::decode(r).map_err(|_| OpStatusCode::InvalidRecipient)?;
+		self.recipient = Some(recipient);
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setRelayer)]
-	pub fn set_relayer(&mut self, relayer: JsString) {
+	pub fn set_relayer(&mut self, relayer: JsString) -> Result<(), JsValue> {
 		let r: String = relayer.into();
-		self.relayer = Some(hex::decode(r).unwrap());
+		let hex_data = hex::decode(r).map_err(|_| OpStatusCode::DeserializationFailed)?;
+		self.relayer = Some(hex_data);
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setLeaves)]
-	pub fn set_leaves(&mut self, leaves: Leaves) {
+	pub fn set_leaves(&mut self, leaves: Leaves) -> Result<(), JsValue> {
 		let ls: Vec<_> = Array::from(&leaves)
 			.to_vec()
 			.into_iter()
 			.map(|v| Uint8Array::new_with_byte_offset_and_length(&v, 0, 32))
 			.map(Uint8Arrayx32::try_from)
 			.collect::<Result<Vec<_>, _>>()
-			.unwrap()
+			.map_err(|_| OpStatusCode::InvalidLeaves)?
 			.into_iter()
 			.map(|v| v.0)
 			.collect();
 		self.leaves = Some(ls);
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setLeafIndex)]
-	pub fn set_leaf_index(&mut self, leaf_index: JsString) {
+	pub fn set_leaf_index(&mut self, leaf_index: JsString) -> Result<(), JsValue> {
 		let leaf_index: String = leaf_index.into();
-		let leaf_index = leaf_index.as_str().parse().unwrap();
+		let leaf_index = leaf_index
+			.as_str()
+			.parse()
+			.map_err(|_| OpStatusCode::InvalidLeafIndex)?;
 		self.leaf_index = Some(leaf_index);
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setFee)]
-	pub fn set_fee(&mut self, fee: JsString) {
+	pub fn set_fee(&mut self, fee: JsString) -> Result<(), JsValue> {
 		let fee: String = fee.into();
-		let fee = fee.as_str().parse().unwrap();
+		let fee = fee.as_str().parse().map_err(|_| OpStatusCode::InvalidFee)?;
 		self.fee = Some(fee);
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setRefund)]
-	pub fn set_refund(&mut self, refund: JsString) {
+	pub fn set_refund(&mut self, refund: JsString) -> Result<(), JsValue> {
 		let refund: String = refund.into();
-		let refund = refund.as_str().parse().unwrap();
+		let refund = refund.as_str().parse().map_err(|_| OpStatusCode::InvalidRefund)?;
 		self.refund = Some(refund);
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setPk)]
-	pub fn set_pk(&mut self, pk: JsString) {
+	pub fn set_pk(&mut self, pk: JsString) -> Result<(), JsValue> {
 		let p: String = pk.into();
-		self.pk = Some(hex::decode(p).unwrap());
+		let proving_key = hex::decode(p).map_err(|_| OpStatusCode::InvalidProvingKey)?;
+		self.pk = Some(proving_key);
+		Ok(())
 	}
 
 	#[wasm_bindgen]
@@ -277,6 +290,7 @@ mod test {
 		public_inputs.push(relayer_bytes);
 		public_inputs.push(fee_bytes.to_vec());
 		public_inputs.push(refund_bytes.to_vec());
+
 		verify_unchecked_raw::<Bn254>(public_inputs.as_slice(), &vk_unchecked_bytes, proof_bytes)
 	}
 	const TREE_DEPTH: u32 = 30;
