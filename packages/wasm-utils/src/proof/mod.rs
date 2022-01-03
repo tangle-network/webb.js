@@ -12,6 +12,12 @@ use wasm_bindgen::prelude::*;
 use crate::note::JsNote;
 use crate::types::{Backend, Curve, Leaves, OpStatusCode, Uint8Arrayx32};
 
+pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
+	let mut truncated_bytes = t[..20].to_vec();
+	truncated_bytes.extend_from_slice(&[0u8; 12]);
+	truncated_bytes
+}
+
 #[wasm_bindgen]
 #[derive(Debug, Eq, PartialEq)]
 pub struct Proof {
@@ -45,7 +51,7 @@ impl Proof {
 	}
 }
 #[wasm_bindgen]
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub struct ProofInput {
 	#[wasm_bindgen(skip)]
 	pub recipient: Vec<u8>,
@@ -236,21 +242,44 @@ mod test {
 	use arkworks_utils::prelude::ark_bn254;
 	use js_sys::Uint8Array;
 	use wasm_bindgen_test::*;
-
-	use crate::note::JsNote;
-
+	wasm_bindgen_test_configure!(run_in_browser);
 	use super::*;
+	use crate::note::JsNote;
+	use arkworks_circuits::setup::mixer::{setup_keys_x5_5, verify_unchecked_raw};
 
-	fn verify_proof(proof: Proof) -> bool {
-		// TODO validate the proof
-		return true;
+	fn verify_proof(proof: Proof, inputs: ProofInput, keys: (Vec<u8>, Vec<u8>)) -> bool {
+		let mut vk_unchecked_bytes = Vec::new();
+		CanonicalSerialize::serialize_uncompressed(&keys.1, &mut vk_unchecked_bytes).unwrap();
+		let proof_bytes = proof.proof.as_slice();
+		let mut public_inputs: Vec<Vec<u8>> = vec![];
+
+		let element_encoder = |v: &[u8]| {
+			let mut output = [0u8; 32];
+			output.iter_mut().zip(v).for_each(|(b1, b2)| *b1 = *b2);
+			output
+		};
+		// inputs
+		let recipient_bytes = truncate_and_pad(&inputs.recipient[..]);
+		let relayer_bytes = truncate_and_pad(&inputs.relayer[..]);
+		let fee_bytes = element_encoder(&inputs.fee.to_le_bytes());
+		let refund_bytes = element_encoder(&inputs.refund.to_le_bytes());
+		let nullifier_hash = proof.nullifier_hash;
+		let root = proof.root;
+
+		public_inputs.push(nullifier_hash);
+		public_inputs.push(root);
+		public_inputs.push(recipient_bytes);
+		public_inputs.push(relayer_bytes);
+		public_inputs.push(fee_bytes.to_vec());
+		public_inputs.push(refund_bytes.to_vec());
+		verify_unchecked_raw::<Bn254>(public_inputs.as_slice(), &vk_unchecked_bytes, proof_bytes)
 	}
 	const TREE_DEPTH: u32 = 30;
 	#[wasm_bindgen_test]
 	fn js_setup() {
-		/*		let (pk, vk) = setup_groth16_random_circuit_x5::<_, ark_bn254::Bn254, TREE_DEPTH>(OsRng, ArkCurve::Bn254);
+		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng);
 		let mut pk_uncompressed_bytes = Vec::new();
-		CanonicalSerialize::serialize_uncompressed(&pk, &mut pk_uncompressed_bytes).unwrap();*/
+		CanonicalSerialize::serialize_uncompressed(&pk, &mut pk_uncompressed_bytes).unwrap();
 
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
@@ -285,6 +314,10 @@ mod test {
 
 	#[wasm_bindgen_test]
 	fn generate_proof() {
+		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng);
+		let mut pk_uncompressed_bytes = Vec::new();
+		CanonicalSerialize::serialize_uncompressed(&pk, &mut pk_uncompressed_bytes).unwrap();
+
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
 		let note = JsNote::deserialize(JsString::from(note_str)).unwrap();
@@ -301,13 +334,11 @@ mod test {
 
 		js_builder.set_relayer(JsString::from(decoded_substrate_address));
 		js_builder.set_recipient(JsString::from(decoded_substrate_address));
-		// TODO insert the wright PK
-		js_builder.set_pk(JsString::from(hex::encode(vec![])));
+		js_builder.set_pk(JsString::from(hex::encode(&pk_uncompressed_bytes)));
 
 		let proof_input = js_builder.build();
-		let proof = generate_proof_js(note, proof_input).unwrap();
-		let is_valied_proof = verify_proof(proof);
+		let proof = generate_proof_js(note, proof_input.clone()).unwrap();
+		let is_valied_proof = verify_proof(proof, proof_input, (pk, vk));
 		assert!(is_valied_proof);
-		// TODO verify the proof
 	}
 }
