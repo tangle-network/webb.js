@@ -1,40 +1,20 @@
 use core::fmt;
+use std::convert::{TryFrom, TryInto};
 use std::str::FromStr;
+
+use js_sys::{JsString, Uint8Array};
+use rand::rngs::OsRng;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsValue;
 
 use crate::note::secrets::{generate_secrets, get_leaf_with_private_raw};
 use crate::types::{
 	Backend, Curve, HashFunction, Leaves, NotePrefix, NoteVersion, OpStatusCode, Prefix, Version, WasmCurve, BE, HF,
 };
-use js_sys::{JsString, Uint8Array};
-use rand::rngs::OsRng;
-use std::convert::{TryFrom, TryInto};
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsValue;
 
 pub mod secrets;
 
-#[derive(Debug, Eq, PartialEq, Clone)]
-pub struct Note {
-	pub prefix: NotePrefix,
-	pub version: NoteVersion,
-	pub target_chain_id: String,
-	pub source_chain_id: String,
-
-	/// zkp related items
-	pub backend: Backend,
-	pub hash_function: HashFunction,
-	pub curve: Curve,
-	pub exponentiation: i8,
-	pub width: usize,
-	/// mixer related items
-	pub secret: Vec<u8>,
-
-	pub token_symbol: String,
-	pub amount: String,
-	pub denomination: u8,
-}
-
-impl Note {
+impl JsNote {
 	/// Deseralize note from a string
 	pub fn deserialize(note: &str) -> Result<Self, OpStatusCode> {
 		note.parse().map_err(Into::into)
@@ -45,7 +25,7 @@ impl Note {
 	}
 }
 
-impl fmt::Display for Note {
+impl fmt::Display for JsNote {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		let secrets = hex::encode(&self.secret);
 		let parts: Vec<String> = vec![
@@ -81,7 +61,7 @@ impl fmt::Display for Note {
 	}
 }
 
-impl FromStr for Note {
+impl FromStr for JsNote {
 	type Err = OpStatusCode;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -105,7 +85,7 @@ impl FromStr for Note {
 		}
 		let secret: Vec<u8> = hex::decode(&note_val.replace("0x", "")).map_err(|_| OpStatusCode::HexParsingFailed)?;
 
-		Ok(Note {
+		Ok(JsNote {
 			prefix,
 			version,
 			target_chain_id,
@@ -127,7 +107,35 @@ impl FromStr for Note {
 #[derive(Debug, Eq, PartialEq)]
 pub struct JsNote {
 	#[wasm_bindgen(skip)]
-	pub note: Note,
+	pub prefix: NotePrefix,
+	#[wasm_bindgen(skip)]
+	pub version: NoteVersion,
+	#[wasm_bindgen(skip)]
+	pub target_chain_id: String,
+	#[wasm_bindgen(skip)]
+	pub source_chain_id: String,
+
+	/// zkp related items
+	#[wasm_bindgen(skip)]
+	pub backend: Backend,
+	#[wasm_bindgen(skip)]
+	pub hash_function: HashFunction,
+	#[wasm_bindgen(skip)]
+	pub curve: Curve,
+	#[wasm_bindgen(skip)]
+	pub exponentiation: i8,
+	#[wasm_bindgen(skip)]
+	pub width: usize,
+	/// mixer related items
+	#[wasm_bindgen(skip)]
+	pub secret: Vec<u8>,
+
+	#[wasm_bindgen(skip)]
+	pub token_symbol: String,
+	#[wasm_bindgen(skip)]
+	pub amount: String,
+	#[wasm_bindgen(skip)]
+	pub denomination: u8,
 }
 
 #[wasm_bindgen]
@@ -296,7 +304,7 @@ impl JsNoteBuilder {
 		let amount = self.amount.ok_or(OpStatusCode::InvalidAmount)?;
 		let denomination = self.denomination.ok_or(OpStatusCode::InvalidDenomination)?;
 
-		let note: Note = Note {
+		let note = JsNote {
 			prefix,
 			version,
 			target_chain_id,
@@ -311,7 +319,7 @@ impl JsNoteBuilder {
 			width,
 			secret,
 		};
-		Ok(JsNote { note })
+		Ok(note)
 	}
 }
 
@@ -322,92 +330,93 @@ impl JsNote {
 		builder.build()
 	}
 
-	pub fn deserialize(note: JsString) -> Result<JsNote, JsValue> {
+	#[wasm_bindgen(js_name = deserialize)]
+	pub fn js_deserialize(note: JsString) -> Result<JsNote, JsValue> {
 		let n: String = note.into();
-		let n = Note::deserialize(&n)?;
-		Ok(JsNote { note: n })
+		let n = JsNote::deserialize(&n)?;
+		Ok(n)
 	}
 
 	#[wasm_bindgen(js_name = getLeafCommitment)]
 	pub fn get_leaf_commitment(&self) -> Result<Uint8Array, JsValue> {
-		let (leaf, ..) = self.note.get_leaf_and_nullifier()?;
+		let (leaf, ..) = self.get_leaf_and_nullifier()?;
 		Ok(Uint8Array::from(leaf.as_slice()))
 	}
 
 	pub fn serialize(&self) -> JsString {
-		JsString::from(self.note.to_string())
+		JsString::from(self.to_string())
 	}
 
 	#[wasm_bindgen(getter)]
 	pub fn prefix(&self) -> JsString {
-		self.note.prefix.clone().into()
+		self.prefix.clone().into()
 	}
 
 	#[wasm_bindgen(getter)]
 	pub fn version(&self) -> JsString {
-		self.note.version.into()
+		self.version.into()
 	}
 
 	#[wasm_bindgen(js_name = targetChainId)]
 	#[wasm_bindgen(getter)]
 	pub fn target_chain_id(&self) -> JsString {
-		self.note.target_chain_id.clone().into()
+		self.target_chain_id.clone().into()
 	}
 
 	#[wasm_bindgen(js_name = sourceChainId)]
 	#[wasm_bindgen(getter)]
 	pub fn source_chain_id(&self) -> JsString {
-		self.note.source_chain_id.clone().into()
+		self.source_chain_id.clone().into()
 	}
 
 	#[wasm_bindgen(getter)]
 	pub fn backend(&self) -> JsString {
-		self.note.backend.into()
+		self.backend.into()
 	}
 
 	#[wasm_bindgen(getter)]
 	#[wasm_bindgen(js_name = hashFunction)]
 	pub fn hash_function(&self) -> JsString {
-		self.note.hash_function.into()
+		self.hash_function.into()
 	}
 
 	#[wasm_bindgen(getter)]
 	pub fn curve(&self) -> JsString {
-		self.note.curve.into()
+		self.curve.into()
 	}
 
 	#[wasm_bindgen(getter)]
 	pub fn secret(&self) -> JsString {
-		let secret = hex::encode(&self.note.secret);
+		let secret = hex::encode(&self.secret);
 		secret.into()
 	}
 
 	#[wasm_bindgen(getter)]
 	#[wasm_bindgen(js_name = tokenSymbol)]
 	pub fn token_symbol(&self) -> JsString {
-		self.note.token_symbol.clone().into()
+		self.token_symbol.clone().into()
 	}
 
 	#[wasm_bindgen(getter)]
 	pub fn amount(&self) -> JsString {
-		self.note.amount.clone().into()
+		self.amount.clone().into()
 	}
 
 	#[wasm_bindgen(getter)]
 	pub fn denomination(&self) -> JsString {
-		let denomination = self.note.denomination.to_string();
+		let denomination = self.denomination.to_string();
 		denomination.into()
 	}
 
 	#[wasm_bindgen(getter)]
 	pub fn width(&self) -> JsString {
-		let width = self.note.width.to_string();
+		let width = self.width.to_string();
 		width.into()
 	}
 
 	#[wasm_bindgen(getter)]
 	pub fn exponentiation(&self) -> JsString {
-		let exp = self.note.exponentiation.to_string();
+		let exp = self.exponentiation.to_string();
 		exp.into()
 	}
 }
@@ -415,15 +424,15 @@ impl JsNote {
 #[cfg(test)]
 mod test {
 	use arkworks_circuits::prelude::ark_bn254;
+	use wasm_bindgen_test::*;
 
 	use super::*;
-	use wasm_bindgen_test::*;
 
 	type Bn254Fr = ark_bn254::Fr;
 	#[test]
 	fn deserialize() {
 		let note = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
-		let note = Note::deserialize(note).unwrap();
+		let note = JsNote::deserialize(note).unwrap();
 		assert_eq!(note.prefix, NotePrefix::Bridge);
 		assert_eq!(note.backend, Backend::Arkworks);
 		assert_eq!(note.curve, Curve::Bn254);
@@ -441,7 +450,7 @@ mod test {
 	fn generate_note() {
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let note_value = hex::decode("7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717").unwrap();
-		let note = Note {
+		let note = JsNote {
 			prefix: NotePrefix::Bridge,
 			version: NoteVersion::V1,
 			target_chain_id: "3".to_string(),
@@ -453,7 +462,7 @@ mod test {
 			hash_function: HashFunction::Poseidon,
 			backend: Backend::Arkworks,
 			curve: Curve::Bn254,
-			amount: "1".to_string(),
+			amount: "0".to_string(),
 			secret: note_value,
 		};
 		assert_eq!(note.to_string(), note_str)
@@ -464,7 +473,7 @@ mod test {
 	#[wasm_bindgen_test]
 	fn deserialize_to_js_note() {
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
-		let note = JsNote::deserialize(JsString::from(note_str)).unwrap();
+		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
 
 		assert_eq!(note.prefix(), JsString::from(NotePrefix::Bridge.to_string()));
 		assert_eq!(note.version(), JsString::from(NoteVersion::V1.to_string()));
