@@ -202,7 +202,7 @@ impl JsProofInputBuilder {
 
 #[wasm_bindgen]
 pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Result<Proof, JsValue> {
-	let note = js_note.note;
+	let note = js_note;
 	let width = note.width;
 	let exponentiation = note.exponentiation;
 	let backend = note.backend;
@@ -303,7 +303,7 @@ mod test {
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
 		let truncated_substrate_address = truncate_and_pad(&hex::decode(decoded_substrate_address).unwrap());
-		let note = JsNote::deserialize(JsString::from(note_str)).unwrap();
+		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
 		let mut js_builder = JsProofInputBuilder::new();
 		let leave: Uint8Array = note.get_leaf_commitment().unwrap();
 		let leave_bytes: Vec<u8> = leave.to_vec();
@@ -344,7 +344,7 @@ mod test {
 
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
-		let note = JsNote::deserialize(JsString::from(note_str)).unwrap();
+		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
 		let mut js_builder = JsProofInputBuilder::new();
 		let leave: Uint8Array = note.get_leaf_commitment().unwrap();
 		let leave_bytes: Vec<u8> = leave.to_vec();
