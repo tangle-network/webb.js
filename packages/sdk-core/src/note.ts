@@ -1,5 +1,4 @@
-import { Asset } from '@webb-tools/sdk-mixer';
-import type { NotePrefix,Backend, Curve, JsNote, HashFunction } from '@webb-tools/wasm-utils';
+import type { Backend, Curve, HashFunction, JsNote, NotePrefix } from "@webb-tools/wasm-utils";
 
 export type NoteGenInput = {
   prefix: NotePrefix;
@@ -19,10 +18,11 @@ export type NoteGenInput = {
 
 export class Note {
   // Default constructor
-  private constructor(readonly note: JsNote) {}
+  private constructor(readonly note: JsNote) {
+  }
 
   private static get wasm() {
-    return import('@webb-tools/wasm-utils');
+    return import("@webb-tools/wasm-utils");
   }
 
   public static async deserialize(value: string): Promise<Note> {
@@ -48,7 +48,7 @@ export class Note {
     const wasm = await Note.wasm;
     const noteBuilderInput = new wasm.JsNoteBuilder();
     noteBuilderInput.prefix(noteGenInput.prefix);
-    noteBuilderInput.version('v1');
+    noteBuilderInput.version("v1");
     noteBuilderInput.targetChainId(noteGenInput.chain);
     noteBuilderInput.sourceChainId(noteGenInput.sourceChain);
     noteBuilderInput.backend(noteGenInput.backend);
@@ -66,7 +66,4 @@ export class Note {
     return new Note(depositNote);
   }
 
-  public asAsset(): Asset {
-    throw new Error('not implemented');
-  }
 }

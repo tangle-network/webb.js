@@ -1,4 +1,8 @@
-import type { Leaves, Proof } from '@webb-tools/wasm-utils';
+import type { JsNote, Leaves, Proof, ProofInput } from "@webb-tools/wasm-utils";
+import { u8aToHex } from "@polkadot/util";
+import { ProofI } from "@webb-tools/sdk-core/proving/proving-manger";
+import { Note } from "../note";
+
 
 export type ProvingManagerSetupInput = {
   note: string;
@@ -18,49 +22,55 @@ type PMEvents = {
 
 export class ProvingManagerWrapper {
   constructor() {
-    self.addEventListener('message', async (event) => {
+    self.addEventListener("message", async (event) => {
       const message = event.data as Partial<PMEvents>;
       const key = Object.keys(message)[0] as keyof PMEvents;
       switch (key) {
-        case 'proof':
-          {
-            const input = message.proof!;
-            const proof = await this.proof(input);
-            (self as unknown as Worker).postMessage({
-              name: key,
-              data: proof
-            });
-          }
+        case "proof": {
+          const input = message.proof!;
+          const proof = await this.proof(input);
+          (self as unknown as Worker).postMessage({
+            name: key,
+            data: proof
+          });
+        }
           break;
-        case 'destroy':
+        case "destroy":
           (self as unknown as Worker).terminate();
           break;
       }
     });
   }
 
-  private static get manager() {
-    return import('@webb-tools/wasm-utils').then((wasm) => {
-      return wasm.ProvingManager;
+  private static get proofBuilder() {
+    return import("@webb-tools/wasm-utils").then((wasm) => {
+      return wasm.JsProofInputBuilder;
     });
   }
 
-  async proof(pmSetupInput: ProvingManagerSetupInput) {
-    const Manager = await ProvingManagerWrapper.manager;
+  private static async generateProof(jsNote: JsNote, proofInput: ProofInput): Promise<Proof> {
+    const wasm = await import("@webb-tools/wasm-utils");
+    return wasm.generate_proof_js(jsNote, proofInput);
+
+  }
+
+  async proof(pmSetupInput: ProvingManagerSetupInput): Promise<ProofI> {
+    const Manager = await ProvingManagerWrapper.proofBuilder;
     const pm = new Manager();
-    pm.setNoteStr(pmSetupInput.note);
+    const { note } = await Note.deserialize(pmSetupInput.note);
     pm.setLeaves(pmSetupInput.leaves);
     pm.setRelayer(pmSetupInput.relayer);
     pm.setRecipient(pmSetupInput.recipient);
-    pm.setLeafIndex(pmSetupInput.leafIndex);
-    pm.setFee(pmSetupInput.fee);
-    pm.setRefund(pmSetupInput.refund);
-    pm.setProvingKey(pmSetupInput.provingKey);
-    const proof: Proof = await pm.proof();
+    pm.setLeafIndex(String(pmSetupInput.leafIndex));
+    pm.setFee(String(pmSetupInput.fee));
+    pm.setRefund(String(pmSetupInput.refund));
+    pm.setPk(u8aToHex(pmSetupInput.provingKey).replace("0x", ""));
+    const proofInput = pm.build_js();
+    const proof = await ProvingManagerWrapper.generateProof(note, proofInput);
     return {
       proof: proof.proof,
       root: proof.root,
-      nullifier_hash: proof.nullifier_hash
+      nullifierHash: proof.nullifierHash
     };
   }
 }
