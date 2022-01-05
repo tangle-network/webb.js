@@ -1,3 +1,3 @@
-import { ProvingMangerWrapper } from '@webb-tools/sdk-core';
+import { ProvingManagerWrapper } from '@webb-tools/sdk-core';
 
-new ProvingMangerWrapper();
+new ProvingManagerWrapper();

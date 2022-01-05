@@ -3,7 +3,7 @@ import { Proof } from '@webb-tools/wasm-utils';
 
 export type ProofI = Omit<Proof, 'free'>;
 
-export class ProvingManger {
+export class ProvingManager {
   constructor(private readonly worker: Worker) {}
 
   proof(input: ProvingManagerSetupInput): Promise<ProofI> {

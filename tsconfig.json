@@ -36,12 +36,6 @@
       "@webb-tools/sdk-core/*": [
         "packages/sdk-core/src/*"
       ],
-      "@webb-tools/sdk-mixer": [
-        "packages/sdk-mixer/src"
-      ],
-      "@webb-tools/sdk-mixer/*": [
-        "packages/sdk-mixer/src/*"
-      ],
       "@webb-tools/app-util": [
         "packages/app-util/src"
       ],
