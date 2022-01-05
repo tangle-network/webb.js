@@ -1,8 +1,8 @@
 import { Asset } from '@webb-tools/sdk-mixer';
-import type { Backend, Curve, DepositNote, HashFunction } from '@webb-tools/wasm-utils';
+import type { NotePrefix,Backend, Curve, JsNote, HashFunction } from '@webb-tools/wasm-utils';
 
 export type NoteGenInput = {
-  prefix: string;
+  prefix: NotePrefix;
   version: string;
   chain: string;
   sourceChain: string;
@@ -19,7 +19,7 @@ export type NoteGenInput = {
 
 export class Note {
   // Default constructor
-  private constructor(readonly note: DepositNote) {}
+  private constructor(readonly note: JsNote) {}
 
   private static get wasm() {
     return import('@webb-tools/wasm-utils');
@@ -27,13 +27,13 @@ export class Note {
 
   public static async deserialize(value: string): Promise<Note> {
     const wasm = await Note.wasm;
-    const depositNote = wasm.DepositNote.deserialize(value);
+    const depositNote = wasm.JsNote.deserialize(value);
     return new Note(depositNote);
   }
 
-  async toDepositNote(): Promise<DepositNote> {
+  async toDepositNote(): Promise<JsNote> {
     const wasm = await Note.wasm;
-    return wasm.DepositNote.deserialize(this.serialize());
+    return wasm.JsNote.deserialize(this.serialize());
   }
 
   public serialize(): string {
@@ -46,11 +46,11 @@ export class Note {
 
   public static async generateNote(noteGenInput: NoteGenInput): Promise<Note> {
     const wasm = await Note.wasm;
-    const noteBuilderInput = new wasm.NoteBuilderInput();
+    const noteBuilderInput = new wasm.JsNoteBuilder();
     noteBuilderInput.prefix(noteGenInput.prefix);
     noteBuilderInput.version('v1');
-    noteBuilderInput.chain(noteGenInput.chain);
-    noteBuilderInput.sourceChain(noteGenInput.sourceChain);
+    noteBuilderInput.targetChainId(noteGenInput.chain);
+    noteBuilderInput.sourceChainId(noteGenInput.sourceChain);
     noteBuilderInput.backend(noteGenInput.backend);
     noteBuilderInput.hashFunction(noteGenInput.hashFunction);
     noteBuilderInput.curve(noteGenInput.curve);
@@ -62,7 +62,7 @@ export class Note {
     if (noteGenInput.secrets) {
       noteBuilderInput.setSecrets(noteGenInput.secrets);
     }
-    const depositNote = new wasm.DepositNote(noteBuilderInput);
+    const depositNote = noteBuilderInput.build();
     return new Note(depositNote);
   }
 
