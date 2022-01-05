@@ -3825,6 +3825,18 @@
     "@webb-tools/sdk-core" "^0.1.2-75"
     lodash "^4.17.20"
 
+"@webb-tools/sdk-mixer@^0.1.4-7":
+  version "0.1.4-9"
+  resolved "https://registry.yarnpkg.com/@webb-tools/sdk-mixer/-/sdk-mixer-0.1.4-9.tgz#3a4afcc5741a75473cacf152faab94a26fb61350"
+  integrity sha512-oJLKhSH/jKhhFwT3qQ7gf8kLnycGKaD8Ei0iaza4IZngDmShawvNGK+9zTvgCGFhgJJ8qaUBuFJiAPnst/VpVw==
+  dependencies:
+    "@polkadot/util" "^6.5.1"
+    "@webb-tools/app-util" "^0.1.4-9"
+    "@webb-tools/sdk-core" "^0.1.4-9"
+    "@webb-tools/sdk-merkle" "^0.1.2-75"
+    "@webb-tools/wasm-utils" "^0.1.4-9"
+    lodash "^4.17.20"
+
 "@webb-tools/type-definitions@0.1.2-91":
   version "0.1.2-91"
   resolved "https://registry.yarnpkg.com/@webb-tools/type-definitions/-/type-definitions-0.1.2-91.tgz#ce5d81b05eafe21069c5b181c30c298bafcae28f"

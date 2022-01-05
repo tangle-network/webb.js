@@ -62,8 +62,8 @@ export class ProvingManagerWrapper {
     pm.setRelayer(pmSetupInput.relayer);
     pm.setRecipient(pmSetupInput.recipient);
     pm.setLeafIndex(String(pmSetupInput.leafIndex));
-    pm.setFee(String(pmSetupInput.fee));
     pm.setRefund(String(pmSetupInput.refund));
+    pm.setFee(String(pmSetupInput.fee));
     pm.setPk(u8aToHex(pmSetupInput.provingKey).replace("0x", ""));
     const proofInput = pm.build_js();
     const proof = await ProvingManagerWrapper.generateProof(note, proofInput);

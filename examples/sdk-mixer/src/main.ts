@@ -1,9 +1,8 @@
 // @ts-ignore
 import Worker from "./mixer.worker.ts";
-import { ProvingManger } from "@webb-tools/sdk-core";
+import { ProvingManager } from "@webb-tools/sdk-core";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
-import { Note } from "@webb-tools/sdk-mixer";
-
+import { Note } from "@webb-tools/sdk-core";
 async function generateLeaf() {
   const depositNote = await Note.deserialize("webb.mix:v1:1:1:Arkworks:Bn254:Poseidon:WEBB:18:10:5:5:a1feeba98193583d3fb0304b456676976ff379ef54f3749419741d9b6eec2b20e059e20847ba94f6b78fcacb2e6b8b6dd1f40e65c6b0d15eb3b40a4fc600431797c787b40e6ead35527a299786411a19731ba909c3ab2e242b4abefb023f072a");
   console.log(depositNote.note.curve, depositNote.note.width, depositNote.note.exponentiation, depositNote.note.denomination, depositNote.note.amount);
@@ -30,11 +29,12 @@ async function generateLeaf() {
 
 async function main() {
   const n = await Note.deserialize(
-    "webb.mix:v1:1:1:Arkworks:Bn254:Poseidon:EDG:18:1:5:5:933bd84d0b7ed9fa9b216797f787d16898c0d489c7461dc3ff8fdcd34453362bb6a1379362205f3bf2a05ae2bfa7023ad01997db8acc404ecc81293f5de02022bcf08f6d2576af2577cd61b2d2aa0d94c2814084d4c3913a4ee4beb76ba9171c"
+    "webb.mixer:v1:15:15:Arkworks:Bn254:Poseidon:WEBB:12:10:5:5:f840b49ab7d1b7472d1798abfb1b8d0e1c6d6a671d9bf88b066a9e6c84386607452e8ab1565f2445bb80bc349329c65cad265331c766d3f5a2ad21e3e6218708"
   );
   console.log(n.note.backend);
   console.log(n.note.curve);
   console.log(n.note.denomination);
+  console.log(n.note.hashFunction);
   let leaves = [
     "0x1111111000000000000000000000000000000000000000000000000000000000",
     "0x1111111000000000000000000000000000000000000000000000000000000100",
@@ -52,15 +52,16 @@ async function main() {
     "0x12dba9517079c0a79fcbdfbf77df8744f4edddf103f72f33787ef19cedf67222",
     "0x573e3cd36487821cc29d6481e5e7465902d086d11ab95a182834dbb91e93c110"
   ];
-  const pm = new ProvingManger(new Worker());
+  const pm = new ProvingManager(new Worker());
   const proof = await pm.proof({
-    "note": "webb.mix:v1:1:1:Arkworks:Bn254:Poseidon:WEBB:18:1:5:3:b508e1099601315c779e3ae9a6f3dededff747ae92b41ebb3841f7a40e97b9182ae2d629b765e689503730525cb0747fd428203119166e7e7788f7b1d2b8ed21",
+    "note": "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717",
     "leafIndex": 0,
     "recipient": "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129",
     "relayer": "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129",
     leaves: leaves.map((a) => hexToU8a(a)),
-    refund: 0,
-    feed: 0
+    refund: 1,
+    fee: 1,
+    provingKey: new Uint8Array() // TODO fetch from IPFS
   });
   console.log(proof);
   console.log(proof.root);
@@ -72,5 +73,7 @@ async function main() {
 
 main().then((a) => {
   console.log(a);
+}).catch(e =>{
+  console.log(e);
 });
 
