@@ -1,5 +1,4 @@
-use std::convert::{TryFrom, TryInto};
-use std::ops::Deref;
+use std::convert::TryFrom;
 
 use arkworks_circuits::setup::mixer::setup_proof_x5_5;
 use arkworks_utils::prelude::ark_bls12_381::Bls12_381;
@@ -112,11 +111,9 @@ impl JsProofInputBuilder {
 	}
 }
 
-#[wasm_bindgen]
-impl JsProofInputBuilder {
-	#[wasm_bindgen(constructor)]
-	pub fn new() -> Self {
-		JsProofInputBuilder {
+impl Default for JsProofInputBuilder {
+	fn default() -> Self {
+		Self {
 			recipient: None,
 			relayer: None,
 			leaves: None,
@@ -125,6 +122,14 @@ impl JsProofInputBuilder {
 			refund: None,
 			pk: None,
 		}
+	}
+}
+
+#[wasm_bindgen]
+impl JsProofInputBuilder {
+	#[wasm_bindgen(constructor)]
+	pub fn new() -> Self {
+		Self::default()
 	}
 
 	#[wasm_bindgen(js_name = setRecipient)]
