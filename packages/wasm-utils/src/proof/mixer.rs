@@ -264,13 +264,14 @@ pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Result<Pro
 #[cfg(test)]
 mod test {
 	use ark_serialize::CanonicalSerialize;
-	use arkworks_circuits::setup::mixer::{setup_keys_x5_5, MixerProverSetup};
+	use arkworks_circuits::setup::mixer::setup_keys_x5_5;
 	use js_sys::Uint8Array;
 	use wasm_bindgen_test::*;
 
 	use crate::note::JsNote;
 
 	use super::*;
+	use arkworks_circuits::setup::common::verify_unchecked_raw;
 
 	fn verify_proof(proof: Proof, inputs: ProofInput, keys: (Vec<u8>, Vec<u8>)) -> bool {
 		let vk_unchecked_bytes = keys.1;
@@ -297,7 +298,7 @@ mod test {
 		public_inputs.push(fee_bytes.to_vec());
 		public_inputs.push(refund_bytes.to_vec());
 
-		verify_unchecked_raw::<Bn254>(public_inputs.as_slice(), &vk_unchecked_bytes, proof_bytes)
+		verify_unchecked_raw::<Bn254>(public_inputs.as_slice(), &vk_unchecked_bytes, proof_bytes).unwrap()
 	}
 	const TREE_DEPTH: u32 = 30;
 	#[wasm_bindgen_test]
