@@ -253,7 +253,8 @@ pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Result<Pro
 			&mut rng,
 		),
 		_ => return Err(JsValue::from(OpStatusCode::InvalidProofParameters)),
-	};
+	}
+	.map_err(|_| JsValue::from(OpStatusCode::InvalidProofParameters))?;
 	Ok(Proof {
 		proof,
 		nullifier_hash,
@@ -263,7 +264,7 @@ pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Result<Pro
 #[cfg(test)]
 mod test {
 	use ark_serialize::CanonicalSerialize;
-	use arkworks_circuits::setup::mixer::{setup_keys_x5_5, verify_unchecked_raw};
+	use arkworks_circuits::setup::mixer::{setup_keys_x5_5, MixerProverSetup};
 	use js_sys::Uint8Array;
 	use wasm_bindgen_test::*;
 
@@ -301,7 +302,7 @@ mod test {
 	const TREE_DEPTH: u32 = 30;
 	#[wasm_bindgen_test]
 	fn js_setup() {
-		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng);
+		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
 		let mut pk_uncompressed_bytes = Vec::new();
 		CanonicalSerialize::serialize_unchecked(&pk, &mut pk_uncompressed_bytes).unwrap();
 
@@ -345,7 +346,7 @@ mod test {
 
 	#[wasm_bindgen_test]
 	fn generate_proof() {
-		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng);
+		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
 
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
@@ -373,7 +374,7 @@ mod test {
 
 	#[wasm_bindgen_test]
 	fn is_valid_merkle_root() {
-		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng);
+		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
 		let rigid_leaf = hex::decode("66b27a63d25d5187381a251ddf36c0d195f69f303826ec45e534806746549820").unwrap();
 		let rigid_root = hex::decode("6caaa2fea7789832bb2df2e74921c8058e5c66e8a842fe9d389864c006e0492b").unwrap();
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
