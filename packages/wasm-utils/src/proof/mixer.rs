@@ -391,7 +391,7 @@ mod test {
 		let proof_input = js_builder.build().unwrap();
 		let proof = generate_proof_js(note, proof_input.clone()).unwrap();
 		assert_eq!(hex::encode(&proof.root.clone()), hex::encode(rigid_root));
-		let is_valied_proof = verify_proof(proof, proof_input, (pk, vk));
+		let is_valid_proof = verify_proof(proof, proof_input, (pk, vk));
 		assert!(is_valied_proof);
 	}
 }
