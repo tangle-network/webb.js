@@ -365,4 +365,33 @@ mod test {
 		let is_valied_proof = verify_proof(proof, proof_input, (pk, vk));
 		assert!(is_valied_proof);
 	}
+
+	#[wasm_bindgen_test]
+	fn is_valid_merkle_root() {
+		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng);
+		let rigid_leaf = hex::decode("66b27a63d25d5187381a251ddf36c0d195f69f303826ec45e534806746549820").unwrap();
+		let rigid_root = hex::decode("6caaa2fea7789832bb2df2e74921c8058e5c66e8a842fe9d389864c006e0492b").unwrap();
+		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
+		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
+		let mut js_builder = JsProofInputBuilder::new();
+		let leave: Uint8Array = Uint8Array::from(rigid_leaf.as_slice());
+		let leaves_ua: Array = vec![leave].into_iter().collect();
+
+		js_builder.set_leaf_index(JsString::from("0"));
+		js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua)));
+
+		js_builder.set_fee(JsString::from("5"));
+		js_builder.set_refund(JsString::from("1"));
+
+		js_builder.set_relayer(JsString::from(decoded_substrate_address));
+		js_builder.set_recipient(JsString::from(decoded_substrate_address));
+		js_builder.set_pk(JsString::from(hex::encode(&pk)));
+
+		let proof_input = js_builder.build().unwrap();
+		let proof = generate_proof_js(note, proof_input.clone()).unwrap();
+		assert_eq!(hex::encode(&proof.root.clone()), hex::encode(rigid_root));
+		let is_valied_proof = verify_proof(proof, proof_input, (pk, vk));
+		assert!(is_valied_proof);
+	}
 }
