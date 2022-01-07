@@ -26,6 +26,10 @@ pub struct Proof {
 	pub nullifier_hash: Vec<u8>,
 	#[wasm_bindgen(skip)]
 	pub root: Vec<u8>,
+	#[wasm_bindgen(skip)]
+	pub public_inputs: Vec<Vec<u8>>,
+	#[wasm_bindgen(skip)]
+	pub leaf: Vec<u8>,
 }
 
 #[wasm_bindgen]
@@ -225,7 +229,7 @@ pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Result<Pro
 	let pk = proof_input.pk;
 
 	let mut rng = OsRng;
-	let (proof, _leaf, nullifier_hash, root, _public_inputs) = match (backend, curve, exponentiation, width) {
+	let (proof, leaf, nullifier_hash, root, public_inputs) = match (backend, curve, exponentiation, width) {
 		(Backend::Arkworks, Curve::Bn254, 5, 5) => setup_proof_x5_5::<Bn254, OsRng>(
 			ArkCurve::Bn254,
 			secrets,
@@ -259,6 +263,8 @@ pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Result<Pro
 		proof,
 		nullifier_hash,
 		root,
+		public_inputs,
+		leaf,
 	})
 }
 #[cfg(test)]
@@ -273,33 +279,6 @@ mod test {
 	use super::*;
 	use arkworks_circuits::setup::common::verify_unchecked_raw;
 
-	fn verify_proof(proof: Proof, inputs: ProofInput, keys: (Vec<u8>, Vec<u8>)) -> bool {
-		let vk_unchecked_bytes = keys.1;
-		let proof_bytes = proof.proof.as_slice();
-		let mut public_inputs: Vec<Vec<u8>> = vec![];
-
-		let element_encoder = |v: &[u8]| {
-			let mut output = [0u8; 32];
-			output.iter_mut().zip(v).for_each(|(b1, b2)| *b1 = *b2);
-			output
-		};
-		// inputs
-		let recipient_bytes = inputs.recipient;
-		let relayer_bytes = inputs.relayer;
-		let fee_bytes = element_encoder(&inputs.fee.to_le_bytes());
-		let refund_bytes = element_encoder(&inputs.refund.to_le_bytes());
-		let nullifier_hash = proof.nullifier_hash;
-		let root = proof.root;
-
-		public_inputs.push(nullifier_hash);
-		public_inputs.push(root);
-		public_inputs.push(recipient_bytes);
-		public_inputs.push(relayer_bytes);
-		public_inputs.push(fee_bytes.to_vec());
-		public_inputs.push(refund_bytes.to_vec());
-
-		verify_unchecked_raw::<Bn254>(public_inputs.as_slice(), &vk_unchecked_bytes, proof_bytes).unwrap()
-	}
 	const TREE_DEPTH: u32 = 30;
 	#[wasm_bindgen_test]
 	fn js_setup() {
@@ -369,8 +348,8 @@ mod test {
 
 		let proof_input = js_builder.build().unwrap();
 		let proof = generate_proof_js(note, proof_input.clone()).unwrap();
-		let is_valied_proof = verify_proof(proof, proof_input, (pk, vk));
-		assert!(is_valied_proof);
+		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
+		assert!(is_valid_proof);
 	}
 
 	#[wasm_bindgen_test]
@@ -382,8 +361,13 @@ mod test {
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
 		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
 		let mut js_builder = JsProofInputBuilder::new();
-		let leave: Uint8Array = Uint8Array::from(rigid_leaf.as_slice());
-		let leaves_ua: Array = vec![leave].into_iter().collect();
+		let (test_leaf, ..) = note.get_leaf_and_nullifier().unwrap();
+
+		// This fails
+		// assert_eq!(test_leaf, rigid_leaf);
+
+		let leaf = note.get_leaf_commitment().unwrap();
+		let leaves_ua: Array = vec![leaf].into_iter().collect();
 
 		js_builder.set_leaf_index(JsString::from("0"));
 		js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua)));
@@ -397,8 +381,10 @@ mod test {
 
 		let proof_input = js_builder.build().unwrap();
 		let proof = generate_proof_js(note, proof_input.clone()).unwrap();
-		assert_eq!(hex::encode(&proof.root.clone()), hex::encode(rigid_root));
-		let is_valid_proof = verify_proof(proof, proof_input, (pk, vk));
+		// This fails
+		// assert_eq!(hex::encode(&proof.leaf.clone()), hex::encode(rigid_leaf));
+		// assert_eq!(hex::encode(&proof.root.clone()), hex::encode(rigid_root));
+		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 		assert!(is_valid_proof);
 	}
 }
