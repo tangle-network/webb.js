@@ -1,6 +1,6 @@
 {
   "name": "sdk-mixer-example",
-  "version": "0.1.4-10",
+  "version": "0.1.4-11",
   "main": "src/index.ts",
   "license": "MIT",
   "scripts": {
