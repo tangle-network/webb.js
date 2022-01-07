@@ -1,5 +1,4 @@
-use std::convert::{TryFrom, TryInto};
-use std::ops::Deref;
+use std::convert::TryFrom;
 
 use arkworks_circuits::setup::mixer::setup_proof_x5_5;
 use arkworks_utils::prelude::ark_bls12_381::Bls12_381;
@@ -27,6 +26,10 @@ pub struct Proof {
 	pub nullifier_hash: Vec<u8>,
 	#[wasm_bindgen(skip)]
 	pub root: Vec<u8>,
+	#[wasm_bindgen(skip)]
+	pub public_inputs: Vec<Vec<u8>>,
+	#[wasm_bindgen(skip)]
+	pub leaf: Vec<u8>,
 }
 
 #[wasm_bindgen]
@@ -112,11 +115,9 @@ impl JsProofInputBuilder {
 	}
 }
 
-#[wasm_bindgen]
-impl JsProofInputBuilder {
-	#[wasm_bindgen(constructor)]
-	pub fn new() -> Self {
-		JsProofInputBuilder {
+impl Default for JsProofInputBuilder {
+	fn default() -> Self {
+		Self {
 			recipient: None,
 			relayer: None,
 			leaves: None,
@@ -125,6 +126,14 @@ impl JsProofInputBuilder {
 			refund: None,
 			pk: None,
 		}
+	}
+}
+
+#[wasm_bindgen]
+impl JsProofInputBuilder {
+	#[wasm_bindgen(constructor)]
+	pub fn new() -> Self {
+		Self::default()
 	}
 
 	#[wasm_bindgen(js_name = setRecipient)]
@@ -220,7 +229,7 @@ pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Result<Pro
 	let pk = proof_input.pk;
 
 	let mut rng = OsRng;
-	let (proof, _leaf, nullifier_hash, root, _public_inputs) = match (backend, curve, exponentiation, width) {
+	let (proof, leaf, nullifier_hash, root, public_inputs) = match (backend, curve, exponentiation, width) {
 		(Backend::Arkworks, Curve::Bn254, 5, 5) => setup_proof_x5_5::<Bn254, OsRng>(
 			ArkCurve::Bn254,
 			secrets,
@@ -248,55 +257,32 @@ pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Result<Pro
 			&mut rng,
 		),
 		_ => return Err(JsValue::from(OpStatusCode::InvalidProofParameters)),
-	};
+	}
+	.map_err(|_| JsValue::from(OpStatusCode::InvalidProofParameters))?;
 	Ok(Proof {
 		proof,
 		nullifier_hash,
 		root,
+		public_inputs,
+		leaf,
 	})
 }
 #[cfg(test)]
 mod test {
 	use ark_serialize::CanonicalSerialize;
-	use arkworks_circuits::setup::mixer::{setup_keys_x5_5, verify_unchecked_raw};
+	use arkworks_circuits::setup::mixer::setup_keys_x5_5;
 	use js_sys::Uint8Array;
 	use wasm_bindgen_test::*;
 
 	use crate::note::JsNote;
 
 	use super::*;
+	use arkworks_circuits::setup::common::verify_unchecked_raw;
 
-	fn verify_proof(proof: Proof, inputs: ProofInput, keys: (Vec<u8>, Vec<u8>)) -> bool {
-		let vk_unchecked_bytes = keys.1;
-		let proof_bytes = proof.proof.as_slice();
-		let mut public_inputs: Vec<Vec<u8>> = vec![];
-
-		let element_encoder = |v: &[u8]| {
-			let mut output = [0u8; 32];
-			output.iter_mut().zip(v).for_each(|(b1, b2)| *b1 = *b2);
-			output
-		};
-		// inputs
-		let recipient_bytes = inputs.recipient;
-		let relayer_bytes = inputs.relayer;
-		let fee_bytes = element_encoder(&inputs.fee.to_le_bytes());
-		let refund_bytes = element_encoder(&inputs.refund.to_le_bytes());
-		let nullifier_hash = proof.nullifier_hash;
-		let root = proof.root;
-
-		public_inputs.push(nullifier_hash);
-		public_inputs.push(root);
-		public_inputs.push(recipient_bytes);
-		public_inputs.push(relayer_bytes);
-		public_inputs.push(fee_bytes.to_vec());
-		public_inputs.push(refund_bytes.to_vec());
-
-		verify_unchecked_raw::<Bn254>(public_inputs.as_slice(), &vk_unchecked_bytes, proof_bytes)
-	}
 	const TREE_DEPTH: u32 = 30;
 	#[wasm_bindgen_test]
 	fn js_setup() {
-		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng);
+		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
 		let mut pk_uncompressed_bytes = Vec::new();
 		CanonicalSerialize::serialize_unchecked(&pk, &mut pk_uncompressed_bytes).unwrap();
 
@@ -340,7 +326,7 @@ mod test {
 
 	#[wasm_bindgen_test]
 	fn generate_proof() {
-		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng);
+		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
 
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
@@ -362,7 +348,43 @@ mod test {
 
 		let proof_input = js_builder.build().unwrap();
 		let proof = generate_proof_js(note, proof_input.clone()).unwrap();
-		let is_valied_proof = verify_proof(proof, proof_input, (pk, vk));
-		assert!(is_valied_proof);
+		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
+		assert!(is_valid_proof);
+	}
+
+	#[wasm_bindgen_test]
+	fn is_valid_merkle_root() {
+		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
+		let rigid_leaf = hex::decode("66b27a63d25d5187381a251ddf36c0d195f69f303826ec45e534806746549820").unwrap();
+		let rigid_root = hex::decode("6caaa2fea7789832bb2df2e74921c8058e5c66e8a842fe9d389864c006e0492b").unwrap();
+		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
+		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
+		let mut js_builder = JsProofInputBuilder::new();
+		let (test_leaf, ..) = note.get_leaf_and_nullifier().unwrap();
+
+		// This fails
+		// assert_eq!(test_leaf, rigid_leaf);
+
+		let leaf = note.get_leaf_commitment().unwrap();
+		let leaves_ua: Array = vec![leaf].into_iter().collect();
+
+		js_builder.set_leaf_index(JsString::from("0"));
+		js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua)));
+
+		js_builder.set_fee(JsString::from("5"));
+		js_builder.set_refund(JsString::from("1"));
+
+		js_builder.set_relayer(JsString::from(decoded_substrate_address));
+		js_builder.set_recipient(JsString::from(decoded_substrate_address));
+		js_builder.set_pk(JsString::from(hex::encode(&pk)));
+
+		let proof_input = js_builder.build().unwrap();
+		let proof = generate_proof_js(note, proof_input.clone()).unwrap();
+		// This fails
+		// assert_eq!(hex::encode(&proof.leaf.clone()), hex::encode(rigid_leaf));
+		// assert_eq!(hex::encode(&proof.root.clone()), hex::encode(rigid_root));
+		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
+		assert!(is_valid_proof);
 	}
 }

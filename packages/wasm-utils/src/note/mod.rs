@@ -1,5 +1,4 @@
 use core::fmt;
-use std::convert::{TryFrom, TryInto};
 use std::str::FromStr;
 
 use js_sys::{JsString, Uint8Array};
@@ -9,7 +8,7 @@ use wasm_bindgen::JsValue;
 
 use crate::note::secrets::{generate_secrets, get_leaf_with_private_raw};
 use crate::types::{
-	Backend, Curve, HashFunction, Leaves, NotePrefix, NoteVersion, OpStatusCode, Prefix, Version, WasmCurve, BE, HF,
+	Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStatusCode, Prefix, Version, WasmCurve, BE, HF,
 };
 
 pub mod secrets;
@@ -291,7 +290,7 @@ impl JsNoteBuilder {
 
 		let secret = match self.secrets {
 			None => generate_secrets(exponentiation, width, curve, &mut OsRng)?,
-			Some(secrets) => secrets.clone(),
+			Some(secrets) => secrets,
 		};
 
 		let prefix = self.prefix.ok_or(OpStatusCode::InvalidNotePrefix)?;
@@ -349,7 +348,7 @@ impl JsNote {
 
 	#[wasm_bindgen(getter)]
 	pub fn prefix(&self) -> JsString {
-		self.prefix.clone().into()
+		self.prefix.into()
 	}
 
 	#[wasm_bindgen(getter)]
