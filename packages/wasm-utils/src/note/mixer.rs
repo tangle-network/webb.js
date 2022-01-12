@@ -15,11 +15,11 @@ pub fn generate_secrets(
 ) -> Result<Vec<u8>, OpStatusCode> {
 	let secrets: Vec<u8> = match (curve, exponentiation, width) {
 		(Curve::Bls381, 5, 5) => {
-			let (secret_bytes, nullifier_bytes, ..) = setup_leaf_x5_5::<BlsFr, _>(ArkworksCurve::Bls381, rng);
+			let (secret_bytes, nullifier_bytes, ..) = setup_leaf_x5_5::<BlsFr, _>(ArkworksCurve::Bls381, rng)?;
 			[secret_bytes, nullifier_bytes].concat()
 		}
 		(Curve::Bn254, 5, 5) => {
-			let (secret_bytes, nullifier_bytes, ..) = setup_leaf_x5_5::<Bn254Fr, _>(ArkworksCurve::Bn254, rng);
+			let (secret_bytes, nullifier_bytes, ..) = setup_leaf_x5_5::<Bn254Fr, _>(ArkworksCurve::Bn254, rng)?;
 			[secret_bytes, nullifier_bytes].concat()
 		}
 		_ => return Err(OpStatusCode::SecretGenFailed),

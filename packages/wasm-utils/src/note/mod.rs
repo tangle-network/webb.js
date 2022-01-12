@@ -7,12 +7,12 @@ use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 
-use crate::note::secrets::{generate_secrets, get_leaf_with_private_raw};
 use crate::types::{
 	Backend, Curve, HashFunction, Leaves, NotePrefix, NoteVersion, OpStatusCode, Prefix, Version, WasmCurve, BE, HF,
 };
 
-pub mod secrets;
+mod anchor;
+pub mod mixer;
 
 impl JsNote {
 	/// Deseralize note from a string
@@ -21,7 +21,7 @@ impl JsNote {
 	}
 
 	pub fn get_leaf_and_nullifier(&self) -> Result<(Vec<u8>, Vec<u8>), OpStatusCode> {
-		get_leaf_with_private_raw(self.curve, self.width, self.exponentiation, &self.secret)
+		mixer::get_leaf_with_private_raw(self.curve, self.width, self.exponentiation, &self.secret)
 	}
 }
 
@@ -288,13 +288,17 @@ impl JsNoteBuilder {
 		let exponentiation = self.exponentiation.ok_or(OpStatusCode::InvalidExponentiation)?;
 		let width = self.width.ok_or(OpStatusCode::InvalidWidth)?;
 		let curve = self.curve.ok_or(OpStatusCode::InvalidCurve)?;
+		let prefix = self.prefix.ok_or(OpStatusCode::InvalidNotePrefix)?;
 
 		let secret = match self.secrets {
-			None => generate_secrets(exponentiation, width, curve, &mut OsRng)?,
+			None => match prefix {
+				NotePrefix::Mixer => mixer::generate_secrets(exponentiation, width, curve, &mut OsRng)?,
+				NotePrefix::Anchor => anchor::generate_secrets(exponentiation, width, curve, &mut OsRng)?,
+				_ => return Err(JsValue::from(OpStatusCode::SecretGenFailed)),
+			},
 			Some(secrets) => secrets.clone(),
 		};
 
-		let prefix = self.prefix.ok_or(OpStatusCode::InvalidNotePrefix)?;
 		let version = self.version.ok_or(OpStatusCode::InvalidNoteVersion)?;
 		let target_chain_id = self.target_chain_id.ok_or(OpStatusCode::InvalidTargetChain)?;
 		let source_chain_id = self.source_chain_id.ok_or(OpStatusCode::InvalidSourceChain)?;

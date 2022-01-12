@@ -43,6 +43,8 @@ pub enum HashFunction {
 pub enum NotePrefix {
 	Mixer,
 	Bridge,
+	Anchor,
+	VAnchor,
 }
 
 impl fmt::Display for NoteVersion {
@@ -122,7 +124,9 @@ impl FromStr for NotePrefix {
 		match s {
 			"webb.mixer" => Ok(NotePrefix::Mixer),
 			"webb.bridge" => Ok(NotePrefix::Bridge),
-			_ => Err(OpStatusCode::InvalidHasFunction),
+			"webb.anchor" => Ok(NotePrefix::Anchor),
+			"webb.vanchor" => Ok(NotePrefix::VAnchor),
+			_ => Err(OpStatusCode::InvalidNotePrefix),
 		}
 	}
 }
@@ -132,6 +136,13 @@ impl fmt::Display for NotePrefix {
 		match self {
 			NotePrefix::Mixer => write!(f, "webb.mixer"),
 			NotePrefix::Bridge => write!(f, "webb.bridge"),
+
+			NotePrefix::Anchor => {
+				write!(f, "webb.anchor")
+			}
+			NotePrefix::VAnchor => {
+				write!(f, "webb.vanchor")
+			}
 		}
 	}
 }
@@ -250,7 +261,7 @@ extern "C" {
 	pub type Leaves;
 }
 #[wasm_bindgen(typescript_custom_section)]
-const NOTE_PREFIX: &str = "type NotePrefix = 'webb.mixer'|'webb.bridge' ";
+const NOTE_PREFIX: &str = "type NotePrefix = 'webb.mixer'|'webb.bridge'|'webb.anchor'|'webb.vanchor' ";
 
 #[wasm_bindgen(typescript_custom_section)]
 const LEAVES: &str = "type Leaves = Array<Uint8Array>;";
