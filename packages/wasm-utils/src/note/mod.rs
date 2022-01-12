@@ -1,5 +1,4 @@
 use core::fmt;
-use std::convert::{TryFrom, TryInto};
 use std::str::FromStr;
 
 use js_sys::{JsString, Uint8Array};
@@ -8,7 +7,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 
 use crate::types::{
-	Backend, Curve, HashFunction, Leaves, NotePrefix, NoteVersion, OpStatusCode, Prefix, Version, WasmCurve, BE, HF,
+	Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStatusCode, Prefix, Version, WasmCurve, BE, HF,
 };
 
 mod anchor;
@@ -289,18 +288,19 @@ impl JsNoteBuilder {
 		let width = self.width.ok_or(OpStatusCode::InvalidWidth)?;
 		let curve = self.curve.ok_or(OpStatusCode::InvalidCurve)?;
 		let prefix = self.prefix.ok_or(OpStatusCode::InvalidNotePrefix)?;
+		let target_chain_id = self.target_chain_id.ok_or(OpStatusCode::InvalidTargetChain)?;
+		let chain_id: u128 = target_chain_id.parse().map_err(|_| OpStatusCode::InvalidTargetChain)?;
 
 		let secret = match self.secrets {
 			None => match prefix {
 				NotePrefix::Mixer => mixer::generate_secrets(exponentiation, width, curve, &mut OsRng)?,
-				NotePrefix::Anchor => anchor::generate_secrets(exponentiation, width, curve, &mut OsRng)?,
+				NotePrefix::Anchor => anchor::generate_secrets(exponentiation, width, curve, &mut OsRng, chain_id)?,
 				_ => return Err(JsValue::from(OpStatusCode::SecretGenFailed)),
 			},
-			Some(secrets) => secrets.clone(),
+			Some(secrets) => secrets,
 		};
 
 		let version = self.version.ok_or(OpStatusCode::InvalidNoteVersion)?;
-		let target_chain_id = self.target_chain_id.ok_or(OpStatusCode::InvalidTargetChain)?;
 		let source_chain_id = self.source_chain_id.ok_or(OpStatusCode::InvalidSourceChain)?;
 		let backend = self.backend.ok_or(OpStatusCode::InvalidBackend)?;
 		let hash_function = self.hash_function.ok_or(OpStatusCode::InvalidHasFunction)?;
@@ -353,7 +353,7 @@ impl JsNote {
 
 	#[wasm_bindgen(getter)]
 	pub fn prefix(&self) -> JsString {
-		self.prefix.clone().into()
+		self.prefix.into()
 	}
 
 	#[wasm_bindgen(getter)]

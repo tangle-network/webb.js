@@ -1,5 +1,5 @@
 {
-  "version": "0.1.4-10",
+  "version": "0.1.4-11",
   "private": true,
   "engines": {
     "yarn": "^1.10.1",
@@ -21,7 +21,8 @@
     "lint": "polkadot-dev-run-lint --skip-tsc",
     "clean": "polkadot-dev-clean-build",
     "postinstall": "polkadot-dev-yarn-only",
-    "test": "polkadot-dev-run-test --coverage",
+    "wasm:test": "wasm-pack test --release --node ./packages/wasm-utils ",
+    "test": "polkadot-dev-run-test --coverage && yarn wasm:test",
     "test:perf": "cross-env NODE_OPTIONS=--experimental-wasm-modules jest --config ./jest.perf.config.js",
     "check-deps": "./node_modules/@open-web3/util/scripts/check-deps.js yarn.lock @polkadot/ @open-web3/",
     "update-metadata": "ts-node-script -r tsconfig-paths/register packages/types/scripts/updateMetadata.ts",
