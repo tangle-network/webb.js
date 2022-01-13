@@ -30,7 +30,6 @@ pub enum Backend {
 pub enum Curve {
 	Bls381,
 	Bn254,
-	Curve25519,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -89,7 +88,6 @@ impl FromStr for Backend {
 impl fmt::Display for Curve {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
-			Curve::Curve25519 => write!(f, "Curve25519"),
 			Curve::Bls381 => write!(f, "Bls381"),
 			Curve::Bn254 => write!(f, "Bn254"),
 		}
@@ -101,7 +99,6 @@ impl FromStr for Curve {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
-			"Curve25519" => Ok(Curve::Curve25519),
 			"Bls381" => Ok(Curve::Bls381),
 			"Bn254" => Ok(Curve::Bn254),
 			_ => Err(OpStatusCode::InvalidCurve),
@@ -164,7 +161,6 @@ impl From<Curve> for ArkCurve {
 		match curve {
 			Curve::Bls381 => ArkCurve::Bls381,
 			Curve::Bn254 => ArkCurve::Bn254,
-			Curve::Curve25519 => unimplemented!(),
 		}
 	}
 }

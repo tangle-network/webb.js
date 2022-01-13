@@ -34,7 +34,6 @@ arkworks-utils = { version = "^0.4.14", features = ["std", "r1cs"], default-feat
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 js-sys = "0.3"
 rand = { version = "0.8.3", features = ["getrandom"] }
-merlin = { version = "2.0.0", default-features = false }
 getrandom = { version = "0.2.3", features = ["js"] }
 hex = "0.4"
 # The `console_error_panic_hook` crate provides better debugging of panics by
@@ -47,11 +46,6 @@ console_error_panic_hook = "0.1.5"
 wee_alloc = { version = "0.4.2", optional = true }
 
 
-
-[dependencies.curve25519-dalek]
-version = "3.0.0"
-default-features = false
-features = ["u64_backend", "alloc"]
 
 # The `web-sys` crate allows you to interact with the various browser APIs,
 # like the DOM.
