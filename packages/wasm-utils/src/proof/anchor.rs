@@ -1,4 +1,4 @@
-use arkworks_circuits::setup::mixer::setup_proof_x5_5;
+use arkworks_circuits::setup::anchor::setup_proof_x5_4;
 use arkworks_utils::prelude::ark_bls12_381::Bls12_381;
 use arkworks_utils::prelude::ark_bn254::Bn254;
 use arkworks_utils::utils::common::Curve as ArkCurve;
@@ -19,32 +19,41 @@ pub fn create_proof(
 	pk: Vec<u8>,
 	refund: u128,
 	fee: u128,
+	chain_id: u128,
 	leaves: Vec<Vec<u8>>,
 	leaf_index: u64,
-	rng: &mut OsRng,
+  rng: &mut OsRng,
+
 ) -> Result<Proof, OpStatusCode> {
-	let (proof, leaf, nullifier_hash, root, public_inputs) = match (backend, curve, exponentiation, width) {
-		(Backend::Arkworks, Curve::Bn254, 5, 5) => setup_proof_x5_5::<Bn254, OsRng>(
+	//		(proof,leaf_raw,nullifier_hash_raw,root_raw,roots_raw,public_inputs_raw)
+	let (proof, leaf, nullifier_hash, root, roots_raw, public_inputs) = match (backend, curve, exponentiation, width) {
+		(Backend::Arkworks, Curve::Bn254, 5, 5) => setup_proof_x5_4::<Bn254, OsRng>(
 			ArkCurve::Bn254,
+			chain_id,
 			secrets,
 			nullifier,
 			leaves,
 			leaf_index,
+			vec![],
 			recipient_raw,
 			relayer_raw,
+			vec![],
 			fee,
 			refund,
 			pk,
 			rng,
 		),
-		(Backend::Arkworks, Curve::Bls381, 5, 5) => setup_proof_x5_5::<Bls12_381, OsRng>(
+		(Backend::Arkworks, Curve::Bls381, 5, 5) => setup_proof_x5_4::<Bls12_381, OsRng>(
 			ArkCurve::Bls381,
+			chain_id,
 			secrets,
 			nullifier,
 			leaves,
 			leaf_index,
+			vec![],
 			recipient_raw,
 			relayer_raw,
+			vec![],
 			fee,
 			refund,
 			pk,
