@@ -4,30 +4,9 @@ use arkworks_utils::prelude::ark_bn254::Bn254;
 use arkworks_utils::utils::common::Curve as ArkCurve;
 use rand::rngs::OsRng;
 
-use crate::proof::Proof;
+use crate::proof::{AnchorProofInput, Proof};
 use crate::types::{Backend, Curve, OpStatusCode};
 
-pub struct AnchorProofInput {
-	pub exponentiation: i8,
-	pub width: usize,
-	pub curve: Curve,
-	pub backend: Backend,
-	pub secrets: Vec<u8>,
-	pub nullifier: Vec<u8>,
-	pub recipient_raw: Vec<u8>,
-	pub relayer_raw: Vec<u8>,
-	pub pk: Vec<u8>,
-	pub refund: u128,
-	pub fee: u128,
-	pub chain_id: u128,
-	pub leaves: Vec<Vec<u8>>,
-	pub leaf_index: u64,
-	/// get roots for linkable tree
-	pub roots: Vec<Vec<u8>>,
-	/// EMPTY commitment if withdrawing [ou8;32]
-	/// not EMPTY if refreshing
-	pub commitment: [u8; 32],
-}
 pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Result<Proof, OpStatusCode> {
 	//		(proof,leaf_raw,nullifier_hash_raw,root_raw,roots_raw,public_inputs_raw)
 	let AnchorProofInput {

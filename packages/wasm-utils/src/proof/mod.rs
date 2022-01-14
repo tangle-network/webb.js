@@ -56,28 +56,54 @@ impl Proof {
 		root.into()
 	}
 }
-#[wasm_bindgen]
 #[derive(Debug, Eq, PartialEq, Clone)]
-pub struct ProofInput {
-	#[wasm_bindgen(skip)]
+pub struct MixerProofInput {
 	pub recipient: Vec<u8>,
-	#[wasm_bindgen(skip)]
 	pub relayer: Vec<u8>,
-	#[wasm_bindgen(skip)]
-	pub leaves: Vec<[u8; 32]>,
-	#[wasm_bindgen(skip)]
+	pub leaves: Vec<Vec<u8>>,
 	pub leaf_index: u64,
-	#[wasm_bindgen(skip)]
 	pub fee: u128,
-	#[wasm_bindgen(skip)]
 	pub refund: u128,
-	#[wasm_bindgen(skip)]
 	pub pk: Vec<u8>,
+	pub secrets: Vec<u8>,
+	pub nullifier: Vec<u8>,
+}
+#[derive(Debug, Eq, PartialEq, Clone)]
+pub struct AnchorProofInput {
+	pub exponentiation: i8,
+	pub width: usize,
+	pub curve: Curve,
+	pub backend: Backend,
+	pub secrets: Vec<u8>,
+	pub nullifier: Vec<u8>,
+	pub recipient_raw: Vec<u8>,
+	pub relayer_raw: Vec<u8>,
+	pub pk: Vec<u8>,
+	pub refund: u128,
+	pub fee: u128,
+	pub chain_id: u128,
+	pub leaves: Vec<Vec<u8>>,
+	pub leaf_index: u64,
+	/// get roots for linkable tree
+	pub roots: Vec<Vec<u8>>,
+	/// EMPTY commitment if withdrawing [ou8;32]
+	/// not EMPTY if refreshing
+	pub commitment: [u8; 32],
 }
 
+#[derive(Debug, Eq, PartialEq, Clone)]
+pub enum ProofInput {
+	Mixer(MixerProofInput),
+	Anchor(AnchorProofInput),
+}
+#[wasm_bindgen]
+pub struct JsProofInput {
+	#[wasm_bindgen(skip)]
+	pub inner: ProofInput,
+}
 #[wasm_bindgen]
 #[derive(Debug, Eq, PartialEq)]
-pub struct JsProofInputBuilder {
+pub struct ProofInputBuilder {
 	#[wasm_bindgen(skip)]
 	pub recipient: Option<Vec<u8>>,
 	#[wasm_bindgen(skip)]
@@ -92,33 +118,87 @@ pub struct JsProofInputBuilder {
 	pub refund: Option<u128>,
 	#[wasm_bindgen(skip)]
 	pub pk: Option<Vec<u8>>,
+	#[wasm_bindgen(skip)]
+	pub note: Option<JsNote>,
+	#[wasm_bindgen(skip)]
+	/// required only for [anchor,]
+	pub commitment: Option<[u8; 32]>,
+	#[wasm_bindgen(skip)]
+	/// required only for [anchor,]
+	pub roots: Option<Vec<Vec<u8>>>,
 }
 
-impl JsProofInputBuilder {
+impl ProofInputBuilder {
 	pub fn build(self) -> Result<ProofInput, OpStatusCode> {
+		let note = self.note.ok_or(OpStatusCode::InvalidNotePrefix)?;
 		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
 		let recipient = self.recipient.ok_or(OpStatusCode::InvalidRecipient)?;
 		let relayer = self.relayer.ok_or(OpStatusCode::InvalidRelayer)?;
 
 		let leaf_index = self.leaf_index.ok_or(OpStatusCode::InvalidLeafIndex)?;
-		let leaves = self.leaves.ok_or(OpStatusCode::InvalidLeaves)?;
+		let leaves: Vec<_> = self.leaves.iter().collect().ok_or(OpStatusCode::InvalidLeaves)?;
 
 		let fee = self.fee.ok_or(OpStatusCode::InvalidFee)?;
 		let refund = self.refund.ok_or(OpStatusCode::InvalidRefund)?;
 
-		Ok(ProofInput {
-			pk,
-			relayer: truncate_and_pad(&relayer),
-			recipient: truncate_and_pad(&recipient),
-			refund,
-			fee,
-			leaf_index,
-			leaves,
-		})
+		let target_chain_id = note
+			.target_chain_id
+			.parse()
+			.map_err(|_| OpStatusCode::InvalidTargetChain)?;
+		let proof_target = note.prefix;
+		let width = note.width;
+		let exponentiation = note.exponentiation;
+		let backend = note.backend;
+		let curve = note.curve;
+		let note_secrets = note.secret;
+		let secrets = note_secrets[..32].to_vec();
+		let nullifier = note_secrets[32..64].to_vec();
+
+		match proof_target {
+			NotePrefix::Mixer => {
+				let mixer_proof_input = MixerProofInput {
+					pk,
+					relayer: truncate_and_pad(&relayer),
+					recipient: truncate_and_pad(&recipient),
+					refund,
+					fee,
+					leaf_index,
+					leaves,
+					secrets,
+					nullifier,
+				};
+				Ok(ProofInput::Mixer(mixer_proof_input))
+			}
+			NotePrefix::Anchor => {
+				let commitment: [u8; 32] = [0u8; 32];
+
+				let anchor_input = AnchorProofInput {
+					exponentiation,
+					width,
+					curve,
+					backend,
+					secrets,
+					nullifier,
+					recipient_raw: relayer,
+					relayer_raw: recipient,
+					pk,
+					refund,
+					fee,
+					chain_id: target_chain_id,
+					leaves,
+					leaf_index,
+					roots: vec![],
+					commitment,
+				};
+				Ok(ProofInput::Anchor(anchor_input))
+			}
+			NotePrefix::Bridge => return Err(OpStatusCode::InvalidNotePrefix),
+			NotePrefix::VAnchor => return Err(OpStatusCode::InvalidNotePrefix),
+		}
 	}
 }
 
-impl Default for JsProofInputBuilder {
+impl Default for ProofInputBuilder {
 	fn default() -> Self {
 		Self {
 			recipient: None,
@@ -128,12 +208,15 @@ impl Default for JsProofInputBuilder {
 			fee: None,
 			refund: None,
 			pk: None,
+			note: None,
+			commitment: None,
+			roots: None,
 		}
 	}
 }
 
 #[wasm_bindgen]
-impl JsProofInputBuilder {
+impl ProofInputBuilder {
 	#[wasm_bindgen(constructor)]
 	pub fn new() -> Self {
 		Self::default()
@@ -207,67 +290,19 @@ impl JsProofInputBuilder {
 	}
 
 	#[wasm_bindgen]
-	pub fn build_js(self) -> Result<ProofInput, JsValue> {
-		self.build().map_err(|e| e.into())
+	pub fn build_js(self) -> Result<JsProofInput, JsValue> {
+		let proof_input = self.build().map_err(|e| JsValue::from(e))?;
+		Ok(JsProofInput { inner: proof_input })
 	}
 }
 
 #[wasm_bindgen]
-pub fn generate_proof_js(js_note: JsNote, proof_input: ProofInput) -> Result<Proof, JsValue> {
-	let note = js_note;
-	let width = note.width;
-	let exponentiation = note.exponentiation;
-	let backend = note.backend;
-	let curve = note.curve;
-	let note_secrets = note.secret;
-	let secrets = note_secrets[..32].to_vec();
-	let nullifier = note_secrets[32..64].to_vec();
-	let leaves: Vec<_> = proof_input.leaves.into_iter().map(|i| i.to_vec()).collect();
-	let leaf_index = proof_input.leaf_index;
-	let recipient_raw = proof_input.recipient;
-	let relayer_raw = proof_input.relayer;
-	let target_chain_id = (note.target_chain_id)
-		.parse()
-		.map_err(|_| OpStatusCode::InvalidTargetChain)?;
-	let fee = proof_input.fee;
-	let refund = proof_input.refund;
-	let pk = proof_input.pk;
-
+pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 	let mut rng = OsRng;
-	match note.prefix {
-		NotePrefix::Mixer => mixer::create_proof(
-			exponentiation,
-			width,
-			curve,
-			backend,
-			secrets,
-			nullifier,
-			recipient_raw,
-			relayer_raw,
-			pk,
-			refund,
-			fee,
-			leaves,
-			leaf_index,
-			&mut rng,
-		),
-		NotePrefix::Anchor => anchor::create_proof(
-			exponentiation,
-			width,
-			curve,
-			backend,
-			secrets,
-			nullifier,
-			recipient_raw,
-			relayer_raw,
-			pk,
-			refund,
-			fee,
-			target_chain_id,
-			leaves,
-			leaf_index,
-			&mut rng,
-		),
+	let proof_input_value = proof_input.inner;
+	match proof_input_value {
+		ProofInput::Mixer(mixer_proof_input) => mixer::create_proof(mixer_proof_input, &mut rng),
+		ProofInput::Anchor(anchor_proof_input) => anchor::create_proof(anchor_proof_input, &mut rng),
 		_ => Err(OpStatusCode::InvalidNotePrefix),
 	}
 	.map_err(|e| e.into())
@@ -295,7 +330,7 @@ mod test {
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
 		let truncated_substrate_address = truncate_and_pad(&hex::decode(decoded_substrate_address).unwrap());
 		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
-		let mut js_builder = JsProofInputBuilder::new();
+		let mut js_builder = ProofInputBuilder::new();
 		let leave: Uint8Array = note.get_leaf_commitment().unwrap();
 		let leave_bytes: Vec<u8> = leave.to_vec();
 		let leaves_ua: Array = vec![leave].into_iter().collect();
@@ -336,7 +371,7 @@ mod test {
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
 		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
-		let mut js_builder = JsProofInputBuilder::new();
+		let mut js_builder = ProofInputBuilder::new();
 		let leave: Uint8Array = note.get_leaf_commitment().unwrap();
 		let leave_bytes: Vec<u8> = leave.to_vec();
 		let leaves_ua: Array = vec![leave].into_iter().collect();
@@ -365,7 +400,7 @@ mod test {
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
 		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
-		let mut js_builder = JsProofInputBuilder::new();
+		let mut js_builder = ProofInputBuilder::new();
 		let (test_leaf, ..) = note.get_leaf_and_nullifier().unwrap();
 
 		// This fails
@@ -384,7 +419,7 @@ mod test {
 		js_builder.set_recipient(JsString::from(decoded_substrate_address));
 		js_builder.set_pk(JsString::from(hex::encode(&pk)));
 
-		let proof_input = js_builder.build().unwrap();
+		let proof_input = js_builder.build_js().unwrap();
 		let proof = generate_proof_js(note, proof_input.clone()).unwrap();
 		// This fails
 		// assert_eq!(hex::encode(&proof.leaf.clone()), hex::encode(rigid_leaf));
