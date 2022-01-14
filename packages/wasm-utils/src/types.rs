@@ -236,6 +236,10 @@ pub enum OpStatusCode {
 	FailedToGenerateTheLeaf = 32,
 	/// Note not set
 	ProofBuilderNoteNotSet = 33,
+	/// Commitment not set
+	CommitmentNotSet = 34,
+	/// Neighbour Roots aren't set
+	RootsNotSet,
 }
 
 #[wasm_bindgen]

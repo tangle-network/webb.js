@@ -204,7 +204,8 @@ impl ProofInputBuilder {
 				Ok(ProofInput::Mixer(mixer_proof_input))
 			}
 			NotePrefix::Anchor => {
-				let commitment: [u8; 32] = [0u8; 32];
+				let commitment = self.commitment.ok_or(OpStatusCode::CommitmentNotSet)?;
+				let roots = self.roots.ok_or(OpStatusCode::RootsNotSet)?;
 
 				let anchor_input = AnchorProofInput {
 					exponentiation,
@@ -221,7 +222,7 @@ impl ProofInputBuilder {
 					chain_id: target_chain_id,
 					leaves,
 					leaf_index,
-					roots: vec![],
+					roots,
 					commitment,
 				};
 				Ok(ProofInput::Anchor(anchor_input))
@@ -254,6 +255,30 @@ impl ProofInputBuilder {
 	#[wasm_bindgen(constructor)]
 	pub fn new() -> Self {
 		Self::default()
+	}
+
+	#[wasm_bindgen(js_name = setRoots)]
+	pub fn set_roots(&mut self, roots: Leaves) -> Result<(), JsValue> {
+		let rs: Vec<Vec<u8>> = Array::from(&roots)
+			.to_vec()
+			.into_iter()
+			.map(|v| Uint8Array::new_with_byte_offset_and_length(&v, 0, 32))
+			.map(Uint8Arrayx32::try_from)
+			.collect::<Result<Vec<_>, _>>()
+			.map_err(|_| OpStatusCode::InvalidLeaves)?
+			.into_iter()
+			.map(|v| v.0.to_vec())
+			.collect();
+		self.roots = Some(rs);
+		Ok(())
+	}
+
+	#[wasm_bindgen(js_name = setCommiment)]
+	pub fn set_commitment(&mut self, commitment: JsString) -> Result<(), JsValue> {
+		let c: String = commitment.into();
+		let recipient = hex::decode(c).map_err(|_| OpStatusCode::InvalidRecipient)?;
+		self.recipient = Some(recipient);
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setRecipient)]
