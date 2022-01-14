@@ -1,9 +1,5 @@
 use std::convert::TryFrom;
 
-use arkworks_circuits::setup::mixer::setup_proof_x5_5;
-use arkworks_utils::prelude::ark_bls12_381::Bls12_381;
-use arkworks_utils::prelude::ark_bn254::Bn254;
-use arkworks_utils::utils::common::Curve as ArkCurve;
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
@@ -227,8 +223,7 @@ impl ProofInputBuilder {
 				};
 				Ok(ProofInput::Anchor(anchor_input))
 			}
-			NotePrefix::Bridge => return Err(OpStatusCode::InvalidNotePrefix),
-			NotePrefix::VAnchor => return Err(OpStatusCode::InvalidNotePrefix),
+			_ => return Err(OpStatusCode::InvalidNotePrefix),
 		}
 	}
 }
@@ -368,7 +363,6 @@ pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 	match proof_input_value {
 		ProofInput::Mixer(mixer_proof_input) => mixer::create_proof(mixer_proof_input, &mut rng),
 		ProofInput::Anchor(anchor_proof_input) => anchor::create_proof(anchor_proof_input, &mut rng),
-		_ => Err(OpStatusCode::InvalidNotePrefix),
 	}
 	.map_err(|e| e.into())
 }
@@ -383,6 +377,8 @@ mod test {
 	use crate::note::JsNote;
 
 	use super::*;
+	use arkworks_circuits::prelude::ark_bn254::Bn254;
+	use arkworks_utils::utils::common::Curve as ArkCurve;
 
 	const TREE_DEPTH: u32 = 30;
 	#[wasm_bindgen_test]
