@@ -13,6 +13,8 @@ export type ProvingManagerSetupInput = {
   fee: number;
   refund: number;
   provingKey: Uint8Array;
+  roots?:Leaves;
+  commitment?:string;
 };
 
 type PMEvents = {
@@ -58,6 +60,9 @@ export class ProvingManagerWrapper {
     const Manager = await ProvingManagerWrapper.proofBuilder;
     const pm = new Manager();
     const { note } = await Note.deserialize(pmSetupInput.note);
+    switch (note.prefix){
+
+    }
     pm.setLeaves(pmSetupInput.leaves);
     pm.setRelayer(pmSetupInput.relayer);
     pm.setRecipient(pmSetupInput.recipient);
