@@ -58,15 +58,20 @@ impl Proof {
 }
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct MixerProofInput {
-	pub recipient: Vec<u8>,
-	pub relayer: Vec<u8>,
-	pub leaves: Vec<Vec<u8>>,
-	pub leaf_index: u64,
-	pub fee: u128,
-	pub refund: u128,
-	pub pk: Vec<u8>,
+	pub exponentiation: i8,
+	pub width: usize,
+	pub curve: Curve,
+	pub backend: Backend,
 	pub secrets: Vec<u8>,
 	pub nullifier: Vec<u8>,
+	pub recipient: Vec<u8>,
+	pub relayer: Vec<u8>,
+	pub pk: Vec<u8>,
+	pub refund: u128,
+	pub fee: u128,
+	pub chain_id: u128,
+	pub leaves: Vec<Vec<u8>>,
+	pub leaf_index: u64,
 }
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct AnchorProofInput {
@@ -76,8 +81,8 @@ pub struct AnchorProofInput {
 	pub backend: Backend,
 	pub secrets: Vec<u8>,
 	pub nullifier: Vec<u8>,
-	pub recipient_raw: Vec<u8>,
-	pub relayer_raw: Vec<u8>,
+	pub recipient: Vec<u8>,
+	pub relayer: Vec<u8>,
 	pub pk: Vec<u8>,
 	pub refund: u128,
 	pub fee: u128,
@@ -147,7 +152,7 @@ pub struct ProofInputBuilder {
 
 impl ProofInputBuilder {
 	pub fn build(self) -> Result<ProofInput, OpStatusCode> {
-		let note = self.note.ok_or(OpStatusCode::InvalidNotePrefix)?;
+		let note = self.note.ok_or(OpStatusCode::ProofBuilderNoteNotSet)?;
 		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
 		let recipient = self.recipient.ok_or(OpStatusCode::InvalidRecipient)?;
 		let relayer = self.relayer.ok_or(OpStatusCode::InvalidRelayer)?;
@@ -176,18 +181,25 @@ impl ProofInputBuilder {
 		let secrets = note_secrets[..32].to_vec();
 		let nullifier = note_secrets[32..64].to_vec();
 
+		let processed_relayer = truncate_and_pad(&relayer);
+		let processed_recipient = truncate_and_pad(&recipient);
 		match proof_target {
 			NotePrefix::Mixer => {
 				let mixer_proof_input = MixerProofInput {
+					exponentiation,
+					width,
+					curve,
 					pk,
-					relayer: truncate_and_pad(&relayer),
-					recipient: truncate_and_pad(&recipient),
+					recipient: processed_recipient,
+					relayer: processed_relayer,
 					refund,
 					fee,
 					leaf_index,
 					leaves,
 					secrets,
 					nullifier,
+					backend,
+					chain_id: 0,
 				};
 				Ok(ProofInput::Mixer(mixer_proof_input))
 			}
@@ -201,8 +213,8 @@ impl ProofInputBuilder {
 					backend,
 					secrets,
 					nullifier,
-					recipient_raw: relayer,
-					relayer_raw: recipient,
+					recipient: processed_recipient,
+					relayer: processed_relayer,
 					pk,
 					refund,
 					fee,
@@ -311,6 +323,12 @@ impl ProofInputBuilder {
 		Ok(())
 	}
 
+	#[wasm_bindgen(js_name = setNote)]
+	pub fn set_note(&mut self, note: &JsNote) -> Result<(), JsValue> {
+		self.note = Some(note.clone());
+		Ok(())
+	}
+
 	#[wasm_bindgen]
 	pub fn build_js(self) -> Result<JsProofInput, JsValue> {
 		let proof_input = self.build().map_err(|e| JsValue::from(e))?;
@@ -367,6 +385,7 @@ mod test {
 		js_builder.set_recipient(JsString::from(decoded_substrate_address));
 
 		js_builder.set_pk(JsString::from(hex::encode(vec![])));
+		js_builder.set_note(&note);
 
 		let proof_input = js_builder.build().unwrap();
 		let mixer_input = proof_input.mixer_input().unwrap();
@@ -391,7 +410,7 @@ mod test {
 	fn generate_proof() {
 		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
 
-		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let note_str = "webb.mixer:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
 		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
 		let mut js_builder = ProofInputBuilder::new();
@@ -408,7 +427,7 @@ mod test {
 		js_builder.set_relayer(JsString::from(decoded_substrate_address));
 		js_builder.set_recipient(JsString::from(decoded_substrate_address));
 		js_builder.set_pk(JsString::from(hex::encode(&pk)));
-
+		js_builder.set_note(&note);
 		let proof_input = js_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_input).unwrap();
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
@@ -420,7 +439,7 @@ mod test {
 		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
 		let rigid_leaf = hex::decode("66b27a63d25d5187381a251ddf36c0d195f69f303826ec45e534806746549820").unwrap();
 		let rigid_root = hex::decode("6caaa2fea7789832bb2df2e74921c8058e5c66e8a842fe9d389864c006e0492b").unwrap();
-		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let note_str = "webb.mixer:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
 		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
 		let mut js_builder = ProofInputBuilder::new();
@@ -441,6 +460,7 @@ mod test {
 		js_builder.set_relayer(JsString::from(decoded_substrate_address));
 		js_builder.set_recipient(JsString::from(decoded_substrate_address));
 		js_builder.set_pk(JsString::from(hex::encode(&pk)));
+		js_builder.set_note(&note);
 
 		let proof_input = js_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_input).unwrap();

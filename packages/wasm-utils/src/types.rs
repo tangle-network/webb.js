@@ -234,6 +234,8 @@ pub enum OpStatusCode {
 	InvalidLeaves = 31,
 	/// Failed to  Generating Leaf
 	FailedToGenerateTheLeaf = 32,
+	/// Note not set
+	ProofBuilderNoteNotSet = 33,
 }
 
 #[wasm_bindgen]

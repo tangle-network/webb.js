@@ -18,6 +18,11 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 		pk,
 		secrets,
 		nullifier,
+		backend,
+		curve,
+		exponentiation,
+		width,
+		..
 	} = mixer_proof_input;
 
 	let (proof, leaf, nullifier_hash, root, public_inputs) = match (backend, curve, exponentiation, width) {

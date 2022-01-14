@@ -103,7 +103,7 @@ impl FromStr for JsNote {
 }
 
 #[wasm_bindgen]
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub struct JsNote {
 	#[wasm_bindgen(skip)]
 	pub prefix: NotePrefix,
