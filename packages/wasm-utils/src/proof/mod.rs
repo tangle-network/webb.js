@@ -96,6 +96,23 @@ pub enum ProofInput {
 	Mixer(MixerProofInput),
 	Anchor(AnchorProofInput),
 }
+
+impl ProofInput {
+	pub fn mixer_input(&self) -> Result<MixerProofInput, OpStatusCode> {
+		match self {
+			ProofInput::Mixer(mixer_input) => Ok(mixer_input.clone()),
+			_ => Err(OpStatusCode::InvalidNotePrefix),
+		}
+	}
+
+	pub fn anchor_input(&self) -> Result<AnchorProofInput, OpStatusCode> {
+		match self {
+			ProofInput::Anchor(anchor) => Ok(anchor.clone()),
+			_ => Err(OpStatusCode::InvalidNotePrefix),
+		}
+	}
+}
+
 #[wasm_bindgen]
 pub struct JsProofInput {
 	#[wasm_bindgen(skip)]
@@ -136,7 +153,12 @@ impl ProofInputBuilder {
 		let relayer = self.relayer.ok_or(OpStatusCode::InvalidRelayer)?;
 
 		let leaf_index = self.leaf_index.ok_or(OpStatusCode::InvalidLeafIndex)?;
-		let leaves: Vec<_> = self.leaves.iter().collect().ok_or(OpStatusCode::InvalidLeaves)?;
+		let leaves: Vec<_> = self
+			.leaves
+			.ok_or(OpStatusCode::InvalidLeaves)?
+			.into_iter()
+			.map(|leaf| leaf.to_vec())
+			.collect();
 
 		let fee = self.fee.ok_or(OpStatusCode::InvalidFee)?;
 		let refund = self.refund.ok_or(OpStatusCode::InvalidRefund)?;
@@ -326,7 +348,7 @@ mod test {
 		let mut pk_uncompressed_bytes = Vec::new();
 		CanonicalSerialize::serialize_unchecked(&pk, &mut pk_uncompressed_bytes).unwrap();
 
-		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let note_str = "webb.mixer:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
 		let truncated_substrate_address = truncate_and_pad(&hex::decode(decoded_substrate_address).unwrap());
 		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
@@ -347,21 +369,22 @@ mod test {
 		js_builder.set_pk(JsString::from(hex::encode(vec![])));
 
 		let proof_input = js_builder.build().unwrap();
+		let mixer_input = proof_input.mixer_input().unwrap();
 
 		assert_eq!(
-			hex::encode(proof_input.recipient),
+			hex::encode(mixer_input.recipient),
 			hex::encode(&truncated_substrate_address)
 		);
 		assert_eq!(
-			hex::encode(proof_input.relayer),
+			hex::encode(mixer_input.relayer),
 			hex::encode(&truncated_substrate_address)
 		);
 
-		assert_eq!(proof_input.refund, 1);
-		assert_eq!(proof_input.fee, 5);
+		assert_eq!(mixer_input.refund, 1);
+		assert_eq!(mixer_input.fee, 5);
 
-		assert_eq!(proof_input.leaf_index, 0);
-		assert_eq!(hex::encode(proof_input.leaves[0]), hex::encode(leave_bytes));
+		assert_eq!(mixer_input.leaf_index, 0);
+		assert_eq!(hex::encode(&mixer_input.leaves[0]), hex::encode(leave_bytes));
 	}
 
 	#[wasm_bindgen_test]
@@ -386,8 +409,8 @@ mod test {
 		js_builder.set_recipient(JsString::from(decoded_substrate_address));
 		js_builder.set_pk(JsString::from(hex::encode(&pk)));
 
-		let proof_input = js_builder.build().unwrap();
-		let proof = generate_proof_js(note, proof_input.clone()).unwrap();
+		let proof_input = js_builder.build_js().unwrap();
+		let proof = generate_proof_js(proof_input).unwrap();
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 		assert!(is_valid_proof);
 	}
@@ -420,7 +443,7 @@ mod test {
 		js_builder.set_pk(JsString::from(hex::encode(&pk)));
 
 		let proof_input = js_builder.build_js().unwrap();
-		let proof = generate_proof_js(note, proof_input.clone()).unwrap();
+		let proof = generate_proof_js(proof_input).unwrap();
 		// This fails
 		// assert_eq!(hex::encode(&proof.leaf.clone()), hex::encode(rigid_leaf));
 		// assert_eq!(hex::encode(&proof.root.clone()), hex::encode(rigid_root));
