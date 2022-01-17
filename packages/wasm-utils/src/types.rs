@@ -336,6 +336,40 @@ impl From<NotePrefix> for JsString {
 	}
 }
 
+impl From<Curve> for WasmCurve {
+	fn from(curve: Curve) -> Self {
+		let js_str = curve.to_string();
+		JsValue::from(&js_str).try_into().unwrap()
+	}
+}
+
+impl From<HashFunction> for HF {
+	fn from(curve: HashFunction) -> Self {
+		let js_str = curve.to_string();
+		JsValue::from(&js_str).try_into().unwrap()
+	}
+}
+
+impl From<NoteVersion> for Version {
+	fn from(curve: NoteVersion) -> Self {
+		let js_str = curve.to_string();
+		JsValue::from(&js_str).try_into().unwrap()
+	}
+}
+impl From<Backend> for BE {
+	fn from(curve: Backend) -> Self {
+		let js_str = curve.to_string();
+		JsValue::from(&js_str).try_into().unwrap()
+	}
+}
+
+impl From<NotePrefix> for Prefix {
+	fn from(curve: NotePrefix) -> Self {
+		let js_str = curve.to_string();
+		JsValue::from(&js_str).try_into().unwrap()
+	}
+}
+
 #[cfg(not(test))]
 #[wasm_bindgen(start)]
 pub fn main() {

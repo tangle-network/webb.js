@@ -352,12 +352,12 @@ impl JsNote {
 	}
 
 	#[wasm_bindgen(getter)]
-	pub fn prefix(&self) -> JsString {
+	pub fn prefix(&self) -> Prefix {
 		self.prefix.into()
 	}
 
 	#[wasm_bindgen(getter)]
-	pub fn version(&self) -> JsString {
+	pub fn version(&self) -> Version {
 		self.version.into()
 	}
 
@@ -374,7 +374,7 @@ impl JsNote {
 	}
 
 	#[wasm_bindgen(getter)]
-	pub fn backend(&self) -> JsString {
+	pub fn backend(&self) -> BE {
 		self.backend.into()
 	}
 
@@ -385,7 +385,7 @@ impl JsNote {
 	}
 
 	#[wasm_bindgen(getter)]
-	pub fn curve(&self) -> JsString {
+	pub fn curve(&self) -> WasmCurve {
 		self.curve.into()
 	}
 
@@ -489,9 +489,9 @@ mod test {
 		assert_eq!(note.denomination(), JsString::from("18"));
 		assert_eq!(note.token_symbol(), JsString::from("EDG"));
 
-		assert_eq!(note.backend(), JsString::from(Backend::Arkworks.to_string()));
-		assert_eq!(note.curve(), JsString::from(Curve::Bn254.to_string()));
-		assert_eq!(note.hash_function(), JsString::from(HashFunction::Poseidon.to_string()));
+		assert_eq!(note.backend(), Backend::Arkworks.into());
+		assert_eq!(note.curve(), Curve::Bn254.into());
+		assert_eq!(note.hash_function(), HashFunction::Poseidon.into());
 	}
 
 	#[wasm_bindgen_test]
