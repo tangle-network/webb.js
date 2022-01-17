@@ -223,7 +223,7 @@ impl ProofInputBuilder {
 				};
 				Ok(ProofInput::Anchor(anchor_input))
 			}
-			_ => return Err(OpStatusCode::InvalidNotePrefix),
+			_ => Err(OpStatusCode::InvalidNotePrefix),
 		}
 	}
 }
@@ -351,7 +351,7 @@ impl ProofInputBuilder {
 
 	#[wasm_bindgen]
 	pub fn build_js(self) -> Result<JsProofInput, JsValue> {
-		let proof_input = self.build().map_err(|e| JsValue::from(e))?;
+		let proof_input = self.build()?;
 		Ok(JsProofInput { inner: proof_input })
 	}
 }
