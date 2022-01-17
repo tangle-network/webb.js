@@ -60,17 +60,6 @@ export class ProvingManagerWrapper {
     const pm = new Manager();
     const { note } = await Note.deserialize(pmSetupInput.note);
     // TODO: handle the prefix and validation
-    /*    switch (note.prefix){
-      case "webb.mixer":
-        break;
-      case "webb.bridge":
-        break;
-      case "webb.anchor":
-        break;
-      case "webb.vanchor":
-        break;
-
-    }*/
     pm.setLeaves(pmSetupInput.leaves);
     pm.setRelayer(pmSetupInput.relayer);
     pm.setRecipient(pmSetupInput.recipient);
