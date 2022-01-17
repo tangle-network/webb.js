@@ -431,6 +431,7 @@ mod test {
 	use wasm_bindgen_test::*;
 
 	use super::*;
+	use crate::utils::to_rust_string;
 
 	type Bn254Fr = ark_bn254::Fr;
 	#[test]
@@ -479,8 +480,8 @@ mod test {
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
 
-		assert_eq!(note.prefix(), JsString::from(NotePrefix::Bridge.to_string()));
-		assert_eq!(note.version(), JsString::from(NoteVersion::V1.to_string()));
+		assert_eq!(to_rust_string(note.prefix()), NotePrefix::Bridge.to_string());
+		assert_eq!(to_rust_string(note.version()), NoteVersion::V1.to_string());
 		assert_eq!(note.target_chain_id(), JsString::from("3"));
 		assert_eq!(note.source_chain_id(), JsString::from("2"));
 
@@ -489,9 +490,9 @@ mod test {
 		assert_eq!(note.denomination(), JsString::from("18"));
 		assert_eq!(note.token_symbol(), JsString::from("EDG"));
 
-		assert_eq!(note.backend(), Backend::Arkworks.into());
-		assert_eq!(note.curve(), Curve::Bn254.into());
-		assert_eq!(note.hash_function(), HashFunction::Poseidon.into());
+		assert_eq!(to_rust_string(note.backend()), Backend::Arkworks.to_string());
+		assert_eq!(to_rust_string(note.curve()), Curve::Bn254.to_string());
+		assert_eq!(to_rust_string(note.hash_function()), HashFunction::Poseidon.to_string());
 	}
 
 	#[wasm_bindgen_test]
