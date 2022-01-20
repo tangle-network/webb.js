@@ -294,7 +294,7 @@ impl JsNoteBuilder {
 		let secret = match self.secrets {
 			None => match prefix {
 				NotePrefix::Mixer => mixer::generate_secrets(exponentiation, width, curve, &mut OsRng)?,
-				NotePrefix::Anchor => anchor::generate_secrets(exponentiation, width, curve, &mut OsRng, chain_id)?,
+				NotePrefix::Anchor => anchor::generate_secrets(exponentiation, width, curve, chain_id, &mut OsRng)?,
 				_ => return Err(JsValue::from(OpStatusCode::SecretGenFailed)),
 			},
 			Some(secrets) => secrets,
