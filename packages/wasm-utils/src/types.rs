@@ -30,7 +30,6 @@ pub enum Backend {
 pub enum Curve {
 	Bls381,
 	Bn254,
-	Curve25519,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -43,6 +42,8 @@ pub enum HashFunction {
 pub enum NotePrefix {
 	Mixer,
 	Bridge,
+	Anchor,
+	VAnchor,
 }
 
 impl fmt::Display for NoteVersion {
@@ -87,7 +88,6 @@ impl FromStr for Backend {
 impl fmt::Display for Curve {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
-			Curve::Curve25519 => write!(f, "Curve25519"),
 			Curve::Bls381 => write!(f, "Bls381"),
 			Curve::Bn254 => write!(f, "Bn254"),
 		}
@@ -99,7 +99,6 @@ impl FromStr for Curve {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
-			"Curve25519" => Ok(Curve::Curve25519),
 			"Bls381" => Ok(Curve::Bls381),
 			"Bn254" => Ok(Curve::Bn254),
 			_ => Err(OpStatusCode::InvalidCurve),
@@ -122,7 +121,9 @@ impl FromStr for NotePrefix {
 		match s {
 			"webb.mixer" => Ok(NotePrefix::Mixer),
 			"webb.bridge" => Ok(NotePrefix::Bridge),
-			_ => Err(OpStatusCode::InvalidHasFunction),
+			"webb.anchor" => Ok(NotePrefix::Anchor),
+			"webb.vanchor" => Ok(NotePrefix::VAnchor),
+			_ => Err(OpStatusCode::InvalidNotePrefix),
 		}
 	}
 }
@@ -132,6 +133,13 @@ impl fmt::Display for NotePrefix {
 		match self {
 			NotePrefix::Mixer => write!(f, "webb.mixer"),
 			NotePrefix::Bridge => write!(f, "webb.bridge"),
+
+			NotePrefix::Anchor => {
+				write!(f, "webb.anchor")
+			}
+			NotePrefix::VAnchor => {
+				write!(f, "webb.vanchor")
+			}
 		}
 	}
 }
@@ -153,7 +161,6 @@ impl From<Curve> for ArkCurve {
 		match curve {
 			Curve::Bls381 => ArkCurve::Bls381,
 			Curve::Bn254 => ArkCurve::Bn254,
-			Curve::Curve25519 => unimplemented!(),
 		}
 	}
 }
@@ -227,6 +234,12 @@ pub enum OpStatusCode {
 	InvalidLeaves = 31,
 	/// Failed to  Generating Leaf
 	FailedToGenerateTheLeaf = 32,
+	/// Note not set
+	ProofBuilderNoteNotSet = 33,
+	/// Commitment not set
+	CommitmentNotSet = 34,
+	/// Neighbour Roots aren't set
+	RootsNotSet,
 }
 
 #[wasm_bindgen]
@@ -250,7 +263,7 @@ extern "C" {
 	pub type Leaves;
 }
 #[wasm_bindgen(typescript_custom_section)]
-const NOTE_PREFIX: &str = "type NotePrefix = 'webb.mixer'|'webb.bridge' ";
+const NOTE_PREFIX: &str = "type NotePrefix = 'webb.mixer'|'webb.bridge'|'webb.anchor'|'webb.vanchor' ";
 
 #[wasm_bindgen(typescript_custom_section)]
 const LEAVES: &str = "type Leaves = Array<Uint8Array>;";
@@ -320,6 +333,40 @@ impl From<NoteVersion> for JsString {
 impl From<NotePrefix> for JsString {
 	fn from(e: NotePrefix) -> Self {
 		JsString::from(e.to_string())
+	}
+}
+
+impl From<Curve> for WasmCurve {
+	fn from(curve: Curve) -> Self {
+		let js_str = curve.to_string();
+		JsValue::from(&js_str).try_into().unwrap()
+	}
+}
+
+impl From<HashFunction> for HF {
+	fn from(curve: HashFunction) -> Self {
+		let js_str = curve.to_string();
+		JsValue::from(&js_str).try_into().unwrap()
+	}
+}
+
+impl From<NoteVersion> for Version {
+	fn from(curve: NoteVersion) -> Self {
+		let js_str = curve.to_string();
+		JsValue::from(&js_str).try_into().unwrap()
+	}
+}
+impl From<Backend> for BE {
+	fn from(curve: Backend) -> Self {
+		let js_str = curve.to_string();
+		JsValue::from(&js_str).try_into().unwrap()
+	}
+}
+
+impl From<NotePrefix> for Prefix {
+	fn from(curve: NotePrefix) -> Self {
+		let js_str = curve.to_string();
+		JsValue::from(&js_str).try_into().unwrap()
 	}
 }
 

@@ -6,12 +6,12 @@ use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 
-use crate::note::secrets::{generate_secrets, get_leaf_with_private_raw};
 use crate::types::{
 	Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStatusCode, Prefix, Version, WasmCurve, BE, HF,
 };
 
-pub mod secrets;
+mod anchor;
+pub mod mixer;
 
 impl JsNote {
 	/// Deseralize note from a string
@@ -20,7 +20,7 @@ impl JsNote {
 	}
 
 	pub fn get_leaf_and_nullifier(&self) -> Result<(Vec<u8>, Vec<u8>), OpStatusCode> {
-		get_leaf_with_private_raw(self.curve, self.width, self.exponentiation, &self.secret)
+		mixer::get_leaf_with_private_raw(self.curve, self.width, self.exponentiation, &self.secret)
 	}
 }
 
@@ -103,7 +103,7 @@ impl FromStr for JsNote {
 }
 
 #[wasm_bindgen]
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub struct JsNote {
 	#[wasm_bindgen(skip)]
 	pub prefix: NotePrefix,
@@ -287,15 +287,20 @@ impl JsNoteBuilder {
 		let exponentiation = self.exponentiation.ok_or(OpStatusCode::InvalidExponentiation)?;
 		let width = self.width.ok_or(OpStatusCode::InvalidWidth)?;
 		let curve = self.curve.ok_or(OpStatusCode::InvalidCurve)?;
+		let prefix = self.prefix.ok_or(OpStatusCode::InvalidNotePrefix)?;
+		let target_chain_id = self.target_chain_id.ok_or(OpStatusCode::InvalidTargetChain)?;
+		let chain_id: u128 = target_chain_id.parse().map_err(|_| OpStatusCode::InvalidTargetChain)?;
 
 		let secret = match self.secrets {
-			None => generate_secrets(exponentiation, width, curve, &mut OsRng)?,
+			None => match prefix {
+				NotePrefix::Mixer => mixer::generate_secrets(exponentiation, width, curve, &mut OsRng)?,
+				NotePrefix::Anchor => anchor::generate_secrets(exponentiation, width, curve, &mut OsRng, chain_id)?,
+				_ => return Err(JsValue::from(OpStatusCode::SecretGenFailed)),
+			},
 			Some(secrets) => secrets,
 		};
 
-		let prefix = self.prefix.ok_or(OpStatusCode::InvalidNotePrefix)?;
 		let version = self.version.ok_or(OpStatusCode::InvalidNoteVersion)?;
-		let target_chain_id = self.target_chain_id.ok_or(OpStatusCode::InvalidTargetChain)?;
 		let source_chain_id = self.source_chain_id.ok_or(OpStatusCode::InvalidSourceChain)?;
 		let backend = self.backend.ok_or(OpStatusCode::InvalidBackend)?;
 		let hash_function = self.hash_function.ok_or(OpStatusCode::InvalidHasFunction)?;
@@ -347,12 +352,12 @@ impl JsNote {
 	}
 
 	#[wasm_bindgen(getter)]
-	pub fn prefix(&self) -> JsString {
+	pub fn prefix(&self) -> Prefix {
 		self.prefix.into()
 	}
 
 	#[wasm_bindgen(getter)]
-	pub fn version(&self) -> JsString {
+	pub fn version(&self) -> Version {
 		self.version.into()
 	}
 
@@ -369,7 +374,7 @@ impl JsNote {
 	}
 
 	#[wasm_bindgen(getter)]
-	pub fn backend(&self) -> JsString {
+	pub fn backend(&self) -> BE {
 		self.backend.into()
 	}
 
@@ -380,7 +385,7 @@ impl JsNote {
 	}
 
 	#[wasm_bindgen(getter)]
-	pub fn curve(&self) -> JsString {
+	pub fn curve(&self) -> WasmCurve {
 		self.curve.into()
 	}
 
@@ -426,6 +431,7 @@ mod test {
 	use wasm_bindgen_test::*;
 
 	use super::*;
+	use crate::utils::to_rust_string;
 
 	type Bn254Fr = ark_bn254::Fr;
 	#[test]
@@ -474,8 +480,8 @@ mod test {
 		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
 
-		assert_eq!(note.prefix(), JsString::from(NotePrefix::Bridge.to_string()));
-		assert_eq!(note.version(), JsString::from(NoteVersion::V1.to_string()));
+		assert_eq!(to_rust_string(note.prefix()), NotePrefix::Bridge.to_string());
+		assert_eq!(to_rust_string(note.version()), NoteVersion::V1.to_string());
 		assert_eq!(note.target_chain_id(), JsString::from("3"));
 		assert_eq!(note.source_chain_id(), JsString::from("2"));
 
@@ -484,9 +490,9 @@ mod test {
 		assert_eq!(note.denomination(), JsString::from("18"));
 		assert_eq!(note.token_symbol(), JsString::from("EDG"));
 
-		assert_eq!(note.backend(), JsString::from(Backend::Arkworks.to_string()));
-		assert_eq!(note.curve(), JsString::from(Curve::Bn254.to_string()));
-		assert_eq!(note.hash_function(), JsString::from(HashFunction::Poseidon.to_string()));
+		assert_eq!(to_rust_string(note.backend()), Backend::Arkworks.to_string());
+		assert_eq!(to_rust_string(note.curve()), Curve::Bn254.to_string());
+		assert_eq!(to_rust_string(note.hash_function()), HashFunction::Poseidon.to_string());
 	}
 
 	#[wasm_bindgen_test]
