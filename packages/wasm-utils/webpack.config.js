@@ -2,7 +2,7 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 
-module.exports = function (config) {
+module.exports = function (config = { isNode: 'false' }) {
   const isNode = config.isNode === 'true';
   if (isNode) {
     console.info('Building for nodjes');
