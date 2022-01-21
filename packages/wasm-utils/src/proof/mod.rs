@@ -87,7 +87,7 @@ pub struct AnchorProofInput {
 	pub leaf_index: u64,
 	/// get roots for linkable tree
 	pub roots: Vec<Vec<u8>>,
-	/// EMPTY commitment if withdrawing [ou8;32]
+	/// EMPTY commitment if withdrawing [0u8;32]
 	/// not EMPTY if refreshing
 	pub commitment: [u8; 32],
 }

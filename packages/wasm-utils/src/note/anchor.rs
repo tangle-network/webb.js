@@ -11,8 +11,8 @@ pub fn generate_secrets(
 	exponentiation: i8,
 	width: usize,
 	curve: Curve,
-	rng: &mut OsRng,
 	chain_id: u128,
+	rng: &mut OsRng,
 ) -> Result<Vec<u8>, OpStatusCode> {
 	let (secret_bytes, nullifier_bytes, ..) = match (curve, exponentiation, width) {
 		(Curve::Bls381, 5, 4) => setup_leaf_x5_4::<BlsFr, _>(ArkworksCurve::Bls381, chain_id, rng),
