@@ -13,5 +13,12 @@ const publishPackageJson = {
 console.log('writing the updated package.json');
 fs.writeFileSync(originalPackageJsonPath, JSON.stringify(publishPackageJson, null, 2));
 console.info(`deleting  node extra files`);
-fs.unlinkSync(path.join(buildDir, 'node', 'package.json'));
-console.info('Done patching the package');
+console.log(`Root files `, fs.readdirSync(buildDir));
+console.log(`Node files `, fs.readdirSync(path.join(buildDir, 'node')));
+
+try {
+  fs.unlinkSync(path.join(buildDir, 'node', 'package.json'));
+  console.info('Done patching the package');
+} catch (e) {
+  console.info('Done patching the package , node/package.json already removed');
+}
