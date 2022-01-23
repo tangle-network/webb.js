@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const CopyPlugin = require('copy-webpack-plugin');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 
@@ -10,6 +11,11 @@ module.exports = function (config = { isNode: 'false' }) {
     console.info('Building for browser');
   }
   const build = path.join(__dirname, 'build', isNode ? 'node' : '');
+  try {
+    console.log(`Root files `, fs.readdirSync(__dirname), 'build');
+  } catch (_) {
+    console.log();
+  }
 
   const args = '--scope webb-tools';
   return {
