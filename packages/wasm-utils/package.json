@@ -1,7 +1,7 @@
 {
   "author": "Webb Developers",
   "name": "@webb-tools/wasm-utils",
-  "version": "0.1.4-18",
+  "version": "0.1.4-19",
   "scripts": {
     "build:node": "webpack --env.isNode=true",
     "build:browser": "webpack --env.isNode=false",
@@ -17,7 +17,11 @@
     "wasm-utils_bg.wasm",
     "wasm-utils.js",
     "wasm-utils_bg.js",
-    "wasm-utils.d.ts"
+    "wasm-utils.d.ts",
+    "node/wasm-utils_bg.wasm",
+    "node/wasm-utils.js",
+    "node/wasm-utils_bg.js",
+    "node/wasm-utils.d.ts"
   ],
   "module": "wasm-utils.js",
   "types": "wasm-utils.d.ts",

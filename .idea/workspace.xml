@@ -24,7 +24,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="DarkyenusTimeTracker">
-    <option name="totalTimeSeconds" value="1109186" />
+    <option name="totalTimeSeconds" value="1109539" />
     <option name="idleThresholdMs" value="60000000" />
     <option name="autoCountIdleSeconds" value="6000" />
   </component>
@@ -429,7 +429,7 @@
       <workItem from="1642694732768" duration="1573000" />
       <workItem from="1642702311083" duration="1517000" />
       <workItem from="1642783040886" duration="7500000" />
-      <workItem from="1642952015081" duration="4432000" />
+      <workItem from="1642952015081" duration="4785000" />
     </task>
     <task id="LOCAL-00190" summary="update the tests for proving">
       <created>1640960234920</created>

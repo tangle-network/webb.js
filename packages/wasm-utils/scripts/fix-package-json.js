@@ -13,10 +13,10 @@ async function main() {
   };
   console.log('writing the updated package.json');
   /// sleep for other fs oprations
-  await new Promise((resolve, reject) => {
-    setTimeout(resolve, 2000);
-  });
-  fs.writeFileSync(originalPackageJsonPath, JSON.stringify(publishPackageJson, null, 2));
+  // await new Promise((resolve, reject) => {
+  //   setTimeout(resolve, 2000);
+  // });
+  // fs.writeFileSync(originalPackageJsonPath, JSON.stringify(publishPackageJson, null, 2));
   console.info(`deleting  node extra files`);
   console.log(`Root files `, fs.readdirSync(buildDir));
   console.log(`Node files `, fs.readdirSync(path.join(buildDir, 'node')));
