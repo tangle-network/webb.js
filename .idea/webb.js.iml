@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/ahash-de528c1283171fa8/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/ark-ff-0f25887b5a8ef2ee/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/clear_on_drop-b501937728beb2e5/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/generic-array-161698eb30cd4018/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/getrandom-57d82000ad1f4050/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/libc-49297560c71995e0/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/log-88485f26a302610c/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/num-bigint-0419c7fefa3fd1d1/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/num-bigint-5a1517cc6213ad04/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/num-integer-e6f9ffdad871213f/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/num-traits-0821bbc74b63cf8a/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/proc-macro2-a4727d5fff65e4a3/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/ryu-9152c4766e3aa926/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/serde-994d9e6a5a400642/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/serde_derive-85f137ecaf79bd43/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/serde_json-bb274cc62d3799bf/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/syn-55e713592ff5dc34/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/typenum-c17cc9dc2d63ee85/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/wasm-bindgen-e1640e808191efeb/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/wasm-bindgen-shared-e208e144d13fa276/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/ahash-002589283d3126b6/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/anyhow-2558ab36ee4dfe3e/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/byteorder-cfba9acc197ff34d/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/clear_on_drop-c3999b0b94aa3c98/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/crunchy-0b9ff43e05811dc4/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/getrandom-533065f76070af52/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/getrandom-53a0043866ec37c7/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/getrandom-53d3761f3bada276/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/libc-306de0e03c8e7878/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/num-bigint-0d0265a41bde8778/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/num-bigint-7fa9767a7b6a4d47/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/proc-macro2-7514292f1ff9d370/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/radium-e5cc6f09c71dbd63/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/ryu-fbb86359f9a01c50/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/serde-09049c8028999fdd/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/serde_derive-a1445ca06da78bde/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/serde_json-7f25a15df3fe9795/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/serde_json-ea8fbd849a4c24aa/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/syn-7053d82c56209b9e/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/syn-7e830a42d2ed017b/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/tiny-keccak-08a2c3ba3fc8fe16/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/typenum-124d3fd81a09d995/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/wasm-bindgen-dda7acc66109dfbf/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/wasm-bindgen-shared-714ac43ec8e711bc/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/syn-910d2c83c587eeef/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/crunchy-a31a2b40352d9fef/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/serde-12d6d9bdc2eabe6c/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/ahash-3ffb6509babf16cc/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/ark-ff-463583f11634d88f/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/crunchy-dbfd24421e0f2569/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/generic-array-9833e68b727b30ff/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/libc-3b82143658db5515/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/log-6d5cdf89aff6f9bf/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/num-bigint-024faea477792633/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/num-integer-659ec8e4388e5aa6/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/num-traits-98f7947b6115e33b/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/proc-macro2-dd8be6c29dd0fa36/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/ryu-b465cc9fd75099ef/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/serde-31fa4f037ccb2f35/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/serde_json-b406fa8e7e93dc32/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/syn-0e809570bafd8d08/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/tiny-keccak-f9bb83510eead9f7/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/typenum-0348d9cc637dc1f8/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/wasm-bindgen-53cc6213312d860d/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/wasm-utils/target/debug/build/wasm-bindgen-shared-aae7923b6bdea7c2/out" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/wasm-utils/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
