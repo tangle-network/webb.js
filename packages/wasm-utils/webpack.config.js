@@ -10,7 +10,8 @@ module.exports = function (config = { isNode: 'false' }) {
   } else {
     console.info('Building for browser');
   }
-  const build = path.join(__dirname, 'build', isNode ? 'node' : '');
+  const nodeBuild = path.join(__dirname, 'build', 'node');
+  const build = path.join(__dirname, 'build');
   try {
     console.log(`Pre build dir`, fs.readdirSync(path.join(__dirname, 'build')));
   } catch (_) {}
@@ -24,8 +25,7 @@ module.exports = function (config = { isNode: 'false' }) {
     output: {
       path: build,
       filename: '[name].js',
-      clean: false,
-      keep: '/node'
+
     },
     devServer: {
       contentBase: build
@@ -33,9 +33,15 @@ module.exports = function (config = { isNode: 'false' }) {
     plugins: [
       new CopyPlugin([path.resolve(__dirname, 'public'), path.resolve(__dirname, 'package.json')]),
       new WasmPackPlugin({
-        extraArgs: isNode ? `${args} --target nodejs` : args,
+        extraArgs: args ,
         crateDirectory: __dirname,
         outDir: build,
+        outName: 'wasm-utils'
+      }),
+      new WasmPackPlugin({
+        extraArgs: `${args} --target nodejs` ,
+        crateDirectory: __dirname,
+        outDir: nodeBuild,
         outName: 'wasm-utils'
       })
     ]

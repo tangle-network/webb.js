@@ -5,7 +5,7 @@
   "scripts": {
     "build:node": "webpack --env.isNode=true",
     "build:browser": "webpack --env.isNode=false",
-    "build": "rimraf build pkg && yarn   build:node && yarn build:browser && node ./scripts/fix-package-json.js",
+    "build": "rimraf build pkg && yarn   build:node  && node ./scripts/fix-package-json.js",
     "start": "rimraf build pkg && webpack-dev-server --open -d",
     "test": "wasm-pack test --release --node "
   },
