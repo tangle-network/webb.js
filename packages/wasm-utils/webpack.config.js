@@ -12,9 +12,8 @@ module.exports = function (config = { isNode: 'false' }) {
   }
   const build = path.join(__dirname, 'build', isNode ? 'node' : '');
   try {
-    console.log(`Root files `, fs.readdirSync(__dirname), 'build');
+    console.log(`Pre build dir`, fs.readdirSync(path.join(__dirname, 'build')));
   } catch (_) {
-    console.log();
   }
 
   const args = '--scope webb-tools';
