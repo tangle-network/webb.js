@@ -5,14 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cdb4a5be-4f14-45b4-b62b-a308ec5a0463" name="examples" comment="merge builds">
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/webb.js.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/packages/types/src/metadata/edgware.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/sdk-mixer/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/sdk-mixer/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/api/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/api/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/app-util/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/app-util/package.json" afterDir="false" />
@@ -20,7 +13,7 @@
       <change beforePath="$PROJECT_DIR$/packages/type-definitions/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/type-definitions/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/types/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/types/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/wasm-utils/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/wasm-utils/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/webb-build-locally-release.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/webb-build-locally-release.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/wasm-utils/scripts/fix-package-json.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/wasm-utils/scripts/fix-package-json.js" afterDir="false" />
     </list>
     <list id="cf6d4b72-fa24-4ffd-a36a-c46e61a3c45b" name="added augment-aip.ts to tracked files" comment="" />
     <list id="4e5133b9-53b8-4db4-9759-91f579fc7c16" name="Default Changelist" comment="Fix rng" />
@@ -31,7 +24,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="DarkyenusTimeTracker">
-    <option name="totalTimeSeconds" value="1108494" />
+    <option name="totalTimeSeconds" value="1109186" />
     <option name="idleThresholdMs" value="60000000" />
     <option name="autoCountIdleSeconds" value="6000" />
   </component>
@@ -436,7 +429,7 @@
       <workItem from="1642694732768" duration="1573000" />
       <workItem from="1642702311083" duration="1517000" />
       <workItem from="1642783040886" duration="7500000" />
-      <workItem from="1642952015081" duration="3752000" />
+      <workItem from="1642952015081" duration="4432000" />
     </task>
     <task id="LOCAL-00190" summary="update the tests for proving">
       <created>1640960234920</created>
