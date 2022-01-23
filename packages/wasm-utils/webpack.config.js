@@ -13,8 +13,7 @@ module.exports = function (config = { isNode: 'false' }) {
   const build = path.join(__dirname, 'build', isNode ? 'node' : '');
   try {
     console.log(`Pre build dir`, fs.readdirSync(path.join(__dirname, 'build')));
-  } catch (_) {
-  }
+  } catch (_) {}
 
   const args = '--scope webb-tools';
   return {
@@ -24,7 +23,9 @@ module.exports = function (config = { isNode: 'false' }) {
     },
     output: {
       path: build,
-      filename: '[name].js'
+      filename: '[name].js',
+      clean: false,
+      keep: '/node'
     },
     devServer: {
       contentBase: build
