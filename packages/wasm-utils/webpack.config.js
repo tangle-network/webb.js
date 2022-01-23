@@ -3,15 +3,10 @@ const fs = require('fs');
 const CopyPlugin = require('copy-webpack-plugin');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 
-module.exports = function (config = { isNode: 'false' }) {
-  const isNode = config.isNode === 'true';
-  if (isNode) {
-    console.info('Building for nodjes');
-  } else {
-    console.info('Building for browser');
-  }
-  const nodeBuild = path.join(__dirname, 'build', 'node');
+module.exports = function () {
+  const nodeBuild = path.join(__dirname, 'build', 'njs');
   const build = path.join(__dirname, 'build');
+
   try {
     console.log(`Pre build dir`, fs.readdirSync(path.join(__dirname, 'build')));
   } catch (_) {}
@@ -24,8 +19,7 @@ module.exports = function (config = { isNode: 'false' }) {
     },
     output: {
       path: build,
-      filename: '[name].js',
-
+      filename: '[name].js'
     },
     devServer: {
       contentBase: build
@@ -33,13 +27,13 @@ module.exports = function (config = { isNode: 'false' }) {
     plugins: [
       new CopyPlugin([path.resolve(__dirname, 'public'), path.resolve(__dirname, 'package.json')]),
       new WasmPackPlugin({
-        extraArgs: args ,
+        extraArgs: args,
         crateDirectory: __dirname,
         outDir: build,
         outName: 'wasm-utils'
       }),
       new WasmPackPlugin({
-        extraArgs: `${args} --target nodejs` ,
+        extraArgs: `${args} --target nodejs`,
         crateDirectory: __dirname,
         outDir: nodeBuild,
         outName: 'wasm-utils'

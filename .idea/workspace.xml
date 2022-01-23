@@ -14,6 +14,7 @@
       <change beforePath="$PROJECT_DIR$/packages/types/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/types/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/wasm-utils/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/wasm-utils/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/wasm-utils/scripts/fix-package-json.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/wasm-utils/scripts/fix-package-json.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/wasm-utils/webpack.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/wasm-utils/webpack.config.js" afterDir="false" />
     </list>
     <list id="cf6d4b72-fa24-4ffd-a36a-c46e61a3c45b" name="added augment-aip.ts to tracked files" comment="" />
     <list id="4e5133b9-53b8-4db4-9759-91f579fc7c16" name="Default Changelist" comment="Fix rng" />
@@ -24,7 +25,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="DarkyenusTimeTracker">
-    <option name="totalTimeSeconds" value="1109539" />
+    <option name="totalTimeSeconds" value="1110633" />
     <option name="idleThresholdMs" value="60000000" />
     <option name="autoCountIdleSeconds" value="6000" />
   </component>
@@ -429,7 +430,7 @@
       <workItem from="1642694732768" duration="1573000" />
       <workItem from="1642702311083" duration="1517000" />
       <workItem from="1642783040886" duration="7500000" />
-      <workItem from="1642952015081" duration="4785000" />
+      <workItem from="1642952015081" duration="5877000" />
     </task>
     <task id="LOCAL-00190" summary="update the tests for proving">
       <created>1640960234920</created>

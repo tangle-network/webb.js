@@ -1,11 +1,9 @@
 {
   "author": "Webb Developers",
   "name": "@webb-tools/wasm-utils",
-  "version": "0.1.4-19",
+  "version": "0.1.4-20",
   "scripts": {
-    "build:node": "webpack --env.isNode=true",
-    "build:browser": "webpack --env.isNode=false",
-    "build": "rimraf build pkg && yarn   build:node  && node ./scripts/fix-package-json.js",
+    "build": "rimraf build pkg && yarn   webpack --env.isNode=true",
     "start": "rimraf build pkg && webpack-dev-server --open -d",
     "test": "wasm-pack test --release --node "
   },
@@ -18,10 +16,10 @@
     "wasm-utils.js",
     "wasm-utils_bg.js",
     "wasm-utils.d.ts",
-    "node/wasm-utils_bg.wasm",
-    "node/wasm-utils.js",
-    "node/wasm-utils_bg.js",
-    "node/wasm-utils.d.ts"
+    "njs/wasm-utils_bg.wasm",
+    "njs/wasm-utils.js",
+    "njs/wasm-utils_bg.js",
+    "njs/wasm-utils.d.ts"
   ],
   "module": "wasm-utils.js",
   "types": "wasm-utils.d.ts",
