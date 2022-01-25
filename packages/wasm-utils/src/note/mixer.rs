@@ -1,7 +1,7 @@
-use ark_std::rand::rngs::OsRng;
-use arkworks_circuits::setup::mixer::{setup_leaf_with_privates_raw_x5_5, setup_leaf_x5_5};
 use ark_bls12_381::Fr as BlsFr;
 use ark_bn254::Fr as Bn254Fr;
+use ark_std::rand::rngs::OsRng;
+use arkworks_circuits::setup::mixer::{setup_leaf_with_privates_raw_x5_5, setup_leaf_x5_5};
 use arkworks_gadgets::prelude::*;
 use arkworks_utils::utils::common::Curve as ArkworksCurve;
 

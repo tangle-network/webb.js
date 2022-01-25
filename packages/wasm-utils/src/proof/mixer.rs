@@ -59,6 +59,7 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 		proof,
 		nullifier_hash,
 		root,
+		roots: Vec::new(),
 		public_inputs,
 		leaf,
 	})

@@ -26,6 +26,8 @@ pub struct Proof {
 	#[wasm_bindgen(skip)]
 	pub root: Vec<u8>,
 	#[wasm_bindgen(skip)]
+	pub roots: Vec<Vec<u8>>,
+	#[wasm_bindgen(skip)]
 	pub public_inputs: Vec<Vec<u8>>,
 	#[wasm_bindgen(skip)]
 	pub leaf: Vec<u8>,
