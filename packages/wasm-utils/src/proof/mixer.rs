@@ -58,7 +58,8 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 	Ok(Proof {
 		proof,
 		nullifier_hash,
-		root,
+		root: root.clone(),
+		roots: vec![root],
 		public_inputs,
 		leaf,
 	})
