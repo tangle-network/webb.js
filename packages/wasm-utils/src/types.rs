@@ -37,7 +37,7 @@ impl OperationError {
 	pub fn data(&self) -> JsString {
 		match self.data.clone() {
 			None => JsString::from("{}"),
-			Some(e) => JsString::from(format!("{}", e)),
+			Some(e) => JsString::from(e.to_string()),
 		}
 	}
 }
@@ -387,7 +387,7 @@ impl From<OpStatusCode> for OperationError {
 		OperationError {
 			code: e.clone(),
 			data: None,
-			error_message: e.clone().into(),
+			error_message: e.into(),
 		}
 	}
 }
