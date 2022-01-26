@@ -37,7 +37,7 @@ impl OperationError {
 	pub fn data(&self) -> JsString {
 		match self.data.clone() {
 			None => JsString::from("{}"),
-			Some(e) => JsString::from(e.to_string()),
+			Some(e) => JsString::from(e),
 		}
 	}
 }
