@@ -7,9 +7,9 @@ use arkworks_utils::utils::common::Curve as ArkCurve;
 use rand::rngs::OsRng;
 
 use crate::proof::{AnchorProofInput, Proof};
-use crate::types::{Backend, Curve, OpStatusCode};
+use crate::types::{Backend, Curve, OpStatusCode, OperationError};
 
-pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Result<Proof, OpStatusCode> {
+pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Result<Proof, OperationError> {
 	//		(proof,leaf_raw,nullifier_hash_raw,root_raw,roots_raw,public_inputs_raw)
 	let AnchorProofInput {
 		exponentiation,
@@ -64,9 +64,13 @@ pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Re
 			pk,
 			rng,
 		),
-		_ => return Err(OpStatusCode::InvalidProofParameters),
+		_ => return Err(OpStatusCode::InvalidProofParameters.into()),
 	}
-	.map_err(|_| OpStatusCode::InvalidProofParameters)?;
+	.map_err(|e| {
+		let mut error: OperationError = OpStatusCode::InvalidProofParameters.into();
+		error.data = Some(e.to_string());
+		error
+	})?;
 	Ok(Proof {
 		proof,
 		nullifier_hash,

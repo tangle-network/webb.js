@@ -1,11 +1,46 @@
-use arkworks_utils::utils::common::Curve as ArkCurve;
 use core::fmt;
-use js_sys::{JsString, Uint8Array};
 use std::convert::{TryFrom, TryInto};
 use std::ops::Deref;
 use std::str::FromStr;
+
+use arkworks_utils::utils::common::Curve as ArkCurve;
+use js_sys::{JsString, Uint8Array};
 use wasm_bindgen::prelude::*;
 
+#[wasm_bindgen]
+#[derive(PartialEq, Eq, Debug)]
+pub struct OperationError {
+	#[wasm_bindgen(skip)]
+	pub code: OpStatusCode,
+	#[wasm_bindgen(skip)]
+	pub error_message: String,
+	#[wasm_bindgen(skip)]
+	pub data: Option<String>,
+}
+
+#[wasm_bindgen]
+impl OperationError {
+	#[wasm_bindgen(js_name = code)]
+	#[wasm_bindgen(getter)]
+	pub fn code(&self) -> JsValue {
+		JsValue::from(self.code.clone() as u32)
+	}
+
+	#[wasm_bindgen(js_name = error_message)]
+	#[wasm_bindgen(getter)]
+	pub fn error_message(&self) -> JsString {
+		JsString::from(self.error_message.clone())
+	}
+
+	#[wasm_bindgen(js_name = data)]
+	#[wasm_bindgen(getter)]
+	pub fn data(&self) -> JsString {
+		match self.data.clone() {
+			None => JsString::from("{}"),
+			Some(e) => JsString::from(e),
+		}
+	}
+}
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum NoteVersion {
 	V1,
@@ -64,6 +99,7 @@ impl FromStr for NoteVersion {
 		}
 	}
 }
+
 impl fmt::Display for Backend {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
@@ -105,6 +141,7 @@ impl FromStr for Curve {
 		}
 	}
 }
+
 impl fmt::Display for HashFunction {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
@@ -165,7 +202,7 @@ impl From<Curve> for ArkCurve {
 	}
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 #[repr(u32)]
 pub enum OpStatusCode {
 	Unknown = 0,
@@ -262,6 +299,7 @@ extern "C" {
 	#[wasm_bindgen(typescript_type = "Leaves")]
 	pub type Leaves;
 }
+
 #[wasm_bindgen(typescript_custom_section)]
 const NOTE_PREFIX: &str = "type NotePrefix = 'webb.mixer'|'webb.bridge'|'webb.anchor'|'webb.vanchor' ";
 
@@ -279,6 +317,7 @@ const VERSION: &str = "type Version = 'v1'";
 
 #[wasm_bindgen(typescript_custom_section)]
 const BE: &str = "type Backend = 'Bulletproofs'|'Arkworks'|'Circom'";
+
 pub struct Uint8Arrayx32(pub [u8; 32]);
 
 impl Deref for Uint8Arrayx32 {
@@ -300,10 +339,63 @@ impl TryFrom<Uint8Array> for Uint8Arrayx32 {
 		Ok(Self(bytes))
 	}
 }
+impl From<OpStatusCode> for String {
+	fn from(e: OpStatusCode) -> Self {
+		match e {
+			OpStatusCode::Unknown => "Unknown error",
+			OpStatusCode::InvalidHexLength => "Invalid hex length",
+			OpStatusCode::HexParsingFailed => "Fail to parse hex",
+			OpStatusCode::InvalidNoteLength => "Invalid note length",
+			OpStatusCode::InvalidNotePrefix => "Invalid note prefix",
+			OpStatusCode::InvalidNoteVersion => "Invalid note version",
+			OpStatusCode::InvalidNoteId => "Invalid note id",
+			OpStatusCode::InvalidNoteBlockNumber => "Invalid block number",
+			OpStatusCode::InvalidNoteSecrets => "Invalid note secrets",
+			OpStatusCode::MerkleTreeNotFound => "Merkle tree not found",
+			OpStatusCode::SerializationFailed => "Failed to serialize",
+			OpStatusCode::DeserializationFailed => "Failed to deserialize",
+			OpStatusCode::InvalidArrayLength => "Invalid array length",
+			OpStatusCode::InvalidCurve => "Invalid curve",
+			OpStatusCode::InvalidHasFunction => "Invalid hash function",
+			OpStatusCode::InvalidBackend => "Invalid backend",
+			OpStatusCode::InvalidDenomination => "Invalid denomination",
+			OpStatusCode::SecretGenFailed => "Failed to generate secrets",
+			OpStatusCode::InvalidSourceChain => "Invalid source chain id",
+			OpStatusCode::InvalidTargetChain => "Invalid target chain id",
+			OpStatusCode::InvalidTokenSymbol => "Invalid token symbol",
+			OpStatusCode::InvalidExponentiation => "Invalid exponentiation",
+			OpStatusCode::InvalidWidth => "Invalid width",
+			OpStatusCode::InvalidAmount => "Invalid amount",
+			OpStatusCode::InvalidProofParameters => "Invalid proof parameters",
+			OpStatusCode::InvalidProvingKey => "Invalid proving key",
+			OpStatusCode::InvalidRecipient => "Invalid recipient",
+			OpStatusCode::InvalidRelayer => "Invalid relayer",
+			OpStatusCode::InvalidLeafIndex => "Invalid leaf index",
+			OpStatusCode::InvalidFee => "Invalid fee",
+			OpStatusCode::InvalidRefund => "Invalid refund",
+			OpStatusCode::InvalidLeaves => "Invalid leaf",
+			OpStatusCode::FailedToGenerateTheLeaf => "Failed to generate the leaf",
+			OpStatusCode::ProofBuilderNoteNotSet => "Proof building failed not not set",
+			OpStatusCode::CommitmentNotSet => "Proof building failed refresh commitment not set",
+			OpStatusCode::RootsNotSet => "Proof building failed roots not set",
+		}
+		.to_string()
+	}
+}
+impl From<OpStatusCode> for OperationError {
+	fn from(e: OpStatusCode) -> Self {
+		OperationError {
+			code: e.clone(),
+			data: None,
+			error_message: e.into(),
+		}
+	}
+}
 
 impl From<OpStatusCode> for JsValue {
 	fn from(e: OpStatusCode) -> Self {
-		JsValue::from(e as u32)
+		let op: OperationError = e.into();
+		JsValue::from(op)
 	}
 }
 
@@ -330,6 +422,7 @@ impl From<NoteVersion> for JsString {
 		JsString::from(e.to_string())
 	}
 }
+
 impl From<NotePrefix> for JsString {
 	fn from(e: NotePrefix) -> Self {
 		JsString::from(e.to_string())
@@ -356,6 +449,7 @@ impl From<NoteVersion> for Version {
 		JsValue::from(&js_str).try_into().unwrap()
 	}
 }
+
 impl From<Backend> for BE {
 	fn from(curve: Backend) -> Self {
 		let js_str = curve.to_string();
