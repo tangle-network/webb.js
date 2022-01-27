@@ -5,8 +5,11 @@ use std::str::FromStr;
 
 use arkworks_utils::utils::common::Curve as ArkCurve;
 use js_sys::{JsString, Uint8Array};
+use wasm_bindgen::__rt::core::fmt::Formatter;
 use wasm_bindgen::prelude::*;
 
+/// Final Operation Error
+#[cfg(not(test))]
 #[wasm_bindgen]
 #[derive(PartialEq, Eq, Debug)]
 pub struct OperationError {
@@ -18,6 +21,7 @@ pub struct OperationError {
 	pub data: Option<String>,
 }
 
+#[cfg(not(test))]
 #[wasm_bindgen]
 impl OperationError {
 	#[wasm_bindgen(js_name = code)]
@@ -41,6 +45,50 @@ impl OperationError {
 		}
 	}
 }
+/// For tests this will have a custom JsValue conversion
+#[cfg(test)]
+pub struct OperationError {
+	pub code: OpStatusCode,
+	pub error_message: String,
+	pub data: Option<String>,
+}
+#[cfg(test)]
+impl OperationError {
+	pub fn code(&self) -> JsValue {
+		JsValue::from(self.code.clone() as u32)
+	}
+
+	pub fn error_message(&self) -> JsString {
+		JsString::from(self.error_message.clone())
+	}
+
+	pub fn data(&self) -> JsString {
+		match self.data.clone() {
+			None => JsString::from("{}"),
+			Some(e) => JsString::from(e),
+		}
+	}
+}
+
+#[cfg(test)]
+impl From<OperationError> for JsValue {
+	fn from(e: OperationError) -> Self {
+		JsValue::from(e.to_string())
+	}
+}
+
+impl fmt::Display for OperationError {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+		write!(
+			f,
+			"Code {} , message {} , data {}",
+			self.code.clone() as u32,
+			self.error_message.clone(),
+			self.data()
+		)
+	}
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum NoteVersion {
 	V1,
@@ -395,7 +443,7 @@ impl From<OpStatusCode> for OperationError {
 impl From<OpStatusCode> for JsValue {
 	fn from(e: OpStatusCode) -> Self {
 		let op: OperationError = e.into();
-		JsValue::from(op)
+		op.into()
 	}
 }
 
