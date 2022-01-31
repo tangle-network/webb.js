@@ -400,7 +400,7 @@ impl From<OpStatusCode> for String {
 		match e {
 			OpStatusCode::Unknown => "Unknown error",
 			OpStatusCode::InvalidHexLength => "Invalid hex length",
-			OpStatusCode::HexParsingFailed => "Fail to parse hex",
+			OpStatusCode::HexParsingFailed => "Failed to parse hex",
 			OpStatusCode::InvalidNoteLength => "Invalid note length",
 			OpStatusCode::InvalidNotePrefix => "Invalid note prefix",
 			OpStatusCode::InvalidNoteVersion => "Invalid note version",
@@ -431,9 +431,9 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::InvalidRefund => "Invalid refund",
 			OpStatusCode::InvalidLeaves => "Invalid leaf",
 			OpStatusCode::FailedToGenerateTheLeaf => "Failed to generate the leaf",
-			OpStatusCode::ProofBuilderNoteNotSet => "Proof building failed not not set",
-			OpStatusCode::CommitmentNotSet => "Proof building failed refresh commitment not set",
-			OpStatusCode::RootsNotSet => "Proof building failed roots not set",
+			OpStatusCode::ProofBuilderNoteNotSet => "Proof building failed note isn't set",
+			OpStatusCode::CommitmentNotSet => "Proof building failed refresh commitment isn't set",
+			OpStatusCode::RootsNotSet => "Proof building failed roots array isn't set",
 		}
 		.to_string()
 	}

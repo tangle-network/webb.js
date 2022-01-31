@@ -18,7 +18,7 @@ pub fn generate_secrets(
 		(Curve::Bn254, 5, 5) => setup_leaf_x5_5::<Bn254Fr, _>(ArkworksCurve::Bn254, rng),
 		_ => {
 			let message = format!(
-				"Not Mixer leaf setup for curve {}, exponentiation {} , and width {}",
+				"No Mixer secrets setup available for curve {}, exponentiation {} , and width {}",
 				curve, exponentiation, width
 			);
 			return Err(OperationError::new_with_message(OpStatusCode::SecretGenFailed, message));
@@ -48,7 +48,7 @@ pub fn get_leaf_with_private_raw(
 		(Curve::Bn254, 5, 5) => setup_leaf_with_privates_raw_x5_5::<Bn254Fr>(ArkworksCurve::Bn254, secrets, nullifer),
 		_ => {
 			let message = format!(
-				"Not Mixer leaf setup for curve {}, exponentiation {} , and width {}",
+				"No Mixer leaf setup for curve {}, exponentiation {} , and width {}",
 				curve, exponentiation, width
 			);
 			return Err(OperationError::new_with_message(
