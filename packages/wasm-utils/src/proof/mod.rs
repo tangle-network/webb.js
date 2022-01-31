@@ -385,8 +385,6 @@ pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 }
 #[cfg(test)]
 mod test {
-
-	use arkworks_circuits::setup::anchor::AnchorProverSetup;
 	use arkworks_circuits::setup::common::verify_unchecked_raw;
 
 	use wasm_bindgen_test::*;
@@ -398,8 +396,6 @@ mod test {
 	};
 
 	use arkworks_circuits::prelude::ark_bn254::Bn254;
-	use arkworks_utils::utils::common::Curve as ArkCurve;
-
 	const TREE_DEPTH: usize = 30;
 
 	#[wasm_bindgen_test]
@@ -408,10 +404,8 @@ mod test {
 			relayer,
 			recipient,
 			proof_input_builder,
-			root,
 			leaf_bytes,
-			leaf_index,
-			vk,
+			..
 		} = generate_mixer_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_X5_5);
 
 		let truncated_substrate_relayer_address = truncate_and_pad(&relayer);
@@ -444,8 +438,7 @@ mod test {
 			proof_input_builder,
 			roots_raw,
 			leaf_bytes,
-			leaf_index,
-			vk,
+			..
 		} = generate_anchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, ANCHOR_NOTE_X5_4);
 		let anchor_input = proof_input_builder.build().unwrap().anchor_input().unwrap();
 		let truncated_substrate_relayer_address = truncate_and_pad(&relayer);
