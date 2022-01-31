@@ -1,11 +1,11 @@
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
 use crate::note::JsNote;
-use crate::types::{Backend, Curve, Leaves, NotePrefix, OpStatusCode, Uint8Arrayx32};
+use crate::types::{Backend, Curve, Leaves, NotePrefix, OpStatusCode, OperationError, Uint8Arrayx32};
 
 mod anchor;
 mod mixer;
@@ -103,17 +103,25 @@ pub enum ProofInput {
 }
 
 impl ProofInput {
-	pub fn mixer_input(&self) -> Result<MixerProofInput, OpStatusCode> {
+	pub fn mixer_input(&self) -> Result<MixerProofInput, OperationError> {
 		match self {
 			ProofInput::Mixer(mixer_input) => Ok(mixer_input.clone()),
-			_ => Err(OpStatusCode::InvalidNotePrefix),
+			ProofInput::Anchor(_) => {
+				let mut oe: OperationError = OpStatusCode::InvalidNotePrefix.into();
+				oe.data = Some("Can't cant construct proof input for AnchorProofInput from mixer input ".to_string());
+				Err(oe)
+			}
 		}
 	}
 
-	pub fn anchor_input(&self) -> Result<AnchorProofInput, OpStatusCode> {
+	pub fn anchor_input(&self) -> Result<AnchorProofInput, OperationError> {
 		match self {
 			ProofInput::Anchor(anchor) => Ok(anchor.clone()),
-			_ => Err(OpStatusCode::InvalidNotePrefix),
+			ProofInput::Mixer(_) => {
+				let mut oe: OperationError = OpStatusCode::InvalidNotePrefix.into();
+				oe.data = Some("Can't cant construct proof input for MixerProofInput from anchor input ".to_string());
+				Err(oe)
+			}
 		}
 	}
 }
@@ -275,8 +283,9 @@ impl ProofInputBuilder {
 	#[wasm_bindgen(js_name = setCommiment)]
 	pub fn set_commitment(&mut self, commitment: JsString) -> Result<(), JsValue> {
 		let c: String = commitment.into();
-		let recipient = hex::decode(c).map_err(|_| OpStatusCode::InvalidRecipient)?;
-		self.recipient = Some(recipient);
+		let commitment = hex::decode(c).map_err(|_| OpStatusCode::CommitmentNotSet)?;
+		let commitment: [u8; 32] = commitment.try_into().map_err(|_| OpStatusCode::CommitmentNotSet)?;
+		self.commitment = Some(commitment);
 		Ok(())
 	}
 
@@ -383,6 +392,8 @@ mod test {
 	use crate::note::JsNote;
 
 	use super::*;
+	use ark_bn254::Fr as Bn254Fr;
+	use ark_ff::{BigInteger, PrimeField};
 	use arkworks_circuits::prelude::ark_bn254::Bn254;
 	use arkworks_utils::utils::common::Curve as ArkCurve;
 
@@ -459,24 +470,39 @@ mod test {
 
 		js_builder.set_pk(JsString::from(hex::encode(vec![])));
 		js_builder.set_note(&note);
+		js_builder.set_commitment(JsString::from(hex::encode([0u8; 32])));
 
+		let random_root = Bn254Fr::from(0u32);
+		let rand_root_bytes = random_root.into_repr().to_bytes_le();
+		let neighboring_roots = vec![rand_root_bytes.clone(), rand_root_bytes];
+		let roots_array: Array = neighboring_roots
+			.clone()
+			.into_iter()
+			.map(|i| Uint8Array::from(i.as_slice()))
+			.collect();
+
+		js_builder.set_roots(Leaves::from(JsValue::from(roots_array))).unwrap();
 		let proof_input = js_builder.build().unwrap();
-		let mixer_input = proof_input.mixer_input().unwrap();
+		let anchor_input = proof_input.anchor_input().unwrap();
 
 		assert_eq!(
-			hex::encode(mixer_input.recipient),
+			hex::encode(anchor_input.recipient),
 			hex::encode(&truncated_substrate_address)
 		);
 		assert_eq!(
-			hex::encode(mixer_input.relayer),
+			hex::encode(anchor_input.relayer),
 			hex::encode(&truncated_substrate_address)
 		);
 
-		assert_eq!(mixer_input.refund, 1);
-		assert_eq!(mixer_input.fee, 5);
+		assert_eq!(hex::encode(anchor_input.commitment), hex::encode([0u8; 32]));
+		assert_eq!(hex::encode(&anchor_input.roots[0]), hex::encode(&neighboring_roots[0]));
+		assert_eq!(anchor_input.roots.len(), neighboring_roots.len());
 
-		assert_eq!(mixer_input.leaf_index, 0);
-		assert_eq!(hex::encode(&mixer_input.leaves[0]), hex::encode(leave_bytes));
+		assert_eq!(anchor_input.refund, 1);
+		assert_eq!(anchor_input.fee, 5);
+
+		assert_eq!(anchor_input.leaf_index, 0);
+		assert_eq!(hex::encode(&anchor_input.leaves[0]), hex::encode(leave_bytes));
 	}
 
 	#[wasm_bindgen_test]
