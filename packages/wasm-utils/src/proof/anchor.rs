@@ -10,7 +10,6 @@ use crate::proof::{AnchorProofInput, Proof};
 use crate::types::{Backend, Curve, OpStatusCode, OperationError};
 
 pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Result<Proof, OperationError> {
-	//		(proof,leaf_raw,nullifier_hash_raw,root_raw,roots_raw,public_inputs_raw)
 	let AnchorProofInput {
 		exponentiation,
 		width,
@@ -31,7 +30,7 @@ pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Re
 	} = anchor_proof_input;
 	let roots_array: [Vec<u8>; 2] = roots.try_into().map_err(|_| OpStatusCode::InvalidProofParameters)?;
 
-	let (proof, leaf, nullifier_hash, roots_raw, public_inputs) = match (backend, curve, exponentiation, width) {
+	let setup_proof = match (backend, curve, exponentiation, width) {
 		(Backend::Arkworks, Curve::Bn254, 5, 4) => setup_proof_x5_4::<Bn254, OsRng>(
 			ArkCurve::Bn254,
 			chain_id,
@@ -72,11 +71,11 @@ pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Re
 		error
 	})?;
 	Ok(Proof {
-		proof,
-		nullifier_hash,
-		root: roots_raw[0].clone(),
-		roots: roots_raw,
-		public_inputs,
-		leaf,
+		proof: setup_proof.proof,
+		nullifier_hash: setup_proof.nullifier_hash_raw,
+		root: setup_proof.roots_raw[0].clone(),
+		roots: setup_proof.roots_raw,
+		public_inputs: setup_proof.public_inputs_raw,
+		leaf: setup_proof.leaf_raw,
 	})
 }

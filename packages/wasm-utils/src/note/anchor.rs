@@ -1,7 +1,8 @@
 use ark_bls12_381::Fr as BlsFr;
 use ark_bn254::Fr as Bn254Fr;
 use ark_std::rand::rngs::OsRng;
-use arkworks_circuits::setup::anchor::{setup_leaf_with_privates_raw_x5_4, setup_leaf_x5_4};
+use arkworks_circuits::setup::anchor::{LeafWithPrivateRaw_x5_4, Leaf_x5_4, setup_leaf_with_privates_raw_x5_4, setup_leaf_x5_4};
+use arkworks_circuits::setup::mixer::LeafWithPrivateRaw_x5_5;
 use arkworks_gadgets::prelude::*;
 use arkworks_utils::utils::common::Curve as ArkworksCurve;
 
@@ -14,14 +15,13 @@ pub fn generate_secrets(
 	chain_id: u128,
 	rng: &mut OsRng,
 ) -> Result<Vec<u8>, OpStatusCode> {
-	let (secret_bytes, nullifier_bytes, ..) = match (curve, exponentiation, width) {
+	let sec: Leaf_x5_4 = match (curve, exponentiation, width) {
 		(Curve::Bls381, 5, 4) => setup_leaf_x5_4::<BlsFr, _>(ArkworksCurve::Bls381, chain_id, rng),
 		(Curve::Bn254, 5, 4) => setup_leaf_x5_4::<Bn254Fr, _>(ArkworksCurve::Bn254, chain_id, rng),
 		_ => return Err(OpStatusCode::SecretGenFailed),
 	}
 	.map_err(|_| OpStatusCode::SecretGenFailed)?;
-
-	let secrets = [secret_bytes, nullifier_bytes].concat();
+	let secrets = [sec.secret_bytes, sec.nullifier_bytes].concat();
 
 	Ok(secrets)
 }
@@ -31,7 +31,7 @@ pub fn get_leaf_with_private_raw(
 	exponentiation: i8,
 	raw: &[u8],
 	chain_id: u128,
-) -> Result<(Vec<u8>, Vec<u8>), OpStatusCode> {
+) -> Result<LeafWithPrivateRaw_x5_4, OpStatusCode> {
 	if raw.len() < 64 {
 		return Err(OpStatusCode::InvalidNoteSecrets);
 	}

@@ -1,5 +1,6 @@
 use core::fmt;
 use std::str::FromStr;
+use arkworks_circuits::setup::mixer::LeafWithPrivateRaw_x5_5;
 
 use js_sys::{JsString, Uint8Array};
 use rand::rngs::OsRng;
@@ -19,7 +20,7 @@ impl JsNote {
 		note.parse().map_err(Into::into)
 	}
 
-	pub fn get_leaf_and_nullifier(&self) -> Result<(Vec<u8>, Vec<u8>), OpStatusCode> {
+	pub fn get_leaf_and_nullifier(&self) -> Result<LeafWithPrivateRaw_x5_5, OpStatusCode> {
 		mixer::get_leaf_with_private_raw(self.curve, self.width, self.exponentiation, &self.secret)
 	}
 }
@@ -343,8 +344,8 @@ impl JsNote {
 
 	#[wasm_bindgen(js_name = getLeafCommitment)]
 	pub fn get_leaf_commitment(&self) -> Result<Uint8Array, JsValue> {
-		let (leaf, ..) = self.get_leaf_and_nullifier()?;
-		Ok(Uint8Array::from(leaf.as_slice()))
+		let leaf_and_nullifier = self.get_leaf_and_nullifier()?;
+		Ok(Uint8Array::from(leaf_and_nullifier.leaf_bytes.as_slice()))
 	}
 
 	pub fn serialize(&self) -> JsString {

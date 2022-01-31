@@ -25,7 +25,7 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 		..
 	} = mixer_proof_input;
 
-	let (proof, leaf, nullifier_hash, root, public_inputs) = match (backend, curve, exponentiation, width) {
+	let setup_proof = match (backend, curve, exponentiation, width) {
 		(Backend::Arkworks, Curve::Bn254, 5, 5) => setup_proof_x5_5::<Bn254, OsRng>(
 			ArkCurve::Bn254,
 			secrets,
@@ -60,11 +60,11 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 		error
 	})?;
 	Ok(Proof {
-		proof,
-		nullifier_hash,
-		root: root.clone(),
-		roots: vec![root],
-		public_inputs,
-		leaf,
+		proof: setup_proof.proof,
+		nullifier_hash: setup_proof.nullifier_hash_raw,
+		root: setup_proof.root_raw.clone(),
+		roots: vec![setup_proof.root_raw],
+		public_inputs: setup_proof.public_inputs_raw,
+		leaf: setup_proof.leaf_raw,
 	})
 }
