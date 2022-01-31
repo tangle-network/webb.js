@@ -47,6 +47,7 @@ impl OperationError {
 }
 /// For tests this will have a custom JsValue conversion
 #[cfg(test)]
+#[derive(PartialEq, Eq, Debug)]
 pub struct OperationError {
 	pub code: OpStatusCode,
 	pub error_message: String,

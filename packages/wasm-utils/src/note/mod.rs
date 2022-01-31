@@ -7,7 +7,8 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 
 use crate::types::{
-	Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStatusCode, Prefix, Version, WasmCurve, BE, HF,
+	Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStatusCode, OperationError, Prefix, Version, WasmCurve,
+	BE, HF,
 };
 
 mod anchor;
@@ -19,8 +20,24 @@ impl JsNote {
 		note.parse().map_err(Into::into)
 	}
 
-	pub fn get_leaf_and_nullifier(&self) -> Result<(Vec<u8>, Vec<u8>), OpStatusCode> {
-		mixer::get_leaf_with_private_raw(self.curve, self.width, self.exponentiation, &self.secret)
+	pub fn get_leaf_and_nullifier(&self) -> Result<(Vec<u8>, Vec<u8>), OperationError> {
+		match self.prefix {
+			NotePrefix::Mixer => {
+				mixer::get_leaf_with_private_raw(self.curve, self.width, self.exponentiation, &self.secret)
+			}
+			NotePrefix::Anchor => anchor::get_leaf_with_private_raw(
+				self.curve,
+				self.width,
+				self.exponentiation,
+				&self.secret,
+				self.target_chain_id.parse().unwrap(),
+			),
+			_ => {
+				let mut oe: OperationError = OpStatusCode::FailedToGenerateTheLeaf.into();
+				oe.data = Some(format!("{} prefix isn't supported yet", self.prefix.to_string()));
+				Err(oe)
+			}
+		}
 	}
 }
 
@@ -430,8 +447,9 @@ mod test {
 	use arkworks_circuits::prelude::ark_bn254;
 	use wasm_bindgen_test::*;
 
-	use super::*;
 	use crate::utils::to_rust_string;
+
+	use super::*;
 
 	type Bn254Fr = ark_bn254::Fr;
 	#[test]

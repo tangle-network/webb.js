@@ -5,7 +5,7 @@ use arkworks_circuits::setup::anchor::{setup_leaf_with_privates_raw_x5_4, setup_
 use arkworks_gadgets::prelude::*;
 use arkworks_utils::utils::common::Curve as ArkworksCurve;
 
-use crate::types::{Curve, OpStatusCode};
+use crate::types::{Curve, OpStatusCode, OperationError};
 
 pub fn generate_secrets(
 	exponentiation: i8,
@@ -13,11 +13,18 @@ pub fn generate_secrets(
 	curve: Curve,
 	chain_id: u128,
 	rng: &mut OsRng,
-) -> Result<Vec<u8>, OpStatusCode> {
+) -> Result<Vec<u8>, OperationError> {
 	let (secret_bytes, nullifier_bytes, ..) = match (curve, exponentiation, width) {
 		(Curve::Bls381, 5, 4) => setup_leaf_x5_4::<BlsFr, _>(ArkworksCurve::Bls381, chain_id, rng),
 		(Curve::Bn254, 5, 4) => setup_leaf_x5_4::<Bn254Fr, _>(ArkworksCurve::Bn254, chain_id, rng),
-		_ => return Err(OpStatusCode::SecretGenFailed),
+		_ => {
+			let mut oe: OperationError = OpStatusCode::SecretGenFailed.into();
+			oe.data = Some(format!(
+				"Not Anchor secrets setup for curve {}, exponentiation {} , and width {}",
+				curve, exponentiation, width
+			));
+			return Err(oe);
+		}
 	}
 	.map_err(|_| OpStatusCode::SecretGenFailed)?;
 
@@ -31,9 +38,9 @@ pub fn get_leaf_with_private_raw(
 	exponentiation: i8,
 	raw: &[u8],
 	chain_id: u128,
-) -> Result<(Vec<u8>, Vec<u8>), OpStatusCode> {
+) -> Result<(Vec<u8>, Vec<u8>), OperationError> {
 	if raw.len() < 64 {
-		return Err(OpStatusCode::InvalidNoteSecrets);
+		return Err(OpStatusCode::InvalidNoteSecrets.into());
 	}
 
 	let secrets = raw[..32].to_vec();
@@ -46,9 +53,20 @@ pub fn get_leaf_with_private_raw(
 		(Curve::Bn254, 5, 4) => {
 			setup_leaf_with_privates_raw_x5_4::<Bn254Fr>(ArkworksCurve::Bn254, secrets, nullifer, chain_id)
 		}
-		_ => return Err(OpStatusCode::FailedToGenerateTheLeaf),
+		_ => {
+			let mut oe: OperationError = OpStatusCode::FailedToGenerateTheLeaf.into();
+			oe.data = Some(format!(
+				"Not Anchor leaf setup for curve {}, exponentiation {} , and width {}",
+				curve, exponentiation, width
+			));
+			return Err(oe);
+		}
 	}
-	.map_err(|_| OpStatusCode::FailedToGenerateTheLeaf)?;
+	.map_err(|e| {
+		let mut oe: OperationError = OpStatusCode::FailedToGenerateTheLeaf.into();
+		oe.data = Some(e.to_string());
+		oe
+	})?;
 	Ok(sec)
 }
 #[cfg(test)]
