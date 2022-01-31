@@ -382,7 +382,7 @@ pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 #[cfg(test)]
 mod test {
 	use ark_serialize::CanonicalSerialize;
-	use arkworks_circuits::setup::anchor::setup_keys_x5_4;
+	use arkworks_circuits::setup::anchor::{setup_keys_x5_4, AnchorProverSetup};
 	use arkworks_circuits::setup::common::verify_unchecked_raw;
 	use arkworks_circuits::setup::mixer::setup_keys_x5_5;
 
@@ -395,9 +395,13 @@ mod test {
 	use ark_bn254::Fr as Bn254Fr;
 	use ark_ff::{BigInteger, PrimeField};
 	use arkworks_circuits::prelude::ark_bn254::Bn254;
-	use arkworks_utils::utils::common::Curve as ArkCurve;
+	use arkworks_utils::utils::common::{setup_params_x5_3, setup_params_x5_4, Curve as ArkCurve};
 
-	const TREE_DEPTH: u32 = 30;
+	const TREE_DEPTH: usize = 30;
+	pub const M: usize = 2;
+
+	pub type AnchorSetup30_2 = AnchorProverSetup<Bn254Fr, M, TREE_DEPTH>;
+
 	#[wasm_bindgen_test]
 	fn mixer_js_setup() {
 		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
@@ -410,7 +414,7 @@ mod test {
 		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
 		let mut js_builder = ProofInputBuilder::new();
 		let leave: Uint8Array = note.get_leaf_commitment().unwrap();
-		let leave_bytes: Vec<u8> = leave.to_vec();
+		let leaf_bytes: Vec<u8> = leave.to_vec();
 		let leaves_ua: Array = vec![leave].into_iter().collect();
 
 		js_builder.set_leaf_index(JsString::from("0"));
@@ -441,7 +445,7 @@ mod test {
 		assert_eq!(mixer_input.fee, 5);
 
 		assert_eq!(mixer_input.leaf_index, 0);
-		assert_eq!(hex::encode(&mixer_input.leaves[0]), hex::encode(leave_bytes));
+		assert_eq!(hex::encode(&mixer_input.leaves[0]), hex::encode(leaf_bytes));
 	}
 
 	#[wasm_bindgen_test]
@@ -456,9 +460,23 @@ mod test {
 		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
 		let mut js_builder = ProofInputBuilder::new();
 		let leave: Uint8Array = note.get_leaf_commitment().unwrap();
-		let leave_bytes: Vec<u8> = leave.to_vec();
+		let leaf_bytes: Vec<u8> = leave.to_vec();
 		let leaves_ua: Array = vec![leave].into_iter().collect();
+		let curve = ArkCurve::Bn254;
+		let params3 = setup_params_x5_3::<Bn254Fr>(curve);
+		let params4 = setup_params_x5_4::<Bn254Fr>(curve);
+		let anchor_setup = AnchorSetup30_2::new(params3, params4);
+		let index = 0;
+		let leaves_f = vec![Bn254Fr::from_le_bytes_mod_order(&leaf_bytes)];
 
+		let (tree, _) = anchor_setup.setup_tree_and_path(&leaves_f, index).unwrap();
+		let roots_f = [tree.root().inner(); M];
+		let roots_raw = roots_f.map(|x| x.into_repr().to_bytes_le());
+		let roots_array: Array = roots_raw
+			.clone()
+			.into_iter()
+			.map(|i| Uint8Array::from(i.as_slice()))
+			.collect();
 		js_builder.set_leaf_index(JsString::from("0"));
 		js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua)));
 
@@ -468,20 +486,12 @@ mod test {
 		js_builder.set_relayer(JsString::from(decoded_substrate_address));
 		js_builder.set_recipient(JsString::from(decoded_substrate_address));
 
-		js_builder.set_pk(JsString::from(hex::encode(vec![])));
 		js_builder.set_note(&note);
+
+		js_builder.set_pk(JsString::from(hex::encode(vec![])));
 		js_builder.set_commitment(JsString::from(hex::encode([0u8; 32])));
-
-		let random_root = Bn254Fr::from(0u32);
-		let rand_root_bytes = random_root.into_repr().to_bytes_le();
-		let neighboring_roots = vec![rand_root_bytes.clone(), rand_root_bytes];
-		let roots_array: Array = neighboring_roots
-			.clone()
-			.into_iter()
-			.map(|i| Uint8Array::from(i.as_slice()))
-			.collect();
-
 		js_builder.set_roots(Leaves::from(JsValue::from(roots_array))).unwrap();
+
 		let proof_input = js_builder.build().unwrap();
 		let anchor_input = proof_input.anchor_input().unwrap();
 
@@ -495,14 +505,14 @@ mod test {
 		);
 
 		assert_eq!(hex::encode(anchor_input.commitment), hex::encode([0u8; 32]));
-		assert_eq!(hex::encode(&anchor_input.roots[0]), hex::encode(&neighboring_roots[0]));
-		assert_eq!(anchor_input.roots.len(), neighboring_roots.len());
+		assert_eq!(hex::encode(&anchor_input.roots[0]), hex::encode(&roots_raw[0]));
+		assert_eq!(anchor_input.roots.len(), roots_raw.len());
 
 		assert_eq!(anchor_input.refund, 1);
 		assert_eq!(anchor_input.fee, 5);
 
 		assert_eq!(anchor_input.leaf_index, 0);
-		assert_eq!(hex::encode(&anchor_input.leaves[0]), hex::encode(leave_bytes));
+		assert_eq!(hex::encode(&anchor_input.leaves[0]), hex::encode(leaf_bytes));
 	}
 
 	#[wasm_bindgen_test]
@@ -514,7 +524,7 @@ mod test {
 		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
 		let mut js_builder = ProofInputBuilder::new();
 		let leave: Uint8Array = note.get_leaf_commitment().unwrap();
-		let leave_bytes: Vec<u8> = leave.to_vec();
+		let leaf_bytes: Vec<u8> = leave.to_vec();
 		let leaves_ua: Array = vec![leave].into_iter().collect();
 
 		js_builder.set_leaf_index(JsString::from("0"));
@@ -533,6 +543,53 @@ mod test {
 		assert!(is_valid_proof);
 	}
 
+	#[wasm_bindgen_test]
+	fn anchor_proving() {
+		let (pk, vk) = setup_keys_x5_4::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
+
+		let note_str = "webb.anchor:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:4:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
+		let truncated_substrate_address = truncate_and_pad(&hex::decode(decoded_substrate_address).unwrap());
+		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
+		let mut js_builder = ProofInputBuilder::new();
+		let leave: Uint8Array = note.get_leaf_commitment().unwrap();
+		let leaf_bytes: Vec<u8> = leave.to_vec();
+		let leaves_ua: Array = vec![leave].into_iter().collect();
+		let curve = ArkCurve::Bn254;
+		let params3 = setup_params_x5_3::<Bn254Fr>(curve);
+		let params4 = setup_params_x5_4::<Bn254Fr>(curve);
+		let anchor_setup = AnchorSetup30_2::new(params3, params4);
+		let index = 0;
+		let leaves_f = vec![Bn254Fr::from_le_bytes_mod_order(&leaf_bytes)];
+
+		let (tree, _) = anchor_setup.setup_tree_and_path(&leaves_f, index).unwrap();
+		let roots_f = [tree.root().inner(); M];
+		let roots_raw = roots_f.map(|x| x.into_repr().to_bytes_le());
+		let roots_array: Array = roots_raw
+			.clone()
+			.into_iter()
+			.map(|i| Uint8Array::from(i.as_slice()))
+			.collect();
+		js_builder.set_leaf_index(JsString::from("0"));
+		js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua)));
+
+		js_builder.set_fee(JsString::from("5"));
+		js_builder.set_refund(JsString::from("1"));
+
+		js_builder.set_relayer(JsString::from(decoded_substrate_address));
+		js_builder.set_recipient(JsString::from(decoded_substrate_address));
+
+		js_builder.set_note(&note);
+
+		js_builder.set_pk(JsString::from(hex::encode(pk)));
+		js_builder.set_commitment(JsString::from(hex::encode([0u8; 32])));
+		js_builder.set_roots(Leaves::from(JsValue::from(roots_array))).unwrap();
+
+		let proof_input = js_builder.build_js().unwrap();
+		let proof = generate_proof_js(proof_input).unwrap();
+		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
+		assert!(is_valid_proof);
+	}
 	#[wasm_bindgen_test]
 	fn is_valid_merkle_root() {
 		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
