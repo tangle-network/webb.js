@@ -107,9 +107,11 @@ impl ProofInput {
 		match self {
 			ProofInput::Mixer(mixer_input) => Ok(mixer_input.clone()),
 			ProofInput::Anchor(_) => {
-				let mut oe: OperationError = OpStatusCode::InvalidNotePrefix.into();
-				oe.data = Some("Can't cant construct proof input for AnchorProofInput from mixer input ".to_string());
-				Err(oe)
+				let message = "Can't cant construct proof input for AnchorProofInput from mixer input ".to_string();
+				Err(OperationError::new_with_message(
+					OpStatusCode::InvalidNotePrefix,
+					message,
+				))
 			}
 		}
 	}
@@ -118,9 +120,11 @@ impl ProofInput {
 		match self {
 			ProofInput::Anchor(anchor) => Ok(anchor.clone()),
 			ProofInput::Mixer(_) => {
-				let mut oe: OperationError = OpStatusCode::InvalidNotePrefix.into();
-				oe.data = Some("Can't cant construct proof input for MixerProofInput from anchor input ".to_string());
-				Err(oe)
+				let message = "Can't cant construct proof input for MixerProofInput from anchor input ".to_string();
+				Err(OperationError::new_with_message(
+					OpStatusCode::InvalidNotePrefix,
+					message,
+				))
 			}
 		}
 	}

@@ -55,18 +55,20 @@ pub fn generate_mixer_test_setup(
 
 	let mut js_builder = ProofInputBuilder::new();
 
-	js_builder.set_leaf_index(JsString::from("0"));
-	js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua)));
+	js_builder.set_leaf_index(JsString::from("0")).unwrap();
+	js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua))).unwrap();
 
-	js_builder.set_fee(JsString::from("5"));
-	js_builder.set_refund(JsString::from("1"));
+	js_builder.set_fee(JsString::from("5")).unwrap();
+	js_builder.set_refund(JsString::from("1")).unwrap();
 
-	js_builder.set_relayer(JsString::from(relayer_decoded_ss58));
-	js_builder.set_recipient(JsString::from(recipient_decoded_ss58));
+	js_builder.set_relayer(JsString::from(relayer_decoded_ss58)).unwrap();
+	js_builder
+		.set_recipient(JsString::from(recipient_decoded_ss58))
+		.unwrap();
 
-	js_builder.set_pk(JsString::from(hex::encode(&pk)));
+	js_builder.set_pk(JsString::from(hex::encode(&pk))).unwrap();
 
-	js_builder.set_note(&note);
+	js_builder.set_note(&note).unwrap();
 
 	MixerTestSetup {
 		relayer: hex::decode(relayer_decoded_ss58).unwrap(),
@@ -84,7 +86,7 @@ pub fn generate_anchor_test_setup(
 	recipient_decoded_ss58: &str,
 	note: &str,
 ) -> AnchorTestSetup {
-	use arkworks_circuits::setup::anchor::{setup_keys_x5_4};
+	use arkworks_circuits::setup::anchor::setup_keys_x5_4;
 	let curve = ArkCurve::Bn254;
 	let index = 0;
 

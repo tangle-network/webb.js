@@ -17,19 +17,14 @@ pub fn generate_secrets(
 		(Curve::Bls381, 5, 5) => setup_leaf_x5_5::<BlsFr, _>(ArkworksCurve::Bls381, rng),
 		(Curve::Bn254, 5, 5) => setup_leaf_x5_5::<Bn254Fr, _>(ArkworksCurve::Bn254, rng),
 		_ => {
-			let mut oe: OperationError = OpStatusCode::SecretGenFailed.into();
-			oe.data = Some(format!(
+			let message = format!(
 				"Not Mixer leaf setup for curve {}, exponentiation {} , and width {}",
 				curve, exponentiation, width
-			));
-			return Err(oe);
+			);
+			return Err(OperationError::new_with_message(OpStatusCode::SecretGenFailed, message));
 		}
 	}
-	.map_err(|e| {
-		let mut oe: OperationError = OpStatusCode::SecretGenFailed.into();
-		oe.data = Some(e.to_string());
-		oe
-	})?;
+	.map_err(|e| OperationError::new_with_message(OpStatusCode::SecretGenFailed, e.to_string()))?;
 
 	let secrets = [secret_bytes, nullifier_bytes].concat();
 
@@ -52,19 +47,17 @@ pub fn get_leaf_with_private_raw(
 		(Curve::Bls381, 5, 5) => setup_leaf_with_privates_raw_x5_5::<BlsFr>(ArkworksCurve::Bls381, secrets, nullifer),
 		(Curve::Bn254, 5, 5) => setup_leaf_with_privates_raw_x5_5::<Bn254Fr>(ArkworksCurve::Bn254, secrets, nullifer),
 		_ => {
-			let mut oe: OperationError = OpStatusCode::FailedToGenerateTheLeaf.into();
-			oe.data = Some(format!(
+			let message = format!(
 				"Not Mixer leaf setup for curve {}, exponentiation {} , and width {}",
 				curve, exponentiation, width
+			);
+			return Err(OperationError::new_with_message(
+				OpStatusCode::FailedToGenerateTheLeaf,
+				message,
 			));
-			return Err(oe);
 		}
 	}
-	.map_err(|e| {
-		let mut oe: OperationError = OpStatusCode::FailedToGenerateTheLeaf.into();
-		oe.data = Some(e.to_string());
-		oe
-	})?;
+	.map_err(|e| OperationError::new_with_message(OpStatusCode::FailedToGenerateTheLeaf, e.to_string()))?;
 	Ok(sec)
 }
 

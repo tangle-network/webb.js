@@ -90,6 +90,13 @@ impl fmt::Display for OperationError {
 	}
 }
 
+impl OperationError {
+	pub fn new_with_message(code: OpStatusCode, message: String) -> Self {
+		let mut oe: Self = code.into();
+		oe.data = Some(message);
+		oe
+	}
+}
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum NoteVersion {
 	V1,

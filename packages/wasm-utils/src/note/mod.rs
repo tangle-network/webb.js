@@ -33,9 +33,11 @@ impl JsNote {
 				self.target_chain_id.parse().unwrap(),
 			),
 			_ => {
-				let mut oe: OperationError = OpStatusCode::FailedToGenerateTheLeaf.into();
-				oe.data = Some(format!("{} prefix isn't supported yet", self.prefix.to_string()));
-				Err(oe)
+				let message = format!("{} prefix isn't supported yet", self.prefix.to_string());
+				Err(OperationError::new_with_message(
+					OpStatusCode::FailedToGenerateTheLeaf,
+					message,
+				))
 			}
 		}
 	}
