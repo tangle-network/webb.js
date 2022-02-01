@@ -1,3 +1,5 @@
+cargo-features = ["edition2021"]
+
 [package]
 name = "wasm-utils"
 description = "WASM Utilities from Webb"
@@ -5,7 +7,7 @@ version = "0.1.1"
 authors = ["Webb Developers"]
 categories = ["wasm" ,"cryptography" ,"arkworks"]
 readme = "README.md"
-edition = "2018"
+edition = "2021"
 homepage="https://webb.tools"
 repository = "https://github.com/webb-tools/webb.js/tree/master/packages/wasm-utils"
 documentation = "https://docs.rs/wasm-utils"
