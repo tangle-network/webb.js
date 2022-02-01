@@ -11,6 +11,7 @@ edition = "2021"
 homepage="https://webb.tools"
 repository = "https://github.com/webb-tools/webb.js/tree/master/packages/wasm-utils"
 documentation = "https://docs.rs/wasm-utils"
+license = "MIT/Apache-2.0"
 
 [lib]
 crate-type = ["cdylib" , "rlib"]
