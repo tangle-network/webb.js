@@ -7,7 +7,7 @@ use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
 use crate::note::JsNote;
-use crate::proof::{truncate_and_pad, ProofInputBuilder};
+use crate::proof::{ProofInputBuilder};
 use crate::types::Leaves;
 use arkworks_circuits::setup::mixer::setup_keys_x5_5;
 
@@ -107,7 +107,7 @@ pub fn generate_anchor_test_setup(
 	let (tree, _) = anchor_setup.setup_tree_and_path(&leaves_f, index).unwrap();
 	let roots_f = [tree.root().inner(); M];
 	let roots_raw = roots_f.map(|x| x.into_repr().to_bytes_le());
-	let roots_array: Array = roots_raw.into_iter().map(|i| Uint8Array::from(i.as_slice())).collect();
+	let roots_array: Array = roots_raw.iter().map(|i| Uint8Array::from(i.as_slice())).collect();
 
 	let mut js_builder = ProofInputBuilder::new();
 	js_builder.set_leaf_index(JsString::from(index.to_string())).unwrap();
