@@ -136,7 +136,7 @@ pub struct JsProofInput {
 	pub inner: ProofInput,
 }
 #[wasm_bindgen]
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Default)]
 pub struct ProofInputBuilder {
 	#[wasm_bindgen(skip)]
 	pub recipient: Option<Vec<u8>>,
@@ -240,23 +240,6 @@ impl ProofInputBuilder {
 				Ok(ProofInput::Anchor(anchor_input))
 			}
 			_ => Err(OpStatusCode::InvalidNotePrefix),
-		}
-	}
-}
-
-impl Default for ProofInputBuilder {
-	fn default() -> Self {
-		Self {
-			recipient: None,
-			relayer: None,
-			leaves: None,
-			leaf_index: None,
-			fee: None,
-			refund: None,
-			pk: None,
-			note: None,
-			commitment: None,
-			roots: None,
 		}
 	}
 }

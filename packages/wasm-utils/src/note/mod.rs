@@ -33,7 +33,7 @@ impl JsNote {
 				self.target_chain_id.parse().unwrap(),
 			),
 			_ => {
-				let message = format!("{} prefix isn't supported yet", self.prefix.to_string());
+				let message = format!("{} prefix isn't supported yet", self.prefix);
 				Err(OperationError::new_with_message(
 					OpStatusCode::FailedToGenerateTheLeaf,
 					message,
@@ -157,6 +157,7 @@ pub struct JsNote {
 }
 
 #[wasm_bindgen]
+#[derive(Default)]
 pub struct JsNoteBuilder {
 	#[wasm_bindgen(skip)]
 	pub prefix: Option<NotePrefix>,
@@ -187,25 +188,6 @@ pub struct JsNoteBuilder {
 	pub secrets: Option<Vec<u8>>,
 }
 
-impl Default for JsNoteBuilder {
-	fn default() -> Self {
-		Self {
-			prefix: None,
-			version: None,
-			target_chain_id: None,
-			source_chain_id: None,
-			backend: None,
-			hash_function: None,
-			curve: None,
-			token_symbol: None,
-			amount: None,
-			denomination: None,
-			exponentiation: None,
-			width: None,
-			secrets: None,
-		}
-	}
-}
 #[wasm_bindgen]
 impl JsNoteBuilder {
 	#[wasm_bindgen(constructor)]

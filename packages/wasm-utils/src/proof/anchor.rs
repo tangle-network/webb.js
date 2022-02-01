@@ -68,7 +68,7 @@ pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Re
 	}
 	.map_err(|e| {
 		let mut error: OperationError = OpStatusCode::InvalidProofParameters.into();
-		error.data = Some(format!("Anchor {}", e.to_string()));
+		error.data = Some(format!("Anchor {}", e));
 		error
 	})?;
 	Ok(Proof {
