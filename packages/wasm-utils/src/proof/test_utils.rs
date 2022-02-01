@@ -7,7 +7,7 @@ use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
 use crate::note::JsNote;
-use crate::proof::{ProofInputBuilder};
+use crate::proof::ProofInputBuilder;
 use crate::types::Leaves;
 use arkworks_circuits::setup::mixer::setup_keys_x5_5;
 
