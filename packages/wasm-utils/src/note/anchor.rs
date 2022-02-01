@@ -19,7 +19,7 @@ pub fn generate_secrets(
 		(Curve::Bn254, 5, 4) => setup_leaf_x5_4::<Bn254Fr, _>(ArkworksCurve::Bn254, chain_id, rng),
 		_ => {
 			let message = format!(
-				"No Anchor secrets setup available for curve {}, exponentiation {} , and width {}",
+				"No Anchor secrets setup available for curve {}, exponentiation {}, and width {}",
 				curve, exponentiation, width
 			);
 			return Err(OperationError::new_with_message(OpStatusCode::SecretGenFailed, message));
