@@ -107,7 +107,7 @@ impl ProofInput {
 		match self {
 			ProofInput::Mixer(mixer_input) => Ok(mixer_input.clone()),
 			ProofInput::Anchor(_) => {
-				let message = "Can't cant construct proof input for AnchorProofInput from mixer input ".to_string();
+				let message = "Can't construct proof input for AnchorProofInput from mixer input".to_string();
 				Err(OperationError::new_with_message(
 					OpStatusCode::InvalidNotePrefix,
 					message,
