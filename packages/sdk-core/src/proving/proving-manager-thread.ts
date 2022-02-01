@@ -1,7 +1,7 @@
-import type { Leaves, Proof, JsProofInput } from '@webb-tools/wasm-utils';
-import { u8aToHex } from '@polkadot/util';
-import { ProofI } from '@webb-tools/sdk-core/proving/proving-manger';
-import { Note } from '../note';
+import type {JsProofInput, Leaves, Proof} from '@webb-tools/wasm-utils';
+import {u8aToHex} from '@polkadot/util';
+import {ProofI} from '@webb-tools/sdk-core/proving/proving-manger';
+import {Note} from '../note';
 
 export type ProvingManagerSetupInput = {
   note: string;
@@ -27,15 +27,14 @@ export class ProvingManagerWrapper {
       const message = event.data as Partial<PMEvents>;
       const key = Object.keys(message)[0] as keyof PMEvents;
       switch (key) {
-        case 'proof':
-          {
-            const input = message.proof!;
-            const proof = await this.proof(input);
-            (self as unknown as Worker).postMessage({
-              name: key,
-              data: proof
-            });
-          }
+        case 'proof': {
+          const input = message.proof!;
+          const proof = await this.proof(input);
+          (self as unknown as Worker).postMessage({
+            name: key,
+            data: proof
+          });
+        }
           break;
         case 'destroy':
           (self as unknown as Worker).terminate();
@@ -58,7 +57,7 @@ export class ProvingManagerWrapper {
   async proof(pmSetupInput: ProvingManagerSetupInput): Promise<ProofI> {
     const Manager = await ProvingManagerWrapper.proofBuilder;
     const pm = new Manager();
-    const { note } = await Note.deserialize(pmSetupInput.note);
+    const {note} = await Note.deserialize(pmSetupInput.note);
     // TODO: handle the prefix and validation
     pm.setLeaves(pmSetupInput.leaves);
     pm.setRelayer(pmSetupInput.relayer);
@@ -68,6 +67,14 @@ export class ProvingManagerWrapper {
     pm.setFee(String(pmSetupInput.fee));
     pm.setPk(u8aToHex(pmSetupInput.provingKey).replace('0x', ''));
     pm.setNote(note);
+
+    if (pmSetupInput.roots) {
+      pm.setRoots(pmSetupInput.roots)
+    }
+    if (pmSetupInput.commitment) {
+      pm.setCommiment(pmSetupInput.commitment)
+
+    }
     const proofInput = pm.build_js();
     const proof = await ProvingManagerWrapper.generateProof(proofInput);
     return {

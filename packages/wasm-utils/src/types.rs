@@ -5,8 +5,11 @@ use std::str::FromStr;
 
 use arkworks_utils::utils::common::Curve as ArkCurve;
 use js_sys::{JsString, Uint8Array};
+use wasm_bindgen::__rt::core::fmt::Formatter;
 use wasm_bindgen::prelude::*;
 
+/// Final Operation Error
+#[cfg(not(test))]
 #[wasm_bindgen]
 #[derive(PartialEq, Eq, Debug)]
 pub struct OperationError {
@@ -18,6 +21,7 @@ pub struct OperationError {
 	pub data: Option<String>,
 }
 
+#[cfg(not(test))]
 #[wasm_bindgen]
 impl OperationError {
 	#[wasm_bindgen(js_name = code)]
@@ -39,6 +43,58 @@ impl OperationError {
 			None => JsString::from("{}"),
 			Some(e) => JsString::from(e),
 		}
+	}
+}
+/// For tests this will have a custom JsValue conversion
+#[cfg(test)]
+#[derive(PartialEq, Eq, Debug)]
+pub struct OperationError {
+	pub code: OpStatusCode,
+	pub error_message: String,
+	pub data: Option<String>,
+}
+#[cfg(test)]
+impl OperationError {
+	pub fn code(&self) -> JsValue {
+		JsValue::from(self.code.clone() as u32)
+	}
+
+	pub fn error_message(&self) -> JsString {
+		JsString::from(self.error_message.clone())
+	}
+
+	pub fn data(&self) -> JsString {
+		match self.data.clone() {
+			None => JsString::from("{}"),
+			Some(e) => JsString::from(e),
+		}
+	}
+}
+
+#[cfg(test)]
+impl From<OperationError> for JsValue {
+	fn from(e: OperationError) -> Self {
+		JsValue::from(e.to_string())
+	}
+}
+
+impl fmt::Display for OperationError {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+		write!(
+			f,
+			"Code {} , message {} , data {}",
+			self.code.clone() as u32,
+			self.error_message.clone(),
+			self.data()
+		)
+	}
+}
+
+impl OperationError {
+	pub fn new_with_message(code: OpStatusCode, message: String) -> Self {
+		let mut oe: Self = code.into();
+		oe.data = Some(message);
+		oe
 	}
 }
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -344,7 +400,7 @@ impl From<OpStatusCode> for String {
 		match e {
 			OpStatusCode::Unknown => "Unknown error",
 			OpStatusCode::InvalidHexLength => "Invalid hex length",
-			OpStatusCode::HexParsingFailed => "Fail to parse hex",
+			OpStatusCode::HexParsingFailed => "Failed to parse hex",
 			OpStatusCode::InvalidNoteLength => "Invalid note length",
 			OpStatusCode::InvalidNotePrefix => "Invalid note prefix",
 			OpStatusCode::InvalidNoteVersion => "Invalid note version",
@@ -368,16 +424,16 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::InvalidAmount => "Invalid amount",
 			OpStatusCode::InvalidProofParameters => "Invalid proof parameters",
 			OpStatusCode::InvalidProvingKey => "Invalid proving key",
-			OpStatusCode::InvalidRecipient => "Invalid recipient",
-			OpStatusCode::InvalidRelayer => "Invalid relayer",
+			OpStatusCode::InvalidRecipient => "Invalid recipient address",
+			OpStatusCode::InvalidRelayer => "Invalid relayer address",
 			OpStatusCode::InvalidLeafIndex => "Invalid leaf index",
 			OpStatusCode::InvalidFee => "Invalid fee",
 			OpStatusCode::InvalidRefund => "Invalid refund",
-			OpStatusCode::InvalidLeaves => "Invalid leaf",
+			OpStatusCode::InvalidLeaves => "Invalid leaves",
 			OpStatusCode::FailedToGenerateTheLeaf => "Failed to generate the leaf",
-			OpStatusCode::ProofBuilderNoteNotSet => "Proof building failed not not set",
-			OpStatusCode::CommitmentNotSet => "Proof building failed refresh commitment not set",
-			OpStatusCode::RootsNotSet => "Proof building failed roots not set",
+			OpStatusCode::ProofBuilderNoteNotSet => "Proof building failed note isn't set",
+			OpStatusCode::CommitmentNotSet => "Proof building failed refresh commitment isn't set",
+			OpStatusCode::RootsNotSet => "Proof building failed roots array isn't set",
 		}
 		.to_string()
 	}
@@ -395,7 +451,7 @@ impl From<OpStatusCode> for OperationError {
 impl From<OpStatusCode> for JsValue {
 	fn from(e: OpStatusCode) -> Self {
 		let op: OperationError = e.into();
-		JsValue::from(op)
+		op.into()
 	}
 }
 

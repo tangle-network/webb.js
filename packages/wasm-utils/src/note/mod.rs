@@ -7,7 +7,8 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 
 use crate::types::{
-	Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStatusCode, Prefix, Version, WasmCurve, BE, HF,
+	Backend, Curve, HashFunction, NotePrefix, NoteVersion, OpStatusCode, OperationError, Prefix, Version, WasmCurve,
+	BE, HF,
 };
 
 mod anchor;
@@ -19,8 +20,26 @@ impl JsNote {
 		note.parse().map_err(Into::into)
 	}
 
-	pub fn get_leaf_and_nullifier(&self) -> Result<(Vec<u8>, Vec<u8>), OpStatusCode> {
-		mixer::get_leaf_with_private_raw(self.curve, self.width, self.exponentiation, &self.secret)
+	pub fn get_leaf_and_nullifier(&self) -> Result<(Vec<u8>, Vec<u8>), OperationError> {
+		match self.prefix {
+			NotePrefix::Mixer => {
+				mixer::get_leaf_with_private_raw(self.curve, self.width, self.exponentiation, &self.secret)
+			}
+			NotePrefix::Anchor => anchor::get_leaf_with_private_raw(
+				self.curve,
+				self.width,
+				self.exponentiation,
+				&self.secret,
+				self.target_chain_id.parse().unwrap(),
+			),
+			_ => {
+				let message = format!("{} prefix isn't supported yet", self.prefix);
+				Err(OperationError::new_with_message(
+					OpStatusCode::FailedToGenerateTheLeaf,
+					message,
+				))
+			}
+		}
 	}
 }
 
@@ -138,6 +157,7 @@ pub struct JsNote {
 }
 
 #[wasm_bindgen]
+#[derive(Default)]
 pub struct JsNoteBuilder {
 	#[wasm_bindgen(skip)]
 	pub prefix: Option<NotePrefix>,
@@ -168,25 +188,6 @@ pub struct JsNoteBuilder {
 	pub secrets: Option<Vec<u8>>,
 }
 
-impl Default for JsNoteBuilder {
-	fn default() -> Self {
-		Self {
-			prefix: None,
-			version: None,
-			target_chain_id: None,
-			source_chain_id: None,
-			backend: None,
-			hash_function: None,
-			curve: None,
-			token_symbol: None,
-			amount: None,
-			denomination: None,
-			exponentiation: None,
-			width: None,
-			secrets: None,
-		}
-	}
-}
 #[wasm_bindgen]
 impl JsNoteBuilder {
 	#[wasm_bindgen(constructor)]
@@ -430,8 +431,9 @@ mod test {
 	use arkworks_circuits::prelude::ark_bn254;
 	use wasm_bindgen_test::*;
 
-	use super::*;
 	use crate::utils::to_rust_string;
+
+	use super::*;
 
 	type Bn254Fr = ark_bn254::Fr;
 	#[test]

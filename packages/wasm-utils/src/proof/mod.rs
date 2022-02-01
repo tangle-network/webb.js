@@ -1,14 +1,16 @@
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
 use crate::note::JsNote;
-use crate::types::{Backend, Curve, Leaves, NotePrefix, OpStatusCode, Uint8Arrayx32};
+use crate::types::{Backend, Curve, Leaves, NotePrefix, OpStatusCode, OperationError, Uint8Arrayx32};
 
 mod anchor;
 mod mixer;
+#[cfg(test)]
+mod test_utils;
 
 pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
 	let mut truncated_bytes = t[..20].to_vec();
@@ -101,17 +103,29 @@ pub enum ProofInput {
 }
 
 impl ProofInput {
-	pub fn mixer_input(&self) -> Result<MixerProofInput, OpStatusCode> {
+	pub fn mixer_input(&self) -> Result<MixerProofInput, OperationError> {
 		match self {
 			ProofInput::Mixer(mixer_input) => Ok(mixer_input.clone()),
-			_ => Err(OpStatusCode::InvalidNotePrefix),
+			ProofInput::Anchor(_) => {
+				let message = "Can't construct proof input for AnchorProofInput from mixer input".to_string();
+				Err(OperationError::new_with_message(
+					OpStatusCode::InvalidNotePrefix,
+					message,
+				))
+			}
 		}
 	}
 
-	pub fn anchor_input(&self) -> Result<AnchorProofInput, OpStatusCode> {
+	pub fn anchor_input(&self) -> Result<AnchorProofInput, OperationError> {
 		match self {
 			ProofInput::Anchor(anchor) => Ok(anchor.clone()),
-			_ => Err(OpStatusCode::InvalidNotePrefix),
+			ProofInput::Mixer(_) => {
+				let message = "Can't cant construct proof input for MixerProofInput from anchor input ".to_string();
+				Err(OperationError::new_with_message(
+					OpStatusCode::InvalidNotePrefix,
+					message,
+				))
+			}
 		}
 	}
 }
@@ -122,7 +136,7 @@ pub struct JsProofInput {
 	pub inner: ProofInput,
 }
 #[wasm_bindgen]
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Default)]
 pub struct ProofInputBuilder {
 	#[wasm_bindgen(skip)]
 	pub recipient: Option<Vec<u8>>,
@@ -230,23 +244,6 @@ impl ProofInputBuilder {
 	}
 }
 
-impl Default for ProofInputBuilder {
-	fn default() -> Self {
-		Self {
-			recipient: None,
-			relayer: None,
-			leaves: None,
-			leaf_index: None,
-			fee: None,
-			refund: None,
-			pk: None,
-			note: None,
-			commitment: None,
-			roots: None,
-		}
-	}
-}
-
 #[wasm_bindgen]
 impl ProofInputBuilder {
 	#[wasm_bindgen(constructor)]
@@ -273,8 +270,9 @@ impl ProofInputBuilder {
 	#[wasm_bindgen(js_name = setCommiment)]
 	pub fn set_commitment(&mut self, commitment: JsString) -> Result<(), JsValue> {
 		let c: String = commitment.into();
-		let recipient = hex::decode(c).map_err(|_| OpStatusCode::InvalidRecipient)?;
-		self.recipient = Some(recipient);
+		let commitment = hex::decode(c).map_err(|_| OpStatusCode::CommitmentNotSet)?;
+		let commitment: [u8; 32] = commitment.try_into().map_err(|_| OpStatusCode::CommitmentNotSet)?;
+		self.commitment = Some(commitment);
 		Ok(())
 	}
 
@@ -370,126 +368,110 @@ pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 }
 #[cfg(test)]
 mod test {
-	use ark_serialize::CanonicalSerialize;
 	use arkworks_circuits::setup::common::verify_unchecked_raw;
-	use arkworks_circuits::setup::mixer::setup_keys_x5_5;
-	use js_sys::Uint8Array;
+
 	use wasm_bindgen_test::*;
 
-	use crate::note::JsNote;
-
 	use super::*;
+	use crate::proof::test_utils::{
+		generate_anchor_test_setup, generate_mixer_test_setup, AnchorTestSetup, MixerTestSetup, ANCHOR_NOTE_X5_4,
+		DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_X5_5,
+	};
+
 	use arkworks_circuits::prelude::ark_bn254::Bn254;
-	use arkworks_utils::utils::common::Curve as ArkCurve;
+	const TREE_DEPTH: usize = 30;
 
-	const TREE_DEPTH: u32 = 30;
 	#[wasm_bindgen_test]
-	fn js_setup() {
-		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
-		let mut pk_uncompressed_bytes = Vec::new();
-		CanonicalSerialize::serialize_unchecked(&pk, &mut pk_uncompressed_bytes).unwrap();
+	fn mixer_js_setup() {
+		let MixerTestSetup {
+			relayer,
+			recipient,
+			proof_input_builder,
+			leaf_bytes,
+			..
+		} = generate_mixer_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_X5_5);
 
-		let note_str = "webb.mixer:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
-		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
-		let truncated_substrate_address = truncate_and_pad(&hex::decode(decoded_substrate_address).unwrap());
-		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
-		let mut js_builder = ProofInputBuilder::new();
-		let leave: Uint8Array = note.get_leaf_commitment().unwrap();
-		let leave_bytes: Vec<u8> = leave.to_vec();
-		let leaves_ua: Array = vec![leave].into_iter().collect();
+		let truncated_substrate_relayer_address = truncate_and_pad(&relayer);
+		let truncated_substrate_recipient_address = truncate_and_pad(&recipient);
 
-		js_builder.set_leaf_index(JsString::from("0"));
-		js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua)));
-
-		js_builder.set_fee(JsString::from("5"));
-		js_builder.set_refund(JsString::from("1"));
-
-		js_builder.set_relayer(JsString::from(decoded_substrate_address));
-		js_builder.set_recipient(JsString::from(decoded_substrate_address));
-
-		js_builder.set_pk(JsString::from(hex::encode(vec![])));
-		js_builder.set_note(&note);
-
-		let proof_input = js_builder.build().unwrap();
+		let proof_input = proof_input_builder.build().unwrap();
 		let mixer_input = proof_input.mixer_input().unwrap();
 
 		assert_eq!(
 			hex::encode(mixer_input.recipient),
-			hex::encode(&truncated_substrate_address)
+			hex::encode(&truncated_substrate_recipient_address)
 		);
 		assert_eq!(
 			hex::encode(mixer_input.relayer),
-			hex::encode(&truncated_substrate_address)
+			hex::encode(&truncated_substrate_relayer_address)
 		);
 
 		assert_eq!(mixer_input.refund, 1);
 		assert_eq!(mixer_input.fee, 5);
 
 		assert_eq!(mixer_input.leaf_index, 0);
-		assert_eq!(hex::encode(&mixer_input.leaves[0]), hex::encode(leave_bytes));
+		assert_eq!(hex::encode(&mixer_input.leaves[0]), hex::encode(leaf_bytes));
 	}
 
 	#[wasm_bindgen_test]
-	fn generate_proof() {
-		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
+	fn anchor_js_setup() {
+		let AnchorTestSetup {
+			relayer,
+			recipient,
+			proof_input_builder,
+			roots_raw,
+			leaf_bytes,
+			..
+		} = generate_anchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, ANCHOR_NOTE_X5_4);
+		let anchor_input = proof_input_builder.build().unwrap().anchor_input().unwrap();
+		let truncated_substrate_relayer_address = truncate_and_pad(&relayer);
+		let truncated_substrate_recipient_address = truncate_and_pad(&recipient);
+		assert_eq!(
+			hex::encode(anchor_input.recipient),
+			hex::encode(&truncated_substrate_recipient_address)
+		);
+		assert_eq!(
+			hex::encode(anchor_input.relayer),
+			hex::encode(&truncated_substrate_relayer_address)
+		);
 
-		let note_str = "webb.mixer:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
-		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
-		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
-		let mut js_builder = ProofInputBuilder::new();
-		let leave: Uint8Array = note.get_leaf_commitment().unwrap();
-		let leave_bytes: Vec<u8> = leave.to_vec();
-		let leaves_ua: Array = vec![leave].into_iter().collect();
+		assert_eq!(hex::encode(anchor_input.commitment), hex::encode([0u8; 32]));
+		assert_eq!(hex::encode(&anchor_input.roots[0]), hex::encode(&roots_raw[0]));
+		assert_eq!(anchor_input.roots.len(), roots_raw.len());
 
-		js_builder.set_leaf_index(JsString::from("0"));
-		js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua)));
+		assert_eq!(anchor_input.refund, 1);
+		assert_eq!(anchor_input.fee, 5);
 
-		js_builder.set_fee(JsString::from("5"));
-		js_builder.set_refund(JsString::from("1"));
+		assert_eq!(anchor_input.leaf_index, 0);
+		assert_eq!(hex::encode(&anchor_input.leaves[0]), hex::encode(leaf_bytes));
+	}
 
-		js_builder.set_relayer(JsString::from(decoded_substrate_address));
-		js_builder.set_recipient(JsString::from(decoded_substrate_address));
-		js_builder.set_pk(JsString::from(hex::encode(&pk)));
-		js_builder.set_note(&note);
-		let proof_input = js_builder.build_js().unwrap();
+	#[wasm_bindgen_test]
+	fn generate_mixer_proof() {
+		let MixerTestSetup {
+			proof_input_builder,
+			vk,
+			..
+		} = generate_mixer_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_X5_5);
+
+		let proof_input = proof_input_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_input).unwrap();
+
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 		assert!(is_valid_proof);
 	}
 
 	#[wasm_bindgen_test]
-	fn is_valid_merkle_root() {
-		let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
-		let rigid_leaf = hex::decode("66b27a63d25d5187381a251ddf36c0d195f69f303826ec45e534806746549820").unwrap();
-		let rigid_root = hex::decode("6caaa2fea7789832bb2df2e74921c8058e5c66e8a842fe9d389864c006e0492b").unwrap();
-		let note_str = "webb.mixer:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
-		let decoded_substrate_address = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
-		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
-		let mut js_builder = ProofInputBuilder::new();
-		let (test_leaf, ..) = note.get_leaf_and_nullifier().unwrap();
+	fn anchor_proving() {
+		let AnchorTestSetup {
+			proof_input_builder,
+			vk,
+			..
+		} = generate_anchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, ANCHOR_NOTE_X5_4);
 
-		// This fails
-		// assert_eq!(test_leaf, rigid_leaf);
-
-		let leaf = note.get_leaf_commitment().unwrap();
-		let leaves_ua: Array = vec![leaf].into_iter().collect();
-
-		js_builder.set_leaf_index(JsString::from("0"));
-		js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua)));
-
-		js_builder.set_fee(JsString::from("5"));
-		js_builder.set_refund(JsString::from("1"));
-
-		js_builder.set_relayer(JsString::from(decoded_substrate_address));
-		js_builder.set_recipient(JsString::from(decoded_substrate_address));
-		js_builder.set_pk(JsString::from(hex::encode(&pk)));
-		js_builder.set_note(&note);
-
-		let proof_input = js_builder.build_js().unwrap();
+		let proof_input = proof_input_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_input).unwrap();
-		// This fails
-		// assert_eq!(hex::encode(&proof.leaf.clone()), hex::encode(rigid_leaf));
-		// assert_eq!(hex::encode(&proof.root.clone()), hex::encode(rigid_root));
+
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 		assert!(is_valid_proof);
 	}
