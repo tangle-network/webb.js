@@ -121,3 +121,8 @@ jobs:
         run: |
           yarn install --immutable | grep -v 'YN0013'
           yarn build
+      - name : integration tests
+        run: |
+          cd tests
+          yarn
+          yarn test
