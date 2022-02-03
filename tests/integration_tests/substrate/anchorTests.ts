@@ -1,8 +1,9 @@
-import { JsNote } from '@webb-tools/wasm-utils/njs/wasm-utils';
+import { JsNote, OperationError } from '@webb-tools/wasm-utils/njs';
 import { ApiPromise } from '@polkadot/api';
 import { Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
 import {
+  catchWasmError,
   createAnchor,
   depositAnchorBnX5_4,
   KillTask,
@@ -56,26 +57,40 @@ describe('Anchor tests', function () {
   });
 
   it('Anchor show work', async function () {
-    const { bob, charlie, alice } = getKeyring();
-    // transfer some funds to sudo & test account
-    await transferBalance(apiPromise!, charlie, [alice, bob]);
-    // set the test account ORML balance of the mixer asset
-    await setORMLTokenBalance(apiPromise!, alice, bob);
-    await createAnchor(apiPromise!, alice, 10);
+    try {
+      const { bob, charlie, alice } = getKeyring();
+      // transfer some funds to sudo & test account
+      await transferBalance(apiPromise!, charlie, [alice, bob]);
+      // set the test account ORML balance of the mixer asset
+      await setORMLTokenBalance(apiPromise!, alice, bob);
+      await createAnchor(apiPromise!, alice, 10);
 
-    let note: JsNote;
-    // deposit to the mixer
-    note = await depositAnchorBnX5_4(apiPromise!, bob);
-    ///Give the chain sometime to insure the leaf is there
-    await sleep(10_000);
-    // withdraw fro the mixer
-    const hash = await withdrawAnchorBnx5_4(
-      apiPromise!,
-      bob,
-      note!,
-      bob.address
-    );
-    console.log(hash);
+      let note: JsNote;
+      // deposit to the mixer
+      note = await catchWasmError(() => depositAnchorBnX5_4(apiPromise!, bob));
+      ///Give the chain sometime to insure the leaf is there
+      await sleep(10_000);
+      // withdraw fro the mixer
+      const hash = await withdrawAnchorBnx5_4(
+        apiPromise!,
+        bob,
+        note!,
+        bob.address
+      );
+      console.log(hash);
+    } catch (e) {
+      if (e instanceof OperationError) {
+        const errorMessage = {
+          code: e.code,
+          errorMessage: e.error_message,
+          data: e.data,
+        };
+        console.log(errorMessage);
+        throw errorMessage;
+      } else {
+        throw e;
+      }
+    }
   });
 
   after(function () {

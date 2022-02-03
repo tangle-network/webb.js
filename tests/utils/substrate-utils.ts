@@ -12,6 +12,7 @@ import path from 'path';
 import fs from 'fs';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+import { OperationError } from '@webb-tools/wasm-utils';
 
 export async function preparePolkadotApi() {
   const wsProvider = new WsProvider('ws://127.0.0.1:9944');
@@ -113,7 +114,7 @@ export async function setORMLTokenBalance(
       });
   });
 }
-
+export async function fetchLinkableAnchorBn254(apiPromise: ApiPromise) {}
 export async function fetchRPCTreeLeaves(
   api: ApiPromise,
   treeId: string | number
@@ -184,7 +185,23 @@ export type WithdrawProof = {
 export type AnchorWithdrawProof = WithdrawProof & {
   commitment: string;
 };
+export function catchWasmError<T extends (...args: any) => any>(
+  fn: T
+): ReturnType<T> {
+  try {
+    return fn();
+  } catch (e) {
+    const error = e as OperationError;
 
+    const errorMessage = {
+      code: error.code,
+      errorMessage: error.error_message,
+      data: error.data,
+    };
+    console.log(errorMessage);
+    throw errorMessage;
+  }
+}
 export async function depositAnchorBnX5_4(
   api: ApiPromise,
   depositor: KeyringPair
@@ -324,7 +341,7 @@ export async function withdrawAnchorBnx5_4(
     withdrawProof.commitment,
   ];
   //@ts-ignore
-  const withdrawTx = api.tx.anchorBn254.widthdraw(parms);
+  const withdrawTx = api.tx.anchorBn254.widthdraw(...parms);
   await withdrawTx.signAndSend(signer);
   return withdrawTx.hash.toString();
 }
@@ -398,7 +415,7 @@ export async function withdrawMixerBnX5_5(
     withdrawProof.refund,
   ];
   //@ts-ignore
-  const withdrawTx = api.tx.mixerBn254.widthdraw(parms);
+  const withdrawTx = api.tx.mixerBn254.withdraw(...parms);
   await withdrawTx.signAndSend(signer);
   return withdrawTx.hash.toString();
 }
