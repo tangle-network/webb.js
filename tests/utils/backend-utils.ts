@@ -1,10 +1,17 @@
-import {execSync, spawn, SpawnOptionsWithoutStdio} from "child_process";
+import { execSync, spawn, SpawnOptionsWithoutStdio } from 'child_process';
 
-function spawnWithLogger(command: string, options?: SpawnOptionsWithoutStdio) {
+function spawnWithLogger(
+  command: string,
+  options?: SpawnOptionsWithoutStdio,
+  allLogs = false
+) {
   const process = spawn(command, options);
-  process.stdout.on('data', (data) => {
-    console.log(data.toString());
-  });
+
+  if (allLogs) {
+    process.stdout.on('data', (data) => {
+      console.log(data.toString());
+    });
+  }
 
   process.stderr.on('data', (data) => {
     console.error(data.toString());
@@ -16,7 +23,7 @@ function spawnWithLogger(command: string, options?: SpawnOptionsWithoutStdio) {
 
   return process;
 }
-export type KillTask = () => void
+export type KillTask = () => void;
 export function startDarkWebbNode(): KillTask {
   execSync(
     'docker pull ghcr.io/webb-tools/protocol-substrate-standalone-node:edge',
@@ -35,22 +42,16 @@ export function startDarkWebbNode(): KillTask {
   };
 
   const node1Cmd = getDockerCmd(node1, [9944, 30333]);
-  const node2Cmd = getDockerCmd(node2 ,       [33334, 33334]);
+  const node2Cmd = getDockerCmd(node2, [33334, 33334]);
 
-  const node1Task = spawnWithLogger(
-    node1Cmd,
-    {
-      shell: true,
-    }
-  );
-  const node2task = spawnWithLogger(
-    node2Cmd,
-    {
-      shell: true,
-    }
-  );
-  return ()=>{
-    node1Task.kill("SIGINT")
-    node2task.kill("SIGINT")
+  const node1Task = spawnWithLogger(node1Cmd, {
+    shell: true,
+  });
+  const node2task = spawnWithLogger(node2Cmd, {
+    shell: true,
+  });
+  return () => {
+    node1Task.kill('SIGINT');
+    node2task.kill('SIGINT');
   };
 }
