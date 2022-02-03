@@ -3,7 +3,8 @@
   "exclude": [
     "build/**/*",
     "**/build/**/*",
-    "examples/**"
+    "examples/**",
+    "tests/**/**"
   ],
   "compilerOptions": {
     "declaration": true,
@@ -13,40 +14,40 @@
     "allowJs": true,
     "paths": {
       "@webb-tools/api": [
-        "../packages/api/src"
+        "packages/api/src"
       ],
       "@webb-tools/api/*": [
-        "../packages/api/src/*"
+        "packages/api/src/*"
       ],
       "@webb-tools/types": [
-        "../packages/types/src"
+        "packages/types/src"
       ],
       "@webb-tools/types/*": [
-        "../packages/types/src/*"
+        "packages/types/src/*"
       ],
       "@webb-tools/type-definitions": [
-        "../packages/type-definitions/src"
+        "packages/type-definitions/src"
       ],
       "@webb-tools/type-definitions/*": [
-        "../packages/type-definitions/src/*"
+        "packages/type-definitions/src/*"
       ],
       "@webb-tools/sdk-core": [
-        "../packages/sdk-core/src"
+        "packages/sdk-core/src"
       ],
       "@webb-tools/sdk-core/*": [
-        "../packages/sdk-core/src/*"
+        "packages/sdk-core/src/*"
       ],
       "@webb-tools/app-util": [
-        "../packages/app-util/src"
+        "packages/app-util/src"
       ],
       "@webb-tools/app-util/*": [
-        "../packages/app-util/src/*"
+        "packages/app-util/src/*"
       ],
       "@webb-tools/wasm-utils": [
-        "../packages/wasm-utils/build"
+        "packages/wasm-utils/build"
       ],
       "@webb-tools/wasm-utils/*": [
-        "../packages/wasm-utils/build/*"
+        "packages/wasm-utils/build/*"
       ]
     },
     "skipLibCheck": true,
@@ -54,6 +55,6 @@
     "typeRoots": [
       "./node_modules/@polkadot/ts",
       "./node_modules/@types"
-    ]
+    ],
   }
 }
