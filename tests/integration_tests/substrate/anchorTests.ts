@@ -1,19 +1,18 @@
-import {JsNote, Proof} from '@webb-tools/wasm-utils/njs/wasm-utils';
+import { JsNote } from '@webb-tools/wasm-utils/njs/wasm-utils';
 import { ApiPromise } from '@polkadot/api';
 import { Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
-
-import { ChildProcessWithoutNullStreams } from 'child_process';
-import WebSocket from 'ws';
 import {
-  depositMixerBnX5_5,
+  createAnchor,
+  depositAnchorBnX5_4,
+  KillTask,
   preparePolkadotApi,
   setORMLTokenBalance,
+  sleep,
+  startDarkWebbNode,
   transferBalance,
-  withdrawMixerBnX5_5,
-} from '../../utils/substrate-utils';
-import {KillTask, startDarkWebbNode} from "../../utils/backend-utils";
-import {sleep} from "../../utils";
+  withdrawAnchorBnx5_4,
+} from '../../utils';
 
 let apiPromise: ApiPromise | null = null;
 let keyring: {
@@ -21,12 +20,7 @@ let keyring: {
   alice: KeyringPair;
   charlie: KeyringPair;
 } | null = null;
-let relayer: ChildProcessWithoutNullStreams;
 let nodes: KillTask | undefined;
-let relayerEndpoint: string;
-
-
-let client: WebSocket;
 
 const BOBPhrase =
   'asthma early danger glue satisfy spatial decade wing organ bean census announce';
@@ -47,7 +41,7 @@ function getKeyring() {
   return keyring;
 }
 
-describe('Mixer tests', function () {
+describe('Anchor tests', function () {
   // increase the timeout for relayer tests
   this.timeout(120_000);
 
@@ -57,39 +51,34 @@ describe('Mixer tests', function () {
       nodes = startDarkWebbNode();
     }
 
-
     apiPromise = await preparePolkadotApi();
-
-    client = new WebSocket(`${relayerEndpoint.replace('http', 'ws')}/ws`);
-    await new Promise((resolve) => client.on('open', resolve));
-    console.log('Connected to Relayer!');
+    await sleep(3000);
   });
 
-  it('should relay successfully', async function () {
+  it('Anchor show work', async function () {
     const { bob, charlie, alice } = getKeyring();
     // transfer some funds to sudo & test account
     await transferBalance(apiPromise!, charlie, [alice, bob]);
     // set the test account ORML balance of the mixer asset
     await setORMLTokenBalance(apiPromise!, alice, bob);
+    await createAnchor(apiPromise!, alice, 10);
 
     let note: JsNote;
     // deposit to the mixer
-    note = await depositMixerBnX5_5(apiPromise!, bob);
+    note = await depositAnchorBnX5_4(apiPromise!, bob);
     ///Give the chain sometime to insure the leaf is there
     await sleep(10_000);
     // withdraw fro the mixer
-    const hash = await withdrawMixerBnX5_5(
+    const hash = await withdrawAnchorBnx5_4(
       apiPromise!,
       bob,
       note!,
       bob.address
     );
-  console.log(hash);
+    console.log(hash);
   });
 
   after(function () {
-    client?.terminate();
-    relayer.kill('SIGINT');
     nodes?.();
   });
 });
