@@ -10,9 +10,67 @@ import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/keyring';
 import path from 'path';
 import fs from 'fs';
-
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { OperationError } from '@webb-tools/wasm-utils';
+import '@webb-tools/types/interfaces/augment-api-query';
+import { BigNumber } from 'ethers';
+
+export function currencyToUnitI128(currencyAmount: number) {
+  let bn = BigNumber.from(currencyAmount);
+  return bn.mul(1_000_000_000);
+}
+
+type MethodPath = {
+  section: string;
+  method: string;
+};
+
+export function polkadotTx(
+  api: ApiPromise,
+  path: MethodPath,
+  params: any[],
+  signer: KeyringPair
+) {
+  // @ts-ignore
+  const tx = api.tx[path.section][path.method](...params);
+  return new Promise<string>((resolve, reject) => {
+    tx.signAndSend(signer, (result) => {
+      const status = result.status;
+      const events = result.events.filter(
+        ({ event: { section } }) => section === 'system'
+      );
+      if (status.isInBlock || status.isFinalized) {
+        for (const event of events) {
+          const {
+            event: { data, method },
+          } = event;
+          const [dispatchError] = data as any;
+
+          if (method === 'ExtrinsicFailed') {
+            let message = dispatchError.type;
+
+            if (dispatchError.isModule) {
+              try {
+                const mod = dispatchError.asModule;
+                const error = dispatchError.registry.findMetaError(mod);
+
+                message = `${error.section}.${error.name}`;
+              } catch (error) {
+                reject(message);
+              }
+            } else if (dispatchError.isToken) {
+              message = `${dispatchError.type}.${dispatchError.asToken.type}`;
+            }
+
+            reject(message);
+          } else if (method === 'ExtrinsicSuccess') {
+            resolve(tx.hash.toString());
+          }
+        }
+      }
+    }).catch((e) => reject(e));
+  });
+}
 
 export async function preparePolkadotApi() {
   const wsProvider = new WsProvider('ws://127.0.0.1:9944');
@@ -72,15 +130,22 @@ export async function transferBalance(
   api: ApiPromise,
   source: KeyringPair,
   receiverPairs: KeyringPair[],
-  amount: string = '1_000_000_000_000'
+  number: number = 1000
 ) {
   console.log('Transfer balances');
   // transfer to alice
   for (const receiverPair of receiverPairs) {
-    // @ts-ignore
-    const tx = api.tx.balances.transfer(receiverPair.address, amount);
-    console.log(`Transferring native funds to ${receiverPair.address} `);
-    await awaitPolkadotTxFinalization(tx, source);
+    console.log(
+      `Transferring native funds to ${
+        receiverPair.address
+      } amount ${currencyToUnitI128(number).toString()} `
+    );
+    await polkadotTx(
+      api,
+      { section: 'balances', method: 'transfer' },
+      [receiverPair.address, currencyToUnitI128(number).toString()],
+      source
+    );
   }
 }
 
@@ -89,10 +154,10 @@ export async function setORMLTokenBalance(
   sudoPair: KeyringPair,
   receiverPair: KeyringPair,
   ORMLCurrencyId: number = 0,
-  amount: number = 100_000_000_000_000
+  amount: number = 1000
 ) {
   console.log(
-    `Setting  ${receiverPair.address} balance to ${100_000_000_000_000} `
+    `Setting  ${receiverPair.address} balance to ${currencyToUnitI128(amount)} `
   );
   return new Promise((resolve, reject) => {
     const address = api.createType('MultiAddress', {
@@ -102,7 +167,11 @@ export async function setORMLTokenBalance(
     api.tx.sudo
       .sudo(
         // @ts-ignore
-        api.tx.currencies.updateBalance(address, ORMLCurrencyId, amount)
+        api.tx.currencies.updateBalance(
+          address,
+          ORMLCurrencyId,
+          currencyToUnitI128(amount)
+        )
       )
       .signAndSend(sudoPair, (res) => {
         if (res.isFinalized || res.isCompleted) {
@@ -114,11 +183,26 @@ export async function setORMLTokenBalance(
       });
   });
 }
-export async function fetchLinkableAnchorBn254(apiPromise: ApiPromise) {}
+
+// @ts-ignore
+export async function fetchLinkableAnchorBn254(apiPromise: ApiPromise) {
+  // Run the
+}
+
+export async function getAnchors(apiPromise: ApiPromise) {
+  const anchors = await apiPromise.query.anchorBn254.anchors.entries();
+  const anc = anchors.map(([key, entry]) => {
+    const treeId = (key.toHuman() as Array<string>)[0];
+    return { treeId, anchor: entry.toHuman() };
+  });
+  return anc;
+}
+
 export async function fetchRPCTreeLeaves(
   api: ApiPromise,
   treeId: string | number
 ): Promise<Uint8Array[]> {
+  console.log(`Fetching leaves for tree with id ${treeId}`);
   let done = false;
   let from = 0;
   let to = 511;
@@ -185,6 +269,7 @@ export type WithdrawProof = {
 export type AnchorWithdrawProof = WithdrawProof & {
   commitment: string;
 };
+
 export function catchWasmError<T extends (...args: any) => any>(
   fn: T
 ): ReturnType<T> {
@@ -202,11 +287,18 @@ export function catchWasmError<T extends (...args: any) => any>(
     throw errorMessage;
   }
 }
+
+function firstAnchorTreeId(apiPromise: ApiPromise) {
+  return getAnchors(apiPromise).then((i) => i[0]!.treeId) as Promise<string>;
+}
+
 export async function depositAnchorBnX5_4(
   api: ApiPromise,
   depositor: KeyringPair
 ) {
-  console.log(`Depositing to tree id = 0 ; anchor bn254`);
+  const treeId = await firstAnchorTreeId(api);
+
+  console.log(`Depositing to tree id = ${treeId}; anchor bn254`);
   let noteBuilder = new JsNoteBuilder();
   noteBuilder.prefix('webb.anchor');
   noteBuilder.version('v1');
@@ -227,16 +319,19 @@ export async function depositAnchorBnX5_4(
   const leaf = note.getLeafCommitment();
   console.log(`deposited leaf ${u8aToHex(leaf)}`);
   console.log(`Deposit note ${note.serialize()}`);
-  //@ts-ignore
-  const depositTx = api.tx.anchorBn254.deposit(0, leaf);
-  await depositTx.signAndSend(depositor);
+  await polkadotTx(
+    api,
+    { method: 'deposit', section: 'anchorBn254' },
+    [treeId, leaf],
+    depositor
+  );
   return note;
 }
 
 export async function createAnchor(
   api: ApiPromise,
   sudoPair: KeyringPair,
-  size: number,
+  size: number /* Size should be more the existential balance*/,
   assetId: number = 0,
   maxEdges: number = 2,
   depth: number = 3
@@ -246,7 +341,12 @@ export async function createAnchor(
     api.tx.sudo
       .sudo(
         // @ts-ignore
-        api.tx.anchorBn254.create(size, maxEdges, depth, assetId)
+        api.tx.anchorBn254.create(
+          currencyToUnitI128(size),
+          maxEdges,
+          depth,
+          assetId
+        )
       )
       .signAndSend(sudoPair, (res) => {
         if (res.isFinalized || res.isCompleted) {
@@ -269,8 +369,9 @@ export async function withdrawAnchorBnx5_4(
 
   const addressHex = u8aToHex(decodeAddress(accountId));
   const relayerAddressHex = u8aToHex(decodeAddress(relayerAccountId));
+  const treeId = await firstAnchorTreeId(api);
   // fetch leaves
-  const leaves = await fetchRPCTreeLeaves(api, 0);
+  const leaves = await fetchRPCTreeLeaves(api, Number(treeId));
   const proofInputBuilder = new ProofInputBuilder();
   const leafHex = u8aToHex(note.getLeafCommitment());
   proofInputBuilder.setNote(note);
@@ -288,6 +389,8 @@ export async function withdrawAnchorBnx5_4(
   const commitment =
     '0000000000000000000000000000000000000000000000000000000000000000';
   proofInputBuilder.setCommiment(commitment);
+  // 1 from eth
+  // 1 from substrate
   proofInputBuilder.setRoots([
     hexToU8a(
       '0x0000000000000000000000000000000000000000000000000000000000000000'
@@ -343,7 +446,12 @@ export async function withdrawAnchorBnx5_4(
   //@ts-ignore
   const withdrawTx = api.tx.anchorBn254.widthdraw(...parms);
   await withdrawTx.signAndSend(signer);
-  return withdrawTx.hash.toString();
+  return polkadotTx(
+    api,
+    { method: 'withdraw', section: 'anchorBn254' },
+    parms,
+    signer
+  );
 }
 
 export async function withdrawMixerBnX5_5(

@@ -6,9 +6,9 @@ import {
   catchWasmError,
   createAnchor,
   depositAnchorBnX5_4,
+  getAnchors,
   KillTask,
   preparePolkadotApi,
-  setORMLTokenBalance,
   sleep,
   startDarkWebbNode,
   transferBalance,
@@ -42,7 +42,7 @@ function getKeyring() {
   return keyring;
 }
 
-describe('Anchor tests', function () {
+describe.only('Anchor tests', function () {
   // increase the timeout for relayer tests
   this.timeout(120_000);
 
@@ -56,14 +56,16 @@ describe('Anchor tests', function () {
     await sleep(3000);
   });
 
-  it('Anchor show work', async function () {
+  it('Anchor should work', async function () {
     try {
       const { bob, charlie, alice } = getKeyring();
       // transfer some funds to sudo & test account
-      await transferBalance(apiPromise!, charlie, [alice, bob]);
+      await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
       // set the test account ORML balance of the mixer asset
-      await setORMLTokenBalance(apiPromise!, alice, bob);
-      await createAnchor(apiPromise!, alice, 10);
+      // await setORMLTokenBalance(apiPromise!, alice, bob, 0, 999999);
+      await createAnchor(apiPromise!, alice, 1000);
+      const anchors = await getAnchors(apiPromise!);
+      console.log(anchors);
 
       let note: JsNote;
       // deposit to the mixer

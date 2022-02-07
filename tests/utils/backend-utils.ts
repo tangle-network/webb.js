@@ -11,11 +11,11 @@ function spawnWithLogger(
     process.stdout.on('data', (data) => {
       console.log(data.toString());
     });
-  }
 
-  process.stderr.on('data', (data) => {
-    console.error(data.toString());
-  });
+    process.stderr.on('data', (data) => {
+      console.error(data.toString());
+    });
+  }
 
   process.on('close', (code) => {
     console.log(` process ${process.pid} exited with code ${code}`);
