@@ -44,7 +44,7 @@ function getKeyring() {
 
 describe.only('Anchor tests', function () {
   // increase the timeout for relayer tests
-  this.timeout(120_000);
+  this.timeout(360_000);
 
   before(async function () {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
@@ -73,11 +73,8 @@ describe.only('Anchor tests', function () {
       ///Give the chain sometime to insure the leaf is there
       await sleep(10_000);
       // withdraw fro the mixer
-      const hash = await withdrawAnchorBnx5_4(
-        apiPromise!,
-        bob,
-        note!,
-        bob.address
+      const hash = await catchWasmError(() =>
+        withdrawAnchorBnx5_4(apiPromise!, bob, note!, bob.address)
       );
       console.log(hash);
     } catch (e) {

@@ -430,7 +430,7 @@ export async function withdrawAnchorBnx5_4(
     relayer: relayerAccountId,
     fee: 0,
     refund: 0,
-    commitment: `ox${commitment}`,
+    commitment: `0x${commitment}`,
   };
   const parms = [
     withdrawProof.id,
@@ -443,9 +443,6 @@ export async function withdrawAnchorBnx5_4(
     withdrawProof.refund,
     withdrawProof.commitment,
   ];
-  //@ts-ignore
-  const withdrawTx = api.tx.anchorBn254.widthdraw(...parms);
-  await withdrawTx.signAndSend(signer);
   return polkadotTx(
     api,
     { method: 'withdraw', section: 'anchorBn254' },
