@@ -42,13 +42,13 @@ function getKeyring() {
   return keyring;
 }
 
-describe.only('Anchor tests', function () {
+describe('Anchor tests', function () {
   // increase the timeout for relayer tests
-  this.timeout(360_000);
+  this.timeout(60 * 60 * 1000);
 
   before(async function () {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
-    if (process.env.LOCAL_NODE !== 'ture') {
+    if (true) {
       nodes = startDarkWebbNode();
     }
 
@@ -64,6 +64,7 @@ describe.only('Anchor tests', function () {
       // set the test account ORML balance of the mixer asset
       // await setORMLTokenBalance(apiPromise!, alice, bob, 0, 999999);
       await createAnchor(apiPromise!, alice, 1000);
+
       const anchors = await getAnchors(apiPromise!);
       console.log(anchors);
 

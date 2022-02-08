@@ -188,6 +188,17 @@ export async function setORMLTokenBalance(
 export async function fetchLinkableAnchorBn254(apiPromise: ApiPromise) {
   // Run the
 }
+export async function fetchCachedRoot(apiPromise: ApiPromise, treeId: string) {
+  const storage =
+    // @ts-ignore
+    await apiPromise.query.merkleTreeBn254.cachedRoots.entries(treeId);
+
+  const rootStorage = storage.map(([key, entry]) => ({
+    key: key.toHuman(),
+    root: entry.toHuman(),
+  }));
+  return rootStorage[rootStorage.length - 1]?.root as string;
+}
 
 export async function getAnchors(apiPromise: ApiPromise) {
   const anchors = await apiPromise.query.anchorBn254.anchors.entries();
@@ -336,27 +347,20 @@ export async function createAnchor(
   maxEdges: number = 2,
   depth: number = 3
 ) {
-  return new Promise((resolve, reject) => {
-    // @ts-ignore
-    api.tx.sudo
-      .sudo(
-        // @ts-ignore
-        api.tx.anchorBn254.create(
-          currencyToUnitI128(size),
-          maxEdges,
-          depth,
-          assetId
-        )
-      )
-      .signAndSend(sudoPair, (res) => {
-        if (res.isFinalized || res.isCompleted) {
-          resolve(null);
-        }
-        if (res.isError) {
-          reject(res.dispatchError);
-        }
-      });
-  });
+  return polkadotTx(
+    api,
+    { method: 'sudo', section: 'sudo' },
+    [
+      // @ts-ignore
+      api.tx.anchorBn254.create(
+        currencyToUnitI128(size),
+        maxEdges,
+        depth,
+        assetId
+      ),
+    ],
+    sudoPair
+  );
 }
 
 export async function withdrawAnchorBnx5_4(
@@ -386,15 +390,15 @@ export async function withdrawAnchorBnx5_4(
 
   proofInputBuilder.setFee('0');
   proofInputBuilder.setRefund('0');
+  const root = await fetchCachedRoot(api, treeId);
+  console.log(`Root to of linked tree ${root}`);
   const commitment =
     '0000000000000000000000000000000000000000000000000000000000000000';
   proofInputBuilder.setCommiment(commitment);
   // 1 from eth
   // 1 from substrate
   proofInputBuilder.setRoots([
-    hexToU8a(
-      '0x0000000000000000000000000000000000000000000000000000000000000000'
-    ),
+    hexToU8a(root),
     hexToU8a(
       '0x0000000000000000000000000000000000000000000000000000000000000000'
     ),
@@ -422,7 +426,7 @@ export async function withdrawAnchorBnx5_4(
   const zkProofMetadata = generate_proof_js(proofInput);
 
   const withdrawProof: AnchorWithdrawProof = {
-    id: String(0),
+    id: treeId,
     proofBytes: `0x${zkProofMetadata.proof}` as any,
     root: `0x${zkProofMetadata.root}`,
     nullifierHash: `0x${zkProofMetadata.nullifierHash}`,
@@ -435,7 +439,7 @@ export async function withdrawAnchorBnx5_4(
   const parms = [
     withdrawProof.id,
     withdrawProof.proofBytes,
-    withdrawProof.root,
+    [withdrawProof.root, withdrawProof.root],
     withdrawProof.nullifierHash,
     withdrawProof.recipient,
     withdrawProof.relayer,
@@ -443,6 +447,7 @@ export async function withdrawAnchorBnx5_4(
     withdrawProof.refund,
     withdrawProof.commitment,
   ];
+  console.log(parms);
   return polkadotTx(
     api,
     { method: 'withdraw', section: 'anchorBn254' },
@@ -519,6 +524,7 @@ export async function withdrawMixerBnX5_5(
     withdrawProof.fee,
     withdrawProof.refund,
   ];
+
   //@ts-ignore
   const withdrawTx = api.tx.mixerBn254.withdraw(...parms);
   await withdrawTx.signAndSend(signer);
