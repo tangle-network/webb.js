@@ -55,6 +55,11 @@ impl Proof {
 		let root = hex::encode(&self.root);
 		root.into()
 	}
+
+	#[wasm_bindgen(getter)]
+	pub fn roots(&self) -> Array {
+		self.roots.iter().map(|i| JsString::from(hex::encode(i))).collect()
+	}
 }
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct MixerProofInput {
