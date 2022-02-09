@@ -189,15 +189,12 @@ export async function fetchLinkableAnchorBn254(apiPromise: ApiPromise) {
   // Run the
 }
 export async function fetchCachedRoot(apiPromise: ApiPromise, treeId: string) {
+  console.log(`fetching metadata for tree id ${treeId}`);
   const storage =
     // @ts-ignore
-    await apiPromise.query.merkleTreeBn254.cachedRoots.entries(treeId);
-
-  const rootStorage = storage.map(([key, entry]) => ({
-    key: key.toHuman(),
-    root: entry.toHuman(),
-  }));
-  return rootStorage[rootStorage.length - 1]?.root as string;
+    await apiPromise.query.merkleTreeBn254.trees(treeId);
+  // @ts-ignore
+  return storage.toHuman().root;
 }
 
 export async function getAnchors(apiPromise: ApiPromise) {
