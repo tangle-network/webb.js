@@ -125,5 +125,5 @@ jobs:
         run: |
           git submodule update --init
           cd tests
-          yarn
+          yarn install --check-files
           yarn test
