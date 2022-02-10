@@ -1,6 +1,6 @@
 import type {JsProofInput, Leaves, Proof} from '@webb-tools/wasm-utils';
 import {u8aToHex} from '@polkadot/util';
-import {ProofI} from '@webb-tools/sdk-core/proving/proving-manger';
+import {ProofI} from '@webb-tools/sdk-core/proving/proving-manager';
 import {Note} from '../note';
 
 export type ProvingManagerSetupInput = {
@@ -80,7 +80,8 @@ export class ProvingManagerWrapper {
     return {
       proof: proof.proof,
       root: proof.root,
-      nullifierHash: proof.nullifierHash
+      nullifierHash: proof.nullifierHash,
+      roots: proof.roots
     };
   }
 }
