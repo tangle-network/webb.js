@@ -12,7 +12,6 @@
     "@webb-tools/api": "0.1.4-32",
     "@webb-tools/app-util": "0.1.4-32",
     "@webb-tools/sdk-core": "0.1.4-32",
-    "@webb-tools/sdk-mixer": "0.1.4-32",
     "@webb-tools/types": "0.1.4-32"
   },
   "devDependencies": {
