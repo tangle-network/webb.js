@@ -6,7 +6,6 @@ import {
   catchWasmError,
   createAnchor,
   depositAnchorBnX5_4,
-  fetchCachedRoot,
   getAnchors,
   KillTask,
   preparePolkadotApi,

@@ -397,7 +397,7 @@ export async function withdrawAnchorBnx5_4(
   proofInputBuilder.setRoots([
     hexToU8a(root),
     hexToU8a(
-      '0x0000000000000000000000000000000000000000000000000000000000000000'
+      `0x0000000000000000000000000000000000000000000000000000000000000000`
     ),
   ]);
 
@@ -433,10 +433,11 @@ export async function withdrawAnchorBnx5_4(
     refund: 0,
     commitment: `0x${commitment}`,
   };
+  console.log(zkProofMetadata.roots);
   const parms = [
     withdrawProof.id,
     withdrawProof.proofBytes,
-    [withdrawProof.root, withdrawProof.root],
+    zkProofMetadata.roots.map((i:string) => `0x${i}`),
     withdrawProof.nullifierHash,
     withdrawProof.recipient,
     withdrawProof.relayer,
