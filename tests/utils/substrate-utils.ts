@@ -311,8 +311,8 @@ export async function depositAnchorBnX5_4(
   noteBuilder.prefix('webb.anchor');
   noteBuilder.version('v1');
 
-  noteBuilder.sourceChainId('1');
-  noteBuilder.targetChainId('1');
+  noteBuilder.sourceChainId('0');
+  noteBuilder.targetChainId('2199023256632');
 
   noteBuilder.tokenSymbol('WEBB');
   noteBuilder.amount('1');
@@ -396,9 +396,7 @@ export async function withdrawAnchorBnx5_4(
   // 1 from substrate
   proofInputBuilder.setRoots([
     hexToU8a(root),
-    hexToU8a(
-      '0x0000000000000000000000000000000000000000000000000000000000000000'
-    ),
+    hexToU8a(root),
   ]);
 
   proofInputBuilder.setRecipient(addressHex.replace('0x', ''));
