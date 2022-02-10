@@ -40,7 +40,7 @@ function getKeyring() {
   return keyring;
 }
 
-describe.only('Mixer tests', function () {
+describe('Mixer tests', function () {
   // increase the timeout for relayer tests
   this.timeout(120_000);
 
