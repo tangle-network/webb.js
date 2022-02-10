@@ -17,7 +17,7 @@ import { BigNumber } from 'ethers';
 
 export function currencyToUnitI128(currencyAmount: number) {
   let bn = BigNumber.from(currencyAmount);
-  return bn.mul(1_000_000_000);
+  return bn.mul(1_000_000_000_000);
 }
 
 type MethodPath = {
@@ -258,9 +258,13 @@ export async function depositMixerBnX5_5(
   const leaf = note.getLeafCommitment();
   console.log(`deposited leaf ${u8aToHex(leaf)}`);
   console.log(`Deposit note ${note.serialize()}`);
-  //@ts-ignore
-  const depositTx = api.tx.mixerBn254.deposit(0, leaf);
-  await depositTx.signAndSend(depositor);
+
+  await polkadotTx(
+    api,
+    { section: 'mixerBn254', method: 'deposit' },
+    [0, leaf],
+    depositor
+  );
   return note;
 }
 
@@ -437,7 +441,7 @@ export async function withdrawAnchorBnx5_4(
   const parms = [
     withdrawProof.id,
     withdrawProof.proofBytes,
-    zkProofMetadata.roots.map((i:string) => `0x${i}`),
+    zkProofMetadata.roots.map((i: string) => `0x${i}`),
     withdrawProof.nullifierHash,
     withdrawProof.recipient,
     withdrawProof.relayer,
@@ -522,9 +526,10 @@ export async function withdrawMixerBnX5_5(
     withdrawProof.fee,
     withdrawProof.refund,
   ];
-
-  //@ts-ignore
-  const withdrawTx = api.tx.mixerBn254.withdraw(...parms);
-  await withdrawTx.signAndSend(signer);
-  return withdrawTx.hash.toString();
+  return polkadotTx(
+    api,
+    { section: 'mixerBn254', method: 'withdraw' },
+    parms,
+    signer
+  );
 }

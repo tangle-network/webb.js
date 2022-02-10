@@ -24,7 +24,7 @@ function spawnWithLogger(
 
   return process;
 }
-export type KillTask = () => void;
+export type KillTask = () => Promise<void>;
 export function startDarkWebbNode(): KillTask {
   execSync(
     'docker pull ghcr.io/webb-tools/protocol-substrate-standalone-node:edge',
