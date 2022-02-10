@@ -6,7 +6,6 @@ import {
   catchWasmError,
   createAnchor,
   depositAnchorBnX5_4,
-  // fetchCachedRoot,
   getAnchors,
   KillTask,
   preparePolkadotApi,
@@ -43,7 +42,7 @@ function getKeyring() {
   return keyring;
 }
 
-describe.only('Anchor tests', function () {
+describe('Anchor tests', function () {
   // increase the timeout for relayer tests
   this.timeout(60 * 60 * 1000);
 
@@ -94,7 +93,7 @@ describe.only('Anchor tests', function () {
     }
   });
 
-  after(function () {
-    nodes?.();
+  after(async function () {
+    await nodes?.();
   });
 });

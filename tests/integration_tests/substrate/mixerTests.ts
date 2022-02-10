@@ -1,4 +1,4 @@
-import { JsNote } from '@webb-tools/wasm-utils/njs/wasm-utils';
+import { JsNote, OperationError } from '@webb-tools/wasm-utils/njs/wasm-utils';
 import { ApiPromise } from '@polkadot/api';
 import { Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -7,7 +7,6 @@ import {
   depositMixerBnX5_5,
   KillTask,
   preparePolkadotApi,
-  setORMLTokenBalance,
   sleep,
   startDarkWebbNode,
   transferBalance,
@@ -55,28 +54,39 @@ describe('Mixer tests', function () {
   });
 
   it('Mixer should work', async function () {
-    const { bob, charlie, alice } = getKeyring();
-    // transfer some funds to sudo & test account
-    await transferBalance(apiPromise!, charlie, [alice, bob]);
-    // set the test account ORML balance of the mixer asset
-    await setORMLTokenBalance(apiPromise!, alice, bob);
-
-    let note: JsNote;
-    // deposit to the mixer
-    note = await depositMixerBnX5_5(apiPromise!, bob);
-    ///Give the chain sometime to insure the leaf is there
-    await sleep(10_000);
-    // withdraw fro the mixer
-    const hash = await withdrawMixerBnX5_5(
-      apiPromise!,
-      bob,
-      note!,
-      bob.address
-    );
-    console.log(hash);
+    try {
+      const { bob, charlie, alice } = getKeyring();
+      // transfer some funds to sudo & test account
+      await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
+      let note: JsNote;
+      // deposit to the mixer
+      note = await depositMixerBnX5_5(apiPromise!, bob);
+      ///Give the chain sometime to insure the leaf is there
+      await sleep(10_000);
+      // withdraw fro the mixer
+      const hash = await withdrawMixerBnX5_5(
+        apiPromise!,
+        bob,
+        note!,
+        bob.address
+      );
+      console.log(hash);
+    } catch (e) {
+      if (e instanceof OperationError) {
+        const errorMessage = {
+          code: e.code,
+          errorMessage: e.error_message,
+          data: e.data,
+        };
+        console.log(errorMessage);
+        throw errorMessage;
+      } else {
+        throw e;
+      }
+    }
   });
 
-  after(function () {
-    nodes?.();
+  after(async function () {
+    await nodes?.();
   });
 });
