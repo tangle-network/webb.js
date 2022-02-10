@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+extern crate arkworks_circuits;
+
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;

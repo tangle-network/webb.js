@@ -5,6 +5,7 @@ import {
   JsNote,
   JsNoteBuilder,
   ProofInputBuilder,
+  validate_proof,
 } from '@webb-tools/wasm-utils/njs';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/keyring';
@@ -398,10 +399,7 @@ export async function withdrawAnchorBnx5_4(
   proofInputBuilder.setCommiment(commitment);
   // 1 from eth
   // 1 from substrate
-  proofInputBuilder.setRoots([
-    hexToU8a(root),
-    hexToU8a(root),
-  ]);
+  proofInputBuilder.setRoots([hexToU8a(root), hexToU8a(root)]);
 
   proofInputBuilder.setRecipient(addressHex.replace('0x', ''));
   proofInputBuilder.setRelayer(relayerAddressHex.replace('0x', ''));
@@ -423,6 +421,19 @@ export async function withdrawAnchorBnx5_4(
   console.log('Generating Zero knowledge proof');
 
   const zkProofMetadata = generate_proof_js(proofInput);
+
+  const vkPath = path.join(
+    // tests path
+    process.cwd(),
+    'protocol-substrate-fixtures',
+    'fixed-anchor',
+    'bn254',
+    'x5',
+    'verifying_key_uncompressed.bin'
+  );
+  const vk = fs.readFileSync(vkPath);
+  const isValid = validate_proof(zkProofMetadata, vk.toString('hex'), 'Bn254');
+  console.log(`This proof generated is ${isValid ? 'valid' : 'invalid'}`);
 
   const withdrawProof: AnchorWithdrawProof = {
     id: treeId,
@@ -494,6 +505,7 @@ export async function withdrawMixerBnX5_5(
     'x5',
     'proving_key_uncompressed.bin'
   );
+
   const pk = fs.readFileSync(pkPath);
 
   proofInputBuilder.setPk(pk.toString('hex'));
@@ -503,6 +515,19 @@ export async function withdrawMixerBnX5_5(
   console.log('Generating Zero knowledge proof');
 
   const zkProofMetadata = generate_proof_js(proofInput);
+
+  const vkPath = path.join(
+    // tests path
+    process.cwd(),
+    'protocol-substrate-fixtures',
+    'mixer',
+    'bn254',
+    'x5',
+    'verifying_key_uncompressed.bin'
+  );
+  const vk = fs.readFileSync(vkPath);
+  const isValid = validate_proof(zkProofMetadata, vk.toString('hex'), 'Bn254');
+  console.log(`This proof generated is ${isValid ? 'valid' : 'invalid'}`);
 
   const withdrawProof: WithdrawProof = {
     id: String(0),

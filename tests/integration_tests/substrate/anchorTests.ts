@@ -42,15 +42,13 @@ function getKeyring() {
   return keyring;
 }
 
-describe('Anchor tests', function () {
+describe.only('Anchor tests', function () {
   // increase the timeout for relayer tests
   this.timeout(60 * 60 * 1000);
 
   before(async function () {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
-    if (false) {
-      nodes = startDarkWebbNode();
-    }
+    nodes = startDarkWebbNode();
 
     apiPromise = await preparePolkadotApi();
     await sleep(3000);

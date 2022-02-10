@@ -1,11 +1,16 @@
 use std::convert::{TryFrom, TryInto};
 
+use arkworks_circuits::prelude::ark_bls12_381::Bls12_381;
+use arkworks_circuits::prelude::ark_bn254::Bn254;
+use arkworks_circuits::prelude::ark_groth16::verify_proof;
+use arkworks_circuits::setup::common::verify_unchecked_raw;
+
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
 use crate::note::JsNote;
-use crate::types::{Backend, Curve, Leaves, NotePrefix, OpStatusCode, OperationError, Uint8Arrayx32};
+use crate::types::{Backend, Curve, Leaves, NotePrefix, OpStatusCode, OperationError, Uint8Arrayx32, WasmCurve};
 
 mod anchor;
 mod mixer;
@@ -372,19 +377,35 @@ pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 	}
 	.map_err(|e| e.into())
 }
+#[wasm_bindgen]
+pub fn validate_proof(proof: &Proof, vk: JsString, curve: WasmCurve) -> Result<bool, JsValue> {
+	let vk_string: String = vk.into();
+	let curve: String = JsValue::from(&curve).as_string().ok_or(OpStatusCode::InvalidCurve)?;
+	let curve: Curve = curve.parse().map_err(|_| OpStatusCode::InvalidCurve)?;
+
+	let vk = hex::decode(vk_string).expect("Field to deserialize");
+	let is_valid = match curve {
+		Curve::Bls381 => verify_unchecked_raw::<Bls12_381>(&proof.public_inputs, &vk, &proof.proof),
+		Curve::Bn254 => verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof),
+	}
+	.map_err(|e| OperationError::new_with_message(OpStatusCode::InvalidProof, e.to_string()))?;
+
+	Ok(is_valid)
+}
 #[cfg(test)]
 mod test {
+	use arkworks_circuits::prelude::ark_bn254::Bn254;
 	use arkworks_circuits::setup::common::verify_unchecked_raw;
 
 	use wasm_bindgen_test::*;
 
-	use super::*;
 	use crate::proof::test_utils::{
 		generate_anchor_test_setup, generate_mixer_test_setup, AnchorTestSetup, MixerTestSetup, ANCHOR_NOTE_X5_4,
 		DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_X5_5,
 	};
 
-	use arkworks_circuits::prelude::ark_bn254::Bn254;
+	use super::*;
+
 	const TREE_DEPTH: usize = 30;
 
 	#[wasm_bindgen_test]
