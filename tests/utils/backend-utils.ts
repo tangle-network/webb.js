@@ -1,4 +1,5 @@
 import { execSync, spawn, SpawnOptionsWithoutStdio } from 'child_process';
+import {sleep} from "./index";
 
 function spawnWithLogger(
   command: string,
@@ -56,9 +57,10 @@ export function startDarkWebbNode(): KillTask {
   const node2task = spawnWithLogger(node2Cmd, {
     shell: true,
   });
-  return () => {
+  return async () => {
     node1Task.kill('SIGINT');
     node2task.kill('SIGINT');
-    execSync(`docker network rm -f ${DOCKER_NETWORK_NAME}`)
+    await sleep(2000);
+    execSync(`docker network rm ${DOCKER_NETWORK_NAME}`)
   };
 }
