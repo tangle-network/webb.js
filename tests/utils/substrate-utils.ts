@@ -1,6 +1,7 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import {
+  AnchorMTBn254X5,
   generate_proof_js,
   JsNote,
   JsNoteBuilder,
@@ -390,10 +391,16 @@ export async function withdrawAnchorBnx5_4(
   );
   proofInputBuilder.setLeafIndex(String(leafIndex));
 
-  proofInputBuilder.setFee('0');
-  proofInputBuilder.setRefund('0');
-  const root = await fetchCachedRoot(api, treeId);
-  console.log(`Root to of linked tree ${root}`);
+  proofInputBuilder.setFee('5');
+  proofInputBuilder.setRefund('1');
+  const chainRoot = await fetchCachedRoot(api, treeId);
+  const merkeTree = new AnchorMTBn254X5(leaves, String(leafIndex));
+  const root = `0x${merkeTree.root}`;
+  console.log(`Root to of linked tree ${chainRoot}`);
+  console.log(
+    `Root from chain ${chainRoot} === root from setup ${merkeTree.root}`
+  );
+
   const commitment =
     '0000000000000000000000000000000000000000000000000000000000000000';
   proofInputBuilder.setCommiment(commitment);
@@ -403,6 +410,7 @@ export async function withdrawAnchorBnx5_4(
 
   proofInputBuilder.setRecipient(addressHex.replace('0x', ''));
   proofInputBuilder.setRelayer(relayerAddressHex.replace('0x', ''));
+
   const pkPath = path.join(
     // tests path
     process.cwd(),
@@ -442,8 +450,8 @@ export async function withdrawAnchorBnx5_4(
     nullifierHash: `0x${zkProofMetadata.nullifierHash}`,
     recipient: accountId,
     relayer: relayerAccountId,
-    fee: 0,
-    refund: 0,
+    fee: 5,
+    refund: 1,
     commitment: `0x${commitment}`,
   };
   console.log(zkProofMetadata.roots);
