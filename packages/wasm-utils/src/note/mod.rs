@@ -156,8 +156,8 @@ pub struct JsNote {
 	pub denomination: u8,
 }
 
-#[wasm_bindgen]
 #[derive(Default)]
+#[wasm_bindgen]
 pub struct JsNoteBuilder {
 	#[wasm_bindgen(skip)]
 	pub prefix: Option<NotePrefix>,
@@ -474,6 +474,7 @@ mod test {
 		};
 		assert_eq!(note.to_string(), note_str)
 	}
+
 	#[test]
 	fn generate_leaf() {}
 

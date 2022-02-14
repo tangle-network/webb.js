@@ -5,7 +5,8 @@
   "scripts": {
     "build": "rimraf build pkg && webpack",
     "start": "rimraf build pkg && webpack-dev-server --open -d",
-    "test": "wasm-pack test --release --node "
+    "test": "wasm-pack test --release --node ",
+    "test-parallel": "wasm-pack test --release --node"
   },
   "publishConfig": {
     "access": "public",

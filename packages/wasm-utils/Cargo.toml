@@ -21,10 +21,6 @@ crate-type = ["cdylib" , "rlib"]
 # so it's only enabled in release mode.
 lto = true
 
-[features]
-# If you uncomment this line, it will enable `wee_alloc`:
-#default = ["wee_alloc"]
-
 [dependencies]
 ark-ff = { version = "^0.3.0", default-features = true }
 ark-serialize = "0.3.0"
@@ -33,11 +29,12 @@ ark-ed-on-bn254 = { version = "^0.3.0", default-features = true, features = ["r1
 ark-bn254 = { version = "^0.3.0", default-features = true, features = ["curve"] }
 ark-bls12-381 = { version = "^0.3.0", default-features = false, features = ["curve"] }
 webb-pedersen-hash = { version = "0.1.0", git = "https://github.com/webb-tools/webb-rs.git" }
-ark-std ={ version = "^0.3.0" }
-arkworks-gadgets = { version = "0.4.19", default-features = false }
-arkworks-circuits = { version = "0.4.19", default-features = false }
-arkworks-utils = { version = "0.4.19", default-features = false }
-
+# arkworks-gadgets = { version = "0.4.19", default-features = true }
+# arkworks-circuits = { version = "0.4.19", default-features = false }
+# arkworks-utils = { version = "0.4.19", default-features = false }
+arkworks-gadgets = { path = "../../../arkworks-gadgets/arkworks-gadgets" }
+arkworks-circuits = { path = "../../../arkworks-gadgets/arkworks-circuits" }
+arkworks-utils = { path = "../../../arkworks-gadgets/arkworks-utils" }
 
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 js-sys = "0.3"
@@ -52,8 +49,8 @@ console_error_panic_hook = "0.1.5"
 # compared to the default allocator's ~10K. However, it is slower than the default
 # allocator, so it's not enabled by default.
 wee_alloc = { version = "0.4.2", optional = true }
-
-
+rayon = { version = "1.5", optional = true }
+wasm-bindgen-rayon = { version = "1.0", optional = true }
 
 # The `web-sys` crate allows you to interact with the various browser APIs,
 # like the DOM.
@@ -67,3 +64,17 @@ wasm-bindgen-test = "0.3"
 js-sys = "0.3"
 lazy_static = "1.4"
 
+[target.wasm32-unknown-unknown]
+rustflags = ["-C", "target-feature=+atomics,+bulk-memory,+mutable-globals"]
+
+[features]
+# If you uncomment this line, it will enable `wee_alloc`:
+#default = ["wee_alloc"]
+parallel = [
+  "rayon",
+  "wasm-bindgen-rayon",
+  "arkworks-gadgets/parallel",
+  "arkworks-circuits/parallel",
+  "arkworks-utils/parallel",
+  "ark-ff/parallel",
+]
