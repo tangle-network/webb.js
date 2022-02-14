@@ -3,7 +3,6 @@ use std::convert::{TryFrom, TryInto};
 use ark_ff::{BigInteger, PrimeField};
 use arkworks_circuits::prelude::ark_bls12_381::Bls12_381;
 use arkworks_circuits::prelude::ark_bn254::Bn254;
-use arkworks_circuits::prelude::ark_groth16::verify_proof;
 use arkworks_circuits::setup::common::{verify_unchecked_raw, Tree_x5};
 
 use js_sys::{Array, JsString, Uint8Array};
@@ -281,7 +280,7 @@ impl AnchorMTBn254X5 {
 			.collect::<Result<Vec<_>, _>>()
 			.map_err(|_| OpStatusCode::InvalidLeaves)?
 			.into_iter()
-			.map(|v| Bn254Fr::from_le_bytes_mod_order(&v.0.to_vec()))
+			.map(|v| Bn254Fr::from_le_bytes_mod_order(v.0.as_ref()))
 			.collect();
 
 		let curve = ArkCurve::Bn254;
@@ -314,13 +313,15 @@ impl AnchorMTBn254X5 {
 			.for_each(|leaf| {
 				leaves_bt
 					.insert(
-						leaves_bt.len() as u32 + 1 as u32,
-						Bn254Fr::from_le_bytes_mod_order(&leaf.0.to_vec()),
+						leaves_bt.len() as u32 + 1_u32,
+						Bn254Fr::from_le_bytes_mod_order(leaf.0.as_ref()),
 					)
 					.unwrap();
 			});
 
-		self.inner.insert_batch(&leaves_bt);
+		self.inner
+			.insert_batch(&leaves_bt)
+			.map_err(|_| OpStatusCode::InvalidLeaves)?;
 		Ok(())
 	}
 }
