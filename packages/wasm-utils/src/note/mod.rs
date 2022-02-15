@@ -1,3 +1,4 @@
+use arkworks_circuits::setup::common::Leaf;
 use core::fmt;
 use std::str::FromStr;
 
@@ -20,7 +21,7 @@ impl JsNote {
 		note.parse().map_err(Into::into)
 	}
 
-	pub fn get_leaf_and_nullifier(&self) -> Result<(Vec<u8>, Vec<u8>), OperationError> {
+	pub fn get_leaf_and_nullifier(&self) -> Result<Leaf, OperationError> {
 		match self.prefix {
 			NotePrefix::Mixer => {
 				mixer::get_leaf_with_private_raw(self.curve, self.width, self.exponentiation, &self.secret)
@@ -344,8 +345,8 @@ impl JsNote {
 
 	#[wasm_bindgen(js_name = getLeafCommitment)]
 	pub fn get_leaf_commitment(&self) -> Result<Uint8Array, JsValue> {
-		let (leaf, ..) = self.get_leaf_and_nullifier()?;
-		Ok(Uint8Array::from(leaf.as_slice()))
+		let leaf_and_nullifier = self.get_leaf_and_nullifier()?;
+		Ok(Uint8Array::from(leaf_and_nullifier.leaf_bytes.as_slice()))
 	}
 
 	pub fn serialize(&self) -> JsString {

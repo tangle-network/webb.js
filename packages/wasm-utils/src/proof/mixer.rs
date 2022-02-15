@@ -1,3 +1,4 @@
+use arkworks_circuits::setup::common::MixerProof;
 use arkworks_circuits::setup::mixer::setup_proof_x5_5;
 use arkworks_utils::prelude::ark_bls12_381::Bls12_381;
 use arkworks_utils::prelude::ark_bn254::Bn254;
@@ -25,7 +26,7 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 		..
 	} = mixer_proof_input;
 
-	let (proof, leaf, nullifier_hash, root, public_inputs) = match (backend, curve, exponentiation, width) {
+	let mixer_proof: MixerProof = match (backend, curve, exponentiation, width) {
 		(Backend::Arkworks, Curve::Bn254, 5, 5) => setup_proof_x5_5::<Bn254, OsRng>(
 			ArkCurve::Bn254,
 			secrets,
@@ -59,12 +60,13 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 		error.data = Some(e.to_string());
 		error
 	})?;
+	// let (proof, leaf, nullifier_hash, root, public_inputs) = mixer_proof;
 	Ok(Proof {
-		proof,
-		nullifier_hash,
-		root: root.clone(),
-		roots: vec![root],
-		public_inputs,
-		leaf,
+		proof: mixer_proof.proof,
+		nullifier_hash: mixer_proof.nullifier_hash_raw,
+		root: mixer_proof.root_raw,
+		roots: vec![],
+		public_inputs: mixer_proof.public_inputs_raw,
+		leaf: mixer_proof.leaf_raw,
 	})
 }
