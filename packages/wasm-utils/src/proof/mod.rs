@@ -363,7 +363,7 @@ impl ProofInputBuilder {
 		Ok(JsProofInput { inner: proof_input })
 	}
 }
-
+#[wasm_bindgen]
 pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 	let mut rng = OsRng;
 	let proof_input_value = proof_input.inner;
