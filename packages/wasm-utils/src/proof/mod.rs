@@ -18,6 +18,7 @@ pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
 	truncated_bytes
 }
 
+#[allow(clippy::unused_unit)]
 #[wasm_bindgen]
 #[derive(Debug, Eq, PartialEq)]
 pub struct Proof {
@@ -35,6 +36,7 @@ pub struct Proof {
 	pub leaf: Vec<u8>,
 }
 
+#[allow(clippy::unused_unit)]
 #[wasm_bindgen]
 impl Proof {
 	#[wasm_bindgen(getter)]
@@ -249,6 +251,7 @@ impl ProofInputBuilder {
 	}
 }
 
+#[allow(clippy::unused_unit)]
 #[wasm_bindgen]
 impl ProofInputBuilder {
 	#[wasm_bindgen(constructor)]
@@ -361,7 +364,6 @@ impl ProofInputBuilder {
 	}
 }
 
-#[wasm_bindgen]
 pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 	let mut rng = OsRng;
 	let proof_input_value = proof_input.inner;

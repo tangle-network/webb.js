@@ -189,6 +189,7 @@ pub struct JsNoteBuilder {
 	pub secrets: Option<Vec<u8>>,
 }
 
+#[allow(clippy::unused_unit)]
 #[wasm_bindgen]
 impl JsNoteBuilder {
 	#[wasm_bindgen(constructor)]
@@ -329,6 +330,7 @@ impl JsNoteBuilder {
 	}
 }
 
+#[allow(clippy::unused_unit)]
 #[wasm_bindgen]
 impl JsNote {
 	#[wasm_bindgen(constructor)]
