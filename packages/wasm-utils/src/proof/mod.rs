@@ -1,3 +1,5 @@
+#![allow(clippy::unused_unit)]
+
 use std::convert::{TryFrom, TryInto};
 
 use js_sys::{Array, JsString, Uint8Array};

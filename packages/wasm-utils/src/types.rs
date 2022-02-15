@@ -1,3 +1,4 @@
+#![allow(clippy::unused_unit)]
 use core::fmt;
 use std::convert::{TryFrom, TryInto};
 use std::ops::Deref;
