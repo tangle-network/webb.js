@@ -1,3 +1,5 @@
+#![allow(clippy::unused_unit)]
+
 use std::convert::{TryFrom, TryInto};
 
 use js_sys::{Array, JsString, Uint8Array};
@@ -18,6 +20,7 @@ pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
 	truncated_bytes
 }
 
+#[allow(clippy::unused_unit)]
 #[wasm_bindgen]
 #[derive(Debug, Eq, PartialEq)]
 pub struct Proof {
@@ -35,6 +38,7 @@ pub struct Proof {
 	pub leaf: Vec<u8>,
 }
 
+#[allow(clippy::unused_unit)]
 #[wasm_bindgen]
 impl Proof {
 	#[wasm_bindgen(getter)]
@@ -249,6 +253,7 @@ impl ProofInputBuilder {
 	}
 }
 
+#[allow(clippy::unused_unit)]
 #[wasm_bindgen]
 impl ProofInputBuilder {
 	#[wasm_bindgen(constructor)]
@@ -360,7 +365,6 @@ impl ProofInputBuilder {
 		Ok(JsProofInput { inner: proof_input })
 	}
 }
-
 #[wasm_bindgen]
 pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 	let mut rng = OsRng;
