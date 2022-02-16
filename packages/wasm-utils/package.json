@@ -4,9 +4,9 @@
   "version": "0.1.4-33",
   "scripts": {
     "build": "rimraf build pkg && webpack",
+    "build-parallel": "rimraf build pkg && PARALLEL=true webpack",
     "start": "rimraf build pkg && webpack-dev-server --open -d",
-    "test": "wasm-pack test --release --node ",
-    "test-parallel": "wasm-pack test --release --node"
+    "test": "wasm-pack test --release --node "
   },
   "publishConfig": {
     "access": "public",

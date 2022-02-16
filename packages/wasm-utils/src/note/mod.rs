@@ -430,6 +430,7 @@ impl JsNote {
 mod test {
 	use arkworks_circuits::prelude::ark_bn254;
 	use wasm_bindgen_test::*;
+	wasm_bindgen_test_configure!(run_in_browser);
 
 	use crate::utils::to_rust_string;
 

@@ -12,6 +12,7 @@ const normalBuild = () => {
   } catch (_) {}
 
   const args = '--scope webb-tools';
+
   return {
     mode: 'production',
     entry: {
@@ -43,15 +44,30 @@ const normalBuild = () => {
 };
 
 const parallelBuild = () => {
-  const nodeBuild = path.join(__dirname, 'build', 'parallel', 'njs');
   const build = path.join(__dirname, 'build', 'parallel');
-  process.env.RUSTFLAGS = '-C target-feature=+atomics,+bulk-memory,+mutable-globals';
 
   try {
     console.log(`Pre build dir`, fs.readdirSync(path.join(__dirname, 'build')));
   } catch (_) {}
 
-  const args = '--scope webb-tools';
+  const pluginArgs = {
+    extraArgs: '',
+    crateDirectory: __dirname,
+    outDir: build,
+    outName: 'wasm-utils'
+  };
+
+  const handler = {
+    get(target, prop) {
+      if (prop === 'extraArgs') {
+        process.env.RUSTFLAGS = '-C target-feature=+atomics,+bulk-memory,+mutable-globals';
+        return '--scope webb-tools --target web --features parallel -Z build-std=panic_abort,std';
+      }
+
+      return Reflect.get(...arguments);
+    }
+  };
+
   return {
     mode: 'production',
     entry: {
@@ -66,19 +82,7 @@ const parallelBuild = () => {
     },
     plugins: [
       new CopyPlugin([path.resolve(__dirname, 'public'), path.resolve(__dirname, 'package.json')]),
-      // RUSTFLAGS='-C target-feature=+atomics,+bulk-memory,+mutable-globals'
-      new WasmPackPlugin({
-        extraArgs: args,
-        crateDirectory: __dirname,
-        outDir: build,
-        outName: 'wasm-utils'
-      }),
-      new WasmPackPlugin({
-        extraArgs: `${args} --target nodejs -- --features parallel -Z build-std=panic_abort,std`,
-        crateDirectory: __dirname,
-        outDir: nodeBuild,
-        outName: 'wasm-utils'
-      })
+      new WasmPackPlugin(new Proxy(pluginArgs, handler))
     ]
   };
 };

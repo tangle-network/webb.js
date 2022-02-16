@@ -376,6 +376,7 @@ mod test {
 	use arkworks_circuits::setup::common::verify_unchecked_raw;
 
 	use wasm_bindgen_test::*;
+	wasm_bindgen_test_configure!(run_in_browser);
 
 	use super::*;
 	use crate::proof::test_utils::{
