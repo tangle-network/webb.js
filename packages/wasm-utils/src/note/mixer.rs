@@ -13,7 +13,7 @@ pub fn generate_secrets(
 	width: usize,
 	curve: Curve,
 	rng: &mut OsRng,
-) -> Result<Vec<u8>, OperationError> {
+) -> Result<[Vec<u8>; 2], OperationError> {
 	let sec: Leaf = match (curve, exponentiation, width) {
 		(Curve::Bls381, 5, 5) => setup_leaf_x5_5::<BlsFr, _>(ArkworksCurve::Bls381, rng),
 		(Curve::Bn254, 5, 5) => setup_leaf_x5_5::<Bn254Fr, _>(ArkworksCurve::Bn254, rng),
@@ -27,7 +27,7 @@ pub fn generate_secrets(
 	}
 	.map_err(|e| OperationError::new_with_message(OpStatusCode::SecretGenFailed, e.to_string()))?;
 
-	let secrets = [sec.secret_bytes, sec.nullifier_bytes].concat();
+	let secrets = [sec.secret_bytes, sec.nullifier_bytes];
 
 	Ok(secrets)
 }

@@ -29,7 +29,7 @@ async function generateLeaf() {
 
 async function main() {
   const n = await Note.deserialize(
-    "webb.mixer:v1:15:15:Arkworks:Bn254:Poseidon:WEBB:12:10:5:5:f840b49ab7d1b7472d1798abfb1b8d0e1c6d6a671d9bf88b066a9e6c84386607452e8ab1565f2445bb80bc349329c65cad265331c766d3f5a2ad21e3e6218708"
+    "webb://mixer:v1:15:15:Arkworks:Bn254:Poseidon:WEBB:12:10:5:5:f840b49ab7d1b7472d1798abfb1b8d0e1c6d6a671d9bf88b066a9e6c84386607452e8ab1565f2445bb80bc349329c65cad265331c766d3f5a2ad21e3e6218708"
   );
   console.log(n.note.backend);
   console.log(n.note.curve);
@@ -54,7 +54,7 @@ async function main() {
   ];
   const pm = new ProvingManager(new Worker());
   const proof = await pm.proof({
-    "note": "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717",
+    "note": "webb.anchor:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717",
     "leafIndex": 0,
     "recipient": "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129",
     "relayer": "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129",

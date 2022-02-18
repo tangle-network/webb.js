@@ -16,7 +16,7 @@ pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Re
 		width,
 		curve,
 		backend,
-		secrets,
+		secret,
 		nullifier,
 		recipient: recipient_raw,
 		relayer: relayer_raw,
@@ -35,7 +35,7 @@ pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Re
 		(Backend::Arkworks, Curve::Bn254, 5, 4) => setup_proof_x5_4::<Bn254, OsRng>(
 			ArkCurve::Bn254,
 			chain_id,
-			secrets,
+			secret,
 			nullifier,
 			leaves,
 			leaf_index,
@@ -51,7 +51,7 @@ pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Re
 		(Backend::Arkworks, Curve::Bls381, 5, 4) => setup_proof_x5_4::<Bls12_381, OsRng>(
 			ArkCurve::Bls381,
 			chain_id,
-			secrets,
+			secret,
 			nullifier,
 			leaves,
 			leaf_index,

@@ -17,7 +17,7 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 		fee,
 		refund,
 		pk,
-		secrets,
+		secret,
 		nullifier,
 		backend,
 		curve,
@@ -29,7 +29,7 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 	let mixer_proof: MixerProof = match (backend, curve, exponentiation, width) {
 		(Backend::Arkworks, Curve::Bn254, 5, 5) => setup_proof_x5_5::<Bn254, OsRng>(
 			ArkCurve::Bn254,
-			secrets,
+			secret,
 			nullifier,
 			leaves,
 			leaf_index,
@@ -42,7 +42,7 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 		),
 		(Backend::Arkworks, Curve::Bls381, 5, 5) => setup_proof_x5_5::<Bls12_381, OsRng>(
 			ArkCurve::Bls381,
-			secrets,
+			secret,
 			nullifier,
 			leaves,
 			leaf_index,

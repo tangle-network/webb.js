@@ -7,7 +7,7 @@ use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
 use crate::note::JsNote;
-use crate::types::{Backend, Curve, Leaves, NotePrefix, OpStatusCode, OperationError, Uint8Arrayx32};
+use crate::types::{Backend, Curve, Leaves, NoteProtocol, OpStatusCode, OperationError, Uint8Arrayx32};
 
 mod anchor;
 mod mixer;
@@ -71,7 +71,7 @@ pub struct MixerProofInput {
 	pub width: usize,
 	pub curve: Curve,
 	pub backend: Backend,
-	pub secrets: Vec<u8>,
+	pub secret: Vec<u8>,
 	pub nullifier: Vec<u8>,
 	pub recipient: Vec<u8>,
 	pub relayer: Vec<u8>,
@@ -88,7 +88,7 @@ pub struct AnchorProofInput {
 	pub width: usize,
 	pub curve: Curve,
 	pub backend: Backend,
-	pub secrets: Vec<u8>,
+	pub secret: Vec<u8>,
 	pub nullifier: Vec<u8>,
 	pub recipient: Vec<u8>,
 	pub relayer: Vec<u8>,
@@ -118,7 +118,7 @@ impl ProofInput {
 			ProofInput::Anchor(_) => {
 				let message = "Can't construct proof input for AnchorProofInput from mixer input".to_string();
 				Err(OperationError::new_with_message(
-					OpStatusCode::InvalidNotePrefix,
+					OpStatusCode::InvalidNoteProtocol,
 					message,
 				))
 			}
@@ -131,7 +131,7 @@ impl ProofInput {
 			ProofInput::Mixer(_) => {
 				let message = "Can't cant construct proof input for MixerProofInput from anchor input ".to_string();
 				Err(OperationError::new_with_message(
-					OpStatusCode::InvalidNotePrefix,
+					OpStatusCode::InvalidNoteProtocol,
 					message,
 				))
 			}
@@ -188,28 +188,24 @@ impl ProofInputBuilder {
 
 		let fee = self.fee.ok_or(OpStatusCode::InvalidFee)?;
 		let refund = self.refund.ok_or(OpStatusCode::InvalidRefund)?;
-
-		let target_chain_id = note
-			.target_chain_id
-			.parse()
-			.map_err(|_| OpStatusCode::InvalidTargetChain)?;
-		let proof_target = note.prefix;
+		let proof_target = note.protocol;
 		let width = note.width;
 		let exponentiation = note.exponentiation;
 		let backend = note.backend;
 		let curve = note.curve;
-		let note_secrets = note.secret;
-		let secrets = note_secrets[..32].to_vec();
-		let nullifier = note_secrets[32..64].to_vec();
-
+		let note_secrets = note.secrets;
 		let processed_relayer = truncate_and_pad(&relayer);
 		let processed_recipient = truncate_and_pad(&recipient);
 		match proof_target {
-			NotePrefix::Mixer => {
+			NoteProtocol::Mixer => {
+				// Mixer note secrets are structure as a vector of [secret, nullifier]
+				let secret = hex::decode(note_secrets[0].to_string()).unwrap_or_default();
+				let nullifier = hex::decode(note_secrets[1].to_string()).unwrap_or_default();
 				let mixer_proof_input = MixerProofInput {
-					exponentiation,
-					width,
-					curve,
+					exponentiation: exponentiation.unwrap_or(5),
+					width: width.unwrap_or(3),
+					curve: curve.unwrap_or(Curve::Bn254),
+					backend: backend.unwrap_or(Backend::Circom),
 					pk,
 					recipient: processed_recipient,
 					relayer: processed_relayer,
@@ -217,30 +213,44 @@ impl ProofInputBuilder {
 					fee,
 					leaf_index,
 					leaves,
-					secrets,
+					secret,
 					nullifier,
-					backend,
 					chain_id: 0,
 				};
 				Ok(ProofInput::Mixer(mixer_proof_input))
 			}
-			NotePrefix::Anchor => {
+			NoteProtocol::Anchor => {
 				let commitment = self.commitment.ok_or(OpStatusCode::CommitmentNotSet)?;
 				let roots = self.roots.ok_or(OpStatusCode::RootsNotSet)?;
-
+				// Anchor note secrets are structure as a vector of [chain_id, secret, nullifier]
+				let chain_id_bytes = hex::decode(note_secrets[0].to_string()).unwrap_or_default();
+				let chain_id;
+				if chain_id_bytes.len() == 6 {
+					let mut temp_bytes = [0u8; 8];
+					temp_bytes[2..8].copy_from_slice(&chain_id_bytes[0..6]);
+					chain_id = u128::from(u64::from_be_bytes(temp_bytes));
+				} else if chain_id_bytes.len() == 8 {
+					let mut temp_bytes = [0u8; 8];
+					temp_bytes[0..8].copy_from_slice(&chain_id_bytes);
+					chain_id = u128::from(u64::from_be_bytes(temp_bytes));
+				} else {
+					return Err(OpStatusCode::InvalidTargetChain);
+				}
+				let secret = hex::decode(note_secrets[1].to_string()).unwrap_or_default();
+				let nullifier = hex::decode(note_secrets[2].to_string()).unwrap_or_default();
 				let anchor_input = AnchorProofInput {
-					exponentiation,
-					width,
-					curve,
-					backend,
-					secrets,
+					exponentiation: exponentiation.unwrap_or(5),
+					width: width.unwrap_or(3),
+					curve: curve.unwrap_or(Curve::Bn254),
+					backend: backend.unwrap_or(Backend::Circom),
+					secret,
 					nullifier,
 					recipient: processed_recipient,
 					relayer: processed_relayer,
 					pk,
 					refund,
 					fee,
-					chain_id: target_chain_id,
+					chain_id,
 					leaves,
 					leaf_index,
 					roots,
@@ -248,7 +258,7 @@ impl ProofInputBuilder {
 				};
 				Ok(ProofInput::Anchor(anchor_input))
 			}
-			_ => Err(OpStatusCode::InvalidNotePrefix),
+			_ => Err(OpStatusCode::InvalidNoteProtocol),
 		}
 	}
 }
