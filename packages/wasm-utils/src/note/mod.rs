@@ -8,8 +8,8 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 
 use crate::types::{
-	Backend, Curve, HashFunction, NoteProtocol, NoteVersion, OpStatusCode, OperationError, Protocol, Version, WasmCurve,
-	BE, HF,
+	Backend, Curve, HashFunction, NoteProtocol, NoteVersion, OpStatusCode, OperationError, Protocol, Version,
+	WasmCurve, BE, HF,
 };
 
 mod anchor;
@@ -30,7 +30,7 @@ impl JsNote {
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
 					self.exponentiation.unwrap_or(5),
-					&secrets_raw[..]
+					&secrets_raw[..],
 				)
 			}
 			NoteProtocol::Anchor => {
@@ -43,7 +43,7 @@ impl JsNote {
 					&secrets_raw[..],
 					self.target_chain_id.parse().unwrap(),
 				)
-			},
+			}
 			_ => {
 				let message = format!("{} protocol isn't supported yet", self.protocol);
 				Err(OperationError::new_with_message(
@@ -60,33 +60,65 @@ impl fmt::Display for JsNote {
 		// Note URI scheme
 		let scheme = "webb://";
 		// Note URI authority
-		let authority = vec![
-			self.version.to_string(),
-			self.protocol.to_string(),
-		].join(":");
+		let authority = vec![self.version.to_string(), self.protocol.to_string()].join(":");
 		// Note URI chain IDs
-		let chain_ids = vec![
-			self.source_chain_id.to_string(),
-			self.target_chain_id.to_string(),
-		].join(":");
+		let chain_ids = vec![self.source_chain_id.to_string(), self.target_chain_id.to_string()].join(":");
 		// Note URI chain identifying data (smart contracts, tree IDs)
 		let chain_identifying_data = vec![
 			self.source_identifying_data.to_string(),
 			self.target_identifying_data.to_string(),
-		].join(":");
+		]
+		.join(":");
 
-		let secrets = &self.secrets.iter().map(|s| hex::encode(s)).collect::<Vec<String>>().join(":");
+		let secrets = &self
+			.secrets
+			.iter()
+			.map(|s| hex::encode(s))
+			.collect::<Vec<String>>()
+			.join(":");
 
 		// Note URI miscellaneous queries
 		let misc_values = vec![
-			if self.curve.is_some() { format!("curve={}", self.curve.unwrap()) } else { "".to_string()},
-			if self.width.is_some() { format!("width={}", self.width.unwrap()) } else { "".to_string()},
-			if self.exponentiation.is_some() { format!("exp={}", self.exponentiation.unwrap()) } else { "".to_string()},
-			if self.hash_function.is_some() { format!("hf={}", self.hash_function.unwrap().to_string()) } else { "".to_string() },
-			if self.backend.is_some() { format!("backend={}", self.backend.unwrap().to_string()) } else { "".to_string() },
-			if self.token_symbol.is_some() { format!("token={}", self.token_symbol.clone().unwrap().to_string()) } else { "".to_string() },
-			if self.denomination.is_some() { format!("denom={}", self.denomination.unwrap().to_string()) } else { "".to_string() },
-			if self.amount.is_some() { format!("amount={}", self.amount.clone().unwrap().to_string()) } else { "".to_string() },
+			if self.curve.is_some() {
+				format!("curve={}", self.curve.unwrap())
+			} else {
+				"".to_string()
+			},
+			if self.width.is_some() {
+				format!("width={}", self.width.unwrap())
+			} else {
+				"".to_string()
+			},
+			if self.exponentiation.is_some() {
+				format!("exp={}", self.exponentiation.unwrap())
+			} else {
+				"".to_string()
+			},
+			if self.hash_function.is_some() {
+				format!("hf={}", self.hash_function.unwrap().to_string())
+			} else {
+				"".to_string()
+			},
+			if self.backend.is_some() {
+				format!("backend={}", self.backend.unwrap().to_string())
+			} else {
+				"".to_string()
+			},
+			if self.token_symbol.is_some() {
+				format!("token={}", self.token_symbol.clone().unwrap().to_string())
+			} else {
+				"".to_string()
+			},
+			if self.denomination.is_some() {
+				format!("denom={}", self.denomination.unwrap().to_string())
+			} else {
+				"".to_string()
+			},
+			if self.amount.is_some() {
+				format!("amount={}", self.amount.clone().unwrap().to_string())
+			} else {
+				"".to_string()
+			},
 		]
 		.iter()
 		.filter(|v| v.len() > 0)
@@ -94,10 +126,7 @@ impl fmt::Display for JsNote {
 		.collect::<Vec<String>>()
 		.join("&");
 		// Note URI queries are prefixed with `?`
-		let misc = vec![
-			"?".to_string(),
-			misc_values,
-		].join("");
+		let misc = vec!["?".to_string(), misc_values].join("");
 
 		let parts: Vec<String> = vec![
 			authority.to_string(),
@@ -135,7 +164,7 @@ impl FromStr for JsNote {
 		assert_eq!(authority_parts.len(), 2, "Invalid authority length");
 		let version = NoteVersion::from_str(authority_parts[0])?;
 		let protocol = NoteProtocol::from_str(authority_parts[1])?;
-		
+
 		// Chain IDs parsing
 		let chain_ids_parts: Vec<&str> = chain_ids.split(":").collect();
 		assert_eq!(chain_ids_parts.len(), 2, "Invalid chain IDs length");
@@ -144,7 +173,11 @@ impl FromStr for JsNote {
 
 		// Chain Identifying Data parsing
 		let chain_identifying_data_parts: Vec<&str> = chain_identifying_data.split(":").collect();
-		assert_eq!(chain_identifying_data_parts.len(), 2, "Invalid chain identifying data length");
+		assert_eq!(
+			chain_identifying_data_parts.len(),
+			2,
+			"Invalid chain identifying data length"
+		);
 		let source_identifying_data = chain_identifying_data_parts[0];
 		let target_identifying_data = chain_identifying_data_parts[1];
 
@@ -174,11 +207,12 @@ impl FromStr for JsNote {
 				"token" => token_symbol = Some(value),
 				"denom" => denomination = Some(value),
 				"amount" => amount = Some(value),
-				_ => return Err(OpStatusCode::InvalidNoteMiscData)
+				_ => return Err(OpStatusCode::InvalidNoteMiscData),
 			}
 		}
 
-		let secret_parts: Vec<String> = secrets.split(":")
+		let secret_parts: Vec<String> = secrets
+			.split(":")
 			.collect::<Vec<&str>>()
 			.iter()
 			.map(|v| v.to_string())
@@ -264,7 +298,6 @@ pub struct JsNoteBuilder {
 	#[wasm_bindgen(skip)]
 	pub target_identifying_data: Option<String>,
 
-	
 	#[wasm_bindgen(skip)]
 	pub amount: Option<String>,
 	#[wasm_bindgen(skip)]
@@ -299,7 +332,10 @@ impl JsNoteBuilder {
 		let protocol: String = JsValue::from(&protocol)
 			.as_string()
 			.ok_or(OpStatusCode::InvalidNoteProtocol)?;
-		let note_protocol: NoteProtocol = protocol.as_str().parse().map_err(|_| OpStatusCode::InvalidNoteProtocol)?;
+		let note_protocol: NoteProtocol = protocol
+			.as_str()
+			.parse()
+			.map_err(|_| OpStatusCode::InvalidNoteProtocol)?;
 		self.protocol = Some(note_protocol);
 		Ok(())
 	}
@@ -308,7 +344,10 @@ impl JsNoteBuilder {
 		let version: String = JsValue::from(&version)
 			.as_string()
 			.ok_or(OpStatusCode::InvalidNoteVersion)?;
-		let note_version: NoteVersion = version.as_str().parse().map_err(|_| OpStatusCode::InvalidNoteProtocol)?;
+		let note_version: NoteVersion = version
+			.as_str()
+			.parse()
+			.map_err(|_| OpStatusCode::InvalidNoteProtocol)?;
 		self.version = Some(note_version);
 		Ok(())
 	}
@@ -390,9 +429,7 @@ impl JsNoteBuilder {
 	pub fn set_secrets(&mut self, secrets: JsString) -> Result<(), JsValue> {
 		let secrets_string: String = secrets.into();
 		let secrets_parts: Vec<String> = secrets_string.split(":").map(|v| String::from(v)).collect();
-		let secs = secrets_parts.iter()
-			.map(|v| secrets_string.replace("0x", ""))
-			.collect();
+		let secs = secrets_parts.iter().map(|v| v.replace("0x", "")).collect();
 		self.secrets = Some(secs);
 		Ok(())
 	}
@@ -408,8 +445,12 @@ impl JsNoteBuilder {
 		let chain_id: u64 = target_chain_id.parse().map_err(|_| OpStatusCode::InvalidTargetChain)?;
 
 		// Chain identifying data
-		let source_identifying_data = self.source_identifying_data.ok_or(OpStatusCode::InvalidSourceIdentifyingData)?;
-		let target_identifying_data = self.target_identifying_data.ok_or(OpStatusCode::InvalidTargetIdentifyingData)?;
+		let source_identifying_data = self
+			.source_identifying_data
+			.ok_or(OpStatusCode::InvalidSourceIdentifyingData)?;
+		let target_identifying_data = self
+			.target_identifying_data
+			.ok_or(OpStatusCode::InvalidTargetIdentifyingData)?;
 
 		// Misc
 		let exponentiation = self.exponentiation;
@@ -423,28 +464,27 @@ impl JsNoteBuilder {
 						exponentiation.unwrap_or(5),
 						width.unwrap_or(5),
 						curve.unwrap_or(Curve::Bn254),
-						&mut OsRng
+						&mut OsRng,
 					)?;
 
 					secrets.iter().map(|s| hex::encode(s)).collect::<Vec<String>>()
-				},
+				}
 				NoteProtocol::Anchor => {
 					let secrets = anchor::generate_secrets(
 						exponentiation.unwrap_or(5),
 						width.unwrap_or(5),
 						curve.unwrap_or(Curve::Bn254),
 						chain_id,
-						&mut OsRng
+						&mut OsRng,
 					)?;
 
 					secrets.iter().map(|s| hex::encode(s)).collect::<Vec<String>>()
-				},
+				}
 				_ => return Err(JsValue::from(OpStatusCode::SecretGenFailed)),
 			},
 			Some(secrets) => secrets,
 		};
 
-		
 		let backend = self.backend;
 		let hash_function = self.hash_function;
 		let token_symbol = self.token_symbol;

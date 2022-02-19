@@ -222,7 +222,8 @@ impl ProofInputBuilder {
 			NoteProtocol::Anchor => {
 				let commitment = self.commitment.ok_or(OpStatusCode::CommitmentNotSet)?;
 				let roots = self.roots.ok_or(OpStatusCode::RootsNotSet)?;
-				// Anchor note secrets are structure as a vector of [chain_id, secret, nullifier]
+				// Anchor note secrets are structure as a vector of [chain_id, secret,
+				// nullifier]
 				let chain_id_bytes = hex::decode(note_secrets[0].to_string()).unwrap_or_default();
 				let chain_id;
 				if chain_id_bytes.len() == 6 {

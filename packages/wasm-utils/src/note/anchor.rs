@@ -35,7 +35,7 @@ pub fn get_leaf_with_private_raw(
 	width: usize,
 	exponentiation: i8,
 	raw: &[u8],
-	chain_id: u128,
+	mut chain_id: u128,
 ) -> Result<Leaf, OperationError> {
 	if raw.len() < 64 {
 		return Err(OpStatusCode::InvalidNoteSecrets.into());
@@ -44,18 +44,20 @@ pub fn get_leaf_with_private_raw(
 	let secrets;
 	let nullifier;
 	if raw.len() == 70 {
+		// 70 bytes raw implies [6 bytes chain ID, 32 bytes nullifier, 32 bytes secret]
 		let mut chain_id_bytes = [0u8; 8];
 		chain_id_bytes[2..8].copy_from_slice(&raw[0..6]);
-		let chain_id: u128 = u128::from(u64::from_be_bytes(chain_id_bytes));
+		chain_id = u128::from(u64::from_be_bytes(chain_id_bytes));
 		secrets = raw[6..38].to_vec();
 		nullifier = raw[38..70].to_vec();
 	} else if raw.len() == 64 {
+		// 64 bytes raw implies [32 bytes nullifier, 32 bytes secret]
 		secrets = raw[0..32].to_vec();
 		nullifier = raw[32..64].to_vec();
 	} else {
 		return Err(OpStatusCode::InvalidNoteSecrets.into());
 	}
-	
+
 	// (leaf_bytes, nullifier_hash_bytes)
 	let sec = match (curve, exponentiation, width) {
 		(Curve::Bls381, 5, 4) => {
