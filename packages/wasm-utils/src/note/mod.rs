@@ -451,7 +451,10 @@ impl JsNoteBuilder {
 	pub fn set_secrets(&mut self, secrets: JsString) -> Result<(), JsValue> {
 		let secrets_string: String = secrets.into();
 		let secrets_parts: Vec<String> = secrets_string.split(":").map(|v| String::from(v)).collect();
-		let secs = secrets_parts.iter().map(|v| hex::decode(v.replace("0x", "")).unwrap_or_default()).collect();
+		let secs = secrets_parts
+			.iter()
+			.map(|v| hex::decode(v.replace("0x", "")).unwrap_or_default())
+			.collect();
 		self.secrets = Some(secs);
 		Ok(())
 	}
@@ -601,7 +604,8 @@ impl JsNote {
 
 	#[wasm_bindgen(getter)]
 	pub fn secrets(&self) -> JsString {
-		let secrets = self.secrets
+		let secrets = self
+			.secrets
 			.iter()
 			.map(|v| hex::encode(v))
 			.collect::<Vec<String>>()
