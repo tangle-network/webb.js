@@ -24,23 +24,47 @@ impl JsNote {
 	pub fn get_leaf_and_nullifier(&self) -> Result<Leaf, OperationError> {
 		match self.protocol {
 			NoteProtocol::Mixer => {
-				let secrets_string: String = self.secrets.join("");
-				let secrets_raw = hex::decode(secrets_string).unwrap_or_default();
+				let raw = match self.version {
+					NoteVersion::V1 => {
+						let mut raw = Vec::new();
+						raw.extend_from_slice(&self.secrets[0][..]);
+						raw
+					}
+					NoteVersion::V2 => {
+						let mut raw = Vec::new();
+						raw.extend_from_slice(&self.secrets[0][..]);
+						raw.extend_from_slice(&self.secrets[1][..]);
+						raw
+					}
+				};
+
 				mixer::get_leaf_with_private_raw(
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
 					self.exponentiation.unwrap_or(5),
-					&secrets_raw[..],
+					&raw[..],
 				)
 			}
 			NoteProtocol::Anchor => {
-				let secrets_string: String = self.secrets.join("");
-				let secrets_raw = hex::decode(secrets_string).unwrap_or_default();
+				let raw = match self.version {
+					NoteVersion::V1 => {
+						let mut raw = Vec::new();
+						raw.extend_from_slice(&self.secrets[0][..]);
+						raw
+					}
+					NoteVersion::V2 => {
+						let mut raw = Vec::new();
+						raw.extend_from_slice(&self.secrets[0][..]);
+						raw.extend_from_slice(&self.secrets[1][..]);
+						raw.extend_from_slice(&self.secrets[2][..]);
+						raw
+					}
+				};
 				anchor::get_leaf_with_private_raw(
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
 					self.exponentiation.unwrap_or(5),
-					&secrets_raw[..],
+					&raw[..],
 					self.target_chain_id.parse().unwrap(),
 				)
 			}
@@ -211,12 +235,10 @@ impl FromStr for JsNote {
 			}
 		}
 
-		let secret_parts: Vec<String> = secrets
+		let secret_parts: Vec<Vec<u8>> = secrets
 			.split(":")
-			.collect::<Vec<&str>>()
-			.iter()
-			.map(|v| v.to_string())
-			.collect::<Vec<String>>();
+			.map(|v| hex::decode(v.to_string()).unwrap_or_default())
+			.collect::<Vec<Vec<u8>>>();
 
 		Ok(JsNote {
 			scheme: scheme.to_string(),
@@ -259,7 +281,7 @@ pub struct JsNote {
 
 	/// mixer related items
 	#[wasm_bindgen(skip)]
-	pub secrets: Vec<String>,
+	pub secrets: Vec<Vec<u8>>,
 
 	/// Misc - zkp related items
 	#[wasm_bindgen(skip)]
@@ -303,7 +325,7 @@ pub struct JsNoteBuilder {
 	#[wasm_bindgen(skip)]
 	pub denomination: Option<u8>,
 	#[wasm_bindgen(skip)]
-	pub secrets: Option<Vec<String>>,
+	pub secrets: Option<Vec<Vec<u8>>>,
 
 	// Misc - zkp related items
 	#[wasm_bindgen(skip)]
@@ -429,7 +451,7 @@ impl JsNoteBuilder {
 	pub fn set_secrets(&mut self, secrets: JsString) -> Result<(), JsValue> {
 		let secrets_string: String = secrets.into();
 		let secrets_parts: Vec<String> = secrets_string.split(":").map(|v| String::from(v)).collect();
-		let secs = secrets_parts.iter().map(|v| v.replace("0x", "")).collect();
+		let secs = secrets_parts.iter().map(|v| hex::decode(v.replace("0x", "")).unwrap_or_default()).collect();
 		self.secrets = Some(secs);
 		Ok(())
 	}
@@ -467,7 +489,7 @@ impl JsNoteBuilder {
 						&mut OsRng,
 					)?;
 
-					secrets.iter().map(|s| hex::encode(s)).collect::<Vec<String>>()
+					secrets.to_vec()
 				}
 				NoteProtocol::Anchor => {
 					let secrets = anchor::generate_secrets(
@@ -478,7 +500,7 @@ impl JsNoteBuilder {
 						&mut OsRng,
 					)?;
 
-					secrets.iter().map(|s| hex::encode(s)).collect::<Vec<String>>()
+					secrets.to_vec()
 				}
 				_ => return Err(JsValue::from(OpStatusCode::SecretGenFailed)),
 			},
@@ -579,7 +601,11 @@ impl JsNote {
 
 	#[wasm_bindgen(getter)]
 	pub fn secrets(&self) -> JsString {
-		let secrets = self.secrets.join(":");
+		let secrets = self.secrets
+			.iter()
+			.map(|v| hex::encode(v))
+			.collect::<Vec<String>>()
+			.join(":");
 		secrets.into()
 	}
 
@@ -625,7 +651,7 @@ mod test {
 	type Bn254Fr = ark_bn254::Fr;
 	#[test]
 	fn deserialize() {
-		let note = "webb://v1:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
+		let note = "webb://v2:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
 		let note = JsNote::deserialize(note).unwrap();
 		assert_eq!(note.protocol, NoteProtocol::Anchor);
 		assert_eq!(note.backend, Some(Backend::Arkworks));
@@ -642,12 +668,13 @@ mod test {
 
 	#[test]
 	fn generate_note() {
-		let note_str = "webb://v1:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
-		let note_value = "7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let note_str = "webb://v2:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
+		let note_value = "376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137";
+		let note_value_decoded = hex::decode(note_value).unwrap();
 		let note = JsNote {
 			scheme: "webb://".to_string(),
 			protocol: NoteProtocol::Anchor,
-			version: NoteVersion::V1,
+			version: NoteVersion::V2,
 			source_chain_id: "2".to_string(),
 			target_chain_id: "3".to_string(),
 			source_identifying_data: "2".to_string(),
@@ -660,7 +687,7 @@ mod test {
 			backend: Some(Backend::Arkworks),
 			curve: Some(Curve::Bn254),
 			amount: Some("0".to_string()),
-			secrets: vec![note_value.to_string()],
+			secrets: vec![note_value_decoded],
 		};
 		assert_eq!(note.to_string(), note_str)
 	}
@@ -669,11 +696,11 @@ mod test {
 
 	#[wasm_bindgen_test]
 	fn deserialize_to_js_note() {
-		let note_str = "webb://v1:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
+		let note_str = "webb://v2:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
 		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
 
 		assert_eq!(to_rust_string(note.protocol()), NoteProtocol::Anchor.to_string());
-		assert_eq!(to_rust_string(note.version()), NoteVersion::V1.to_string());
+		assert_eq!(to_rust_string(note.version()), NoteVersion::V2.to_string());
 		assert_eq!(note.target_chain_id(), JsString::from("3"));
 		assert_eq!(note.source_chain_id(), JsString::from("2"));
 
@@ -689,11 +716,11 @@ mod test {
 
 	#[wasm_bindgen_test]
 	fn serialize_js_note() {
-		let note_str = "webb://v1:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
+		let note_str = "webb://v2:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
 
 		let mut note_builder = JsNoteBuilder::new();
 		let protocol: Protocol = JsValue::from(NoteProtocol::Anchor.to_string()).into();
-		let version: Version = JsValue::from(NoteVersion::V1.to_string()).into();
+		let version: Version = JsValue::from(NoteVersion::V2.to_string()).into();
 		let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
 		let hash_function: HF = JsValue::from(HashFunction::Poseidon.to_string()).into();
 		let curve: WasmCurve = JsValue::from(Curve::Bn254.to_string()).into();

@@ -199,8 +199,8 @@ impl ProofInputBuilder {
 		match proof_target {
 			NoteProtocol::Mixer => {
 				// Mixer note secrets are structure as a vector of [secret, nullifier]
-				let secret = hex::decode(note_secrets[0].to_string()).unwrap_or_default();
-				let nullifier = hex::decode(note_secrets[1].to_string()).unwrap_or_default();
+				let secret = note_secrets[0].clone();
+				let nullifier = note_secrets[1].clone();
 				let mixer_proof_input = MixerProofInput {
 					exponentiation: exponentiation.unwrap_or(5),
 					width: width.unwrap_or(3),
@@ -224,7 +224,7 @@ impl ProofInputBuilder {
 				let roots = self.roots.ok_or(OpStatusCode::RootsNotSet)?;
 				// Anchor note secrets are structure as a vector of [chain_id, secret,
 				// nullifier]
-				let chain_id_bytes = hex::decode(note_secrets[0].to_string()).unwrap_or_default();
+				let chain_id_bytes = note_secrets[0].clone();
 				let chain_id;
 				if chain_id_bytes.len() == 6 {
 					let mut temp_bytes = [0u8; 8];
@@ -237,8 +237,8 @@ impl ProofInputBuilder {
 				} else {
 					return Err(OpStatusCode::InvalidTargetChain);
 				}
-				let secret = hex::decode(note_secrets[1].to_string()).unwrap_or_default();
-				let nullifier = hex::decode(note_secrets[2].to_string()).unwrap_or_default();
+				let secret = note_secrets[1].clone();
+				let nullifier = note_secrets[2].clone();
 				let anchor_input = AnchorProofInput {
 					exponentiation: exponentiation.unwrap_or(5),
 					width: width.unwrap_or(3),
