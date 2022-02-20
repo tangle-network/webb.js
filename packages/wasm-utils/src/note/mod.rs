@@ -15,6 +15,8 @@ use crate::types::{
 mod anchor;
 pub mod mixer;
 
+mod versioning;
+
 impl JsNote {
 	/// Deseralize note from a string
 	pub fn deserialize(note: &str) -> Result<Self, OpStatusCode> {
@@ -169,95 +171,11 @@ impl FromStr for JsNote {
 	type Err = OpStatusCode;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		let scheme_and_parts: Vec<&str> = s.split("://").collect();
-		let scheme = scheme_and_parts[0];
-
-		let parts: Vec<&str> = scheme_and_parts[1].split("/").collect();
-		if parts.len() < 5 {
-			return Err(OpStatusCode::InvalidNoteLength);
+		if !s.contains("://") {
+			return versioning::v1::note_from_str(s);
+		} else {
+			return versioning::v2::note_from_str(s);
 		}
-		// Raw parts
-		let authority = parts[0];
-		let chain_ids = parts[1];
-		let chain_identifying_data = parts[2];
-		let secrets = parts[3];
-		let misc = parts[4].replace("?", "");
-
-		// Authority parsing
-		let authority_parts: Vec<&str> = authority.split(":").collect();
-		assert_eq!(authority_parts.len(), 2, "Invalid authority length");
-		let version = NoteVersion::from_str(authority_parts[0])?;
-		let protocol = NoteProtocol::from_str(authority_parts[1])?;
-
-		// Chain IDs parsing
-		let chain_ids_parts: Vec<&str> = chain_ids.split(":").collect();
-		assert_eq!(chain_ids_parts.len(), 2, "Invalid chain IDs length");
-		let source_chain_id = chain_ids_parts[0];
-		let target_chain_id = chain_ids_parts[1];
-
-		// Chain Identifying Data parsing
-		let chain_identifying_data_parts: Vec<&str> = chain_identifying_data.split(":").collect();
-		assert_eq!(
-			chain_identifying_data_parts.len(),
-			2,
-			"Invalid chain identifying data length"
-		);
-		let source_identifying_data = chain_identifying_data_parts[0];
-		let target_identifying_data = chain_identifying_data_parts[1];
-
-		// Misc data parsing
-		let misc_parts: Vec<&str> = misc.split("&").collect();
-		let mut curve = None;
-		let mut width = None;
-		let mut exponentiation = None;
-		let mut hash_function = None;
-		let mut backend = None;
-		let mut token_symbol = None;
-		let mut denomination = None;
-		let mut amount = None;
-
-		for part in misc_parts {
-			let part_parts: Vec<&str> = part.split("=").collect();
-			assert_eq!(part_parts.len(), 2, "Invalid misc data length");
-			let key = part_parts[0];
-			let value = part_parts[1];
-			println!("{}={}", key, value);
-			match key {
-				"curve" => curve = Some(value),
-				"width" => width = Some(value),
-				"exp" => exponentiation = Some(value),
-				"hf" => hash_function = Some(value),
-				"backend" => backend = Some(value),
-				"token" => token_symbol = Some(value),
-				"denom" => denomination = Some(value),
-				"amount" => amount = Some(value),
-				_ => return Err(OpStatusCode::InvalidNoteMiscData),
-			}
-		}
-
-		let secret_parts: Vec<Vec<u8>> = secrets
-			.split(":")
-			.map(|v| hex::decode(v.to_string()).unwrap_or_default())
-			.collect::<Vec<Vec<u8>>>();
-
-		Ok(JsNote {
-			scheme: scheme.to_string(),
-			protocol,
-			version,
-			target_chain_id: target_chain_id.to_string(),
-			source_chain_id: source_chain_id.to_string(),
-			source_identifying_data: source_identifying_data.to_string(),
-			target_identifying_data: target_identifying_data.to_string(),
-			token_symbol: token_symbol.map(|v| v.to_string()),
-			curve: curve.map(|v| v.parse::<Curve>().unwrap()),
-			hash_function: hash_function.map(|v| HashFunction::from_str(v).unwrap()),
-			backend: backend.map(|b| b.parse().unwrap()),
-			denomination: denomination.map(|v| v.parse::<u8>().unwrap()),
-			amount: amount.map(|v| v.parse::<String>().unwrap()),
-			exponentiation: exponentiation.map(|v| v.parse::<i8>().unwrap()),
-			width: width.map(|v| v.parse::<usize>().unwrap()),
-			secrets: secret_parts,
-		})
 	}
 }
 
@@ -653,8 +571,51 @@ mod test {
 	use super::*;
 
 	type Bn254Fr = ark_bn254::Fr;
+
 	#[test]
-	fn deserialize() {
+	fn deserialize_v1() {
+		let note = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let note = JsNote::deserialize(note).unwrap();
+		assert_eq!(note.protocol, NoteProtocol::Anchor);
+		assert_eq!(note.backend, Some(Backend::Arkworks));
+		assert_eq!(note.curve, Some(Curve::Bn254));
+		assert_eq!(note.hash_function, Some(HashFunction::Poseidon));
+		assert_eq!(note.token_symbol, Some(String::from("EDG")));
+		assert_eq!(note.denomination, Some(18));
+		assert_eq!(note.version, NoteVersion::V1);
+		assert_eq!(note.width, Some(5));
+		assert_eq!(note.exponentiation, Some(5));
+		assert_eq!(note.target_chain_id, "3".to_string());
+		assert_eq!(note.source_chain_id, "2".to_string());
+	}
+
+	#[test]
+	fn generate_note_v1() {
+		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let note_value = hex::decode("7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717").unwrap();
+		let note = JsNote {
+			scheme: "webb://".to_string(),
+			protocol: NoteProtocol::Anchor,
+			version: NoteVersion::V1,
+			source_chain_id: "2".to_string(),
+			target_chain_id: "3".to_string(),
+			source_identifying_data: "2".to_string(),
+			target_identifying_data: "3".to_string(),
+			width: Some(5),
+			exponentiation: Some(5),
+			denomination: Some(18),
+			token_symbol: Some("EDG".to_string()),
+			hash_function: Some(HashFunction::Poseidon),
+			backend: Some(Backend::Arkworks),
+			curve: Some(Curve::Bn254),
+			amount: Some("0".to_string()),
+			secrets: vec![note_value],
+		};
+		assert_eq!(note.to_string(), JsNote::from_str(note_str).unwrap().to_string());
+	}
+
+	#[test]
+	fn deserialize_v2() {
 		let note = "webb://v2:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
 		let note = JsNote::deserialize(note).unwrap();
 		assert_eq!(note.protocol, NoteProtocol::Anchor);
@@ -671,7 +632,7 @@ mod test {
 	}
 
 	#[test]
-	fn generate_note() {
+	fn generate_note_v2() {
 		let note_str = "webb://v2:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
 		let note_value = "376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137";
 		let note_value_decoded = hex::decode(note_value).unwrap();
@@ -699,7 +660,7 @@ mod test {
 	fn generate_leaf() {}
 
 	#[wasm_bindgen_test]
-	fn deserialize_to_js_note() {
+	fn deserialize_to_js_note_v2() {
 		let note_str = "webb://v2:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
 		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
 
@@ -719,7 +680,7 @@ mod test {
 	}
 
 	#[wasm_bindgen_test]
-	fn serialize_js_note() {
+	fn serialize_js_note_v2() {
 		let note_str = "webb://v2:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
 
 		let mut note_builder = JsNoteBuilder::new();
