@@ -17,6 +17,7 @@ pub mod mixer;
 
 mod versioning;
 
+#[allow(unused_macros)]
 macro_rules! console_log {
 	// Note that this is using the `log` function imported above during
 	// `bare_bones`
@@ -101,14 +102,10 @@ impl fmt::Display for JsNote {
 		]
 		.join(":");
 
-		let secrets = &self
-			.secrets
-			.iter()
-			.map(|s| hex::encode(s))
-			.collect::<Vec<String>>()
-			.join(":");
+		let secrets = &self.secrets.iter().map(hex::encode).collect::<Vec<String>>().join(":");
 
 		// Note URI miscellaneous queries
+		#[allow(clippy::map_clone)]
 		let misc_values = vec![
 			if self.curve.is_some() {
 				format!("curve={}", self.curve.unwrap())
@@ -126,46 +123,40 @@ impl fmt::Display for JsNote {
 				"".to_string()
 			},
 			if self.hash_function.is_some() {
-				format!("hf={}", self.hash_function.unwrap().to_string())
+				format!("hf={}", self.hash_function.unwrap())
 			} else {
 				"".to_string()
 			},
 			if self.backend.is_some() {
-				format!("backend={}", self.backend.unwrap().to_string())
+				format!("backend={}", self.backend.unwrap())
 			} else {
 				"".to_string()
 			},
 			if self.token_symbol.is_some() {
-				format!("token={}", self.token_symbol.clone().unwrap().to_string())
+				format!("token={}", self.token_symbol.clone().unwrap())
 			} else {
 				"".to_string()
 			},
 			if self.denomination.is_some() {
-				format!("denom={}", self.denomination.unwrap().to_string())
+				format!("denom={}", self.denomination.unwrap())
 			} else {
 				"".to_string()
 			},
 			if self.amount.is_some() {
-				format!("amount={}", self.amount.clone().unwrap().to_string())
+				format!("amount={}", self.amount.clone().unwrap())
 			} else {
 				"".to_string()
 			},
 		]
 		.iter()
-		.filter(|v| v.len() > 0)
+		.filter(|v| !v.is_empty())
 		.map(|v| v.clone())
 		.collect::<Vec<String>>()
 		.join("&");
 		// Note URI queries are prefixed with `?`
 		let misc = vec!["?".to_string(), misc_values].join("");
 
-		let parts: Vec<String> = vec![
-			authority.to_string(),
-			chain_ids.to_string(),
-			chain_identifying_data.to_string(),
-			secrets.to_string(),
-			misc.to_string(),
-		];
+		let parts: Vec<String> = vec![authority, chain_ids, chain_identifying_data, secrets.to_string(), misc];
 		// Join the parts with `/` and connect to the scheme as is
 		let note = vec![scheme.to_string(), parts.join("/")].join("");
 		write!(f, "{}", note)
@@ -177,9 +168,9 @@ impl FromStr for JsNote {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		if !s.contains("://") {
-			return versioning::v1::note_from_str(s);
+			versioning::v1::note_from_str(s)
 		} else {
-			return versioning::v2::note_from_str(s);
+			versioning::v2::note_from_str(s)
 		}
 	}
 }
@@ -373,7 +364,7 @@ impl JsNoteBuilder {
 	#[wasm_bindgen(js_name = setSecrets)]
 	pub fn set_secrets(&mut self, secrets: JsString) -> Result<(), JsValue> {
 		let secrets_string: String = secrets.into();
-		let secrets_parts: Vec<String> = secrets_string.split(":").map(|v| String::from(v)).collect();
+		let secrets_parts: Vec<String> = secrets_string.split(':').map(String::from).collect();
 		let secs = secrets_parts
 			.iter()
 			.map(|v| hex::decode(v.replace("0x", "")).unwrap_or_default())
@@ -527,12 +518,7 @@ impl JsNote {
 
 	#[wasm_bindgen(getter)]
 	pub fn secrets(&self) -> JsString {
-		let secrets = self
-			.secrets
-			.iter()
-			.map(|v| hex::encode(v))
-			.collect::<Vec<String>>()
-			.join(":");
+		let secrets = self.secrets.iter().map(hex::encode).collect::<Vec<String>>().join(":");
 		secrets.into()
 	}
 
