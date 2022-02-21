@@ -1,7 +1,7 @@
-import type { Backend, Curve, HashFunction, JsNote, NotePrefix } from "@webb-tools/wasm-utils";
+import type { Backend, Curve, HashFunction, JsNote, NoteProtocol } from "@webb-tools/wasm-utils";
 
 export type NoteGenInput = {
-  prefix: NotePrefix;
+  protocol: NoteProtocol;
   version: string;
   chain: string;
   sourceChain: string;
@@ -47,7 +47,7 @@ export class Note {
   public static async generateNote(noteGenInput: NoteGenInput): Promise<Note> {
     const wasm = await Note.wasm;
     const noteBuilderInput = new wasm.JsNoteBuilder();
-    noteBuilderInput.prefix(noteGenInput.prefix);
+    noteBuilderInput.protocol(noteGenInput.protocol);
     noteBuilderInput.version("v1");
     noteBuilderInput.targetChainId(noteGenInput.chain);
     noteBuilderInput.sourceChainId(noteGenInput.sourceChain);
