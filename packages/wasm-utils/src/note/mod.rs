@@ -17,6 +17,12 @@ pub mod mixer;
 
 mod versioning;
 
+macro_rules! console_log {
+	// Note that this is using the `log` function imported above during
+	// `bare_bones`
+	($($t:tt)*) => (crate::types::log(&format_args!($($t)*).to_string()))
+}
+
 impl JsNote {
 	/// Deseralize note from a string
 	pub fn deserialize(note: &str) -> Result<Self, OpStatusCode> {
@@ -39,7 +45,6 @@ impl JsNote {
 						raw
 					}
 				};
-
 				mixer::get_leaf_with_private_raw(
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
@@ -705,8 +710,60 @@ mod test {
 		note_builder.curve(curve).unwrap();
 		note_builder.hash_function(hash_function).unwrap();
 		note_builder.backend(backend);
-		note_builder.set_secrets(JsString::from("7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717")).unwrap();
+		note_builder.set_secrets(JsString::from("376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137")).unwrap();
 		let note = note_builder.build().unwrap();
 		assert_eq!(note.serialize(), JsString::from(note_str));
+	}
+
+	#[wasm_bindgen_test]
+	fn deserialize_to_js_note_v1() {
+		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
+
+		assert_eq!(to_rust_string(note.protocol()), NoteProtocol::Anchor.to_string());
+		assert_eq!(to_rust_string(note.version()), NoteVersion::V1.to_string());
+		assert_eq!(note.target_chain_id(), JsString::from("3"));
+		assert_eq!(note.source_chain_id(), JsString::from("2"));
+
+		assert_eq!(note.width(), JsString::from("5"));
+		assert_eq!(note.exponentiation(), JsString::from("5"));
+		assert_eq!(note.denomination(), JsString::from("18"));
+		assert_eq!(note.token_symbol(), JsString::from("EDG"));
+
+		assert_eq!(to_rust_string(note.backend()), Backend::Arkworks.to_string());
+		assert_eq!(to_rust_string(note.curve()), Curve::Bn254.to_string());
+		assert_eq!(to_rust_string(note.hash_function()), HashFunction::Poseidon.to_string());
+	}
+
+	#[wasm_bindgen_test]
+	fn serialize_js_note_v1() {
+		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
+
+		let mut note_builder = JsNoteBuilder::new();
+		let protocol: Protocol = JsValue::from(NoteProtocol::Anchor.to_string()).into();
+		let version: Version = JsValue::from(NoteVersion::V1.to_string()).into();
+		let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
+		let hash_function: HF = JsValue::from(HashFunction::Poseidon.to_string()).into();
+		let curve: WasmCurve = JsValue::from(Curve::Bn254.to_string()).into();
+
+		note_builder.protocol(protocol).unwrap();
+		note_builder.version(version).unwrap();
+		note_builder.source_chain_id(JsString::from("2"));
+		note_builder.target_chain_id(JsString::from("3"));
+		note_builder.source_identifying_data(JsString::from("2"));
+		note_builder.target_identifying_data(JsString::from("3"));
+
+		note_builder.width(JsString::from("5")).unwrap();
+		note_builder.exponentiation(JsString::from("5")).unwrap();
+		note_builder.denomination(JsString::from("18")).unwrap();
+		note_builder.amount(JsString::from("0"));
+		note_builder.token_symbol(JsString::from("EDG"));
+		note_builder.curve(curve).unwrap();
+		note_builder.hash_function(hash_function).unwrap();
+		note_builder.backend(backend);
+		note_builder.set_secrets(JsString::from("7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717")).unwrap();
+		let note = note_builder.build().unwrap();
+		let note_from_str = JsNote::from_str(note_str).unwrap();
+		assert_eq!(note.serialize(), note_from_str.serialize());
 	}
 }

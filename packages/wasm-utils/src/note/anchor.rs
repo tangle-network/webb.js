@@ -50,7 +50,7 @@ pub fn get_leaf_with_private_raw(
 		chain_id = u128::from(u64::from_be_bytes(chain_id_bytes));
 		secrets = raw[6..38].to_vec();
 		nullifier = raw[38..70].to_vec();
-	} else if raw.len() == 64 {
+	} else if raw.len() >= 64 {
 		// 64 bytes raw implies [32 bytes nullifier, 32 bytes secret]
 		secrets = raw[0..32].to_vec();
 		nullifier = raw[32..64].to_vec();

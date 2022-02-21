@@ -139,6 +139,12 @@ impl ProofInput {
 	}
 }
 
+macro_rules! console_log {
+	// Note that this is using the `log` function imported above during
+	// `bare_bones`
+	($($t:tt)*) => (crate::types::log(&format_args!($($t)*).to_string()))
+}
+
 #[wasm_bindgen]
 pub struct JsProofInput {
 	#[wasm_bindgen(skip)]
@@ -198,9 +204,18 @@ impl ProofInputBuilder {
 		let processed_recipient = truncate_and_pad(&recipient);
 		match proof_target {
 			NoteProtocol::Mixer => {
-				// Mixer note secrets are structure as a vector of [secret, nullifier]
-				let secret = note_secrets[0].clone();
-				let nullifier = note_secrets[1].clone();
+				// Mixer secrets are structures as a vector of [secret, nullifier] or
+				// concatenated bytes
+				let mut secret = Vec::new();
+				let mut nullifier = Vec::new();
+				if note_secrets.len() == 1 && note_secrets[0].len() >= 64 {
+					secret.extend_from_slice(&note_secrets[0][0..32]);
+					nullifier.extend_from_slice(&note_secrets[0][32..64]);
+				} else {
+					secret = note_secrets[0].clone();
+					nullifier = note_secrets[1].clone();
+				}
+
 				let mixer_proof_input = MixerProofInput {
 					exponentiation: exponentiation.unwrap_or(5),
 					width: width.unwrap_or(3),
@@ -220,25 +235,40 @@ impl ProofInputBuilder {
 				Ok(ProofInput::Mixer(mixer_proof_input))
 			}
 			NoteProtocol::Anchor => {
+				// Mixer secrets are structures as a vector of [secret, nullifier] or
+				// concatenated bytes
+				let mut chain_id = note
+					.target_chain_id
+					.parse()
+					.map_err(|_| OpStatusCode::InvalidTargetChain)?;
+				let mut secret = Vec::new();
+				let mut nullifier = Vec::new();
+				if note_secrets.len() == 1 && note_secrets[0].len() >= 64 {
+					secret.extend_from_slice(&note_secrets[0][0..32]);
+					nullifier.extend_from_slice(&note_secrets[0][32..64]);
+				} else {
+					secret = note_secrets[0].clone();
+					nullifier = note_secrets[1].clone();
+
+					// Anchor note secrets are structure as a vector of [chain_id, secret,
+					// nullifier]
+					let chain_id_bytes = note_secrets[0].clone();
+					if chain_id_bytes.len() == 6 {
+						let mut temp_bytes = [0u8; 8];
+						temp_bytes[2..8].copy_from_slice(&chain_id_bytes[0..6]);
+						chain_id = u128::from(u64::from_be_bytes(temp_bytes));
+					} else if chain_id_bytes.len() == 8 {
+						let mut temp_bytes = [0u8; 8];
+						temp_bytes[0..8].copy_from_slice(&chain_id_bytes);
+						chain_id = u128::from(u64::from_be_bytes(temp_bytes));
+					} else {
+						return Err(OpStatusCode::InvalidTargetChain);
+					}
+				}
+
 				let commitment = self.commitment.ok_or(OpStatusCode::CommitmentNotSet)?;
 				let roots = self.roots.ok_or(OpStatusCode::RootsNotSet)?;
-				// Anchor note secrets are structure as a vector of [chain_id, secret,
-				// nullifier]
-				let chain_id_bytes = note_secrets[0].clone();
-				let chain_id;
-				if chain_id_bytes.len() == 6 {
-					let mut temp_bytes = [0u8; 8];
-					temp_bytes[2..8].copy_from_slice(&chain_id_bytes[0..6]);
-					chain_id = u128::from(u64::from_be_bytes(temp_bytes));
-				} else if chain_id_bytes.len() == 8 {
-					let mut temp_bytes = [0u8; 8];
-					temp_bytes[0..8].copy_from_slice(&chain_id_bytes);
-					chain_id = u128::from(u64::from_be_bytes(temp_bytes));
-				} else {
-					return Err(OpStatusCode::InvalidTargetChain);
-				}
-				let secret = note_secrets[1].clone();
-				let nullifier = note_secrets[2].clone();
+
 				let anchor_input = AnchorProofInput {
 					exponentiation: exponentiation.unwrap_or(5),
 					width: width.unwrap_or(3),

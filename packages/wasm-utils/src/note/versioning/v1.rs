@@ -5,7 +5,7 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
 	let parts: Vec<&str> = s.split(':').collect();
 	let prefix = parts[0];
 	let prefix_parts = prefix.split('.').collect::<Vec<&str>>();
-	let protocol = if prefix_parts[1] == "bridge" {
+	let protocol = if prefix_parts[1] == "bridge" || prefix_parts[1] == "anchor" {
 		NoteProtocol::Anchor
 	} else {
 		NoteProtocol::Mixer

@@ -154,7 +154,7 @@ impl FromStr for NoteVersion {
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
 			"v1" => Ok(NoteVersion::V1),
-			"v2" => Ok(NoteVersion::V1),
+			"v2" => Ok(NoteVersion::V2),
 			_ => Err(OpStatusCode::InvalidNoteVersion),
 		}
 	}
@@ -217,7 +217,7 @@ impl FromStr for NoteProtocol {
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
 			"mixer" => Ok(NoteProtocol::Mixer),
-			"anchor" => Ok(NoteProtocol::Anchor),
+			"anchor" | "bridge" => Ok(NoteProtocol::Anchor),
 			"vanchor" => Ok(NoteProtocol::VAnchor),
 			_ => Err(OpStatusCode::InvalidNoteProtocol),
 		}
@@ -340,6 +340,11 @@ pub enum OpStatusCode {
 
 #[wasm_bindgen]
 extern "C" {
+	// Use `js_namespace` here to bind `console.log(..)` instead of just
+	// `log(..)`
+	#[wasm_bindgen(js_namespace = console)]
+	pub fn log(s: &str);
+
 	#[wasm_bindgen(typescript_type = "NoteProtocol")]
 	pub type Protocol;
 
