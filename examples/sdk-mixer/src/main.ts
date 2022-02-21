@@ -29,7 +29,7 @@ async function generateLeaf() {
 
 async function main() {
   const n = await Note.deserialize(
-    "webb://mixer:v1:15:15:Arkworks:Bn254:Poseidon:WEBB:12:10:5:5:f840b49ab7d1b7472d1798abfb1b8d0e1c6d6a671d9bf88b066a9e6c84386607452e8ab1565f2445bb80bc349329c65cad265331c766d3f5a2ad21e3e6218708"
+    "webb.mixer:v1:15:15:Arkworks:Bn254:Poseidon:WEBB:12:10:5:5:f840b49ab7d1b7472d1798abfb1b8d0e1c6d6a671d9bf88b066a9e6c84386607452e8ab1565f2445bb80bc349329c65cad265331c766d3f5a2ad21e3e6218708"
   );
   console.log(n.note.backend);
   console.log(n.note.curve);
