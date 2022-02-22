@@ -283,7 +283,7 @@ impl JsNoteBuilder {
 		let note_version: NoteVersion = version
 			.as_str()
 			.parse()
-			.map_err(|_| OpStatusCode::InvalidNoteProtocol)?;
+			.map_err(|_| OpStatusCode::InvalidNoteVersion)?;
 		self.version = Some(note_version);
 		Ok(())
 	}

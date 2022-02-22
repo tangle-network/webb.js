@@ -265,7 +265,7 @@ pub enum OpStatusCode {
 	HexParsingFailed = 2,
 	/// Invalid number of note parts when decoding
 	InvalidNoteLength = 3,
-	/// Invalid note prefix
+	/// Invalid note protocol
 	InvalidNoteProtocol = 4,
 	/// Invalid note version
 	InvalidNoteVersion = 5,
