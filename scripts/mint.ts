@@ -1,5 +1,5 @@
 import { options } from '@webb-tools/api';
-import { ApiPromise, WsProvider, Keyring } from '@polkadot/api';
+import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { LoggerService } from '@webb-tools/app-util';
 import BN from 'bn.js';
 
@@ -42,7 +42,9 @@ async function main() {
       }
       if (status.isInBlock || status.isFinalized) {
         const info = await api.query.system.account(targetAccount);
-        apiLogger.info('Your Current balance: ', info.data.free.toHuman());
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        apiLogger.info('Your Current balance: ', info?.data.free.toHuman());
         await api.disconnect();
       }
     });

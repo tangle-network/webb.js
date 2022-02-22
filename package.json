@@ -6,8 +6,7 @@
     "node": "^14"
   },
   "workspaces": [
-    "packages/*",
-    "examples/*"
+    "packages/*"
   ],
   "resolutions": {
     "@edgeware/node-types": "3.5.1-erup-4"

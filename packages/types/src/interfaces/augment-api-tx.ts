@@ -1,15 +1,14 @@
 // Auto-generated via `yarn polkadot-types-from-chain`, do not edit
 /* eslint-disable */
 
-import type { ApiTypes, SubmittableExtrinsic } from '@polkadot/api/types';
-import type { Bytes, Compact, Null, Option, Vec, bool, u128, u32, u8 } from '@polkadot/types';
-import type { Extrinsic } from '@polkadot/types/interfaces/extrinsics';
-import type { AnyNumber } from '@polkadot/types/types';
+import type { ApiTypes } from '@polkadot/api-base/types';
+import type { Bytes, Compact, Null, Option, Vec, bool, u128, u32, u8 } from '@polkadot/types-codec';
+import type { AnyNumber } from '@polkadot/types-codec/types';
 import type { DarkwebbStandaloneRuntimeElement, PalletAssetRegistryAssetType } from '@webb-tools/types/interfaces/pallets';
-import type { AccountId32, Call, MultiAddress } from '@webb-tools/types/interfaces/runtime';
+import type { AccountId32, MultiAddress } from '@webb-tools/types/interfaces/runtime';
 
-declare module '@polkadot/api/types/submittable' {
-  export interface AugmentedSubmittables<ApiType> {
+declare module '@polkadot/api-base/types/submittable' {
+  export interface AugmentedSubmittables<ApiType extends ApiTypes> {
     anchorBls381: {
       create: AugmentedSubmittable<(depositSize: u128 | AnyNumber | Uint8Array, maxEdges: u32 | AnyNumber | Uint8Array, depth: u8 | AnyNumber | Uint8Array, asset: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u32, u8, u32]>;
       deposit: AugmentedSubmittable<(treeId: u32 | AnyNumber | Uint8Array, leaf: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, DarkwebbStandaloneRuntimeElement]>;
@@ -202,10 +201,5 @@ declare module '@polkadot/api/types/submittable' {
        **/
       [key: string]: SubmittableExtrinsicFunction<ApiType>;
     };
-  }
-
-  export interface SubmittableExtrinsics<ApiType extends ApiTypes> extends AugmentedSubmittables<ApiType> {
-    (extrinsic: Call | Extrinsic | Uint8Array | string): SubmittableExtrinsic<ApiType>;
-    [key: string]: SubmittableModuleExtrinsics<ApiType>;
-  }
-}
+  } // AugmentedSubmittables
+} // declare module

@@ -1,7 +1,8 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import type { BitVec, Bool, Bytes, Data, I128, I16, I256, I32, I64, I8, Json, Null, Raw, StorageKey, Text, Type, U128, U16, U256, U32, U64, U8, USize, bool, i128, i16, i256, i32, i64, i8, u128, u16, u256, u32, u64, u8, usize } from '@polkadot/types';
+import type { Data, StorageKey } from '@polkadot/types';
+import type { BitVec, Bool, Bytes, I128, I16, I256, I32, I64, I8, Json, Null, Raw, Text, Type, U128, U16, U256, U32, U64, U8, USize, bool, i128, i16, i256, i32, i64, i8, u128, u16, u256, u32, u64, u8, usize } from '@polkadot/types-codec';
 import type { AssetApproval, AssetApprovalKey, AssetBalance, AssetDestroyWitness, AssetDetails, AssetMetadata, TAssetBalance, TAssetDepositBalance } from '@polkadot/types/interfaces/assets';
 import type { BlockAttestations, IncludedBlocks, MoreAttestations } from '@polkadot/types/interfaces/attestations';
 import type { RawAuraPreDigest } from '@polkadot/types/interfaces/aura';
@@ -16,8 +17,8 @@ import type { PrefixedStorageKey } from '@polkadot/types/interfaces/childstate';
 import type { StatementKind } from '@polkadot/types/interfaces/claims';
 import type { CollectiveOrigin, MemberCount, ProposalIndex, Votes, VotesTo230 } from '@polkadot/types/interfaces/collective';
 import type { AuthorityId, RawVRFOutput } from '@polkadot/types/interfaces/consensus';
-import type { AliveContractInfo, CodeHash, ContractCallRequest, ContractExecResult, ContractExecResultErr, ContractExecResultErrModule, ContractExecResultOk, ContractExecResultResult, ContractExecResultSuccessTo255, ContractExecResultSuccessTo260, ContractExecResultTo255, ContractExecResultTo260, ContractExecResultTo267, ContractInfo, ContractInstantiateResult, ContractInstantiateResultTo267, ContractStorageKey, DeletedContract, ExecReturnValue, Gas, HostFnWeights, HostFnWeightsTo264, InstantiateRequest, InstantiateReturnValue, InstantiateReturnValueTo267, InstructionWeights, Limits, LimitsTo264, PrefabWasmModule, RentProjection, Schedule, ScheduleTo212, ScheduleTo258, ScheduleTo264, SeedOf, TombstoneContractInfo, TrieId } from '@polkadot/types/interfaces/contracts';
-import type { ContractConstructorSpec, ContractContractSpec, ContractCryptoHasher, ContractDiscriminant, ContractDisplayName, ContractEventParamSpec, ContractEventSpec, ContractLayoutArray, ContractLayoutCell, ContractLayoutEnum, ContractLayoutHash, ContractLayoutHashingStrategy, ContractLayoutKey, ContractLayoutStruct, ContractLayoutStructField, ContractMessageParamSpec, ContractMessageSpec, ContractMetadata, ContractMetadataLatest, ContractMetadataV0, ContractMetadataV1, ContractProject, ContractProjectContract, ContractProjectInfo, ContractProjectSource, ContractProjectV0, ContractSelector, ContractStorageLayout, ContractTypeSpec } from '@polkadot/types/interfaces/contractsAbi';
+import type { AliveContractInfo, CodeHash, CodeSource, CodeUploadRequest, CodeUploadResult, CodeUploadResultValue, ContractCallFlags, ContractCallRequest, ContractExecResult, ContractExecResultErr, ContractExecResultErrModule, ContractExecResultOk, ContractExecResultResult, ContractExecResultSuccessTo255, ContractExecResultSuccessTo260, ContractExecResultTo255, ContractExecResultTo260, ContractExecResultTo267, ContractInfo, ContractInstantiateResult, ContractInstantiateResultTo267, ContractInstantiateResultTo299, ContractReturnFlags, ContractStorageKey, DeletedContract, ExecReturnValue, Gas, HostFnWeights, HostFnWeightsTo264, InstantiateRequest, InstantiateRequestV1, InstantiateRequestV2, InstantiateReturnValue, InstantiateReturnValueOk, InstantiateReturnValueTo267, InstructionWeights, Limits, LimitsTo264, PrefabWasmModule, RentProjection, Schedule, ScheduleTo212, ScheduleTo258, ScheduleTo264, SeedOf, StorageDeposit, TombstoneContractInfo, TrieId } from '@polkadot/types/interfaces/contracts';
+import type { ContractConstructorSpecLatest, ContractConstructorSpecV0, ContractConstructorSpecV1, ContractConstructorSpecV2, ContractConstructorSpecV3, ContractContractSpecV0, ContractContractSpecV1, ContractContractSpecV2, ContractContractSpecV3, ContractCryptoHasher, ContractDiscriminant, ContractDisplayName, ContractEventParamSpecLatest, ContractEventParamSpecV0, ContractEventParamSpecV2, ContractEventSpecLatest, ContractEventSpecV0, ContractEventSpecV1, ContractEventSpecV2, ContractLayoutArray, ContractLayoutCell, ContractLayoutEnum, ContractLayoutHash, ContractLayoutHashingStrategy, ContractLayoutKey, ContractLayoutStruct, ContractLayoutStructField, ContractMessageParamSpecLatest, ContractMessageParamSpecV0, ContractMessageParamSpecV2, ContractMessageSpecLatest, ContractMessageSpecV0, ContractMessageSpecV1, ContractMessageSpecV2, ContractMetadata, ContractMetadataLatest, ContractMetadataV0, ContractMetadataV1, ContractMetadataV2, ContractMetadataV3, ContractProject, ContractProjectContract, ContractProjectInfo, ContractProjectSource, ContractProjectV0, ContractSelector, ContractStorageLayout, ContractTypeSpec } from '@polkadot/types/interfaces/contractsAbi';
 import type { FundIndex, FundInfo, LastContribution, TrieIndex } from '@polkadot/types/interfaces/crowdloan';
 import type { ConfigData, MessageId, OverweightIndex, PageCounter, PageIndexData } from '@polkadot/types/interfaces/cumulus';
 import type { AccountVote, AccountVoteSplit, AccountVoteStandard, Conviction, Delegations, PreimageStatus, PreimageStatusAvailable, PriorLock, PropIndex, Proposal, ProxyState, ReferendumIndex, ReferendumInfo, ReferendumInfoFinished, ReferendumInfoTo239, ReferendumStatus, Tally, Voting, VotingDelegating, VotingDirect, VotingDirectVote } from '@polkadot/types/interfaces/democracy';
@@ -36,7 +37,7 @@ import type { ErrorMetadataLatest, ErrorMetadataV10, ErrorMetadataV11, ErrorMeta
 import type { MmrLeafProof } from '@polkadot/types/interfaces/mmr';
 import type { StorageKind } from '@polkadot/types/interfaces/offchain';
 import type { DeferredOffenceOf, Kind, OffenceDetails, Offender, OpaqueTimeSlot, ReportIdOf, Reporter } from '@polkadot/types/interfaces/offences';
-import type { AbridgedCandidateReceipt, AbridgedHostConfiguration, AbridgedHrmpChannel, AssignmentId, AssignmentKind, AttestedCandidate, AuctionIndex, AuthorityDiscoveryId, AvailabilityBitfield, AvailabilityBitfieldRecord, BackedCandidate, Bidder, BufferedSessionChange, CandidateCommitments, CandidateDescriptor, CandidateHash, CandidateInfo, CandidatePendingAvailability, CandidateReceipt, CollatorId, CollatorSignature, CommittedCandidateReceipt, CoreAssignment, CoreIndex, CoreOccupied, DisputeLocation, DisputeResult, DisputeState, DisputeStatement, DisputeStatementSet, DoubleVoteReport, DownwardMessage, ExplicitDisputeStatement, GlobalValidationData, GlobalValidationSchedule, GroupIndex, HeadData, HostConfiguration, HrmpChannel, HrmpChannelId, HrmpOpenChannelRequest, InboundDownwardMessage, InboundHrmpMessage, InboundHrmpMessages, IncomingParachain, IncomingParachainDeploy, IncomingParachainFixed, InvalidDisputeStatementKind, LeasePeriod, LeasePeriodOf, LocalValidationData, MessageIngestionType, MessageQueueChain, MessagingStateSnapshot, MessagingStateSnapshotEgressEntry, MultiDisputeStatementSet, NewBidder, OutboundHrmpMessage, ParaGenesisArgs, ParaId, ParaInfo, ParaLifecycle, ParaPastCodeMeta, ParaScheduling, ParaValidatorIndex, ParachainDispatchOrigin, ParachainInherentData, ParachainProposal, ParachainsInherentData, ParathreadClaim, ParathreadClaimQueue, ParathreadEntry, PersistedValidationData, QueuedParathread, RegisteredParachainInfo, RelayBlockNumber, RelayChainBlockNumber, RelayChainHash, RelayHash, Remark, ReplacementTimes, Retriable, Scheduling, ServiceQuality, SessionInfo, SessionInfoValidatorGroup, SignedAvailabilityBitfield, SignedAvailabilityBitfields, SigningContext, SlotRange, Statement, SubId, SystemInherentData, TransientValidationData, UpgradeGoAhead, UpgradeRestriction, UpwardMessage, ValidDisputeStatementKind, ValidationCode, ValidationCodeHash, ValidationData, ValidationDataType, ValidationFunctionParams, ValidatorSignature, ValidityAttestation, VecInboundHrmpMessage, WinnersData, WinnersDataTuple, WinningData, WinningDataEntry } from '@polkadot/types/interfaces/parachains';
+import type { AbridgedCandidateReceipt, AbridgedHostConfiguration, AbridgedHrmpChannel, AssignmentId, AssignmentKind, AttestedCandidate, AuctionIndex, AuthorityDiscoveryId, AvailabilityBitfield, AvailabilityBitfieldRecord, BackedCandidate, Bidder, BufferedSessionChange, CandidateCommitments, CandidateDescriptor, CandidateHash, CandidateInfo, CandidatePendingAvailability, CandidateReceipt, CollatorId, CollatorSignature, CommittedCandidateReceipt, CoreAssignment, CoreIndex, CoreOccupied, DisputeLocation, DisputeResult, DisputeState, DisputeStatement, DisputeStatementSet, DoubleVoteReport, DownwardMessage, ExplicitDisputeStatement, GlobalValidationData, GlobalValidationSchedule, GroupIndex, HeadData, HostConfiguration, HrmpChannel, HrmpChannelId, HrmpOpenChannelRequest, InboundDownwardMessage, InboundHrmpMessage, InboundHrmpMessages, IncomingParachain, IncomingParachainDeploy, IncomingParachainFixed, InvalidDisputeStatementKind, LeasePeriod, LeasePeriodOf, LocalValidationData, MessageIngestionType, MessageQueueChain, MessagingStateSnapshot, MessagingStateSnapshotEgressEntry, MultiDisputeStatementSet, NewBidder, OutboundHrmpMessage, ParaGenesisArgs, ParaId, ParaInfo, ParaLifecycle, ParaPastCodeMeta, ParaScheduling, ParaValidatorIndex, ParachainDispatchOrigin, ParachainInherentData, ParachainProposal, ParachainsInherentData, ParathreadClaim, ParathreadClaimQueue, ParathreadEntry, PersistedValidationData, QueuedParathread, RegisteredParachainInfo, RelayBlockNumber, RelayChainBlockNumber, RelayChainHash, RelayHash, Remark, ReplacementTimes, Retriable, Scheduling, ServiceQuality, SessionInfo, SessionInfoValidatorGroup, SignedAvailabilityBitfield, SignedAvailabilityBitfields, SigningContext, SlotRange, SlotRange10, Statement, SubId, SystemInherentData, TransientValidationData, UpgradeGoAhead, UpgradeRestriction, UpwardMessage, ValidDisputeStatementKind, ValidationCode, ValidationCodeHash, ValidationData, ValidationDataType, ValidationFunctionParams, ValidatorSignature, ValidityAttestation, VecInboundHrmpMessage, WinnersData, WinnersData10, WinnersDataTuple, WinnersDataTuple10, WinningData, WinningData10, WinningDataEntry } from '@polkadot/types/interfaces/parachains';
 import type { FeeDetails, InclusionFee, RuntimeDispatchInfo } from '@polkadot/types/interfaces/payment';
 import type { Approvals } from '@polkadot/types/interfaces/poll';
 import type { ProxyAnnouncement, ProxyDefinition, ProxyType } from '@polkadot/types/interfaces/proxy';
@@ -201,6 +202,10 @@ declare module '@polkadot/types/types/registry' {
     ClassMetadata: ClassMetadata;
     CodecHash: CodecHash;
     CodeHash: CodeHash;
+    CodeSource: CodeSource;
+    CodeUploadRequest: CodeUploadRequest;
+    CodeUploadResult: CodeUploadResult;
+    CodeUploadResultValue: CodeUploadResultValue;
     CollatorId: CollatorId;
     CollatorSignature: CollatorSignature;
     CollectiveOrigin: CollectiveOrigin;
@@ -216,14 +221,27 @@ declare module '@polkadot/types/types/registry' {
     Consensus: Consensus;
     ConsensusEngineId: ConsensusEngineId;
     ConsumedWeight: ConsumedWeight;
+    ContractCallFlags: ContractCallFlags;
     ContractCallRequest: ContractCallRequest;
-    ContractConstructorSpec: ContractConstructorSpec;
-    ContractContractSpec: ContractContractSpec;
+    ContractConstructorSpecLatest: ContractConstructorSpecLatest;
+    ContractConstructorSpecV0: ContractConstructorSpecV0;
+    ContractConstructorSpecV1: ContractConstructorSpecV1;
+    ContractConstructorSpecV2: ContractConstructorSpecV2;
+    ContractConstructorSpecV3: ContractConstructorSpecV3;
+    ContractContractSpecV0: ContractContractSpecV0;
+    ContractContractSpecV1: ContractContractSpecV1;
+    ContractContractSpecV2: ContractContractSpecV2;
+    ContractContractSpecV3: ContractContractSpecV3;
     ContractCryptoHasher: ContractCryptoHasher;
     ContractDiscriminant: ContractDiscriminant;
     ContractDisplayName: ContractDisplayName;
-    ContractEventParamSpec: ContractEventParamSpec;
-    ContractEventSpec: ContractEventSpec;
+    ContractEventParamSpecLatest: ContractEventParamSpecLatest;
+    ContractEventParamSpecV0: ContractEventParamSpecV0;
+    ContractEventParamSpecV2: ContractEventParamSpecV2;
+    ContractEventSpecLatest: ContractEventSpecLatest;
+    ContractEventSpecV0: ContractEventSpecV0;
+    ContractEventSpecV1: ContractEventSpecV1;
+    ContractEventSpecV2: ContractEventSpecV2;
     ContractExecResult: ContractExecResult;
     ContractExecResultErr: ContractExecResultErr;
     ContractExecResultErrModule: ContractExecResultErrModule;
@@ -237,6 +255,7 @@ declare module '@polkadot/types/types/registry' {
     ContractInfo: ContractInfo;
     ContractInstantiateResult: ContractInstantiateResult;
     ContractInstantiateResultTo267: ContractInstantiateResultTo267;
+    ContractInstantiateResultTo299: ContractInstantiateResultTo299;
     ContractLayoutArray: ContractLayoutArray;
     ContractLayoutCell: ContractLayoutCell;
     ContractLayoutEnum: ContractLayoutEnum;
@@ -245,17 +264,25 @@ declare module '@polkadot/types/types/registry' {
     ContractLayoutKey: ContractLayoutKey;
     ContractLayoutStruct: ContractLayoutStruct;
     ContractLayoutStructField: ContractLayoutStructField;
-    ContractMessageParamSpec: ContractMessageParamSpec;
-    ContractMessageSpec: ContractMessageSpec;
+    ContractMessageParamSpecLatest: ContractMessageParamSpecLatest;
+    ContractMessageParamSpecV0: ContractMessageParamSpecV0;
+    ContractMessageParamSpecV2: ContractMessageParamSpecV2;
+    ContractMessageSpecLatest: ContractMessageSpecLatest;
+    ContractMessageSpecV0: ContractMessageSpecV0;
+    ContractMessageSpecV1: ContractMessageSpecV1;
+    ContractMessageSpecV2: ContractMessageSpecV2;
     ContractMetadata: ContractMetadata;
     ContractMetadataLatest: ContractMetadataLatest;
     ContractMetadataV0: ContractMetadataV0;
     ContractMetadataV1: ContractMetadataV1;
+    ContractMetadataV2: ContractMetadataV2;
+    ContractMetadataV3: ContractMetadataV3;
     ContractProject: ContractProject;
     ContractProjectContract: ContractProjectContract;
     ContractProjectInfo: ContractProjectInfo;
     ContractProjectSource: ContractProjectSource;
     ContractProjectV0: ContractProjectV0;
+    ContractReturnFlags: ContractReturnFlags;
     ContractSelector: ContractSelector;
     ContractStorageKey: ContractStorageKey;
     ContractStorageLayout: ContractStorageLayout;
@@ -510,7 +537,10 @@ declare module '@polkadot/types/types/registry' {
     InstanceId: InstanceId;
     InstanceMetadata: InstanceMetadata;
     InstantiateRequest: InstantiateRequest;
+    InstantiateRequestV1: InstantiateRequestV1;
+    InstantiateRequestV2: InstantiateRequestV2;
     InstantiateReturnValue: InstantiateReturnValue;
+    InstantiateReturnValueOk: InstantiateReturnValueOk;
     InstantiateReturnValueTo267: InstantiateReturnValueTo267;
     InstructionV2: InstructionV2;
     InstructionWeights: InstructionWeights;
@@ -907,6 +937,7 @@ declare module '@polkadot/types/types/registry' {
     Slot: Slot;
     SlotNumber: SlotNumber;
     SlotRange: SlotRange;
+    SlotRange10: SlotRange10;
     SocietyJudgement: SocietyJudgement;
     SocietyVote: SocietyVote;
     SolutionOrSnapshotSize: SolutionOrSnapshotSize;
@@ -923,6 +954,7 @@ declare module '@polkadot/types/types/registry' {
     StatementKind: StatementKind;
     StorageChangeSet: StorageChangeSet;
     StorageData: StorageData;
+    StorageDeposit: StorageDeposit;
     StorageEntryMetadataLatest: StorageEntryMetadataLatest;
     StorageEntryMetadataV10: StorageEntryMetadataV10;
     StorageEntryMetadataV11: StorageEntryMetadataV11;
@@ -1073,8 +1105,11 @@ declare module '@polkadot/types/types/registry' {
     WildMultiAssetV1: WildMultiAssetV1;
     WildMultiAssetV2: WildMultiAssetV2;
     WinnersData: WinnersData;
+    WinnersData10: WinnersData10;
     WinnersDataTuple: WinnersDataTuple;
+    WinnersDataTuple10: WinnersDataTuple10;
     WinningData: WinningData;
+    WinningData10: WinningData10;
     WinningDataEntry: WinningDataEntry;
     WithdrawReasons: WithdrawReasons;
     Xcm: Xcm;
@@ -1094,5 +1129,5 @@ declare module '@polkadot/types/types/registry' {
     XcmV1: XcmV1;
     XcmV2: XcmV2;
     XcmVersion: XcmVersion;
-  }
-}
+  } // InterfaceTypes
+} // declare module

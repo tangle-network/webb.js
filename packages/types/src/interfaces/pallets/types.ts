@@ -1,7 +1,7 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import type { Bytes, Enum, Struct, U8aFixed, bool, u8 } from '@polkadot/types';
+import type { Bytes, Enum, Struct, U8aFixed, bool, u8 } from '@polkadot/types-codec';
 import type { ChainId } from '@polkadot/types/interfaces/bridges';
 import type { TreeId } from '@webb-tools/types/interfaces/merkle';
 import type { AccountId, AssetId, Balance, BlockNumber, LockIdentifier } from '@webb-tools/types/interfaces/runtime';
@@ -69,6 +69,7 @@ export interface PalletAssetRegistryAssetMetadata extends Struct {
 export interface PalletAssetRegistryAssetType extends Enum {
   readonly isToken: boolean;
   readonly isPoolShare: boolean;
+  readonly type: 'Token' | 'PoolShare';
 }
 
 /** @name PalletMixerMixerMetadata */
