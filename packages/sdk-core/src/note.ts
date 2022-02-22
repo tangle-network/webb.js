@@ -4,7 +4,9 @@ export type NoteGenInput = {
   protocol: NoteProtocol;
   version: string;
   chain: string;
+  targetIdentifyingData?: string;
   sourceChain: string;
+  sourceIdentifyingData?: string;
   backend: Backend;
   hashFunction: HashFunction;
   curve: Curve;
@@ -48,7 +50,7 @@ export class Note {
     const wasm = await Note.wasm;
     const noteBuilderInput = new wasm.JsNoteBuilder();
     noteBuilderInput.protocol(noteGenInput.protocol);
-    noteBuilderInput.version("v1");
+    noteBuilderInput.version("v2");
     noteBuilderInput.targetChainId(noteGenInput.chain);
     noteBuilderInput.sourceChainId(noteGenInput.sourceChain);
     noteBuilderInput.backend(noteGenInput.backend);
@@ -62,8 +64,13 @@ export class Note {
     if (noteGenInput.secrets) {
       noteBuilderInput.setSecrets(noteGenInput.secrets);
     }
+    if (noteGenInput.targetIdentifyingData) {
+      noteBuilderInput.targetIdentifyingData(noteGenInput.targetIdentifyingData);
+    }
+    if (noteGenInput.sourceIdentifyingData) {
+      noteBuilderInput.sourceIdentifyingData(noteGenInput.sourceIdentifyingData);
+    }
     const depositNote = noteBuilderInput.build();
     return new Note(depositNote);
   }
-
 }

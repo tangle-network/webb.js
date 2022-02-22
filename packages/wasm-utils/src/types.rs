@@ -377,7 +377,7 @@ const HF: &str = "type HashFunction = 'Poseidon'|'MiMCTornado'";
 const CURVE: &str = "type Curve = 'Bls381'|'Bn254' |'Curve25519'";
 
 #[wasm_bindgen(typescript_custom_section)]
-const VERSION: &str = "type Version = 'v1'";
+const VERSION: &str = "type Version = 'v1' | 'v2'";
 
 #[wasm_bindgen(typescript_custom_section)]
 const BE: &str = "type Backend = 'Bulletproofs'|'Arkworks'|'Circom'";
@@ -410,7 +410,7 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::InvalidHexLength => "Invalid hex length",
 			OpStatusCode::HexParsingFailed => "Failed to parse hex",
 			OpStatusCode::InvalidNoteLength => "Invalid note length",
-			OpStatusCode::InvalidNoteProtocol => "Invalid note prefix",
+			OpStatusCode::InvalidNoteProtocol => "Invalid note protocol",
 			OpStatusCode::InvalidNoteVersion => "Invalid note version",
 			OpStatusCode::InvalidNoteId => "Invalid note id",
 			OpStatusCode::InvalidNoteBlockNumber => "Invalid block number",
