@@ -17,8 +17,8 @@
   "dependencies": {
     "@babel/runtime": "^7.10.2",
     "@edgeware/node-types": "3.5.1-erup-4",
-    "@polkadot/api": "^6.9.2",
-    "@polkadot/rpc-core": "^6.9.2",
+    "@polkadot/api": "^7.5.1",
+    "@polkadot/rpc-core": "^7.5.1",
     "@webb-tools/types": "0.1.4-33"
   }
 }
