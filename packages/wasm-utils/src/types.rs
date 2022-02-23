@@ -1,3 +1,4 @@
+#![allow(clippy::unused_unit)]
 use core::fmt;
 use std::convert::{TryFrom, TryInto};
 use std::ops::Deref;
@@ -21,6 +22,7 @@ pub struct OperationError {
 	pub data: Option<String>,
 }
 
+#[allow(clippy::unused_unit)]
 #[cfg(not(test))]
 #[wasm_bindgen]
 impl OperationError {
@@ -339,6 +341,7 @@ pub enum OpStatusCode {
 
 #[wasm_bindgen]
 extern "C" {
+
 	#[wasm_bindgen(typescript_type = "NotePrefix")]
 	pub type Prefix;
 
@@ -524,6 +527,7 @@ impl From<NotePrefix> for Prefix {
 }
 
 #[cfg(not(test))]
+#[allow(clippy::unused_unit)]
 #[wasm_bindgen(start)]
 pub fn main() {
 	console_error_panic_hook::set_once();

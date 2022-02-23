@@ -45,7 +45,7 @@ pub fn generate_mixer_test_setup(
 	recipient_decoded_ss58: &str,
 	note: &str,
 ) -> MixerTestSetup {
-	let (pk, vk) = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
+	let keys = setup_keys_x5_5::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
 	let index = 0;
 	let note = JsNote::js_deserialize(JsString::from(note)).unwrap();
 	let leaf = note.get_leaf_commitment().unwrap();
@@ -66,14 +66,14 @@ pub fn generate_mixer_test_setup(
 		.set_recipient(JsString::from(recipient_decoded_ss58))
 		.unwrap();
 
-	js_builder.set_pk(JsString::from(hex::encode(&pk))).unwrap();
+	js_builder.set_pk(JsString::from(hex::encode(&keys.pk))).unwrap();
 
 	js_builder.set_note(&note).unwrap();
 
 	MixerTestSetup {
 		relayer: hex::decode(relayer_decoded_ss58).unwrap(),
 		recipient: hex::decode(recipient_decoded_ss58).unwrap(),
-		vk,
+		vk: keys.vk,
 		root: vec![],
 		leaf_bytes,
 		proof_input_builder: js_builder,
@@ -90,7 +90,7 @@ pub fn generate_anchor_test_setup(
 	let curve = ArkCurve::Bn254;
 	let index = 0;
 
-	let (pk, vk) = setup_keys_x5_4::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
+	let key = setup_keys_x5_4::<Bn254, _>(ArkCurve::Bn254, &mut OsRng).unwrap();
 
 	let note = JsNote::js_deserialize(JsString::from(note)).unwrap();
 
@@ -124,7 +124,7 @@ pub fn generate_anchor_test_setup(
 
 	js_builder.set_note(&note).unwrap();
 
-	js_builder.set_pk(JsString::from(hex::encode(pk))).unwrap();
+	js_builder.set_pk(JsString::from(hex::encode(key.pk))).unwrap();
 	js_builder
 		.set_commitment(JsString::from(hex::encode([0u8; 32])))
 		.unwrap();
@@ -133,7 +133,7 @@ pub fn generate_anchor_test_setup(
 	AnchorTestSetup {
 		relayer: hex::decode(relayer_decoded_ss58).unwrap(),
 		recipient: hex::decode(recipient_decoded_ss58).unwrap(),
-		vk,
+		vk: key.vk,
 		leaf_index: index,
 		leaf_bytes,
 		proof_input_builder: js_builder,

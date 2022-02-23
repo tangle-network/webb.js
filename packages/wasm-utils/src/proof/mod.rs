@@ -1,3 +1,5 @@
+#![allow(clippy::unused_unit)]
+
 use std::convert::{TryFrom, TryInto};
 
 use ark_ff::{BigInteger, PrimeField};
@@ -24,6 +26,7 @@ pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
 	truncated_bytes
 }
 
+#[allow(clippy::unused_unit)]
 #[wasm_bindgen]
 #[derive(Debug, Eq, PartialEq)]
 pub struct Proof {
@@ -41,6 +44,7 @@ pub struct Proof {
 	pub leaf: Vec<u8>,
 }
 
+#[allow(clippy::unused_unit)]
 #[wasm_bindgen]
 impl Proof {
 	#[wasm_bindgen(getter)]
@@ -266,6 +270,7 @@ pub struct AnchorMTBn254X5 {
 	pub inner: Tree_x5<Bn254Fr>,
 }
 
+#[allow(clippy::unused_unit)]
 #[wasm_bindgen]
 impl AnchorMTBn254X5 {
 	#[wasm_bindgen(constructor)]
@@ -436,7 +441,6 @@ impl ProofInputBuilder {
 		Ok(JsProofInput { inner: proof_input })
 	}
 }
-
 #[wasm_bindgen]
 pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 	let mut rng = OsRng;
