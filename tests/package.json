@@ -1,5 +1,5 @@
 {
-  "name": "webb.js-tests",
+  "name": "js-integration-tests",
   "version": "1.0.0",
   "description": "Integration tests for webb.js",
   "main": "main.js",
