@@ -14,7 +14,7 @@ import path from 'path';
 import fs from 'fs';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { OperationError } from '@webb-tools/wasm-utils';
-import '@webb-tools/types/interfaces/augment-api-query';
+import '@webb-tools/types/interfaces/types';
 import { BigNumber } from 'ethers';
 
 export function currencyToUnitI128(currencyAmount: number) {
@@ -200,6 +200,7 @@ export async function fetchCachedRoot(apiPromise: ApiPromise, treeId: string) {
 }
 
 export async function getAnchors(apiPromise: ApiPromise) {
+  // @ts-ignore
   const anchors = await apiPromise.query.anchorBn254.anchors.entries();
   const anc = anchors.map(([key, entry]) => {
     const treeId = (key.toHuman() as Array<string>)[0];
