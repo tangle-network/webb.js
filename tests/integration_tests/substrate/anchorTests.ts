@@ -42,7 +42,7 @@ function getKeyring() {
   return keyring;
 }
 
-describe.only('Anchor tests', function () {
+describe('Anchor tests', function () {
   // increase the timeout for relayer tests
   this.timeout(60 * 60 * 1000);
 

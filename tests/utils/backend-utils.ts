@@ -1,5 +1,5 @@
 import { execSync, spawn, SpawnOptionsWithoutStdio } from 'child_process';
-import {sleep} from "./index";
+import { sleep } from './index';
 
 function spawnWithLogger(
   command: string,
@@ -30,10 +30,10 @@ export function startDarkWebbNode(): KillTask {
     'docker pull ghcr.io/webb-tools/protocol-substrate-standalone-node:edge',
     { stdio: 'inherit' }
   );
-  const DOCKER_NETWORK_NAME = 'webb-network'
-  try{
-    execSync(`docker network create -d bridge ${DOCKER_NETWORK_NAME}`)
-  }catch (e) {
+  const DOCKER_NETWORK_NAME = 'webb-network';
+  try {
+    execSync(`docker network create -d bridge ${DOCKER_NETWORK_NAME}`);
+  } catch (e) {
     console.log((e as any)?.toString());
   }
   const node1 =
@@ -61,6 +61,11 @@ export function startDarkWebbNode(): KillTask {
     node1Task.kill('SIGINT');
     node2task.kill('SIGINT');
     await sleep(2000);
-    execSync(`docker network rm ${DOCKER_NETWORK_NAME}`)
+    try {
+      execSync(`docker network rm ${DOCKER_NETWORK_NAME}`);
+    } catch (e) {
+      console.log(e);
+      console.log('Field to removed the docker network , Error ignored ');
+    }
   };
 }

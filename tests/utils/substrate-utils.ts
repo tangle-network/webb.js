@@ -14,9 +14,8 @@ import path from 'path';
 import fs from 'fs';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { OperationError } from '@webb-tools/wasm-utils';
-import '@webb-tools/types/interfaces/types';
 import { BigNumber } from 'ethers';
-
+/// <reference path="@webb-tools/types/interfaces/types.d.ts"
 export function currencyToUnitI128(currencyAmount: number) {
   let bn = BigNumber.from(currencyAmount);
   return bn.mul(1_000_000_000_000);
