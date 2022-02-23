@@ -86,7 +86,7 @@ jobs:
         run: |
           yarn install --immutable | grep -v 'YN0013'
           yarn test
-      - name: Building  for integration tests
+      - name: Building for integration tests
         run: |
           yarn install --immutable | grep -v 'YN0013'
           yarn build

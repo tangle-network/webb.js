@@ -6,7 +6,6 @@ import {
   JsNote,
   JsNoteBuilder,
   ProofInputBuilder,
-  validate_proof,
 } from '@webb-tools/wasm-utils/njs';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/keyring';
@@ -239,7 +238,6 @@ export async function depositMixerBnX5_5(
   api: ApiPromise,
   depositor: KeyringPair
 ) {
-  console.log(`Depositing to tree id = 0 ; mixer bn254`);
   let noteBuilder = new JsNoteBuilder();
   noteBuilder.prefix('webb.mixer');
   noteBuilder.version('v1');
@@ -258,8 +256,6 @@ export async function depositMixerBnX5_5(
   noteBuilder.exponentiation('5');
   const note = noteBuilder.build();
   const leaf = note.getLeafCommitment();
-  console.log(`deposited leaf ${u8aToHex(leaf)}`);
-  console.log(`Deposit note ${note.serialize()}`);
 
   await polkadotTx(
     api,
@@ -312,7 +308,6 @@ export async function depositAnchorBnX5_4(
 ) {
   const treeId = await firstAnchorTreeId(api);
 
-  console.log(`Depositing to tree id = ${treeId}; anchor bn254`);
   let noteBuilder = new JsNoteBuilder();
   noteBuilder.prefix('webb.anchor');
   noteBuilder.version('v1');
@@ -331,8 +326,6 @@ export async function depositAnchorBnX5_4(
   noteBuilder.exponentiation('5');
   const note = noteBuilder.build();
   const leaf = note.getLeafCommitment();
-  console.log(`deposited leaf ${u8aToHex(leaf)}`);
-  console.log(`Deposit note ${note.serialize()}`);
   await polkadotTx(
     api,
     { method: 'deposit', section: 'anchorBn254' },
@@ -384,22 +377,13 @@ export async function withdrawAnchorBnx5_4(
   proofInputBuilder.setNote(note);
   proofInputBuilder.setLeaves(leaves);
   const leafIndex = leaves.findIndex((l) => u8aToHex(l) === leafHex);
-  console.log(
-    leafHex,
-    leafIndex,
-    leaves.map((i) => u8aToHex(i))
-  );
+
   proofInputBuilder.setLeafIndex(String(leafIndex));
 
   proofInputBuilder.setFee('5');
   proofInputBuilder.setRefund('1');
-  const chainRoot = await fetchCachedRoot(api, treeId);
   const merkeTree = new AnchorMTBn254X5(leaves, String(leafIndex));
   const root = `0x${merkeTree.root}`;
-  console.log(`Root to of linked tree ${chainRoot}`);
-  console.log(
-    `Root from chain ${chainRoot} === root from setup ${merkeTree.root}`
-  );
 
   const commitment =
     '0000000000000000000000000000000000000000000000000000000000000000';
@@ -426,9 +410,8 @@ export async function withdrawAnchorBnx5_4(
 
   const proofInput = proofInputBuilder.build_js();
 
-  console.log('Generating Zero knowledge proof');
-
   const zkProofMetadata = generate_proof_js(proofInput);
+  /*
 
   const vkPath = path.join(
     // tests path
@@ -441,7 +424,7 @@ export async function withdrawAnchorBnx5_4(
   );
   const vk = fs.readFileSync(vkPath);
   const isValid = validate_proof(zkProofMetadata, vk.toString('hex'), 'Bn254');
-  console.log(`This proof generated is ${isValid ? 'valid' : 'invalid'}`);
+*/
 
   const withdrawProof: AnchorWithdrawProof = {
     id: treeId,
@@ -454,7 +437,6 @@ export async function withdrawAnchorBnx5_4(
     refund: 1,
     commitment: `0x${commitment}`,
   };
-  console.log(zkProofMetadata.roots);
   const parms = [
     withdrawProof.id,
     withdrawProof.proofBytes,
@@ -466,7 +448,6 @@ export async function withdrawAnchorBnx5_4(
     withdrawProof.refund,
     withdrawProof.commitment,
   ];
-  console.log(parms);
   return polkadotTx(
     api,
     { method: 'withdraw', section: 'anchorBn254' },
@@ -492,11 +473,7 @@ export async function withdrawMixerBnX5_5(
   proofInputBuilder.setNote(note);
   proofInputBuilder.setLeaves(leaves);
   const leafIndex = leaves.findIndex((l) => u8aToHex(l) === leafHex);
-  console.log(
-    leafHex,
-    leafIndex,
-    leaves.map((i) => u8aToHex(i))
-  );
+
   proofInputBuilder.setLeafIndex(String(leafIndex));
 
   proofInputBuilder.setFee('0');
@@ -520,10 +497,9 @@ export async function withdrawMixerBnX5_5(
 
   const proofInput = proofInputBuilder.build_js();
 
-  console.log('Generating Zero knowledge proof');
-
   const zkProofMetadata = generate_proof_js(proofInput);
 
+  /*
   const vkPath = path.join(
     // tests path
     process.cwd(),
@@ -535,7 +511,7 @@ export async function withdrawMixerBnX5_5(
   );
   const vk = fs.readFileSync(vkPath);
   const isValid = validate_proof(zkProofMetadata, vk.toString('hex'), 'Bn254');
-  console.log(`This proof generated is ${isValid ? 'valid' : 'invalid'}`);
+*/
 
   const withdrawProof: WithdrawProof = {
     id: String(0),

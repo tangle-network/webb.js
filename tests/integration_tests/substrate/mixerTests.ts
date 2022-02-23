@@ -64,13 +64,7 @@ describe('Mixer tests', function () {
       ///Give the chain sometime to insure the leaf is there
       await sleep(10_000);
       // withdraw fro the mixer
-      const hash = await withdrawMixerBnX5_5(
-        apiPromise!,
-        bob,
-        note!,
-        bob.address
-      );
-      console.log(hash);
+      await withdrawMixerBnX5_5(apiPromise!, bob, note!, bob.address);
     } catch (e) {
       if (e instanceof OperationError) {
         const errorMessage = {
