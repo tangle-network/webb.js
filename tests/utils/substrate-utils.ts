@@ -132,14 +132,8 @@ export async function transferBalance(
   receiverPairs: KeyringPair[],
   number: number = 1000
 ) {
-  console.log('Transfer balances');
   // transfer to alice
   for (const receiverPair of receiverPairs) {
-    console.log(
-      `Transferring native funds to ${
-        receiverPair.address
-      } amount ${currencyToUnitI128(number).toString()} `
-    );
     await polkadotTx(
       api,
       { section: 'balances', method: 'transfer' },
@@ -156,9 +150,6 @@ export async function setORMLTokenBalance(
   ORMLCurrencyId: number = 0,
   amount: number = 1000
 ) {
-  console.log(
-    `Setting  ${receiverPair.address} balance to ${currencyToUnitI128(amount)} `
-  );
   return new Promise((resolve, reject) => {
     const address = api.createType('MultiAddress', {
       Id: receiverPair.address,
@@ -189,7 +180,6 @@ export async function fetchLinkableAnchorBn254(apiPromise: ApiPromise) {
   // Run the
 }
 export async function fetchCachedRoot(apiPromise: ApiPromise, treeId: string) {
-  console.log(`fetching metadata for tree id ${treeId}`);
   const storage =
     // @ts-ignore
     await apiPromise.query.merkleTreeBn254.trees(treeId);
@@ -211,7 +201,6 @@ export async function fetchRPCTreeLeaves(
   api: ApiPromise,
   treeId: string | number
 ): Promise<Uint8Array[]> {
-  console.log(`Fetching leaves for tree with id ${treeId}`);
   let done = false;
   let from = 0;
   let to = 511;
