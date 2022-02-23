@@ -8,7 +8,7 @@ import {
   KillTask,
   preparePolkadotApi,
   sleep,
-  startDarkWebbNode,
+  startWebbNode,
   transferBalance,
   withdrawMixerBnX5_5,
 } from '../../utils';
@@ -47,7 +47,7 @@ describe('Mixer tests', function () {
   before(async function () {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
     if (process.env.LOCAL_NODE !== 'ture') {
-      nodes = startDarkWebbNode();
+      nodes = startWebbNode();
     }
     await sleep(3000);
     apiPromise = await preparePolkadotApi();

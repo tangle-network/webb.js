@@ -25,7 +25,7 @@ function spawnWithLogger(
   return process;
 }
 export type KillTask = () => Promise<void>;
-export function startDarkWebbNode(): KillTask {
+export function startWebbNode(): KillTask {
   execSync(
     'docker pull ghcr.io/webb-tools/protocol-substrate-standalone-node:edge',
     { stdio: 'inherit' }

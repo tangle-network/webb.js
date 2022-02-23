@@ -10,7 +10,7 @@ import {
   KillTask,
   preparePolkadotApi,
   sleep,
-  startDarkWebbNode,
+  startWebbNode,
   transferBalance,
   withdrawAnchorBnx5_4,
 } from '../../utils';
@@ -48,7 +48,7 @@ describe('Anchor tests', function () {
 
   before(async function () {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
-    nodes = startDarkWebbNode();
+    nodes = startWebbNode();
 
     apiPromise = await preparePolkadotApi();
     await sleep(3000);

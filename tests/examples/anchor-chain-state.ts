@@ -5,7 +5,7 @@ import {
   preparePolkadotApi,
   setORMLTokenBalance,
   sleep,
-  startDarkWebbNode,
+  startWebbNode,
   transferBalance,
 } from '../utils';
 import { Keyring } from '@polkadot/keyring';
@@ -43,7 +43,7 @@ let apiPromise: ApiPromise | null = null;
 
 async function main() {
   try {
-    nodes = startDarkWebbNode();
+    nodes = startWebbNode();
     await sleep(2000);
     apiPromise = await preparePolkadotApi();
     const { bob, charlie, alice } = getKeyring();
