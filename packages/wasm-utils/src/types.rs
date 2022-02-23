@@ -335,6 +335,8 @@ pub enum OpStatusCode {
 	CommitmentNotSet = 34,
 	/// Neighbour Roots aren't set
 	RootsNotSet,
+	/// Invalid Proof
+	InvalidProof,
 }
 
 #[wasm_bindgen]
@@ -437,6 +439,7 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::ProofBuilderNoteNotSet => "Proof building failed note isn't set",
 			OpStatusCode::CommitmentNotSet => "Proof building failed refresh commitment isn't set",
 			OpStatusCode::RootsNotSet => "Proof building failed roots array isn't set",
+			OpStatusCode::InvalidProof => "Proof verification failed",
 		}
 		.to_string()
 	}

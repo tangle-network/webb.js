@@ -4,3 +4,4 @@
 **/examples/*
 packages/types/src/metadata/static-latest.ts
 **/target/*
+/tests/*
