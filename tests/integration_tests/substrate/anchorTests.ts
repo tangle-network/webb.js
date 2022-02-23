@@ -6,7 +6,6 @@ import {
   catchWasmError,
   createAnchor,
   depositAnchorBnX5_4,
-  getAnchors,
   KillTask,
   preparePolkadotApi,
   sleep,
@@ -62,20 +61,15 @@ describe('Anchor tests', function () {
       // set the test account ORML balance of the mixer asset
       // await setORMLTokenBalance(apiPromise!, alice, bob, 0, 999999);
       await createAnchor(apiPromise!, alice, 1000);
-
-      const anchors = await getAnchors(apiPromise!);
-      console.log(anchors);
-
       let note: JsNote;
       // deposit to the mixer
       note = await catchWasmError(() => depositAnchorBnX5_4(apiPromise!, bob));
       ///Give the chain sometime to insure the leaf is there
       await sleep(10_000);
       // withdraw fro the mixer
-      const hash = await catchWasmError(() =>
+      await catchWasmError(() =>
         withdrawAnchorBnx5_4(apiPromise!, bob, note!, bob.address)
       );
-      console.log(hash);
     } catch (e) {
       if (e instanceof OperationError) {
         const errorMessage = {
