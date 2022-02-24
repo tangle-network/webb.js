@@ -24,7 +24,10 @@ export class Note {
   }
 
   private static get wasm() {
-    return import("@webb-tools/wasm-utils");
+    if (typeof window != 'undefined') {
+      return import("@webb-tools/wasm-utils");
+    }
+    return import("@webb-tools/wasm-utils/build/njs");
   }
 
   public static async deserialize(value: string): Promise<Note> {
