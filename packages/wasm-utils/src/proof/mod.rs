@@ -2,17 +2,23 @@
 
 use std::convert::{TryFrom, TryInto};
 
+use ark_ff::{BigInteger, PrimeField};
+use arkworks_circuits::prelude::ark_bls12_381::Bls12_381;
+use arkworks_circuits::prelude::ark_bn254::Bn254;
+use arkworks_circuits::setup::common::{verify_unchecked_raw, Tree_x5};
+
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
 use crate::note::JsNote;
-use crate::types::{Backend, Curve, Leaves, NoteProtocol, OpStatusCode, OperationError, Uint8Arrayx32};
+use crate::types::{Backend, Curve, Leaves, NoteProtocol, OpStatusCode, OperationError, Uint8Arrayx32, WasmCurve};
 
 mod anchor;
 mod mixer;
-#[cfg(test)]
 mod test_utils;
+// #[cfg(test)]
+// mod test_utils;
 
 pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
 	let mut truncated_bytes = t[..20].to_vec();
@@ -62,7 +68,8 @@ impl Proof {
 
 	#[wasm_bindgen(getter)]
 	pub fn roots(&self) -> Array {
-		self.roots.iter().map(|i| JsString::from(hex::encode(i))).collect()
+		let roots: Array = self.roots.iter().map(|i| JsString::from(hex::encode(i))).collect();
+		roots
 	}
 }
 #[derive(Debug, Eq, PartialEq, Clone)]
@@ -294,8 +301,77 @@ impl ProofInputBuilder {
 		}
 	}
 }
+use ark_bn254::Fr as Bn254Fr;
+use arkworks_utils::utils::common::{setup_params_x5_3, setup_params_x5_4, Curve as ArkCurve};
+use test_utils::AnchorSetup30_2;
+use wasm_bindgen::__rt::std::collections::btree_map::BTreeMap;
+
+#[wasm_bindgen]
+pub struct AnchorMTBn254X5 {
+	#[wasm_bindgen(skip)]
+	pub inner: Tree_x5<Bn254Fr>,
+}
 
 #[allow(clippy::unused_unit)]
+#[wasm_bindgen]
+impl AnchorMTBn254X5 {
+	#[wasm_bindgen(constructor)]
+	pub fn new(initial_leaves: Leaves, leaf_index: JsString) -> Result<AnchorMTBn254X5, JsValue> {
+		let leaf_index: String = leaf_index.into();
+		let leaf_index: u64 = leaf_index.parse().expect("Failed to parse the leaf index");
+		let leaves: Vec<_> = Array::from(&initial_leaves)
+			.to_vec()
+			.into_iter()
+			.map(|v| Uint8Array::new_with_byte_offset_and_length(&v, 0, 32))
+			.map(Uint8Arrayx32::try_from)
+			.collect::<Result<Vec<_>, _>>()
+			.map_err(|_| OpStatusCode::InvalidLeaves)?
+			.into_iter()
+			.map(|v| Bn254Fr::from_le_bytes_mod_order(v.0.as_ref()))
+			.collect();
+
+		let curve = ArkCurve::Bn254;
+		let params3 = setup_params_x5_3::<Bn254Fr>(curve);
+		let params4 = setup_params_x5_4::<Bn254Fr>(curve);
+
+		let anchor_setup = AnchorSetup30_2::new(params3, params4);
+
+		let (tree, _) = anchor_setup.setup_tree_and_path(&leaves, leaf_index).unwrap();
+		Ok(Self { inner: tree })
+	}
+
+	#[wasm_bindgen(getter)]
+	pub fn root(&self) -> JsString {
+		let root = self.inner.root().inner().into_repr().to_bytes_le().to_vec();
+		JsString::from(hex::encode(root))
+	}
+
+	#[wasm_bindgen]
+	pub fn insert(&mut self, leaves: Leaves) -> Result<(), JsValue> {
+		let mut leaves_bt = BTreeMap::<_, Bn254Fr>::new();
+		Array::from(&leaves)
+			.to_vec()
+			.into_iter()
+			.map(|v| Uint8Array::new_with_byte_offset_and_length(&v, 0, 32))
+			.map(Uint8Arrayx32::try_from)
+			.collect::<Result<Vec<_>, _>>()
+			.map_err(|_| OpStatusCode::InvalidLeaves)?
+			.iter()
+			.for_each(|leaf| {
+				leaves_bt
+					.insert(
+						leaves_bt.len() as u32 + 1_u32,
+						Bn254Fr::from_le_bytes_mod_order(leaf.0.as_ref()),
+					)
+					.unwrap();
+			});
+
+		self.inner
+			.insert_batch(&leaves_bt)
+			.map_err(|_| OpStatusCode::InvalidLeaves)?;
+		Ok(())
+	}
+}
 #[wasm_bindgen]
 impl ProofInputBuilder {
 	#[wasm_bindgen(constructor)]
@@ -417,19 +493,35 @@ pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 	}
 	.map_err(|e| e.into())
 }
+#[wasm_bindgen]
+pub fn validate_proof(proof: &Proof, vk: JsString, curve: WasmCurve) -> Result<bool, JsValue> {
+	let vk_string: String = vk.into();
+	let curve: String = JsValue::from(&curve).as_string().ok_or(OpStatusCode::InvalidCurve)?;
+	let curve: Curve = curve.parse().map_err(|_| OpStatusCode::InvalidCurve)?;
+
+	let vk = hex::decode(vk_string).expect("Field to deserialize");
+	let is_valid = match curve {
+		Curve::Bls381 => verify_unchecked_raw::<Bls12_381>(&proof.public_inputs, &vk, &proof.proof),
+		Curve::Bn254 => verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof),
+	}
+	.map_err(|e| OperationError::new_with_message(OpStatusCode::InvalidProofParameters, e.to_string()))?;
+
+	Ok(is_valid)
+}
 #[cfg(test)]
 mod test {
+	use arkworks_circuits::prelude::ark_bn254::Bn254;
 	use arkworks_circuits::setup::common::verify_unchecked_raw;
 
 	use wasm_bindgen_test::*;
 
-	use super::*;
 	use crate::proof::test_utils::{
 		generate_anchor_test_setup, generate_mixer_test_setup, AnchorTestSetup, MixerTestSetup, ANCHOR_NOTE_X5_4,
 		DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_X5_5,
 	};
 
-	use arkworks_circuits::prelude::ark_bn254::Bn254;
+	use super::*;
+
 	const TREE_DEPTH: usize = 30;
 
 	#[wasm_bindgen_test]
