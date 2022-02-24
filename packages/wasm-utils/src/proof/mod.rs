@@ -516,8 +516,8 @@ mod test {
 	use wasm_bindgen_test::*;
 
 	use crate::proof::test_utils::{
-		generate_anchor_test_setup, generate_mixer_test_setup, AnchorTestSetup, MixerTestSetup, ANCHOR_NOTE_X5_4,
-		DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_X5_5,
+		generate_anchor_test_setup, generate_mixer_test_setup, AnchorTestSetup, MixerTestSetup, ANCHOR_NOTE_V1_X5_4,
+		DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5,
 	};
 
 	use super::*;
@@ -532,7 +532,7 @@ mod test {
 			proof_input_builder,
 			leaf_bytes,
 			..
-		} = generate_mixer_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_X5_5);
+		} = generate_mixer_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5);
 
 		let truncated_substrate_relayer_address = truncate_and_pad(&relayer);
 		let truncated_substrate_recipient_address = truncate_and_pad(&recipient);
@@ -565,7 +565,7 @@ mod test {
 			roots_raw,
 			leaf_bytes,
 			..
-		} = generate_anchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, ANCHOR_NOTE_X5_4);
+		} = generate_anchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, ANCHOR_NOTE_V1_X5_4);
 		let anchor_input = proof_input_builder.build().unwrap().anchor_input().unwrap();
 		let truncated_substrate_relayer_address = truncate_and_pad(&relayer);
 		let truncated_substrate_recipient_address = truncate_and_pad(&recipient);
@@ -595,7 +595,7 @@ mod test {
 			proof_input_builder,
 			vk,
 			..
-		} = generate_mixer_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_X5_5);
+		} = generate_mixer_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5);
 
 		let proof_input = proof_input_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_input).unwrap();
@@ -605,12 +605,12 @@ mod test {
 	}
 
 	#[wasm_bindgen_test]
-	fn anchor_proving() {
+	fn anchor_proving_v1() {
 		let AnchorTestSetup {
 			proof_input_builder,
 			vk,
 			..
-		} = generate_anchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, ANCHOR_NOTE_X5_4);
+		} = generate_anchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, ANCHOR_NOTE_V1_X5_4);
 
 		let proof_input = proof_input_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_input).unwrap();

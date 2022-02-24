@@ -612,7 +612,7 @@ mod test {
 		assert_eq!(note.hash_function, Some(HashFunction::Poseidon));
 		assert_eq!(note.token_symbol, Some(String::from("EDG")));
 		assert_eq!(note.denomination, Some(18));
-		assert_eq!(note.version, NoteVersion::V1);
+		assert_eq!(note.version, NoteVersion::V2);
 		assert_eq!(note.width, Some(5));
 		assert_eq!(note.exponentiation, Some(5));
 		assert_eq!(note.target_chain_id, "3".to_string());
@@ -649,51 +649,52 @@ mod test {
 
 	#[wasm_bindgen_test]
 	fn deserialize_to_js_note_v2() {
-		let note_str = "webb://v2:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
+		let note_str = "webb://v2:anchor/1099511632777:1099511632778/0xD24260C102B5D128cbEFA0F655E5be3c2370677C:0xD30C8839c1145609E564b986F667b273Ddcb8496/01000000138a:00424d778a429c96530df11fc3e87f166109f4bad1cffc58d75577a87ea492c9:0048b277fb5e1d8d5a58079fcbf6036563d7429179681e1f83dae27e4e5c7cef/?curve=Bn254&width=3&exp=5&hf=Poseidon&backend=Circom&token=webbDEV&denom=18&amount=1";
 		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
 
 		assert_eq!(to_rust_string(note.protocol()), NoteProtocol::Anchor.to_string());
 		assert_eq!(to_rust_string(note.version()), NoteVersion::V2.to_string());
-		assert_eq!(note.target_chain_id(), JsString::from("3"));
-		assert_eq!(note.source_chain_id(), JsString::from("2"));
+		assert_eq!(note.target_chain_id(), JsString::from("1099511632778"));
+		assert_eq!(note.source_chain_id(), JsString::from("1099511632777"));
 
-		assert_eq!(note.width(), JsString::from("5"));
+		assert_eq!(note.width(), JsString::from("3"));
 		assert_eq!(note.exponentiation(), JsString::from("5"));
 		assert_eq!(note.denomination(), JsString::from("18"));
-		assert_eq!(note.token_symbol(), JsString::from("EDG"));
+		assert_eq!(note.token_symbol(), JsString::from("webbDEV"));
 
-		assert_eq!(to_rust_string(note.backend()), Backend::Arkworks.to_string());
+		assert_eq!(to_rust_string(note.backend()), Backend::Circom.to_string());
 		assert_eq!(to_rust_string(note.curve()), Curve::Bn254.to_string());
 		assert_eq!(to_rust_string(note.hash_function()), HashFunction::Poseidon.to_string());
+		assert_eq!(note.secrets(), JsString::from("01000000138a:00424d778a429c96530df11fc3e87f166109f4bad1cffc58d75577a87ea492c9:0048b277fb5e1d8d5a58079fcbf6036563d7429179681e1f83dae27e4e5c7cef"))
 	}
 
 	#[wasm_bindgen_test]
 	fn serialize_js_note_v2() {
-		let note_str = "webb://v2:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
+		let note_str = "webb://v2:anchor/1099511632777:1099511632778/0xD24260C102B5D128cbEFA0F655E5be3c2370677C:0xD30C8839c1145609E564b986F667b273Ddcb8496/01000000138a:00424d778a429c96530df11fc3e87f166109f4bad1cffc58d75577a87ea492c9:0048b277fb5e1d8d5a58079fcbf6036563d7429179681e1f83dae27e4e5c7cef/?curve=Bn254&width=3&exp=5&hf=Poseidon&backend=Circom&token=webbDEV&denom=18&amount=1";
 
 		let mut note_builder = JsNoteBuilder::new();
 		let protocol: Protocol = JsValue::from(NoteProtocol::Anchor.to_string()).into();
 		let version: Version = JsValue::from(NoteVersion::V2.to_string()).into();
-		let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
+		let backend: BE = JsValue::from(Backend::Circom.to_string()).into();
 		let hash_function: HF = JsValue::from(HashFunction::Poseidon.to_string()).into();
 		let curve: WasmCurve = JsValue::from(Curve::Bn254.to_string()).into();
 
 		note_builder.protocol(protocol).unwrap();
 		note_builder.version(version).unwrap();
-		note_builder.target_chain_id(JsString::from("3"));
-		note_builder.source_chain_id(JsString::from("2"));
-		note_builder.source_identifying_data(JsString::from("2"));
-		note_builder.target_identifying_data(JsString::from("3"));
+		note_builder.target_chain_id(JsString::from("1099511632778"));
+		note_builder.source_chain_id(JsString::from("1099511632777"));
+		note_builder.source_identifying_data(JsString::from("0xD24260C102B5D128cbEFA0F655E5be3c2370677C"));
+		note_builder.target_identifying_data(JsString::from("0xD30C8839c1145609E564b986F667b273Ddcb8496"));
 
-		note_builder.width(JsString::from("5")).unwrap();
+		note_builder.width(JsString::from("3")).unwrap();
 		note_builder.exponentiation(JsString::from("5")).unwrap();
 		note_builder.denomination(JsString::from("18")).unwrap();
-		note_builder.amount(JsString::from("0"));
-		note_builder.token_symbol(JsString::from("EDG"));
+		note_builder.amount(JsString::from("1"));
+		note_builder.token_symbol(JsString::from("webbDEV"));
 		note_builder.curve(curve).unwrap();
 		note_builder.hash_function(hash_function).unwrap();
 		note_builder.backend(backend);
-		note_builder.set_secrets(JsString::from("376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137")).unwrap();
+		note_builder.set_secrets(JsString::from("01000000138a:00424d778a429c96530df11fc3e87f166109f4bad1cffc58d75577a87ea492c9:0048b277fb5e1d8d5a58079fcbf6036563d7429179681e1f83dae27e4e5c7cef")).unwrap();
 		let note = note_builder.build().unwrap();
 		assert_eq!(note.serialize(), JsString::from(note_str));
 	}
