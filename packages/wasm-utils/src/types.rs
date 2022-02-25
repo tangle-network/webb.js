@@ -336,6 +336,8 @@ pub enum OpStatusCode {
 	InvalidSourceIdentifyingData = 37,
 	/// Invalid target IdentifyingData
 	InvalidTargetIdentifyingData = 38,
+	/// Unsupported combination of parameters
+	UnsupportedParameterCombination = 39,
 }
 
 #[wasm_bindgen]

@@ -24,10 +24,10 @@ export class Note {
   }
 
   private static get wasm() {
-    if (typeof window != 'undefined') {
-      return import("@webb-tools/wasm-utils");
-    }
-    return import("@webb-tools/wasm-utils/build/njs");
+    // if (typeof "process" !== "undefined" && process && process.versions && process.versions.node) {
+    //   return import("@webb-tools/wasm-utils/build/njs");
+    // }
+    return import("@webb-tools/wasm-utils");
   }
 
   public static async deserialize(value: string): Promise<Note> {
