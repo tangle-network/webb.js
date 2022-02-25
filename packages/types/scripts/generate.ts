@@ -18,7 +18,7 @@ import { Metadata } from '@polkadot/types';
 
 // Only keep our own modules to avoid confllicts with the one provided by polkadot.js
 // TODO: make an issue on polkadot.js
-function filterModules(names: string[], defs: any): string {
+function filterModules(names: string[], defs: any): `0x${string}` {
   const registry = new TypeRegistry();
   registerDefinitions(registry, defs);
   const metadata = new Metadata(registry, metaHex);
@@ -60,16 +60,16 @@ const metadata = filterModules(
 );
 const augmentApiIndex = `
 /* eslint-disable */
-export * from './augment-api-consts';
-export * from './augment-api-tx';
-export * from './augment-api-query';
-export * from './augment-types';
+/// <reference path="./augment-api-consts.d.ts" />
+/// <reference path="./augment-api-tx.d.ts" />
+/// <reference path="./augment-api-query.d.ts" />
+/// <reference path="./augment-types.d.ts" />
 `.trim();
 generateTsDef(definitions, 'packages/types/src/interfaces', '@webb-tools/types/interfaces');
-generateInterfaceTypes(definitions, 'packages/types/src/interfaces/augment-types.ts');
-generateDefaultConsts('packages/types/src/interfaces/augment-api-consts.ts', metadata, definitions);
+generateInterfaceTypes(definitions, 'packages/types/src/interfaces/augment-types.d.ts');
+generateDefaultConsts('packages/types/src/interfaces/augment-api-consts.d.ts', metadata, definitions);
 
-generateDefaultTx('packages/types/src/interfaces/augment-api-tx.ts', metadata, definitions);
-generateDefaultQuery('packages/types/src/interfaces/augment-api-query.ts', metadata, definitions);
+generateDefaultTx('packages/types/src/interfaces/augment-api-tx.d.ts', metadata, definitions);
+generateDefaultQuery('packages/types/src/interfaces/augment-api-query.d.ts', metadata, definitions);
 
-fs.writeFileSync('packages/types/src/interfaces/augment-api.ts', augmentApiIndex);
+fs.writeFileSync('packages/types/src/interfaces/augment-api.d.ts', augmentApiIndex);

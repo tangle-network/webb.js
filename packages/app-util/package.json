@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/app-util",
-  "version": "0.1.4-35",
+  "version": "0.1.4-36",
   "description": "Utilities to work with Webb",
   "author": "Webb Developers <drew@webb.tools>",
   "main": "index.js",

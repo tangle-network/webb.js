@@ -338,6 +338,8 @@ pub enum OpStatusCode {
 	InvalidTargetIdentifyingData = 38,
 	/// Unsupported combination of parameters
 	UnsupportedParameterCombination = 39,
+	/// Invalid proof on verification
+	InvalidProof = 40,
 }
 
 #[wasm_bindgen]
@@ -447,6 +449,8 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::InvalidNoteMiscData => "Invalid note misc data",
 			OpStatusCode::InvalidSourceIdentifyingData => "Invalid source identifying data",
 			OpStatusCode::InvalidTargetIdentifyingData => "Invalid target identifying data",
+			OpStatusCode::UnsupportedParameterCombination => "Unsupported Paramater combination to generate proof",
+			OpStatusCode::InvalidProof => "Proof verification failed",
 		}
 		.to_string()
 	}

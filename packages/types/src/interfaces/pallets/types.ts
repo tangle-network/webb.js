@@ -69,6 +69,7 @@ export interface PalletAssetRegistryAssetMetadata extends Struct {
 export interface PalletAssetRegistryAssetType extends Enum {
   readonly isToken: boolean;
   readonly isPoolShare: boolean;
+  readonly type: 'Token' | 'PoolShare';
 }
 
 /** @name PalletMixerMixerMetadata */

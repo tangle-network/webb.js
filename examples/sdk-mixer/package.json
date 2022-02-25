@@ -1,6 +1,6 @@
 {
   "name": "sdk-mixer-example",
-  "version": "0.1.4-35",
+  "version": "0.1.4-36",
   "main": "src/index.ts",
   "license": "MIT",
   "scripts": {
@@ -8,12 +8,13 @@
     "build": "webpack --config ./webpack.config.js "
   },
   "dependencies": {
-    "@polkadot/api": "^6.9.2",
-    "@webb-tools/api": "^0.1.4-7",
-    "@webb-tools/app-util": "^0.1.4-7",
-    "@webb-tools/sdk-core": "^0.1.4-7",
-    "@webb-tools/sdk-mixer": "^0.1.4-7",
-    "@webb-tools/types": "^0.1.4-7"
+    "@polkadot/api": "^7.5.1",
+    "@webb-tools/api": "file:../packages/api/build",
+    "@webb-tools/app-util": "file:../packages/app-util/build",
+    "@webb-tools/sdk-core": "file:../packages/sdk-core/build",
+    "@webb-tools/type-definitions": "file:../packages/type-definitions/build",
+    "@webb-tools/types": "file:../packages/types/build",
+    "@webb-tools/wasm-utils": "file:../packages/wasm-utils/build"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",

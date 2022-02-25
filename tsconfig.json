@@ -3,7 +3,8 @@
   "exclude": [
     "build/**/*",
     "**/build/**/*",
-    "examples/**"
+    "examples/**",
+    "tests/**/**"
   ],
   "compilerOptions": {
     "declaration": true,
@@ -54,6 +55,6 @@
     "typeRoots": [
       "./node_modules/@polkadot/ts",
       "./node_modules/@types"
-    ]
+    ],
   }
 }

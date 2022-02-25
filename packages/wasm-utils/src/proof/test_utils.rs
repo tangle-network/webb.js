@@ -19,7 +19,7 @@ const TREE_DEPTH: usize = 30;
 pub const M: usize = 2;
 pub const DECODED_SUBSTRATE_ADDRESS: &str = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
 
-type AnchorSetup30_2 = AnchorProverSetup<Bn254Fr, M, TREE_DEPTH>;
+pub type AnchorSetup30_2 = AnchorProverSetup<Bn254Fr, M, TREE_DEPTH>;
 
 pub struct MixerTestSetup {
 	pub(crate) relayer: Vec<u8>,
