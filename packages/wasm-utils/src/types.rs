@@ -449,11 +449,8 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::InvalidNoteMiscData => "Invalid note misc data",
 			OpStatusCode::InvalidSourceIdentifyingData => "Invalid source identifying data",
 			OpStatusCode::InvalidTargetIdentifyingData => "Invalid target identifying data",
-<<<<<<< HEAD
-=======
 			OpStatusCode::UnsupportedParameterCombination => "Unsupported Paramater combination to generate proof",
 			OpStatusCode::InvalidProof => "Proof verification failed",
->>>>>>> 3b498bbdc81fb4c5a5d76e93a335e3e5cff5495a
 		}
 		.to_string()
 	}
