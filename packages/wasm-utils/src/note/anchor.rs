@@ -27,7 +27,7 @@ pub fn generate_secrets(
 		}
 	}
 	.map_err(|_| OpStatusCode::SecretGenFailed)?;
-	let secrets = [chain_id.to_be_bytes().to_vec(), sec.secret_bytes, sec.nullifier_bytes];
+	let secrets = [chain_id.to_be_bytes().to_vec(), sec.nullifier_bytes, sec.secret_bytes];
 	Ok(secrets)
 }
 pub fn get_leaf_with_private_raw(
