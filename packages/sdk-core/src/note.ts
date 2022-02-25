@@ -1,9 +1,10 @@
 import type { Backend, Curve, HashFunction, JsNote, NoteProtocol } from "@webb-tools/wasm-utils";
 
 export type NoteGenInput = {
+  scheme: string;
   protocol: NoteProtocol;
   version: string;
-  chain: string;
+  targetChain: string;
   targetIdentifyingData?: string;
   sourceChain: string;
   sourceIdentifyingData?: string;
@@ -24,9 +25,9 @@ export class Note {
   }
 
   private static get wasm() {
-    if (typeof window != 'undefined') {
-      return import("@webb-tools/wasm-utils");
-    }
+    // if (typeof window !== undefined) {
+    //   return import("@webb-tools/wasm-utils");
+    // }
     return import("@webb-tools/wasm-utils/build/njs");
   }
 
@@ -54,7 +55,7 @@ export class Note {
     const noteBuilderInput = new wasm.JsNoteBuilder();
     noteBuilderInput.protocol(noteGenInput.protocol);
     noteBuilderInput.version("v2");
-    noteBuilderInput.targetChainId(noteGenInput.chain);
+    noteBuilderInput.targetChainId(noteGenInput.targetChain);
     noteBuilderInput.sourceChainId(noteGenInput.sourceChain);
     noteBuilderInput.backend(noteGenInput.backend);
     noteBuilderInput.hashFunction(noteGenInput.hashFunction);

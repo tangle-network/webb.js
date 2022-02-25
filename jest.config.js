@@ -21,6 +21,7 @@ module.exports = Object.assign({}, config, {
     '@webb-tools/sdk-merkle(.*)$': '<rootDir>/packages/sdk-merkle/src/$1',
     '@webb-tools/sdk-mixer(.*)$': '<rootDir>/packages/sdk-mixer/src/$1'
   },
+
   moduleDirectories: ['node_modules'],
   modulePathIgnorePatterns: [...buildDirs],
   testPathIgnorePatterns: [...buildDirs],

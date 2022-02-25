@@ -508,6 +508,7 @@ pub fn validate_proof(proof: &Proof, vk: JsString, curve: WasmCurve) -> Result<b
 
 	Ok(is_valid)
 }
+
 #[cfg(test)]
 mod test {
 	use arkworks_circuits::prelude::ark_bn254::Bn254;
@@ -565,7 +566,11 @@ mod test {
 			roots_raw,
 			leaf_bytes,
 			..
-		} = generate_anchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, ANCHOR_NOTE_V1_X5_4);
+		} = generate_anchor_test_setup(
+			DECODED_SUBSTRATE_ADDRESS,
+			DECODED_SUBSTRATE_ADDRESS,
+			ANCHOR_NOTE_V1_X5_4,
+		);
 		let anchor_input = proof_input_builder.build().unwrap().anchor_input().unwrap();
 		let truncated_substrate_relayer_address = truncate_and_pad(&relayer);
 		let truncated_substrate_recipient_address = truncate_and_pad(&recipient);
@@ -610,7 +615,11 @@ mod test {
 			proof_input_builder,
 			vk,
 			..
-		} = generate_anchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, ANCHOR_NOTE_V1_X5_4);
+		} = generate_anchor_test_setup(
+			DECODED_SUBSTRATE_ADDRESS,
+			DECODED_SUBSTRATE_ADDRESS,
+			ANCHOR_NOTE_V1_X5_4,
+		);
 
 		let proof_input = proof_input_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_input).unwrap();

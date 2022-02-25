@@ -1,7 +1,7 @@
-import type {JsProofInput, Leaves, Proof} from '@webb-tools/wasm-utils';
-import {u8aToHex} from '@polkadot/util';
-import {ProofI} from '@webb-tools/sdk-core/proving/proving-manager';
-import {Note} from '../note';
+import type { JsProofInput, Leaves, Proof } from '@webb-tools/wasm-utils';
+import { u8aToHex } from '@polkadot/util';
+import { ProofI } from '@webb-tools/sdk-core/proving/proving-manager';
+import { Note } from '../note';
 
 export type ProvingManagerSetupInput = {
   note: string;
@@ -44,20 +44,20 @@ export class ProvingManagerWrapper {
   }
 
   private static get proofBuilder() {
-    return import('@webb-tools/wasm-utils').then((wasm) => {
+    return import('@webb-tools/wasm-utils/build/njs').then((wasm) => {
       return wasm.ProofInputBuilder;
     });
   }
 
   private static async generateProof(proofInput: JsProofInput): Promise<Proof> {
-    const wasm = await import('@webb-tools/wasm-utils');
+    const wasm = await import('@webb-tools/wasm-utils/build/njs');
     return wasm.generate_proof_js(proofInput);
   }
 
   async proof(pmSetupInput: ProvingManagerSetupInput): Promise<ProofI> {
     const Manager = await ProvingManagerWrapper.proofBuilder;
     const pm = new Manager();
-    const {note} = await Note.deserialize(pmSetupInput.note);
+    const { note } = await Note.deserialize(pmSetupInput.note);
     // TODO: handle the prefix and validation
     pm.setLeaves(pmSetupInput.leaves);
     pm.setRelayer(pmSetupInput.relayer);
