@@ -27,7 +27,7 @@ pub fn generate_secrets(
 		}
 	}
 	.map_err(|_| OpStatusCode::SecretGenFailed)?;
-	let secrets = [chain_id.to_le_bytes().to_vec(), sec.nullifier_bytes, sec.secret_bytes];
+	let secrets = [chain_id.to_be_bytes().to_vec(), sec.nullifier_bytes, sec.secret_bytes];
 	Ok(secrets)
 }
 pub fn get_leaf_with_private_raw(
@@ -48,8 +48,8 @@ pub fn get_leaf_with_private_raw(
 		let mut chain_id_bytes = [0u8; 8];
 		chain_id_bytes[2..8].copy_from_slice(&raw[0..6]);
 		chain_id = u128::from(u64::from_be_bytes(chain_id_bytes));
-		secrets = raw[6..38].to_vec();
-		nullifier = raw[38..70].to_vec();
+		nullifier = raw[6..38].to_vec();
+		secrets = raw[38..70].to_vec();
 	} else if raw.len() >= 64 {
 		// 64 bytes raw implies [32 bytes nullifier, 32 bytes secret]
 		secrets = raw[0..32].to_vec();

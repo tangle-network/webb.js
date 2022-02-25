@@ -228,11 +228,13 @@ export async function depositMixerBnX5_5(
   depositor: KeyringPair
 ) {
   let noteBuilder = new JsNoteBuilder();
-  noteBuilder.prefix('webb.mixer');
-  noteBuilder.version('v1');
+  noteBuilder.protocol('mixer');
+  noteBuilder.version('v2');
 
   noteBuilder.sourceChainId('1');
   noteBuilder.targetChainId('1');
+  noteBuilder.sourceIdentifyingData('3');
+  noteBuilder.targetIdentifyingData('3');
 
   noteBuilder.tokenSymbol('WEBB');
   noteBuilder.amount('1');
@@ -298,11 +300,13 @@ export async function depositAnchorBnX5_4(
   const treeId = await firstAnchorTreeId(api);
 
   let noteBuilder = new JsNoteBuilder();
-  noteBuilder.prefix('webb.anchor');
-  noteBuilder.version('v1');
+  noteBuilder.protocol('anchor');
+  noteBuilder.version('v2');
 
-  noteBuilder.sourceChainId('0');
+  noteBuilder.sourceChainId('2199023256632');
   noteBuilder.targetChainId('2199023256632');
+  noteBuilder.sourceIdentifyingData(treeId);
+  noteBuilder.targetIdentifyingData(treeId);
 
   noteBuilder.tokenSymbol('WEBB');
   noteBuilder.amount('1');
@@ -315,6 +319,9 @@ export async function depositAnchorBnX5_4(
   noteBuilder.exponentiation('5');
   const note = noteBuilder.build();
   const leaf = note.getLeafCommitment();
+  console.log('note generated: ', note.serialize());
+  console.log('leaf generated: ', leaf.toString());
+  console.log('tree id in deposit: ', treeId);
   await polkadotTx(
     api,
     { method: 'deposit', section: 'anchorBn254' },
@@ -359,13 +366,17 @@ export async function withdrawAnchorBnx5_4(
   const addressHex = u8aToHex(decodeAddress(accountId));
   const relayerAddressHex = u8aToHex(decodeAddress(relayerAccountId));
   const treeId = await firstAnchorTreeId(api);
+  console.log('tree id in withdraw: ', treeId);
+
   // fetch leaves
   const leaves = await fetchRPCTreeLeaves(api, Number(treeId));
   const proofInputBuilder = new ProofInputBuilder();
   const leafHex = u8aToHex(note.getLeafCommitment());
+  console.log('leafHex in substrate-utils withdraw: ', leafHex);
   proofInputBuilder.setNote(note);
   proofInputBuilder.setLeaves(leaves);
   const leafIndex = leaves.findIndex((l) => u8aToHex(l) === leafHex);
+  console.log('leafIndex: ', leafIndex);
 
   proofInputBuilder.setLeafIndex(String(leafIndex));
 
@@ -374,12 +385,12 @@ export async function withdrawAnchorBnx5_4(
   const merkeTree = new AnchorMTBn254X5(leaves, String(leafIndex));
   const root = `0x${merkeTree.root}`;
 
-  const commitment =
-    '0000000000000000000000000000000000000000000000000000000000000000';
-  proofInputBuilder.setCommiment(commitment);
+  proofInputBuilder.setCommiment(leafHex.substring(2));
   // 1 from eth
   // 1 from substrate
+  console.log('root on chain: ', await fetchCachedRoot(api, treeId));
   proofInputBuilder.setRoots([hexToU8a(root), hexToU8a(root)]);
+  console.log('roots set on proof builder: ', root);
 
   proofInputBuilder.setRecipient(addressHex.replace('0x', ''));
   proofInputBuilder.setRelayer(relayerAddressHex.replace('0x', ''));
@@ -400,6 +411,11 @@ export async function withdrawAnchorBnx5_4(
   const proofInput = proofInputBuilder.build_js();
 
   const zkProofMetadata = generate_proof_js(proofInput);
+
+  console.log('zkProof: ');
+  console.log('   root: ', zkProofMetadata.root);
+  console.log('   roots: ', zkProofMetadata.roots);
+  console.log('   nullifier hash: ', zkProofMetadata.nullifierHash);
   /*
 
   const vkPath = path.join(
@@ -424,7 +440,7 @@ export async function withdrawAnchorBnx5_4(
     relayer: relayerAccountId,
     fee: 5,
     refund: 1,
-    commitment: `0x${commitment}`,
+    commitment: `0x${leafHex.substring(2)}`,
   };
   const parms = [
     withdrawProof.id,

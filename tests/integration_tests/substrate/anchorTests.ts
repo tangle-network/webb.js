@@ -53,7 +53,7 @@ describe('Anchor tests', function () {
     await sleep(3000);
   });
 
-  it('Anchor should work', async function () {
+  it.only('Anchor should work', async function () {
     try {
       const { bob, charlie, alice } = getKeyring();
       // transfer some funds to sudo & test account
@@ -64,6 +64,8 @@ describe('Anchor tests', function () {
       let note: JsNote;
       // deposit to the mixer
       note = await catchWasmError(() => depositAnchorBnX5_4(apiPromise!, bob));
+      console.log('note chainId: ', note.targetChainId);
+      console.log('note secrets: ', note.secrets);
       ///Give the chain sometime to insure the leaf is there
       await sleep(10_000);
       // withdraw fro the mixer

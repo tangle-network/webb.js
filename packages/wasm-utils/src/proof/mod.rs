@@ -252,11 +252,11 @@ impl ProofInputBuilder {
 				let mut secret = Vec::new();
 				let mut nullifier = Vec::new();
 				if note_secrets.len() == 1 && note_secrets[0].len() >= 64 {
-					secret.extend_from_slice(&note_secrets[0][0..32]);
-					nullifier.extend_from_slice(&note_secrets[0][32..64]);
+					nullifier.extend_from_slice(&note_secrets[0][0..32]);
+					secret.extend_from_slice(&note_secrets[0][32..64]);
 				} else {
-					secret = note_secrets[0].clone();
 					nullifier = note_secrets[1].clone();
+					secret = note_secrets[2].clone();
 
 					// Anchor note secrets are structure as a vector of [chain_id, secret,
 					// nullifier]
