@@ -53,7 +53,7 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 			pk,
 			rng,
 		),
-		_ => return Err(OpStatusCode::InvalidProofParameters.into()),
+		_ => return Err(OpStatusCode::UnsupportedParameterCombination.into()),
 	}
 	.map_err(|e| {
 		let mut error: OperationError = OpStatusCode::InvalidProofParameters.into();
