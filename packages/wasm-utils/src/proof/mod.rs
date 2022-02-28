@@ -252,8 +252,8 @@ impl ProofInputBuilder {
 				let mut secret = Vec::new();
 				let mut nullifier = Vec::new();
 				if note_secrets.len() == 1 && note_secrets[0].len() >= 64 {
-					nullifier.extend_from_slice(&note_secrets[0][0..32]);
-					secret.extend_from_slice(&note_secrets[0][32..64]);
+					secret.extend_from_slice(&note_secrets[0][0..32]);
+					nullifier.extend_from_slice(&note_secrets[0][32..64]);
 				} else {
 					nullifier = note_secrets[1].clone();
 					secret = note_secrets[2].clone();
@@ -264,11 +264,11 @@ impl ProofInputBuilder {
 					if chain_id_bytes.len() == 6 {
 						let mut temp_bytes = [0u8; 8];
 						temp_bytes[2..8].copy_from_slice(&chain_id_bytes[0..6]);
-						chain_id = u128::from(u64::from_be_bytes(temp_bytes));
+						chain_id = u128::from(u64::from_le_bytes(temp_bytes));
 					} else if chain_id_bytes.len() == 8 {
 						let mut temp_bytes = [0u8; 8];
 						temp_bytes[0..8].copy_from_slice(&chain_id_bytes);
-						chain_id = u128::from(u64::from_be_bytes(temp_bytes));
+						chain_id = u128::from(u64::from_le_bytes(temp_bytes));
 					} else {
 						return Err(OpStatusCode::InvalidTargetChain);
 					}

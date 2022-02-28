@@ -68,6 +68,32 @@ impl JsNote {
 						raw
 					}
 				};
+
+				let valid_note = match self.version {
+					NoteVersion::V1 => {
+						if raw.len() == 64 {
+							true
+						} else {
+							false
+						}
+					},
+					NoteVersion::V2 => {
+						if raw.len() == 70 || raw.len() == 72 {
+							true
+						} else {
+							false
+						}
+					}
+				};
+
+				if !valid_note {
+					let message = format!("Invalid secret format for protocol {}", self.protocol);
+					return Err(OperationError::new_with_message(
+						OpStatusCode::InvalidNoteSecrets,
+						message,
+					))
+				}
+
 				anchor::get_leaf_with_private_raw(
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),

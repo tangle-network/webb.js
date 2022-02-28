@@ -12,8 +12,9 @@ import { decodeAddress } from '@polkadot/keyring';
 import path from 'path';
 import fs from 'fs';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { OperationError, validate_proof } from '@webb-tools/wasm-utils';
+import { OperationError } from '@webb-tools/wasm-utils';
 import { BigNumber } from 'ethers';
+
 /// <reference path="@webb-tools/types/interfaces/types.d.ts"
 export function currencyToUnitI128(currencyAmount: number) {
   let bn = BigNumber.from(currencyAmount);
@@ -322,6 +323,7 @@ export async function depositAnchorBnX5_4(
   console.log('note generated: ', note.serialize());
   console.log('leaf generated: ', leaf.toString());
   console.log('tree id in deposit: ', treeId);
+
   await polkadotTx(
     api,
     { method: 'deposit', section: 'anchorBn254' },
@@ -417,18 +419,18 @@ export async function withdrawAnchorBnx5_4(
   console.log('   roots: ', zkProofMetadata.roots);
   console.log('   nullifier hash: ', zkProofMetadata.nullifierHash);
 
-  const vkPath = path.join(
-    // tests path
-    process.cwd(),
-    'protocol-substrate-fixtures',
-    'fixed-anchor',
-    'bn254',
-    'x5',
-    'verifying_key_uncompressed.bin'
-  );
-  const vk = fs.readFileSync(vkPath);
-  const isValid = validate_proof(zkProofMetadata, vk.toString('hex'), 'Bn254');
-  console.log('isValid proof? ', isValid);
+  // const vkPath = path.join(
+  //   // tests path
+  //   process.cwd(),
+  //   'protocol-substrate-fixtures',
+  //   'fixed-anchor',
+  //   'bn254',
+  //   'x5',
+  //   'verifying_key_uncompressed.bin'
+  // );
+  // const vk = fs.readFileSync(vkPath);
+  // const isValid = validate_proof(zkProofMetadata, vk.toString('hex'), 'Bn254');
+  // console.log('isValid proof? ', isValid);
 
   const withdrawProof: AnchorWithdrawProof = {
     id: treeId,

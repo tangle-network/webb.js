@@ -47,13 +47,13 @@ pub fn get_leaf_with_private_raw(
 		// 70 bytes raw implies [6 bytes chain ID, 32 bytes nullifier, 32 bytes secret]
 		let mut chain_id_bytes = [0u8; 8];
 		chain_id_bytes[2..8].copy_from_slice(&raw[0..6]);
-		chain_id = u128::from(u64::from_be_bytes(chain_id_bytes));
+		chain_id = u128::from(u64::from_le_bytes(chain_id_bytes));
 		nullifier = raw[6..38].to_vec();
 		secrets = raw[38..70].to_vec();
 	} else if raw.len() == 72 {
 		let mut chain_id_bytes = [0u8; 8];
 		chain_id_bytes[0..8].copy_from_slice(&raw[0..8]);
-		chain_id = u128::from(u64::from_be_bytes(chain_id_bytes));
+		chain_id = u128::from(u64::from_le_bytes(chain_id_bytes));
 		nullifier = raw[8..40].to_vec();
 		secrets = raw[40..72].to_vec();
 	} else if raw.len() >= 64 {
