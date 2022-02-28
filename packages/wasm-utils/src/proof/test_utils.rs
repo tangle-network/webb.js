@@ -13,7 +13,7 @@ use arkworks_circuits::setup::mixer::setup_keys_x5_5;
 
 pub const MIXER_NOTE_V1_X5_5:&str  = "webb.mixer:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
 pub const ANCHOR_NOTE_V1_X5_4:&str  ="webb.anchor:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:4:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
-pub const ANCHOR_NOTE_V2_X5_4:&str  ="webb://v2:anchor/1099511632777:1099511632778/0xD24260C102B5D128cbEFA0F655E5be3c2370677C:0xD30C8839c1145609E564b986F667b273Ddcb8496/01000000138a:00424d778a429c96530df11fc3e87f166109f4bad1cffc58d75577a87ea492c9:0048b277fb5e1d8d5a58079fcbf6036563d7429179681e1f83dae27e4e5c7cef/?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Arkworks&token=webbDEV&denom=18&amount=1";
+pub const ANCHOR_NOTE_V2_X5_4:&str  ="webb://v2:anchor/2199023256632:2199023256632/0:3/0000020000000438:d8b84d776284d1e53884efb08d40f31a78158b67f11474319e284aa71695890e:cadd7ea7ea6a2fd97c787243acc0aa240c599288f5cef562a80efe0a1e368b0d/?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Arkworks&token=WEBB&denom=18&amount=10";
 
 const TREE_DEPTH: usize = 30;
 pub const M: usize = 2;

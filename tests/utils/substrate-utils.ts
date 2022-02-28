@@ -12,7 +12,7 @@ import { decodeAddress } from '@polkadot/keyring';
 import path from 'path';
 import fs from 'fs';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { OperationError } from '@webb-tools/wasm-utils';
+import { OperationError, validate_proof } from '@webb-tools/wasm-utils';
 import { BigNumber } from 'ethers';
 /// <reference path="@webb-tools/types/interfaces/types.d.ts"
 export function currencyToUnitI128(currencyAmount: number) {
@@ -385,7 +385,7 @@ export async function withdrawAnchorBnx5_4(
   const merkeTree = new AnchorMTBn254X5(leaves, String(leafIndex));
   const root = `0x${merkeTree.root}`;
 
-  proofInputBuilder.setCommiment(leafHex.substring(2));
+  proofInputBuilder.setCommiment('0000000000000000000000000000000000000000000000000000000000000000');
   // 1 from eth
   // 1 from substrate
   console.log('root on chain: ', await fetchCachedRoot(api, treeId));
@@ -416,7 +416,6 @@ export async function withdrawAnchorBnx5_4(
   console.log('   root: ', zkProofMetadata.root);
   console.log('   roots: ', zkProofMetadata.roots);
   console.log('   nullifier hash: ', zkProofMetadata.nullifierHash);
-  /*
 
   const vkPath = path.join(
     // tests path
@@ -429,7 +428,7 @@ export async function withdrawAnchorBnx5_4(
   );
   const vk = fs.readFileSync(vkPath);
   const isValid = validate_proof(zkProofMetadata, vk.toString('hex'), 'Bn254');
-*/
+  console.log('isValid proof? ', isValid);
 
   const withdrawProof: AnchorWithdrawProof = {
     id: treeId,
@@ -440,7 +439,7 @@ export async function withdrawAnchorBnx5_4(
     relayer: relayerAccountId,
     fee: 5,
     refund: 1,
-    commitment: `0x${leafHex.substring(2)}`,
+    commitment: `0x${leafHex.replace('0x', '')}`,
   };
   const parms = [
     withdrawProof.id,
