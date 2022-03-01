@@ -381,7 +381,7 @@ export async function withdrawAnchorBnx5_4(
   const merkeTree = new AnchorMTBn254X5(leaves, String(leafIndex));
   const root = `0x${merkeTree.root}`;
 
-  proofInputBuilder.setCommiment('0000000000000000000000000000000000000000000000000000000000000000');
+  proofInputBuilder.setRefreshCommitment('0000000000000000000000000000000000000000000000000000000000000000');
   // 1 from eth
   // 1 from substrate
   proofInputBuilder.setRoots([hexToU8a(root), hexToU8a(root)]);

@@ -70,12 +70,8 @@ impl JsNote {
 				};
 
 				let valid_note = match self.version {
-					NoteVersion::V1 => {
-						raw.len() == 64
-					}
-					NoteVersion::V2 => {
-						raw.len() == 70 || raw.len() == 72
-					}
+					NoteVersion::V1 => raw.len() == 64
+					NoteVersion::V2 => raw.len() == 70 || raw.len() == 72
 				};
 
 				if !valid_note {
