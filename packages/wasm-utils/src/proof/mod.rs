@@ -245,7 +245,7 @@ impl ProofInputBuilder {
 			NoteProtocol::Anchor => {
 				// Mixer secrets are structures as a vector of [secret, nullifier] or
 				// concatenated bytes
-				let mut chain_id = note
+				let chain_id = note
 					.target_chain_id
 					.parse()
 					.map_err(|_| OpStatusCode::InvalidTargetChain)?;
@@ -260,18 +260,18 @@ impl ProofInputBuilder {
 
 					// Anchor note secrets are structure as a vector of [chain_id, secret,
 					// nullifier]
-					let chain_id_bytes = note_secrets[0].clone();
-					if chain_id_bytes.len() == 6 {
-						let mut temp_bytes = [0u8; 8];
-						temp_bytes[2..8].copy_from_slice(&chain_id_bytes[0..6]);
-						chain_id = u128::from(u64::from_le_bytes(temp_bytes));
-					} else if chain_id_bytes.len() == 8 {
-						let mut temp_bytes = [0u8; 8];
-						temp_bytes[0..8].copy_from_slice(&chain_id_bytes);
-						chain_id = u128::from(u64::from_le_bytes(temp_bytes));
-					} else {
-						return Err(OpStatusCode::InvalidTargetChain);
-					}
+					// let chain_id_bytes = note_secrets[0].clone();
+					// if chain_id_bytes.len() == 6 {
+					// 	let mut temp_bytes = [0u8; 8];
+					// 	temp_bytes[2..8].copy_from_slice(&chain_id_bytes[0..6]);
+					// 	chain_id = u128::from(u64::from_le_bytes(temp_bytes));
+					// } else if chain_id_bytes.len() == 8 {
+					// 	let mut temp_bytes = [0u8; 8];
+					// 	temp_bytes[0..8].copy_from_slice(&chain_id_bytes);
+					// 	chain_id = u128::from(u64::from_le_bytes(temp_bytes));
+					// } else {
+					// 	return Err(OpStatusCode::InvalidTargetChain);
+					// }
 				}
 
 				let commitment = self.commitment.ok_or(OpStatusCode::CommitmentNotSet)?;

@@ -97,7 +97,7 @@ impl JsNote {
 				anchor::get_leaf_with_private_raw(
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
-					self.exponentiation.unwrap_or(5),
+					self.exponentiation.unwrap_or(4),
 					&raw[..],
 					self.target_chain_id.parse().unwrap(),
 				)
@@ -434,7 +434,7 @@ impl JsNoteBuilder {
 				NoteProtocol::Anchor => {
 					let secrets = anchor::generate_secrets(
 						exponentiation.unwrap_or(5),
-						width.unwrap_or(5),
+						width.unwrap_or(4),
 						curve.unwrap_or(Curve::Bn254),
 						chain_id,
 						&mut OsRng,

@@ -441,7 +441,7 @@ export async function withdrawAnchorBnx5_4(
     relayer: relayerAccountId,
     fee: 5,
     refund: 1,
-    commitment: `0x${leafHex.replace('0x', '')}`,
+    commitment: `0x0000000000000000000000000000000000000000000000000000000000000000`,
   };
   const parms = [
     withdrawProof.id,
