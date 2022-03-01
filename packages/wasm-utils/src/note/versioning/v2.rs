@@ -18,8 +18,8 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
 
 	// Authority parsing
 	let authority_parts: Vec<&str> = authority.split(':').collect();
-	if authority_parts.len() != 2 { 
-		return Err(OpStatusCode::InvalidNoteLength)
+	if authority_parts.len() != 2 {
+		return Err(OpStatusCode::InvalidNoteLength);
 	}
 
 	let version = NoteVersion::from_str(authority_parts[0])?;
@@ -28,7 +28,7 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
 	// Chain IDs parsing
 	let chain_ids_parts: Vec<&str> = chain_ids.split(':').collect();
 	if chain_ids_parts.len() != 2 {
-		return Err(OpStatusCode::InvalidNoteLength)
+		return Err(OpStatusCode::InvalidNoteLength);
 	}
 	let source_chain_id = chain_ids_parts[0];
 	let target_chain_id = chain_ids_parts[1];
@@ -36,7 +36,7 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
 	// Chain Identifying Data parsing
 	let chain_identifying_data_parts: Vec<&str> = chain_identifying_data.split(':').collect();
 	if chain_identifying_data_parts.len() != 2 {
-		return Err(OpStatusCode::InvalidNoteLength)
+		return Err(OpStatusCode::InvalidNoteLength);
 	}
 	let source_identifying_data = chain_identifying_data_parts[0];
 	let target_identifying_data = chain_identifying_data_parts[1];
@@ -55,7 +55,7 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
 	for part in misc_parts {
 		let part_parts: Vec<&str> = part.split('=').collect();
 		if part_parts.len() != 2 {
-			return Err(OpStatusCode::InvalidNoteMiscData)
+			return Err(OpStatusCode::InvalidNoteMiscData);
 		}
 		let key = part_parts[0];
 		let value = part_parts[1];

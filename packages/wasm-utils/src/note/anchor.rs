@@ -36,20 +36,26 @@ pub fn get_leaf_with_private_raw(
 	exponentiation: i8,
 	chain_id: u64,
 	nullifier_bytes: Vec<u8>,
-	secret_bytes: Vec<u8>
+	secret_bytes: Vec<u8>,
 ) -> Result<Leaf, OperationError> {
-	if secret_bytes.len() < 32  || nullifier_bytes.len() < 32 {
+	if secret_bytes.len() < 32 || nullifier_bytes.len() < 32 {
 		return Err(OpStatusCode::InvalidNoteSecrets.into());
 	}
 
 	// (leaf_bytes, nullifier_hash_bytes)
 	let sec = match (curve, exponentiation, width) {
-		(Curve::Bls381, 5, 4) => {
-			setup_leaf_with_privates_raw_x5_4::<BlsFr>(ArkworksCurve::Bls381, secret_bytes, nullifier_bytes, u128::from(chain_id))
-		}
-		(Curve::Bn254, 5, 4) => {
-			setup_leaf_with_privates_raw_x5_4::<Bn254Fr>(ArkworksCurve::Bn254, secret_bytes, nullifier_bytes, u128::from(chain_id))
-		}
+		(Curve::Bls381, 5, 4) => setup_leaf_with_privates_raw_x5_4::<BlsFr>(
+			ArkworksCurve::Bls381,
+			secret_bytes,
+			nullifier_bytes,
+			u128::from(chain_id),
+		),
+		(Curve::Bn254, 5, 4) => setup_leaf_with_privates_raw_x5_4::<Bn254Fr>(
+			ArkworksCurve::Bn254,
+			secret_bytes,
+			nullifier_bytes,
+			u128::from(chain_id),
+		),
 		_ => {
 			let message = format!(
 				"No Anchor leaf setup available for curve {}, exponentiation {} , and width {}",

@@ -65,7 +65,7 @@ impl JsNote {
 						} else {
 							false
 						}
-					},
+					}
 					NoteVersion::V2 => {
 						if self.secrets.len() == 3 {
 							nullifier_bytes = self.secrets[1].clone();
@@ -78,7 +78,7 @@ impl JsNote {
 						} else {
 							false
 						}
-					},
+					}
 				};
 
 				if !valid_note {
