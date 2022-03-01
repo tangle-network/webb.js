@@ -50,28 +50,35 @@ impl JsNote {
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
 					self.exponentiation.unwrap_or(5),
-					&raw[..],
+					&raw,
 				)
 			}
 			NoteProtocol::Anchor => {
-				let raw = match self.version {
+				let mut secret_bytes: Vec<u8> = Vec::new();
+				let mut nullifier_bytes: Vec<u8> = Vec::new();
+				let valid_note: bool = match self.version {
 					NoteVersion::V1 => {
-						let mut raw = Vec::new();
-						raw.extend_from_slice(&self.secrets[0][..]);
-						raw
-					}
+						if self.secrets.len() == 1 && self.secrets[0].len() == 64 {
+							secret_bytes = self.secrets[0][0..32].to_vec();
+							nullifier_bytes = self.secrets[0][32..64].to_vec();
+							true
+						} else {
+							false
+						}
+					},
 					NoteVersion::V2 => {
-						let mut raw = Vec::new();
-						raw.extend_from_slice(&self.secrets[0][..]);
-						raw.extend_from_slice(&self.secrets[1][..]);
-						raw.extend_from_slice(&self.secrets[2][..]);
-						raw
-					}
-				};
-
-				let valid_note = match self.version {
-					NoteVersion::V1 => raw.len() == 64,
-					NoteVersion::V2 => raw.len() == 70 || raw.len() == 72,
+						if self.secrets.len() == 3 {
+							nullifier_bytes = self.secrets[1].clone();
+							secret_bytes = self.secrets[2].clone();
+							if nullifier_bytes.len() == 32 && secret_bytes.len() == 32 {
+								true
+							} else {
+								false
+							}
+						} else {
+							false
+						}
+					},
 				};
 
 				if !valid_note {
@@ -86,8 +93,9 @@ impl JsNote {
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
 					self.exponentiation.unwrap_or(4),
-					&raw[..],
-					self.target_chain_id.parse().unwrap(),
+					u64::from_str(&self.target_chain_id).unwrap(),
+					nullifier_bytes,
+					secret_bytes,
 				)
 			}
 			_ => {

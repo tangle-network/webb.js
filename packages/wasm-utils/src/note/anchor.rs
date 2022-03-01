@@ -34,38 +34,21 @@ pub fn get_leaf_with_private_raw(
 	curve: Curve,
 	width: usize,
 	exponentiation: i8,
-	raw: &[u8],
-	chain_id: u128,
+	chain_id: u64,
+	nullifier_bytes: Vec<u8>,
+	secret_bytes: Vec<u8>
 ) -> Result<Leaf, OperationError> {
-	if raw.len() < 64 {
-		return Err(OpStatusCode::InvalidNoteSecrets.into());
-	}
-
-	let secrets;
-	let nullifier;
-	if raw.len() == 70 {
-		// 70 bytes raw implies [6 bytes chain ID, 32 bytes nullifier, 32 bytes secret]
-		nullifier = raw[6..38].to_vec();
-		secrets = raw[38..70].to_vec();
-	} else if raw.len() == 72 {
-		// 72 bytes raw implies [8 bytes chain ID, 32 bytes nullifier, 32 bytes secret]
-		nullifier = raw[8..40].to_vec();
-		secrets = raw[40..72].to_vec();
-	} else if raw.len() >= 64 {
-		// 64 bytes raw implies [32 bytes nullifier, 32 bytes secret]
-		secrets = raw[0..32].to_vec();
-		nullifier = raw[32..64].to_vec();
-	} else {
+	if secret_bytes.len() < 32  || nullifier_bytes.len() < 32 {
 		return Err(OpStatusCode::InvalidNoteSecrets.into());
 	}
 
 	// (leaf_bytes, nullifier_hash_bytes)
 	let sec = match (curve, exponentiation, width) {
 		(Curve::Bls381, 5, 4) => {
-			setup_leaf_with_privates_raw_x5_4::<BlsFr>(ArkworksCurve::Bls381, secrets, nullifier, chain_id)
+			setup_leaf_with_privates_raw_x5_4::<BlsFr>(ArkworksCurve::Bls381, secret_bytes, nullifier_bytes, u128::from(chain_id))
 		}
 		(Curve::Bn254, 5, 4) => {
-			setup_leaf_with_privates_raw_x5_4::<Bn254Fr>(ArkworksCurve::Bn254, secrets, nullifier, chain_id)
+			setup_leaf_with_privates_raw_x5_4::<Bn254Fr>(ArkworksCurve::Bn254, secret_bytes, nullifier_bytes, u128::from(chain_id))
 		}
 		_ => {
 			let message = format!(
