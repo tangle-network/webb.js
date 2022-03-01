@@ -71,18 +71,10 @@ impl JsNote {
 
 				let valid_note = match self.version {
 					NoteVersion::V1 => {
-						if raw.len() == 64 {
-							true
-						} else {
-							false
-						}
-					},
+						raw.len() == 64
+					}
 					NoteVersion::V2 => {
-						if raw.len() == 70 || raw.len() == 72 {
-							true
-						} else {
-							false
-						}
+						raw.len() == 70 || raw.len() == 72
 					}
 				};
 
@@ -91,7 +83,7 @@ impl JsNote {
 					return Err(OperationError::new_with_message(
 						OpStatusCode::InvalidNoteSecrets,
 						message,
-					))
+					));
 				}
 
 				anchor::get_leaf_with_private_raw(

@@ -386,7 +386,9 @@ impl ProofInputBuilder {
 	pub fn set_refresh_commitment(&mut self, refresh_commitment: JsString) -> Result<(), JsValue> {
 		let c: String = refresh_commitment.into();
 		let refresh_commitment = hex::decode(c).map_err(|_| OpStatusCode::CommitmentNotSet)?;
-		let refresh_commitment: [u8; 32] = refresh_commitment.try_into().map_err(|_| OpStatusCode::CommitmentNotSet)?;
+		let refresh_commitment: [u8; 32] = refresh_commitment
+			.try_into()
+			.map_err(|_| OpStatusCode::CommitmentNotSet)?;
 		self.refresh_commitment = Some(refresh_commitment);
 		Ok(())
 	}
@@ -504,7 +506,7 @@ mod test {
 
 	use crate::proof::test_utils::{
 		generate_anchor_test_setup, generate_mixer_test_setup, AnchorTestSetup, MixerTestSetup, ANCHOR_NOTE_V1_X5_4,
-		DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, ANCHOR_NOTE_V2_X5_4,
+		ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5,
 	};
 
 	use super::*;
@@ -552,7 +554,11 @@ mod test {
 			roots_raw,
 			leaf_bytes,
 			..
-		} = generate_anchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, ANCHOR_NOTE_V1_X5_4);
+		} = generate_anchor_test_setup(
+			DECODED_SUBSTRATE_ADDRESS,
+			DECODED_SUBSTRATE_ADDRESS,
+			ANCHOR_NOTE_V1_X5_4,
+		);
 		let anchor_input = proof_input_builder.build().unwrap().anchor_input().unwrap();
 		let truncated_substrate_relayer_address = truncate_and_pad(&relayer);
 		let truncated_substrate_recipient_address = truncate_and_pad(&recipient);
@@ -597,7 +603,11 @@ mod test {
 			proof_input_builder,
 			vk,
 			..
-		} = generate_anchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, ANCHOR_NOTE_V1_X5_4);
+		} = generate_anchor_test_setup(
+			DECODED_SUBSTRATE_ADDRESS,
+			DECODED_SUBSTRATE_ADDRESS,
+			ANCHOR_NOTE_V1_X5_4,
+		);
 
 		let proof_input = proof_input_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_input).unwrap();
@@ -612,10 +622,14 @@ mod test {
 			proof_input_builder,
 			vk,
 			..
-		} = generate_anchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, ANCHOR_NOTE_V2_X5_4);
-		
+		} = generate_anchor_test_setup(
+			DECODED_SUBSTRATE_ADDRESS,
+			DECODED_SUBSTRATE_ADDRESS,
+			ANCHOR_NOTE_V2_X5_4,
+		);
+
 		let proof_input = proof_input_builder.build_js().unwrap();
-		
+
 		let proof = generate_proof_js(proof_input).unwrap();
 
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
