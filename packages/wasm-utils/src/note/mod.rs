@@ -70,11 +70,7 @@ impl JsNote {
 						if self.secrets.len() == 3 {
 							nullifier_bytes = self.secrets[1].clone();
 							secret_bytes = self.secrets[2].clone();
-							if nullifier_bytes.len() == 32 && secret_bytes.len() == 32 {
-								true
-							} else {
-								false
-							}
+							nullifier_bytes.len() == 32 && secret_bytes.len() == 32
 						} else {
 							false
 						}
