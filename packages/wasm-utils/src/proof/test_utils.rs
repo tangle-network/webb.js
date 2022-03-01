@@ -127,7 +127,7 @@ pub fn generate_anchor_test_setup(
 
 	js_builder.set_pk(JsString::from(hex::encode(key.pk))).unwrap();
 	js_builder
-		.set_commitment(JsString::from(hex::encode([0u8; 32])))
+		.set_refresh_commitment(JsString::from(hex::encode([0u8; 32])))
 		.unwrap();
 	js_builder.set_roots(Leaves::from(JsValue::from(roots_array))).unwrap();
 

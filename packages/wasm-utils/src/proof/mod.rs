@@ -109,7 +109,7 @@ pub struct AnchorProofInput {
 	pub roots: Vec<Vec<u8>>,
 	/// EMPTY commitment if withdrawing [0u8;32]
 	/// not EMPTY if refreshing
-	pub commitment: [u8; 32],
+	pub refresh_commitment: [u8; 32],
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]
@@ -179,7 +179,7 @@ pub struct ProofInputBuilder {
 	pub note: Option<JsNote>,
 	#[wasm_bindgen(skip)]
 	/// required only for [anchor,]
-	pub commitment: Option<[u8; 32]>,
+	pub refresh_commitment: Option<[u8; 32]>,
 	#[wasm_bindgen(skip)]
 	/// required only for [anchor,]
 	pub roots: Option<Vec<Vec<u8>>>,
@@ -274,7 +274,7 @@ impl ProofInputBuilder {
 					// }
 				}
 
-				let commitment = self.commitment.ok_or(OpStatusCode::CommitmentNotSet)?;
+				let refresh_commitment = self.refresh_commitment.ok_or(OpStatusCode::CommitmentNotSet)?;
 				let roots = self.roots.ok_or(OpStatusCode::RootsNotSet)?;
 
 				let anchor_input = AnchorProofInput {
@@ -293,7 +293,7 @@ impl ProofInputBuilder {
 					leaves,
 					leaf_index,
 					roots,
-					commitment,
+					refresh_commitment,
 				};
 				Ok(ProofInput::Anchor(anchor_input))
 			}
@@ -395,12 +395,12 @@ impl ProofInputBuilder {
 		Ok(())
 	}
 
-	#[wasm_bindgen(js_name = setCommiment)]
-	pub fn set_commitment(&mut self, commitment: JsString) -> Result<(), JsValue> {
-		let c: String = commitment.into();
-		let commitment = hex::decode(c).map_err(|_| OpStatusCode::CommitmentNotSet)?;
-		let commitment: [u8; 32] = commitment.try_into().map_err(|_| OpStatusCode::CommitmentNotSet)?;
-		self.commitment = Some(commitment);
+	#[wasm_bindgen(js_name = setRefreshCommitment)]
+	pub fn set_refresh_commitment(&mut self, refresh_commitment: JsString) -> Result<(), JsValue> {
+		let c: String = refresh_commitment.into();
+		let refresh_commitment = hex::decode(c).map_err(|_| OpStatusCode::CommitmentNotSet)?;
+		let refresh_commitment: [u8; 32] = refresh_commitment.try_into().map_err(|_| OpStatusCode::CommitmentNotSet)?;
+		self.refresh_commitment = Some(refresh_commitment);
 		Ok(())
 	}
 
@@ -578,7 +578,7 @@ mod test {
 			hex::encode(&truncated_substrate_relayer_address)
 		);
 
-		assert_eq!(hex::encode(anchor_input.commitment), hex::encode([0u8; 32]));
+		assert_eq!(hex::encode(anchor_input.refresh_commitment), hex::encode([0u8; 32]));
 		assert_eq!(hex::encode(&anchor_input.roots[0]), hex::encode(&roots_raw[0]));
 		assert_eq!(anchor_input.roots.len(), roots_raw.len());
 

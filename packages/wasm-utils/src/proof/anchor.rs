@@ -27,7 +27,7 @@ pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Re
 		leaves,
 		leaf_index,
 		roots,
-		commitment,
+		refresh_commitment,
 	} = anchor_proof_input;
 	let roots_array: [Vec<u8>; 2] = roots.try_into().map_err(|_| OpStatusCode::InvalidProofParameters)?;
 
@@ -42,7 +42,7 @@ pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Re
 			roots_array,
 			recipient_raw,
 			relayer_raw,
-			commitment.to_vec(),
+			refresh_commitment.to_vec(),
 			fee,
 			refund,
 			pk,
@@ -58,7 +58,7 @@ pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Re
 			roots_array,
 			recipient_raw,
 			relayer_raw,
-			commitment.to_vec(),
+			refresh_commitment.to_vec(),
 			fee,
 			refund,
 			pk,
