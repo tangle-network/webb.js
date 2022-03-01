@@ -13,7 +13,7 @@ export type ProvingManagerSetupInput = {
   refund: number;
   provingKey: Uint8Array;
   roots?: Leaves;
-  commitment?: string;
+  refreshCommitment?: string;
 };
 
 type PMEvents = {
@@ -71,8 +71,8 @@ export class ProvingManagerWrapper {
     if (pmSetupInput.roots) {
       pm.setRoots(pmSetupInput.roots)
     }
-    if (pmSetupInput.commitment) {
-      pm.setCommiment(pmSetupInput.commitment)
+    if (pmSetupInput.refreshCommitment) {
+      pm.setRefreshCommitment(pmSetupInput.refreshCommitment)
 
     }
     const proofInput = pm.build_js();

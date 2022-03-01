@@ -320,9 +320,6 @@ export async function depositAnchorBnX5_4(
   noteBuilder.exponentiation('5');
   const note = noteBuilder.build();
   const leaf = note.getLeafCommitment();
-  console.log('note generated: ', note.serialize());
-  console.log('leaf generated: ', leaf.toString());
-  console.log('tree id in deposit: ', treeId);
 
   await polkadotTx(
     api,
@@ -368,17 +365,14 @@ export async function withdrawAnchorBnx5_4(
   const addressHex = u8aToHex(decodeAddress(accountId));
   const relayerAddressHex = u8aToHex(decodeAddress(relayerAccountId));
   const treeId = await firstAnchorTreeId(api);
-  console.log('tree id in withdraw: ', treeId);
 
   // fetch leaves
   const leaves = await fetchRPCTreeLeaves(api, Number(treeId));
   const proofInputBuilder = new ProofInputBuilder();
   const leafHex = u8aToHex(note.getLeafCommitment());
-  console.log('leafHex in substrate-utils withdraw: ', leafHex);
   proofInputBuilder.setNote(note);
   proofInputBuilder.setLeaves(leaves);
   const leafIndex = leaves.findIndex((l) => u8aToHex(l) === leafHex);
-  console.log('leafIndex: ', leafIndex);
 
   proofInputBuilder.setLeafIndex(String(leafIndex));
 
@@ -390,9 +384,7 @@ export async function withdrawAnchorBnx5_4(
   proofInputBuilder.setCommiment('0000000000000000000000000000000000000000000000000000000000000000');
   // 1 from eth
   // 1 from substrate
-  console.log('root on chain: ', await fetchCachedRoot(api, treeId));
   proofInputBuilder.setRoots([hexToU8a(root), hexToU8a(root)]);
-  console.log('roots set on proof builder: ', root);
 
   proofInputBuilder.setRecipient(addressHex.replace('0x', ''));
   proofInputBuilder.setRelayer(relayerAddressHex.replace('0x', ''));
@@ -414,24 +406,6 @@ export async function withdrawAnchorBnx5_4(
 
   const zkProofMetadata = generate_proof_js(proofInput);
 
-  console.log('zkProof: ');
-  console.log('   root: ', zkProofMetadata.root);
-  console.log('   roots: ', zkProofMetadata.roots);
-  console.log('   nullifier hash: ', zkProofMetadata.nullifierHash);
-
-  // const vkPath = path.join(
-  //   // tests path
-  //   process.cwd(),
-  //   'protocol-substrate-fixtures',
-  //   'fixed-anchor',
-  //   'bn254',
-  //   'x5',
-  //   'verifying_key_uncompressed.bin'
-  // );
-  // const vk = fs.readFileSync(vkPath);
-  // const isValid = validate_proof(zkProofMetadata, vk.toString('hex'), 'Bn254');
-  // console.log('isValid proof? ', isValid);
-
   const withdrawProof: AnchorWithdrawProof = {
     id: treeId,
     proofBytes: `0x${zkProofMetadata.proof}` as any,
@@ -443,7 +417,7 @@ export async function withdrawAnchorBnx5_4(
     refund: 1,
     commitment: `0x0000000000000000000000000000000000000000000000000000000000000000`,
   };
-  const parms = [
+  const params = [
     withdrawProof.id,
     withdrawProof.proofBytes,
     zkProofMetadata.roots.map((i: string) => `0x${i}`),
@@ -457,7 +431,7 @@ export async function withdrawAnchorBnx5_4(
   return polkadotTx(
     api,
     { method: 'withdraw', section: 'anchorBn254' },
-    parms,
+    params,
     signer
   );
 }
@@ -529,7 +503,7 @@ export async function withdrawMixerBnX5_5(
     fee: 0,
     refund: 0,
   };
-  const parms = [
+  const params = [
     withdrawProof.id,
     withdrawProof.proofBytes,
     withdrawProof.root,
@@ -542,7 +516,7 @@ export async function withdrawMixerBnX5_5(
   return polkadotTx(
     api,
     { section: 'mixerBn254', method: 'withdraw' },
-    parms,
+    params,
     signer
   );
 }

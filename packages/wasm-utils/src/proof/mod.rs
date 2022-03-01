@@ -255,23 +255,10 @@ impl ProofInputBuilder {
 					secret.extend_from_slice(&note_secrets[0][0..32]);
 					nullifier.extend_from_slice(&note_secrets[0][32..64]);
 				} else {
-					nullifier = note_secrets[1].clone();
-					secret = note_secrets[2].clone();
-
 					// Anchor note secrets are structure as a vector of [chain_id, secret,
 					// nullifier]
-					// let chain_id_bytes = note_secrets[0].clone();
-					// if chain_id_bytes.len() == 6 {
-					// 	let mut temp_bytes = [0u8; 8];
-					// 	temp_bytes[2..8].copy_from_slice(&chain_id_bytes[0..6]);
-					// 	chain_id = u128::from(u64::from_le_bytes(temp_bytes));
-					// } else if chain_id_bytes.len() == 8 {
-					// 	let mut temp_bytes = [0u8; 8];
-					// 	temp_bytes[0..8].copy_from_slice(&chain_id_bytes);
-					// 	chain_id = u128::from(u64::from_le_bytes(temp_bytes));
-					// } else {
-					// 	return Err(OpStatusCode::InvalidTargetChain);
-					// }
+					nullifier = note_secrets[1].clone();
+					secret = note_secrets[2].clone();
 				}
 
 				let refresh_commitment = self.refresh_commitment.ok_or(OpStatusCode::CommitmentNotSet)?;
