@@ -1,10 +1,12 @@
-import type { Backend, Curve, HashFunction, JsNote, NotePrefix } from "@webb-tools/wasm-utils";
+import type { Backend, Curve, HashFunction, JsNote, NoteProtocol } from "@webb-tools/wasm-utils";
 
 export type NoteGenInput = {
-  prefix: NotePrefix;
+  protocol: NoteProtocol;
   version: string;
   chain: string;
+  targetIdentifyingData?: string;
   sourceChain: string;
+  sourceIdentifyingData?: string;
   backend: Backend;
   hashFunction: HashFunction;
   curve: Curve;
@@ -22,6 +24,9 @@ export class Note {
   }
 
   private static get wasm() {
+    // if (typeof "process" !== "undefined" && process && process.versions && process.versions.node) {
+    //   return import("@webb-tools/wasm-utils/build/njs");
+    // }
     return import("@webb-tools/wasm-utils");
   }
 
@@ -47,8 +52,8 @@ export class Note {
   public static async generateNote(noteGenInput: NoteGenInput): Promise<Note> {
     const wasm = await Note.wasm;
     const noteBuilderInput = new wasm.JsNoteBuilder();
-    noteBuilderInput.prefix(noteGenInput.prefix);
-    noteBuilderInput.version("v1");
+    noteBuilderInput.protocol(noteGenInput.protocol);
+    noteBuilderInput.version("v2");
     noteBuilderInput.targetChainId(noteGenInput.chain);
     noteBuilderInput.sourceChainId(noteGenInput.sourceChain);
     noteBuilderInput.backend(noteGenInput.backend);
@@ -62,8 +67,13 @@ export class Note {
     if (noteGenInput.secrets) {
       noteBuilderInput.setSecrets(noteGenInput.secrets);
     }
+    if (noteGenInput.targetIdentifyingData) {
+      noteBuilderInput.targetIdentifyingData(noteGenInput.targetIdentifyingData);
+    }
+    if (noteGenInput.sourceIdentifyingData) {
+      noteBuilderInput.sourceIdentifyingData(noteGenInput.sourceIdentifyingData);
+    }
     const depositNote = noteBuilderInput.build();
     return new Note(depositNote);
   }
-
 }

@@ -102,6 +102,7 @@ impl OperationError {
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum NoteVersion {
 	V1,
+	V2,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -132,9 +133,8 @@ pub enum HashFunction {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum NotePrefix {
+pub enum NoteProtocol {
 	Mixer,
-	Bridge,
 	Anchor,
 	VAnchor,
 }
@@ -143,6 +143,7 @@ impl fmt::Display for NoteVersion {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
 			NoteVersion::V1 => write!(f, "v1"),
+			NoteVersion::V2 => write!(f, "v2"),
 		}
 	}
 }
@@ -153,6 +154,7 @@ impl FromStr for NoteVersion {
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
 			"v1" => Ok(NoteVersion::V1),
+			"v2" => Ok(NoteVersion::V2),
 			_ => Err(OpStatusCode::InvalidNoteVersion),
 		}
 	}
@@ -209,32 +211,25 @@ impl fmt::Display for HashFunction {
 	}
 }
 
-impl FromStr for NotePrefix {
+impl FromStr for NoteProtocol {
 	type Err = OpStatusCode;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
-			"webb.mixer" => Ok(NotePrefix::Mixer),
-			"webb.bridge" => Ok(NotePrefix::Bridge),
-			"webb.anchor" => Ok(NotePrefix::Anchor),
-			"webb.vanchor" => Ok(NotePrefix::VAnchor),
-			_ => Err(OpStatusCode::InvalidNotePrefix),
+			"mixer" => Ok(NoteProtocol::Mixer),
+			"anchor" | "bridge" => Ok(NoteProtocol::Anchor),
+			"vanchor" => Ok(NoteProtocol::VAnchor),
+			_ => Err(OpStatusCode::InvalidNoteProtocol),
 		}
 	}
 }
 
-impl fmt::Display for NotePrefix {
+impl fmt::Display for NoteProtocol {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
-			NotePrefix::Mixer => write!(f, "webb.mixer"),
-			NotePrefix::Bridge => write!(f, "webb.bridge"),
-
-			NotePrefix::Anchor => {
-				write!(f, "webb.anchor")
-			}
-			NotePrefix::VAnchor => {
-				write!(f, "webb.vanchor")
-			}
+			NoteProtocol::Mixer => write!(f, "mixer"),
+			NoteProtocol::Anchor => write!(f, "anchor"),
+			NoteProtocol::VAnchor => write!(f, "vanchor"),
 		}
 	}
 }
@@ -270,8 +265,8 @@ pub enum OpStatusCode {
 	HexParsingFailed = 2,
 	/// Invalid number of note parts when decoding
 	InvalidNoteLength = 3,
-	/// Invalid note prefix
-	InvalidNotePrefix = 4,
+	/// Invalid note protocol
+	InvalidNoteProtocol = 4,
 	/// Invalid note version
 	InvalidNoteVersion = 5,
 	/// Invalid note id when parsing
@@ -334,16 +329,28 @@ pub enum OpStatusCode {
 	/// Commitment not set
 	CommitmentNotSet = 34,
 	/// Neighbour Roots aren't set
-	RootsNotSet,
-	/// Invalid Proof
-	InvalidProof,
+	RootsNotSet = 35,
+	/// Invalid note misc data
+	InvalidNoteMiscData = 36,
+	/// Invalid Source IdentifyingData
+	InvalidSourceIdentifyingData = 37,
+	/// Invalid target IdentifyingData
+	InvalidTargetIdentifyingData = 38,
+	/// Unsupported combination of parameters
+	UnsupportedParameterCombination = 39,
+	/// Invalid proof on verification
+	InvalidProof = 40,
 }
 
 #[wasm_bindgen]
 extern "C" {
+	// Use `js_namespace` here to bind `console.log(..)` instead of just
+	// `log(..)`
+	#[wasm_bindgen(js_namespace = console)]
+	pub fn log(s: &str);
 
-	#[wasm_bindgen(typescript_type = "NotePrefix")]
-	pub type Prefix;
+	#[wasm_bindgen(typescript_type = "NoteProtocol")]
+	pub type Protocol;
 
 	#[wasm_bindgen(typescript_type = "Curve")]
 	pub type WasmCurve;
@@ -362,7 +369,7 @@ extern "C" {
 }
 
 #[wasm_bindgen(typescript_custom_section)]
-const NOTE_PREFIX: &str = "type NotePrefix = 'webb.mixer'|'webb.bridge'|'webb.anchor'|'webb.vanchor' ";
+const NOTE_PROTOCOL: &str = "type NoteProtocol = 'mixer'|'anchor'|'vanchor' ";
 
 #[wasm_bindgen(typescript_custom_section)]
 const LEAVES: &str = "type Leaves = Array<Uint8Array>;";
@@ -374,7 +381,7 @@ const HF: &str = "type HashFunction = 'Poseidon'|'MiMCTornado'";
 const CURVE: &str = "type Curve = 'Bls381'|'Bn254' |'Curve25519'";
 
 #[wasm_bindgen(typescript_custom_section)]
-const VERSION: &str = "type Version = 'v1'";
+const VERSION: &str = "type Version = 'v1' | 'v2'";
 
 #[wasm_bindgen(typescript_custom_section)]
 const BE: &str = "type Backend = 'Bulletproofs'|'Arkworks'|'Circom'";
@@ -407,7 +414,7 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::InvalidHexLength => "Invalid hex length",
 			OpStatusCode::HexParsingFailed => "Failed to parse hex",
 			OpStatusCode::InvalidNoteLength => "Invalid note length",
-			OpStatusCode::InvalidNotePrefix => "Invalid note prefix",
+			OpStatusCode::InvalidNoteProtocol => "Invalid note protocol",
 			OpStatusCode::InvalidNoteVersion => "Invalid note version",
 			OpStatusCode::InvalidNoteId => "Invalid note id",
 			OpStatusCode::InvalidNoteBlockNumber => "Invalid block number",
@@ -439,6 +446,10 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::ProofBuilderNoteNotSet => "Proof building failed note isn't set",
 			OpStatusCode::CommitmentNotSet => "Proof building failed refresh commitment isn't set",
 			OpStatusCode::RootsNotSet => "Proof building failed roots array isn't set",
+			OpStatusCode::InvalidNoteMiscData => "Invalid note misc data",
+			OpStatusCode::InvalidSourceIdentifyingData => "Invalid source identifying data",
+			OpStatusCode::InvalidTargetIdentifyingData => "Invalid target identifying data",
+			OpStatusCode::UnsupportedParameterCombination => "Unsupported Paramater combination to generate proof",
 			OpStatusCode::InvalidProof => "Proof verification failed",
 		}
 		.to_string()
@@ -485,8 +496,8 @@ impl From<NoteVersion> for JsString {
 	}
 }
 
-impl From<NotePrefix> for JsString {
-	fn from(e: NotePrefix) -> Self {
+impl From<NoteProtocol> for JsString {
+	fn from(e: NoteProtocol) -> Self {
 		JsString::from(e.to_string())
 	}
 }
@@ -499,29 +510,29 @@ impl From<Curve> for WasmCurve {
 }
 
 impl From<HashFunction> for HF {
-	fn from(curve: HashFunction) -> Self {
-		let js_str = curve.to_string();
+	fn from(hash_function: HashFunction) -> Self {
+		let js_str = hash_function.to_string();
 		JsValue::from(&js_str).try_into().unwrap()
 	}
 }
 
 impl From<NoteVersion> for Version {
-	fn from(curve: NoteVersion) -> Self {
-		let js_str = curve.to_string();
+	fn from(version: NoteVersion) -> Self {
+		let js_str = version.to_string();
 		JsValue::from(&js_str).try_into().unwrap()
 	}
 }
 
 impl From<Backend> for BE {
-	fn from(curve: Backend) -> Self {
-		let js_str = curve.to_string();
+	fn from(backend: Backend) -> Self {
+		let js_str = backend.to_string();
 		JsValue::from(&js_str).try_into().unwrap()
 	}
 }
 
-impl From<NotePrefix> for Prefix {
-	fn from(curve: NotePrefix) -> Self {
-		let js_str = curve.to_string();
+impl From<NoteProtocol> for Protocol {
+	fn from(proto: NoteProtocol) -> Self {
+		let js_str = proto.to_string();
 		JsValue::from(&js_str).try_into().unwrap()
 	}
 }

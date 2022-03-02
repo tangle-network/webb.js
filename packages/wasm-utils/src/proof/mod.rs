@@ -12,7 +12,7 @@ use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
 use crate::note::JsNote;
-use crate::types::{Backend, Curve, Leaves, NotePrefix, OpStatusCode, OperationError, Uint8Arrayx32, WasmCurve};
+use crate::types::{Backend, Curve, Leaves, NoteProtocol, OpStatusCode, OperationError, Uint8Arrayx32, WasmCurve};
 
 mod anchor;
 mod mixer;
@@ -78,7 +78,7 @@ pub struct MixerProofInput {
 	pub width: usize,
 	pub curve: Curve,
 	pub backend: Backend,
-	pub secrets: Vec<u8>,
+	pub secret: Vec<u8>,
 	pub nullifier: Vec<u8>,
 	pub recipient: Vec<u8>,
 	pub relayer: Vec<u8>,
@@ -95,7 +95,7 @@ pub struct AnchorProofInput {
 	pub width: usize,
 	pub curve: Curve,
 	pub backend: Backend,
-	pub secrets: Vec<u8>,
+	pub secret: Vec<u8>,
 	pub nullifier: Vec<u8>,
 	pub recipient: Vec<u8>,
 	pub relayer: Vec<u8>,
@@ -109,7 +109,7 @@ pub struct AnchorProofInput {
 	pub roots: Vec<Vec<u8>>,
 	/// EMPTY commitment if withdrawing [0u8;32]
 	/// not EMPTY if refreshing
-	pub commitment: [u8; 32],
+	pub refresh_commitment: [u8; 32],
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]
@@ -125,7 +125,7 @@ impl ProofInput {
 			ProofInput::Anchor(_) => {
 				let message = "Can't construct proof input for AnchorProofInput from mixer input".to_string();
 				Err(OperationError::new_with_message(
-					OpStatusCode::InvalidNotePrefix,
+					OpStatusCode::InvalidNoteProtocol,
 					message,
 				))
 			}
@@ -138,12 +138,19 @@ impl ProofInput {
 			ProofInput::Mixer(_) => {
 				let message = "Can't cant construct proof input for MixerProofInput from anchor input ".to_string();
 				Err(OperationError::new_with_message(
-					OpStatusCode::InvalidNotePrefix,
+					OpStatusCode::InvalidNoteProtocol,
 					message,
 				))
 			}
 		}
 	}
+}
+
+#[allow(unused_macros)]
+macro_rules! console_log {
+	// Note that this is using the `log` function imported above during
+	// `bare_bones`
+	($($t:tt)*) => (crate::types::log(&format_args!($($t)*).to_string()))
 }
 
 #[wasm_bindgen]
@@ -172,7 +179,7 @@ pub struct ProofInputBuilder {
 	pub note: Option<JsNote>,
 	#[wasm_bindgen(skip)]
 	/// required only for [anchor,]
-	pub commitment: Option<[u8; 32]>,
+	pub refresh_commitment: Option<[u8; 32]>,
 	#[wasm_bindgen(skip)]
 	/// required only for [anchor,]
 	pub roots: Option<Vec<Vec<u8>>>,
@@ -195,28 +202,33 @@ impl ProofInputBuilder {
 
 		let fee = self.fee.ok_or(OpStatusCode::InvalidFee)?;
 		let refund = self.refund.ok_or(OpStatusCode::InvalidRefund)?;
-
-		let target_chain_id = note
-			.target_chain_id
-			.parse()
-			.map_err(|_| OpStatusCode::InvalidTargetChain)?;
-		let proof_target = note.prefix;
+		let proof_target = note.protocol;
 		let width = note.width;
 		let exponentiation = note.exponentiation;
 		let backend = note.backend;
 		let curve = note.curve;
-		let note_secrets = note.secret;
-		let secrets = note_secrets[..32].to_vec();
-		let nullifier = note_secrets[32..64].to_vec();
-
+		let note_secrets = note.secrets;
 		let processed_relayer = truncate_and_pad(&relayer);
 		let processed_recipient = truncate_and_pad(&recipient);
 		match proof_target {
-			NotePrefix::Mixer => {
+			NoteProtocol::Mixer => {
+				// Mixer secrets are structures as a vector of [secret, nullifier] or
+				// concatenated bytes
+				let mut secret = Vec::new();
+				let mut nullifier = Vec::new();
+				if note_secrets.len() == 1 && note_secrets[0].len() >= 64 {
+					secret.extend_from_slice(&note_secrets[0][0..32]);
+					nullifier.extend_from_slice(&note_secrets[0][32..64]);
+				} else {
+					secret = note_secrets[0].clone();
+					nullifier = note_secrets[1].clone();
+				}
+
 				let mixer_proof_input = MixerProofInput {
-					exponentiation,
-					width,
-					curve,
+					exponentiation: exponentiation.unwrap_or(5),
+					width: width.unwrap_or(3),
+					curve: curve.unwrap_or(Curve::Bn254),
+					backend: backend.unwrap_or(Backend::Circom),
 					pk,
 					recipient: processed_recipient,
 					relayer: processed_relayer,
@@ -224,38 +236,55 @@ impl ProofInputBuilder {
 					fee,
 					leaf_index,
 					leaves,
-					secrets,
+					secret,
 					nullifier,
-					backend,
 					chain_id: 0,
 				};
 				Ok(ProofInput::Mixer(mixer_proof_input))
 			}
-			NotePrefix::Anchor => {
-				let commitment = self.commitment.ok_or(OpStatusCode::CommitmentNotSet)?;
+			NoteProtocol::Anchor => {
+				// Mixer secrets are structures as a vector of [secret, nullifier] or
+				// concatenated bytes
+				let chain_id = note
+					.target_chain_id
+					.parse()
+					.map_err(|_| OpStatusCode::InvalidTargetChain)?;
+				let mut secret = Vec::new();
+				let mut nullifier = Vec::new();
+				if note_secrets.len() == 1 && note_secrets[0].len() >= 64 {
+					secret.extend_from_slice(&note_secrets[0][0..32]);
+					nullifier.extend_from_slice(&note_secrets[0][32..64]);
+				} else {
+					// Anchor note secrets are structure as a vector of [chain_id, secret,
+					// nullifier]
+					nullifier = note_secrets[1].clone();
+					secret = note_secrets[2].clone();
+				}
+
+				let refresh_commitment = self.refresh_commitment.ok_or(OpStatusCode::CommitmentNotSet)?;
 				let roots = self.roots.ok_or(OpStatusCode::RootsNotSet)?;
 
 				let anchor_input = AnchorProofInput {
-					exponentiation,
-					width,
-					curve,
-					backend,
-					secrets,
+					exponentiation: exponentiation.unwrap_or(5),
+					width: width.unwrap_or(3),
+					curve: curve.unwrap_or(Curve::Bn254),
+					backend: backend.unwrap_or(Backend::Circom),
+					secret,
 					nullifier,
 					recipient: processed_recipient,
 					relayer: processed_relayer,
 					pk,
 					refund,
 					fee,
-					chain_id: target_chain_id,
+					chain_id,
 					leaves,
 					leaf_index,
 					roots,
-					commitment,
+					refresh_commitment,
 				};
 				Ok(ProofInput::Anchor(anchor_input))
 			}
-			_ => Err(OpStatusCode::InvalidNotePrefix),
+			_ => Err(OpStatusCode::InvalidNoteProtocol),
 		}
 	}
 }
@@ -353,12 +382,14 @@ impl ProofInputBuilder {
 		Ok(())
 	}
 
-	#[wasm_bindgen(js_name = setCommiment)]
-	pub fn set_commitment(&mut self, commitment: JsString) -> Result<(), JsValue> {
-		let c: String = commitment.into();
-		let commitment = hex::decode(c).map_err(|_| OpStatusCode::CommitmentNotSet)?;
-		let commitment: [u8; 32] = commitment.try_into().map_err(|_| OpStatusCode::CommitmentNotSet)?;
-		self.commitment = Some(commitment);
+	#[wasm_bindgen(js_name = setRefreshCommitment)]
+	pub fn set_refresh_commitment(&mut self, refresh_commitment: JsString) -> Result<(), JsValue> {
+		let c: String = refresh_commitment.into();
+		let refresh_commitment = hex::decode(c).map_err(|_| OpStatusCode::CommitmentNotSet)?;
+		let refresh_commitment: [u8; 32] = refresh_commitment
+			.try_into()
+			.map_err(|_| OpStatusCode::CommitmentNotSet)?;
+		self.refresh_commitment = Some(refresh_commitment);
 		Ok(())
 	}
 
@@ -474,8 +505,8 @@ mod test {
 	use wasm_bindgen_test::*;
 
 	use crate::proof::test_utils::{
-		generate_anchor_test_setup, generate_mixer_test_setup, AnchorTestSetup, MixerTestSetup, ANCHOR_NOTE_X5_4,
-		DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_X5_5,
+		generate_anchor_test_setup, generate_mixer_test_setup, AnchorTestSetup, MixerTestSetup, ANCHOR_NOTE_V1_X5_4,
+		ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5,
 	};
 
 	use super::*;
@@ -490,7 +521,7 @@ mod test {
 			proof_input_builder,
 			leaf_bytes,
 			..
-		} = generate_mixer_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_X5_5);
+		} = generate_mixer_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5);
 
 		let truncated_substrate_relayer_address = truncate_and_pad(&relayer);
 		let truncated_substrate_recipient_address = truncate_and_pad(&recipient);
@@ -523,7 +554,11 @@ mod test {
 			roots_raw,
 			leaf_bytes,
 			..
-		} = generate_anchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, ANCHOR_NOTE_X5_4);
+		} = generate_anchor_test_setup(
+			DECODED_SUBSTRATE_ADDRESS,
+			DECODED_SUBSTRATE_ADDRESS,
+			ANCHOR_NOTE_V1_X5_4,
+		);
 		let anchor_input = proof_input_builder.build().unwrap().anchor_input().unwrap();
 		let truncated_substrate_relayer_address = truncate_and_pad(&relayer);
 		let truncated_substrate_recipient_address = truncate_and_pad(&recipient);
@@ -536,7 +571,7 @@ mod test {
 			hex::encode(&truncated_substrate_relayer_address)
 		);
 
-		assert_eq!(hex::encode(anchor_input.commitment), hex::encode([0u8; 32]));
+		assert_eq!(hex::encode(anchor_input.refresh_commitment), hex::encode([0u8; 32]));
 		assert_eq!(hex::encode(&anchor_input.roots[0]), hex::encode(&roots_raw[0]));
 		assert_eq!(anchor_input.roots.len(), roots_raw.len());
 
@@ -553,7 +588,7 @@ mod test {
 			proof_input_builder,
 			vk,
 			..
-		} = generate_mixer_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_X5_5);
+		} = generate_mixer_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5);
 
 		let proof_input = proof_input_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_input).unwrap();
@@ -563,14 +598,38 @@ mod test {
 	}
 
 	#[wasm_bindgen_test]
-	fn anchor_proving() {
+	fn anchor_proving_v1() {
 		let AnchorTestSetup {
 			proof_input_builder,
 			vk,
 			..
-		} = generate_anchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, ANCHOR_NOTE_X5_4);
+		} = generate_anchor_test_setup(
+			DECODED_SUBSTRATE_ADDRESS,
+			DECODED_SUBSTRATE_ADDRESS,
+			ANCHOR_NOTE_V1_X5_4,
+		);
 
 		let proof_input = proof_input_builder.build_js().unwrap();
+		let proof = generate_proof_js(proof_input).unwrap();
+
+		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
+		assert!(is_valid_proof);
+	}
+
+	#[wasm_bindgen_test]
+	fn anchor_proving_v2() {
+		let AnchorTestSetup {
+			proof_input_builder,
+			vk,
+			..
+		} = generate_anchor_test_setup(
+			DECODED_SUBSTRATE_ADDRESS,
+			DECODED_SUBSTRATE_ADDRESS,
+			ANCHOR_NOTE_V2_X5_4,
+		);
+
+		let proof_input = proof_input_builder.build_js().unwrap();
+
 		let proof = generate_proof_js(proof_input).unwrap();
 
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();

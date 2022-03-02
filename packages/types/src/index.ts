@@ -12,10 +12,10 @@ import {
   DefinitionRpcSub
 } from '@polkadot/types/types';
 
-import './interfaces/augment-api';
-import './interfaces/augment-api-consts';
-import './interfaces/augment-api-query';
-import './interfaces/augment-types';
+/// <reference path="./interfaces/augment-api-consts.d.ts" />
+/// <reference path="./interfaces/augment-api-tx.d.ts" />
+/// <reference path="./interfaces/augment-api-query.d.ts" />
+/// <reference path="./interfaces/augment-types.d.ts" />
 
 export const types: RegistryTypes = webbTypes;
 
