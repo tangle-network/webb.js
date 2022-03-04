@@ -83,4 +83,4 @@ describe('Mixer tests', function () {
   after(async function () {
     await nodes?.();
   });
-}).timeout(120_000);
+});
