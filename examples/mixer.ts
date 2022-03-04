@@ -5,11 +5,11 @@ import { options } from '@webb-tools/api';
 // import { JsNote } from '@webb-tools/wasm-utils/njs';
 
 async function connectToLocalChain() {
-    const provider = new WsProvider('wss://localhost:9944');
-    const api = new ApiPromise(options({ provider }));
-    await api.isReady;
-    console.log((await api.rpc.system.properties()).toHuman());
-  }
+  const provider = new WsProvider('wss://localhost:9944');
+  const api = new ApiPromise(options({ provider }));
+  await api.isReady;
+  return api;
+}
 
 (async () => {
   await connectToLocalChain();

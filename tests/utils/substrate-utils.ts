@@ -392,6 +392,7 @@ export async function withdrawAnchorBnx5_4(
   const pkPath = path.join(
     // tests path
     process.cwd(),
+    'tests',
     'protocol-substrate-fixtures',
     'fixed-anchor',
     'bn254',
@@ -464,6 +465,7 @@ export async function withdrawMixerBnX5_5(
   const pkPath = path.join(
     // tests path
     process.cwd(),
+    'tests',
     'protocol-substrate-fixtures',
     'mixer',
     'bn254',

@@ -4,6 +4,7 @@ import { Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
 
 import {
+  catchWasmError,
   depositMixerBnX5_5,
   KillTask,
   preparePolkadotApi,
@@ -41,15 +42,11 @@ function getKeyring() {
 }
 
 describe('Mixer tests', function () {
-  // // increase the timeout for relayer tests
-  // this.timeout(120_000);
+  this.timeout(120_000);
 
   before(async function () {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
-    if (process.env.LOCAL_NODE !== 'ture') {
-      nodes = startWebbNode();
-    }
-    await sleep(3000);
+    nodes = startWebbNode();
     apiPromise = await preparePolkadotApi();
   });
 
@@ -57,14 +54,17 @@ describe('Mixer tests', function () {
     try {
       const { bob, charlie, alice } = getKeyring();
       // transfer some funds to sudo & test account
+      console.log(`Transferring 10,000 balance to Alice and Bob`)
       await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
       let note: JsNote;
       // deposit to the mixer
-      note = await depositMixerBnX5_5(apiPromise!, bob);
+      console.log(`Depositing to the mixer`)
+      note = await catchWasmError(() => depositMixerBnX5_5(apiPromise!, bob));
       ///Give the chain sometime to insure the leaf is there
       await sleep(10_000);
       // withdraw fro the mixer
-      await withdrawMixerBnX5_5(apiPromise!, bob, note!, bob.address);
+      console.log(`Withdrawing from the mixer`)
+      await catchWasmError(() => withdrawMixerBnX5_5(apiPromise!, bob, note!, bob.address));
     } catch (e) {
       if (e instanceof OperationError) {
         const errorMessage = {
@@ -83,4 +83,4 @@ describe('Mixer tests', function () {
   after(async function () {
     await nodes?.();
   });
-});
+}).timeout(120_000);
