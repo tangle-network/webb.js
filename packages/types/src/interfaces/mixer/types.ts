@@ -1,7 +1,7 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import type { U8aFixed, i128, u64 } from '@polkadot/types';
+import type { U8aFixed, i128, u64 } from '@polkadot/types-codec';
 
 /** @name Amount */
 export interface Amount extends i128 {}

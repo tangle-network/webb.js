@@ -42,7 +42,7 @@ function getKeyring() {
 }
 
 describe('Anchor tests', function () {
-  beforeAll(async function () {
+  before(async function () {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
     nodes = startWebbNode();
 
@@ -50,7 +50,7 @@ describe('Anchor tests', function () {
     await sleep(3000);
   });
 
-  test('Anchor should work', async function () {
+  it('Anchor should work', async function () {
     try {
       const { bob, charlie, alice } = getKeyring();
       // transfer some funds to sudo & test account
@@ -82,7 +82,7 @@ describe('Anchor tests', function () {
     }
   });
 
-  afterAll(async function () {
+  after(async function () {
     await nodes?.();
   });
 });

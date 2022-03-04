@@ -10,7 +10,7 @@
     // "tests/**/*"
   ],
   "compilerOptions": {
-    "types": ["jest", "node"],
+    "types": ["mocha", "node"],
     "declaration": true,
     "target": "ES2020",
     "module": "CommonJS",

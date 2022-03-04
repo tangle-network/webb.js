@@ -44,7 +44,7 @@ describe('Mixer tests', function () {
   // // increase the timeout for relayer tests
   // this.timeout(120_000);
 
-  beforeAll(async function () {
+  before(async function () {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
     if (process.env.LOCAL_NODE !== 'ture') {
       nodes = startWebbNode();
@@ -53,7 +53,7 @@ describe('Mixer tests', function () {
     apiPromise = await preparePolkadotApi();
   });
 
-  test('Mixer should work', async function () {
+  it('Mixer should work', async function () {
     try {
       const { bob, charlie, alice } = getKeyring();
       // transfer some funds to sudo & test account
@@ -80,7 +80,7 @@ describe('Mixer tests', function () {
     }
   });
 
-  afterAll(async function () {
+  after(async function () {
     await nodes?.();
   });
 });
