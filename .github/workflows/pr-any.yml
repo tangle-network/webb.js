@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [14.x]
+        node-version: [ 16.x ]
     steps:
       - uses: actions/checkout@v1
       - name: Install Rust toolchain with clippy available
@@ -82,19 +82,13 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ steps.rust_toolchain.outputs.rustc_hash }}
       - name: install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh -s -- -f
-      - name: Unit Test
-        run: |
-          yarn install --immutable | grep -v 'YN0013'
-          yarn test
       - name: Building for integration tests
         run: |
           yarn install --immutable | grep -v 'YN0013'
           yarn build
-      - name : Running integration tests
+      - name : Running tests
         run: |
-          git submodule update --init
-          cd tests
-          yarn install --check-files
+          git submodule update --init --recursive
           yarn test
 
   build_code:
