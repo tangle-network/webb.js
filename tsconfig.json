@@ -2,7 +2,8 @@
   "extends": "@open-web3/dev-config/config/tsconfig.json",
   "exclude": [
     "build/**/*",
-    "**/build/**/*"
+    "**/build/**/*",
+    "scripts"
   ],
   "include": [
     "packages/**/*",
