@@ -1,4 +1,4 @@
-import { JsNote, OperationError } from '@webb-tools/wasm-utils/njs/wasm-utils';
+import { JsNote, OperationError } from '@webb-tools/wasm-utils/njs';
 import { ApiPromise } from '@polkadot/api';
 import { Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -41,10 +41,10 @@ function getKeyring() {
 }
 
 describe('Mixer tests', function () {
-  // increase the timeout for relayer tests
-  this.timeout(120_000);
+  // // increase the timeout for relayer tests
+  // this.timeout(120_000);
 
-  before(async function () {
+  beforeAll(async function () {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
     if (process.env.LOCAL_NODE !== 'ture') {
       nodes = startWebbNode();
@@ -53,7 +53,7 @@ describe('Mixer tests', function () {
     apiPromise = await preparePolkadotApi();
   });
 
-  it('Mixer should work', async function () {
+  test('Mixer should work', async function () {
     try {
       const { bob, charlie, alice } = getKeyring();
       // transfer some funds to sudo & test account
@@ -80,7 +80,7 @@ describe('Mixer tests', function () {
     }
   });
 
-  after(async function () {
+  afterAll(async function () {
     await nodes?.();
   });
 });

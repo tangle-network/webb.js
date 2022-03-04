@@ -3,10 +3,14 @@
   "exclude": [
     "build/**/*",
     "**/build/**/*",
-    "examples/**",
-    "tests/**/**"
+  ],
+  "include": [
+    "packages/**/*",
+    "examples/*"
+    // "tests/**/*"
   ],
   "compilerOptions": {
+    "types": ["jest", "node"],
     "declaration": true,
     "target": "ES2020",
     "module": "CommonJS",
@@ -55,6 +59,6 @@
     "typeRoots": [
       "./node_modules/@polkadot/ts",
       "./node_modules/@types"
-    ],
+    ]
   }
 }

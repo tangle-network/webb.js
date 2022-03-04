@@ -42,10 +42,7 @@ function getKeyring() {
 }
 
 describe('Anchor tests', function () {
-  // increase the timeout for relayer tests
-  this.timeout(60 * 60 * 1000);
-
-  before(async function () {
+  beforeAll(async function () {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
     nodes = startWebbNode();
 
@@ -53,7 +50,7 @@ describe('Anchor tests', function () {
     await sleep(3000);
   });
 
-  it('Anchor should work', async function () {
+  test('Anchor should work', async function () {
     try {
       const { bob, charlie, alice } = getKeyring();
       // transfer some funds to sudo & test account
@@ -85,7 +82,7 @@ describe('Anchor tests', function () {
     }
   });
 
-  after(async function () {
+  afterAll(async function () {
     await nodes?.();
   });
 });
