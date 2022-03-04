@@ -12,7 +12,7 @@ import { decodeAddress } from '@polkadot/keyring';
 import path from 'path';
 import fs from 'fs';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { OperationError } from '@webb-tools/wasm-utils';
+import { OperationError } from '@webb-tools/wasm-utils/njs';
 import { BigNumber } from 'ethers';
 
 /// <reference path="@webb-tools/types/interfaces/types.d.ts"
