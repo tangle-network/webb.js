@@ -16,14 +16,6 @@ export type PresetToken = 'EDG' | 'WEBB' | 'DEV';
 
 // common tokens config in acala network and polkadot
 export const presetTokensConfig: Record<CHAIN, Record<PresetToken, TokenConfig>> = {
-  edgeware: {
-    EDG: {
-      chain: 'edgeware',
-      name: 'EDG',
-      symbol: 'EDG',
-      precision: 18
-    }
-  } as Record<PresetToken, TokenConfig>,
   dev: {
     DEV: {
       chain: 'dev',
@@ -56,7 +48,7 @@ export class Token {
     this.name = config.name;
     this.symbol = config.symbol || config.name;
     this.precision = config.precision || 18;
-    this.chain = config.chain || 'edgeware';
+    this.chain = config.chain || 'webb';
 
     if (config.amount) {
       if (config.amount instanceof FixedPointNumber) {
@@ -80,7 +72,7 @@ export class Token {
   }
 
   public toChainData(): { Token: string } | string {
-    if (this.chain === 'edgeware') {
+    if (this.chain === 'webb') {
       return { Token: this.name };
     }
 
@@ -112,7 +104,7 @@ function convert(config: Record<CHAIN, Record<string, TokenConfig>>): Record<CHA
 
 export const PRESET_TOKENS = convert(presetTokensConfig);
 
-export function getPresetToken(name: PresetToken, chain: CHAIN = 'edgeware'): Token {
+export function getPresetToken(name: PresetToken, chain: CHAIN = 'webb'): Token {
   return PRESET_TOKENS[chain][name];
 }
 

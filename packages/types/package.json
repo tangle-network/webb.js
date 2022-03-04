@@ -16,7 +16,7 @@
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
     "@babel/runtime": "^7.10.2",
-    "@open-web3/orml-types": "^0.8.2-6",
+    "@open-web3/orml-types": "^1.0.1",
     "@polkadot/metadata": "^4.17.1",
     "@polkadot/typegen": "^7.10.1",
     "@polkadot/types": "^7.10.1",
