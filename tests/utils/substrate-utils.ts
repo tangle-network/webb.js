@@ -344,7 +344,7 @@ export async function createAnchor(
     [
       // @ts-ignore
       api.tx.anchorBn254.create(
-        currencyToUnitI128(size),
+        currencyToUnitI128(size).toString(),
         maxEdges,
         depth,
         assetId
