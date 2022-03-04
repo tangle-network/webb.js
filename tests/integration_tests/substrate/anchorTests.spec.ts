@@ -51,25 +51,39 @@ describe('Anchor tests', function () {
   });
 
   it('Anchor should work', async function () {
-    const { bob, charlie, alice } = getKeyring();
-    // transfer some funds to sudo & test account
-    console.log(`Transferring 10,000 balance to Alice and Bob`)
-    await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
-    // set the test account ORML balance of the mixer asset
-    // await setORMLTokenBalance(apiPromise!, alice, bob, 0, 999999);
-    console.log(`Creating the Anchor with size 1,000`)
-    await createAnchor(apiPromise!, alice, 1000);
-    let note: JsNote;
-    // deposit to the mixer
-    console.log(`Depositing to the Anchor`)
-    note = await catchWasmError(() => depositAnchorBnX5_4(apiPromise!, bob));
-    ///Give the chain sometime to insure the leaf is there
-    await sleep(10_000);
-    // withdraw fro the mixer
-    console.log(`Withdrawing from the Anchor`)
-    await catchWasmError(() =>
-      withdrawAnchorBnx5_4(apiPromise!, bob, note!, bob.address)
-    );
+    try {
+      const { bob, charlie, alice } = getKeyring();
+      // transfer some funds to sudo & test account
+      console.log(`Transferring 10,000 balance to Alice and Bob`)
+      await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
+      // set the test account ORML balance of the mixer asset
+      // await setORMLTokenBalance(apiPromise!, alice, bob, 0, 999999);
+      console.log(`Creating the Anchor with size 1,000`)
+      await createAnchor(apiPromise!, alice, 1000);
+      let note: JsNote;
+      // deposit to the mixer
+      console.log(`Depositing to the Anchor`)
+      note = await catchWasmError(() => depositAnchorBnX5_4(apiPromise!, bob));
+      ///Give the chain sometime to insure the leaf is there
+      await sleep(10_000);
+      // withdraw fro the mixer
+      console.log(`Withdrawing from the Anchor`)
+      await catchWasmError(() =>
+        withdrawAnchorBnx5_4(apiPromise!, bob, note!, bob.address)
+      );
+    } catch (e) {
+      if (e instanceof OperationError) {
+        const errorMessage = {
+          code: e.code,
+          errorMessage: e.error_message,
+          data: e.data,
+        };
+        console.log(errorMessage);
+        throw errorMessage;
+      } else {
+        throw e;
+      }
+    }
   });
 
   after(async function () {
