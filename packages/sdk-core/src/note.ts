@@ -1,12 +1,14 @@
-import type { Backend, Curve, HashFunction, JsNote, NoteProtocol } from "@webb-tools/wasm-utils";
+import type { Backend, Curve, HashFunction, JsNote, NoteProtocol } from '@webb-tools/wasm-utils';
+
+const IS_NODE = typeof process === 'object' && typeof require === 'function';
 
 export type NoteGenInput = {
   protocol: NoteProtocol;
   version: string;
-  chain: string;
-  targetIdentifyingData?: string;
   sourceChain: string;
   sourceIdentifyingData?: string;
+  targetChain: string;
+  targetIdentifyingData?: string;
   backend: Backend;
   hashFunction: HashFunction;
   curve: Curve;
@@ -24,10 +26,11 @@ export class Note {
   }
 
   private static get wasm() {
-    // if (typeof "process" !== "undefined" && process && process.versions && process.versions.node) {
-    //   return import("@webb-tools/wasm-utils/build/njs");
-    // }
-    return import("@webb-tools/wasm-utils");
+    if (typeof process === 'object') {
+      return import('@webb-tools/wasm-utils/njs');
+    } else {
+      return import('@webb-tools/wasm-utils');
+    }
   }
 
   public static async deserialize(value: string): Promise<Note> {
@@ -50,30 +53,46 @@ export class Note {
   }
 
   public static async generateNote(noteGenInput: NoteGenInput): Promise<Note> {
-    const wasm = await Note.wasm;
-    const noteBuilderInput = new wasm.JsNoteBuilder();
-    noteBuilderInput.protocol(noteGenInput.protocol);
-    noteBuilderInput.version("v2");
-    noteBuilderInput.targetChainId(noteGenInput.chain);
-    noteBuilderInput.sourceChainId(noteGenInput.sourceChain);
-    noteBuilderInput.backend(noteGenInput.backend);
-    noteBuilderInput.hashFunction(noteGenInput.hashFunction);
-    noteBuilderInput.curve(noteGenInput.curve);
-    noteBuilderInput.tokenSymbol(noteGenInput.tokenSymbol);
-    noteBuilderInput.amount(noteGenInput.amount);
-    noteBuilderInput.denomination(noteGenInput.denomination);
-    noteBuilderInput.width(noteGenInput.width);
-    noteBuilderInput.exponentiation(noteGenInput.exponentiation);
-    if (noteGenInput.secrets) {
-      noteBuilderInput.setSecrets(noteGenInput.secrets);
+    let OperationError;
+    if (IS_NODE) {
+      OperationError = require('@webb-tools/wasm-utils/njs').OperationError;
+    } else {
+      OperationError = require('@webb-tools/wasm-utils').OperationError;
     }
-    if (noteGenInput.targetIdentifyingData) {
-      noteBuilderInput.targetIdentifyingData(noteGenInput.targetIdentifyingData);
+
+    try {
+      const wasm = await Note.wasm;
+      const noteBuilderInput = new wasm.JsNoteBuilder();
+      noteBuilderInput.protocol(noteGenInput.protocol);
+      noteBuilderInput.version('v2');
+      noteBuilderInput.targetChainId(noteGenInput.targetChain);
+      noteBuilderInput.sourceChainId(noteGenInput.sourceChain);
+      noteBuilderInput.backend(noteGenInput.backend);
+      noteBuilderInput.hashFunction(noteGenInput.hashFunction);
+      noteBuilderInput.curve(noteGenInput.curve);
+      noteBuilderInput.tokenSymbol(noteGenInput.tokenSymbol);
+      noteBuilderInput.amount(noteGenInput.amount);
+      noteBuilderInput.denomination(noteGenInput.denomination);
+      noteBuilderInput.width(noteGenInput.width);
+      noteBuilderInput.exponentiation(noteGenInput.exponentiation);
+      if (noteGenInput.secrets) {
+        noteBuilderInput.setSecrets(noteGenInput.secrets);
+      }
+      if (noteGenInput.targetIdentifyingData) {
+        noteBuilderInput.targetIdentifyingData(noteGenInput.targetIdentifyingData);
+      }
+      if (noteGenInput.sourceIdentifyingData) {
+        noteBuilderInput.sourceIdentifyingData(noteGenInput.sourceIdentifyingData);
+      }
+      const depositNote = noteBuilderInput.build();
+      return new Note(depositNote);
+    } catch (e: typeof OperationError) {
+      const errorMessage = {
+        code: e.code,
+        errorMessage: e.error_message,
+        data: e.data,
+      };
+      throw errorMessage;
     }
-    if (noteGenInput.sourceIdentifyingData) {
-      noteBuilderInput.sourceIdentifyingData(noteGenInput.sourceIdentifyingData);
-    }
-    const depositNote = noteBuilderInput.build();
-    return new Note(depositNote);
   }
 }

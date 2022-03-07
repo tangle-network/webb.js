@@ -401,10 +401,10 @@ impl JsNoteBuilder {
 		// Chain identifying data
 		let source_identifying_data = self
 			.source_identifying_data
-			.ok_or(OpStatusCode::InvalidSourceIdentifyingData)?;
+			.ok_or(source_chain_id.clone())?;
 		let target_identifying_data = self
 			.target_identifying_data
-			.ok_or(OpStatusCode::InvalidTargetIdentifyingData)?;
+			.ok_or(target_chain_id.clone())?;
 
 		// Misc
 		let exponentiation = self.exponentiation;
@@ -513,6 +513,18 @@ impl JsNote {
 	#[wasm_bindgen(getter)]
 	pub fn source_chain_id(&self) -> JsString {
 		self.source_chain_id.clone().into()
+	}
+
+	#[wasm_bindgen(js_name = targetIdentifyingData)]
+	#[wasm_bindgen(getter)]
+	pub fn target_identifying_data(&self) -> JsString {
+		self.target_identifying_data.clone().into()
+	}
+
+	#[wasm_bindgen(js_name = sourceIdentifyingData)]
+	#[wasm_bindgen(getter)]
+	pub fn source_identifying_data(&self) -> JsString {
+		self.source_identifying_data.clone().into()
 	}
 
 	#[wasm_bindgen(getter)]
