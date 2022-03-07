@@ -3,10 +3,15 @@
   "exclude": [
     "build/**/*",
     "**/build/**/*",
-    "examples/**",
-    "tests/**/**"
+    "scripts"
+  ],
+  "include": [
+    "packages/**/*",
+    "examples/*",
+    "tests/**/*"
   ],
   "compilerOptions": {
+    "types": ["mocha", "node"],
     "declaration": true,
     "target": "ES2020",
     "module": "CommonJS",
@@ -55,6 +60,6 @@
     "typeRoots": [
       "./node_modules/@polkadot/ts",
       "./node_modules/@types"
-    ],
+    ]
   }
 }

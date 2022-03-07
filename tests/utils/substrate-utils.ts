@@ -12,7 +12,7 @@ import { decodeAddress } from '@polkadot/keyring';
 import path from 'path';
 import fs from 'fs';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { OperationError } from '@webb-tools/wasm-utils';
+import { OperationError } from '@webb-tools/wasm-utils/njs';
 import { BigNumber } from 'ethers';
 
 /// <reference path="@webb-tools/types/interfaces/types.d.ts"
@@ -344,7 +344,7 @@ export async function createAnchor(
     [
       // @ts-ignore
       api.tx.anchorBn254.create(
-        currencyToUnitI128(size),
+        currencyToUnitI128(size).toString(),
         maxEdges,
         depth,
         assetId
@@ -392,6 +392,7 @@ export async function withdrawAnchorBnx5_4(
   const pkPath = path.join(
     // tests path
     process.cwd(),
+    'tests',
     'protocol-substrate-fixtures',
     'fixed-anchor',
     'bn254',
@@ -464,6 +465,7 @@ export async function withdrawMixerBnX5_5(
   const pkPath = path.join(
     // tests path
     process.cwd(),
+    'tests',
     'protocol-substrate-fixtures',
     'mixer',
     'bn254',

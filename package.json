@@ -2,14 +2,16 @@
   "version": "0.1.4-38",
   "private": true,
   "engines": {
-    "yarn": "^1.10.1",
-    "node": "^14"
+    "yarn": "^1.10.1"
   },
   "workspaces": [
-    "packages/*"
+    "examples/*",
+    "packages/*",
+    "tests/*"
   ],
   "resolutions": {
-    "@edgeware/node-types": "3.5.1-erup-4"
+    "@polkadot/api": "^7.10.1",
+    "@polkadot/types": "^7.10.1"
   },
   "scripts": {
     "pumbp": "./scripts/update-version.js prerelease",
@@ -21,11 +23,13 @@
     "clean": "polkadot-dev-clean-build",
     "postinstall": "polkadot-dev-yarn-only",
     "wasm:test": "wasm-pack test --release --node ./packages/wasm-utils ",
-    "test": "polkadot-dev-run-test --coverage && yarn wasm:test",
+    "test": "yarn test:unit && yarn test:integration && yarn wasm:test",
+    "test:unit": "ts-mocha -p ./tsconfig.json -r tsconfig-paths/register 'packages/**/*.spec.ts' --exit",
+    "test:integration": "ts-mocha -p ./tsconfig.json -r tsconfig-paths/register 'tests/integration_tests/**/*.ts' --exit",
     "test:perf": "cross-env NODE_OPTIONS=--experimental-wasm-modules jest --config ./jest.perf.config.js",
     "check-deps": "./node_modules/@open-web3/util/scripts/check-deps.js yarn.lock @polkadot/ @open-web3/",
     "update-metadata": "ts-node-script -r tsconfig-paths/register packages/types/scripts/updateMetadata.ts",
-    "example:sdk-mixer": "cd ./examples/sdk-mixer && yarn dev",
+    "example:mixer": "ts-node -r tsconfig-paths/register examples/mixer.ts",
     "script": "ts-node-script -r tsconfig-paths/register",
     "format": "prettier --write \"packages/**/*.{ts,js,jsx,tsx}\" && cargo fmt --manifest-path packages/wasm-utils/Cargo.toml",
     "generate:meta": "ts-node --skip-project node_modules/.bin/polkadot-types-from-chain --package sample-polkadotjs-typegen/interfaces --endpoint ./packages/types/src/metadata/edgware.json --output ./interfaces --strict"
@@ -34,21 +38,38 @@
     "@babel/core": "^7.10.2",
     "@babel/register": "^7.10.1",
     "@babel/runtime": "^7.10.2",
-    "@open-web3/dev-config": "^0.1.10",
-    "@open-web3/util": "^0.8.2-6",
-    "@types/jest": "^26.0.20",
+    "@ethersproject/experimental": "^5.5.0",
+    "@open-web3/dev-config": "^0.1.13",
+    "@open-web3/util": "^1.0.1",
+    "@openzeppelin/contracts": "^4.2.0",
+    "@polkadot/api": "^7.10.1",
+    "@polkadot/types": "^7.10.1",
+    "@truffle/hdwallet-provider": "^1.4.1",
+    "@types/jest": "^26.0.24",
+    "@types/mocha": "^9.1.0",
     "@types/source-map-support": "^0.5.3",
+    "@webb-tools/protocol-solidity": "^0.0.4",
     "cross-env": "^7.0.3",
+    "dotenv": "^10.0.0",
+    "ethers": "5.5.1",
+    "ganache": "^7.0.0-rc.0",
     "jest": "^26.6.3",
     "jest-performance": "^2.1.0",
+    "keccak": "^3.0.1",
+    "mocha": "^9.2.1",
+    "node-cron": "^3.0.0",
+    "node-fetch": "^2.6.1",
+    "opsgenie-sdk": "^0.5.0",
     "prettier": "^2.2.1",
     "source-map-support": "^0.5.19",
     "ts-jest": "^26.5.2",
+    "ts-mocha": "^9.0.2",
     "ts-node": "^9.1.1",
-    "tsconfig-paths": "^3.9.0",
+    "tsconfig-paths": "^3.12.0",
     "typescript": "^4.4.3",
     "worker-loader": "^3.0.7",
-    "workerloader-jest-transformer": "^0.0.2"
+    "workerloader-jest-transformer": "^0.0.2",
+    "ws": "^7.5.1"
   },
   "dependencies": {
     "ts-proto": "^1.82.2"
