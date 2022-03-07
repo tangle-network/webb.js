@@ -4,6 +4,7 @@ module.exports = {
   ...base,
   parser: '@typescript-eslint/parser',
   plugins: ["@typescript-eslint"],
+  files: ['*.ts', '*.tsx'],
   ignorePatterns: [
     '.eslintrc.cjs',
     '.eslintrc.js',
