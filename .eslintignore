@@ -5,3 +5,5 @@
 packages/types/src/metadata/static-latest.ts
 **/target/*
 /tests/*
+babel.config.js
+

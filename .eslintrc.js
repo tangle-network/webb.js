@@ -2,9 +2,12 @@ const base = require('@open-web3/dev-config/config/eslint.cjs');
 
 module.exports = {
   ...base,
+  parser: '@typescript-eslint/parser',
+  plugins: ["@typescript-eslint"],
   ignorePatterns: [
     '.eslintrc.cjs',
     '.eslintrc.js',
+    'babel.config.js',
     '.github/**',
     '.vscode/**',
     '.yarn/**',
