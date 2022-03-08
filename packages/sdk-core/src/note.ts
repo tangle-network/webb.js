@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable prefer-promise-reject-errors */
 import type { Backend, Curve, HashFunction, JsNote, NoteProtocol, Version } from '@webb-tools/wasm-utils';
 
 const IS_NODE = typeof process === 'object' && typeof require === 'function';

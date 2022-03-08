@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Note, NoteGenInput } from '../note';
 import { expect } from 'chai';
 
@@ -102,9 +103,12 @@ describe('Note class', () => {
       + '1:1/'
       + '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/'
       + '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
-    const err = await Note.deserialize(serialized).catch((err) => { return err; });
-    expect(err.code).to.equal(4);
-    expect(err.message).to.equal('Invalid note protocol');
+    try {
+      await Note.deserialize(serialized);
+    } catch (e: any) {
+      expect(e.code).to.equal(4);
+      expect(e.message).to.equal('Invalid note protocol');
+    }
   });
 
   it.only('should fail to deserialize invalid version', async () => {
@@ -114,10 +118,14 @@ describe('Note class', () => {
       + '1:1/'
       + '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/'
       + '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
-      const err = await Note.deserialize(serialized).catch((err) => { return err; });
-      expect(err.code).to.equal(5);
-      expect(err.message).to.equal('Invalid note version');
+    try {
+      await Note.deserialize(serialized);
+    } catch (e: any) {
+      expect(e.code).to.equal(5);
+      expect(e.message).to.equal('Invalid note version');
+    }
   });
+  
 
   it.only('should fail to deserialize invalid source chain id', async () => {
     const serialized = 'webb://'
@@ -126,9 +134,12 @@ describe('Note class', () => {
       + '1:1/'
       + '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/'
       + '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
-      const err = await Note.deserialize(serialized).catch((err) => { return err; });
-      expect(err.code).to.equal(18);
-      expect(err.message).to.equal('Invalid source chain id');
+    try {
+      await Note.deserialize(serialized);
+    } catch (e: any) {
+      expect(e.code).to.equal(18);
+      expect(e.message).to.equal('Invalid source chain id');
+    }
   });
 
   it.only('should fail to deserialize invalid target chain id', async () => {
@@ -138,9 +149,12 @@ describe('Note class', () => {
       + '1:1/'
       + '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/'
       + '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
-      const err = await Note.deserialize(serialized).catch((err) => { return err; });
-      expect(err.code).to.equal(19);
-      expect(err.message).to.equal('Invalid target chain id');
+    try {
+      await Note.deserialize(serialized)
+    } catch (e: any) {
+      expect(e.code).to.equal(19);
+      expect(e.message).to.equal('Invalid target chain id');
+    }
   });
 
   it.only('should fail to deserialize invalid note length', async () => {
@@ -150,9 +164,12 @@ describe('Note class', () => {
       // + '1:1/' Nullify the source identify data
       + '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/'
       + '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
-      const err = await Note.deserialize(serialized).catch((err) => { return err; });
-      expect(err.code).to.equal(3);
-      expect(err.message).to.equal('Invalid note length');
+    try {
+      await Note.deserialize(serialized);
+    } catch (e: any) {
+      expect(e.code).to.equal(3);
+      expect(e.message).to.equal('Invalid note length');
+    }
   });
 
   it.only('should fail to deserialize anchor invalid secrets (invalid chain id item - too large)', async () => {
@@ -163,9 +180,12 @@ describe('Note class', () => {
       // Get rid of target chain ID from secrets portion
       + '11010101010101100000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/'
       + '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
-      const err = await Note.deserialize(serialized).catch((err) => { return err; });
-      expect(err.code).to.equal(8);
-      expect(err.message).to.equal('Invalid note secrets');
+    try {
+      await Note.deserialize(serialized)
+    } catch (e: any) {
+      expect(e.code).to.equal(8);
+      expect(e.message).to.equal('Invalid note secrets');
+    }
   });
 
   it.only('should fail to deserialize anchor invalid secrets (invalid chain id item - too small)', async () => {
@@ -176,9 +196,12 @@ describe('Note class', () => {
       // Get rid of target chain ID from secrets portion
       + '0001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/'
       + '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
-      const err = await Note.deserialize(serialized).catch((err) => { return err; });
-      expect(err.code).to.equal(8);
-      expect(err.message).to.equal('Invalid note secrets');
+    try {
+      await Note.deserialize(serialized)
+    } catch (e: any) {
+      expect(e.code).to.equal(8);
+      expect(e.message).to.equal('Invalid note secrets');
+    }
   });
 
   it.only('should fail to deserialize anchor invalid secrets (missing chain id item)', async () => {
@@ -189,9 +212,12 @@ describe('Note class', () => {
       // Get rid of target chain ID from secrets portion
       + 'ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/'
       + '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
-      const err = await Note.deserialize(serialized).catch((err) => { return err; });
-      expect(err.code).to.equal(3);
-      expect(err.message).to.equal('Invalid note length');
+    try {
+      await Note.deserialize(serialized)
+    } catch (e: any) {
+      expect(e.code).to.equal(3);
+      expect(e.message).to.equal('Invalid note length');
+    }
   });
 
   it.only('should fail to deserialize anchor invalid secrets (nullifier item)', async () => {
@@ -202,9 +228,12 @@ describe('Note class', () => {
       // Get rid of target chain ID from secrets portion
       + '0000000000000001:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/'
       + '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
-      const err = await Note.deserialize(serialized).catch((err) => { return err; });
-      expect(err.code).to.equal(3);
-      expect(err.message).to.equal('Invalid note length');
+    try {
+      await Note.deserialize(serialized)
+    } catch (e: any) {
+      expect(e.code).to.equal(3);
+      expect(e.message).to.equal('Invalid note length');
+    }
   });
 
   it.only('should fail to deserialize anchor invalid secrets (multiple colons)', async () => {
@@ -215,9 +244,12 @@ describe('Note class', () => {
       // Remove a secret item and leave colon
       + '0000000000000001::339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/'
       + '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
-      const err = await Note.deserialize(serialized).catch((err) => { return err; });
-      expect(err.code).to.equal(8);
-      expect(err.message).to.equal('Invalid note secrets');
+    try {
+      await Note.deserialize(serialized)
+    } catch (e: any) {
+      expect(e.code).to.equal(8);
+      expect(e.message).to.equal('Invalid note secrets');
+    }
   });
 
   it.only('should fail to deserialize anchor invalid secrets (1 colon)', async () => {
@@ -228,8 +260,11 @@ describe('Note class', () => {
       // Remove a secret item and also remove colon
       + '0000000000000001:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/'
       + '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
-      const err = await Note.deserialize(serialized).catch((err) => { return err; });
-      expect(err.code).to.equal(3);
-      expect(err.message).to.equal('Invalid note length');
+    try {
+      await Note.deserialize(serialized)
+    } catch (e: any) {
+      expect(e.code).to.equal(3);
+      expect(e.message).to.equal('Invalid note length');
+    }
   });
 });
