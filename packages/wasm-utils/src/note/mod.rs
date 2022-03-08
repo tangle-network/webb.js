@@ -395,6 +395,7 @@ impl JsNoteBuilder {
 
 		// Chain Ids
 		let source_chain_id = self.source_chain_id.ok_or(OpStatusCode::InvalidSourceChain)?;
+		let _: u64 = source_chain_id.parse().map_err(|_| OpStatusCode::InvalidSourceChain)?;
 		let target_chain_id = self.target_chain_id.ok_or(OpStatusCode::InvalidTargetChain)?;
 		let chain_id: u64 = target_chain_id.parse().map_err(|_| OpStatusCode::InvalidTargetChain)?;
 

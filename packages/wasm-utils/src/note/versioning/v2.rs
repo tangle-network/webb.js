@@ -31,7 +31,9 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
 		return Err(OpStatusCode::InvalidNoteLength);
 	}
 	let source_chain_id = chain_ids_parts[0];
+	let _: u64 = source_chain_id.parse().map_err(|_| OpStatusCode::InvalidSourceChain)?;
 	let target_chain_id = chain_ids_parts[1];
+	let _: u64 = target_chain_id.parse().map_err(|_| OpStatusCode::InvalidTargetChain)?;
 
 	// Chain Identifying Data parsing
 	let chain_identifying_data_parts: Vec<&str> = chain_identifying_data.split(':').collect();
@@ -77,6 +79,17 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
 		.split(':')
 		.map(|v| hex::decode(v).unwrap_or_default())
 		.collect::<Vec<Vec<u8>>>();
+	if secret_parts.len() != 3 {
+		return Err(OpStatusCode::InvalidNoteLength);
+	}
+	for v in secret_parts.iter() {
+		if v.len() == 0 {
+			return Err(OpStatusCode::InvalidNoteSecrets);
+		}
+	}
+	if secret_parts[0].len() != 8 || secret_parts[0].len() == 6 {
+		return Err(OpStatusCode::InvalidNoteSecrets);
+	}
 
 	Ok(JsNote {
 		scheme: scheme.to_string(),
