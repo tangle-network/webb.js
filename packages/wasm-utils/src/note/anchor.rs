@@ -1,10 +1,8 @@
 use ark_std::rand::rngs::OsRng;
 use arkworks_setups::common::AnchorLeaf;
 
-use crate::AnchorR1CSProverBls381_30_2;
-use crate::AnchorR1CSProverBn254_30_2;
-use arkworks_setups::AnchorProver;
-use arkworks_setups::Curve as ArkCurve;
+use crate::{AnchorR1CSProverBls381_30_2, AnchorR1CSProverBn254_30_2};
+use arkworks_setups::{AnchorProver, Curve as ArkCurve};
 
 use crate::types::{Curve, OpStatusCode, OperationError};
 

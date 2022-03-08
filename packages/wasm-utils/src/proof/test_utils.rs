@@ -1,22 +1,17 @@
 use ark_bn254::{Bn254, Fr as Bn254Fr};
-use ark_ff::PrimeField;
-use arkworks_setups::Curve as ArkCurve;
-use arkworks_setups::common::{setup_params, setup_tree_and_create_path, setup_keys_unchecked};
+use ark_ff::{BigInteger, PrimeField};
 use arkworks_native_gadgets::poseidon::Poseidon;
 use arkworks_r1cs_gadgets::poseidon::PoseidonGadget;
+use arkworks_setups::common::{setup_keys_unchecked, setup_params, setup_tree_and_create_path};
+use arkworks_setups::Curve as ArkCurve;
 use js_sys::{Array, JsString, Uint8Array};
-use ark_ff::BigInteger;
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
-use crate::DEFAULT_LEAF;
-use crate::TREE_HEIGHT;
-use crate::ANCHOR_COUNT;
-use crate::MixerR1CSProverBn254_30;
-use crate::AnchorR1CSProverBn254_30_2;
 use crate::note::JsNote;
 use crate::proof::ProofInputBuilder;
 use crate::types::Leaves;
+use crate::{AnchorR1CSProverBn254_30_2, MixerR1CSProverBn254_30, ANCHOR_COUNT, DEFAULT_LEAF, TREE_HEIGHT};
 
 pub const MIXER_NOTE_V1_X5_5:&str  = "webb.mixer:v1:16:16:Arkworks:Bn254:Poseidon:WEBB:12:10:5:5:7dc8420a25a15d2e7b712b4df15c6f6f9f5a8bacfa466671eb1f078406b09a2a00b7063c9fc19d488c25a18cb9c40bc4c29c00f822fdecd58d579cafa46ac31f";
 pub const ANCHOR_NOTE_V1_X5_4:&str  ="webb.anchor:v1:2199023256632:2199023256632:Arkworks:Bn254:Poseidon:WEBB:18:10:5:4:fd6518ad0f63d214d0964206105dc67ec9dfe677b18a4626bd522c1d0719920cebea49a028e691673b87921f9792fe9d4d6a374919fe07984df3373b630c2e05";
@@ -108,7 +103,13 @@ pub fn generate_anchor_test_setup(
 	let poseidon3 = Poseidon::new(params3);
 
 	let leaves_f = vec![Bn254Fr::from_le_bytes_mod_order(&leaf_bytes)];
-	let (tree, _) = setup_tree_and_create_path::<Bn254Fr, PoseidonGadget<Bn254Fr>, TREE_HEIGHT>(poseidon3, &leaves_f, index, &DEFAULT_LEAF).unwrap();
+	let (tree, _) = setup_tree_and_create_path::<Bn254Fr, PoseidonGadget<Bn254Fr>, TREE_HEIGHT>(
+		poseidon3,
+		&leaves_f,
+		index,
+		&DEFAULT_LEAF,
+	)
+	.unwrap();
 	let roots_f = [tree.root(); ANCHOR_COUNT];
 	let roots_raw = roots_f.map(|x| x.into_repr().to_bytes_le());
 	let roots_array: Array = roots_raw.iter().map(|i| Uint8Array::from(i.as_slice())).collect();

@@ -632,19 +632,19 @@ mod test {
 
 	#[test]
 	fn deserialize_v2() {
-		let note = "webb://v2:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
+		let note = "webb://v2:anchor/1:1/1:1/0000000000000001:661e5546715c7ad35f5a707a7f800a2be90588dc92426623044ab46c4db4c604:f455466451de6960e9a8943f8edd3b4e29c750ec975221210cf4eb72a8196417/?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1";
 		let note = JsNote::deserialize(note).unwrap();
 		assert_eq!(note.protocol, NoteProtocol::Anchor);
-		assert_eq!(note.backend, Some(Backend::Arkworks));
+		assert_eq!(note.backend, Some(Backend::Circom));
 		assert_eq!(note.curve, Some(Curve::Bn254));
 		assert_eq!(note.hash_function, Some(HashFunction::Poseidon));
-		assert_eq!(note.token_symbol, Some(String::from("EDG")));
+		assert_eq!(note.token_symbol, Some(String::from("WEBB")));
 		assert_eq!(note.denomination, Some(18));
 		assert_eq!(note.version, NoteVersion::V2);
-		assert_eq!(note.width, Some(5));
+		assert_eq!(note.width, Some(4));
 		assert_eq!(note.exponentiation, Some(5));
-		assert_eq!(note.target_chain_id, "3".to_string());
-		assert_eq!(note.source_chain_id, "2".to_string());
+		assert_eq!(note.target_chain_id, "1".to_string());
+		assert_eq!(note.source_chain_id, "1".to_string());
 	}
 
 	#[test]

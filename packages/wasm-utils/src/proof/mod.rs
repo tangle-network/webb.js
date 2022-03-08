@@ -9,16 +9,13 @@ use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
-use ark_bn254::Fr as Bn254Fr;
-use arkworks_setups::common::setup_params;
-use arkworks_setups::Curve as ArkCurve;
-use arkworks_setups::common::setup_tree_and_create_path;
+use ark_bls12_381::Bls12_381;
+use ark_bn254::{Bn254, Fr as Bn254Fr};
 use arkworks_native_gadgets::merkle_tree::SparseMerkleTree;
 use arkworks_native_gadgets::poseidon::Poseidon;
-use arkworks_setups::common::verify_unchecked_raw;
+use arkworks_setups::common::{setup_params, setup_tree_and_create_path, verify_unchecked_raw};
+use arkworks_setups::Curve as ArkCurve;
 use wasm_bindgen::__rt::std::collections::btree_map::BTreeMap;
-use ark_bls12_381::Bls12_381;
-use ark_bn254::Bn254;
 
 use crate::note::JsNote;
 use crate::types::{Backend, Curve, Leaves, NoteProtocol, OpStatusCode, OperationError, Uint8Arrayx32, WasmCurve};
@@ -328,7 +325,10 @@ impl AnchorMTBn254X5 {
 		let params3 = setup_params::<Bn254Fr>(curve, 5, 3);
 		let poseidon3 = Poseidon::new(params3);
 
-		let (tree, _) = setup_tree_and_create_path::<Bn254Fr, PoseidonGadget<Bn254Fr>, TREE_HEIGHT>(poseidon3, &leaves, leaf_index, &[0u8; 32]).unwrap();
+		let (tree, _) = setup_tree_and_create_path::<Bn254Fr, PoseidonGadget<Bn254Fr>, TREE_HEIGHT>(
+			poseidon3, &leaves, leaf_index, &[0u8; 32],
+		)
+		.unwrap();
 		Ok(Self { inner: tree })
 	}
 
@@ -481,7 +481,7 @@ impl ProofInputBuilder {
 }
 
 #[wasm_bindgen]
-pub fn  generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
+pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 	let mut rng = OsRng;
 	let proof_input_value = proof_input.inner;
 	match proof_input_value {
