@@ -1,7 +1,7 @@
 use crate::note::*;
-use crate::types::OpStatusCode;
+use crate::types::{OpStatusCode, OperationError};
 
-pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
+pub fn note_from_str(s: &str) -> Result<JsNote, OperationError> {
 	let parts: Vec<&str> = s.split(':').collect();
 	let prefix = parts[0];
 	let prefix_parts = prefix.split('.').collect::<Vec<&str>>();
@@ -25,9 +25,17 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
 	let note_val = parts[12];
 
 	if note_val.is_empty() {
-		return Err(OpStatusCode::InvalidNoteSecrets);
+		return Err(OperationError::new_with_message(
+			OpStatusCode::InvalidNoteSecrets,
+			"Note value is empty".to_string(),
+		));
 	}
-	let secrets: Vec<u8> = hex::decode(&note_val.replace("0x", "")).map_err(|_| OpStatusCode::HexParsingFailed)?;
+	let secrets: Vec<u8> = hex::decode(&note_val.replace("0x", "")).map_err(|_| {
+		OperationError::new_with_message(
+			OpStatusCode::HexParsingFailed,
+			"Failed to parse note secrets value".to_string(),
+		)
+	})?;
 
 	Ok(JsNote {
 		scheme: prefix_parts[0].to_string(),
