@@ -1,10 +1,10 @@
-use ark_bls12_381::Fr as BlsFr;
-use ark_bn254::Fr as Bn254Fr;
 use ark_std::rand::rngs::OsRng;
-use arkworks_circuits::setup::common::Leaf;
-use arkworks_circuits::setup::mixer::{setup_leaf_with_privates_raw_x5_5, setup_leaf_x5_5};
-use arkworks_gadgets::prelude::*;
-use arkworks_utils::utils::common::Curve as ArkworksCurve;
+use arkworks_setups::common::MixerLeaf;
+
+use crate::MixerR1CSProverBn254_30;
+use crate::MixerR1CSProverBls381_30;
+use arkworks_setups::MixerProver;
+use arkworks_setups::Curve as ArkCurve;
 
 use crate::types::{Curve, OpStatusCode, OperationError};
 
@@ -14,9 +14,9 @@ pub fn generate_secrets(
 	curve: Curve,
 	rng: &mut OsRng,
 ) -> Result<[Vec<u8>; 2], OperationError> {
-	let sec: Leaf = match (curve, exponentiation, width) {
-		(Curve::Bls381, 5, 5) => setup_leaf_x5_5::<BlsFr, _>(ArkworksCurve::Bls381, rng),
-		(Curve::Bn254, 5, 5) => setup_leaf_x5_5::<Bn254Fr, _>(ArkworksCurve::Bn254, rng),
+	let sec = match (curve, exponentiation, width) {
+		(Curve::Bls381, 5, 5) => MixerR1CSProverBn254_30::create_random_leaf(ArkCurve::Bls381, rng),
+		(Curve::Bn254, 5, 5) => MixerR1CSProverBls381_30::create_random_leaf(ArkCurve::Bn254, rng),
 		_ => {
 			let message = format!(
 				"No Mixer secrets setup available for curve {}, exponentiation {} , and width {}",
@@ -31,12 +31,13 @@ pub fn generate_secrets(
 
 	Ok(secrets)
 }
+
 pub fn get_leaf_with_private_raw(
 	curve: Curve,
 	width: usize,
 	exponentiation: i8,
 	raw: &[u8],
-) -> Result<Leaf, OperationError> {
+) -> Result<MixerLeaf, OperationError> {
 	if raw.len() < 64 {
 		return Err(OpStatusCode::InvalidNoteSecrets.into());
 	}
@@ -45,8 +46,8 @@ pub fn get_leaf_with_private_raw(
 	let nullifer = raw[32..64].to_vec();
 	// (leaf_bytes, nullifier_hash_bytes)
 	let sec = match (curve, exponentiation, width) {
-		(Curve::Bls381, 5, 5) => setup_leaf_with_privates_raw_x5_5::<BlsFr>(ArkworksCurve::Bls381, secrets, nullifer),
-		(Curve::Bn254, 5, 5) => setup_leaf_with_privates_raw_x5_5::<Bn254Fr>(ArkworksCurve::Bn254, secrets, nullifer),
+		(Curve::Bls381, 5, 5) => MixerR1CSProverBn254_30::create_leaf_with_privates(ArkCurve::Bls381, secrets, nullifer),
+		(Curve::Bn254, 5, 5) => MixerR1CSProverBn254_30::create_leaf_with_privates(ArkCurve::Bn254, secrets, nullifer),
 		_ => {
 			let message = format!(
 				"No Mixer leaf setup for curve {}, exponentiation {} , and width {}",

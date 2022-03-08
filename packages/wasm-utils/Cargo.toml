@@ -33,10 +33,11 @@ ark-ed-on-bn254 = { version = "^0.3.0", default-features = true, features = ["r1
 ark-bn254 = { version = "^0.3.0", default-features = true, features = ["curve"] }
 ark-bls12-381 = { version = "^0.3.0", default-features = false, features = ["curve"] }
 webb-pedersen-hash = { version = "0.1.0", git = "https://github.com/webb-tools/webb-rs.git" }
-ark-std ={ version = "^0.3.0" }
-arkworks-gadgets = { version = "0.4.20", default-features = false }
-arkworks-circuits = { version = "0.4.20", default-features = false }
-arkworks-utils = { version = "0.4.20", default-features = false }
+ark-std = { version = "^0.3.0" }
+arkworks-setups = { version = "0.5.0", default-features = false, features = ["r1cs"], git = "https://github.com/webb-tools/arkworks-gadgets.git", branch = "filip/sync-public-inputs" }
+arkworks-native-gadgets = { version = "0.5.0", default-features = false, git = "https://github.com/webb-tools/arkworks-gadgets.git", branch = "filip/sync-public-inputs" }
+arkworks-r1cs-gadgets = { version = "0.5.0", default-features = false, git = "https://github.com/webb-tools/arkworks-gadgets.git", branch = "filip/sync-public-inputs" }
+zeroize = { version = ">=1, <1.4", default-features = false }
 
 
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }

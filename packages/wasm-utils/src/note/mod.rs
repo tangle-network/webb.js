@@ -1,4 +1,3 @@
-use arkworks_circuits::setup::common::Leaf;
 use core::fmt;
 use std::str::FromStr;
 
@@ -30,7 +29,7 @@ impl JsNote {
 		note.parse().map_err(Into::into)
 	}
 
-	pub fn get_leaf_and_nullifier(&self) -> Result<Leaf, OperationError> {
+	pub fn get_leaf_and_nullifier(&self) -> Result<(Vec<u8>, Vec<u8>), OperationError> {
 		match self.protocol {
 			NoteProtocol::Mixer => {
 				let raw = match self.version {
@@ -46,12 +45,13 @@ impl JsNote {
 						raw
 					}
 				};
-				mixer::get_leaf_with_private_raw(
+				let mixer_leaf = mixer::get_leaf_with_private_raw(
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
 					self.exponentiation.unwrap_or(5),
 					&raw,
-				)
+				)?;
+				Ok((mixer_leaf.leaf_bytes, mixer_leaf.nullifier_bytes))
 			}
 			NoteProtocol::Anchor => {
 				let mut secret_bytes: Vec<u8> = Vec::new();
@@ -85,14 +85,15 @@ impl JsNote {
 					));
 				}
 
-				anchor::get_leaf_with_private_raw(
+				let leaf = anchor::get_leaf_with_private_raw(
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
 					self.exponentiation.unwrap_or(4),
 					u64::from_str(&self.target_chain_id).unwrap(),
 					nullifier_bytes,
 					secret_bytes,
-				)
+				)?;
+				Ok((leaf.leaf_bytes, leaf.nullifier_bytes))
 			}
 			_ => {
 				let message = format!("{} protocol isn't supported yet", self.protocol);
@@ -485,8 +486,8 @@ impl JsNote {
 
 	#[wasm_bindgen(js_name = getLeafCommitment)]
 	pub fn get_leaf_commitment(&self) -> Result<Uint8Array, JsValue> {
-		let leaf_and_nullifier = self.get_leaf_and_nullifier()?;
-		Ok(Uint8Array::from(leaf_and_nullifier.leaf_bytes.as_slice()))
+		let (leaf_bytes, _) = self.get_leaf_and_nullifier()?;
+		Ok(Uint8Array::from(leaf_bytes.as_slice()))
 	}
 
 	pub fn serialize(&self) -> JsString {
@@ -569,7 +570,7 @@ impl JsNote {
 
 #[cfg(test)]
 mod test {
-	use arkworks_circuits::prelude::ark_bn254;
+	use ark_bn254;
 	use wasm_bindgen_test::*;
 
 	use crate::utils::to_rust_string;

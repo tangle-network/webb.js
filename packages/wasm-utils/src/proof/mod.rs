@@ -3,13 +3,22 @@
 use std::convert::{TryFrom, TryInto};
 
 use ark_ff::{BigInteger, PrimeField};
-use arkworks_circuits::prelude::ark_bls12_381::Bls12_381;
-use arkworks_circuits::prelude::ark_bn254::Bn254;
-use arkworks_circuits::setup::common::{verify_unchecked_raw, Tree_x5};
 
+use arkworks_r1cs_gadgets::poseidon::PoseidonGadget;
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
+
+use ark_bn254::Fr as Bn254Fr;
+use arkworks_setups::common::setup_params;
+use arkworks_setups::Curve as ArkCurve;
+use arkworks_setups::common::setup_tree_and_create_path;
+use arkworks_native_gadgets::merkle_tree::SparseMerkleTree;
+use arkworks_native_gadgets::poseidon::Poseidon;
+use arkworks_setups::common::verify_unchecked_raw;
+use wasm_bindgen::__rt::std::collections::btree_map::BTreeMap;
+use ark_bls12_381::Bls12_381;
+use ark_bn254::Bn254;
 
 use crate::note::JsNote;
 use crate::types::{Backend, Curve, Leaves, NoteProtocol, OpStatusCode, OperationError, Uint8Arrayx32, WasmCurve};
@@ -102,7 +111,7 @@ pub struct AnchorProofInput {
 	pub pk: Vec<u8>,
 	pub refund: u128,
 	pub fee: u128,
-	pub chain_id: u128,
+	pub chain_id: u64,
 	pub leaves: Vec<Vec<u8>>,
 	pub leaf_index: u64,
 	/// get roots for linkable tree
@@ -288,15 +297,13 @@ impl ProofInputBuilder {
 		}
 	}
 }
-use ark_bn254::Fr as Bn254Fr;
-use arkworks_utils::utils::common::{setup_params_x5_3, setup_params_x5_4, Curve as ArkCurve};
-use test_utils::AnchorSetup30_2;
-use wasm_bindgen::__rt::std::collections::btree_map::BTreeMap;
+
+const TREE_HEIGHT: usize = 30;
 
 #[wasm_bindgen]
 pub struct AnchorMTBn254X5 {
 	#[wasm_bindgen(skip)]
-	pub inner: Tree_x5<Bn254Fr>,
+	pub inner: SparseMerkleTree<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>,
 }
 
 #[allow(clippy::unused_unit)]
@@ -318,18 +325,16 @@ impl AnchorMTBn254X5 {
 			.collect();
 
 		let curve = ArkCurve::Bn254;
-		let params3 = setup_params_x5_3::<Bn254Fr>(curve);
-		let params4 = setup_params_x5_4::<Bn254Fr>(curve);
+		let params3 = setup_params::<Bn254Fr>(curve, 5, 3);
+		let poseidon3 = Poseidon::new(params3);
 
-		let anchor_setup = AnchorSetup30_2::new(params3, params4);
-
-		let (tree, _) = anchor_setup.setup_tree_and_path(&leaves, leaf_index).unwrap();
+		let (tree, _) = setup_tree_and_create_path::<Bn254Fr, PoseidonGadget<Bn254Fr>, TREE_HEIGHT>(poseidon3, &leaves, leaf_index, &[0u8; 32]).unwrap();
 		Ok(Self { inner: tree })
 	}
 
 	#[wasm_bindgen(getter)]
 	pub fn root(&self) -> JsString {
-		let root = self.inner.root().inner().into_repr().to_bytes_le().to_vec();
+		let root = self.inner.root().into_repr().to_bytes_le().to_vec();
 		JsString::from(hex::encode(root))
 	}
 
@@ -353,8 +358,10 @@ impl AnchorMTBn254X5 {
 					.unwrap();
 			});
 
+		let params3 = setup_params::<Bn254Fr>(ArkCurve::Bn254, 5, 3);
+		let poseidon3 = Poseidon::new(params3);
 		self.inner
-			.insert_batch(&leaves_bt)
+			.insert_batch(&leaves_bt, &poseidon3)
 			.map_err(|_| OpStatusCode::InvalidLeaves)?;
 		Ok(())
 	}
@@ -499,8 +506,7 @@ pub fn validate_proof(proof: &Proof, vk: JsString, curve: WasmCurve) -> Result<b
 }
 #[cfg(test)]
 mod test {
-	use arkworks_circuits::prelude::ark_bn254::Bn254;
-	use arkworks_circuits::setup::common::verify_unchecked_raw;
+	use super::*;
 
 	use wasm_bindgen_test::*;
 
@@ -508,8 +514,6 @@ mod test {
 		generate_anchor_test_setup, generate_mixer_test_setup, AnchorTestSetup, MixerTestSetup, ANCHOR_NOTE_V1_X5_4,
 		ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5,
 	};
-
-	use super::*;
 
 	const TREE_DEPTH: usize = 30;
 

@@ -1,11 +1,12 @@
 use std::convert::TryInto;
 
-use arkworks_circuits::setup::anchor::setup_proof_x5_4;
-use arkworks_circuits::setup::common::AnchorProof;
-use arkworks_utils::prelude::ark_bls12_381::Bls12_381;
-use arkworks_utils::prelude::ark_bn254::Bn254;
-use arkworks_utils::utils::common::Curve as ArkCurve;
+use arkworks_setups::Curve as ArkCurve;
 use rand::rngs::OsRng;
+
+use crate::AnchorR1CSProverBn254_30_2;
+use crate::AnchorR1CSProverBls381_30_2;
+use crate::DEFAULT_LEAF;
+use arkworks_setups::AnchorProver;
 
 use crate::proof::{AnchorProofInput, Proof};
 use crate::types::{Backend, Curve, OpStatusCode, OperationError};
@@ -31,8 +32,8 @@ pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Re
 	} = anchor_proof_input;
 	let roots_array: [Vec<u8>; 2] = roots.try_into().map_err(|_| OpStatusCode::InvalidProofParameters)?;
 
-	let anchor_proof: AnchorProof = match (backend, curve, exponentiation, width) {
-		(Backend::Arkworks, Curve::Bn254, 5, 4) => setup_proof_x5_4::<Bn254, OsRng>(
+	let anchor_proof = match (backend, curve, exponentiation, width) {
+		(Backend::Arkworks, Curve::Bn254, 5, 4) => AnchorR1CSProverBn254_30_2::create_proof(
 			ArkCurve::Bn254,
 			chain_id,
 			secret,
@@ -42,13 +43,14 @@ pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Re
 			roots_array,
 			recipient_raw,
 			relayer_raw,
-			refresh_commitment.to_vec(),
 			fee,
 			refund,
+			refresh_commitment.to_vec(),
 			pk,
+			DEFAULT_LEAF,
 			rng,
 		),
-		(Backend::Arkworks, Curve::Bls381, 5, 4) => setup_proof_x5_4::<Bls12_381, OsRng>(
+		(Backend::Arkworks, Curve::Bls381, 5, 4) => AnchorR1CSProverBls381_30_2::create_proof(
 			ArkCurve::Bls381,
 			chain_id,
 			secret,
@@ -58,10 +60,11 @@ pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Re
 			roots_array,
 			recipient_raw,
 			relayer_raw,
-			refresh_commitment.to_vec(),
 			fee,
 			refund,
+			refresh_commitment.to_vec(),
 			pk,
+			DEFAULT_LEAF,
 			rng,
 		),
 		_ => return Err(OpStatusCode::InvalidProofParameters.into()),
