@@ -223,13 +223,13 @@ describe('Note class', () => {
   it.only('should fail to deserialize anchor invalid secrets (1 colon)', async () => {
     const serialized = 'webb://'
       + 'v2:anchor/'
-      + '1:invalid_target_chain_id/'
+      + '1:1/'
       + '1:1/'
       // Remove a secret item and also remove colon
       + '0000000000000001:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/'
       + '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
       const err = await Note.deserialize(serialized).catch((err) => { return err; });
-      expect(err.code).to.equal(19);
-      expect(err.message).to.equal('Invalid target chain id');
+      expect(err.code).to.equal(3);
+      expect(err.message).to.equal('Invalid note length');
   });
 });
