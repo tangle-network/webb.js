@@ -32,7 +32,7 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 	} = mixer_proof_input;
 
 	let mixer_proof = match (backend, curve, exponentiation, width) {
-		(Backend::Arkworks, Curve::Bn254, 5, 5) => MixerR1CSProverBn254_30::create_proof(
+		(Backend::Arkworks, Curve::Bn254, 5, 3) => MixerR1CSProverBn254_30::create_proof(
 			ArkCurve::Bn254,
 			secret,
 			nullifier,
@@ -46,7 +46,7 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 			DEFAULT_LEAF,
 			rng,
 		),
-		(Backend::Arkworks, Curve::Bls381, 5, 5) => MixerR1CSProverBls381_30::create_proof(
+		(Backend::Arkworks, Curve::Bls381, 5, 3) => MixerR1CSProverBls381_30::create_proof(
 			ArkCurve::Bls381,
 			secret,
 			nullifier,
