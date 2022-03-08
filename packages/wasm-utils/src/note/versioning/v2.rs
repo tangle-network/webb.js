@@ -83,7 +83,7 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
 		return Err(OpStatusCode::InvalidNoteLength);
 	}
 	for v in secret_parts.iter() {
-		if v.len() == 0 {
+		if v.is_empty() {
 			return Err(OpStatusCode::InvalidNoteSecrets);
 		}
 	}
