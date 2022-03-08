@@ -27,13 +27,13 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OperationError> {
 	if note_val.is_empty() {
 		return Err(OperationError::new_with_message(
 			OpStatusCode::InvalidNoteSecrets,
-			format!("Note value is empty"),
+			"Note value is empty".to_string(),
 		));
 	}
 	let secrets: Vec<u8> = hex::decode(&note_val.replace("0x", "")).map_err(|_| {
 		OperationError::new_with_message(
 			OpStatusCode::HexParsingFailed,
-			format!("Failed to parse note secrets value"),
+			"Failed to parse note secrets value".to_string(),
 		)
 	})?;
 
