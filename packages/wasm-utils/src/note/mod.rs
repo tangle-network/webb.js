@@ -26,7 +26,7 @@ macro_rules! console_log {
 
 impl JsNote {
 	/// Deseralize note from a string
-	pub fn deserialize(note: &str) -> Result<Self, OpStatusCode> {
+	pub fn deserialize(note: &str) -> Result<Self, OperationError> {
 		note.parse().map_err(Into::into)
 	}
 
@@ -182,7 +182,7 @@ impl fmt::Display for JsNote {
 }
 
 impl FromStr for JsNote {
-	type Err = OpStatusCode;
+	type Err = OperationError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		if !s.contains("://") {
