@@ -87,7 +87,7 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
 			return Err(OpStatusCode::InvalidNoteSecrets);
 		}
 	}
-	if secret_parts[0].len() != 8 || secret_parts[0].len() == 6 {
+	if secret_parts[0].len() != 8 && secret_parts[0].len() != 6 {
 		return Err(OpStatusCode::InvalidNoteSecrets);
 	}
 
