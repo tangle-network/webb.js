@@ -18,8 +18,8 @@ use ark_bls12_381::Bls12_381;
 use ark_bn254::Bn254;
 
 pub const DEFAULT_LEAF: [u8; 32] = [0u8; 32];
-const TREE_HEIGHT: usize = 30;
-const ANCHOR_COUNT: usize = 2;
+pub const TREE_HEIGHT: usize = 30;
+pub const ANCHOR_COUNT: usize = 2;
 
 pub type MixerR1CSProverBn254_30 = MixerR1CSProver<Bn254, TREE_HEIGHT>;
 pub type MixerR1CSProverBls381_30 = MixerR1CSProver<Bls12_381, TREE_HEIGHT>;

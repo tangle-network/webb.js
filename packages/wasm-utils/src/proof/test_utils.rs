@@ -1,9 +1,7 @@
 use ark_bn254::{Bn254, Fr as Bn254Fr};
 use ark_ff::PrimeField;
-use arkworks_setups::r1cs::anchor::AnchorR1CSProver;
-use arkworks_setups::r1cs::mixer::MixerR1CSProver;
 use arkworks_setups::Curve as ArkCurve;
-use arkworks_setups::common::{setup_params, setup_keys, setup_tree_and_create_path};
+use arkworks_setups::common::{setup_params, setup_tree_and_create_path, setup_keys_unchecked};
 use arkworks_native_gadgets::poseidon::Poseidon;
 use arkworks_r1cs_gadgets::poseidon::PoseidonGadget;
 use js_sys::{Array, JsString, Uint8Array};
@@ -11,6 +9,11 @@ use ark_ff::BigInteger;
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
+use crate::DEFAULT_LEAF;
+use crate::TREE_HEIGHT;
+use crate::ANCHOR_COUNT;
+use crate::MixerR1CSProverBn254_30;
+use crate::AnchorR1CSProverBn254_30_2;
 use crate::note::JsNote;
 use crate::proof::ProofInputBuilder;
 use crate::types::Leaves;
@@ -19,12 +22,7 @@ pub const MIXER_NOTE_V1_X5_5:&str  = "webb.mixer:v1:16:16:Arkworks:Bn254:Poseido
 pub const ANCHOR_NOTE_V1_X5_4:&str  ="webb.anchor:v1:2199023256632:2199023256632:Arkworks:Bn254:Poseidon:WEBB:18:10:5:4:fd6518ad0f63d214d0964206105dc67ec9dfe677b18a4626bd522c1d0719920cebea49a028e691673b87921f9792fe9d4d6a374919fe07984df3373b630c2e05";
 pub const ANCHOR_NOTE_V2_X5_4:&str  ="webb://v2:anchor/2199023256632:2199023256632/0:3/3804000000200000:d8b84d776284d1e53884efb08d40f31a78158b67f11474319e284aa71695890e:cadd7ea7ea6a2fd97c787243acc0aa240c599288f5cef562a80efe0a1e368b0d/?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Arkworks&token=WEBB&denom=18&amount=10";
 
-const TREE_DEPTH: usize = 30;
-pub const M: usize = 2;
 pub const DECODED_SUBSTRATE_ADDRESS: &str = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
-
-pub type AnchorSetup30_2 = AnchorR1CSProver<Bn254, M, TREE_DEPTH>;
-pub type MixerSetup30 = MixerR1CSProver<Bn254, TREE_DEPTH>;
 
 pub struct MixerTestSetup {
 	pub(crate) relayer: Vec<u8>,
@@ -51,8 +49,8 @@ pub fn generate_mixer_test_setup(
 	recipient_decoded_ss58: &str,
 	note: &str,
 ) -> MixerTestSetup {
-	let (c, ..) = MixerSetup30::setup_random_circuit(ArkCurve::Bn254, [0u8; 32], &mut OsRng).unwrap();
-	let (pk, vk) = setup_keys::<Bn254, _, _>(c, &mut OsRng).unwrap();
+	let (c, ..) = MixerR1CSProverBn254_30::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
+	let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
 	let index = 0;
 	let note = JsNote::js_deserialize(JsString::from(note)).unwrap();
 	let leaf = note.get_leaf_commitment().unwrap();
@@ -80,7 +78,7 @@ pub fn generate_mixer_test_setup(
 	MixerTestSetup {
 		relayer: hex::decode(relayer_decoded_ss58).unwrap(),
 		recipient: hex::decode(recipient_decoded_ss58).unwrap(),
-		vk: vk,
+		vk,
 		root: vec![],
 		leaf_bytes,
 		proof_input_builder: js_builder,
@@ -96,8 +94,8 @@ pub fn generate_anchor_test_setup(
 	let curve = ArkCurve::Bn254;
 	let index = 0;
 
-	let (c, ..) = AnchorSetup30_2::setup_random_circuit(ArkCurve::Bn254, [0u8; 32], &mut OsRng).unwrap();
-	let (pk, vk) = setup_keys::<Bn254, _, _>(c, &mut OsRng).unwrap();
+	let (c, ..) = AnchorR1CSProverBn254_30_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
+	let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
 
 	let note = JsNote::js_deserialize(JsString::from(note)).unwrap();
 
@@ -110,8 +108,8 @@ pub fn generate_anchor_test_setup(
 	let poseidon3 = Poseidon::new(params3);
 
 	let leaves_f = vec![Bn254Fr::from_le_bytes_mod_order(&leaf_bytes)];
-	let (tree, _) = setup_tree_and_create_path::<Bn254Fr, PoseidonGadget<Bn254Fr>, TREE_DEPTH>(poseidon3, &leaves_f, index, &[0u8; 32]).unwrap();
-	let roots_f = [tree.root(); M];
+	let (tree, _) = setup_tree_and_create_path::<Bn254Fr, PoseidonGadget<Bn254Fr>, TREE_HEIGHT>(poseidon3, &leaves_f, index, &DEFAULT_LEAF).unwrap();
+	let roots_f = [tree.root(); ANCHOR_COUNT];
 	let roots_raw = roots_f.map(|x| x.into_repr().to_bytes_le());
 	let roots_array: Array = roots_raw.iter().map(|i| Uint8Array::from(i.as_slice())).collect();
 

@@ -22,6 +22,7 @@ use ark_bn254::Bn254;
 
 use crate::note::JsNote;
 use crate::types::{Backend, Curve, Leaves, NoteProtocol, OpStatusCode, OperationError, Uint8Arrayx32, WasmCurve};
+use crate::TREE_HEIGHT;
 
 mod anchor;
 mod mixer;
@@ -163,6 +164,7 @@ macro_rules! console_log {
 }
 
 #[wasm_bindgen]
+#[derive(Debug, Clone)]
 pub struct JsProofInput {
 	#[wasm_bindgen(skip)]
 	pub inner: ProofInput,
@@ -297,8 +299,6 @@ impl ProofInputBuilder {
 		}
 	}
 }
-
-const TREE_HEIGHT: usize = 30;
 
 #[wasm_bindgen]
 pub struct AnchorMTBn254X5 {
@@ -479,8 +479,9 @@ impl ProofInputBuilder {
 		Ok(JsProofInput { inner: proof_input })
 	}
 }
+
 #[wasm_bindgen]
-pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
+pub fn  generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 	let mut rng = OsRng;
 	let proof_input_value = proof_input.inner;
 	match proof_input_value {
@@ -489,6 +490,7 @@ pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 	}
 	.map_err(|e| e.into())
 }
+
 #[wasm_bindgen]
 pub fn validate_proof(proof: &Proof, vk: JsString, curve: WasmCurve) -> Result<bool, JsValue> {
 	let vk_string: String = vk.into();
@@ -634,7 +636,22 @@ mod test {
 
 		let proof_input = proof_input_builder.build_js().unwrap();
 
-		let proof = generate_proof_js(proof_input).unwrap();
+		let proof = generate_proof_js(proof_input.clone()).unwrap();
+
+		// match proof_input.inner {
+		// 	ProofInput::Mixer(_) => (),
+		// 	ProofInput::Anchor(anchor_proof_input) => {
+		// 		wasm_bindgen_test::console_log!("{:?}", anchor_proof_input.chain_id);
+		// 		wasm_bindgen_test::console_log!("{:?}", anchor_proof_input.recipient);
+		// 		wasm_bindgen_test::console_log!("{:?}", anchor_proof_input.relayer);
+		// 		wasm_bindgen_test::console_log!("{:?}", anchor_proof_input.roots);
+		// 		wasm_bindgen_test::console_log!("{:?}", anchor_proof_input.fee);
+		// 		wasm_bindgen_test::console_log!("{:?}", anchor_proof_input.refund);
+		// 	},
+		// };
+		for p in &proof.public_inputs {
+			wasm_bindgen_test::console_log!("{:?}", p);
+		}
 
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 		assert!(is_valid_proof);
