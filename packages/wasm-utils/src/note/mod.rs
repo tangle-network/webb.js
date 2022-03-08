@@ -25,7 +25,7 @@ macro_rules! console_log {
 
 impl JsNote {
 	/// Deseralize note from a string
-	pub fn deserialize(note: &str) -> Result<Self, OpStatusCode> {
+	pub fn deserialize(note: &str) -> Result<Self, OperationError> {
 		note.parse().map_err(Into::into)
 	}
 
@@ -183,7 +183,7 @@ impl fmt::Display for JsNote {
 }
 
 impl FromStr for JsNote {
-	type Err = OpStatusCode;
+	type Err = OperationError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		if !s.contains("://") {
@@ -396,16 +396,13 @@ impl JsNoteBuilder {
 
 		// Chain Ids
 		let source_chain_id = self.source_chain_id.ok_or(OpStatusCode::InvalidSourceChain)?;
+		let _: u64 = source_chain_id.parse().map_err(|_| OpStatusCode::InvalidSourceChain)?;
 		let target_chain_id = self.target_chain_id.ok_or(OpStatusCode::InvalidTargetChain)?;
 		let chain_id: u64 = target_chain_id.parse().map_err(|_| OpStatusCode::InvalidTargetChain)?;
 
 		// Chain identifying data
-		let source_identifying_data = self
-			.source_identifying_data
-			.ok_or(OpStatusCode::InvalidSourceIdentifyingData)?;
-		let target_identifying_data = self
-			.target_identifying_data
-			.ok_or(OpStatusCode::InvalidTargetIdentifyingData)?;
+		let source_identifying_data = self.source_identifying_data.ok_or_else(|| source_chain_id.clone())?;
+		let target_identifying_data = self.target_identifying_data.ok_or_else(|| target_chain_id.clone())?;
 
 		// Misc
 		let exponentiation = self.exponentiation;
@@ -514,6 +511,18 @@ impl JsNote {
 	#[wasm_bindgen(getter)]
 	pub fn source_chain_id(&self) -> JsString {
 		self.source_chain_id.clone().into()
+	}
+
+	#[wasm_bindgen(js_name = targetIdentifyingData)]
+	#[wasm_bindgen(getter)]
+	pub fn target_identifying_data(&self) -> JsString {
+		self.target_identifying_data.clone().into()
+	}
+
+	#[wasm_bindgen(js_name = sourceIdentifyingData)]
+	#[wasm_bindgen(getter)]
+	pub fn source_identifying_data(&self) -> JsString {
+		self.source_identifying_data.clone().into()
 	}
 
 	#[wasm_bindgen(getter)]

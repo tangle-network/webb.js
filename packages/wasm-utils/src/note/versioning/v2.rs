@@ -1,13 +1,16 @@
 use crate::note::*;
-use crate::types::OpStatusCode;
+use crate::types::{OpStatusCode, OperationError};
 
-pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
+pub fn note_from_str(s: &str) -> Result<JsNote, OperationError> {
 	let scheme_and_parts: Vec<&str> = s.split("://").collect();
 	let scheme = scheme_and_parts[0];
 
 	let parts: Vec<&str> = scheme_and_parts[1].split('/').collect();
 	if parts.len() < 5 {
-		return Err(OpStatusCode::InvalidNoteLength);
+		return Err(OperationError::new_with_message(
+			OpStatusCode::InvalidNoteLength,
+			format!("Note length has incorrect parts length: {}", parts.len()),
+		));
 	}
 	// Raw parts
 	let authority = parts[0];
@@ -19,7 +22,10 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
 	// Authority parsing
 	let authority_parts: Vec<&str> = authority.split(':').collect();
 	if authority_parts.len() != 2 {
-		return Err(OpStatusCode::InvalidNoteLength);
+		return Err(OperationError::new_with_message(
+			OpStatusCode::InvalidNoteLength,
+			format!("Invalid authority parts length: {}", authority_parts.len()),
+		));
 	}
 
 	let version = NoteVersion::from_str(authority_parts[0])?;
@@ -28,15 +34,26 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
 	// Chain IDs parsing
 	let chain_ids_parts: Vec<&str> = chain_ids.split(':').collect();
 	if chain_ids_parts.len() != 2 {
-		return Err(OpStatusCode::InvalidNoteLength);
+		return Err(OperationError::new_with_message(
+			OpStatusCode::InvalidNoteLength,
+			format!("Invalid chain IDs parts length: {}", chain_ids_parts.len()),
+		));
 	}
 	let source_chain_id = chain_ids_parts[0];
+	let _: u64 = source_chain_id.parse().map_err(|_| OpStatusCode::InvalidSourceChain)?;
 	let target_chain_id = chain_ids_parts[1];
+	let _: u64 = target_chain_id.parse().map_err(|_| OpStatusCode::InvalidTargetChain)?;
 
 	// Chain Identifying Data parsing
 	let chain_identifying_data_parts: Vec<&str> = chain_identifying_data.split(':').collect();
 	if chain_identifying_data_parts.len() != 2 {
-		return Err(OpStatusCode::InvalidNoteLength);
+		return Err(OperationError::new_with_message(
+			OpStatusCode::InvalidNoteLength,
+			format!(
+				"Invalid chain identifying data parts length: {}",
+				chain_identifying_data_parts.len()
+			),
+		));
 	}
 	let source_identifying_data = chain_identifying_data_parts[0];
 	let target_identifying_data = chain_identifying_data_parts[1];
@@ -55,7 +72,10 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
 	for part in misc_parts {
 		let part_parts: Vec<&str> = part.split('=').collect();
 		if part_parts.len() != 2 {
-			return Err(OpStatusCode::InvalidNoteMiscData);
+			return Err(OperationError::new_with_message(
+				OpStatusCode::InvalidNoteMiscData,
+				format!("Invalid note misc data parts length: {}", part_parts.len()),
+			));
 		}
 		let key = part_parts[0];
 		let value = part_parts[1];
@@ -69,7 +89,12 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
 			"token" => token_symbol = Some(value),
 			"denom" => denomination = Some(value),
 			"amount" => amount = Some(value),
-			_ => return Err(OpStatusCode::InvalidNoteMiscData),
+			_ => {
+				return Err(OperationError::new_with_message(
+					OpStatusCode::InvalidNoteMiscData,
+					format!("Unknown miscellaneous key: {}", key),
+				))
+			}
 		}
 	}
 
@@ -77,6 +102,29 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OpStatusCode> {
 		.split(':')
 		.map(|v| hex::decode(v).unwrap_or_default())
 		.collect::<Vec<Vec<u8>>>();
+	if secret_parts.len() != 3 {
+		return Err(OperationError::new_with_message(
+			OpStatusCode::InvalidNoteLength,
+			format!("Invalid secret parts length: {}", secret_parts.len()),
+		));
+	}
+	for (inx, v) in secret_parts.iter().enumerate() {
+		if v.is_empty() {
+			return Err(OperationError::new_with_message(
+				OpStatusCode::InvalidNoteSecrets,
+				format!("Secret part {} is empty", inx),
+			));
+		}
+	}
+	if secret_parts[0].len() != 8 && secret_parts[0].len() != 6 {
+		return Err(OperationError::new_with_message(
+			OpStatusCode::InvalidNoteSecrets,
+			format!(
+				"First secret part must be 6 or 8 bytes long, but is {} bytes long",
+				secret_parts[0].len()
+			),
+		));
+	}
 
 	Ok(JsNote {
 		scheme: scheme.to_string(),

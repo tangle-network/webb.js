@@ -1,7 +1,7 @@
 import { FixedPointNumber } from '../fixed-point-number';
 import { expect } from 'chai';
 
-describe('fixed point number constructor should worker', () => {
+describe('fixed point number constructor should work', () => {
   it('toString & toNumber', () => {
     const a = FixedPointNumber.fromInner('123456789123456789123456789');
     const b = FixedPointNumber.fromInner('123456789123456781123456789');
@@ -52,7 +52,7 @@ describe('fixed point number constructor should worker', () => {
   });
 });
 
-describe('fixed point number calculation should worker', () => {
+describe('fixed point number calculation should work', () => {
   it('get the absolute value', () => {
     const a = new FixedPointNumber(-1);
     const b = new FixedPointNumber(1);
@@ -131,7 +131,7 @@ describe('fixed point number calculation should worker', () => {
   });
 });
 
-describe('fixed point number compare should worker', () => {
+describe('fixed point number compare should work', () => {
   it('isZero', () => {
     const a = new FixedPointNumber(0);
     const b = new FixedPointNumber(1);
