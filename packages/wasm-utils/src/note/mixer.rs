@@ -15,8 +15,8 @@ pub fn generate_secrets(
 	rng: &mut OsRng,
 ) -> Result<[Vec<u8>; 2], OperationError> {
 	let sec = match (curve, exponentiation, width) {
-		(Curve::Bls381, 5, 5) => MixerR1CSProverBn254_30::create_random_leaf(ArkCurve::Bls381, rng),
-		(Curve::Bn254, 5, 5) => MixerR1CSProverBls381_30::create_random_leaf(ArkCurve::Bn254, rng),
+		(Curve::Bls381, 5, 5) => MixerR1CSProverBls381_30::create_random_leaf(ArkCurve::Bls381, rng),
+		(Curve::Bn254, 5, 5) => MixerR1CSProverBn254_30::create_random_leaf(ArkCurve::Bn254, rng),
 		_ => {
 			let message = format!(
 				"No Mixer secrets setup available for curve {}, exponentiation {} , and width {}",
@@ -46,7 +46,7 @@ pub fn get_leaf_with_private_raw(
 	let nullifer = raw[32..64].to_vec();
 	// (leaf_bytes, nullifier_hash_bytes)
 	let sec = match (curve, exponentiation, width) {
-		(Curve::Bls381, 5, 5) => MixerR1CSProverBn254_30::create_leaf_with_privates(ArkCurve::Bls381, secrets, nullifer),
+		(Curve::Bls381, 5, 5) => MixerR1CSProverBls381_30::create_leaf_with_privates(ArkCurve::Bls381, secrets, nullifer),
 		(Curve::Bn254, 5, 5) => MixerR1CSProverBn254_30::create_leaf_with_privates(ArkCurve::Bn254, secrets, nullifer),
 		_ => {
 			let message = format!(

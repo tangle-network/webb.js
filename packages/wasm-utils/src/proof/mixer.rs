@@ -6,13 +6,11 @@ use ark_bn254::Bn254;
 
 use rand::rngs::OsRng;
 
+use crate::MixerR1CSProverBn254_30;
+use crate::MixerR1CSProverBls381_30;
+use crate::DEFAULT_LEAF;
 use crate::proof::{MixerProofInput, Proof};
 use crate::types::{Backend, Curve, OpStatusCode, OperationError};
-
-const DEFAULT_LEAF: [u8; 32] = [0u8; 32];
-const TREE_HEIGHT: usize = 30;
-type MixerR1CSProverBn254_30 = MixerR1CSProver<Bn254, TREE_HEIGHT>;
-type MixerR1CSProverBls381_30 = MixerR1CSProver<Bls12_381, TREE_HEIGHT>;
 
 pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Result<Proof, OperationError> {
 	let MixerProofInput {

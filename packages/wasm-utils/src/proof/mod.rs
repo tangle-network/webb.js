@@ -26,9 +26,8 @@ use crate::TREE_HEIGHT;
 
 mod anchor;
 mod mixer;
+#[cfg(test)]
 mod test_utils;
-// #[cfg(test)]
-// mod test_utils;
 
 pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
 	let mut truncated_bytes = t[..20].to_vec();
@@ -277,7 +276,7 @@ impl ProofInputBuilder {
 
 				let anchor_input = AnchorProofInput {
 					exponentiation: exponentiation.unwrap_or(5),
-					width: width.unwrap_or(3),
+					width: width.unwrap_or(4),
 					curve: curve.unwrap_or(Curve::Bn254),
 					backend: backend.unwrap_or(Backend::Circom),
 					secret,
@@ -638,20 +637,43 @@ mod test {
 
 		let proof = generate_proof_js(proof_input.clone()).unwrap();
 
+		// UNCOMENT FOR DEBUGGING
 		// match proof_input.inner {
 		// 	ProofInput::Mixer(_) => (),
 		// 	ProofInput::Anchor(anchor_proof_input) => {
-		// 		wasm_bindgen_test::console_log!("{:?}", anchor_proof_input.chain_id);
-		// 		wasm_bindgen_test::console_log!("{:?}", anchor_proof_input.recipient);
-		// 		wasm_bindgen_test::console_log!("{:?}", anchor_proof_input.relayer);
-		// 		wasm_bindgen_test::console_log!("{:?}", anchor_proof_input.roots);
-		// 		wasm_bindgen_test::console_log!("{:?}", anchor_proof_input.fee);
-		// 		wasm_bindgen_test::console_log!("{:?}", anchor_proof_input.refund);
+		// 		wasm_bindgen_test::console_log!("exponentiation {:?}", anchor_proof_input.exponentiation);
+		// 		wasm_bindgen_test::console_log!("width {:?}", anchor_proof_input.width);
+		// 		wasm_bindgen_test::console_log!("curve {:?}", anchor_proof_input.curve);
+		// 		wasm_bindgen_test::console_log!("backend {:?}", anchor_proof_input.backend);
+		// 		wasm_bindgen_test::console_log!("secret {:?}", anchor_proof_input.secret);
+		// 		wasm_bindgen_test::console_log!("nullifier {:?}", anchor_proof_input.nullifier);
+		// 		wasm_bindgen_test::console_log!("recipient {:?}", anchor_proof_input.recipient);
+		// 		wasm_bindgen_test::console_log!("relayer {:?}", anchor_proof_input.relayer);
+		// 		wasm_bindgen_test::console_log!("refund {:?}", anchor_proof_input.refund);
+		// 		wasm_bindgen_test::console_log!("fee {:?}", anchor_proof_input.fee);
+		// 		wasm_bindgen_test::console_log!("chain id {:?}", anchor_proof_input.chain_id);
+		// 		wasm_bindgen_test::console_log!("leaves {:?}", anchor_proof_input.leaves);
+		// 		wasm_bindgen_test::console_log!("leaf index {:?}", anchor_proof_input.leaf_index);
+		// 		wasm_bindgen_test::console_log!("roots {:?}", anchor_proof_input.roots);
+
+		// 		let params = setup_params(ArkCurve::Bn254, 5, 4);
+		// 		let poseidon = Poseidon::<Bn254Fr>::new(params);
+
+		// 		let chain_id = Bn254Fr::from(anchor_proof_input.chain_id);
+		// 		let secret = Bn254Fr::from_le_bytes_mod_order(&anchor_proof_input.secret);
+		// 		let nullifier = Bn254Fr::from_le_bytes_mod_order(&anchor_proof_input.nullifier);
+		// 		let res = poseidon.hash(&[chain_id, nullifier, secret]).unwrap();
+		// 		let res_bytes = res.into_repr().to_bytes_le();
+		// 		let nullifier_hash = poseidon.hash_two(&nullifier, &nullifier).unwrap();
+		// 		let nullifier_hash_bytes = nullifier_hash.into_repr().to_bytes_le();
+		// 		wasm_bindgen_test::console_log!("calc leaf {:?}", res_bytes);
+		// 		wasm_bindgen_test::console_log!("nullifier hash {:?}", nullifier_hash_bytes);
 		// 	},
 		// };
-		for p in &proof.public_inputs {
-			wasm_bindgen_test::console_log!("{:?}", p);
-		}
+
+		// for p in &proof.public_inputs {
+		// 	wasm_bindgen_test::console_log!("{:?}", p);
+		// }
 
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 		assert!(is_valid_proof);

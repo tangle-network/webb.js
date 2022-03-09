@@ -50,7 +50,7 @@ pub fn get_leaf_with_private_raw(
 			secret_bytes,
 			nullifier_bytes,
 		),
-		(Curve::Bn254, 5, 4) => AnchorR1CSProverBls381_30_2::create_leaf_with_privates(
+		(Curve::Bn254, 5, 4) => AnchorR1CSProverBn254_30_2::create_leaf_with_privates(
 			ArkCurve::Bn254,
 			chain_id,
 			secret_bytes,
