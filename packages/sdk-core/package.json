@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/sdk-core",
-  "version": "0.1.4-38",
+  "version": "0.1.4-39",
   "description": "the core of webb tools sdk",
   "main": "index.js",
   "author": "Webb Developers <drew@webb.tools>",
@@ -16,15 +16,15 @@
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
     "@types/events": "^3.0.0",
-    "@webb-tools/api": "^0.1.4-38",
-    "@webb-tools/wasm-utils": "^0.1.4-38",
+    "@webb-tools/api": "^0.1.4-39",
+    "@webb-tools/wasm-utils": "^0.1.4-39",
     "bignumber.js": "^9.0.0",
     "events": "^3.2.0",
     "lodash": "^4.17.20"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.161",
     "@types/chai": "^4.3.0",
+    "@types/lodash": "^4.14.161",
     "chai": "^4.3.6"
   }
 }
