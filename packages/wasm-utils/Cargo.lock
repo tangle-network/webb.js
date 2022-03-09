@@ -251,7 +251,7 @@ dependencies = [
 [[package]]
 name = "arkworks-native-gadgets"
 version = "0.5.0"
-source = "git+https://github.com/webb-tools/arkworks-gadgets.git?branch=filip/fix-public-inputs-mixer-anchor#5f87f5bc7837a719fbd499d679fc15636d5fc817"
+source = "git+https://github.com/webb-tools/arkworks-gadgets.git?branch=filip/fix-public-inputs-mixer-anchor#d0eee42813fcdeabdae3fbed71ff539407a58199"
 dependencies = [
  "ark-crypto-primitives",
  "ark-ff",
@@ -261,7 +261,7 @@ dependencies = [
 [[package]]
 name = "arkworks-r1cs-circuits"
 version = "0.5.0"
-source = "git+https://github.com/webb-tools/arkworks-gadgets.git?branch=filip/fix-public-inputs-mixer-anchor#5f87f5bc7837a719fbd499d679fc15636d5fc817"
+source = "git+https://github.com/webb-tools/arkworks-gadgets.git?branch=filip/fix-public-inputs-mixer-anchor#d0eee42813fcdeabdae3fbed71ff539407a58199"
 dependencies = [
  "ark-ff",
  "ark-r1cs-std",
@@ -274,7 +274,7 @@ dependencies = [
 [[package]]
 name = "arkworks-r1cs-gadgets"
 version = "0.5.0"
-source = "git+https://github.com/webb-tools/arkworks-gadgets.git?branch=filip/fix-public-inputs-mixer-anchor#5f87f5bc7837a719fbd499d679fc15636d5fc817"
+source = "git+https://github.com/webb-tools/arkworks-gadgets.git?branch=filip/fix-public-inputs-mixer-anchor#d0eee42813fcdeabdae3fbed71ff539407a58199"
 dependencies = [
  "ark-crypto-primitives",
  "ark-ff",
@@ -287,7 +287,7 @@ dependencies = [
 [[package]]
 name = "arkworks-setups"
 version = "0.5.0"
-source = "git+https://github.com/webb-tools/arkworks-gadgets.git?branch=filip/fix-public-inputs-mixer-anchor#5f87f5bc7837a719fbd499d679fc15636d5fc817"
+source = "git+https://github.com/webb-tools/arkworks-gadgets.git?branch=filip/fix-public-inputs-mixer-anchor#d0eee42813fcdeabdae3fbed71ff539407a58199"
 dependencies = [
  "ark-crypto-primitives",
  "ark-ec",
@@ -309,7 +309,7 @@ dependencies = [
 [[package]]
 name = "arkworks-utils"
 version = "0.5.0"
-source = "git+https://github.com/webb-tools/arkworks-gadgets.git?branch=filip/fix-public-inputs-mixer-anchor#5f87f5bc7837a719fbd499d679fc15636d5fc817"
+source = "git+https://github.com/webb-tools/arkworks-gadgets.git?branch=filip/fix-public-inputs-mixer-anchor#d0eee42813fcdeabdae3fbed71ff539407a58199"
 dependencies = [
  "ark-ff",
  "ark-std",

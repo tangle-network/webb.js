@@ -1,5 +1,5 @@
 use ark_std::rand::rngs::OsRng;
-use arkworks_setups::common::MixerLeaf;
+use arkworks_setups::common::Leaf;
 
 use crate::MixerR1CSProverBn254_30;
 use crate::MixerR1CSProverBls381_30;
@@ -37,7 +37,7 @@ pub fn get_leaf_with_private_raw(
 	width: usize,
 	exponentiation: i8,
 	raw: &[u8],
-) -> Result<MixerLeaf, OperationError> {
+) -> Result<Leaf, OperationError> {
 	if raw.len() < 64 {
 		return Err(OpStatusCode::InvalidNoteSecrets.into());
 	}

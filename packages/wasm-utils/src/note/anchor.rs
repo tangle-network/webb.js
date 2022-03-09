@@ -1,5 +1,5 @@
 use ark_std::rand::rngs::OsRng;
-use arkworks_setups::common::AnchorLeaf;
+use arkworks_setups::common::Leaf;
 
 use crate::AnchorR1CSProverBls381_30_2;
 use crate::AnchorR1CSProverBn254_30_2;
@@ -37,7 +37,7 @@ pub fn get_leaf_with_private_raw(
 	chain_id: u64,
 	nullifier_bytes: Vec<u8>,
 	secret_bytes: Vec<u8>,
-) -> Result<AnchorLeaf, OperationError> {
+) -> Result<Leaf, OperationError> {
 	if secret_bytes.len() < 32 || nullifier_bytes.len() < 32 {
 		return Err(OpStatusCode::InvalidNoteSecrets.into());
 	}

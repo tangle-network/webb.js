@@ -1,8 +1,5 @@
 use arkworks_setups::Curve as ArkCurve;
-use arkworks_setups::r1cs::mixer::MixerR1CSProver;
 use arkworks_setups::MixerProver;
-use ark_bls12_381::Bls12_381;
-use ark_bn254::Bn254;
 
 use rand::rngs::OsRng;
 

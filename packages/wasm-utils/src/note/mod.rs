@@ -5,6 +5,7 @@ use js_sys::{JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
+use arkworks_setups::common::Leaf;
 
 use crate::types::{
 	Backend, Curve, HashFunction, NoteProtocol, NoteVersion, OpStatusCode, OperationError, Protocol, Version,
@@ -29,7 +30,7 @@ impl JsNote {
 		note.parse().map_err(Into::into)
 	}
 
-	pub fn get_leaf_and_nullifier(&self) -> Result<(Vec<u8>, Vec<u8>), OperationError> {
+	pub fn get_leaf_and_nullifier(&self) -> Result<Leaf, OperationError> {
 		match self.protocol {
 			NoteProtocol::Mixer => {
 				let raw = match self.version {
@@ -45,13 +46,12 @@ impl JsNote {
 						raw
 					}
 				};
-				let mixer_leaf = mixer::get_leaf_with_private_raw(
+				mixer::get_leaf_with_private_raw(
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
 					self.exponentiation.unwrap_or(5),
 					&raw,
-				)?;
-				Ok((mixer_leaf.leaf_bytes, mixer_leaf.nullifier_bytes))
+				)
 			}
 			NoteProtocol::Anchor => {
 				let mut secret_bytes: Vec<u8> = Vec::new();
@@ -85,15 +85,14 @@ impl JsNote {
 					));
 				}
 
-				let leaf = anchor::get_leaf_with_private_raw(
+				anchor::get_leaf_with_private_raw(
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
 					self.exponentiation.unwrap_or(4),
 					u64::from_str(&self.target_chain_id).unwrap(),
 					nullifier_bytes,
 					secret_bytes,
-				)?;
-				Ok((leaf.leaf_bytes, leaf.nullifier_bytes))
+				)
 			}
 			_ => {
 				let message = format!("{} protocol isn't supported yet", self.protocol);
@@ -486,8 +485,8 @@ impl JsNote {
 
 	#[wasm_bindgen(js_name = getLeafCommitment)]
 	pub fn get_leaf_commitment(&self) -> Result<Uint8Array, JsValue> {
-		let (leaf_bytes, _) = self.get_leaf_and_nullifier()?;
-		Ok(Uint8Array::from(leaf_bytes.as_slice()))
+		let leaf= self.get_leaf_and_nullifier()?;
+		Ok(Uint8Array::from(leaf.leaf_bytes.as_slice()))
 	}
 
 	pub fn serialize(&self) -> JsString {
