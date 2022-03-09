@@ -6,7 +6,7 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const rimraf = require('rimraf');
-const { execSync: _execSync } = require('child_process');
+const { execSync: _execSync, exec } = require('child_process');
 
 const argv = require('yargs')
   .options({
@@ -33,13 +33,15 @@ function runCheck() {
   execSync('yarn lint');
 }
 
-function runTest() {
-  execSync('yarn test');
-}
-
 function runBuild() {
   execSync('yarn build');
 }
+
+function runTest() {
+  execSync('git submodule update --init --recursive')
+  execSync('yarn test');
+}
+
 
 function npmGetVersion() {
   return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'package.json'), 'utf8')).version;
