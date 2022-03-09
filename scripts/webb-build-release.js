@@ -35,12 +35,6 @@ function runCheck() {
 
 function runTest() {
   execSync('yarn test');
-
-  // if [ -f "coverage/lcov.info" ] && [ -n "$COVERALLS_REPO_TOKEN" ]; then
-  //   console.log('*** Submitting to coveralls.io');
-
-  //   (cat coverage/lcov.info | yarn run coveralls) || true
-  // fi
 }
 
 function runBuild() {
@@ -190,8 +184,8 @@ npmSetup();
 
 runClean();
 runCheck();
-runTest();
 runBuild();
+runTest();
 
 gitPush();
 loopFunc(npmPublish);
