@@ -1,8 +1,8 @@
-import { InternalChainId } from '@webb-dapp/apps/configs';
-import { ActiveWebbRelayer, WebbRelayer } from '@webb-dapp/react-environment/webb-context/relayer';
 import { EventBus } from '@webb-tools/app-util';
 import { Note } from '@webb-tools/sdk-core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { ActiveWebbRelayer, WebbRelayer } from '../relayer';
+import { InternalChainId } from '../../chains';
 
 export enum WithdrawState {
   Cancelling,
@@ -13,7 +13,7 @@ export enum WithdrawState {
   SendingTransaction,
 
   Done,
-  Failed,
+  Failed
 }
 
 export type MixerWithdrawEvents = {

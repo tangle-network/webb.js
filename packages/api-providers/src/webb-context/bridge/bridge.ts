@@ -3,14 +3,15 @@ import { BridgeConfig } from '../../types/bridge-config.interface';
 import { AppConfig } from '../common';
 import { WebbCurrencyId } from '../../enums';
 import { InternalChainId } from '../../chains';
+import { CurrencyRole } from '../../types/currency-config.interface';
 
 export class Bridge {
-  private constructor(private bridgeConfig: BridgeConfig) {}
+  private constructor(private bridgeConfig: BridgeConfig, private readonly appConfig: AppConfig) {}
 
-  static from(bridgeCurrency: WebbCurrencyId, bridgeConfigByAsset: AppConfig['bridgeByAsset']): Bridge {
+  static from(bridgeCurrency: WebbCurrencyId, appConfig: AppConfig): Bridge {
     console.log('WebbCurrencyId in Bridge static constructor: ', bridgeCurrency);
-    const bridgeConfig = bridgeConfigByAsset[bridgeCurrency];
-    return new Bridge(bridgeConfig);
+    const bridgeConfig = appConfig.bridgeByAsset[bridgeCurrency];
+    return new Bridge(bridgeConfig, appConfig);
   }
 
   /*
@@ -24,20 +25,20 @@ export class Bridge {
    *  Get the bridge currency
    * */
   get currency() {
-    return Currency.fromCurrencyId(this.bridgeConfig.asset);
+    return Currency.fromCurrencyId(this.appConfig.currencies, this.bridgeConfig.asset);
   }
 
-  getTokenAddress(currenciesConfig: AppConfig['currencies'], chainId: InternalChainId) {
-    return currenciesConfig[this.bridgeConfig.asset].addresses.get(chainId);
+  getTokenAddress(chainId: InternalChainId) {
+    return this.appConfig.currencies[this.bridgeConfig.asset].addresses.get(chainId);
   }
 
   /*
    *  Get all Bridge tokens
    * */
   static getTokens(currenciesConfig: AppConfig['currencies']): Currency[] {
-    const bridgeCurrenciesConfig = Object.values(currenciesConfig).filter((i) => i.role == CurrencyRole.Governable);
+    const bridgeCurrenciesConfig = Object.values(currenciesConfig).filter((i) => i.role === CurrencyRole.Governable);
     return bridgeCurrenciesConfig.map((config) => {
-      return Currency.fromCurrencyId(config.id);
+      return Currency.fromCurrencyId(currenciesConfig, config.id);
     });
   }
 

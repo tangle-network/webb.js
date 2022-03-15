@@ -1,6 +1,6 @@
-import { WebbCurrencyId } from '@webb-dapp/apps/configs';
-import { MixerSize } from '@webb-dapp/react-environment';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { WebbCurrencyId } from '../../enums';
+import { MixerSize } from '../mixer';
 
 /**
  *
@@ -145,6 +145,7 @@ export class WrappingBalanceWatcher {
       if (token2Updated) {
         this.token2 = token2;
       }
+      console.log(this.subscription);
       // **one exists**
       // ==>one is native
       // --->> current account balance

@@ -1,55 +1,50 @@
 import { ChainType, ChainTypeId } from './chain-id.enum';
-
-import {
-  byteArrayToNum,
-  numToByteArray,
-  computeChainIdType,
-  parseChainIdType,
-} from './chain-utils';
+import { expect } from 'chai';
+import { byteArrayToNum, numToByteArray, computeChainIdType, parseChainIdType } from './chain-utils';
 
 // TODO: Move utils and tests to webb.js
 describe('test various conversion functions', () => {
   test('byte array to num converts correctly', () => {
     const arr = [2, 0, 0, 0, 122, 105];
     const result = 2199023286889;
-    expect(byteArrayToNum(arr)).toEqual(result);
+    expect(byteArrayToNum(arr)).to.deep.equal(result);
   });
 
   test('numToByteArray converts correctly', () => {
-    let arrResult = [2, 0, 0, 0, 122, 105];
-    let number = 2199023286889;
-    expect(numToByteArray(number, 4)).toEqual(arrResult);
+    const arrResult = [2, 0, 0, 0, 122, 105];
+    const number = 2199023286889;
+    expect(numToByteArray(number, 4)).to.deep.equal(arrResult);
   });
 
   test('numToByteArray converts hexstring values correctly', () => {
-    let evmResult = [1, 0];
-    expect(numToByteArray(ChainType.EVM, 2)).toEqual(evmResult);
-    let kusamaParachainResult = [3, 17];
-    expect(numToByteArray(ChainType.KusamaParachain, 2)).toEqual(kusamaParachainResult);
+    const evmResult = [1, 0];
+    expect(numToByteArray(ChainType.EVM, 2)).to.deep.equal(evmResult);
+    const kusamaParachainResult = [3, 17];
+    expect(numToByteArray(ChainType.KusamaParachain, 2)).to.deep.equal(kusamaParachainResult);
   });
 
   test('numToByteArray maintains minimum size with leading zeroes', () => {
-    let arrResult = [0, 0, 122, 105];
-    let number = 31337;
-    expect(numToByteArray(number, 4)).toEqual(arrResult);
+    const arrResult = [0, 0, 122, 105];
+    const number = 31337;
+    expect(numToByteArray(number, 4)).to.deep.equal(arrResult);
   });
 
   test('computeChainIdType converts correctly', () => {
-    let chainType = ChainType.Substrate;
-    let chainId = 31337;
-    let chainIdTypeResult = 2199023286889;
-    expect(computeChainIdType(chainType, chainId)).toEqual(chainIdTypeResult);
+    const chainType = ChainType.Substrate;
+    const chainId = 31337;
+    const chainIdTypeResult = 2199023286889;
+    expect(computeChainIdType(chainType, chainId)).to.deep.equal(chainIdTypeResult);
   });
 
   test('typeAndIdFromChainIdType converts correctly', () => {
-    let chainIdType = 2199023286889;
-    let chainTypeResult = ChainType.Substrate;
-    let chainIdResult = 31337;
+    const chainIdType = 2199023286889;
+    const chainTypeResult = ChainType.Substrate;
+    const chainIdResult = 31337;
 
-    let result: ChainTypeId = {
+    const result: ChainTypeId = {
       chainType: chainTypeResult,
-      chainId: chainIdResult,
+      chainId: chainIdResult
     };
-    expect(parseChainIdType(chainIdType)).toEqual(result);
+    expect(parseChainIdType(chainIdType)).to.deep.equal(result);
   });
 });

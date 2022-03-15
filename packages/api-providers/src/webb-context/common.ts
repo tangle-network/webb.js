@@ -8,7 +8,7 @@ import { ChainConfig } from '../types/chain-config.interface';
 export type Chain = ChainConfig & {
   wallets: Record<number, Wallet>;
 };
-export type Wallet = WalletConfig & {};
+export type Wallet = WalletConfig;
 
 export type AppConfig = {
   wallet: Record<number, WalletConfig>;
