@@ -1,7 +1,7 @@
-import { ChainTypeId, chainTypeIdToInternalId, InternalChainId, WebbCurrencyId } from '@webb-dapp/apps/configs';
 import { BehaviorSubject, Observable } from 'rxjs';
-
-import { Currency } from '../currency/currency';
+import { ChainTypeId, chainTypeIdToInternalId, InternalChainId } from '../chains';
+import { WebbCurrencyId } from '../enums';
+import { Currency } from '../webb-context/currency/currency';
 
 export type BridgeCurrencyIndex = string | number | WebbCurrencyId;
 
@@ -15,13 +15,14 @@ export type AnchorBase = {
     [key in InternalChainId]?: string | number;
   };
 };
+
 export abstract class BridgeApi<Api, BridgeConfigEntry> {
   private readonly _store: BehaviorSubject<BridgeStore<BridgeConfigEntry>>;
   private readonly _watcher: Observable<BridgeStore<BridgeConfigEntry>>;
 
   public constructor(protected inner: Api, initialStore: Record<BridgeCurrencyIndex, BridgeConfigEntry>) {
     this._store = new BehaviorSubject({
-      config: initialStore,
+      config: initialStore
     });
     this._watcher = this._store.asObservable();
   }
@@ -38,7 +39,8 @@ export abstract class BridgeApi<Api, BridgeConfigEntry> {
     return Object.keys(this.store.config) as BridgeCurrencyIndex[];
   }
 
-  protected set store(next: Partial<BridgeStore<BridgeConfigEntry>>) {
+  // eslint-disable-next-line @typescript-eslint/adjacent-overload-signatures
+  set store(next: Partial<BridgeStore<BridgeConfigEntry>>) {
     this._store.next({ ...this.store, ...next });
   }
 
@@ -58,9 +60,10 @@ export abstract class BridgeApi<Api, BridgeConfigEntry> {
   setActiveBridge(activeBridge: BridgeConfigEntry | undefined) {
     this.store = {
       ...this.store,
-      activeBridge: activeBridge,
+      activeBridge: activeBridge
     };
   }
+
   abstract getWrappableAssets(chainId: ChainTypeId): Promise<Currency[]>;
 
   /*

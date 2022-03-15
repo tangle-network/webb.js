@@ -1,6 +1,6 @@
-import { WebbCurrencyId } from '@webb-dapp/apps/configs';
-
 // The chain query class returns information from the selected provider
+import { WebbCurrencyId } from '../enums';
+
 export abstract class ChainQuery<Provider> {
   constructor(protected inner: Provider) {}
 

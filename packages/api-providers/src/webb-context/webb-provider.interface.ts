@@ -11,7 +11,7 @@ import { InteractiveFeedback } from '../webb-error';
 import { Bridge, BridgeDeposit, BridgeWithdraw } from './bridge';
 
 /// list of the apis that are available for  the provider
-export interface WebbMethods<T> {
+export interface WebbMethods<T extends WebbApiProvider<any>> {
   mixer: WebbMixer<T>;
   bridge: WebbBridge<T>;
   wrapUnwrap: WrapAndUnwrap<T>;
@@ -37,7 +37,7 @@ export interface WrapAndUnwrap<T> {
     enabled: boolean;
   };
 }
-export interface WebbBridge<T> {
+export interface WebbBridge<T extends WebbApiProvider<any>> {
   core: Bridge | null;
   // deposit
   deposit: WebbMethod<BridgeDeposit<T, DepositPayload>, MixerDepositEvents>;
@@ -137,7 +137,7 @@ export interface WebbApiProvider<T> extends EventBus<WebbProviderEvents> {
   /// Accounts Adapter will have all methods related to the provider accounts
   accounts: AccountsAdapter<any>;
   /// All of the available methods and api of the provider
-  methods: WebbMethods<T>;
+  methods: WebbMethods<WebbApiProvider<T>>;
 
   /// A hook will be called to drop the provider and do cleanup listeners etc..
   destroy(): Promise<void> | void;
