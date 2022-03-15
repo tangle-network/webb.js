@@ -1,4 +1,4 @@
-import { DepositPayload, MixerDeposit } from '../mixer/mixer-deposit';
+import { DepositPayload, MixerDeposit } from '../webb-context';
 
 export abstract class BridgeDeposit<T, K extends DepositPayload = DepositPayload<any>> extends MixerDeposit<T, K> {
   generateNote(mixerId: number | string): Promise<K> {
