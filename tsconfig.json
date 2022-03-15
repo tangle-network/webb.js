@@ -53,6 +53,12 @@
       ],
       "@webb-tools/wasm-utils/*": [
         "packages/wasm-utils/build/*"
+      ],
+      "@webb-tools/api-providers": [
+        "packages/api-providers/build"
+      ],
+      "@webb-tools/api-providers/*": [
+        "packages/api-providers/build/*"
       ]
     },
     "skipLibCheck": true,
