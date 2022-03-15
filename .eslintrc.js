@@ -1,4 +1,4 @@
-const base = require('@open-web3/dev-config/config/eslint.cjs');
+const base = require('@polkadot/dev/config/eslint.cjs');
 
 module.exports = {
   ...base,

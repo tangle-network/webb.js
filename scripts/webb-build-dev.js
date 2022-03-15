@@ -3,12 +3,55 @@
 // SPDX-License-Identifier: Apache-2.0
 
 const babel = require('@babel/cli/lib/babel/dir').default;
-const fs = require('fs');
-const mkdirp = require('mkdirp');
 const path = require('path');
+const mkdirp = require('mkdirp');
+const { execSync } = require('child_process');
+const fs = require('fs-extra');
+const glob = require('glob');
+const glob2base = require('glob2base');
+const { Minimatch } = require('minimatch');
 
-const copySync = require('@open-web3/dev-config/scripts/copySync.cjs');
-const execSync = require('@open-web3/dev-config/scripts/execSync.cjs');
+function normalizePath(originalPath) {
+  const normalizedPath = path.relative(process.cwd(), path.resolve(originalPath)).replace(/\\/g, '/');
+
+  return /\/$/.test(normalizedPath) ? normalizedPath.slice(0, -1) : normalizedPath || '.';
+}
+
+const copySync = (src, dst) => {
+  const normalizedSource = normalizePath(src);
+  const normalizedOutputDir = normalizePath(dst);
+  const baseDir = normalizePath(glob2base({ minimatch: new Minimatch(normalizedSource) }));
+
+  glob
+    .sync(normalizedSource, {
+      follow: false,
+      nodir: true,
+      silent: true
+    })
+    .forEach((src) => {
+      const dst = baseDir === '.' ? path.join(normalizedOutputDir, src) : src.replace(baseDir, normalizedOutputDir);
+
+      if (dst !== src) {
+        const stat = fs.statSync(src);
+
+        if (stat.isDirectory()) {
+          fs.ensureDirSync(dst);
+        } else {
+          fs.ensureDirSync(path.dirname(dst));
+          fs.copySync(src, dst);
+        }
+
+        fs.chmodSync(dst, stat.mode);
+      }
+    });
+}
+const executeSync = (cmd) => {
+  try {
+    execSync(cmd, { stdio: 'inherit' });
+  } catch (error) {
+    process.exit(-1);
+  }
+}
 
 const CONFIGS = ['babel.config.js', 'babel.config.cjs'];
 const CPX = ['css', 'gif', 'hbs', 'jpg', 'js', 'json', 'png', 'svg', 'd.ts']
@@ -18,7 +61,7 @@ const CPX = ['css', 'gif', 'hbs', 'jpg', 'js', 'json', 'png', 'svg', 'd.ts']
 console.log('$ polkadot-dev-build-ts', process.argv.slice(2).join(' '));
 
 function buildWebpack() {
-  execSync('yarn polkadot-exec-webpack --config webpack.config.js --mode production');
+  executeSync('yarn polkadot-exec-webpack --config webpack.config.js --mode production');
 }
 
 async function buildBabel(dir) {
@@ -72,14 +115,14 @@ async function buildJs(dir) {
 }
 
 async function buildMonorepo() {
-  execSync('yarn polkadot-dev-clean-build');
+  executeSync('yarn polkadot-dev-clean-build');
   const cw = process.cwd();
   const packages = path.join(cw, 'packages', 'wasm-utils');
-  execSync(`cd ` + packages + ' && yarn build');
+  executeSync(`cd ` + packages + ' && yarn build');
 
   process.chdir('packages');
 
-  execSync('tsc --emitDeclarationOnly --outdir ../build');
+  executeSync('tsc --emitDeclarationOnly --outdir ../build');
 
   const dirs = fs
     .readdirSync('.')
@@ -97,7 +140,7 @@ async function buildMonorepo() {
 }
 
 async function buildPolyrepo() {
-  execSync('yarn polkadot-exec-tsc --outdir ./build');
+  executeSync('yarn polkadot-exec-tsc --outdir ./build');
 
   [...CPX].forEach((src) => copySync(src, './build'));
 }

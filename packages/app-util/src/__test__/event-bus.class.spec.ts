@@ -2,7 +2,7 @@ import { EventBus } from '../shared/event-bus.class';
 import { expect } from 'chai';
 
 class TestEvent extends EventBus<{ log: number }> {
-  readonly sendEvent: EventBus<{ log: number }>['emit'];
+  override readonly sendEvent: EventBus<{ log: number }>['emit'];
 
   constructor() {
     super();
