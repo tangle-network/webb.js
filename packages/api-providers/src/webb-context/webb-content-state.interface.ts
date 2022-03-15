@@ -1,4 +1,5 @@
-import { Chain, Wallet, WebbApiProvider } from '@webb-dapp/react-environment/webb-context';
+import { Chain, Wallet } from './common';
+import { WebbApiProvider } from './webb-provider.interface';
 
 export interface WebbContextState<T = unknown> {
   wallets: Record<number, Wallet>;

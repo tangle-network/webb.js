@@ -1,10 +1,6 @@
-import {
-  chainsConfig,
-  getAnchorAddressForBridge,
-  InternalChainId,
-  webbCurrencyIdFromString,
-} from '@webb-dapp/apps/configs';
-import { EvmChainMixersInfo } from '@webb-dapp/react-environment/api-providers/web3/EvmChainMixersInfo';
+import { LoggerService } from '@webb-tools/app-util';
+import { Observable, Subject } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import {
   Capabilities,
   EVMCMDKeys,
@@ -15,11 +11,13 @@ import {
   RelayerEVMCommands,
   RelayerMessage,
   RelayerSubstrateCommands,
-  SubstrateCMDKeys,
-} from '@webb-dapp/react-environment/webb-context/relayer/types';
-import { LoggerService } from '@webb-tools/app-util';
-import { Observable, Subject } from 'rxjs';
-import { filter } from 'rxjs/operators';
+  SubstrateCMDKeys
+} from './types';
+import { InternalChainId } from '../../chains';
+import { AppConfig } from '../common';
+import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo';
+import { webbCurrencyIdFromString } from '../../enums';
+import { getAnchorAddressForBridge } from '../../uitls/anchor-utils';
 
 const logger = LoggerService.get('webb-relayer class');
 
@@ -27,7 +25,7 @@ const shuffleRelayers = (arr: WebbRelayer[]): WebbRelayer[] => {
   let currentIndex = arr.length;
   let randomIndex = 0;
 
-  while (currentIndex != 0) {
+  while (currentIndex !== 0) {
     randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex--;
 
@@ -58,7 +56,7 @@ export type RelayedChainInput = {
   // TODO: change to just contract
   contractAddress: string;
 };
-type TornadoRelayerWithdrawArgs = {
+export type TornadoRelayerWithdrawArgs = {
   root: string;
   nullifierHash: string;
   recipient: string;
@@ -66,7 +64,7 @@ type TornadoRelayerWithdrawArgs = {
   fee: string;
   refund: string;
 };
-type BridgeRelayerWithdrawArgs = {
+export type BridgeRelayerWithdrawArgs = {
   roots: number[];
   refreshCommitment: string;
   nullifierHash: string;
@@ -108,7 +106,11 @@ export class WebbRelayerBuilder {
   private _listUpdated = new Subject<void>();
   public readonly listUpdated: Observable<void>;
 
-  private constructor(private config: RelayerConfig[], private readonly chainNameAdapter: ChainNameIntoChainId) {
+  private constructor(
+    protected relayerConfigs: RelayerConfig[],
+    private readonly chainNameAdapter: ChainNameIntoChainId,
+    private appConfig: AppConfig
+  ) {
     this.listUpdated = this._listUpdated.asObservable();
   }
 
@@ -143,8 +145,8 @@ export class WebbRelayerBuilder {
                 m.set(nameAdapter(key, 'substrate'), info.substrate[key]);
                 return m;
               }, new Map())
-          : new Map(),
-      },
+          : new Map()
+      }
     };
   }
 
@@ -159,7 +161,7 @@ export class WebbRelayerBuilder {
     const info: RelayerInfo = await res.json();
     return WebbRelayerBuilder.infoIntoCapabilities(
       {
-        endpoint,
+        endpoint
       },
       info,
       this.chainNameAdapter
@@ -178,19 +180,20 @@ export class WebbRelayerBuilder {
    * */
   static async initBuilder(
     config: RelayerConfig[],
-    chainNameAdapter: ChainNameIntoChainId
+    chainNameAdapter: ChainNameIntoChainId,
+    appConfig: AppConfig
   ): Promise<WebbRelayerBuilder> {
-    const relayerBuilder = new WebbRelayerBuilder(config, chainNameAdapter);
+    const relayerBuilder = new WebbRelayerBuilder(config, chainNameAdapter, appConfig);
 
-    // For all relayers in the config, fetch the info - but timeout after 5 seconds
+    // For all relayers in the relayerConfigs, fetch the info - but timeout after 5 seconds
     // This is done to prevent issues with relayers which are not operating properly
     await Promise.allSettled(
       config.map((p) => {
         return Promise.race([
           relayerBuilder.fetchCapabilitiesAndInsert(p),
-          new Promise((res) => {
-            setTimeout(res.bind(null, null), 5000);
-          }),
+          new Promise((resolve) => {
+            setTimeout(resolve.bind(null, null), 5000);
+          })
         ]);
       })
     );
@@ -213,20 +216,19 @@ export class WebbRelayerBuilder {
           }
         }
         if (contractAddress && baseOn && chainId) {
-          if (baseOn == 'evm') {
+          if (baseOn === 'evm') {
             return Boolean(
               capabilities.supportedChains[baseOn]
                 .get(chainId)
                 ?.contracts?.find(
-                  (contract) =>
-                    contract.address == contractAddress.toLowerCase() && contract.eventsWatcher.enabled == true
+                  (contract) => contract.address === contractAddress.toLowerCase() && contract.eventsWatcher.enabled
                 )
             );
           }
         }
         if (tornadoSupport && baseOn && chainId) {
-          if (baseOn == 'evm') {
-            const evmId = chainsConfig[chainId].chainId!;
+          if (baseOn === 'evm') {
+            const evmId = this.appConfig.chains[chainId].chainId!;
             const mixersInfoForChain = new EvmChainMixersInfo(evmId);
             const mixerInfo = mixersInfoForChain.getTornMixerInfoBySize(
               tornadoSupport.amount,
@@ -237,8 +239,7 @@ export class WebbRelayerBuilder {
                 capabilities.supportedChains[baseOn]
                   .get(chainId)
                   ?.contracts?.find(
-                    (contract) =>
-                      contract.address == mixerInfo.address.toLowerCase() && contract.eventsWatcher.enabled == true
+                    (contract) => contract.address === mixerInfo.address.toLowerCase() && contract.eventsWatcher.enabled
                   )
               );
             } else {
@@ -247,19 +248,19 @@ export class WebbRelayerBuilder {
           }
         }
         if (bridgeSupport && baseOn && chainId) {
-          if (baseOn == 'evm') {
+          if (baseOn === 'evm') {
             const bridgeAddress = getAnchorAddressForBridge(
               webbCurrencyIdFromString(bridgeSupport.tokenSymbol),
               chainId,
-              bridgeSupport.amount
+              bridgeSupport.amount,
+              this.appConfig.bridgeByAsset
             );
             if (bridgeAddress) {
               return Boolean(
                 capabilities.supportedChains[baseOn]
                   .get(chainId)
                   ?.contracts?.find(
-                    (contract) =>
-                      contract.address == bridgeAddress.toLowerCase() && contract.eventsWatcher.enabled == true
+                    (contract) => contract.address === bridgeAddress.toLowerCase() && contract.eventsWatcher.enabled
                   )
               );
             } else {
@@ -294,7 +295,7 @@ export enum RelayedWithdrawResult {
   /// the withdraw is done with success
   CleanExit,
   /// failed to create the withdraw
-  Errored,
+  Errored
 }
 
 type RelayerLeaves = {
@@ -348,9 +349,9 @@ class RelayedWithdraw {
         [this.prefix]: {
           contract: chain.contractAddress,
           proof,
-          ...args,
-        },
-      },
+          ...args
+        }
+      }
     };
   }
 
@@ -382,9 +383,9 @@ export class WebbRelayer {
 
   async initWithdraw<Target extends RelayerCMDKey>(target: Target) {
     const ws = new WebSocket(this.endpoint.replace('http', 'ws') + '/ws');
-    await new Promise((r, c) => {
-      ws.onopen = r;
-      ws.onerror = r;
+    await new Promise((resolve, reject) => {
+      ws.onopen = resolve;
+      ws.onerror = reject;
     });
     /// insure the socket is open
     /// maybe removed soon
@@ -392,8 +393,8 @@ export class WebbRelayer {
       if (ws.readyState === 1) {
         break;
       }
-      await new Promise((r) => {
-        setTimeout(r, 300);
+      await new Promise((resolve) => {
+        setTimeout(resolve, 300);
       });
     }
     return new RelayedWithdraw(ws, target);
@@ -421,7 +422,7 @@ export class WebbRelayer {
       logger.info(`info fetched from relayer: ${fetchedLeaves} + ${lastQueriedBlockNumber}`);
       return {
         leaves: fetchedLeaves,
-        lastQueriedBlock: lastQueriedBlockNumber,
+        lastQueriedBlock: lastQueriedBlockNumber
       };
     } else {
       throw new Error('network error');

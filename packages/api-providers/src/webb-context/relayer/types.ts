@@ -1,4 +1,4 @@
-import { InternalChainId } from '@webb-dapp/apps/configs';
+import { InternalChainId } from '../../chains';
 
 export type RelayedChainConfig = {
   account: string;

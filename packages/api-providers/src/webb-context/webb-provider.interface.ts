@@ -1,14 +1,14 @@
-import { Bridge, BridgeDeposit, BridgeWithdraw } from '@webb-dapp/react-environment/webb-context/bridge';
-import { BridgeApi } from '@webb-dapp/react-environment/webb-context/bridge/bridge-api';
-import { ChainQuery } from '@webb-dapp/react-environment/webb-context/chain-query';
-import { AppConfig } from '@webb-dapp/react-environment/webb-context/common';
-import { WebbRelayerBuilder } from '@webb-dapp/react-environment/webb-context/relayer';
-import { WrapUnWrap } from '@webb-dapp/react-environment/webb-context/wrap-unwrap';
-import { InteractiveFeedback } from '@webb-dapp/utils/webb-error';
-import { AccountsAdapter } from '@webb-dapp/wallet/account/Accounts.adapter';
 import { EventBus } from '@webb-tools/app-util';
 
 import { DepositPayload, MixerDeposit, MixerDepositEvents, MixerWithdraw, MixerWithdrawEvents } from './mixer';
+import { ChainQuery } from './chain-query';
+import { BridgeApi } from './bridge/bridge-api';
+import { AppConfig } from './common';
+import { WrapUnWrap } from './wrap-unwrap';
+import { WebbRelayerBuilder } from './relayer';
+import { AccountsAdapter } from '../account/Accounts.adapter';
+import { InteractiveFeedback } from '../webb-error';
+import { Bridge, BridgeDeposit, BridgeWithdraw } from './bridge';
 
 /// list of the apis that are available for  the provider
 export interface WebbMethods<T> {
@@ -20,7 +20,7 @@ export interface WebbMethods<T> {
 }
 
 export type WebbMethod<T extends EventBus<K>, K extends Record<string, unknown>> = {
-  //// the underlying provider for the methods
+  // the underlying provider for the methods
   inner: T;
   enabled: boolean;
 };
@@ -72,9 +72,6 @@ export type ProvideCapabilities = {
   hasSessions: boolean;
 };
 
-type WebApiCalls = {
-  addToken(input: any): Promise<void>;
-};
 export type NotificationKey = string | number;
 export type VariantType = 'default' | 'error' | 'success' | 'warning' | 'info';
 
@@ -124,7 +121,7 @@ export type NotificationPayload = {
   name: 'Transaction' | 'Approval';
   // key for a given notification can be used to remove/dismiss a notification
   key: string;
-  //level
+  // level
   level: NotificationLevel;
   // Record for more metadata
   data?: Record<string, string>;
