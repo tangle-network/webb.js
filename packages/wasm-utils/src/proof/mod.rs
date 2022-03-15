@@ -4,7 +4,6 @@ use std::convert::{TryFrom, TryInto};
 
 use ark_ff::{BigInteger, PrimeField};
 
-use arkworks_r1cs_gadgets::poseidon::PoseidonGadget;
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
@@ -327,7 +326,7 @@ impl AnchorMTBn254X5 {
 		let params3 = setup_params::<Bn254Fr>(curve, 5, 3);
 		let poseidon3 = Poseidon::new(params3);
 
-		let (tree, _) = setup_tree_and_create_path::<Bn254Fr, PoseidonGadget<Bn254Fr>, TREE_HEIGHT>(poseidon3, &leaves, leaf_index, &[0u8; 32]).unwrap();
+		let (tree, _) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(&poseidon3, &leaves, leaf_index, &[0u8; 32]).unwrap();
 		Ok(Self { inner: tree })
 	}
 

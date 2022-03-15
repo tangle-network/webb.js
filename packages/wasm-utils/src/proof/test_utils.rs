@@ -3,7 +3,6 @@ use ark_ff::PrimeField;
 use arkworks_setups::Curve as ArkCurve;
 use arkworks_setups::common::{setup_params, setup_tree_and_create_path, setup_keys_unchecked};
 use arkworks_native_gadgets::poseidon::Poseidon;
-use arkworks_r1cs_gadgets::poseidon::PoseidonGadget;
 use js_sys::{Array, JsString, Uint8Array};
 use ark_ff::BigInteger;
 use rand::rngs::OsRng;
@@ -108,7 +107,7 @@ pub fn generate_anchor_test_setup(
 	let poseidon3 = Poseidon::new(params3);
 
 	let leaves_f = vec![Bn254Fr::from_le_bytes_mod_order(&leaf_bytes)];
-	let (tree, _) = setup_tree_and_create_path::<Bn254Fr, PoseidonGadget<Bn254Fr>, TREE_HEIGHT>(poseidon3, &leaves_f, index, &DEFAULT_LEAF).unwrap();
+	let (tree, _) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(&poseidon3, &leaves_f, index, &DEFAULT_LEAF).unwrap();
 	let roots_f = [tree.root(); ANCHOR_COUNT];
 	let roots_raw = roots_f.map(|x| x.into_repr().to_bytes_le());
 	let roots_array: Array = roots_raw.iter().map(|i| Uint8Array::from(i.as_slice())).collect();

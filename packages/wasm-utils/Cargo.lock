@@ -242,7 +242,7 @@ dependencies = [
 [[package]]
 name = "arkworks-native-gadgets"
 version = "0.5.0"
-source = "git+https://github.com/webb-tools/arkworks-gadgets.git#9ba1dd677ee3266a83555464a69688d5783a861f"
+source = "git+https://github.com/webb-tools/arkworks-gadgets.git#85673bf47e56e518e82d1bfb1b3ff4554489f4b3"
 dependencies = [
  "ark-crypto-primitives",
  "ark-ff",
@@ -252,7 +252,7 @@ dependencies = [
 [[package]]
 name = "arkworks-r1cs-circuits"
 version = "0.5.0"
-source = "git+https://github.com/webb-tools/arkworks-gadgets.git#9ba1dd677ee3266a83555464a69688d5783a861f"
+source = "git+https://github.com/webb-tools/arkworks-gadgets.git#85673bf47e56e518e82d1bfb1b3ff4554489f4b3"
 dependencies = [
  "ark-ff",
  "ark-r1cs-std",
@@ -265,7 +265,7 @@ dependencies = [
 [[package]]
 name = "arkworks-r1cs-gadgets"
 version = "0.5.0"
-source = "git+https://github.com/webb-tools/arkworks-gadgets.git#9ba1dd677ee3266a83555464a69688d5783a861f"
+source = "git+https://github.com/webb-tools/arkworks-gadgets.git#85673bf47e56e518e82d1bfb1b3ff4554489f4b3"
 dependencies = [
  "ark-crypto-primitives",
  "ark-ff",
@@ -278,7 +278,7 @@ dependencies = [
 [[package]]
 name = "arkworks-setups"
 version = "0.5.0"
-source = "git+https://github.com/webb-tools/arkworks-gadgets.git#9ba1dd677ee3266a83555464a69688d5783a861f"
+source = "git+https://github.com/webb-tools/arkworks-gadgets.git#85673bf47e56e518e82d1bfb1b3ff4554489f4b3"
 dependencies = [
  "ark-crypto-primitives",
  "ark-ec",
@@ -299,7 +299,7 @@ dependencies = [
 [[package]]
 name = "arkworks-utils"
 version = "0.5.0"
-source = "git+https://github.com/webb-tools/arkworks-gadgets.git#9ba1dd677ee3266a83555464a69688d5783a861f"
+source = "git+https://github.com/webb-tools/arkworks-gadgets.git#85673bf47e56e518e82d1bfb1b3ff4554489f4b3"
 dependencies = [
  "ark-ff",
  "ark-std",
@@ -471,9 +471,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.119"
+version = "0.2.120"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1bf2e165bb3457c8e098ea76f3e3bc9db55f87aa90d52d0e6be741470916aaa4"
+checksum = "ad5c14e80759d0939d013e6ca49930e59fc53dd8e5009132f76240c179380c09"
 
 [[package]]
 name = "log"
@@ -705,9 +705,9 @@ checksum = "6bdef32e8150c2a081110b42772ffe7d7c9032b606bc226c8260fd97e0976601"
 
 [[package]]
 name = "syn"
-version = "1.0.86"
+version = "1.0.88"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a65b3f4ffa0092e9887669db0eae07941f023991ab58ea44da8fe8e2d511c6b"
+checksum = "ebd69e719f31e88618baa1eaa6ee2de5c9a1c004f1e9ecdb58e8352a13f20a01"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -766,9 +766,9 @@ dependencies = [
 
 [[package]]
 name = "tracing"
-version = "0.1.31"
+version = "0.1.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6c650a8ef0cd2dd93736f033d21cbd1224c5a967aa0c258d00fcf7dafef9b9f"
+checksum = "4a1bdf54a7c28a2bbf701e1d2233f6c77f473486b94bee4f9678da5a148dca7f"
 dependencies = [
  "cfg-if 1.0.0",
  "pin-project-lite",
@@ -946,7 +946,6 @@ dependencies = [
  "ark-serialize",
  "ark-std",
  "arkworks-native-gadgets",
- "arkworks-r1cs-gadgets",
  "arkworks-setups",
  "console_error_panic_hook",
  "getrandom",
@@ -974,7 +973,7 @@ dependencies = [
 [[package]]
 name = "webb-pedersen-hash"
 version = "0.1.0"
-source = "git+https://github.com/webb-tools/webb-rs.git#3f0d3bf203b828e831c71fcb4ba0cbb372ea509b"
+source = "git+https://github.com/webb-tools/webb-rs.git#40e8d6ca0d5b617fbf45b423ad47a76b3fc2e691"
 dependencies = [
  "ark-crypto-primitives",
  "ark-ed-on-bn254",
