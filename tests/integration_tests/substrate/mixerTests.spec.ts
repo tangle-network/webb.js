@@ -5,13 +5,13 @@ import { KeyringPair } from '@polkadot/keyring/types';
 
 import {
   catchWasmError,
-  depositMixerBnX5_5,
+  depositMixerBnX5_3,
   KillTask,
   preparePolkadotApi,
   sleep,
   startWebbNode,
   transferBalance,
-  withdrawMixerBnX5_5,
+  withdrawMixerBnX5_3,
 } from '../../utils';
 
 let apiPromise: ApiPromise | null = null;
@@ -46,7 +46,9 @@ describe('Mixer tests', function () {
 
   before(async function () {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
-    nodes = startWebbNode();
+    if (false) {
+      nodes = startWebbNode();
+    }
     apiPromise = await preparePolkadotApi();
   });
 
@@ -59,12 +61,12 @@ describe('Mixer tests', function () {
       let note: JsNote;
       // deposit to the mixer
       console.log(`Depositing to the mixer`)
-      note = await catchWasmError(() => depositMixerBnX5_5(apiPromise!, bob));
+      note = await catchWasmError(() => depositMixerBnX5_3(apiPromise!, bob));
       ///Give the chain sometime to insure the leaf is there
       await sleep(10_000);
       // withdraw fro the mixer
       console.log(`Withdrawing from the mixer`)
-      await catchWasmError(() => withdrawMixerBnX5_5(apiPromise!, bob, note!, bob.address));
+      await catchWasmError(() => withdrawMixerBnX5_3(apiPromise!, bob, note!, bob.address));
     } catch (e) {
       if (e instanceof OperationError) {
         const errorMessage = {
