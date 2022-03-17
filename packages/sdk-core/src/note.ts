@@ -5,15 +5,6 @@
 /* eslint-disable prefer-promise-reject-errors */
 import type { Backend, Curve, HashFunction, JsNote, NoteProtocol, Version } from '@webb-tools/wasm-utils';
 
-const IS_NODE = typeof process === 'object' && typeof require === 'function';
-
-let OperationError: any;
-if (IS_NODE) {
-  OperationError = require('@webb-tools/wasm-utils/njs').OperationError;
-} else {
-  OperationError = require('@webb-tools/wasm-utils').OperationError;
-}
-
 /**
  * The note input used to generate a `Note` instance.
  * 
@@ -69,11 +60,12 @@ export class Note {
    * Supports the browser and Node.js.
    */
   private static get wasm() {
-    if (typeof process === 'object') {
-      return import('@webb-tools/wasm-utils/njs');
-    } else {
-      return import('@webb-tools/wasm-utils');
-    }
+    return import('@webb-tools/wasm-utils');
+    // if (typeof process === 'object') {
+    //   return import('@webb-tools/wasm-utils/njs');
+    // } else {
+    //   return import('@webb-tools/wasm-utils');
+    // }
   }
 
   /**
@@ -87,7 +79,7 @@ export class Note {
       const wasm = await Note.wasm;
       const depositNote = wasm.JsNote.deserialize(value);
       return new Note(depositNote);
-    } catch (e: typeof OperationError) {
+    } catch (e: any) {
       return Promise.reject({
         code: e.code,
         message: e.error_message,
@@ -180,7 +172,7 @@ export class Note {
       }
       const depositNote = noteBuilderInput.build();
       return new Note(depositNote);
-    } catch (e: typeof OperationError) {
+    } catch (e: any) {
       return Promise.reject({
         code: e.code,
         message: e.error_message,

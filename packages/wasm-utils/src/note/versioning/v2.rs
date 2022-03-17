@@ -102,29 +102,6 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OperationError> {
 		.split(':')
 		.map(|v| hex::decode(v).unwrap_or_default())
 		.collect::<Vec<Vec<u8>>>();
-	if secret_parts.len() != 3 {
-		return Err(OperationError::new_with_message(
-			OpStatusCode::InvalidNoteLength,
-			format!("Invalid secret parts length: {}", secret_parts.len()),
-		));
-	}
-	for (inx, v) in secret_parts.iter().enumerate() {
-		if v.is_empty() {
-			return Err(OperationError::new_with_message(
-				OpStatusCode::InvalidNoteSecrets,
-				format!("Secret part {} is empty", inx),
-			));
-		}
-	}
-	if secret_parts[0].len() != 8 && secret_parts[0].len() != 6 {
-		return Err(OperationError::new_with_message(
-			OpStatusCode::InvalidNoteSecrets,
-			format!(
-				"First secret part must be 6 or 8 bytes long, but is {} bytes long",
-				secret_parts[0].len()
-			),
-		));
-	}
 
 	Ok(JsNote {
 		scheme: scheme.to_string(),
