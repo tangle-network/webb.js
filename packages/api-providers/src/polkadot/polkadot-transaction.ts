@@ -1,11 +1,12 @@
-import { NotificationHandler } from '@webb-dapp/react-environment';
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { EventBus, LoggerService } from '@webb-tools/app-util';
 import { uniqueId } from 'lodash';
-import React from 'react';
 
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/submittable/types';
 import { web3FromAddress } from '@polkadot/extension-dapp';
+import { ReactElement } from '../types/abstracts';
+import { NotificationHandler } from '../webb-context';
 
 export type QueueTxStatus =
   | 'future'
@@ -51,14 +52,14 @@ type PolkadotTXEvents = {
 };
 
 export type NotificationConfig = {
-  loading: (data: PolkadotTXEventsPayload<JSX.Element>) => string | number;
+  loading: (data: PolkadotTXEventsPayload<ReactElement>) => string | number;
   finalize: (data: PolkadotTXEventsPayload<string | void | undefined>) => string | number;
   failed: (data: PolkadotTXEventsPayload<string>) => string | number;
 };
 const txLogger = LoggerService.get('PolkadotTx');
 
 export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents> {
-  private notificationKey: string = '';
+  public notificationKey = '';
   private transactionAddress: string | null = null;
   private isWrapped = false;
   constructor(private apiPromise: ApiPromise, private path: MethodPath, private parms: P) {
@@ -74,12 +75,11 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
       txLogger.error(`can not find api.tx.${this.path.section}.${this.path.method}`);
       return;
     }
-    const accountInfo = await api.query.system.account(signAddress);
     const injector = await web3FromAddress(signAddress);
     this.notificationKey = uniqueId(`${this.path.section}-${this.path.method}`);
     await api.setSigner(injector.signer);
     const txResults = await api.tx[this.path.section][this.path.method](...this.parms).signAsync(signAddress, {
-      nonce: -1,
+      nonce: -1
     });
     this.emitWithPayload('beforeSend', undefined);
     this.emitWithPayload('loading', '');
@@ -103,12 +103,12 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
       key: this.notificationKey,
       path: this.path,
       address: this.transactionAddress ?? '',
-      data: data,
+      data: data
     } as any);
   }
 
   private errorHandler(r: SubmittableResult) {
-    //@ts-ignore
+    // @ts-ignore
     let message = r.dispatchError?.type || r.type || r.message;
     if (r.dispatchError?.isModule) {
       try {
@@ -133,11 +133,10 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
         await tx.send((result) => {
           const status = result.status;
           const events = result.events.filter(({ event: { section } }) => section === 'system');
-          const txStatus = result.status.type.toLowerCase() as QueueTxStatus;
           if (status.isInBlock || status.isFinalized) {
             for (const event of events) {
               const {
-                event: { data, method },
+                event: { data, method }
               } = event;
               const [dispatchError] = data as any;
 
@@ -197,7 +196,7 @@ export class PolkaTXBuilder {
         description: data.address,
         level: 'loading',
         name: 'Transaction',
-        persist: true,
+        persist: true
       });
     });
 
@@ -208,7 +207,7 @@ export class PolkaTXBuilder {
         description: data.address,
         level: 'success',
         name: 'Transaction',
-        persist: true,
+        persist: true
       });
     });
 
@@ -220,7 +219,7 @@ export class PolkaTXBuilder {
         description: data.data,
         level: 'error',
         name: 'Transaction',
-        persist: true,
+        persist: true
       });
     });
 
