@@ -1,40 +1,49 @@
 {
-    "CurrencyId": "u64",
+    "KeyId": "u32",
+    "TreeId": "u32",
     "Amount": "i128",
     "AmountOf": "Amount",
+    "CurrencyId": "u64",
     "CurrencyIdOf": "CurrencyId",
     "ScalarData": "[u8; 32]",
-    "TreeId": "u32",
-    "KeyId": "u32",
-    "Element": "Vec<u8>",
-    "DarkwebbStandaloneRuntimeElement": "[u8;32]",
-    "OrmlTokensBalanceLock": {
-        "id": "LockIdentifier",
-        "balance": "Balance"
+    "DarkwebbPrimitivesDepositDetails": {
+        "deposit": "Balance",
+        "depositor": "AccountId"
     },
+    "DarkwebbStandaloneRuntimeElement": "[u8;32]",
+    "Element": "Vec<u8>",
     "OrmlTokensAccountData": {
         "free": "Balance",
         "frozen": "Balance",
         "reserved": "Balance"
     },
-    "PalletMixerMixerMetadata": {
-        "creator": "AccountId",
-        "deposit_size": "Balance",
-        "asset": "AssetId"
+    "OrmlTokensBalanceLock": {
+        "balance": "Balance",
+        "id": "LockIdentifier"
     },
     "PalletAnchorAnchorMetadata": {
         "creator": "AccountId",
         "deposit_size": "Balance"
     },
     "PalletAnchorEdgeMetadata": {
-        "src_chain_id": "ChainId",
+        "height": "BlockNumber",
         "root": "Element",
-        "height": "BlockNumber"
+        "src_chain_id": "ChainId"
     },
     "PalletAnchorHandlerUpdateRecord": {
-        "tree_id": "TreeId",
+        "edge_metadata": "PalletAnchorEdgeMetadata",
         "resource_id": "ResourceId",
-        "edge_metadata": "PalletAnchorEdgeMetadata"
+        "tree_id": "TreeId"
+    },
+    "PalletAssetRegistryAssetDetails": {
+        "asset_type": "PalletAssetRegistryAssetType",
+        "existential_deposit": "Balance",
+        "locked": "bool",
+        "name": "Vec<u8>"
+    },
+    "PalletAssetRegistryAssetMetadata": {
+        "decimals": "u8",
+        "symbol": "Vec<u8>"
     },
     "PalletAssetRegistryAssetType": {
         "_enum": [
@@ -42,42 +51,33 @@
             "PoolShare"
         ]
     },
-    "PalletAssetRegistryAssetMetadata": {
-        "symbol": "Vec<u8>",
-        "decimals": "u8"
+    "PalletMixerMixerMetadata": {
+        "asset": "AssetId",
+        "creator": "AccountId",
+        "deposit_size": "Balance"
     },
     "ResourceId": "[u8; 32]",
-    "PalletAssetRegistryAssetDetails": {
-        "name": "Vec<u8>",
-        "asset_type": "PalletAssetRegistryAssetType",
-        "existential_deposit": "Balance",
-        "locked": "bool"
-    },
-    "DarkwebbPrimitivesDepositDetails": {
-        "depositor": "AccountId",
-        "deposit": "Balance"
-    },
     "Address": "AccountId",
-    "LookupSource": "AccountId",
     "Keys": "SessionKeys2",
+    "LookupSource": "AccountId",
     "PalletsOrigin": {
         "_enum": {
+            "Aura": "Null",
+            "Authorship": "Null",
+            "Balances": "Null",
+            "Grandpa": "Null",
+            "Historical": "Null",
+            "Indices": "Null",
+            "Merkle": "Null",
+            "Mixer": "Null",
+            "RandomnessCollectiveFlip": "Null",
+            "Session": "Null",
+            "Staking": "Null",
+            "Sudo": "Null",
             "System": "SystemOrigin",
             "Timestamp": "Null",
-            "RandomnessCollectiveFlip": "Null",
-            "Balances": "Null",
-            "Utility": "Null",
-            "Indices": "Null",
-            "Authorship": "Null",
-            "Aura": "Null",
-            "Grandpa": "Null",
-            "Staking": "Null",
-            "Session": "Null",
-            "Historical": "Null",
-            "Sudo": "Null",
             "TransactionPayment": "Null",
-            "Merkle": "Null",
-            "Mixer": "Null"
+            "Utility": "Null"
         }
     }
 }
