@@ -1,3 +1,6 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -7,7 +10,7 @@ import type { Backend, Curve, HashFunction, JsNote, NoteProtocol, Version } from
 
 /**
  * The note input used to generate a `Note` instance.
- * 
+ *
  * @param protocol - The shielded pool protocol to use.
  * @param version - The version of the note to use.
  * @param sourceChain - The source chain id.
@@ -44,7 +47,7 @@ export type NoteGenInput = {
 
 /**
  * Note class using the WebAssembly note backend.
- * 
+ *
  * The goal of this class is to provide a Note interface
  * that works both in Node.js and in the browser.
  */
@@ -52,75 +55,76 @@ export class Note {
   static CURRENT_VERSION: Version = 'v2';
 
   // Default constructor
-  private constructor(readonly note: JsNote) {
+  private constructor (readonly note: JsNote) {
   }
 
   /**
    * Gets the WebAssembly module for the target environment.
    * Supports the browser and Node.js.
    */
-  private static get wasm() {
-    return import('@webb-tools/wasm-utils');
-    // if (typeof process === 'object') {
-    //   return import('@webb-tools/wasm-utils/njs');
-    // } else {
-    //   return import('@webb-tools/wasm-utils');
-    // }
+  private static get wasm () {
+    if (typeof process !== 'undefined' && process.versions != null && process.versions.node != null) {
+      return import('@webb-tools/wasm-utils/njs');
+    } else {
+      return import('@webb-tools/wasm-utils');
+    }
   }
 
   /**
    * Deserializes a note from a string.
-   * 
+   *
    * @param value A serialized note.
    * @returns A note class instance.
    */
-  public static async deserialize(value: string): Promise<Note> {
+  public static async deserialize (value: string): Promise<Note> {
     try {
       const wasm = await Note.wasm;
       const depositNote = wasm.JsNote.deserialize(value);
+
       return new Note(depositNote);
     } catch (e: any) {
       return Promise.reject({
         code: e.code,
-        message: e.error_message,
         data: e.data,
+        message: e.error_message
       });
     }
   }
 
   /**
    * Turns a `Note` into a WebAssembly compatible `JsNote`.
-   * 
+   *
    * @returns The `JsNote` struct.
    */
-  async toDepositNote(): Promise<JsNote> {
+  async toDepositNote (): Promise<JsNote> {
     const wasm = await Note.wasm;
+
     return wasm.JsNote.deserialize(this.serialize());
   }
 
   /**
    * Serializes the note to a string.
-   * 
+   *
    * @returns The serialized note.
    */
-  public serialize(): string {
+  public serialize (): string {
     return this.note.serialize();
   }
 
   /**
    * Get's the leaf commitment of the note depending
    * of the protocol.
-   * 
+   *
    * @returns Returns the leaf commitment of the note.
    */
-  getLeaf(): Uint8Array {
+  getLeaf (): Uint8Array {
     return this.note.getLeafCommitment();
   }
 
   /**
    * Generates a note using the relevant input data. Supports
    * the protocols defined in the WebAssembly note backend.
-   * 
+   *
    * ```typescript
    * // Generate an anchor note
    * const input: NoteGenInput = {
@@ -139,16 +143,17 @@ export class Note {
    *   width: '4',
    *   exponentiation: '5',
    * }
-   * 
+   *
    * const note = await Note.generateNote(input);
    * ```
    * @param noteGenInput The input data for generating a note.
-   * @returns 
+   * @returns
    */
-  public static async generateNote(noteGenInput: NoteGenInput): Promise<Note> {
+  public static async generateNote (noteGenInput: NoteGenInput): Promise<Note> {
     try {
       const wasm = await Note.wasm;
       const noteBuilderInput = new wasm.JsNoteBuilder();
+
       noteBuilderInput.protocol(noteGenInput.protocol);
       noteBuilderInput.version(Note.CURRENT_VERSION);
       noteBuilderInput.targetChainId(noteGenInput.targetChain);
@@ -161,22 +166,27 @@ export class Note {
       noteBuilderInput.denomination(noteGenInput.denomination);
       noteBuilderInput.width(noteGenInput.width);
       noteBuilderInput.exponentiation(noteGenInput.exponentiation);
+
       if (noteGenInput.secrets) {
         noteBuilderInput.setSecrets(noteGenInput.secrets);
       }
+
       if (noteGenInput.targetIdentifyingData) {
         noteBuilderInput.targetIdentifyingData(noteGenInput.targetIdentifyingData);
       }
+
       if (noteGenInput.sourceIdentifyingData) {
         noteBuilderInput.sourceIdentifyingData(noteGenInput.sourceIdentifyingData);
       }
+
       const depositNote = noteBuilderInput.build();
+
       return new Note(depositNote);
     } catch (e: any) {
       return Promise.reject({
         code: e.code,
-        message: e.error_message,
         data: e.data,
+        message: e.error_message
       });
     }
   }

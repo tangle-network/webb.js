@@ -1,5 +1,9 @@
-import { FixedPointNumber } from '../fixed-point-number';
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from 'chai';
+
+import { FixedPointNumber } from '../fixed-point-number';
 
 describe('fixed point number constructor should work', () => {
   it('toString & toNumber', () => {
@@ -251,6 +255,7 @@ describe('fixed point number compare should work', () => {
     expect(c2.times(FixedPointNumber.TEN).toString()).to.deep.equal(FixedPointNumber.FIVE.toString());
 
     const d = FixedPointNumber.fromRational(-1, 2).frac().times(FixedPointNumber.TEN);
+
     expect(d.toString()).to.deep.equal(FixedPointNumber.ZERO.minus(FixedPointNumber.FIVE).toString());
   });
 });

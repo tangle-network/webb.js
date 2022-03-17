@@ -1,3 +1,6 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import fs from 'fs';
@@ -5,11 +8,14 @@ import { w3cwebsocket as WebSocket } from 'websocket';
 
 const main = (): void => {
   const endpoint = 'ws://localhost:9944';
+
   console.log('Connecting to ', endpoint);
   const ws = new WebSocket(endpoint);
+
   ws.onopen = (): void => {
     ws.send('{"id":"1","jsonrpc":"2.0","method":"state_getMetadata","params":[]}');
   };
+
   ws.onmessage = (msg: any): void => {
     const fullData = JSON.parse(msg.data);
 

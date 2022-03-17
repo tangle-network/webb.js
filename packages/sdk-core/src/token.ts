@@ -1,7 +1,12 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
+import { CurrencyId } from '@webb-tools/types/interfaces';
+
+import { ApiPromise, ApiRx } from '@polkadot/api';
+
 import { FixedPointNumber } from './fixed-point-number';
 import { CHAIN } from './type';
-import { ApiPromise, ApiRx } from '@polkadot/api';
-import { CurrencyId } from '@webb-tools/types/interfaces';
 
 export interface TokenConfig {
   chain?: CHAIN; // which chain the token is in
@@ -20,16 +25,16 @@ export const presetTokensConfig: Record<CHAIN, Record<PresetToken, TokenConfig>>
     DEV: {
       chain: 'dev',
       name: 'DEV',
-      symbol: 'DEV',
-      precision: 12
+      precision: 12,
+      symbol: 'DEV'
     }
   } as Record<PresetToken, TokenConfig>,
   webb: {
     WEBB: {
       chain: 'webb',
       name: 'WEBB',
-      symbol: 'WEBB',
-      precision: 18
+      precision: 18,
+      symbol: 'WEBB'
     }
   } as Record<PresetToken, TokenConfig>
 };
@@ -44,7 +49,7 @@ export class Token {
   readonly precision!: number;
   public amount!: FixedPointNumber;
 
-  constructor(config: TokenConfig) {
+  constructor (config: TokenConfig) {
     this.name = config.name;
     this.symbol = config.symbol || config.name;
     this.precision = config.precision || 18;
@@ -63,30 +68,30 @@ export class Token {
    * @name isEqual
    * @description check if `token` equal current
    */
-  public isEqual(token: Token): boolean {
+  public isEqual (token: Token): boolean {
     return this.chain === token.chain && this.name === token.name;
   }
 
-  public toString(): string {
+  public toString (): string {
     return this.name;
   }
 
-  public toChainData(): { Token: string } | string {
+  public toChainData (): { Token: string } | string {
     return this.name;
   }
 
-  public clone(newConfig?: Partial<TokenConfig>): Token {
+  public clone (newConfig?: Partial<TokenConfig>): Token {
     return new Token({
-      name: newConfig?.name || this.name || '',
-      chain: newConfig?.chain || this.chain || '',
-      precision: newConfig?.precision || this.precision || 0,
       amount: newConfig?.amount || this.amount || new FixedPointNumber(0),
+      chain: newConfig?.chain || this.chain || '',
+      name: newConfig?.name || this.name || '',
+      precision: newConfig?.precision || this.precision || 0,
       symbol: newConfig?.symbol || this.symbol || ''
     });
   }
 }
 
-function convert(config: Record<CHAIN, Record<string, TokenConfig>>): Record<CHAIN, Record<string, Token>> {
+function convert (config: Record<CHAIN, Record<string, TokenConfig>>): Record<CHAIN, Record<string, Token>> {
   return Object.keys(config).reduce((prev, chain) => {
     prev[chain as CHAIN] = Object.keys(config[chain as CHAIN]).reduce((prev, name) => {
       prev[name] = new Token(config[chain as CHAIN][name]);
@@ -100,7 +105,7 @@ function convert(config: Record<CHAIN, Record<string, TokenConfig>>): Record<CHA
 
 export const PRESET_TOKENS = convert(presetTokensConfig);
 
-export function getPresetToken(name: PresetToken, chain: CHAIN = 'webb'): Token {
+export function getPresetToken (name: PresetToken, chain: CHAIN = 'webb'): Token {
   return PRESET_TOKENS[chain][name];
 }
 
@@ -110,16 +115,16 @@ const TOKEN_SORT: Record<string, number> = {
 
 const Tokens: Array<PresetToken> = ['WEBB'];
 
-export function sortTokens(token1: Token, token2: Token, ...other: Token[]): Token[] {
+export function sortTokens (token1: Token, token2: Token, ...other: Token[]): Token[] {
   const result = [token1, token2, ...other];
 
   return result.sort((a, b) => TOKEN_SORT[a.name] - TOKEN_SORT[b.name]);
 }
 
-export function token2CurrencyId(api: ApiPromise | ApiRx, token: Token): CurrencyId {
+export function token2CurrencyId (api: ApiPromise | ApiRx, token: Token): CurrencyId {
   return api.createType('CurrencyId', token.toChainData());
 }
 
-export function currencyId2Token(token: CurrencyId): Token {
-  return getPresetToken(Tokens[token.toNumber()] as PresetToken);
+export function currencyId2Token (token: CurrencyId): Token {
+  return getPresetToken(Tokens[token.toNumber()]);
 }

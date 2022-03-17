@@ -1,25 +1,33 @@
-import { Fixed18 } from '../fixed-18';
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
 import BigNumber from 'bignumber.js';
 import { expect } from 'chai';
+
+import { Fixed18 } from '../fixed-18';
 
 describe('fixed 128 constructor', () => {
   it('constructor should work', () => {
     const a = new Fixed18(1);
     const b = new Fixed18('1');
     const c = new Fixed18(new BigNumber(1));
+
     expect(a).to.deep.equal(b);
     expect(a).to.deep.equal(c);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const d = new Fixed18(); // test for no params
+
     expect(d).to.deep.equal(Fixed18.ZERO);
   });
   it('from parts should work', () => {
     const a = Fixed18.fromParts(1);
+
     expect(a.getInner().toNumber()).to.deep.equal(1);
   });
   it('from natural should work', () => {
     const a = Fixed18.fromNatural(1);
+
     expect(a.getInner().toNumber()).to.deep.equal(1e18);
   });
   it('from rational should work', () => {
@@ -27,6 +35,7 @@ describe('fixed 128 constructor', () => {
     const b = Fixed18.fromRational(100, 20);
     // 0.0000000000000000001 will be 0
     const c = Fixed18.fromRational(1, 10000000000000000000);
+
     expect(a.toNumber()).to.deep.equal(5);
     expect(a).to.deep.equal(b);
     expect(c).to.deep.equal(Fixed18.ZERO);
@@ -47,29 +56,36 @@ describe('toFixed should work', () => {
 describe('fixed 128 operation', () => {
   const a = Fixed18.fromNatural(10);
   const b = Fixed18.fromNatural(20);
+
   it('add should work', () => {
     const c = Fixed18.fromNatural(30);
+
     expect(a.add(b)).to.deep.equal(c);
   });
   it('sub should work', () => {
     const c = Fixed18.fromNatural(-10);
+
     expect(a.sub(b)).to.deep.equal(c);
   });
   it('mul should work', () => {
     const c = Fixed18.fromNatural(200);
+
     expect(a.mul(b)).to.deep.equal(c);
   });
   it('div should work', () => {
     const c = Fixed18.fromRational(1, 2);
+
     expect(a.div(b)).to.deep.equal(c);
   });
   it('div with zero should be Infinity', () => {
     const b = Fixed18.fromNatural(0);
     const c = new Fixed18(Infinity);
+
     expect(a.div(b)).to.deep.equal(c);
   });
   it('negated should work', () => {
     const c = Fixed18.fromNatural(-10);
+
     expect(a.negated()).to.deep.equal(c);
   });
 });
@@ -77,6 +93,7 @@ describe('fixed 128 operation', () => {
 describe('fixed 128 compare should work', () => {
   const a = Fixed18.fromNatural(10);
   const b = Fixed18.fromNatural(20);
+
   it('lessThan should work', () => {
     expect(a.isLessThan(b)).to.deep.equal(true);
   });
@@ -85,6 +102,7 @@ describe('fixed 128 compare should work', () => {
   });
   it('isEqual should work', () => {
     const c = Fixed18.fromNatural(10);
+
     expect(a.isEqualTo(b)).to.deep.equal(false);
     expect(a.isEqualTo(c)).to.deep.equal(true);
   });
@@ -94,6 +112,7 @@ describe('fixed 128 compare should work', () => {
   });
   it('isZero should work', () => {
     const c = Fixed18.ZERO;
+
     expect(c.isZero()).to.deep.equal(true);
     expect(a.isZero()).to.deep.equal(false);
   });
@@ -101,6 +120,7 @@ describe('fixed 128 compare should work', () => {
     const c1 = Fixed18.fromNatural(Infinity);
     const c2 = Fixed18.fromNatural(-Infinity);
     const c3 = Fixed18.fromNatural(NaN);
+
     expect(c1.isFinity()).to.deep.equal(false);
     expect(c2.isFinity()).to.deep.equal(false);
     expect(c3.isFinity()).to.deep.equal(false);
@@ -109,6 +129,7 @@ describe('fixed 128 compare should work', () => {
   it('isNaN should work', () => {
     const c = Fixed18.fromNatural(NaN);
     const d = Fixed18.ZERO.div(Fixed18.ZERO);
+
     expect(a.isNaN()).to.deep.equal(false);
     expect(c.isNaN()).to.deep.equal(true);
     expect(d.isNaN()).to.deep.equal(true);
@@ -117,6 +138,7 @@ describe('fixed 128 compare should work', () => {
 
 describe('fixed 128 format', () => {
   const a = Fixed18.fromRational(256, 100);
+
   it('toNumber should work', () => {
     expect(a.toNumber()).to.deep.equal(2.56);
     expect(a.toNumber(1, 2)).to.deep.equal(2.6); // round towards infinity
@@ -131,6 +153,7 @@ describe('fixed 128 format', () => {
     const b = Fixed18.fromParts(5.5);
     const c1 = Fixed18.fromNatural(NaN);
     const c2 = Fixed18.fromNatural(Infinity);
+
     expect(a.innerToString()).to.deep.equal('2560000000000000000');
     expect(b.innerToString()).to.deep.equal('5');
     expect(c1.innerToString()).to.deep.equal('0');
