@@ -1,9 +1,4 @@
-import { ChainType, computeChainIdType, internalChainIdToChainId } from '@webb-dapp/apps/configs';
-import { NativeTokenProperties } from '@webb-dapp/mixer';
-import { Currency } from '@webb-dapp/mixer/utils/currency';
-import { DepositPayload as IDepositPayload, MixerDeposit } from '@webb-dapp/react-environment/webb-context';
-import { ORMLCurrency } from '@webb-dapp/react-environment/webb-context/currency/orml-currency';
-import { WebbError, WebbErrorCodes } from '@webb-dapp/utils/webb-error';
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { LoggerService } from '@webb-tools/app-util';
 import { Note, NoteGenInput } from '@webb-tools/sdk-core';
 import { PalletMixerMixerMetadata } from '@webb-tools/types/interfaces/pallets';
@@ -11,19 +6,21 @@ import { PalletMixerMixerMetadata } from '@webb-tools/types/interfaces/pallets';
 import { u8aToHex } from '@polkadot/util';
 
 import { WebbPolkadot } from './webb-polkadot-provider';
+import { DepositPayload as TDepositPayload, MixerDeposit, MixerSize } from '../webb-context';
+import { ORMLCurrency } from '../webb-context/currency/orml-currency';
+import { WebbError, WebbErrorCodes } from '../webb-error';
+import { Currency } from '../webb-context/currency/currency';
+import { ChainType, computeChainIdType, internalChainIdToChainId } from '../chains';
 
-type DepositPayload = IDepositPayload<Note, [number, string]>;
+type DepositPayload = TDepositPayload<Note, [number, string]>;
 const logger = LoggerService.get('tornado-deposit');
 
 export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayload> {
-  private readonly tokens: ORMLCurrency;
-
-  constructor(t: WebbPolkadot) {
-    super(t);
-    this.tokens = new ORMLCurrency(t);
+  constructor(protected inner: WebbPolkadot) {
+    super(inner);
   }
 
-  static async getSizes(webbPolkadot: WebbPolkadot) {
+  static async getSizes(webbPolkadot: WebbPolkadot): Promise<MixerSize[]> {
     const api = webbPolkadot.api;
     const ormlCurrency = new ORMLCurrency(webbPolkadot);
     const ormlAssets = await ormlCurrency.list();
@@ -32,43 +29,43 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     const tokenProperty: Array<NativeTokenProperties> = await api.rpc.system.properties();
     const groupItem = data
       .map(([storageKey, info]) => {
-        const mixerInfo = (info as PalletMixerMixerMetadata).toHuman();
-        const cId: number = Number(mixerInfo.asset);
+        const mixerInfo = (info as unknown as PalletMixerMixerMetadata).toHuman();
+        const cId = Number(mixerInfo.asset);
         const amount = mixerInfo.depositSize;
         // @ts-ignore
         const treeId = storageKey.toHuman()[0];
-        const asset = ormlAssets.find((asset) => Number(asset.id) === cId) || {
-          locked: false,
-          existentialDeposit: 30000,
-          id: '0',
-          name: 'WEBB',
-        };
-        console.log('treeId: ', treeId);
-
         const id = storageKey.toString() + treeId;
         console.log('id in getSizes: ', id);
         // parse number from amount string
         // TODO: Get and parse native / non-native token denomination
+        // TODO replace `replaceAll` or target es2021
+        // @ts-ignore
         const amountNumber = (Number(amount?.toString().replaceAll(',', '')) * 1.0) / Math.pow(10, 12);
         const currency = cId
-          ? Currency.fromORMLAsset(ormlAssets.find((asset) => Number(asset.id) === cId)!, api, amountNumber)
-          : Currency.fromCurrencyId(cId, api, amountNumber);
+          ? Currency.fromORMLAsset(
+              webbPolkadot.config.currencies,
+              ormlAssets.find((asset) => Number(asset.id) === cId)!
+            )
+          : Currency.fromCurrencyId(webbPolkadot.config, Number(cId));
         return {
           id,
           amount: amountNumber,
           currency: currency,
-          treeId,
-          token: currency.token,
+          treeId
         };
       })
-      .map(({ amount, currency, id, token, treeId }) => ({
-        id: treeId,
-        treeId,
-        value: amount,
-        title: amount + ` ${currency.symbol}`,
-        symbol: currency.symbol,
-      }))
-      .sort((a, b) => (a.value > b.value ? 1 : a.value < b.value ? -1 : 0));
+      .map(
+        ({ amount, currency, treeId }) =>
+          ({
+            id: treeId,
+            treeId,
+            value: amount,
+            title: amount + ` ${currency.view.symbol}`,
+            asset: currency.view.symbol,
+            amount: amount
+          } as MixerSize)
+      )
+      .sort((a, b) => (a.amount > b.amount ? 1 : a.amount < b.amount ? -1 : 0));
     return groupItem;
   }
 
@@ -86,7 +83,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     if (!amount) {
       throw Error('amount not found! for mixer id ' + mixerId);
     }
-    const treeId = amount?.treeId;
+    const treeId = amount.id;
     logger.info(`Depositing to tree id ${treeId}`);
     const noteInput: NoteGenInput = {
       protocol: 'mixer',
@@ -97,12 +94,12 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
       hashFunction: 'Poseidon',
       curve: 'Bn254',
       denomination: `${denomination}`,
-      amount: String(amount.value),
-      chain: chainIdType.toString(),
+      amount: String(amount.amount),
+      targetChain: chainIdType.toString(),
       sourceChain: chainIdType.toString(),
       sourceIdentifyingData: treeId.toString(),
       targetIdentifyingData: treeId.toString(),
-      tokenSymbol: amount.symbol,
+      tokenSymbol: amount.asset
     };
     logger.info(`noteInput in generateNote: `, noteInput);
     const depositNote = await Note.generateNote(noteInput);
@@ -111,7 +108,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
 
     return {
       note: depositNote,
-      params: [Number(treeId), u8aToHex(leaf)],
+      params: [Number(treeId), u8aToHex(leaf)]
     };
   }
 
@@ -119,7 +116,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     const tx = this.inner.txBuilder.build(
       {
         section: 'mixerBn254',
-        method: 'deposit',
+        method: 'deposit'
       },
       depositPayload.params
     );
@@ -138,6 +135,5 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
       console.log('deposit done');
     });
     await tx.call(account.address);
-    return;
   }
 }

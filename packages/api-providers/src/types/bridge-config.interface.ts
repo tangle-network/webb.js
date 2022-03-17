@@ -1,6 +1,5 @@
-import { WebbCurrencyId } from '@webb-dapp/apps/configs';
-
 import { AnchorConfigEntry } from './anchor-config.interface';
+import { WebbCurrencyId } from '../enums';
 
 export interface BridgeConfig {
   asset: WebbCurrencyId;

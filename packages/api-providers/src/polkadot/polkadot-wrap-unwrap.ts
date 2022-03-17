@@ -1,13 +1,8 @@
-import { WebbCurrencyId } from '@webb-dapp/apps/configs';
-import { MixerSize } from '@webb-dapp/react-environment';
-import { WebbPolkadot } from '@webb-dapp/react-environment/api-providers';
-import {
-  Amount,
-  WrappingBalance,
-  WrappingEvent,
-  WrapUnWrap,
-} from '@webb-dapp/react-environment/webb-context/wrap-unwrap';
 import { Observable } from 'rxjs';
+import { Amount, WrappingBalance, WrappingEvent, WrapUnWrap } from '../webb-context/wrap-unwrap';
+import { WebbPolkadot } from './webb-polkadot-provider';
+import { MixerSize } from '../webb-context';
+import { WebbCurrencyId } from '../enums';
 
 export class PolkadotWrapUnwrap extends WrapUnWrap<WebbPolkadot> {
   canWrap(wrapPayload: any): Promise<boolean> {

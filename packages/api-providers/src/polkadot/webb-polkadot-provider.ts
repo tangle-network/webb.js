@@ -21,6 +21,7 @@ import { PolkadotChainQuery } from './polkadot-chain-query';
 import { WebbRelayerBuilder } from '../webb-context/relayer';
 import { AccountsAdapter } from '../account/Accounts.adapter';
 import { PolkadotWrapUnwrap } from './polkadot-wrap-unwrap';
+import { PolkadotProvider } from '../ext-providers';
 
 export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbApiProvider<WebbPolkadot> {
   readonly methods: WebbMethods<WebbPolkadot>;
@@ -31,7 +32,7 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
     apiPromise: ApiPromise,
     injectedExtension: InjectedExtension,
     readonly relayingManager: WebbRelayerBuilder,
-    readonly config: AppConfig,
+    public readonly config: AppConfig,
     readonly notificationHandler: NotificationHandler,
     private readonly provider: PolkadotProvider,
     readonly accounts: AccountsAdapter<InjectedExtension, InjectedAccount>
@@ -86,7 +87,7 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
 
   async awaitMetaDataCheck() {
     /// delay some time till the UI is instantiated and then check if the dApp needs to update extension meta data
-    await new Promise((r) => setTimeout(r, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     const metaData = await this.provider.checkMetaDataUpdate();
     if (metaData) {
       /// feedback body
@@ -100,7 +101,14 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
         /// update extension metadata
         .action('Update MetaData', () => this.provider.updateMetaData(metaData), 'success')
         .actions();
-      const feedback = new InteractiveFeedback('info', actions, () => {}, feedbackEntries);
+      const feedback = new InteractiveFeedback(
+        'info',
+        actions,
+        () => {
+          return null;
+        },
+        feedbackEntries
+      );
       /// emit the feedback object
       this.emit('interactiveFeedback', feedback);
     }
@@ -109,6 +117,7 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
   private async insureApiInterface() {
     // check for RPC
     console.log(this.api, 'api');
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const merkleRPC = Boolean(this.api.rpc.mt.getLeaves);
     // merkle rpc

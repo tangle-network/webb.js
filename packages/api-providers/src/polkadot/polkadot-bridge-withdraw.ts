@@ -1,18 +1,17 @@
-import { InternalChainId } from '@webb-dapp/apps/configs';
+// TODO :handle workers from sdk-core
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import Worker from '@webb-dapp/mixer/utils/proving-manager.worker';
-import { WithdrawState } from '@webb-dapp/react-environment';
-import { WebbPolkadot } from '@webb-dapp/react-environment/api-providers';
-import { getCachedFixtureURI, withLocalFixtures } from '@webb-dapp/utils/misc';
-import { WebbError, WebbErrorCodes } from '@webb-dapp/utils/webb-error';
-import { LoggerService } from '@webb-tools/app-util';
-import { Note, ProvingManager } from '@webb-tools/sdk-core';
-import { ProvingManagerSetupInput } from '@webb-tools/sdk-core/proving/proving-manager-thread';
-
-import { decodeAddress } from '@polkadot/keyring';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
+import { BridgeWithdraw } from '../bridge';
+import { WebbError, WebbErrorCodes } from '../webb-error';
+import { WebbPolkadot } from './webb-polkadot-provider';
+import { Note, ProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core';
+import { WithdrawState } from '../webb-context';
+import { decodeAddress } from '@polkadot/keyring';
+import { InternalChainId } from '../chains';
+import { LoggerService } from '@webb-tools/app-util';
 
-import { BridgeWithdraw } from '../../webb-context/bridge/bridge-withdraw';
 const logger = LoggerService.get('PolkadotBridgeWithdraw');
 export type AnchorWithdrawProof = {
   id: string;
@@ -46,14 +45,18 @@ export class PolkadotBridgeWithdraw extends BridgeWithdraw<WebbPolkadot> {
     }
     return leaves;
   }
+
   async fetchRoot(treeId: string) {
     logger.trace(`fetching metadata for tree id ${treeId}`);
     const storage =
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       await this.inner.api.query.merkleTreeBn254.trees(treeId);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return storage.toHuman().root;
   }
+
   async withdraw(note: string, recipient: string): Promise<string> {
     // TODO: implement cross chain
     // TODO: Integrate with Substrate relayer
@@ -77,7 +80,7 @@ export class PolkadotBridgeWithdraw extends BridgeWithdraw<WebbPolkadot> {
       const leaves = await this.fetchRPCTreeLeaves(treeId);
       const leaf = depositNote.getLeafCommitment();
       const leafHex = u8aToHex(leaf);
-      let leafIndex = leaves.findIndex((leaf) => u8aToHex(leaf) === leafHex);
+      const leafIndex = leaves.findIndex((leaf) => u8aToHex(leaf) === leafHex);
       logger.trace(leaves.map((i) => u8aToHex(i)));
       const pm = new ProvingManager(new Worker());
 
@@ -97,7 +100,7 @@ export class PolkadotBridgeWithdraw extends BridgeWithdraw<WebbPolkadot> {
         relayer: relayerAccountHex.replace('0x', ''),
         provingKey,
         refreshCommitment,
-        roots: [hexToU8a(root), hexToU8a(root)],
+        roots: [hexToU8a(root), hexToU8a(root)]
       };
       logger.log('proofInput to webb.js: ', proofInput);
       const zkProofMetadata = await pm.proof(proofInput);
@@ -110,7 +113,7 @@ export class PolkadotBridgeWithdraw extends BridgeWithdraw<WebbPolkadot> {
         relayer: relayerAccountId,
         fee: 0,
         refund: 0,
-        refreshCommitment: `0x${refreshCommitment}`,
+        refreshCommitment: `0x${refreshCommitment}`
       };
       const parms = [
         withdrawProof.id,
@@ -121,14 +124,14 @@ export class PolkadotBridgeWithdraw extends BridgeWithdraw<WebbPolkadot> {
         withdrawProof.relayer,
         withdrawProof.fee,
         withdrawProof.refund,
-        withdrawProof.refreshCommitment,
+        withdrawProof.refreshCommitment
       ];
 
       this.emit('stateChange', WithdrawState.SendingTransaction);
       const tx = this.inner.txBuilder.build(
         {
           section: 'anchorBn254',
-          method: 'withdraw',
+          method: 'withdraw'
         },
         parms
       );
@@ -144,8 +147,7 @@ export class PolkadotBridgeWithdraw extends BridgeWithdraw<WebbPolkadot> {
 async function fetchSubstrateProvingKey() {
   // TODO: change to anchor fixture
   const IPFSUrl = `https://ipfs.io/ipfs/QmYDtGX7Wf5qUPEpGsgrX6oss2m2mm8vi7uzNdK4C9yJdZ`;
-  const cachedURI = getCachedFixtureURI('proving_key_uncompressed_anchor.bin');
-  const ipfsKeyRequest = await fetch(withLocalFixtures() ? cachedURI : IPFSUrl);
+  const ipfsKeyRequest = await fetch(IPFSUrl);
   const circuitKeyArrayBuffer = await ipfsKeyRequest.arrayBuffer();
   logger.info(`Done Fetching key`);
   const circuitKey = new Uint8Array(circuitKeyArrayBuffer);

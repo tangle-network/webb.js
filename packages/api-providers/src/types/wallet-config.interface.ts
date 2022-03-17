@@ -1,6 +1,8 @@
+import { ReactElement } from './abstracts';
+
 export interface WalletConfig {
   id: number;
-  logo: React.ComponentType;
+  logo: ReactElement;
   name: string;
   title: string;
   platform: string;

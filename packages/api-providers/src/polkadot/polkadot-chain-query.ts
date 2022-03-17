@@ -1,7 +1,6 @@
-import { WebbCurrencyId } from '@webb-dapp/apps/configs';
-import { ChainQuery } from '@webb-dapp/react-environment/webb-context/chain-query';
-
 import { WebbPolkadot } from './webb-polkadot-provider';
+import { ChainQuery } from '../webb-context/chain-query';
+import { WebbCurrencyId } from '../enums';
 
 export class PolkadotChainQuery extends ChainQuery<WebbPolkadot> {
   constructor(protected inner: WebbPolkadot) {
