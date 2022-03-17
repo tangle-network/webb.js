@@ -1,26 +1,17 @@
 import { parseUnits } from '@ethersproject/units';
-import {
-  chainTypeIdToInternalId,
-  evmIdIntoInternalChainId,
-  InternalChainId,
-  parseChainIdType,
-} from '@webb-dapp/apps/configs';
-import { chainIdToRelayerName } from '@webb-dapp/apps/configs/relayer-config';
-import { bufferToFixed } from '@webb-dapp/contracts/utils/buffer-to-fixed';
-import { depositFromPreimage } from '@webb-dapp/contracts/utils/make-deposit';
-import { fromDepositIntoZKPTornPublicInputs } from '@webb-dapp/contracts/utils/zkp-adapters';
-import { WebbWeb3Provider } from '@webb-dapp/react-environment/api-providers/web3/webb-web3-provider';
-import {
-  MixerWithdraw,
-  OptionalActiveRelayer,
-  OptionalRelayer,
-  WithdrawState,
-} from '@webb-dapp/react-environment/webb-context';
-import { RelayedWithdrawResult, RelayerCMDBase, WebbRelayer } from '@webb-dapp/react-environment/webb-context/relayer';
-import { WebbError, WebbErrorCodes } from '@webb-dapp/utils/webb-error';
+
 import { LoggerService } from '@webb-tools/app-util';
 import { Note } from '@webb-tools/sdk-core';
 import { BigNumber } from 'ethers';
+import { RelayedWithdrawResult, RelayerCMDBase, WebbRelayer } from '../webb-context/relayer';
+import { WebbError, WebbErrorCodes } from '../webb-error';
+import { MixerWithdraw, OptionalActiveRelayer, OptionalRelayer, WithdrawState } from '../webb-context';
+import { chainTypeIdToInternalId, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains';
+import { depositFromPreimage } from '../contracts/utils/make-deposit';
+import { WebbWeb3Provider } from './webb-web3-provider';
+import { fromDepositIntoZKPTornPublicInputs } from '../contracts/utils/zkp-adapters';
+import { bufferToFixed } from '../contracts/utils/buffer-to-fixed';
+import { chainIdToRelayerName } from '../uitls/relayer-utils';
 
 const logger = LoggerService.get('Web3MixerWithdraw');
 
@@ -35,7 +26,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
       relayer,
       {
         basedOn: 'evm',
-        chain: chainId,
+        chain: chainId
       },
       // Define the function for retrieving fee information for the relayer
       async (note: string) => {
@@ -46,11 +37,11 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
 
         // Given the note, iterate over the relayer's supported contracts and find the corresponding configuration
         // for the contract.
-        const supportedContract = relayer.capabilities.supportedChains['evm']
+        const supportedContract = relayer.capabilities.supportedChains.evm
           .get(chainTypeIdToInternalId(targetChainIdType))
           ?.contracts.find(({ address, size }) => {
             // Match on the relayer configuration as well as note
-            return address.toLowerCase() === contractAddress.toLowerCase() && size == Number(evmNote.amount);
+            return address.toLowerCase() === contractAddress.toLowerCase() && size === Number(evmNote.amount);
           });
 
         // The user somehow selected a relayer which does not support the mixer.
@@ -68,7 +59,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
         const feeBig = feeBigMill.div(BigNumber.from(1000000));
         return {
           totalFees: feeBig.toString(),
-          withdrawFeePercentage: supportedContract.withdrawFeePercentage,
+          withdrawFeePercentage: supportedContract.withdrawFeePercentage
         };
       }
     );
@@ -79,7 +70,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
       const chainId = evmIdIntoInternalChainId(evmId);
       return this.inner.relayingManager.getRelayer({
         baseOn: 'evm',
-        chainId,
+        chainId
       });
     });
   }
@@ -90,8 +81,8 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
       chainId: chainTypeIdToInternalId(parseChainIdType(Number(evmNote.note.targetChainId))),
       tornadoSupport: {
         amount: Number(evmNote.note.amount),
-        tokenSymbol: evmNote.note.tokenSymbol,
-      },
+        tokenSymbol: evmNote.note.tokenSymbol
+      }
     });
   }
 
@@ -99,7 +90,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
     return this.inner.relayingManager.getRelayer({
       baseOn: 'evm',
       chainId: chainId,
-      contractAddress: address,
+      contractAddress: address
     });
   }
 
@@ -124,7 +115,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
           level: 'loading',
           message: 'evm-mixer:withdraw',
           name: 'Transaction',
-          key: 'mixer-withdraw-evm',
+          key: 'mixer-withdraw-evm'
         });
 
         logger.info(`Withdrawing through relayer with address ${activeRelayer.endpoint}`);
@@ -137,7 +128,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
         const zkpInputWithoutMerkleProof = fromDepositIntoZKPTornPublicInputs(deposit, {
           recipient,
           relayer: activeRelayer.account ?? activeRelayer.beneficiary,
-          fee: Number(fees?.totalFees),
+          fee: Number(fees?.totalFees)
         });
 
         const relayerLeaves = await activeRelayer.getLeaves(chainEvmId.toString(16), mixerInfo.address);
@@ -161,7 +152,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
             level: 'error',
             message: 'evm-mixer:withdraw',
             name: 'Transaction',
-            key: 'mixer-withdraw-evm',
+            key: 'mixer-withdraw-evm'
           });
           this.emit('stateChange', WithdrawState.Ideal);
           return '';
@@ -175,7 +166,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
           baseOn: 'evm' as RelayerCMDBase,
           name: chainIdToRelayerName(chainId),
           contractAddress: mixerInfo.address,
-          endpoint: '',
+          endpoint: ''
         };
         const tx = relayedWithdraw.generateWithdrawRequest<typeof chainInput, 'tornadoRelayTx'>(chainInput, zkp.proof, {
           chain: chainIdToRelayerName(chainId),
@@ -185,7 +176,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
           recipient: zkp.input.recipient,
           refund: bufferToFixed(zkp.input.refund),
           relayer: zkp.input.relayer,
-          root: bufferToFixed(zkp.input.root),
+          root: bufferToFixed(zkp.input.root)
         });
         relayedWithdraw.watcher.subscribe(([nextValue, message]) => {
           switch (nextValue) {
@@ -203,7 +194,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
                 level: 'success',
                 message: 'evm-mixer:withdraw',
                 name: 'Transaction',
-                key: 'mixer-withdraw-evm',
+                key: 'mixer-withdraw-evm'
               });
 
               break;
@@ -216,7 +207,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
                 level: 'error',
                 message: 'evm-mixer:withdraw',
                 name: 'Transaction',
-                key: 'mixer-withdraw-evm',
+                key: 'mixer-withdraw-evm'
               });
 
               break;
@@ -242,7 +233,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
           level: 'error',
           message: 'evm-mixer:withdraw',
           name: 'Transaction',
-          key: 'mixer-withdraw-evm',
+          key: 'mixer-withdraw-evm'
         });
 
         if ((e as any)?.code === WebbErrorCodes.RelayerMisbehaving) {
@@ -257,7 +248,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
         level: 'loading',
         message: 'evm-mixer:withdraw',
         name: 'Transaction',
-        key: 'mixer-withdraw-evm',
+        key: 'mixer-withdraw-evm'
       });
 
       const contract = await this.inner.getContractBySize(Number(evmNote.note.amount), evmNote.note.tokenSymbol);
@@ -266,7 +257,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
       let zkp: any;
       const zkpInputWithoutMerkleProof = fromDepositIntoZKPTornPublicInputs(deposit, {
         recipient,
-        relayer: recipient,
+        relayer: recipient
       });
       try {
         if (relayers.length) {
@@ -301,7 +292,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
             level: 'error',
             message: 'evm-mixer:withdraw',
             name: 'Transaction',
-            key: 'mixer-withdraw-evm',
+            key: 'mixer-withdraw-evm'
           });
           this.emit('stateChange', WithdrawState.Ideal);
           return '';
@@ -316,7 +307,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
           level: 'success',
           message: 'evm-mixer:withdraw',
           name: 'Transaction',
-          key: 'mixer-withdraw-evm',
+          key: 'mixer-withdraw-evm'
         });
 
         this.emit('stateChange', WithdrawState.Ideal);
@@ -331,7 +322,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
             level: 'error',
             message: 'evm-mixer:withdraw',
             name: 'Transaction',
-            key: 'mixer-withdraw-evm',
+            key: 'mixer-withdraw-evm'
           });
 
           this.emit('stateChange', WithdrawState.Ideal);
@@ -342,7 +333,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
           level: 'error',
           message: 'evm-mixer:withdraw',
           name: 'Transaction',
-          key: 'mixer-withdraw-evm',
+          key: 'mixer-withdraw-evm'
         });
         throw e;
       }

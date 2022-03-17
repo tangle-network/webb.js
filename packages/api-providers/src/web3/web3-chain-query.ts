@@ -1,18 +1,22 @@
-import { evmIdIntoInternalChainId, WebbCurrencyId } from '@webb-dapp/apps/configs';
-import { zeroAddress } from '@webb-dapp/contracts/contracts';
-import { ERC20__factory } from '@webb-dapp/contracts/types';
-import { WebbWeb3Provider } from '@webb-dapp/react-environment/api-providers';
-import { ChainQuery } from '@webb-dapp/react-environment/webb-context/chain-query';
-import { Currency } from '@webb-dapp/react-environment/webb-context/currency/currency';
 import { ethers } from 'ethers';
+import { ChainQuery } from '../webb-context/chain-query';
+import { WebbWeb3Provider } from './webb-web3-provider';
+import { Currency } from '../webb-context/currency/currency';
+import { WebbCurrencyId } from '../enums';
+import { evmIdIntoInternalChainId } from '../chains';
+import { zeroAddress } from '../contracts/contracts';
+// eslint-disable-next-line camelcase
+import { ERC20__factory } from '../contracts/types';
 
 export class Web3ChainQuery extends ChainQuery<WebbWeb3Provider> {
   constructor(protected inner: WebbWeb3Provider) {
     super(inner);
   }
+
   private get config() {
     return this.inner.config;
   }
+
   async tokenBalanceByCurrencyId(currencyId: WebbCurrencyId): Promise<string> {
     const provider = this.inner.getEthersProvider();
 
@@ -26,13 +30,13 @@ export class Web3ChainQuery extends ChainQuery<WebbWeb3Provider> {
       return '';
     }
     // Return the balance of the account if native currency
-    if (this.config.chains[webbChain].nativeCurrencyId == currencyId) {
+    if (this.config.chains[webbChain].nativeCurrencyId === currencyId) {
       const tokenBalanceBig = await provider.getBalance(accounts[0].address);
       const tokenBalance = ethers.utils.formatEther(tokenBalanceBig);
       return tokenBalance;
     } else {
       // Find the currency address on this chain
-      const currency = Currency.fromCurrencyId(currencyId);
+      const currency = Currency.fromCurrencyId(this.inner.config, currencyId);
       const currencyOnChain = currency.getAddress(webbChain);
       if (!currencyOnChain) return '';
 

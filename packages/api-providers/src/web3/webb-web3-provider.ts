@@ -1,31 +1,29 @@
-import { EVMChainId, evmIdIntoInternalChainId, parseChainIdType } from '@webb-dapp/apps/configs';
-import { TornadoContract } from '@webb-dapp/contracts/contracts/tornado-anchor';
-import { AnchorContract } from '@webb-dapp/contracts/contracts/webb-anchor';
+import { EventBus } from '@webb-tools/app-util';
+import { Note } from '@webb-tools/sdk-core';
+import { providers } from 'ethers';
+import { Eth } from 'web3-eth';
+import { Web3WrapUnwrap } from './web3-wrap-unwrap';
+import { Web3BridgeDeposit } from './web3-bridge-deposit';
+import { Web3MixerWithdraw } from './web3-mixer-withdraw';
+import { Web3Accounts, Web3Provider } from '../ext-providers';
+import { Web3MixerDeposit } from './web3-mixer-deposit';
+import { WebbError, WebbErrorCodes } from '../webb-error';
+import { EVMChainId, evmIdIntoInternalChainId, parseChainIdType } from '../chains';
+import { EvmChainMixersInfo } from './EvmChainMixersInfo';
 import {
   AppConfig,
+  MixerSize,
   NotificationHandler,
   WebbApiProvider,
   WebbMethods,
-  WebbProviderEvents,
-} from '@webb-dapp/react-environment';
-import { Web3WrapUnwrap } from '@webb-dapp/react-environment/api-providers';
-import { EvmChainMixersInfo } from '@webb-dapp/react-environment/api-providers/web3/EvmChainMixersInfo';
-import { Web3BridgeApi } from '@webb-dapp/react-environment/api-providers/web3/web3-bridge-api';
-import { Web3BridgeDeposit } from '@webb-dapp/react-environment/api-providers/web3/web3-bridge-deposit';
-import { Web3BridgeWithdraw } from '@webb-dapp/react-environment/api-providers/web3/web3-bridge-withdraw';
-import { Web3ChainQuery } from '@webb-dapp/react-environment/api-providers/web3/web3-chain-query';
-import { Web3MixerDeposit } from '@webb-dapp/react-environment/api-providers/web3/web3-mixer-deposit';
-import { Web3MixerWithdraw } from '@webb-dapp/react-environment/api-providers/web3/web3-mixer-withdraw';
-import { MixerSize } from '@webb-dapp/react-environment/webb-context';
-import { WebbRelayerBuilder } from '@webb-dapp/react-environment/webb-context/relayer';
-import { WebbError, WebbErrorCodes } from '@webb-dapp/utils/webb-error';
-import { AccountsAdapter } from '@webb-dapp/wallet/account/Accounts.adapter';
-import { Web3Accounts } from '@webb-dapp/wallet/providers/web3/web3-accounts';
-import { Web3Provider } from '@webb-dapp/wallet/providers/web3/web3-provider';
-import { EventBus } from '@webb-tools/app-util';
-import { Note } from '@webb-tools/sdk-core';
-import { ethers, providers } from 'ethers';
-import { Eth } from 'web3-eth';
+  WebbProviderEvents
+} from '../webb-context';
+import { Web3BridgeWithdraw } from './web3-bridge-withdraw';
+import { Web3ChainQuery } from './web3-chain-query';
+import { Web3BridgeApi } from './web3-bridge-api';
+import { WebbRelayerBuilder } from '../webb-context/relayer';
+import { AccountsAdapter } from '../account/Accounts.adapter';
+import { AnchorContract, TornadoContract } from '../contracts/contracts';
 
 export class WebbWeb3Provider
   extends EventBus<WebbProviderEvents<[number]>>
@@ -37,7 +35,7 @@ export class WebbWeb3Provider
 
   private constructor(
     private web3Provider: Web3Provider,
-    private chainId: number,
+    protected chainId: number,
     readonly relayingManager: WebbRelayerBuilder,
     readonly config: AppConfig,
     readonly notificationHandler: NotificationHandler,
@@ -46,10 +44,13 @@ export class WebbWeb3Provider
     super();
     this.ethersProvider = web3Provider.intoEthersProvider();
 
+    // TODO: fix types
     // Remove listeners for chainChanged on the previous object
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.ethersProvider.provider?.removeAllListeners('chainChanged');
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.ethersProvider.provider?.on?.('accountsChanged', () => {
       this.emit('newAccounts', this.accounts);
@@ -59,32 +60,32 @@ export class WebbWeb3Provider
       wrapUnwrap: {
         core: {
           enabled: true,
-          inner: new Web3WrapUnwrap(this),
-        },
+          inner: new Web3WrapUnwrap(this)
+        }
       },
       bridge: {
         core: null,
         deposit: {
           inner: new Web3BridgeDeposit(this),
-          enabled: true,
+          enabled: true
         },
         withdraw: {
           inner: new Web3BridgeWithdraw(this),
-          enabled: true,
-        },
+          enabled: true
+        }
       },
       mixer: {
         deposit: {
           enabled: true,
-          inner: new Web3MixerDeposit(this),
+          inner: new Web3MixerDeposit(this)
         },
         withdraw: {
           enabled: true,
-          inner: new Web3MixerWithdraw(this),
-        },
+          inner: new Web3MixerWithdraw(this)
+        }
       },
       chainQuery: new Web3ChainQuery(this),
-      bridgeApi: new Web3BridgeApi(this, this.config.bridgeByAsset),
+      bridgeApi: new Web3BridgeApi(this, this.config.bridgeByAsset)
     };
   }
 
@@ -98,6 +99,7 @@ export class WebbWeb3Provider
       const chainId = await this.web3Provider.network;
       this.emit('providerUpdate', [chainId]);
     };
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.ethersProvider.provider?.on?.('chainChanged', handler);
   }
@@ -110,7 +112,7 @@ export class WebbWeb3Provider
     await this.endSession();
     this.subscriptions = {
       providerUpdate: [],
-      interactiveFeedback: [],
+      interactiveFeedback: []
     };
   }
 
@@ -205,27 +207,10 @@ export class WebbWeb3Provider
     return this.web3Provider.endSession();
   }
 
-  async reason(hash: string) {
-    const a = await this.ethersProvider.getTransaction(hash);
-    if (!a) {
-      throw new Error('TX not found');
-    }
-    try {
-      // @ts-ignore
-      let code = await this.ethersProvider.call(a, a.blockNumber);
-      console.log({ ERRORCODE: code });
-    } catch (e) {
-      let err = e as any;
-      const code = err?.message.replace('Reverted ', '');
-      let reason = ethers.utils.toUtf8String('0x' + code.substr(138));
-      return reason;
-    }
-  }
-
   switchOrAddChain(evmChainId: number) {
     return this.web3Provider
       .switchChain({
-        chainId: `0x${evmChainId.toString(16)}`,
+        chainId: `0x${evmChainId.toString(16)}`
       })
       ?.catch(async (switchError) => {
         console.log('inside catch for switchChain', switchError);
@@ -244,13 +229,13 @@ export class WebbWeb3Provider
             nativeCurrency: {
               decimals: 18,
               name: currency.name,
-              symbol: currency.symbol,
-            },
+              symbol: currency.symbol
+            }
           });
           // add network will prompt the switch, check evmId again and throw if user rejected
           const newChainId = await this.web3Provider.network;
 
-          if (newChainId != chain.chainId) {
+          if (newChainId !== chain.chainId) {
             throw switchError;
           }
         } else {

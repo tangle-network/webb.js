@@ -1,18 +1,13 @@
-import {
-  ChainType,
-  computeChainIdType,
-  getEVMChainName,
-  getNativeCurrencySymbol,
-  parseChainIdType,
-} from '@webb-dapp/apps/configs';
-import { createTornDeposit, Deposit } from '@webb-dapp/contracts/utils/make-deposit';
-import { DepositPayload as IDepositPayload, MixerDeposit, MixerSize } from '@webb-dapp/react-environment/webb-context';
 import { Note, NoteGenInput } from '@webb-tools/sdk-core';
 import utils from 'web3-utils';
 
 import { u8aToHex } from '@polkadot/util';
 
 import { WebbWeb3Provider } from './webb-web3-provider';
+import { createTornDeposit, Deposit } from '../contracts/utils/make-deposit';
+import { DepositPayload as IDepositPayload, MixerDeposit, MixerSize } from '../webb-context';
+import { ChainType, computeChainIdType, parseChainIdType } from '../chains';
+import { getEVMChainName, getNativeCurrencySymbol } from '../uitls/chain-utils';
 
 type DepositPayload = IDepositPayload<Note, [Deposit, number]>;
 
@@ -26,14 +21,18 @@ export class Web3MixerDeposit extends MixerDeposit<WebbWeb3Provider, DepositPayl
       level: 'loading',
       description: 'Depositing',
       data: {
-        chain: getEVMChainName(evmChainId),
+        chain: getEVMChainName(this.inner.config, evmChainId),
         amount: String(Number(depositPayload.note.amount)),
-        currency: depositPayload.note.tokenSymbol,
+        currency: depositPayload.note.tokenSymbol
       },
-      message: 'mixer:deposit',
+      message: 'mixer:deposit'
     });
     const [deposit, amount] = params;
-    const contract = await this.inner.getContractBySize(amount, getNativeCurrencySymbol(await this.inner.getChainId()));
+    const providerEvmChainId = await this.inner.getChainId();
+    const contract = await this.inner.getContractBySize(
+      amount,
+      getNativeCurrencySymbol(this.inner.config, providerEvmChainId)
+    );
     try {
       await contract.deposit(deposit.commitment);
       this.inner.notificationHandler({
@@ -41,16 +40,16 @@ export class Web3MixerDeposit extends MixerDeposit<WebbWeb3Provider, DepositPayl
         key: 'web3-mixer-deposit',
         level: 'success',
         description: 'Deposit succeed',
-        message: 'mixer:deposit',
+        message: 'mixer:deposit'
       });
     } catch (e) {
-      if ((e as any)?.code == 4001) {
+      if ((e as any)?.code === 4001) {
         this.inner.notificationHandler({
           name: 'Transaction',
           key: 'web3-mixer-deposit',
           level: 'error',
           description: 'User Rejected Deposit',
-          message: 'mixer:deposit',
+          message: 'mixer:deposit'
         });
       } else {
         this.inner.notificationHandler({
@@ -58,7 +57,7 @@ export class Web3MixerDeposit extends MixerDeposit<WebbWeb3Provider, DepositPayl
           key: 'web3-mixer-deposit',
           level: 'error',
           description: 'Deposit Failed',
-          message: 'mixer:deposit',
+          message: 'mixer:deposit'
         });
       }
     }
@@ -81,7 +80,7 @@ export class Web3MixerDeposit extends MixerDeposit<WebbWeb3Provider, DepositPayl
       protocol: 'mixer',
       exponentiation: '5',
       width: '3',
-      chain: noteChain.toString(),
+      targetChain: noteChain.toString(),
       sourceChain: noteChain.toString(),
       sourceIdentifyingData: mixerAddress,
       targetIdentifyingData: mixerAddress,
@@ -92,17 +91,18 @@ export class Web3MixerDeposit extends MixerDeposit<WebbWeb3Provider, DepositPayl
       backend: 'Circom',
       version: 'v2',
       tokenSymbol: mixerInfo.symbol,
-      secrets: u8aToHex(secrets),
+      secrets: u8aToHex(secrets)
     };
     const note = await Note.generateNote(noteInput);
 
     return {
       note: note,
-      params: [deposit, mixerInfo.size],
+      params: [deposit, mixerInfo.size]
     };
   }
 
   async getSizes(): Promise<MixerSize[]> {
-    return this.inner.getMixerSizes(getNativeCurrencySymbol(await this.inner.getChainId()));
+    const chainId = await this.inner.getChainId();
+    return this.inner.getMixerSizes(getNativeCurrencySymbol(this.inner.config, chainId));
   }
 }

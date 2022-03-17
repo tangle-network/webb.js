@@ -1,10 +1,10 @@
-import { ChainTypeId, chainTypeIdToInternalId, evmIdIntoInternalChainId } from '@webb-dapp/apps/configs';
-import { WebbGovernedToken } from '@webb-dapp/contracts/contracts';
-import { WebbWeb3Provider } from '@webb-dapp/react-environment/api-providers';
-import { BridgeConfig } from '@webb-dapp/react-environment/types/bridge-config.interface';
-import { CurrencyRole, CurrencyType } from '@webb-dapp/react-environment/types/currency-config.interface';
-import { AnchorBase, BridgeApi } from '@webb-dapp/react-environment/webb-context/bridge/bridge-api';
-import { Currency } from '@webb-dapp/react-environment/webb-context/currency/currency';
+import { CurrencyRole, CurrencyType } from '../types/currency-config.interface';
+import { WebbWeb3Provider } from './webb-web3-provider';
+import { AnchorBase, BridgeApi } from '../bridge/bridge-api';
+import { Currency } from '../webb-context/currency/currency';
+import { BridgeConfig } from '../types/bridge-config.interface';
+import { ChainTypeId, chainTypeIdToInternalId, evmIdIntoInternalChainId } from '../chains';
+import { WebbGovernedToken } from '../contracts/contracts';
 
 export class Web3BridgeApi extends BridgeApi<WebbWeb3Provider, BridgeConfig> {
   getTokenAddress(chainTypeId: ChainTypeId): string | null {
@@ -12,19 +12,21 @@ export class Web3BridgeApi extends BridgeApi<WebbWeb3Provider, BridgeConfig> {
     const internalChainId = chainTypeIdToInternalId(chainTypeId);
     return activeBridgeAsset ? this.config.currencies[activeBridgeAsset].addresses.get(internalChainId) ?? null : null;
   }
+
   private get config() {
     return this.inner.config;
   }
+
   async getCurrencies(): Promise<Currency[]> {
     const currentChainId = await this.inner.getChainId();
     const internalChainId = evmIdIntoInternalChainId(currentChainId);
     const bridgeCurrenciesConfig = Object.values(this.config.currencies).filter((i) => {
-      const isValid = i.role == CurrencyRole.Governable && i.type == CurrencyType.ERC20;
-      const isSupported = Currency.fromCurrencyId(i.id).hasChain(internalChainId);
+      const isValid = i.role === CurrencyRole.Governable && i.type === CurrencyType.ERC20;
+      const isSupported = Currency.fromCurrencyId(this.config.currencies, i.id).hasChain(internalChainId);
       return isSupported && isValid;
     });
     return bridgeCurrenciesConfig.map((config) => {
-      return Currency.fromCurrencyId(config.id);
+      return Currency.fromCurrencyId(this.config.currencies, config.id);
     });
   }
 
@@ -33,14 +35,14 @@ export class Web3BridgeApi extends BridgeApi<WebbWeb3Provider, BridgeConfig> {
   }
 
   get currency(): Currency | null {
-    return this.activeBridgeAsset ? Currency.fromCurrencyId(this.activeBridgeAsset) : null;
+    return this.activeBridgeAsset ? Currency.fromCurrencyId(this.config.currencies, this.activeBridgeAsset) : null;
   }
 
   async getAnchors(): Promise<AnchorBase[]> {
     return (
       this.store.activeBridge?.anchors.map((anchor) => ({
         amount: anchor.amount,
-        neighbours: anchor.anchorAddresses,
+        neighbours: anchor.anchorAddresses
       })) ?? []
     );
   }
@@ -68,7 +70,7 @@ export class Web3BridgeApi extends BridgeApi<WebbWeb3Provider, BridgeConfig> {
       wrappableCurrencyIds.push(this.config.chains[internalChainId].nativeCurrencyId);
 
     const wrappableCurrencies = wrappableCurrencyIds.map((currencyId) => {
-      return Currency.fromCurrencyId(currencyId);
+      return Currency.fromCurrencyId(this.config.currencies, currencyId);
     });
 
     return wrappableCurrencies;

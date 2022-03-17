@@ -1,38 +1,26 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import { parseUnits } from '@ethersproject/units';
-import {
-  chainTypeIdToInternalId,
-  evmIdIntoInternalChainId,
-  getAnchorAddressForBridge,
-  getEVMChainName,
-  getEVMChainNameFromInternal,
-  InternalChainId,
-  parseChainIdType,
-  webbCurrencyIdFromString,
-} from '@webb-dapp/apps/configs';
-import { chainIdToRelayerName } from '@webb-dapp/apps/configs/relayer-config';
-import {
-  anchorDeploymentBlock,
-  bridgeCurrencyBridgeStorageFactory,
-  MixerStorage,
-} from '@webb-dapp/apps/configs/storages';
-import { AnchorContract } from '@webb-dapp/contracts/contracts';
-import { generateWithdrawProofCallData, hexStringToBytes } from '@webb-dapp/contracts/utils/bridge-utils';
-import { bufferToFixed } from '@webb-dapp/contracts/utils/buffer-to-fixed';
-import { depositFromAnchorNote } from '@webb-dapp/contracts/utils/make-deposit';
-import { Bridge, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer } from '@webb-dapp/react-environment';
-import { WebbWeb3Provider } from '@webb-dapp/react-environment/api-providers/web3/webb-web3-provider';
-import {
-  BridgeWithdraw,
-  OptionalActiveRelayer,
-  OptionalRelayer,
-  WithdrawState,
-} from '@webb-dapp/react-environment/webb-context';
-import { WebbError, WebbErrorCodes } from '@webb-dapp/utils/webb-error';
-import { Web3Provider } from '@webb-dapp/wallet/providers/web3/web3-provider';
+
 import { LoggerService } from '@webb-tools/app-util';
 import { Note } from '@webb-tools/sdk-core';
 import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
 import { BigNumber } from 'ethers';
+import { BridgeWithdraw } from '../bridge';
+import { WebbWeb3Provider } from './webb-web3-provider';
+import { Bridge, OptionalActiveRelayer, OptionalRelayer, WithdrawState } from '../webb-context';
+import { chainTypeIdToInternalId, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains';
+import { ActiveWebbRelayer, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer } from '../webb-context/relayer';
+import { webbCurrencyIdFromString } from '../enums';
+import { getAnchorAddressForBridge } from '../uitls';
+import { WebbError, WebbErrorCodes } from '../webb-error';
+import { depositFromAnchorNote } from '../contracts/utils/make-deposit';
+import { getEVMChainName, getEVMChainNameFromInternal } from '../uitls/chain-utils';
+import { Web3Provider } from '../ext-providers';
+import { generateWithdrawProofCallData, hexStringToBytes } from '../contracts/utils/bridge-utils';
+import { chainIdToRelayerName } from '../uitls/relayer-utils';
+import { bufferToFixed } from '../contracts/utils/buffer-to-fixed';
+import { AnchorContract } from '../contracts/contracts';
+import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, MixerStorage } from '../uitls/storage-mock';
 
 const logger = LoggerService.get('Web3BridgeWithdraw');
 
@@ -40,6 +28,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
   private get config() {
     return this.inner.config;
   }
+
   async mapRelayerIntoActive(relayer: OptionalRelayer): Promise<OptionalActiveRelayer> {
     if (!relayer) {
       return null;
@@ -50,7 +39,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
       relayer,
       {
         basedOn: 'evm',
-        chain: chainId,
+        chain: chainId
       },
       // Define the function for retrieving fee information for the relayer
       async (note: string) => {
@@ -59,7 +48,8 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
         const contractAddress = await getAnchorAddressForBridge(
           webbCurrencyIdFromString(evmNote.tokenSymbol),
           Number(evmNote.targetChainId),
-          Number(evmNote.amount)
+          Number(evmNote.amount),
+          this.config.bridgeByAsset
         );
 
         if (!contractAddress) {
@@ -68,11 +58,11 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
 
         // Given the note, iterate over the relayer's supported contracts and find the corresponding configuration
         // for the contract.
-        const supportedContract = relayer.capabilities.supportedChains['evm']
+        const supportedContract = relayer.capabilities.supportedChains.evm
           .get(Number(evmNote.targetChainId))
           ?.contracts.find(({ address, size }) => {
             // Match on the relayer configuration as well as note
-            return address.toLowerCase() === contractAddress.toLowerCase() && size == Number(evmNote.amount);
+            return address.toLowerCase() === contractAddress.toLowerCase() && size === Number(evmNote.amount);
           });
 
         // The user somehow selected a relayer which does not support the mixer.
@@ -90,7 +80,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
         const feeBig = feeBigMill.div(BigNumber.from(1000000));
         return {
           totalFees: feeBig.toString(),
-          withdrawFeePercentage: supportedContract.withdrawFeePercentage,
+          withdrawFeePercentage: supportedContract.withdrawFeePercentage
         };
       }
     );
@@ -100,7 +90,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
     return this.inner.relayingManager.getRelayer({
       baseOn: 'evm',
       chainId: chainId,
-      contractAddress: address,
+      contractAddress: address
     });
   }
 
@@ -109,7 +99,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
       const chainId = evmIdIntoInternalChainId(evmId);
       return this.inner.relayingManager.getRelayer({
         baseOn: 'evm',
-        chainId,
+        chainId
       });
     });
   }
@@ -120,8 +110,8 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
       chainId: Number(evmNote.note.targetChainId),
       bridgeSupport: {
         amount: Number(evmNote.note.amount),
-        tokenSymbol: evmNote.note.tokenSymbol,
-      },
+        tokenSymbol: evmNote.note.tokenSymbol
+      }
     });
   }
 
@@ -129,7 +119,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
     this.cancelToken.cancelled = false;
 
     const bridgeCurrencyId = webbCurrencyIdFromString(note.tokenSymbol);
-    const bridge = Bridge.from(bridgeCurrencyId, this.inner.config.bridgeByAsset);
+    const bridge = Bridge.from(bridgeCurrencyId, this.inner.config);
 
     const activeChain = await this.inner.getChainId();
     const internalId = evmIdIntoInternalChainId(activeChain);
@@ -155,11 +145,14 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
       recipient: account.address,
 
       fee: 0,
-      refund: 0,
+      refund: 0
     };
 
     logger.trace(`input for zkp`, input);
-    const section = `Bridge ${bridge.currency.getChainIds().map(getEVMChainNameFromInternal).join('-')}`;
+    const section = `Bridge ${bridge.currency
+      .getChainIds()
+      .map((id) => getEVMChainNameFromInternal(this.config, id))
+      .join('-')}`;
     const key = `web3-bridge-withdraw`;
     this.emit('stateChange', WithdrawState.GeneratingZk);
     const zkpResults = await contract.generateZKP(deposit, input);
@@ -168,7 +161,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
       key,
       level: 'loading',
       message: `${section}:withdraw`,
-      name: 'Transaction',
+      name: 'Transaction'
     });
     // Check for cancelled here, abort if it was set.
     if (this.cancelToken.cancelled) {
@@ -177,13 +170,13 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
         key,
         level: 'error',
         message: `${section}:withdraw`,
-        name: 'Transaction',
+        name: 'Transaction'
       });
       this.emit('stateChange', WithdrawState.Ideal);
       return '';
     }
 
-    let txHash: string;
+    let txHash = '';
 
     this.emit('stateChange', WithdrawState.SendingTransaction);
     try {
@@ -200,7 +193,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
           refund: input.refund,
           relayer: input.relayer,
           root: zkpResults.root as any,
-          secret: zkpResults.input.secret,
+          secret: zkpResults.input.secret
         },
         zkpResults.input
       );
@@ -212,9 +205,9 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
         key,
         level: 'error',
         message: `${section}:withdraw`,
-        name: 'Transaction',
+        name: 'Transaction'
       });
-      return '';
+      return txHash;
     }
 
     this.emit('stateChange', WithdrawState.Ideal);
@@ -223,14 +216,17 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
       key,
       level: 'success',
       message: `${section}:withdraw`,
-      name: 'Transaction',
+      name: 'Transaction'
     });
     return '';
   }
 
   async crossChainWithdraw(note: DepositNote, recipient: string) {
     this.cancelToken.cancelled = false;
+    // TODO: handle provider storage
+    // const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
     const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
+    throw new Error('no storage');
 
     // Setup a provider for the source chain
     const sourceChainIdType = parseChainIdType(Number(note.sourceChainId));
@@ -253,7 +249,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
     const bridgeCurrency = this.inner.methods.bridgeApi.currency;
     // await this.inner.methods.bridgeApi.setActiveBridge()
     const availableAnchors = await this.inner.methods.bridgeApi.getAnchors();
-    const selectedAnchor = availableAnchors.find((anchor) => anchor.amount == note.amount);
+    const selectedAnchor = availableAnchors.find((anchor) => anchor.amount === note.amount);
     const destContractAddress = selectedAnchor?.neighbours[destInternalId]! as string;
     const sourceContractAddress = selectedAnchor?.neighbours[sourceInternalId]! as string;
 
@@ -273,8 +269,8 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
       baseOn: 'evm',
       bridgeSupport: {
         amount: Number(note.amount),
-        tokenSymbol: note.tokenSymbol,
-      },
+        tokenSymbol: note.tokenSymbol
+      }
     });
 
     let leaves: string[] = [];
@@ -301,7 +297,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
 
           await bridgeStorageStorage.set(sourceContract.inner.address.toLowerCase(), {
             lastQueriedBlock: relayerLeaves.lastQueriedBlock,
-            leaves: relayerLeaves.leaves,
+            leaves: relayerLeaves.leaves
           });
           break;
         }
@@ -315,7 +311,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
         sourceContractAddress.toLowerCase()
       )) || {
         lastQueriedBlock: anchorDeploymentBlock[sourceContractAddress.toLowerCase()] || 0,
-        leaves: [] as string[],
+        leaves: [] as string[]
       };
 
       const leavesFromChain = await sourceContract.getDepositLeaves(storedContractInfo.lastQueriedBlock + 1, 0);
@@ -337,7 +333,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
         key: 'mixer-withdraw-evm',
         message: 'bridge:withdraw',
         name: 'Transaction',
-        level: 'error',
+        level: 'error'
       });
       this.emit('stateChange', WithdrawState.Ideal);
       return '';
@@ -350,7 +346,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
     let txHash: string;
     const activeRelayer = this.activeRelayer[0];
 
-    if (activeRelayer && (activeRelayer.account || activeRelayer.beneficiary)) {
+    if (activeRelayer && activeRelayer !== null && (activeRelayer?.account || activeRelayer?.beneficiary)) {
       logger.log(`withdrawing through relayer`);
       const input = {
         destinationChainId: Number(note.targetChainId),
@@ -358,10 +354,10 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
         nullifier: sourceDeposit.nullifier,
         nullifierHash: sourceDeposit.nullifierHash,
 
-        relayer: activeRelayer.beneficiary ? activeRelayer.beneficiary : activeRelayer.account!,
+        relayer: activeRelayer?.beneficiary ? activeRelayer?.beneficiary : activeRelayer?.account!,
         recipient: recipient,
         fee: 0,
-        refund: 0,
+        refund: 0
       };
 
       let zkp;
@@ -376,7 +372,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
           key: 'mixer-withdraw-evm',
           message: 'bridge:withdraw',
           name: 'Transaction',
-          level: 'error',
+          level: 'error'
         });
 
         return '';
@@ -393,14 +389,14 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
       const relayerRootsBytes = hexStringToBytes(relayerRootString);
       const relayerRoots = Array.from(relayerRootsBytes);
 
-      const relayedWithdraw = await activeRelayer.initWithdraw('anchorRelayTx');
+      const relayedWithdraw = await (activeRelayer as ActiveWebbRelayer).initWithdraw('anchorRelayTx');
       logger.trace('initialized the withdraw WebSocket');
 
       const chainInfo = {
         baseOn: 'evm' as RelayerCMDBase,
         name: chainIdToRelayerName(destInternalId),
         contractAddress: destContractAddress,
-        endpoint: '',
+        endpoint: ''
       };
 
       const tx = relayedWithdraw.generateWithdrawRequest<typeof chainInfo, 'anchorRelayTx'>(
@@ -415,7 +411,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
           recipient: zkp.input.recipient,
           refund: bufferToFixed(zkp.input.refund),
           relayer: zkp.input.relayer,
-          roots: relayerRoots,
+          roots: relayerRoots
         }
       );
       relayedWithdraw.watcher.subscribe(([nextValue, message]) => {
@@ -435,7 +431,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
               key: 'mixer-withdraw-evm',
               message: 'bridge:withdraw',
               name: 'Transaction',
-              level: 'success',
+              level: 'success'
             });
 
             break;
@@ -448,7 +444,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
               key: 'mixer-withdraw-evm',
               message: 'bridge:withdraw',
               name: 'Transaction',
-              level: 'error',
+              level: 'error'
             });
 
             break;
@@ -461,10 +457,10 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
 
       relayedWithdraw.send(tx);
       const txResult = await relayedWithdraw.await();
-      if (!txResult || !txResult[1]) {
+      if (!txResult || !txResult?.[1]) {
         return '';
       }
-      txHash = txResult[1];
+      txHash = txResult?.[1] || '';
     } else {
       try {
         logger.log(`withdrawing without relayer`);
@@ -479,7 +475,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
           recipient: recipient,
 
           fee: 0,
-          refund: 0,
+          refund: 0
         };
 
         let zkpResults;
@@ -494,7 +490,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
             key: 'mixer-withdraw-evm',
             message: 'bridge:withdraw',
             name: 'Transaction',
-            level: 'error',
+            level: 'error'
           });
 
           return '';
@@ -512,29 +508,35 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
             refund: input.refund,
             relayer: input.relayer,
             root: zkpResults.root as any,
-            secret: zkpResults.input.secret,
+            secret: zkpResults.input.secret
           },
           zkpResults.input
         );
       } catch (e) {
         this.emit('stateChange', WithdrawState.Ideal);
         this.inner.notificationHandler({
-          message: `Bridge ${bridgeCurrency?.getChainIds().map(getEVMChainNameFromInternal).join('-')}:withdraw`,
+          message: `Bridge ${bridgeCurrency
+            ?.getChainIds()
+            .map((id) => getEVMChainNameFromInternal(this.config, id))
+            .join('-')}:withdraw`,
           description: (e as any)?.code === 4001 ? 'Withdraw rejected' : 'Withdraw failed',
           key: 'bridge-withdraw-evm',
           level: 'error',
-          name: 'Transaction',
+          name: 'Transaction'
         });
         return '';
       }
     }
 
     this.inner.notificationHandler({
-      message: `Bridge ${bridgeCurrency?.getChainIds().map(getEVMChainNameFromInternal).join('-')}:withdraw`,
+      message: `Bridge ${bridgeCurrency
+        ?.getChainIds()
+        .map((id) => getEVMChainNameFromInternal(this.config, id))
+        .join('-')}:withdraw`,
       description: 'Withdraw done',
       key: 'bridge-withdraw-evm',
       level: 'success',
-      name: 'Transaction',
+      name: 'Transaction'
     });
 
     this.emit('stateChange', WithdrawState.Done);
@@ -547,8 +549,8 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
 
     const parseNote = await Note.deserialize(note);
     const depositNote = parseNote.note;
-    const sourceChainName = getEVMChainName(parseChainIdType(Number(depositNote.sourceChainId)).chainId);
-    const targetChainName = getEVMChainName(parseChainIdType(Number(depositNote.targetChainId)).chainId);
+    const sourceChainName = getEVMChainName(this.config, parseChainIdType(Number(depositNote.sourceChainId)).chainId);
+    const targetChainName = getEVMChainName(this.config, parseChainIdType(Number(depositNote.targetChainId)).chainId);
     logger.trace(`Bridge withdraw from ${sourceChainName} to ${targetChainName}`);
 
     if (depositNote.sourceChainId === depositNote.targetChainId) {
