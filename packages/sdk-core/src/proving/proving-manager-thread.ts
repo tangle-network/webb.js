@@ -35,7 +35,7 @@ export class ProvingManagerWrapper {
 
       switch (key) {
         case 'proof': {
-          const input = message.proof;
+          const input = message.proof!;
           const proof = await this.proof(input);
 
           (self as unknown as Worker).postMessage({

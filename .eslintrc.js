@@ -35,6 +35,7 @@ module.exports = {
     '@typescript-eslint/restrict-template-expressions': 0,
     '@typescript-eslint/unbound-method': 0,
     '@typescript-eslint/await-thenable': 0,
-    '@typescript-eslint/no-misused-promises': 0
+    '@typescript-eslint/no-misused-promises': 0,
+    '@typescript-eslint/no-non-null-assertion': 0
   }
 };
