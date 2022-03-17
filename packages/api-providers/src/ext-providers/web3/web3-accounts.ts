@@ -1,71 +1,9 @@
-import React from 'react';
 import { Eth } from 'web3-eth';
-import {Account, AccountsAdapter} from "../../account/Accounts.adapter";
-
-function fallbackCopyTextToClipboard(text: string) {
-  const textArea = document.createElement('textarea');
-  textArea.value = text;
-
-  // Avoid scrolling to bottom
-  textArea.style.top = '0';
-  textArea.style.left = '0';
-  textArea.style.position = 'fixed';
-
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
-
-  try {
-    const successful = document.execCommand('copy');
-    const msg = successful ? 'successful' : 'unsuccessful';
-    console.log('Fallback: Copying text command was ' + msg);
-  } catch (err) {
-    console.error('Fallback: Oops, unable to copy', err);
-  }
-
-  document.body.removeChild(textArea);
-}
-
-function copyTextToClipboard(text: string) {
-  if (!navigator.clipboard) {
-    fallbackCopyTextToClipboard(text);
-    return;
-  }
-  navigator.clipboard.writeText(text).then(
-    function () {
-      console.log('Async: Copying to clipboard was successful!');
-    },
-    function (err) {
-      console.error('Async: Could not copy text: ', err);
-    }
-  );
-}
+import { Account, AccountsAdapter, PromiseOrT } from '../../account/Accounts.adapter';
 
 export class Web3Account extends Account<Eth> {
   get avatar() {
-    const color = `#${this.address.slice(-6)}`;
-    const address = this.address;
-    return React.createElement(
-      'div',
-      {
-        onClick() {
-          copyTextToClipboard(address);
-        },
-        style: {
-          cursor: 'copy',
-          width: 20,
-          height: 20,
-          background: color,
-          border: `1px solid ${tinycolor(color).lighten(30)}`,
-          borderRadius: '50%',
-          fontSize: 10,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        },
-      },
-      [this.address.slice(-2)]
-    );
+    return '';
   }
 
   get name(): string {

@@ -1,7 +1,7 @@
-import { bufferToFixed } from '@webb-dapp/contracts/utils/buffer-to-fixed';
-import { Deposit } from '@webb-dapp/contracts/utils/make-deposit';
-import { pedersenHash } from '@webb-dapp/contracts/utils/pedersen-hash';
-import { WebbError, WebbErrorCodes } from '@webb-dapp/utils/webb-error';
+import { Deposit } from './make-deposit';
+import { pedersenHash } from './pedersen-hash';
+import { WebbError, WebbErrorCodes } from '../../webb-error';
+import { bufferToFixed } from './buffer-to-fixed';
 
 const snarkjs = require('tornado-snarkjs');
 
@@ -63,7 +63,7 @@ export class EvmNote {
       commitment,
       preimage: this.preImage,
       nullifier,
-      secret,
+      secret
     };
   }
 }

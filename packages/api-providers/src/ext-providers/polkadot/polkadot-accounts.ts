@@ -1,15 +1,9 @@
 import { InjectedAccount, InjectedExtension } from '@polkadot/extension-inject/types';
-import IDIcon from '@polkadot/react-identicon';
 import { Account, AccountsAdapter, PromiseOrT } from '../../account/Accounts.adapter';
 
 export class PolkadotAccount extends Account<InjectedAccount> {
   get avatar() {
-    return React.createElement('div', null, [
-      React.createElement(IDIcon, {
-        size: 16,
-        value: this.address
-      })
-    ]);
+    return null;
   }
 
   get name(): string {

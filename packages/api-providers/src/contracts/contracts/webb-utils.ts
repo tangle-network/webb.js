@@ -1,5 +1,5 @@
-import { fetchKeyForEdges, fetchWasmForEdges } from '@webb-dapp/apps/configs/ipfs/evm/anchors';
-import { BridgeWitnessInput } from '@webb-dapp/contracts/contracts/types';
+import { BridgeWitnessInput } from './types';
+import { fetchKeyForEdges, fetchWasmForEdges } from '../../ipfs/evm/anchors';
 
 const groth16 = require('snarkjs/src/groth16');
 const zkey = require('snarkjs/src/zkey');
@@ -9,11 +9,11 @@ type MaxEdges = 1 | 2 | 3 | 4 | 5;
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
 export const ZERO = `ZERO`;
 
-const isZero = (value: string | number) => {
+export const isZero = (value: string | number) => {
   if (value === zeroAddress) {
     return true;
   }
-  return value == ZERO;
+  return value === ZERO;
 };
 export const generateWitness = async (input: BridgeWitnessInput, maxEdges: MaxEdges) => {
   try {

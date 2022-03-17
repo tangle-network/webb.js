@@ -1,12 +1,12 @@
-import { bufferToFixed } from '@webb-dapp/contracts/utils/buffer-to-fixed';
-import { pedersenHash } from '@webb-dapp/contracts/utils/pedersen-hash';
-import { poseidonHash3 } from '@webb-dapp/contracts/utils/poseidon-hash3';
-import { PoseidonHasher } from '@webb-dapp/utils/merkle/poseidon-hasher';
 import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
+import { pedersenHash } from './pedersen-hash';
+import { poseidonHash3 } from './poseidon-hash3';
+import { bufferToFixed } from './buffer-to-fixed';
+import { PoseidonHasher } from './merkle';
 
 const tornSnarkjs = require('tornado-snarkjs');
 const utils = require('ffjavascript').utils;
-const { leBuff2int, unstringifyBigInts } = utils;
+const { leBuff2int } = utils;
 
 const crypto = require('crypto');
 // const utils = require('ffjavascript').utils;
@@ -33,7 +33,7 @@ export function createTornDeposit() {
     commitment,
     nullifierHash,
     nullifier: bufferToFixed(nullifier),
-    secret: bufferToFixed(secret),
+    secret: bufferToFixed(secret)
   };
 
   return deposit;
@@ -60,7 +60,7 @@ export function createAnchor2Deposit(chainId: number) {
     nullifierHash,
     nullifier: bufferToFixed(nullifier).substring(2),
     secret: bufferToFixed(secret).substring(2),
-    chainId: chainId,
+    chainId: chainId
   };
   return deposit;
 }
@@ -83,7 +83,7 @@ export function depositFromAnchorNote(note: DepositNote): Deposit {
     nullifierHash,
     nullifier: bufferToFixed(nullifier),
     secret: bufferToFixed(secret),
-    chainId: chainId,
+    chainId: chainId
   };
   return deposit;
 }
@@ -101,7 +101,7 @@ export function depositFromPreimage(hexString: string): Deposit {
     commitment,
     nullifierHash,
     nullifier: nullifier,
-    secret: secret,
+    secret: secret
   };
   return deposit;
 }

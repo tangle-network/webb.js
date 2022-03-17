@@ -1,10 +1,10 @@
-import { GovernedTokenWrapper__factory } from '@webb-dapp/contracts/types/factories/GovernedTokenWrapper__factory';
-import { GovernedTokenWrapper } from '@webb-dapp/contracts/types/GovernedTokenWrapper';
+/* eslint-disable camelcase */
+import { GovernedTokenWrapper__factory } from '../types/factories/GovernedTokenWrapper__factory';
 import { LoggerService } from '@webb-tools/app-util';
 import { BigNumberish, Contract, PayableOverrides, providers, Signer } from 'ethers';
-import utils from 'web3-utils';
 
 import { zeroAddress } from './webb-utils';
+import { GovernedTokenWrapper } from '../types/GovernedTokenWrapper';
 
 const logger = LoggerService.get('WebbGovernedToken');
 
@@ -24,9 +24,11 @@ export class WebbGovernedToken {
     logger.info(`Init with address ${address} `);
     this._contract = new Contract(address, GovernedTokenWrapper__factory.abi, this.signer) as any;
   }
+
   get address() {
     return this._contract.address;
   }
+
   get tokens() {
     return this._contract.getTokens();
   }
@@ -35,7 +37,7 @@ export class WebbGovernedToken {
     const [symbol, name] = await Promise.all([this._contract.symbol(), this._contract.name()]);
     return {
       symbol,
-      name,
+      name
     };
   }
 
@@ -45,11 +47,11 @@ export class WebbGovernedToken {
 
   /// todo assume native
   async wrap(address: string, amount: BigNumberish) {
-    let isNative = checkNativeAddress(address);
-    let amountParam = isNative ? 0 : amount;
+    const isNative = checkNativeAddress(address);
+    const amountParam = isNative ? 0 : amount;
 
     const overrides: PayableOverrides = {
-      gasLimit: 6000000,
+      gasLimit: 6000000
     };
 
     if (isNative) {
@@ -61,7 +63,7 @@ export class WebbGovernedToken {
 
   async unwrap(address: string, amount: BigNumberish) {
     const overrides: PayableOverrides = {
-      gasLimit: 6000000,
+      gasLimit: 6000000
     };
     logger.info(
       `Unwrapping ${checkNativeAddress(address) ? 'native' : `non-native (${address})`} amount ${amount.toString()}`
@@ -79,9 +81,9 @@ export class WebbGovernedToken {
   }
 
   async canUnwrap(account: string, amount: BigNumberish) {
-    const [currentWrappedLiquidity, currentNativeLiquidity] = await Promise.all([
+    const [currentWrappedLiquidity] = await Promise.all([
       this.currentLiquidity,
-      this.web3Provider.getBalance(this._contract.address),
+      this.web3Provider.getBalance(this._contract.address)
     ]);
     if (currentWrappedLiquidity.lt(amount) || currentWrappedLiquidity.lt(amount)) {
       // no enough liquidity

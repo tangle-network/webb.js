@@ -19,7 +19,7 @@ import { Web3Provider } from '../ext-providers';
 import { generateWithdrawProofCallData, hexStringToBytes } from '../contracts/utils/bridge-utils';
 import { chainIdToRelayerName } from '../uitls/relayer-utils';
 import { bufferToFixed } from '../contracts/utils/buffer-to-fixed';
-import { AnchorContract } from '../contracts/contracts';
+import { AnchorContract, ZKPWebbInputWithoutMerkle } from '../contracts/contracts';
 import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, MixerStorage } from '../uitls/storage-mock';
 
 const logger = LoggerService.get('Web3BridgeWithdraw');
@@ -348,13 +348,13 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
 
     if (activeRelayer && activeRelayer !== null && (activeRelayer?.account || activeRelayer?.beneficiary)) {
       logger.log(`withdrawing through relayer`);
-      const input = {
+      const input: ZKPWebbInputWithoutMerkle = {
         destinationChainId: Number(note.targetChainId),
         secret: sourceDeposit.secret,
         nullifier: sourceDeposit.nullifier,
         nullifierHash: sourceDeposit.nullifierHash,
 
-        relayer: activeRelayer?.beneficiary ? activeRelayer?.beneficiary : activeRelayer?.account!,
+        relayer: String(activeRelayer?.beneficiary ? activeRelayer?.beneficiary : activeRelayer?.account!),
         recipient: recipient,
         fee: 0,
         refund: 0
