@@ -21,5 +21,6 @@ module.exports = {
     ...base.rules,
     '@typescript-eslint/no-explicit-any': 'off',
     'prettier/prettier': 0,
+    '@typescript-eslint/no-var-requires': 0
   }
 };
