@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import WalletConnectProvider from '@walletconnect/web3-provider';
-import { ProvideCapabilities } from '@webb-dapp/react-environment';
-import { WebbError, WebbErrorCodes } from '@webb-dapp/utils/webb-error';
+
 import { ethers } from 'ethers';
 import Web3 from 'web3';
 import { AbstractProvider } from 'web3-core';
+import { WebbError, WebbErrorCodes } from '../../webb-error';
+import { ProvideCapabilities } from '../../webb-context';
 export type AddToken = { address: string; symbol: string; decimals: number; image: string };
 export interface AddEthereumChainParameter {
   chainId: string; // A 0x-prefixed hexadecimal string
@@ -35,15 +37,15 @@ export class Web3Provider<T = unknown> {
     addNetworkRpc: false,
     hasSessions: false,
     listenForAccountChange: false,
-    listenForChainChane: false,
+    listenForChainChane: false
   };
 
   private constructor(private _inner: Web3, readonly clientMeta: ClientMetaData | null = null) {}
 
   static get currentProvider() {
-    //@ts-ignore
+    // @ts-ignore
     if (typeof window !== 'undefined' && typeof window.web3 !== 'undefined') {
-      //@ts-ignore
+      // @ts-ignore
       const provider = window.ethereum || window.web3.currentProvider;
       if (provider) {
         return provider;
@@ -54,22 +56,22 @@ export class Web3Provider<T = unknown> {
   }
 
   static async fromExtension() {
-    //@ts-ignore
+    // @ts-ignore
     if (typeof window !== 'undefined' && typeof window.web3 !== 'undefined') {
-      //@ts-ignore
+      // @ts-ignore
       const provider = Web3Provider.currentProvider;
       await provider.enable();
       const web3Provider = new Web3Provider(new Web3(provider), {
         description: 'MetaMask',
         name: 'MetaMask',
         icons: [],
-        url: 'https://https://metamask.io',
+        url: 'https://https://metamask.io'
       });
       web3Provider._capabilities = {
         addNetworkRpc: true,
         listenForAccountChange: true,
         listenForChainChane: true,
-        hasSessions: false,
+        hasSessions: false
       };
       return web3Provider;
     }
@@ -90,7 +92,7 @@ export class Web3Provider<T = unknown> {
       addNetworkRpc: false,
       listenForAccountChange: false,
       listenForChainChane: false,
-      hasSessions: true,
+      hasSessions: true
     };
     web3Provider.helperApi = WCProvider;
     return web3Provider;
@@ -128,8 +130,11 @@ export class Web3Provider<T = unknown> {
     try {
       if (this.capabilities.hasSessions) {
         if (this.helperApi instanceof WalletConnectProvider) {
+          // TODO : handle the connector not found type error
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           await this.helperApi.connector.killSession({
-            message: 'Session end error',
+            message: 'Session end error'
           });
         }
       }
@@ -142,7 +147,7 @@ export class Web3Provider<T = unknown> {
     const provider = this._inner.currentProvider as AbstractProvider;
     return provider.request?.({
       method: 'wallet_addEthereumChain',
-      params: [chainInput],
+      params: [chainInput]
     });
   }
 
@@ -150,7 +155,7 @@ export class Web3Provider<T = unknown> {
     const provider = this._inner.currentProvider as AbstractProvider;
     return provider.request?.({
       method: 'wallet_switchEthereumChain',
-      params: [chainInput],
+      params: [chainInput]
     });
   }
 
@@ -163,9 +168,9 @@ export class Web3Provider<T = unknown> {
           address: addTokenInput.address, // The address that the token is at.
           symbol: addTokenInput.symbol, // A ticker symbol or shorthand, up to 5 chars.
           decimals: addTokenInput.decimals, // The number of decimals in the token
-          image: addTokenInput.image, // A string url of the token logo
-        },
-      },
+          image: addTokenInput.image // A string url of the token logo
+        }
+      }
     });
   }
 }

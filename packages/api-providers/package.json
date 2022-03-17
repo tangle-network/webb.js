@@ -12,9 +12,13 @@
   "repository": "https://github.com/webb-tools/webb.js.git",
   "dependencies": {
     "@babel/runtime": "^7.10.2",
+    "@polkadot/extension-dapp": "^0.35.0-beta.35",
+    "@walletconnect/web3-provider": "^1.7.5",
     "bignumber.js": "^9.0.0",
-    "@polkadot/extension-dapp": "^0.35.0-beta.35"
-
+    "tornado-circomlib": "git+https://github.com/webb-tools/tornado-circomlib.git",
+    "tornado-snarkjs": "git+https://github.com/tornadocash/snarkjs.git#869181cfaf7526fe8972073d31655493a04326d5",
+    "tornado-websnark": "git+https://github.com/webb-tools/websnark.git",
+    "snarkjs": "^0.4.6"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",

@@ -27,7 +27,6 @@ export class PolkadotBridgeDeposit extends BridgeDeposit<WebbPolkadot, DepositPa
     }
     const hash = await tx.call(account.address);
     console.log(hash);
-    return;
   }
 
   async generateBridgeNote(
@@ -66,7 +65,7 @@ export class PolkadotBridgeDeposit extends BridgeDeposit<WebbPolkadot, DepositPa
       exponentiation: '5',
       width: '4',
       protocol: 'anchor',
-      chain: destChainId.toString(),
+      targetChain: destChainId.toString(),
       sourceChain: sourceChainId.toString(),
       sourceIdentifyingData: anchorIndex.toString(),
       targetIdentifyingData: treeId.toString(),
@@ -100,7 +99,9 @@ export class PolkadotBridgeDeposit extends BridgeDeposit<WebbPolkadot, DepositPa
     if (currency) {
       return anchors.map((anchor, anchorIndex) => ({
         id: `Bridge=${anchor.amount}@${currency.view.name}@${anchorIndex}`,
-        title: `${anchor.amount} ${currency.view.name}`
+        title: `${anchor.amount} ${currency.view.name}`,
+        amount: Number(anchor.amount),
+        asset: currency.view.symbol
       }));
     }
     return [];
