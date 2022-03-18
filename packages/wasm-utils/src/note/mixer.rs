@@ -1,10 +1,8 @@
 use ark_std::rand::rngs::OsRng;
 use arkworks_setups::common::Leaf;
 
-use crate::MixerR1CSProverBn254_30;
-use crate::MixerR1CSProverBls381_30;
-use arkworks_setups::MixerProver;
-use arkworks_setups::Curve as ArkCurve;
+use crate::{MixerR1CSProverBls381_30, MixerR1CSProverBn254_30};
+use arkworks_setups::{Curve as ArkCurve, MixerProver};
 
 use crate::types::{Curve, OpStatusCode, OperationError};
 
@@ -46,7 +44,9 @@ pub fn get_leaf_with_private_raw(
 	let nullifer = raw[32..64].to_vec();
 	// (leaf_bytes, nullifier_hash_bytes)
 	let sec = match (curve, exponentiation, width) {
-		(Curve::Bls381, 5, 3) => MixerR1CSProverBls381_30::create_leaf_with_privates(ArkCurve::Bls381, secrets, nullifer),
+		(Curve::Bls381, 5, 3) => {
+			MixerR1CSProverBls381_30::create_leaf_with_privates(ArkCurve::Bls381, secrets, nullifer)
+		}
 		(Curve::Bn254, 5, 3) => MixerR1CSProverBn254_30::create_leaf_with_privates(ArkCurve::Bn254, secrets, nullifer),
 		_ => {
 			let message = format!(

@@ -3,9 +3,7 @@ use std::convert::TryInto;
 use arkworks_setups::Curve as ArkCurve;
 use rand::rngs::OsRng;
 
-use crate::AnchorR1CSProverBn254_30_2;
-use crate::AnchorR1CSProverBls381_30_2;
-use crate::DEFAULT_LEAF;
+use crate::{AnchorR1CSProverBls381_30_2, AnchorR1CSProverBn254_30_2, DEFAULT_LEAF};
 use arkworks_setups::AnchorProver;
 
 use crate::proof::{AnchorProofInput, Proof};

@@ -1,11 +1,11 @@
 use core::fmt;
 use std::str::FromStr;
 
+use arkworks_setups::common::Leaf;
 use js_sys::{JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
-use arkworks_setups::common::Leaf;
 
 use crate::types::{
 	Backend, Curve, HashFunction, NoteProtocol, NoteVersion, OpStatusCode, OperationError, Protocol, Version,
@@ -485,7 +485,7 @@ impl JsNote {
 
 	#[wasm_bindgen(js_name = getLeafCommitment)]
 	pub fn get_leaf_commitment(&self) -> Result<Uint8Array, JsValue> {
-		let leaf= self.get_leaf_and_nullifier()?;
+		let leaf = self.get_leaf_and_nullifier()?;
 		Ok(Uint8Array::from(leaf.leaf_bytes.as_slice()))
 	}
 

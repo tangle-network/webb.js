@@ -12,10 +12,10 @@ pub mod proof;
 pub mod types;
 mod utils;
 
-use arkworks_setups::r1cs::mixer::MixerR1CSProver;
-use arkworks_setups::r1cs::anchor::AnchorR1CSProver;
 use ark_bls12_381::Bls12_381;
 use ark_bn254::Bn254;
+use arkworks_setups::r1cs::anchor::AnchorR1CSProver;
+use arkworks_setups::r1cs::mixer::MixerR1CSProver;
 
 pub const DEFAULT_LEAF: [u8; 32] = [0u8; 32];
 pub const TREE_HEIGHT: usize = 30;
