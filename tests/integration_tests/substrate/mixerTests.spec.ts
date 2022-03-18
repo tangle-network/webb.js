@@ -46,9 +46,7 @@ describe('Mixer tests', function () {
 
   before(async function () {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
-    if (false) {
-      nodes = startWebbNode();
-    }
+    nodes = startWebbNode();
     apiPromise = await preparePolkadotApi();
   });
 
