@@ -66,6 +66,7 @@ export class ProvingManagerWrapper {
     const Manager = await ProvingManagerWrapper.proofBuilder;
     const pm = new Manager();
     const { note } = await Note.deserialize(pmSetupInput.note);
+
     console.log('pmSetupInput: ', pmSetupInput);
 
     // TODO: handle the prefix and validation
@@ -102,15 +103,16 @@ export class ProvingManagerWrapper {
    a web worker context. Issue: https://github.com/polkadot-js/common/issues/1435
 */
 
-const U8_TO_HEX = new Array(256);
-const U16_TO_HEX = new Array(256 * 256);
+const U8_TO_HEX = new Array<any>(256);
+const U16_TO_HEX = new Array<any>(256 * 256);
 const HEX_TO_U8 = {};
 const HEX_TO_U16 = {};
 
 for (let n = 0; n < 256; n++) {
   const hex = n.toString(16).padStart(2, '0');
+
   U8_TO_HEX[n] = hex;
-  //@ts-ignore
+  // @ts-ignore
   HEX_TO_U8[hex] = n;
 }
 
@@ -118,14 +120,15 @@ for (let i = 0; i < 256; i++) {
   for (let j = 0; j < 256; j++) {
     const hex = U8_TO_HEX[i] + U8_TO_HEX[j];
     const n = i << 8 | j;
+
     U16_TO_HEX[n] = hex;
-    //@ts-ignore
+    // @ts-ignore
     HEX_TO_U16[hex] = n;
   }
 }
 
-//@ts-ignore
-function hex(value) {
+// @ts-ignore
+function hex (value) {
   const mod = value.length % 2;
   const length = value.length - mod;
   const dv = new DataView(value.buffer, value.byteOffset);
@@ -142,8 +145,9 @@ function hex(value) {
   return result;
 }
 
-//@ts-ignore
-export function u8aToHex(value, bitLength = -1, isPrefixed = true) {
+// @ts-ignore
+export function u8aToHex (value, bitLength = -1, isPrefixed = true) {
   const length = Math.ceil(bitLength / 8);
+
   return `${isPrefixed ? '0x' : ''}${!value || !value.length ? '' : length > 0 && value.length > length ? `${hex(value.subarray(0, length / 2))}…${hex(value.subarray(value.length - length / 2))}` : hex(value)}`;
 }
