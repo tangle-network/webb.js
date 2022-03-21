@@ -1,7 +1,8 @@
 /* eslint-disable */
+/* tslint:disable */
 // TODO resole eslint issue and merge this to protocol solidity
 //@ts-nocheck
-import { PoseidonHasher3 } from '@webb-dapp/contracts/utils/poseidon-hash3';
+import { PoseidonHasher3 } from './poseidon-hash3';
 
 /**
  * Copyright 2021 Webb Technologies
@@ -140,7 +141,7 @@ function generateDeposit(targetChainID = 0, secret = 31) {
   let deposit = {
     chainID: BigInt(targetChainID),
     secret: rbigint(secret),
-    nullifier: rbigint(31),
+    nullifier: rbigint(31)
   };
 
   deposit.commitment = poseidonHasher.hash3([deposit.chainID, deposit.nullifier, deposit.secret]);
@@ -191,9 +192,9 @@ function toSolidityInput(proof, publicSignals) {
     pi_a: [proof.pi_a[0], proof.pi_a[1]],
     pi_b: [
       [proof.pi_b[0][1], proof.pi_b[0][0]],
-      [proof.pi_b[1][1], proof.pi_b[1][0]],
+      [proof.pi_b[1][1], proof.pi_b[1][0]]
     ],
-    pi_c: [proof.pi_c[0], proof.pi_c[1]],
+    pi_c: [proof.pi_c[0], proof.pi_c[1]]
   };
 
   result.publicSignals = publicSignals;
@@ -263,5 +264,5 @@ export {
   toSolidityInput,
   p256,
   groth16ExportSolidityCallData,
-  generateWithdrawProofCallData,
+  generateWithdrawProofCallData
 };

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { options } from '@webb-tools/api';
 import { EventBus, LoggerService } from '@webb-tools/app-util';
 import { isNumber } from 'lodash';
@@ -49,18 +50,11 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
     return new PolkadotProvider(apiPromise, currentExtensions, txBuilder);
   }
 
-  static async getParams(
+  static async getApiPromise(
     appName: string,
     [endPoint, ...allEndPoints]: string[],
     onError: ApiInitHandler['onError']
-  ): Promise<[ApiPromise, InjectedExtension]> {
-    const extensions = await web3Enable(appName);
-    logger.info('Extensions', extensions);
-    if (extensions.length === 0) {
-      logger.warn(`Polkadot extension isn't installed`);
-      throw WebbError.from(WebbErrorCodes.PolkaDotExtensionNotInstalled);
-    }
-    const currentExtensions = extensions[0];
+  ) {
     // eslint-disable-next-line no-async-promise-executor
     const wsProvider = await new Promise<WsProvider>(async (resolve, reject) => {
       let wsProvider: WsProvider;
@@ -71,12 +65,12 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
       const connectWs = async (wsProvider: WsProvider) => {
         /// perform a connection that won't reconnect if the connection failed to establish or due to broken-pipe (Ping connection)
         await wsProvider.connect();
-        return new Promise((res, rej) => {
+        return new Promise((resolve, reject) => {
           wsProvider.on('connected', () => {
-            res(wsProvider);
+            resolve(wsProvider);
           });
           wsProvider.on('error', () => {
-            rej();
+            reject();
           });
         });
       };
@@ -109,6 +103,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
           /// create a new WS Provider that is failure friendly and will retry to connect
           /// no need to call `.connect` the Promise api will handle this
           resolve(new WsProvider([endPoint, ...allEndPoints]));
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           if (typeof interActiveFeedback !== 'undefined') {
             /// cancel the feedback as  the connection is established
@@ -135,6 +130,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
               reportNewInteractiveError = false;
             })
             .actions();
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           /// if the connection is established from the first time then there's no interActiveFeedback instance
           if (typeof interActiveFeedback !== 'undefined') {
@@ -189,6 +185,23 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
         }
       }
     });
+    return apiPromise;
+  }
+
+  static async getParams(
+    appName: string,
+    [endPoint, ...allEndPoints]: string[],
+    onError: ApiInitHandler['onError']
+  ): Promise<[ApiPromise, InjectedExtension]> {
+    const { web3Enable } = await import('@polkadot/extension-dapp');
+    const extensions = await web3Enable(appName);
+    logger.info('Extensions', extensions);
+    if (extensions.length === 0) {
+      logger.warn(`Polkadot extension isn't installed`);
+      throw WebbError.from(WebbErrorCodes.PolkaDotExtensionNotInstalled);
+    }
+    const currentExtensions = extensions[0];
+    const apiPromise = await PolkadotProvider.getApiPromise(appName, [endPoint, ...allEndPoints], onError);
     return [apiPromise, currentExtensions];
   }
 

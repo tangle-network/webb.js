@@ -1,9 +1,11 @@
 import { BridgeWitnessInput } from './types';
 import { fetchKeyForEdges, fetchWasmForEdges } from '../../ipfs/evm/anchors';
 
-const groth16 = require('snarkjs/src/groth16');
-const zkey = require('snarkjs/src/zkey');
-
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import * as snarkjs from 'snarkjs';
+const groth16 = snarkjs.groth16;
+const zkey = snarkjs.zkey;
 type MaxEdges = 1 | 2 | 3 | 4 | 5;
 
 export const zeroAddress = '0x0000000000000000000000000000000000000000';

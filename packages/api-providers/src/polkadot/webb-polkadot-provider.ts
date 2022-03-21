@@ -162,9 +162,10 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
     relayerBuilder: WebbRelayerBuilder,
     appConfig: AppConfig,
     notification: NotificationHandler,
-    accounts: AccountsAdapter<InjectedExtension, InjectedAccount>
+    accounts: AccountsAdapter<InjectedExtension, InjectedAccount>,
+    apiPromise: ApiPromise,
+    injectedExtension: InjectedExtension
   ): Promise<WebbPolkadot> {
-    const [apiPromise, injectedExtension] = await PolkadotProvider.getParams(appName, endpoints, errorHandler.onError);
     const provider = new PolkadotProvider(apiPromise, injectedExtension, new PolkaTXBuilder(apiPromise, notification));
     const instance = new WebbPolkadot(
       apiPromise,

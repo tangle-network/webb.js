@@ -3,6 +3,7 @@ import { LoggerService } from '@webb-tools/app-util';
 export type AppMode = 'development' | 'production';
 const appLogger = LoggerService.get('App');
 export function appMode(): AppMode {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   return process.env.REACT_APP_BUILD_ENV;
 }

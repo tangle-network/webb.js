@@ -58,10 +58,10 @@
         "packages/wasm-utils/build/*"
       ],
       "@webb-tools/api-providers": [
-        "packages/api-providers/build"
+        "packages/api-providers/src"
       ],
       "@webb-tools/api-providers/*": [
-        "packages/api-providers/build/*"
+        "packages/api-providers/src/*"
       ]
     },
 
