@@ -4,7 +4,6 @@ import { EventBus, LoggerService } from '@webb-tools/app-util';
 import { isNumber } from 'lodash';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { web3Enable } from '@polkadot/extension-dapp';
 import { InjectedExtension } from '@polkadot/extension-inject/types';
 import { PolkadotAccount, PolkadotAccounts } from './polkadot-accounts';
 import { PolkaTXBuilder } from '../../polkadot';

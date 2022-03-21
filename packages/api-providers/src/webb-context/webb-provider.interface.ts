@@ -134,6 +134,7 @@ export type NotificationHandler = ((notification: NotificationPayload) => string
   // remove the notification programmatically
   remove(key: string | number): void;
 };
+
 export interface WebbApiProvider<T> extends EventBus<WebbProviderEvents> {
   /// Accounts Adapter will have all methods related to the provider accounts
   accounts: AccountsAdapter<any>;
@@ -155,4 +156,5 @@ export interface WebbApiProvider<T> extends EventBus<WebbProviderEvents> {
   config: AppConfig;
   // Notification handler
   notificationHandler: NotificationHandler;
+  // wasm-utils workers factory
 }
