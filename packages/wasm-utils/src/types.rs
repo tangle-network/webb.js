@@ -4,7 +4,7 @@ use std::convert::{TryFrom, TryInto};
 use std::ops::Deref;
 use std::str::FromStr;
 
-use arkworks_utils::utils::common::Curve as ArkCurve;
+use arkworks_setups::Curve as ArkCurve;
 use js_sys::{JsString, Uint8Array};
 use wasm_bindgen::__rt::core::fmt::Formatter;
 use wasm_bindgen::prelude::*;
