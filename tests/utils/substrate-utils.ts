@@ -224,7 +224,7 @@ export async function fetchRPCTreeLeaves(
   return leaves;
 }
 
-export async function depositMixerBnX5_5(
+export async function depositMixerBnX5_3(
   api: ApiPromise,
   depositor: KeyringPair
 ) {
@@ -244,7 +244,7 @@ export async function depositMixerBnX5_5(
   noteBuilder.backend('Arkworks');
   noteBuilder.hashFunction('Poseidon');
   noteBuilder.curve('Bn254');
-  noteBuilder.width('5');
+  noteBuilder.width('3');
   noteBuilder.exponentiation('5');
   const note = noteBuilder.build();
   const leaf = note.getLeafCommitment();
@@ -437,7 +437,7 @@ export async function withdrawAnchorBnx5_4(
   );
 }
 
-export async function withdrawMixerBnX5_5(
+export async function withdrawMixerBnX5_3(
   api: ApiPromise,
   signer: KeyringPair,
   note: JsNote,

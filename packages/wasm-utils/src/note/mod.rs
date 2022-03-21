@@ -1,7 +1,7 @@
-use arkworks_circuits::setup::common::Leaf;
 use core::fmt;
 use std::str::FromStr;
 
+use arkworks_setups::common::Leaf;
 use js_sys::{JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
@@ -482,8 +482,8 @@ impl JsNote {
 
 	#[wasm_bindgen(js_name = getLeafCommitment)]
 	pub fn get_leaf_commitment(&self) -> Result<Uint8Array, JsValue> {
-		let leaf_and_nullifier = self.get_leaf_and_nullifier()?;
-		Ok(Uint8Array::from(leaf_and_nullifier.leaf_bytes.as_slice()))
+		let leaf = self.get_leaf_and_nullifier()?;
+		Ok(Uint8Array::from(leaf.leaf_bytes.as_slice()))
 	}
 
 	pub fn serialize(&self) -> JsString {
@@ -578,7 +578,7 @@ impl JsNote {
 
 #[cfg(test)]
 mod test {
-	use arkworks_circuits::prelude::ark_bn254;
+	use ark_bn254;
 	use wasm_bindgen_test::*;
 
 	use crate::utils::to_rust_string;
