@@ -8,8 +8,8 @@ import type { AccountId, AssetId, Balance, BlockNumber, LockIdentifier } from '@
 
 /** @name DarkwebbPrimitivesDepositDetails */
 export interface DarkwebbPrimitivesDepositDetails extends Struct {
-  readonly depositor: AccountId;
   readonly deposit: Balance;
+  readonly depositor: AccountId;
 }
 
 /** @name DarkwebbStandaloneRuntimeElement */
@@ -27,8 +27,8 @@ export interface OrmlTokensAccountData extends Struct {
 
 /** @name OrmlTokensBalanceLock */
 export interface OrmlTokensBalanceLock extends Struct {
-  readonly id: LockIdentifier;
   readonly balance: Balance;
+  readonly id: LockIdentifier;
 }
 
 /** @name PalletAnchorAnchorMetadata */
@@ -39,30 +39,30 @@ export interface PalletAnchorAnchorMetadata extends Struct {
 
 /** @name PalletAnchorEdgeMetadata */
 export interface PalletAnchorEdgeMetadata extends Struct {
-  readonly src_chain_id: ChainId;
-  readonly root: Element;
   readonly height: BlockNumber;
+  readonly root: Element;
+  readonly src_chain_id: ChainId;
 }
 
 /** @name PalletAnchorHandlerUpdateRecord */
 export interface PalletAnchorHandlerUpdateRecord extends Struct {
-  readonly tree_id: TreeId;
-  readonly resource_id: ResourceId;
   readonly edge_metadata: PalletAnchorEdgeMetadata;
+  readonly resource_id: ResourceId;
+  readonly tree_id: TreeId;
 }
 
 /** @name PalletAssetRegistryAssetDetails */
 export interface PalletAssetRegistryAssetDetails extends Struct {
-  readonly name: Bytes;
   readonly asset_type: PalletAssetRegistryAssetType;
   readonly existential_deposit: Balance;
   readonly locked: bool;
+  readonly name: Bytes;
 }
 
 /** @name PalletAssetRegistryAssetMetadata */
 export interface PalletAssetRegistryAssetMetadata extends Struct {
-  readonly symbol: Bytes;
   readonly decimals: u8;
+  readonly symbol: Bytes;
 }
 
 /** @name PalletAssetRegistryAssetType */
@@ -74,9 +74,9 @@ export interface PalletAssetRegistryAssetType extends Enum {
 
 /** @name PalletMixerMixerMetadata */
 export interface PalletMixerMixerMetadata extends Struct {
+  readonly asset: AssetId;
   readonly creator: AccountId;
   readonly deposit_size: Balance;
-  readonly asset: AssetId;
 }
 
 /** @name ResourceId */

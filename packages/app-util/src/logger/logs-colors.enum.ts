@@ -1,3 +1,6 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
 export enum Color {
   Reset = '\x1b[0m',
   Bright = '\x1b[1m',

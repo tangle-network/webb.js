@@ -1,55 +1,58 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
 export default {
   rpc: {},
   types: {
-    Element: 'Vec<u8>',
-    DarkwebbStandaloneRuntimeElement: '[u8;32]',
-    OrmlTokensBalanceLock: {
-      id: 'LockIdentifier',
-      balance: 'Balance'
+    // primitives
+    DarkwebbPrimitivesDepositDetails: {
+      deposit: 'Balance',
+      depositor: 'AccountId'
     },
+    DarkwebbStandaloneRuntimeElement: '[u8;32]',
+    Element: 'Vec<u8>',
     OrmlTokensAccountData: {
       free: 'Balance',
       frozen: 'Balance',
       reserved: 'Balance'
     },
-    PalletMixerMixerMetadata: {
-      creator: 'AccountId',
-      deposit_size: 'Balance',
-      asset: 'AssetId'
+    OrmlTokensBalanceLock: {
+      balance: 'Balance',
+      id: 'LockIdentifier'
     },
     PalletAnchorAnchorMetadata: {
       creator: 'AccountId',
       deposit_size: 'Balance'
     },
     PalletAnchorEdgeMetadata: {
-      src_chain_id: 'ChainId',
+      height: 'BlockNumber',
       root: 'Element',
-      height: 'BlockNumber'
+      src_chain_id: 'ChainId'
     },
     PalletAnchorHandlerUpdateRecord: {
-      tree_id: 'TreeId',
+      edge_metadata: 'PalletAnchorEdgeMetadata',
       resource_id: 'ResourceId',
-      edge_metadata: 'PalletAnchorEdgeMetadata'
+      tree_id: 'TreeId'
+    },
+    PalletAssetRegistryAssetDetails: {
+      asset_type: 'PalletAssetRegistryAssetType',
+      existential_deposit: 'Balance',
+      locked: 'bool',
+      name: 'Vec<u8>'
+    },
+    PalletAssetRegistryAssetMetadata: {
+      decimals: 'u8',
+      symbol: 'Vec<u8>'
     },
     PalletAssetRegistryAssetType: {
       _enum: ['Token', 'PoolShare']
     },
-    PalletAssetRegistryAssetMetadata: {
-      symbol: 'Vec<u8>',
-      decimals: 'u8'
+    PalletMixerMixerMetadata: {
+      asset: 'AssetId',
+      creator: 'AccountId',
+      deposit_size: 'Balance'
     },
-    ResourceId: '[u8; 32]',
-    PalletAssetRegistryAssetDetails: {
-      name: 'Vec<u8>',
-      asset_type: 'PalletAssetRegistryAssetType',
-      existential_deposit: 'Balance',
-      locked: 'bool'
-    },
-    // primitives
-    DarkwebbPrimitivesDepositDetails: {
-      depositor: 'AccountId',
-      deposit: 'Balance'
-    }
+    ResourceId: '[u8; 32]'
   },
   typesAlias: {}
 };

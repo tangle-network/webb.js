@@ -1,1 +1,1 @@
-module.exports = require('@open-web3/dev-config/config/prettier.cjs');
+module.exports = require('@polkadot/dev/config/prettier.cjs');
