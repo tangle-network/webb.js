@@ -4,9 +4,11 @@ import { uniqueId } from 'lodash';
 
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/submittable/types';
-import { web3FromAddress } from '@polkadot/extension-dapp';
+
 import { ReactElement } from '../types/abstracts';
 import { NotificationHandler } from '../webb-context';
+import { IKeyringPair } from '@polkadot/types/types';
+type AddressOrPair = string | IKeyringPair;
 
 export type QueueTxStatus =
   | 'future'
@@ -60,13 +62,13 @@ const txLogger = LoggerService.get('PolkadotTx');
 
 export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents> {
   public notificationKey = '';
-  private transactionAddress: string | null = null;
+  private transactionAddress: AddressOrPair | null = null;
   private isWrapped = false;
   constructor(private apiPromise: ApiPromise, private path: MethodPath, private parms: P) {
     super();
   }
 
-  async call(signAddress: string) {
+  async call(signAddress: AddressOrPair) {
     txLogger.info(`Sending ${this.path.section} ${this.path.method} transaction by`, signAddress, this.parms);
     this.transactionAddress = signAddress;
     const api = this.apiPromise;
@@ -75,9 +77,14 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
       txLogger.error(`can not find api.tx.${this.path.section}.${this.path.method}`);
       return;
     }
-    const injector = await web3FromAddress(signAddress);
     this.notificationKey = uniqueId(`${this.path.section}-${this.path.method}`);
-    await api.setSigner(injector.signer);
+    if ((signAddress as IKeyringPair)?.address === undefined) {
+      // passed an account id or string of address
+      const { web3FromAddress } = await import('@polkadot/extension-dapp');
+      const injector = await web3FromAddress(signAddress as string);
+      await api.setSigner(injector.signer);
+    }
+
     const txResults = await api.tx[this.path.section][this.path.method](...this.parms).signAsync(signAddress, {
       nonce: -1
     });
