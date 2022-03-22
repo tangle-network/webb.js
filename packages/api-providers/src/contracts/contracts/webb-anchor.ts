@@ -83,7 +83,7 @@ export class AnchorContract {
   }
 
   static createTreeWithRoot(leaves: string[], targetRoot: string): MerkleTree | undefined {
-    const tree = new MerkleTree('eth', 30, [], new PoseidonHasher());
+    const tree =  MerkleTree.new('eth', 30, [], new PoseidonHasher());
 
     for (let i = 0; i < leaves.length; i++) {
       tree.insert(leaves[i]);
@@ -271,7 +271,7 @@ export class AnchorContract {
     };
     const treeHeight = await this._contract.levels();
     logger.trace(`Generating merkle proof treeHeight ${treeHeight} of deposit`, deposit);
-    const tree = new MerkleTree('eth', treeHeight, storedContractInfo.leaves, new PoseidonHasher());
+    const tree =  MerkleTree.new('eth', treeHeight, storedContractInfo.leaves, new PoseidonHasher());
 
     // Query for missing blocks starting from the stored endingBlock
     const lastQueriedBlock = storedContractInfo.lastQueriedBlock;

@@ -1,4 +1,4 @@
-import { Storage } from './storage';
+import {Storage} from './storage';
 
 export interface Hasher {
   hash(level: any, left: any, right: any): any;
@@ -18,7 +18,24 @@ class UpdateTraverser implements TraverserHandler {
     private hasher: Hasher,
     public currentElement: any,
     private zeroValues: any
-  ) {}
+  ) {
+  }
+
+  static new(
+    prefix: string,
+    storage: Storage,
+    hasher: Hasher,
+    currentElement: any,
+    zeroValues: any
+  ): UpdateTraverser {
+    return new UpdateTraverser(
+      prefix,
+      storage,
+      hasher,
+      currentElement,
+      zeroValues,
+    )
+  }
 
   async handleIndex(level: number, elementIndex: number, siblingIndex: number) {
     if (level === 0) {
@@ -52,7 +69,8 @@ class PathTraverser implements TraverserHandler {
   public pathElements: any[] = [];
   public pathIndex: number[] = [];
 
-  constructor(private prefix: string, private storage: Storage, private zeroValues: any) {}
+  constructor(private prefix: string, private storage: Storage, private zeroValues: any) {
+  }
 
   handleIndex(level: number, elementIndex: number, siblingIndex: number) {
     const sibling = this.storage.getOrDefault(
@@ -72,12 +90,22 @@ export class MerkleTree {
     return `${prefix}_tree_${level}_${index}`;
   }
 
+  static new(
+    prefix: string,
+    nLevel: number,
+    defaultElements: any[] =[],
+    hasher: Hasher,
+    storage: Storage = new Storage(),
+  ): MerkleTree {
+    return new MerkleTree(prefix ,nLevel,defaultElements,hasher,storage)
+  }
+
   constructor(
     private prefix: string,
     private nLevel: number,
-    defaultElements: any[] = [],
+    defaultElements: any[],
     private hasher: Hasher,
-    private storage: Storage = new Storage()
+    private storage: Storage
   ) {
     let currentZeroValue = '21663839004416932945382355908790599225266501822907911457504978515578255421292';
     this.zeroValues.push(currentZeroValue);
@@ -130,7 +158,7 @@ export class MerkleTree {
       throw Error('Use update method for existing elements.');
     }
     try {
-      const traverser = new UpdateTraverser(this.prefix, this.storage, this.hasher, element, this.zeroValues);
+      const traverser = UpdateTraverser.new(this.prefix, this.storage, this.hasher, element, this.zeroValues);
 
       this.traverse(index, traverser);
       traverser.keyValuesToPut.push({

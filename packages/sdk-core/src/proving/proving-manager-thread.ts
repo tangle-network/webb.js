@@ -7,8 +7,6 @@ import { ProofI } from '@webb-tools/sdk-core/proving/proving-manager';
 
 import { Note } from '../note';
 
-import { u8aToHex } from '@polkadot/util';
-
 
 export type ProvingManagerSetupInput = {
   note: string;
