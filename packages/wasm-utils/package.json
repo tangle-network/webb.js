@@ -3,19 +3,25 @@
   "name": "@webb-tools/wasm-utils",
   "version": "0.1.4-42",
   "scripts": {
-    "build": "rimraf build pkg && webpack",
-    "start": "rimraf build pkg && webpack-dev-server --open -d",
-    "test": "wasm-pack test --release --node "
+    "build": "rimraf build pkg && yarn build:web && yarn build:bundler && yarn build:nodejs",
+    "build:web": "wasm-pack build --target web --out-dir build/web",
+    "build:bundler": "wasm-pack build --target bundler --out-dir build/bundler",
+    "build:nodejs": "wasm-pack build --target nodejs --out-dir build/njs",
+    "test": "wasm-pack test --release --node"
   },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
   },
   "files": [
-    "wasm-utils_bg.wasm",
-    "wasm-utils.js",
-    "wasm-utils_bg.js",
-    "wasm-utils.d.ts",
+    "web/wasm-utils_bg.wasm",
+    "web/wasm-utils.js",
+    "web/wasm-utils_bg.js",
+    "web/wasm-utils.d.ts",
+    "bundler/wasm-utils_bg.wasm",
+    "bundler/wasm-utils.js",
+    "bundler/wasm-utils_bg.js",
+    "bundler/wasm-utils.d.ts",
     "njs/wasm-utils_bg.wasm",
     "njs/wasm-utils.js",
     "njs/wasm-utils_bg.js",
