@@ -32,6 +32,10 @@ export class WebbWeb3Provider
   readonly methods: WebbMethods<WebbWeb3Provider>;
   private ethersProvider: providers.Web3Provider;
   private connectedMixers: EvmChainMixersInfo;
+  // TODO: make the factory configurable if the web3 interface in need of this functionality
+  readonly wasmFactory = () => {
+    return null;
+  };
 
   private constructor(
     private web3Provider: Web3Provider,

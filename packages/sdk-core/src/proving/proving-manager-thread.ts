@@ -1,7 +1,7 @@
-import type {JsProofInput, Leaves, Proof} from '@webb-tools/wasm-utils';
-import {u8aToHex} from '@polkadot/util';
-import {ProofI} from '@webb-tools/sdk-core/proving/proving-manager';
-import {Note} from '../note';
+import type { JsProofInput, Leaves, Proof } from '@webb-tools/wasm-utils';
+import { u8aToHex } from '@polkadot/util';
+import { ProofI } from '@webb-tools/sdk-core/proving/proving-manager';
+import { Note } from '../note';
 
 export type ProvingManagerSetupInput = {
   note: string;
@@ -22,42 +22,49 @@ type PMEvents = {
 };
 
 export class ProvingManagerWrapper {
-  constructor() {
-    self.addEventListener('message', async (event) => {
-      const message = event.data as Partial<PMEvents>;
-      const key = Object.keys(message)[0] as keyof PMEvents;
-      switch (key) {
-        case 'proof': {
-          const input = message.proof!;
-          const proof = await this.proof(input);
-          (self as unknown as Worker).postMessage({
-            name: key,
-            data: proof
-          });
+  constructor(private ctx: 'worker' | 'direct-call' = 'worker') {
+    if (ctx === 'worker') {
+      self.addEventListener('message', async (event) => {
+        const message = event.data as Partial<PMEvents>;
+        const key = Object.keys(message)[0] as keyof PMEvents;
+        switch (key) {
+          case 'proof':
+            {
+              const input = message.proof!;
+              const proof = await this.proof(input);
+              (self as unknown as Worker).postMessage({
+                name: key,
+                data: proof
+              });
+            }
+            break;
+          case 'destroy':
+            (self as unknown as Worker).terminate();
+            break;
         }
-          break;
-        case 'destroy':
-          (self as unknown as Worker).terminate();
-          break;
-      }
-    });
+      });
+    }
   }
 
-  private static get proofBuilder() {
-    return import('@webb-tools/wasm-utils').then((wasm) => {
+  private get wasmBlob() {
+    return this.ctx === 'worker' ? import('@webb-tools/wasm-utils') : import('@webb-tools/wasm-utils/njs');
+  }
+
+  private get proofBuilder() {
+    return this.wasmBlob.then((wasm) => {
       return wasm.ProofInputBuilder;
     });
   }
 
-  private static async generateProof(proofInput: JsProofInput): Promise<Proof> {
-    const wasm = await import('@webb-tools/wasm-utils');
+  private async generateProof(proofInput: JsProofInput): Promise<Proof> {
+    const wasm = await this.wasmBlob;
     return wasm.generate_proof_js(proofInput);
   }
 
   async proof(pmSetupInput: ProvingManagerSetupInput): Promise<ProofI> {
-    const Manager = await ProvingManagerWrapper.proofBuilder;
+    const Manager = await this.proofBuilder;
     const pm = new Manager();
-    const {note} = await Note.deserialize(pmSetupInput.note);
+    const { note } = await Note.deserialize(pmSetupInput.note);
     // TODO: handle the prefix and validation
     pm.setLeaves(pmSetupInput.leaves);
     pm.setRelayer(pmSetupInput.relayer);
@@ -69,14 +76,13 @@ export class ProvingManagerWrapper {
     pm.setNote(note);
 
     if (pmSetupInput.roots) {
-      pm.setRoots(pmSetupInput.roots)
+      pm.setRoots(pmSetupInput.roots);
     }
     if (pmSetupInput.refreshCommitment) {
-      pm.setRefreshCommitment(pmSetupInput.refreshCommitment)
-
+      pm.setRefreshCommitment(pmSetupInput.refreshCommitment);
     }
     const proofInput = pm.build_js();
-    const proof = await ProvingManagerWrapper.generateProof(proofInput);
+    const proof = await this.generateProof(proofInput);
     return {
       proof: proof.proof,
       root: proof.root,

@@ -3,6 +3,7 @@ import { Note } from '@webb-tools/sdk-core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ActiveWebbRelayer, WebbRelayer } from '../relayer';
 import { InternalChainId } from '../../chains';
+import { WebbApiProvider } from '@webb-tools/api-providers/webb-context';
 
 export enum WithdrawState {
   Cancelling,
@@ -33,7 +34,7 @@ export type CancelToken = {
   cancelled: boolean;
 };
 
-export abstract class MixerWithdraw<T> extends EventBus<MixerWithdrawEvents> {
+export abstract class MixerWithdraw<T extends WebbApiProvider<any>> extends EventBus<MixerWithdrawEvents> {
   state: WithdrawState = WithdrawState.Ideal;
   protected emitter = new BehaviorSubject<OptionalActiveRelayer>(null);
   readonly watcher: Observable<OptionalActiveRelayer>;

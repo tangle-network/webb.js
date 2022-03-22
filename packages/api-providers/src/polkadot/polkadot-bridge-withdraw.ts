@@ -1,7 +1,3 @@
-// TODO :handle workers from sdk-core
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import Worker from '@webb-dapp/mixer/utils/proving-manager.worker';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { BridgeWithdraw } from '../bridge';
 import { WebbError, WebbErrorCodes } from '../webb-error';
@@ -82,7 +78,8 @@ export class PolkadotBridgeWithdraw extends BridgeWithdraw<WebbPolkadot> {
       const leafHex = u8aToHex(leaf);
       const leafIndex = leaves.findIndex((leaf) => u8aToHex(leaf) === leafHex);
       logger.trace(leaves.map((i) => u8aToHex(i)));
-      const pm = new ProvingManager(new Worker());
+      const worker = this.inner.wasmFactory('wasm-utils');
+      const pm = new ProvingManager(worker);
 
       const recipientAccountHex = u8aToHex(decodeAddress(recipient));
       const relayerAccountHex = u8aToHex(decodeAddress(recipient));
@@ -103,7 +100,7 @@ export class PolkadotBridgeWithdraw extends BridgeWithdraw<WebbPolkadot> {
         roots: [hexToU8a(root), hexToU8a(root)]
       };
       logger.log('proofInput to webb.js: ', proofInput);
-      const zkProofMetadata = await pm.proof(proofInput);
+      const zkProofMetadata = await pm.prove(proofInput);
       const withdrawProof: AnchorWithdrawProof = {
         id: treeId,
         proofBytes: `0x${zkProofMetadata.proof}` as any,

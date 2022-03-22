@@ -6,11 +6,6 @@ import { ProvingManagerSetupInput } from '@webb-tools/sdk-core/proving/proving-m
 import { decodeAddress } from '@polkadot/keyring';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
-// TODO :handle workers from sdk-core
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import Worker from '@webb-dapp/mixer/utils/proving-manager.worker';
-
 import { WebbPolkadot } from './webb-polkadot-provider';
 import { PolkadotMixerDeposit } from '.';
 import { MixerWithdraw, OptionalActiveRelayer, OptionalRelayer, WithdrawState } from '../webb-context';
@@ -136,8 +131,8 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
       logger.trace(`leaf ${leaf} has index `, leafIndex);
       logger.trace(leaves.map((i) => u8aToHex(i)));
       const activeRelayer = this.activeRelayer[0];
-
-      const pm = new ProvingManager(new Worker());
+      const worker = this.inner.wasmFactory('wasm-utils');
+      const pm = new ProvingManager(worker);
 
       const recipientAccountHex = u8aToHex(decodeAddress(recipient));
       // ss58 format
@@ -166,7 +161,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
           key: 'mixer-withdraw-sub'
         });
       }
-      const zkProofMetadata = await pm.proof(proofInput);
+      const zkProofMetadata = await pm.prove(proofInput);
 
       const withdrawProof: WithdrawProof = {
         id: String(treeId),

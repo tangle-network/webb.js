@@ -5,6 +5,7 @@ import {
   AppConfig,
   NotificationHandler,
   ProvideCapabilities,
+  WasmFactory,
   WebbApiProvider,
   WebbMethods,
   WebbProviderEvents
@@ -35,7 +36,8 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
     public readonly config: AppConfig,
     readonly notificationHandler: NotificationHandler,
     private readonly provider: PolkadotProvider,
-    readonly accounts: AccountsAdapter<InjectedExtension, InjectedAccount>
+    readonly accounts: AccountsAdapter<InjectedExtension, InjectedAccount>,
+    readonly wasmFactory: WasmFactory
   ) {
     super();
     this.provider = new PolkadotProvider(
@@ -134,7 +136,8 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
     errorHandler: ApiInitHandler,
     relayerBuilder: WebbRelayerBuilder,
     appConfig: AppConfig,
-    notification: NotificationHandler
+    notification: NotificationHandler,
+    wasmFactory: WasmFactory
   ): Promise<WebbPolkadot> {
     const [apiPromise, injectedExtension] = await PolkadotProvider.getParams(appName, endpoints, errorHandler.onError);
     const provider = new PolkadotProvider(apiPromise, injectedExtension, new PolkaTXBuilder(apiPromise, notification));
@@ -146,7 +149,8 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
       appConfig,
       notification,
       provider,
-      accounts
+      accounts,
+      wasmFactory
     );
     await instance.insureApiInterface();
     /// check metadata update
@@ -164,7 +168,8 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
     notification: NotificationHandler,
     accounts: AccountsAdapter<InjectedExtension, InjectedAccount>,
     apiPromise: ApiPromise,
-    injectedExtension: InjectedExtension
+    injectedExtension: InjectedExtension,
+    wasmFactory: WasmFactory
   ): Promise<WebbPolkadot> {
     const provider = new PolkadotProvider(apiPromise, injectedExtension, new PolkaTXBuilder(apiPromise, notification));
     const instance = new WebbPolkadot(
@@ -174,7 +179,8 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
       appConfig,
       notification,
       provider,
-      accounts
+      accounts,
+      wasmFactory
     );
     await instance.insureApiInterface();
     /// check metadata update

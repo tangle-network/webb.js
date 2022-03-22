@@ -26,7 +26,7 @@ export type WebbMethod<T extends EventBus<K>, K extends Record<string, unknown>>
   enabled: boolean;
 };
 
-export interface WebbMixer<T> {
+export interface WebbMixer<T extends WebbApiProvider<any>> {
   // deposit
   deposit: WebbMethod<MixerDeposit<T, DepositPayload>, MixerDepositEvents>;
   // withdraw
@@ -134,7 +134,11 @@ export type NotificationHandler = ((notification: NotificationPayload) => string
   // remove the notification programmatically
   remove(key: string | number): void;
 };
-
+/*
+ * Wasm factory
+ * @params
+ * */
+export type WasmFactory = (name?: string) => Worker | null;
 export interface WebbApiProvider<T> extends EventBus<WebbProviderEvents> {
   /// Accounts Adapter will have all methods related to the provider accounts
   accounts: AccountsAdapter<any>;
@@ -157,4 +161,5 @@ export interface WebbApiProvider<T> extends EventBus<WebbProviderEvents> {
   // Notification handler
   notificationHandler: NotificationHandler;
   // wasm-utils workers factory
+  wasmFactory: WasmFactory;
 }

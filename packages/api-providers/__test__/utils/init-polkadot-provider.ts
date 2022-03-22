@@ -8,6 +8,7 @@ import { InteractiveFeedback } from '@webb-tools/api-providers/webb-error';
 import { relayerNameToChainId } from '@webb-tools/api-providers/uitls';
 import { mockAppConfig } from './mock-config';
 import { PolkadotProvider } from '@webb-tools/api-providers/ext-providers';
+
 const relayerConfig: RelayerConfig[] = [
   {
     endpoint: 'http://localhost:9955'
@@ -92,7 +93,8 @@ export async function initPolkadotProvider(): Promise<WebbPolkadot> {
     notificationHandler,
     new PolkadotAccounts({} as any),
     apiPromise,
-    {} as any
+    {} as any,
+    () => null
   );
   return provider;
 }
