@@ -1,12 +1,10 @@
-use arkworks_circuits::setup::common::MixerProof;
-use arkworks_circuits::setup::mixer::setup_proof_x5_5;
-use arkworks_utils::prelude::ark_bls12_381::Bls12_381;
-use arkworks_utils::prelude::ark_bn254::Bn254;
-use arkworks_utils::utils::common::Curve as ArkCurve;
+use arkworks_setups::{Curve as ArkCurve, MixerProver};
+
 use rand::rngs::OsRng;
 
 use crate::proof::{MixerProofInput, Proof};
 use crate::types::{Backend, Curve, OpStatusCode, OperationError};
+use crate::{MixerR1CSProverBls381_30, MixerR1CSProverBn254_30, DEFAULT_LEAF};
 
 pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Result<Proof, OperationError> {
 	let MixerProofInput {
@@ -26,8 +24,8 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 		..
 	} = mixer_proof_input;
 
-	let mixer_proof: MixerProof = match (backend, curve, exponentiation, width) {
-		(Backend::Arkworks, Curve::Bn254, 5, 5) => setup_proof_x5_5::<Bn254, OsRng>(
+	let mixer_proof = match (backend, curve, exponentiation, width) {
+		(Backend::Arkworks, Curve::Bn254, 5, 3) => MixerR1CSProverBn254_30::create_proof(
 			ArkCurve::Bn254,
 			secret,
 			nullifier,
@@ -38,9 +36,10 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 			fee,
 			refund,
 			pk,
+			DEFAULT_LEAF,
 			rng,
 		),
-		(Backend::Arkworks, Curve::Bls381, 5, 5) => setup_proof_x5_5::<Bls12_381, OsRng>(
+		(Backend::Arkworks, Curve::Bls381, 5, 3) => MixerR1CSProverBls381_30::create_proof(
 			ArkCurve::Bls381,
 			secret,
 			nullifier,
@@ -51,6 +50,7 @@ pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Resu
 			fee,
 			refund,
 			pk,
+			DEFAULT_LEAF,
 			rng,
 		),
 		_ => return Err(OpStatusCode::UnsupportedParameterCombination.into()),

@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/type-definitions",
-  "version": "0.1.4-39",
+  "version": "0.1.4-42",
   "description": "Polkadot.js type definations for Webb Network",
   "main": "index.js",
   "author": "Webb Developers <drew@webb.tools>",
@@ -15,6 +15,6 @@
   },
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
-    "@open-web3/orml-type-definitions": "^0.8.2-6"
+    "@open-web3/orml-type-definitions": "^1.0.1"
   }
 }

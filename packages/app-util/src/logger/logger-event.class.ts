@@ -1,5 +1,8 @@
-import { LogLevel } from './logs-level.enum';
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
 import { EventBus } from '../shared/event-bus.class';
+import { LogLevel } from './logs-level.enum';
 
 export type LogEvent = {
   log: {
@@ -10,7 +13,7 @@ export type LogEvent = {
 };
 
 export class LoggerEvent extends EventBus<LogEvent> {
-  constructor() {
+  constructor () {
     super();
     this.sendEvent = this.emit;
   }

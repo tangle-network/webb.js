@@ -3,22 +3,27 @@
 use std::convert::{TryFrom, TryInto};
 
 use ark_ff::{BigInteger, PrimeField};
-use arkworks_circuits::prelude::ark_bls12_381::Bls12_381;
-use arkworks_circuits::prelude::ark_bn254::Bn254;
-use arkworks_circuits::setup::common::{verify_unchecked_raw, Tree_x5};
 
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
+use ark_bls12_381::Bls12_381;
+use ark_bn254::{Bn254, Fr as Bn254Fr};
+use arkworks_native_gadgets::merkle_tree::SparseMerkleTree;
+use arkworks_native_gadgets::poseidon::Poseidon;
+use arkworks_setups::common::{setup_params, setup_tree_and_create_path, verify_unchecked_raw};
+use arkworks_setups::Curve as ArkCurve;
+use wasm_bindgen::__rt::std::collections::btree_map::BTreeMap;
+
 use crate::note::JsNote;
 use crate::types::{Backend, Curve, Leaves, NoteProtocol, OpStatusCode, OperationError, Uint8Arrayx32, WasmCurve};
+use crate::TREE_HEIGHT;
 
 mod anchor;
 mod mixer;
+#[cfg(test)]
 mod test_utils;
-// #[cfg(test)]
-// mod test_utils;
 
 pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
 	let mut truncated_bytes = t[..20].to_vec();
@@ -102,7 +107,7 @@ pub struct AnchorProofInput {
 	pub pk: Vec<u8>,
 	pub refund: u128,
 	pub fee: u128,
-	pub chain_id: u128,
+	pub chain_id: u64,
 	pub leaves: Vec<Vec<u8>>,
 	pub leaf_index: u64,
 	/// get roots for linkable tree
@@ -154,6 +159,7 @@ macro_rules! console_log {
 }
 
 #[wasm_bindgen]
+#[derive(Debug, Clone)]
 pub struct JsProofInput {
 	#[wasm_bindgen(skip)]
 	pub inner: ProofInput,
@@ -266,7 +272,7 @@ impl ProofInputBuilder {
 
 				let anchor_input = AnchorProofInput {
 					exponentiation: exponentiation.unwrap_or(5),
-					width: width.unwrap_or(3),
+					width: width.unwrap_or(4),
 					curve: curve.unwrap_or(Curve::Bn254),
 					backend: backend.unwrap_or(Backend::Circom),
 					secret,
@@ -288,15 +294,11 @@ impl ProofInputBuilder {
 		}
 	}
 }
-use ark_bn254::Fr as Bn254Fr;
-use arkworks_utils::utils::common::{setup_params_x5_3, setup_params_x5_4, Curve as ArkCurve};
-use test_utils::AnchorSetup30_2;
-use wasm_bindgen::__rt::std::collections::btree_map::BTreeMap;
 
 #[wasm_bindgen]
 pub struct AnchorMTBn254X5 {
 	#[wasm_bindgen(skip)]
-	pub inner: Tree_x5<Bn254Fr>,
+	pub inner: SparseMerkleTree<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>,
 }
 
 #[allow(clippy::unused_unit)]
@@ -318,18 +320,19 @@ impl AnchorMTBn254X5 {
 			.collect();
 
 		let curve = ArkCurve::Bn254;
-		let params3 = setup_params_x5_3::<Bn254Fr>(curve);
-		let params4 = setup_params_x5_4::<Bn254Fr>(curve);
+		let params3 = setup_params::<Bn254Fr>(curve, 5, 3);
+		let poseidon3 = Poseidon::new(params3);
 
-		let anchor_setup = AnchorSetup30_2::new(params3, params4);
-
-		let (tree, _) = anchor_setup.setup_tree_and_path(&leaves, leaf_index).unwrap();
+		let (tree, _) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
+			&poseidon3, &leaves, leaf_index, &[0u8; 32],
+		)
+		.unwrap();
 		Ok(Self { inner: tree })
 	}
 
 	#[wasm_bindgen(getter)]
 	pub fn root(&self) -> JsString {
-		let root = self.inner.root().inner().into_repr().to_bytes_le().to_vec();
+		let root = self.inner.root().into_repr().to_bytes_le().to_vec();
 		JsString::from(hex::encode(root))
 	}
 
@@ -353,8 +356,10 @@ impl AnchorMTBn254X5 {
 					.unwrap();
 			});
 
+		let params3 = setup_params::<Bn254Fr>(ArkCurve::Bn254, 5, 3);
+		let poseidon3 = Poseidon::new(params3);
 		self.inner
-			.insert_batch(&leaves_bt)
+			.insert_batch(&leaves_bt, &poseidon3)
 			.map_err(|_| OpStatusCode::InvalidLeaves)?;
 		Ok(())
 	}
@@ -472,6 +477,7 @@ impl ProofInputBuilder {
 		Ok(JsProofInput { inner: proof_input })
 	}
 }
+
 #[wasm_bindgen]
 pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 	let mut rng = OsRng;
@@ -482,6 +488,7 @@ pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 	}
 	.map_err(|e| e.into())
 }
+
 #[wasm_bindgen]
 pub fn validate_proof(proof: &Proof, vk: JsString, curve: WasmCurve) -> Result<bool, JsValue> {
 	let vk_string: String = vk.into();
@@ -499,8 +506,7 @@ pub fn validate_proof(proof: &Proof, vk: JsString, curve: WasmCurve) -> Result<b
 }
 #[cfg(test)]
 mod test {
-	use arkworks_circuits::prelude::ark_bn254::Bn254;
-	use arkworks_circuits::setup::common::verify_unchecked_raw;
+	use super::*;
 
 	use wasm_bindgen_test::*;
 
@@ -508,8 +514,6 @@ mod test {
 		generate_anchor_test_setup, generate_mixer_test_setup, AnchorTestSetup, MixerTestSetup, ANCHOR_NOTE_V1_X5_4,
 		ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5,
 	};
-
-	use super::*;
 
 	const TREE_DEPTH: usize = 30;
 
@@ -630,7 +634,47 @@ mod test {
 
 		let proof_input = proof_input_builder.build_js().unwrap();
 
-		let proof = generate_proof_js(proof_input).unwrap();
+		let proof = generate_proof_js(proof_input.clone()).unwrap();
+
+		// UNCOMENT FOR DEBUGGING
+		// match proof_input.inner {
+		// 	ProofInput::Mixer(_) => (),
+		// 	ProofInput::Anchor(anchor_proof_input) => {
+		// 		wasm_bindgen_test::console_log!("exponentiation {:?}",
+		// anchor_proof_input.exponentiation); 		wasm_bindgen_test::console_log!("width
+		// {:?}", anchor_proof_input.width); 		wasm_bindgen_test::console_log!("curve
+		// {:?}", anchor_proof_input.curve); 		wasm_bindgen_test::console_log!("backend
+		// {:?}", anchor_proof_input.backend); 		wasm_bindgen_test::console_log!("secret
+		// {:?}", anchor_proof_input.secret); 		wasm_bindgen_test::console_log!("nullifier
+		// {:?}", anchor_proof_input.nullifier); 		wasm_bindgen_test::console_log!("
+		// recipient {:?}", anchor_proof_input.recipient); 		wasm_bindgen_test::
+		// console_log!("relayer {:?}", anchor_proof_input.relayer); 		wasm_bindgen_test::
+		// console_log!("refund {:?}", anchor_proof_input.refund); 		wasm_bindgen_test::
+		// console_log!("fee {:?}", anchor_proof_input.fee); 		wasm_bindgen_test::
+		// console_log!("chain id {:?}", anchor_proof_input.chain_id);
+		// 		wasm_bindgen_test::console_log!("leaves {:?}", anchor_proof_input.leaves);
+		// 		wasm_bindgen_test::console_log!("leaf index {:?}",
+		// anchor_proof_input.leaf_index); 		wasm_bindgen_test::console_log!("roots {:?}",
+		// anchor_proof_input.roots);
+
+		// 		let params = setup_params(ArkCurve::Bn254, 5, 4);
+		// 		let poseidon = Poseidon::<Bn254Fr>::new(params);
+
+		// 		let chain_id = Bn254Fr::from(anchor_proof_input.chain_id);
+		// 		let secret = Bn254Fr::from_le_bytes_mod_order(&anchor_proof_input.secret);
+		// 		let nullifier =
+		// Bn254Fr::from_le_bytes_mod_order(&anchor_proof_input.nullifier); 		let res =
+		// poseidon.hash(&[chain_id, nullifier, secret]).unwrap(); 		let res_bytes =
+		// res.into_repr().to_bytes_le(); 		let nullifier_hash =
+		// poseidon.hash_two(&nullifier, &nullifier).unwrap(); 		let nullifier_hash_bytes
+		// = nullifier_hash.into_repr().to_bytes_le(); 		wasm_bindgen_test::console_log!("
+		// calc leaf {:?}", res_bytes); 		wasm_bindgen_test::console_log!("nullifier hash
+		// {:?}", nullifier_hash_bytes); 	},
+		// };
+
+		// for p in &proof.public_inputs {
+		// 	wasm_bindgen_test::console_log!("{:?}", p);
+		// }
 
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 		assert!(is_valid_proof);
