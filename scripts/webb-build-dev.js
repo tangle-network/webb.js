@@ -64,6 +64,10 @@ function buildWebpack() {
   executeSync('yarn polkadot-exec-webpack --config webpack.config.js --mode production');
 }
 
+function buildWasmPack() {
+  executeSync('yarn build');
+}
+
 async function buildBabel(dir) {
   // Get Root Configs
   const configs = CONFIGS.map((c) => path.join(process.cwd(), `../../${c}`));
@@ -105,7 +109,8 @@ async function buildJs(dir) {
     mkdirp.sync('build');
 
     if (fs.existsSync(path.join(process.cwd(), 'public'))) {
-      buildWebpack(dir);
+      // buildWebpack(dir);
+      // buildWasmPack(dir)
     } else {
       await buildBabel(dir);
     }

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ProvingManagerSetupInput } from '@webb-tools/sdk-core/proving/proving-manager-thread';
-import { Proof } from '@webb-tools/wasm-utils';
+import { Proof } from '@webb-tools/wasm-utils/web';
 
 export type ProofI = Omit<Proof, 'free'>;
 
