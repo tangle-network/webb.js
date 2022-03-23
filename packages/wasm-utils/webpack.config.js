@@ -40,7 +40,7 @@ module.exports = function () {
         crateDirectory: __dirname,
         extraArgs: `${args} --target nodejs`,
         outDir: nodeBuild,
-        outName: 'wasm-utils'
+        outName: 'wasm-utils-njs'
       })
     ]
   };
