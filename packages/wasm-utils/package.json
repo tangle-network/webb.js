@@ -16,15 +16,16 @@
     "wasm-utils.js",
     "wasm-utils_bg.js",
     "wasm-utils.d.ts",
-    "njs/wasm-utils_bg.wasm",
-    "njs/wasm-utils.js",
-    "njs/wasm-utils_bg.js",
-    "njs/wasm-utils.d.ts"
+    "njs/package.json",
+    "njs/wasm-utils-njs_bg.wasm",
+    "njs/wasm-utils-njs.js",
+    "njs/wasm-utils-njs_bg.js",
+    "njs/wasm-utils-njs.d.ts"
   ],
   "module": "wasm-utils.js",
   "types": "wasm-utils.d.ts",
   "devDependencies": {
-    "@polkadot/dev": "^0.65.90",
+    "@polkadot/dev": "^0.65.97",
     "@wasm-tool/wasm-pack-plugin": "^1.3",
     "copy-webpack-plugin": "^5.0.3",
     "rimraf": "^3.0.0",
