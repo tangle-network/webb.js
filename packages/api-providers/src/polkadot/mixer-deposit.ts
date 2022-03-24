@@ -6,7 +6,8 @@ import {PalletMixerMixerMetadata} from '@webb-tools/types/interfaces/pallets';
 import {u8aToHex} from '@polkadot/util';
 
 import {WebbPolkadot} from './webb-provider';
-import {DepositPayload as TDepositPayload, MixerDeposit, MixerSize} from '@webb-tools/api-providers';
+import {DepositPayload as TDepositPayload, MixerSize} from '@webb-tools/api-providers';
+import {MixerDeposit} from '../abstracts';
 import {ORMLCurrency} from '@webb-tools/api-providers';
 import {WebbError, WebbErrorCodes} from '../webb-error';
 import {Currency} from '@webb-tools/api-providers';

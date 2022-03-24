@@ -2,7 +2,7 @@ import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { WebbError, WebbErrorCodes } from '../webb-error';
 import { WebbPolkadot } from './webb-provider';
 import { Note, ProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core';
-import {BridgeWithdraw, WithdrawState} from '@webb-tools/api-providers';
+import {BridgeWithdraw, WithdrawState} from '../abstracts';
 import { decodeAddress } from '@polkadot/keyring';
 import { InternalChainId } from '../chains';
 import { LoggerService } from '@webb-tools/app-util';

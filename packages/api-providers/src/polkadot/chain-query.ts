@@ -1,5 +1,5 @@
 import { WebbPolkadot } from './webb-provider';
-import { ChainQuery } from '@webb-tools/api-providers';
+import { ChainQuery } from '../abstracts';
 import { WebbCurrencyId } from '../enums';
 
 export class PolkadotChainQuery extends ChainQuery<WebbPolkadot> {

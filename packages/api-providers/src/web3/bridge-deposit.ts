@@ -1,6 +1,6 @@
 import {LoggerService} from '@webb-tools/app-util';
 import {Note, NoteGenInput} from '@webb-tools/sdk-core';
-import {BridgeDeposit, Currency, DepositPayload as IDepositPayload, MixerSize} from '@webb-tools/api-providers';
+import {BridgeDeposit, Currency, DepositPayload as IDepositPayload, MixerSize} from '../abstracts';
 import {createAnchor2Deposit, Deposit} from '../contracts/utils/make-deposit';
 import {
   ChainType,

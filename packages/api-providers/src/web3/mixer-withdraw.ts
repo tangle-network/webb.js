@@ -5,7 +5,7 @@ import {Note} from '@webb-tools/sdk-core';
 import {BigNumber} from 'ethers';
 import {RelayedWithdrawResult, RelayerCMDBase, WebbRelayer} from '@webb-tools/api-providers';
 import {WebbError, WebbErrorCodes} from '../webb-error';
-import {MixerWithdraw, OptionalActiveRelayer, OptionalRelayer, WithdrawState} from '@webb-tools/api-providers';
+import {MixerWithdraw, OptionalActiveRelayer, OptionalRelayer, WithdrawState} from '../abstracts';
 import {chainTypeIdToInternalId, evmIdIntoInternalChainId, InternalChainId, parseChainIdType} from '../chains';
 import {depositFromPreimage} from '../contracts/utils/make-deposit';
 import {WebbWeb3Provider} from './webb-provider';

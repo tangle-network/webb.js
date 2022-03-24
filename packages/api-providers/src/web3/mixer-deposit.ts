@@ -5,7 +5,7 @@ import { u8aToHex } from '@polkadot/util';
 
 import { WebbWeb3Provider } from './webb-provider';
 import { createTornDeposit, Deposit } from '../contracts/utils/make-deposit';
-import { DepositPayload as IDepositPayload, MixerDeposit, MixerSize } from '@webb-tools/api-providers';
+import { DepositPayload as IDepositPayload, MixerDeposit, MixerSize } from '../abstracts';
 import { ChainType, computeChainIdType, parseChainIdType } from '../chains';
 import {getEVMChainName, getNativeCurrencySymbol} from "@webb-tools/api-providers/utils";
 

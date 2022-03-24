@@ -6,7 +6,7 @@ import { ChainType, computeChainIdType, InternalChainId, SubstrateChainId } from
 import { Note, NoteGenInput } from '@webb-tools/sdk-core';
 import { BridgeApi } from '@webb-tools/api-providers';
 import { BridgeConfig } from '../types/bridge-config.interface';
-import {BridgeDeposit, DepositPayload as IDepositPayload, MixerSize} from '@webb-tools/api-providers';
+import {BridgeDeposit, DepositPayload as IDepositPayload, MixerSize} from '../abstracts';
 const logger = LoggerService.get('PolkadotBridgeDeposit');
 
 type DepositPayload = IDepositPayload<Note, [number, string]>;

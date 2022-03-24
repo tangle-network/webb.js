@@ -8,8 +8,9 @@ import {WebbWeb3Provider} from './webb-provider';
 import {CurrencyType} from '../types/currency-config.interface';
 // eslint-disable-next-line camelcase
 import {ERC20__factory} from '../contracts/types';
-import {Amount, WrappingBalance, WrappingEvent, WrapUnWrap} from "@webb-tools/api-providers";
+import {Amount, WrappingBalance, WrappingEvent} from "@webb-tools/api-providers";
 import {Bridge, Currency, MixerSize} from "@webb-tools/api-providers/abstracts";
+import {WrapUnWrap} from '../abstracts'
 
 export type Web3WrapPayload = Amount;
 export type Web3UnwrapPayload = Amount;

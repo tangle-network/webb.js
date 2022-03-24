@@ -1,4 +1,4 @@
-import { AnchorBase, BridgeApi } from '@webb-tools/api-providers';
+import { AnchorBase, BridgeApi } from '../abstracts';
 import { WebbPolkadot } from './webb-provider';
 import { BridgeConfig } from '../types/bridge-config.interface';
 import { Currency } from '@webb-tools/api-providers';

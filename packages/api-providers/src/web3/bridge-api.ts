@@ -1,8 +1,8 @@
-import {AnchorBase, BridgeApi, BridgeConfig, Currency, CurrencyRole, CurrencyType} from '@webb-tools/api-providers';
+import {AnchorBase, BridgeConfig, Currency, CurrencyRole, CurrencyType} from '@webb-tools/api-providers';
 import {WebbWeb3Provider} from './webb-provider';
 import {ChainTypeId, chainTypeIdToInternalId, evmIdIntoInternalChainId} from '../chains';
 import {WebbGovernedToken} from '../contracts/contracts';
-
+import {BridgeApi} from'../abstracts'
 export class Web3BridgeApi extends BridgeApi<WebbWeb3Provider, BridgeConfig> {
   getTokenAddress(chainTypeId: ChainTypeId): string | null {
     const activeBridgeAsset = this.store.activeBridge?.asset;

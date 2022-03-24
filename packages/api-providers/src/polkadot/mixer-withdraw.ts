@@ -8,11 +8,11 @@ import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { WebbPolkadot } from './webb-provider';
 import { PolkadotMixerDeposit } from '.';
-import { MixerWithdraw, OptionalActiveRelayer, OptionalRelayer, WithdrawState } from '@webb-tools/api-providers';
+import {  OptionalActiveRelayer, OptionalRelayer, WithdrawState } from '@webb-tools/api-providers';
 import { InternalChainId } from '../chains';
 import { RelayedWithdrawResult, WebbRelayer } from '@webb-tools/api-providers';
 import { WebbError, WebbErrorCodes } from '../webb-error';
-
+import {MixerWithdraw} from '../abstracts'
 const logger = LoggerService.get('PolkadotMixerWithdraw');
 const transactionString = (hexString: string) => {
   return `${hexString.slice(0, 6)}...${hexString.slice(hexString.length - 4, hexString.length)}`;

@@ -1,12 +1,12 @@
 import {ethers} from 'ethers';
-import {ChainQuery, Currency} from '@webb-tools/api-providers';
+import { Currency} from '@webb-tools/api-providers';
 import {WebbWeb3Provider} from './webb-provider';
 import {WebbCurrencyId} from '../enums';
 import {evmIdIntoInternalChainId} from '../chains';
 import {zeroAddress} from '../contracts/contracts';
 // eslint-disable-next-line camelcase
 import {ERC20__factory} from '../contracts/types';
-
+import{ChainQuery} from '../abstracts'
 export class Web3ChainQuery extends ChainQuery<WebbWeb3Provider> {
   constructor(protected inner: WebbWeb3Provider) {
     super(inner);
