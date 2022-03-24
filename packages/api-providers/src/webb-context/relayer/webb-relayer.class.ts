@@ -17,7 +17,7 @@ import { InternalChainId } from '../../chains';
 import { AppConfig } from '../common';
 import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo';
 import { webbCurrencyIdFromString } from '../../enums';
-import { getAnchorAddressForBridge } from '../../uitls/anchor-utils';
+import {getAnchorAddressForBridge} from "@webb-tools/api-providers";
 
 const logger = LoggerService.get('webb-relayer class');
 

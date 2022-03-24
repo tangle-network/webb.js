@@ -5,22 +5,23 @@ import { LoggerService } from '@webb-tools/app-util';
 import { Note } from '@webb-tools/sdk-core';
 import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
 import { BigNumber } from 'ethers';
-import { BridgeWithdraw } from '../bridge';
 import { WebbWeb3Provider } from './webb-web3-provider';
-import { Bridge, OptionalActiveRelayer, OptionalRelayer, WithdrawState } from '../webb-context';
+import {Bridge, BridgeWithdraw, OptionalActiveRelayer, OptionalRelayer, WithdrawState} from '../webb-context';
 import { chainTypeIdToInternalId, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains';
 import { ActiveWebbRelayer, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer } from '../webb-context/relayer';
 import { webbCurrencyIdFromString } from '../enums';
-import { getAnchorAddressForBridge } from '../uitls';
 import { WebbError, WebbErrorCodes } from '../webb-error';
 import { depositFromAnchorNote } from '../contracts/utils/make-deposit';
-import { getEVMChainName, getEVMChainNameFromInternal } from '../uitls/chain-utils';
 import { Web3Provider } from '../ext-providers';
 import { generateWithdrawProofCallData, hexStringToBytes } from '../contracts/utils/bridge-utils';
-import { chainIdToRelayerName } from '../uitls/relayer-utils';
 import { bufferToFixed } from '../contracts/utils/buffer-to-fixed';
 import { AnchorContract, ZKPWebbInputWithoutMerkle } from '../contracts/contracts';
-import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, MixerStorage } from '../uitls/storage-mock';
+import {
+  anchorDeploymentBlock,
+  bridgeCurrencyBridgeStorageFactory, chainIdToRelayerName,
+  getAnchorAddressForBridge, getEVMChainName, getEVMChainNameFromInternal,
+  MixerStorage
+} from "@webb-tools/api-providers/utils";
 
 const logger = LoggerService.get('Web3BridgeWithdraw');
 

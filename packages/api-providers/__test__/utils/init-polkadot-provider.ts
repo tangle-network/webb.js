@@ -5,7 +5,7 @@ import { RelayerConfig, WebbRelayerBuilder } from '@webb-tools/api-providers/web
 import { InternalChainId } from '@webb-tools/api-providers/chains';
 import { NotificationPayload, WebbPolkadot } from '@webb-tools/api-providers';
 import { InteractiveFeedback } from '@webb-tools/api-providers/webb-error';
-import { relayerNameToChainId } from '@webb-tools/api-providers/uitls';
+import { relayerNameToChainId } from '@webb-tools/api-providers';
 import { mockAppConfig } from './mock-config';
 import { PolkadotProvider } from '@webb-tools/api-providers/ext-providers';
 

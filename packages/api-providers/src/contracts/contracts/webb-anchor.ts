@@ -16,12 +16,12 @@ import {
   EvmNote,
   generateWithdrawProofCallData
 } from '../utils';
-import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, MixerStorage } from '../../uitls';
 import { generateWitness, proofAndVerify, zeroAddress } from './webb-utils';
 import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo';
 import { BridgeWitnessInput, ZKPWebbInputWithMerkle, ZKPWebbInputWithoutMerkle } from './types';
 import { MerkleTree, PoseidonHasher } from '../utils/merkle';
-import { retryPromise } from '../../uitls/retry-promise';
+import {anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, MixerStorage} from "@webb-tools/api-providers/utils";
+import {retryPromise} from "@webb-tools/api-providers/utils/retry-promise";
 
 type DepositEvent = [string, number, BigNumber];
 const logger = LoggerService.get('AnchorContract');

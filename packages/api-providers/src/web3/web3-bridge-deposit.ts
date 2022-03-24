@@ -1,8 +1,7 @@
 import { LoggerService } from '@webb-tools/app-util';
 import { Note, NoteGenInput } from '@webb-tools/sdk-core';
-import { DepositPayload as IDepositPayload, MixerSize } from '../webb-context';
+import {BridgeDeposit, DepositPayload as IDepositPayload, MixerSize} from '../webb-context';
 import { createAnchor2Deposit, Deposit } from '../contracts/utils/make-deposit';
-import { getEVMChainNameFromInternal } from '../uitls/chain-utils';
 import {
   ChainType,
   chainTypeIdToInternalId,
@@ -15,9 +14,9 @@ import { WebbGovernedToken } from '../contracts/contracts';
 import { WebbWeb3Provider } from './webb-web3-provider';
 import { Currency } from '../webb-context/currency/currency';
 import { bufferToFixed } from '../contracts/utils/buffer-to-fixed';
-import { BridgeDeposit } from '../bridge';
 // eslint-disable-next-line camelcase
 import { ERC20__factory } from '../contracts/types';
+import {getEVMChainNameFromInternal} from "@webb-tools/api-providers/utils";
 
 const logger = LoggerService.get('web3-bridge-deposit');
 

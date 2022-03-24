@@ -7,9 +7,8 @@ import { WrapUnWrap } from './wrap-unwrap';
 import { WebbRelayerBuilder } from './relayer';
 import { AccountsAdapter } from '../account/Accounts.adapter';
 import { InteractiveFeedback } from '../webb-error';
-import { Bridge, BridgeDeposit } from './bridge';
+import {Bridge, BridgeDeposit, BridgeWithdraw} from './bridge';
 import { BridgeApi } from '../bridge/bridge-api';
-import { BridgeWithdraw } from '../bridge';
 
 /// list of the apis that are available for  the provider
 export interface WebbMethods<T extends WebbApiProvider<any>> {
