@@ -11,7 +11,7 @@ import {
   parseChainIdType
 } from '../chains';
 import {WebbGovernedToken} from '../contracts/contracts';
-import {WebbWeb3Provider} from './webb-web3-provider';
+import {WebbWeb3Provider} from './webb-provider';
 import {bufferToFixed} from '../contracts/utils/buffer-to-fixed';
 // eslint-disable-next-line camelcase
 import {ERC20__factory} from '../contracts/types';

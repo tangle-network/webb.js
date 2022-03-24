@@ -8,7 +8,7 @@ import {WebbError, WebbErrorCodes} from '../webb-error';
 import {MixerWithdraw, OptionalActiveRelayer, OptionalRelayer, WithdrawState} from '@webb-tools/api-providers';
 import {chainTypeIdToInternalId, evmIdIntoInternalChainId, InternalChainId, parseChainIdType} from '../chains';
 import {depositFromPreimage} from '../contracts/utils/make-deposit';
-import {WebbWeb3Provider} from './webb-web3-provider';
+import {WebbWeb3Provider} from './webb-provider';
 import {fromDepositIntoZKPTornPublicInputs} from '../contracts/utils/zkp-adapters';
 import {bufferToFixed} from '../contracts/utils/buffer-to-fixed';
 import {chainIdToRelayerName} from "@webb-tools/api-providers";

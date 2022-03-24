@@ -6,7 +6,7 @@ import { ProvingManagerSetupInput } from '@webb-tools/sdk-core/proving/proving-m
 import { decodeAddress } from '@polkadot/keyring';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
-import { WebbPolkadot } from './webb-polkadot-provider';
+import { WebbPolkadot } from './webb-provider';
 import { PolkadotMixerDeposit } from '.';
 import { MixerWithdraw, OptionalActiveRelayer, OptionalRelayer, WithdrawState } from '@webb-tools/api-providers';
 import { InternalChainId } from '../chains';

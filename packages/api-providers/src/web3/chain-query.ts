@@ -1,6 +1,6 @@
 import {ethers} from 'ethers';
 import {ChainQuery, Currency} from '@webb-tools/api-providers';
-import {WebbWeb3Provider} from './webb-web3-provider';
+import {WebbWeb3Provider} from './webb-provider';
 import {WebbCurrencyId} from '../enums';
 import {evmIdIntoInternalChainId} from '../chains';
 import {zeroAddress} from '../contracts/contracts';

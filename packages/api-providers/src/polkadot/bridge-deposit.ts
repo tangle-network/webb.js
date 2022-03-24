@@ -1,7 +1,7 @@
 import { u8aToHex } from '@polkadot/util';
 import { LoggerService } from '@webb-tools/app-util';
 import { WebbError, WebbErrorCodes } from '../webb-error';
-import { WebbPolkadot } from './webb-polkadot-provider';
+import { WebbPolkadot } from './webb-provider';
 import { ChainType, computeChainIdType, InternalChainId, SubstrateChainId } from '../chains';
 import { Note, NoteGenInput } from '@webb-tools/sdk-core';
 import { BridgeApi } from '@webb-tools/api-providers';

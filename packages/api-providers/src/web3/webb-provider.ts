@@ -2,11 +2,11 @@ import {EventBus} from '@webb-tools/app-util';
 import {Note} from '@webb-tools/sdk-core';
 import {providers} from 'ethers';
 import {Eth} from 'web3-eth';
-import {Web3WrapUnwrap} from './web3-wrap-unwrap';
-import {Web3BridgeDeposit} from './web3-bridge-deposit';
-import {Web3MixerWithdraw} from './web3-mixer-withdraw';
+import {Web3WrapUnwrap} from './wrap-unwrap';
+import {Web3BridgeDeposit} from './bridge-deposit';
+import {Web3MixerWithdraw} from './mixer-withdraw';
 import {Web3Accounts, Web3Provider} from '../ext-providers';
-import {Web3MixerDeposit} from './web3-mixer-deposit';
+import {Web3MixerDeposit} from './mixer-deposit';
 import {WebbError, WebbErrorCodes} from '../webb-error';
 import {EVMChainId, evmIdIntoInternalChainId, parseChainIdType} from '../chains';
 import {EvmChainMixersInfo} from './EvmChainMixersInfo';
@@ -19,9 +19,9 @@ import {
   WebbProviderEvents,
   WebbRelayerBuilder
 } from '@webb-tools/api-providers';
-import {Web3BridgeWithdraw} from './web3-bridge-withdraw';
-import {Web3ChainQuery} from './web3-chain-query';
-import {Web3BridgeApi} from './web3-bridge-api';
+import {Web3BridgeWithdraw} from './bridge-withdraw';
+import {Web3ChainQuery} from './chain-query';
+import {Web3BridgeApi} from './bridge-api';
 import {AccountsAdapter} from '../account/Accounts.adapter';
 import {AnchorContract, TornadoContract} from '../contracts/contracts';
 

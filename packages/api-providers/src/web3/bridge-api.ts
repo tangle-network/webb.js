@@ -1,5 +1,5 @@
 import {AnchorBase, BridgeApi, BridgeConfig, Currency, CurrencyRole, CurrencyType} from '@webb-tools/api-providers';
-import {WebbWeb3Provider} from './webb-web3-provider';
+import {WebbWeb3Provider} from './webb-provider';
 import {ChainTypeId, chainTypeIdToInternalId, evmIdIntoInternalChainId} from '../chains';
 import {WebbGovernedToken} from '../contracts/contracts';
 

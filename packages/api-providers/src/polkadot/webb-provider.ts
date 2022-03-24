@@ -10,18 +10,18 @@ import {
   WebbMethods,
   WebbProviderEvents
 } from '@webb-tools/api-providers';
-import { PolkadotBridgeApi } from './polkadot-bridge-api';
-import { PolkadotBridgeDeposit } from './polkadot-bridge-deposit';
-import { PolkadotMixerWithdraw } from './polkadot-mixer-withdraw';
-import { PolkadotBridgeWithdraw } from './polkadot-bridge-withdraw';
+import { PolkadotBridgeApi } from './bridge-api';
+import { PolkadotBridgeDeposit } from './bridge-deposit';
+import { PolkadotMixerWithdraw } from './mixer-withdraw';
+import { PolkadotBridgeWithdraw } from './bridge-withdraw';
 import { ActionsBuilder, InteractiveFeedback, WebbError, WebbErrorCodes } from '../webb-error';
-import { PolkaTXBuilder } from './polkadot-transaction';
-import { PolkadotMixerDeposit } from './polkadot-mixer-deposit';
+import { PolkaTXBuilder } from './transaction';
+import { PolkadotMixerDeposit } from './mixer-deposit';
 import { EventBus } from '@webb-tools/app-util';
-import { PolkadotChainQuery } from './polkadot-chain-query';
+import { PolkadotChainQuery } from './chain-query';
 import { WebbRelayerBuilder } from '@webb-tools/api-providers';
 import { AccountsAdapter } from '../account/Accounts.adapter';
-import { PolkadotWrapUnwrap } from './polkadot-wrap-unwrap';
+import { PolkadotWrapUnwrap } from './wrap-unwrap';
 import { PolkadotProvider } from '../ext-providers';
 
 export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbApiProvider<WebbPolkadot> {

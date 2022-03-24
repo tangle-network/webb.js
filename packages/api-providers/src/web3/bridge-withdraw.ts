@@ -5,7 +5,7 @@ import { LoggerService } from '@webb-tools/app-util';
 import { Note } from '@webb-tools/sdk-core';
 import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
 import { BigNumber } from 'ethers';
-import { WebbWeb3Provider } from './webb-web3-provider';
+import { WebbWeb3Provider } from './webb-provider';
 import {Bridge, BridgeWithdraw, OptionalActiveRelayer, OptionalRelayer, WithdrawState} from '@webb-tools/api-providers';
 import { chainTypeIdToInternalId, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains';
 import { ActiveWebbRelayer, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer } from '@webb-tools/api-providers';

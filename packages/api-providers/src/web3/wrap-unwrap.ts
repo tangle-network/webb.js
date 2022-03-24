@@ -4,7 +4,7 @@ import Web3 from 'web3';
 import {WebbCurrencyId, webbCurrencyIdToString} from '../enums';
 import {evmIdIntoInternalChainId, InternalChainId} from '../chains';
 import {WebbGovernedToken, zeroAddress} from '../contracts/contracts';
-import {WebbWeb3Provider} from './webb-web3-provider';
+import {WebbWeb3Provider} from './webb-provider';
 import {CurrencyType} from '../types/currency-config.interface';
 // eslint-disable-next-line camelcase
 import {ERC20__factory} from '../contracts/types';

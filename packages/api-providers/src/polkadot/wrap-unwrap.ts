@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { Amount, WrappingBalance, WrappingEvent, WrapUnWrap } from '@webb-tools/api-providers';
-import { WebbPolkadot } from './webb-polkadot-provider';
+import { WebbPolkadot } from './webb-provider';
 import { MixerSize } from '@webb-tools/api-providers';
 import { WebbCurrencyId } from '../enums';
 

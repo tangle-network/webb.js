@@ -3,7 +3,7 @@ import utils from 'web3-utils';
 
 import { u8aToHex } from '@polkadot/util';
 
-import { WebbWeb3Provider } from './webb-web3-provider';
+import { WebbWeb3Provider } from './webb-provider';
 import { createTornDeposit, Deposit } from '../contracts/utils/make-deposit';
 import { DepositPayload as IDepositPayload, MixerDeposit, MixerSize } from '@webb-tools/api-providers';
 import { ChainType, computeChainIdType, parseChainIdType } from '../chains';

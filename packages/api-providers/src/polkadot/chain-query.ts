@@ -1,4 +1,4 @@
-import { WebbPolkadot } from './webb-polkadot-provider';
+import { WebbPolkadot } from './webb-provider';
 import { ChainQuery } from '@webb-tools/api-providers';
 import { WebbCurrencyId } from '../enums';
 
