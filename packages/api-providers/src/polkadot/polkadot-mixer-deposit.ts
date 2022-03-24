@@ -46,7 +46,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
               webbPolkadot.config.currencies,
               ormlAssets.find((asset) => Number(asset.id) === cId)!
             )
-          : Currency.fromCurrencyId(webbPolkadot.config, Number(cId));
+          : Currency.fromCurrencyId(webbPolkadot.config.currencies, Number(cId));
         return {
           id,
           amount: amountNumber,
@@ -89,7 +89,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
       protocol: 'mixer',
       version: 'v2',
       exponentiation: '5',
-      width: '5',
+      width: '3',
       backend: 'Arkworks',
       hashFunction: 'Poseidon',
       curve: 'Bn254',

@@ -11,11 +11,10 @@ import { ZKPTornInputWithMerkle, ZKPTornPublicInputs } from './types';
 import { EVMChainId } from '../../chains';
 import { WebbError, WebbErrorCodes } from '../../webb-error';
 import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo';
-import { MerkleTree } from '@webb-tools/protocol-solidity/lib/packages/fixed-bridge/src';
 import { bufferToFixed } from '../utils/buffer-to-fixed';
 
 import { abi } from '../abis/NativeAnchor.json';
-import { MimcSpongeHasher } from '../utils/merkle';
+import {MerkleTree, MimcSpongeHasher } from '../utils/merkle';
 import { retryPromise } from '../../uitls/retry-promise';
 import { fetchTornadoCircuitData, fetchTornadoProvingKey } from '../../uitls/fixtures';
 
@@ -147,7 +146,7 @@ export class TornadoContract {
   async generateMerkleProof(deposit: Deposit) {
     const storedContractInfo = await this.mixersInfo.getMixerStorage(this._contract.address);
     const treeHeight = await this._contract.levels();
-    const tree = new MerkleTree('eth', treeHeight, storedContractInfo.leaves, new MimcSpongeHasher());
+    const tree = MerkleTree.new('eth', treeHeight, storedContractInfo.leaves, new MimcSpongeHasher());
 
     // Query for missing blocks starting from the stored endingBlock
     const lastQueriedBlock = storedContractInfo.lastQueriedBlock;
@@ -155,9 +154,9 @@ export class TornadoContract {
     const fetchedLeaves = await this.getDepositLeaves(lastQueriedBlock + 1);
     logger.trace(`New Leaves ${fetchedLeaves.newLeaves.length}`, fetchedLeaves.newLeaves);
 
-    tree.batch_insert(fetchedLeaves.newLeaves);
+    tree.batchInsert(fetchedLeaves.newLeaves);
 
-    const newRoot = tree.get_root();
+    const newRoot = tree.getRoot();
     const formattedRoot = bufferToFixed(newRoot);
     const knownRoot = await this._contract.isKnownRoot(formattedRoot);
     logger.info(`knownRoot: ${knownRoot}`);
@@ -179,7 +178,7 @@ export class TornadoContract {
 
   async generateZKP(deposit: Deposit, zkpPublicInputs: ZKPTornPublicInputs) {
     const merkleProof = await this.generateMerkleProof(deposit);
-    const { pathElements, pathIndices, merkleRoot: root } = merkleProof;
+    const { pathElements, pathIndex:pathIndices,  root } = merkleProof;
     const circuitData = await fetchTornadoCircuitData();
     const provingKey = await fetchTornadoProvingKey();
     const zkpInput: ZKPTornInputWithMerkle = {
@@ -211,13 +210,13 @@ export class TornadoContract {
   ) {
     // Build a local merkle tree from the leaves
     const treeHeight = await this._contract.levels();
-    const tree = new MerkleTree('eth', treeHeight, leaves, new MimcSpongeHasher());
+    const tree =  MerkleTree.new('eth', treeHeight, leaves, new MimcSpongeHasher());
     const leafIndex = leaves.findIndex((commitment) => commitment === bufferToFixed(deposit.commitment));
     logger.info(`Leaf index ${leafIndex}`);
     const merkleProof = tree.path(leafIndex);
 
     // Verify the local merkle tree against what is on chain
-    const newRoot = tree.get_root();
+    const newRoot = tree.getRoot();
     const formattedRoot = bufferToFixed(newRoot);
     const knownRoot = await this._contract.isKnownRoot(formattedRoot);
 
@@ -247,7 +246,7 @@ export class TornadoContract {
       await this.mixersInfo.setMixerStorage(this._contract.address, lastQueriedBlock, [...leaves]);
     }
 
-    const { pathElements, pathIndices, merkleRoot: root } = merkleProof;
+    const { pathElements, pathIndex:pathIndices,  root } = merkleProof;
     const circuitData = await fetchTornadoCircuitData();
     const provingKey = await fetchTornadoProvingKey();
     const zkpInput: ZKPTornInputWithMerkle = {
