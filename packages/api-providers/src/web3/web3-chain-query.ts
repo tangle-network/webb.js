@@ -1,12 +1,11 @@
-import { ethers } from 'ethers';
-import { ChainQuery } from '../webb-context/chain-query';
-import { WebbWeb3Provider } from './webb-web3-provider';
-import { Currency } from '../webb-context/currency/currency';
-import { WebbCurrencyId } from '../enums';
-import { evmIdIntoInternalChainId } from '../chains';
-import { zeroAddress } from '../contracts/contracts';
+import {ethers} from 'ethers';
+import {ChainQuery, Currency} from '@webb-tools/api-providers';
+import {WebbWeb3Provider} from './webb-web3-provider';
+import {WebbCurrencyId} from '../enums';
+import {evmIdIntoInternalChainId} from '../chains';
+import {zeroAddress} from '../contracts/contracts';
 // eslint-disable-next-line camelcase
-import { ERC20__factory } from '../contracts/types';
+import {ERC20__factory} from '../contracts/types';
 
 export class Web3ChainQuery extends ChainQuery<WebbWeb3Provider> {
   constructor(protected inner: WebbWeb3Provider) {
@@ -21,7 +20,7 @@ export class Web3ChainQuery extends ChainQuery<WebbWeb3Provider> {
     const provider = this.inner.getEthersProvider();
 
     // check if the token is the native token of this chain
-    const { chainId: evmId } = await provider.getNetwork();
+    const {chainId: evmId} = await provider.getNetwork();
     const webbChain = evmIdIntoInternalChainId(evmId);
 
     const accounts = await this.inner.accounts.accounts();

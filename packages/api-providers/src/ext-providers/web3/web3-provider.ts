@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 import Web3 from 'web3';
 import { AbstractProvider } from 'web3-core';
 import { WebbError, WebbErrorCodes } from '../../webb-error';
-import { ProvideCapabilities } from '../../webb-context';
+import { ProvideCapabilities } from '@webb-tools/api-providers';
 export type AddToken = { address: string; symbol: string; decimals: number; image: string };
 export interface AddEthereumChainParameter {
   chainId: string; // A 0x-prefixed hexadecimal string

@@ -9,7 +9,7 @@ import {
   WebbApiProvider,
   WebbMethods,
   WebbProviderEvents
-} from '../webb-context';
+} from '@webb-tools/api-providers';
 import { PolkadotBridgeApi } from './polkadot-bridge-api';
 import { PolkadotBridgeDeposit } from './polkadot-bridge-deposit';
 import { PolkadotMixerWithdraw } from './polkadot-mixer-withdraw';
@@ -19,7 +19,7 @@ import { PolkaTXBuilder } from './polkadot-transaction';
 import { PolkadotMixerDeposit } from './polkadot-mixer-deposit';
 import { EventBus } from '@webb-tools/app-util';
 import { PolkadotChainQuery } from './polkadot-chain-query';
-import { WebbRelayerBuilder } from '../webb-context/relayer';
+import { WebbRelayerBuilder } from '@webb-tools/api-providers';
 import { AccountsAdapter } from '../account/Accounts.adapter';
 import { PolkadotWrapUnwrap } from './polkadot-wrap-unwrap';
 import { PolkadotProvider } from '../ext-providers';

@@ -1,7 +1,7 @@
-import { LoggerService } from '@webb-tools/app-util';
-import { Note, NoteGenInput } from '@webb-tools/sdk-core';
-import {BridgeDeposit, DepositPayload as IDepositPayload, MixerSize} from '../webb-context';
-import { createAnchor2Deposit, Deposit } from '../contracts/utils/make-deposit';
+import {LoggerService} from '@webb-tools/app-util';
+import {Note, NoteGenInput} from '@webb-tools/sdk-core';
+import {BridgeDeposit, Currency, DepositPayload as IDepositPayload, MixerSize} from '@webb-tools/api-providers';
+import {createAnchor2Deposit, Deposit} from '../contracts/utils/make-deposit';
 import {
   ChainType,
   chainTypeIdToInternalId,
@@ -10,12 +10,11 @@ import {
   InternalChainId,
   parseChainIdType
 } from '../chains';
-import { WebbGovernedToken } from '../contracts/contracts';
-import { WebbWeb3Provider } from './webb-web3-provider';
-import { Currency } from '../webb-context/currency/currency';
-import { bufferToFixed } from '../contracts/utils/buffer-to-fixed';
+import {WebbGovernedToken} from '../contracts/contracts';
+import {WebbWeb3Provider} from './webb-web3-provider';
+import {bufferToFixed} from '../contracts/utils/buffer-to-fixed';
 // eslint-disable-next-line camelcase
-import { ERC20__factory } from '../contracts/types';
+import {ERC20__factory} from '../contracts/types';
 import {getEVMChainNameFromInternal} from "@webb-tools/api-providers/utils";
 
 const logger = LoggerService.get('web3-bridge-deposit');

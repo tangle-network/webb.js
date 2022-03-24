@@ -1,7 +1,8 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import { ChainTypeId, chainTypeIdToInternalId, InternalChainId } from '../chains';
-import { WebbCurrencyId } from '../enums';
-import { Currency } from '../webb-context/currency/currency';
+import {WebbCurrencyId} from "@webb-tools/api-providers/enums";
+import {ChainTypeId, chainTypeIdToInternalId, InternalChainId} from "@webb-tools/api-providers";
+import {Currency} from "@webb-tools/api-providers";
+
 
 export type BridgeCurrencyIndex = string | number | WebbCurrencyId;
 

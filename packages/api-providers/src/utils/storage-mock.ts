@@ -1,7 +1,6 @@
 import { getEVMChainName } from './chain-utils';
 import { Storage } from '../storage';
-import { AppConfig } from '../webb-context';
-
+import {AppConfig} from "@webb-tools/api-providers/abstracts";
 export type MixerStorage = Record<string, { lastQueriedBlock: number; leaves: string[] }>;
 export const evmChainStorageFactory = (config: AppConfig, chainId: number) => {
   // localStorage will have key: <name of chain>, value: { Record<contractAddress: string, info: DynamicMixerInfoStore> }

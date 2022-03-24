@@ -1,4 +1,4 @@
-import { getCachedFixtureURI, withLocalFixtures } from '../../uitls/misc';
+import {getCachedFixtureURI, withLocalFixtures} from "@webb-tools/api-providers";
 
 export const fetchWasmForEdges = async (maxEdges: number) => {
   let ipfsHash: string;

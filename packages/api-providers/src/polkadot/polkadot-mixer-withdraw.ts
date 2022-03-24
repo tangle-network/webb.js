@@ -8,9 +8,9 @@ import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { WebbPolkadot } from './webb-polkadot-provider';
 import { PolkadotMixerDeposit } from '.';
-import { MixerWithdraw, OptionalActiveRelayer, OptionalRelayer, WithdrawState } from '../webb-context';
+import { MixerWithdraw, OptionalActiveRelayer, OptionalRelayer, WithdrawState } from '@webb-tools/api-providers';
 import { InternalChainId } from '../chains';
-import { RelayedWithdrawResult, WebbRelayer } from '../webb-context/relayer';
+import { RelayedWithdrawResult, WebbRelayer } from '@webb-tools/api-providers';
 import { WebbError, WebbErrorCodes } from '../webb-error';
 
 const logger = LoggerService.get('PolkadotMixerWithdraw');

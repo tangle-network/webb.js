@@ -1,7 +1,7 @@
-import { AnchorBase, BridgeApi } from '../bridge/bridge-api';
+import { AnchorBase, BridgeApi } from '@webb-tools/api-providers';
 import { WebbPolkadot } from './webb-polkadot-provider';
 import { BridgeConfig } from '../types/bridge-config.interface';
-import { Currency } from '../webb-context/currency/currency';
+import { Currency } from '@webb-tools/api-providers';
 import { ChainTypeId } from '../chains';
 import { CurrencyRole, CurrencyType } from '../types/currency-config.interface';
 

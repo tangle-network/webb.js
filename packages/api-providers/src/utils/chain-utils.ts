@@ -1,4 +1,4 @@
-import { AppConfig } from '../webb-context';
+import { AppConfig } from '@webb-tools/api-providers';
 import { WebbError, WebbErrorCodes } from '../webb-error';
 import { ChainTypeId, chainTypeIdToInternalId, InternalChainId } from '../chains';
 

@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
-import { Amount, WrappingBalance, WrappingEvent, WrapUnWrap } from '../webb-context/wrap-unwrap';
+import { Amount, WrappingBalance, WrappingEvent, WrapUnWrap } from '@webb-tools/api-providers';
 import { WebbPolkadot } from './webb-polkadot-provider';
-import { MixerSize } from '../webb-context';
+import { MixerSize } from '@webb-tools/api-providers';
 import { WebbCurrencyId } from '../enums';
 
 export class PolkadotWrapUnwrap extends WrapUnWrap<WebbPolkadot> {

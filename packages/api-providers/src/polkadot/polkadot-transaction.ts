@@ -6,7 +6,7 @@ import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/submittable/types';
 
 import { ReactElement } from '../types/abstracts';
-import { NotificationHandler } from '../webb-context';
+import { NotificationHandler } from '@webb-tools/api-providers';
 import { IKeyringPair } from '@polkadot/types/types';
 type AddressOrPair = string | IKeyringPair;
 

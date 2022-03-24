@@ -1,6 +1,6 @@
 export * from './web3';
 export * from './polkadot';
-export * from './webb-context';
+export * from './abstracts';
 export * from './webb-error'
 export * from './contracts';
 export * from './utils';
@@ -8,6 +8,6 @@ export * from './types';
 export * from './enums'
 export * from './storage';
 export * from './chains';
-export * from './bridge'
 export * from './account'
 export * from './ext-providers';
+export * from './chains'

@@ -1,17 +1,17 @@
-import { parseUnits } from '@ethersproject/units';
+import {parseUnits} from '@ethersproject/units';
 
-import { LoggerService } from '@webb-tools/app-util';
-import { Note } from '@webb-tools/sdk-core';
-import { BigNumber } from 'ethers';
-import { RelayedWithdrawResult, RelayerCMDBase, WebbRelayer } from '../webb-context/relayer';
-import { WebbError, WebbErrorCodes } from '../webb-error';
-import { MixerWithdraw, OptionalActiveRelayer, OptionalRelayer, WithdrawState } from '../webb-context';
-import { chainTypeIdToInternalId, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains';
-import { depositFromPreimage } from '../contracts/utils/make-deposit';
-import { WebbWeb3Provider } from './webb-web3-provider';
-import { fromDepositIntoZKPTornPublicInputs } from '../contracts/utils/zkp-adapters';
-import { bufferToFixed } from '../contracts/utils/buffer-to-fixed';
-import { chainIdToRelayerName } from '../uitls/relayer-utils';
+import {LoggerService} from '@webb-tools/app-util';
+import {Note} from '@webb-tools/sdk-core';
+import {BigNumber} from 'ethers';
+import {RelayedWithdrawResult, RelayerCMDBase, WebbRelayer} from '@webb-tools/api-providers';
+import {WebbError, WebbErrorCodes} from '../webb-error';
+import {MixerWithdraw, OptionalActiveRelayer, OptionalRelayer, WithdrawState} from '@webb-tools/api-providers';
+import {chainTypeIdToInternalId, evmIdIntoInternalChainId, InternalChainId, parseChainIdType} from '../chains';
+import {depositFromPreimage} from '../contracts/utils/make-deposit';
+import {WebbWeb3Provider} from './webb-web3-provider';
+import {fromDepositIntoZKPTornPublicInputs} from '../contracts/utils/zkp-adapters';
+import {bufferToFixed} from '../contracts/utils/buffer-to-fixed';
+import {chainIdToRelayerName} from "@webb-tools/api-providers";
 
 const logger = LoggerService.get('Web3MixerWithdraw');
 
@@ -39,7 +39,7 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
         // for the contract.
         const supportedContract = relayer.capabilities.supportedChains.evm
           .get(chainTypeIdToInternalId(targetChainIdType))
-          ?.contracts.find(({ address, size }) => {
+          ?.contracts.find(({address, size}) => {
             // Match on the relayer configuration as well as note
             return address.toLowerCase() === contractAddress.toLowerCase() && size === Number(evmNote.amount);
           });

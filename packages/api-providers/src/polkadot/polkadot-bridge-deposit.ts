@@ -1,13 +1,12 @@
 import { u8aToHex } from '@polkadot/util';
 import { LoggerService } from '@webb-tools/app-util';
-import { BridgeDeposit } from '../bridge';
 import { WebbError, WebbErrorCodes } from '../webb-error';
 import { WebbPolkadot } from './webb-polkadot-provider';
 import { ChainType, computeChainIdType, InternalChainId, SubstrateChainId } from '../chains';
 import { Note, NoteGenInput } from '@webb-tools/sdk-core';
-import { BridgeApi } from '../bridge/bridge-api';
+import { BridgeApi } from '@webb-tools/api-providers';
 import { BridgeConfig } from '../types/bridge-config.interface';
-import { DepositPayload as IDepositPayload, MixerSize } from '../webb-context';
+import {BridgeDeposit, DepositPayload as IDepositPayload, MixerSize} from '@webb-tools/api-providers';
 const logger = LoggerService.get('PolkadotBridgeDeposit');
 
 type DepositPayload = IDepositPayload<Note, [number, string]>;

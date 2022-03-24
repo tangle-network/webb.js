@@ -1,8 +1,8 @@
-import { evmChainStorageFactory, MixerStorage } from '../uitls/storage-mock';
 import { MixerConfig } from '../types/mixer-config.interface';
 import { EVMChainId, evmIdIntoInternalChainId } from '../chains';
-import { AppConfig, MixerSize } from '../webb-context';
+import { AppConfig, MixerSize } from '@webb-tools/api-providers';
 import { Storage } from '../storage';
+import {evmChainStorageFactory, MixerStorage} from "@webb-tools/api-providers";
 
 export type LeafIntervalInfo = {
   startingBlock: number;

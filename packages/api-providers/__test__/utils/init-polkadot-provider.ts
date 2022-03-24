@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { InjectedAccount, InjectedExtension } from '@polkadot/extension-inject/types';
 import { Account, AccountsAdapter, PromiseOrT } from '@webb-tools/api-providers/account/Accounts.adapter';
-import { RelayerConfig, WebbRelayerBuilder } from '@webb-tools/api-providers/webb-context/relayer';
+import { RelayerConfig, WebbRelayerBuilder } from '@webb-tools/api-providers';
 import { InternalChainId } from '@webb-tools/api-providers/chains';
 import { NotificationPayload, WebbPolkadot } from '@webb-tools/api-providers';
 import { InteractiveFeedback } from '@webb-tools/api-providers/webb-error';

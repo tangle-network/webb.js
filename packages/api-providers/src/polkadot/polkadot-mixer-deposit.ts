@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { LoggerService } from '@webb-tools/app-util';
-import { Note, NoteGenInput } from '@webb-tools/sdk-core';
-import { PalletMixerMixerMetadata } from '@webb-tools/types/interfaces/pallets';
+import {LoggerService} from '@webb-tools/app-util';
+import {Note, NoteGenInput} from '@webb-tools/sdk-core';
+import {PalletMixerMixerMetadata} from '@webb-tools/types/interfaces/pallets';
 
-import { u8aToHex } from '@polkadot/util';
+import {u8aToHex} from '@polkadot/util';
 
-import { WebbPolkadot } from './webb-polkadot-provider';
-import { DepositPayload as TDepositPayload, MixerDeposit, MixerSize } from '../webb-context';
-import { ORMLCurrency } from '../webb-context/currency/orml-currency';
-import { WebbError, WebbErrorCodes } from '../webb-error';
-import { Currency } from '../webb-context/currency/currency';
-import { ChainType, computeChainIdType, internalChainIdToChainId } from '../chains';
+import {WebbPolkadot} from './webb-polkadot-provider';
+import {DepositPayload as TDepositPayload, MixerDeposit, MixerSize} from '@webb-tools/api-providers';
+import {ORMLCurrency} from '@webb-tools/api-providers';
+import {WebbError, WebbErrorCodes} from '../webb-error';
+import {Currency} from '@webb-tools/api-providers';
+import {ChainType, computeChainIdType, internalChainIdToChainId} from '../chains';
 
 type DepositPayload = TDepositPayload<Note, [number, string]>;
 const logger = LoggerService.get('tornado-deposit');
@@ -43,9 +43,9 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
         const amountNumber = (Number(amount?.toString().replaceAll(',', '')) * 1.0) / Math.pow(10, 12);
         const currency = cId
           ? Currency.fromORMLAsset(
-              webbPolkadot.config.currencies,
-              ormlAssets.find((asset) => Number(asset.id) === cId)!
-            )
+            webbPolkadot.config.currencies,
+            ormlAssets.find((asset) => Number(asset.id) === cId)!
+          )
           : Currency.fromCurrencyId(webbPolkadot.config.currencies, Number(cId));
         return {
           id,
@@ -55,7 +55,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
         };
       })
       .map(
-        ({ amount, currency, treeId }) =>
+        ({amount, currency, treeId}) =>
           ({
             id: treeId,
             treeId,

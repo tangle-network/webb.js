@@ -1,27 +1,27 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Log } from '@ethersproject/abstract-provider';
+import {Log} from '@ethersproject/abstract-provider';
 
-import { LoggerService } from '@webb-tools/app-util';
-import { BigNumber, Contract, providers, Signer } from 'ethers';
+import {LoggerService} from '@webb-tools/app-util';
+import {BigNumber, Contract, providers, Signer} from 'ethers';
 import utils from 'web3-utils';
-import { Tornado } from '../types/Tornado';
-import { EvmNote } from '../utils/evm-note';
-import { createTornDeposit, Deposit } from '../utils/make-deposit';
-import { ZKPTornInputWithMerkle, ZKPTornPublicInputs } from './types';
-import { EVMChainId } from '../../chains';
-import { WebbError, WebbErrorCodes } from '../../webb-error';
-import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo';
-import { bufferToFixed } from '../utils/buffer-to-fixed';
+import {Tornado} from '../types/Tornado';
+import {EvmNote} from '../utils/evm-note';
+import {createTornDeposit, Deposit} from '../utils/make-deposit';
+import {ZKPTornInputWithMerkle, ZKPTornPublicInputs} from './types';
+import {EVMChainId} from '../../chains';
+import {WebbError, WebbErrorCodes} from '../../webb-error';
+import {EvmChainMixersInfo} from '../../web3/EvmChainMixersInfo';
+import {bufferToFixed} from '../utils/buffer-to-fixed';
 
-import { abi } from '../abis/NativeAnchor.json';
-import {MerkleTree, MimcSpongeHasher } from '../utils/merkle';
-import { retryPromise } from '../../uitls/retry-promise';
-import { fetchTornadoCircuitData, fetchTornadoProvingKey } from '../../uitls/fixtures';
+import {abi} from '../abis/NativeAnchor.json';
+import {MerkleTree, MimcSpongeHasher} from '../utils/merkle';
+import {fetchTornadoCircuitData, fetchTornadoProvingKey, retryPromise} from "@webb-tools/api-providers";
 
 const webSnarkUtils = require('tornado-websnark/src/utils');
 type DepositEvent = [string, number, BigNumber];
 const logger = LoggerService.get('anchor');
 const mixerLogger = logger;
+
 export class TornadoContract {
   private _contract: Tornado;
   private readonly signer: Signer;
@@ -60,7 +60,7 @@ export class TornadoContract {
   }
 
   async deposit(commitment: string, onComplete?: (event: DepositEvent) => void) {
-    const overrides = { value: await this.denomination };
+    const overrides = {value: await this.denomination};
     const filters = await this._contract.filters.Deposit(commitment, null, null);
     this._contract.once(filters, (commitment: any, insertedIndex: number, timestamp: BigNumber) => {
       onComplete?.([commitment, insertedIndex, timestamp]);
@@ -178,7 +178,7 @@ export class TornadoContract {
 
   async generateZKP(deposit: Deposit, zkpPublicInputs: ZKPTornPublicInputs) {
     const merkleProof = await this.generateMerkleProof(deposit);
-    const { pathElements, pathIndex:pathIndices,  root } = merkleProof;
+    const {pathElements, pathIndex: pathIndices, root} = merkleProof;
     const circuitData = await fetchTornadoCircuitData();
     const provingKey = await fetchTornadoProvingKey();
     const zkpInput: ZKPTornInputWithMerkle = {
@@ -197,8 +197,8 @@ export class TornadoContract {
       circuitData,
       provingKey
     );
-    const { proof } = await webSnarkUtils.toSolidityInput(proofsData);
-    return { proof, input: zkpInput };
+    const {proof} = await webSnarkUtils.toSolidityInput(proofsData);
+    return {proof, input: zkpInput};
   }
 
   // function to call when generating ZKP with a relayer
@@ -210,7 +210,7 @@ export class TornadoContract {
   ) {
     // Build a local merkle tree from the leaves
     const treeHeight = await this._contract.levels();
-    const tree =  MerkleTree.new('eth', treeHeight, leaves, new MimcSpongeHasher());
+    const tree = MerkleTree.new('eth', treeHeight, leaves, new MimcSpongeHasher());
     const leafIndex = leaves.findIndex((commitment) => commitment === bufferToFixed(deposit.commitment));
     logger.info(`Leaf index ${leafIndex}`);
     const merkleProof = tree.path(leafIndex);
@@ -246,7 +246,7 @@ export class TornadoContract {
       await this.mixersInfo.setMixerStorage(this._contract.address, lastQueriedBlock, [...leaves]);
     }
 
-    const { pathElements, pathIndex:pathIndices,  root } = merkleProof;
+    const {pathElements, pathIndex: pathIndices, root} = merkleProof;
     const circuitData = await fetchTornadoCircuitData();
     const provingKey = await fetchTornadoProvingKey();
     const zkpInput: ZKPTornInputWithMerkle = {
@@ -265,8 +265,8 @@ export class TornadoContract {
       circuitData,
       provingKey
     );
-    const { proof } = await webSnarkUtils.toSolidityInput(proofsData);
-    return { proof, input: zkpInput };
+    const {proof} = await webSnarkUtils.toSolidityInput(proofsData);
+    return {proof, input: zkpInput};
   }
 
   async withdraw(proof: any, zkp: ZKPTornInputWithMerkle) {

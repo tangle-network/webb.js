@@ -1,16 +1,15 @@
-import { ContractTransaction } from 'ethers';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import {ContractTransaction} from 'ethers';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import Web3 from 'web3';
-import { Amount, WrappingBalance, WrappingEvent, WrapUnWrap } from '../webb-context/wrap-unwrap';
-import { WebbCurrencyId, webbCurrencyIdToString } from '../enums';
-import { Bridge, MixerSize } from '../webb-context';
-import { evmIdIntoInternalChainId, InternalChainId } from '../chains';
-import { WebbGovernedToken, zeroAddress } from '../contracts/contracts';
-import { WebbWeb3Provider } from './webb-web3-provider';
-import { Currency } from '../webb-context/currency/currency';
-import { CurrencyType } from '../types/currency-config.interface';
+import {WebbCurrencyId, webbCurrencyIdToString} from '../enums';
+import {evmIdIntoInternalChainId, InternalChainId} from '../chains';
+import {WebbGovernedToken, zeroAddress} from '../contracts/contracts';
+import {WebbWeb3Provider} from './webb-web3-provider';
+import {CurrencyType} from '../types/currency-config.interface';
 // eslint-disable-next-line camelcase
-import { ERC20__factory } from '../contracts/types';
+import {ERC20__factory} from '../contracts/types';
+import {Amount, WrappingBalance, WrappingEvent, WrapUnWrap} from "@webb-tools/api-providers";
+import {Bridge, Currency, MixerSize} from "@webb-tools/api-providers/abstracts";
 
 export type Web3WrapPayload = Amount;
 export type Web3UnwrapPayload = Amount;
@@ -112,7 +111,7 @@ export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
   }
 
   async canUnWrap(unwrapPayload: Web3UnwrapPayload): Promise<boolean> {
-    const { amount } = unwrapPayload;
+    const {amount} = unwrapPayload;
     const governedTokenId = this.governedToken!;
     const webbGovernedToken = this.governedTokenWrapper(governedTokenId);
 
@@ -122,7 +121,7 @@ export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
   }
 
   async unwrap(unwrapPayload: Web3UnwrapPayload): Promise<string> {
-    const { amount: amountNumber } = unwrapPayload;
+    const {amount: amountNumber} = unwrapPayload;
 
     const governedTokenId = this.governedToken!;
     const wrappableTokenId = this.wrappableToken!;
@@ -186,7 +185,7 @@ export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
   }
 
   async wrap(wrapPayload: Web3WrapPayload): Promise<string> {
-    const { amount: amountNumber } = wrapPayload;
+    const {amount: amountNumber} = wrapPayload;
 
     const wrappableTokenId = this.wrappableToken!;
     const governableTokenId = this.governedToken!;

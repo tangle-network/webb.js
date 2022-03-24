@@ -1,5 +1,5 @@
 import { WebbCurrencyId } from '../enums';
-import { AppConfig } from '../webb-context';
+import { AppConfig } from '@webb-tools/api-providers';
 import { InternalChainId } from '../chains';
 
 export const getAnchorAddressForBridge = (

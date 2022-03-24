@@ -1,10 +1,7 @@
-import { CurrencyRole, CurrencyType } from '../types/currency-config.interface';
-import { WebbWeb3Provider } from './webb-web3-provider';
-import { AnchorBase, BridgeApi } from '../bridge/bridge-api';
-import { Currency } from '../webb-context/currency/currency';
-import { BridgeConfig } from '../types/bridge-config.interface';
-import { ChainTypeId, chainTypeIdToInternalId, evmIdIntoInternalChainId } from '../chains';
-import { WebbGovernedToken } from '../contracts/contracts';
+import {AnchorBase, BridgeApi, BridgeConfig, Currency, CurrencyRole, CurrencyType} from '@webb-tools/api-providers';
+import {WebbWeb3Provider} from './webb-web3-provider';
+import {ChainTypeId, chainTypeIdToInternalId, evmIdIntoInternalChainId} from '../chains';
+import {WebbGovernedToken} from '../contracts/contracts';
 
 export class Web3BridgeApi extends BridgeApi<WebbWeb3Provider, BridgeConfig> {
   getTokenAddress(chainTypeId: ChainTypeId): string | null {

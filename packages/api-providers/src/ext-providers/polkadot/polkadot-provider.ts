@@ -7,7 +7,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { InjectedExtension } from '@polkadot/extension-inject/types';
 import { PolkadotAccount, PolkadotAccounts } from './polkadot-accounts';
 import { PolkaTXBuilder } from '../../polkadot';
-import { ApiInitHandler } from '../../webb-context';
+import { ApiInitHandler } from '@webb-tools/api-providers';
 import { InteractiveFeedback, WebbError, WebbErrorCodes } from '../../webb-error';
 
 type ExtensionProviderEvents = {

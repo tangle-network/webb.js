@@ -3,7 +3,7 @@ import { Note } from '@webb-tools/sdk-core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ActiveWebbRelayer, WebbRelayer } from '../relayer';
 import { InternalChainId } from '../../chains';
-import { WebbApiProvider } from '@webb-tools/api-providers/webb-context';
+import { WebbApiProvider } from '@webb-tools/api-providers';
 
 export enum WithdrawState {
   Cancelling,
