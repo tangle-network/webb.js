@@ -47,7 +47,7 @@ export const parseChainIdType = (chainIdType: number): ChainTypeId => {
   const chainType = byteArrayToNum(byteArray.slice(0, 2));
   const chainId = byteArrayToNum(byteArray.slice(2));
 
-  return { chainType, chainId };
+  return { chainId, chainType };
 };
 
 export const internalChainIdToChainId = (chainType: ChainType, internalId: InternalChainId) => {

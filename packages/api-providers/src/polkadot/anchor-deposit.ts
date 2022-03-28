@@ -21,8 +21,8 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
   async deposit (depositPayload: DepositPayload): Promise<void> {
     const tx = this.inner.txBuilder.build(
       {
-        section: 'anchorBn254',
-        method: 'deposit'
+        method: 'deposit',
+        section: 'anchorBn254'
       },
       depositPayload.params
     );
@@ -63,29 +63,29 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
 
     logger.trace({
       amount,
-      anchorIndex,
       anchor,
+      anchorId,
+      anchorIndex,
       anchors,
-      sourceChainId,
       destination,
-      anchorId
+      sourceChainId
     });
     const treeId = anchor.neighbours[InternalChainId.WebbDevelopment] as number; // TODO: Anchor in one chain the 0 id contains the treeId
     const noteInput: NoteGenInput = {
+      amount: amount,
+      backend: 'Arkworks',
+      curve: 'Bn254',
+      denomination: '18',
       exponentiation: '5',
-      width: '4',
+      hashFunction: 'Poseidon',
       protocol: 'anchor',
-      targetChain: destChainId.toString(),
       sourceChain: sourceChainId.toString(),
       sourceIdentifyingData: anchorIndex.toString(),
+      targetChain: destChainId.toString(),
       targetIdentifyingData: treeId.toString(),
-      amount: amount,
-      denomination: '18',
-      hashFunction: 'Poseidon',
-      curve: 'Bn254',
-      backend: 'Arkworks',
+      tokenSymbol: tokenSymbol,
       version: 'v1',
-      tokenSymbol: tokenSymbol
+      width: '4'
     };
 
     logger.log('note input', noteInput);
@@ -113,10 +113,10 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
 
     if (currency) {
       return anchors.map((anchor, anchorIndex) => ({
-        id: `Bridge=${anchor.amount}@${currency.view.name}@${anchorIndex}`,
-        title: `${anchor.amount} ${currency.view.name}`,
         amount: Number(anchor.amount),
-        asset: currency.view.symbol
+        asset: currency.view.symbol,
+        id: `Bridge=${anchor.amount}@${currency.view.name}@${anchorIndex}`,
+        title: `${anchor.amount} ${currency.view.name}`
       }));
     }
 

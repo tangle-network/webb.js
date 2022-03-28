@@ -223,10 +223,10 @@ export class MerkleTree {
     this.traverse(index, traverser);
 
     return {
-      root,
+      element,
       pathElements: traverser.pathElements,
       pathIndex: traverser.pathIndex,
-      element
+      root
     };
   }
 

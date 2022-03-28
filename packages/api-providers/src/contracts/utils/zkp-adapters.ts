@@ -15,11 +15,11 @@ export function fromDepositIntoZKPTornPublicInputs (
   data: ZKPTornFromDepositInput
 ): ZKPTornPublicInputs {
   return {
-    nullifierHash: deposit.nullifierHash,
-    // public
-    relayer: data.relayer ? data.relayer : bufferToFixed(0),
-    recipient: data.recipient,
     fee: data.fee || 0,
-    refund: data.refund || 0
+    // public
+    nullifierHash: deposit.nullifierHash,
+    recipient: data.recipient,
+    refund: data.refund || 0,
+    relayer: data.relayer ? data.relayer : bufferToFixed(0)
   };
 }

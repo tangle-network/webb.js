@@ -30,10 +30,10 @@ export class Currency extends CurrencyContent {
   static fromORMLAsset (currenciesConfig: AppConfig['currencies'], asset: ORMLAsset): Currency {
     return new Currency({
       ...currenciesConfig[WebbCurrencyId.WEBB],
-      id: `ORML@${asset.id}`,
       addresses: new Map([[InternalChainId.WebbDevelopment, asset.id]]),
-      symbol: asset.name.slice(0, 3).toLocaleUpperCase(),
-      name: asset.name
+      id: `ORML@${asset.id}`,
+      name: asset.name,
+      symbol: asset.name.slice(0, 3).toLocaleUpperCase()
     });
   }
 
@@ -57,18 +57,18 @@ export class Currency extends CurrencyContent {
 
   getChainIdsAndTypes (chainsConfig: AppConfig['chains']): ChainTypeId[] {
     return Array.from(this.data.addresses.keys()).map((internalId: any) => {
-      return { chainType: chainsConfig[internalId].chainType, chainId: chainsConfig[internalId].chainId };
+      return { chainId: chainsConfig[internalId].chainId, chainType: chainsConfig[internalId].chainType };
     });
   }
 
   get view (): CurrencyView {
     return {
+      color: this.data.color,
       icon: this.data.icon,
       id: this.data.id as any,
-      type: this.data.type,
       name: this.data.name,
-      color: this.data.color,
-      symbol: this.data.symbol
+      symbol: this.data.symbol,
+      type: this.data.type
     };
   }
 }

@@ -101,30 +101,30 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
       const root = await this.fetchRoot(treeId);
 
       const proofInput: ProvingManagerSetupInput = {
+        fee: 0,
+        leafIndex,
         leaves,
         note,
-        leafIndex,
-        refund: 0,
-        fee: 0,
-        recipient: recipientAccountHex.replace('0x', ''),
-        relayer: relayerAccountHex.replace('0x', ''),
         provingKey,
+        recipient: recipientAccountHex.replace('0x', ''),
         refreshCommitment,
+        refund: 0,
+        relayer: relayerAccountHex.replace('0x', ''),
         roots: [hexToU8a(root), hexToU8a(root)]
       };
 
       logger.log('proofInput to webb.js: ', proofInput);
       const zkProofMetadata = await pm.prove(proofInput);
       const withdrawProof: AnchorWithdrawProof = {
-        id: treeId,
-        proofBytes: `0x${zkProofMetadata.proof}` as any,
-        root: `0x${zkProofMetadata.root}`,
-        nullifierHash: `0x${zkProofMetadata.nullifierHash}`,
-        recipient: accountId,
-        relayer: relayerAccountId,
         fee: 0,
+        id: treeId,
+        nullifierHash: `0x${zkProofMetadata.nullifierHash}`,
+        proofBytes: `0x${zkProofMetadata.proof}` as any,
+        recipient: accountId,
+        refreshCommitment: `0x${refreshCommitment}`,
         refund: 0,
-        refreshCommitment: `0x${refreshCommitment}`
+        relayer: relayerAccountId,
+        root: `0x${zkProofMetadata.root}`
       };
       const parms = [
         withdrawProof.id,
@@ -141,8 +141,8 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
       this.emit('stateChange', WithdrawState.SendingTransaction);
       const tx = this.inner.txBuilder.build(
         {
-          section: 'anchorBn254',
-          method: 'withdraw'
+          method: 'withdraw',
+          section: 'anchorBn254'
         },
         parms
       );

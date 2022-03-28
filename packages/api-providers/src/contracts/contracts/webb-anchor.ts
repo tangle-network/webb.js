@@ -69,8 +69,8 @@ export class AnchorContract {
     const note = new EvmNote(assetSymbol, depositSize, chainId, deposit.preimage);
 
     return {
-      note,
-      deposit
+      deposit,
+      note
     };
   }
 
@@ -365,19 +365,19 @@ export class AnchorContract {
     neighborRoots[sourceChainRootIndex] = root;
     const input: AnchorWitnessInput = {
       // public
-      nullifierHash: deposit.nullifierHash,
-      refreshCommitment: bufferToFixed('0'),
-      recipient: zkpInputWithoutMerkleProof.recipient,
-      relayer: zkpInputWithoutMerkleProof.relayer,
-      fee: String(zkpInputWithoutMerkleProof.fee),
-      refund: String(zkpInputWithoutMerkleProof.refund),
       chainID: BigInt(zkpInputWithoutMerkleProof.destinationChainId),
-      roots: [localRoot, ...neighborRoots],
-      // private
+      fee: String(zkpInputWithoutMerkleProof.fee),
       nullifier: deposit.nullifier,
-      secret: deposit.secret,
+      nullifierHash: deposit.nullifierHash,
       pathElements,
-      pathIndices
+      pathIndices,
+      recipient: zkpInputWithoutMerkleProof.recipient,
+      refreshCommitment: bufferToFixed('0'),
+      // private
+      refund: String(zkpInputWithoutMerkleProof.refund),
+      relayer: zkpInputWithoutMerkleProof.relayer,
+      roots: [localRoot, ...neighborRoots],
+      secret: deposit.secret
     };
     const edges = await this._contract.maxEdges();
 
@@ -389,7 +389,7 @@ export class AnchorContract {
 
     logger.trace('Zero knowlage proof', proof);
 
-    return { proof: proof.proof, input: input, root };
+    return { input, proof: proof.proof, root };
   }
 
   async generateZKP (deposit: Deposit, zkpInputWithoutMerkleProof: ZKPWebbAnchorInputWithoutMerkle) {
@@ -404,19 +404,19 @@ export class AnchorContract {
     logger.trace('Latest Neighbor Roots', nr);
     const input: AnchorWitnessInput = {
       // public
-      nullifierHash: deposit.nullifierHash,
-      refreshCommitment: bufferToFixed('0'),
-      recipient: zkpInputWithoutMerkleProof.recipient,
-      relayer: zkpInputWithoutMerkleProof.relayer,
-      fee: String(zkpInputWithoutMerkleProof.fee),
-      refund: String(zkpInputWithoutMerkleProof.refund),
       chainID: BigInt(deposit.chainId!),
-      roots: [root, ...nr],
-      // private
+      fee: String(zkpInputWithoutMerkleProof.fee),
       nullifier: deposit.nullifier,
-      secret: deposit.secret,
+      nullifierHash: deposit.nullifierHash,
       pathElements,
-      pathIndices
+      pathIndices,
+      recipient: zkpInputWithoutMerkleProof.recipient,
+      refreshCommitment: bufferToFixed('0'),
+      // private
+      refund: String(zkpInputWithoutMerkleProof.refund),
+      relayer: zkpInputWithoutMerkleProof.relayer,
+      roots: [root, ...nr],
+      secret: deposit.secret
     };
     const edges = await this._contract.maxEdges();
 
@@ -428,7 +428,7 @@ export class AnchorContract {
 
     logger.trace('Zero knowlage proof', proof);
 
-    return { proof: proof.proof, input: input, root };
+    return { input, proof: proof.proof, root };
   }
 
   async withdraw (proof: any, zkp: ZKPWebbAnchorInputWithMerkle, pub: any): Promise<string> {
@@ -439,14 +439,14 @@ export class AnchorContract {
     const tx = await this._contract.withdraw(
       `0x${proofBytes}`,
       {
-        _roots: createRootsBytes(pub.roots),
-        _nullifierHash: bufferToFixed(zkp.nullifierHash),
-        _refreshCommitment: bufferToFixed('0'),
-
-        _recipient: zkp.recipient,
-        _relayer: zkp.relayer,
         _fee: bufferToFixed(zkp.fee),
-        _refund: bufferToFixed(zkp.refund)
+        _nullifierHash: bufferToFixed(zkp.nullifierHash),
+        _recipient: zkp.recipient,
+
+        _refreshCommitment: bufferToFixed('0'),
+        _refund: bufferToFixed(zkp.refund),
+        _relayer: zkp.relayer,
+        _roots: createRootsBytes(pub.roots)
       },
       overrides
     );

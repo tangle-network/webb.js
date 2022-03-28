@@ -445,8 +445,8 @@ export class WebbRelayer {
       logger.info(`info fetched from relayer: ${fetchedLeaves} + ${lastQueriedBlockNumber}`);
 
       return {
-        leaves: fetchedLeaves,
-        lastQueriedBlock: lastQueriedBlockNumber
+        lastQueriedBlock: lastQueriedBlockNumber,
+        leaves: fetchedLeaves
       };
     } else {
       throw new Error('network error');

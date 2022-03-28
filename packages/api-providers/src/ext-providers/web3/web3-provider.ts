@@ -66,16 +66,16 @@ export class Web3Provider<T = unknown> {
       await provider.enable();
       const web3Provider = new Web3Provider(new Web3(provider), {
         description: 'MetaMask',
-        name: 'MetaMask',
         icons: [],
+        name: 'MetaMask',
         url: 'https://https://metamask.io'
       });
 
       web3Provider._capabilities = {
         addNetworkRpc: true,
+        hasSessions: false,
         listenForAccountChange: true,
-        listenForChainChane: true,
-        hasSessions: false
+        listenForChainChane: true
       };
 
       return web3Provider;
@@ -98,9 +98,9 @@ export class Web3Provider<T = unknown> {
 
     web3Provider._capabilities = {
       addNetworkRpc: false,
+      hasSessions: true,
       listenForAccountChange: false,
-      listenForChainChane: false,
-      hasSessions: true
+      listenForChainChane: false
     };
     web3Provider.helperApi = WCProvider;
 
@@ -174,13 +174,13 @@ export class Web3Provider<T = unknown> {
     return (this._inner.currentProvider as AbstractProvider).request?.({
       method: 'wallet_watchAsset',
       params: {
-        type: 'ERC20', // Initially only supports ERC20, but eventually more!
         options: {
           address: addTokenInput.address, // The address that the token is at.
-          symbol: addTokenInput.symbol, // A ticker symbol or shorthand, up to 5 chars.
           decimals: addTokenInput.decimals, // The number of decimals in the token
-          image: addTokenInput.image // A string url of the token logo
-        }
+          image: addTokenInput.image, // A string url of the token logo
+          symbol: addTokenInput.symbol // A ticker symbol or shorthand, up to 5 chars.
+        },
+        type: 'ERC20' // Initially only supports ERC20, but eventually more!
       }
     });
   }

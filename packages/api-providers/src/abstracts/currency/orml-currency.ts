@@ -42,8 +42,8 @@ export class ORMLCurrency {
         const currencyId = storageKey[0];
 
         return {
-          id: currencyId,
-          balance: balance.toHuman()
+          balance: balance.toHuman(),
+          id: currencyId
         };
       });
     }

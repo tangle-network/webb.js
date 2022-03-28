@@ -51,8 +51,8 @@ describe('test various conversion functions', () => {
     const chainIdResult = 31337;
 
     const result: ChainTypeId = {
-      chainType: chainTypeResult,
-      chainId: chainIdResult
+      chainId: chainIdResult,
+      chainType: chainTypeResult
     };
 
     expect(parseChainIdType(chainIdType)).to.deep.equal(result);

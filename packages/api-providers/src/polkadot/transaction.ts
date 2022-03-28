@@ -119,10 +119,10 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
     }
 
     this.emit(event, {
-      key: this.notificationKey,
-      path: this.path,
       address: this.transactionAddress ?? '',
-      data: data
+      data: data,
+      key: this.notificationKey,
+      path: this.path
     } as any);
   }
 
@@ -217,10 +217,10 @@ export class PolkaTXBuilder {
 
     tx.on('loading', (data) => {
       handler({
-        message: `${data.path.section}:${data.path.method}`,
-        key: data.key,
         description: data.address,
+        key: data.key,
         level: 'loading',
+        message: `${data.path.section}:${data.path.method}`,
         name: 'Transaction',
         persist: true
       });
@@ -228,10 +228,10 @@ export class PolkaTXBuilder {
 
     tx.on('finalize', (data) => {
       handler({
-        message: `${data.path.section}:${data.path.method}`,
-        key: data.key,
         description: data.address,
+        key: data.key,
         level: 'success',
+        message: `${data.path.section}:${data.path.method}`,
         name: 'Transaction',
         persist: true
       });
@@ -240,10 +240,10 @@ export class PolkaTXBuilder {
     tx.on('failed', (data) => {
       console.log(data);
       handler({
-        message: `${data.path.section}:${data.path.method}`,
-        key: data.key,
         description: data.data,
+        key: data.key,
         level: 'error',
+        message: `${data.path.section}:${data.path.method}`,
         name: 'Transaction',
         persist: true
       });

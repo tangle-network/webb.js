@@ -63,10 +63,10 @@ export class EvmNote {
     const nullifierHash = pedersenHash(nullifier.leInt2Buff(31));
 
     return {
-      nullifierHash,
       commitment,
-      preimage: this.preImage,
       nullifier,
+      nullifierHash,
+      preimage: this.preImage,
       secret
     };
   }

@@ -32,10 +32,10 @@ export function createTornDeposit () {
   const nullifierHash = bufferToFixed(pedersenHash(nullifier));
 
   const deposit: Deposit = {
-    preimage,
     commitment,
-    nullifierHash,
     nullifier: bufferToFixed(nullifier),
+    nullifierHash,
+    preimage,
     secret: bufferToFixed(secret)
   };
 
@@ -60,12 +60,12 @@ export function createAnchor2Deposit (chainId: number) {
   console.log('commitment when creating deposit note: ', commitment);
 
   const deposit: Deposit = {
-    preimage,
+    chainId: chainId,
     commitment,
-    nullifierHash,
     nullifier: bufferToFixed(nullifier).substring(2),
-    secret: bufferToFixed(secret).substring(2),
-    chainId: chainId
+    nullifierHash,
+    preimage,
+    secret: bufferToFixed(secret).substring(2)
   };
 
   return deposit;
@@ -84,12 +84,12 @@ export function depositFromAnchorNote (note: DepositNote): Deposit {
   const commitment = bufferToFixed(commitmentBN);
 
   const deposit: Deposit = {
-    preimage,
+    chainId: chainId,
     commitment,
-    nullifierHash,
     nullifier: bufferToFixed(nullifier),
-    secret: bufferToFixed(secret),
-    chainId: chainId
+    nullifierHash,
+    preimage,
+    secret: bufferToFixed(secret)
   };
 
   return deposit;
@@ -104,10 +104,10 @@ export function depositFromPreimage (hexString: string): Deposit {
 
   const nullifierHash = pedersenHash(nullifier.leInt2Buff(31));
   const deposit: Deposit = {
-    preimage: preImage,
     commitment,
-    nullifierHash,
     nullifier: nullifier,
+    nullifierHash,
+    preimage: preImage,
     secret: secret
   };
 

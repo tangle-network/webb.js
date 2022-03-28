@@ -73,7 +73,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
             resolve(wsProvider);
           });
           wsProvider.on('error', (e) => {
-            reject(new ('WS Error ')());
+            reject(new Error('WS Error '));
           });
         });
       };
@@ -172,24 +172,24 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
             description: 'Query for the tree leaves',
             params: [
               {
+                isOptional: false,
                 name: 'tree_id',
-                type: 'u32',
-                isOptional: false
+                type: 'u32'
               },
               {
+                isOptional: false,
                 name: 'from',
-                type: 'u32',
-                isOptional: false
+                type: 'u32'
               },
               {
+                isOptional: false,
                 name: 'to',
-                type: 'u32',
-                isOptional: false
+                type: 'u32'
               },
               {
+                isOptional: true,
                 name: 'at',
-                type: 'Hash',
-                isOptional: true
+                type: 'Hash'
               }
             ],
             type: 'Vec<[u8; 32]>'

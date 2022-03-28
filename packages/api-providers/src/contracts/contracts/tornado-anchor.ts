@@ -55,8 +55,8 @@ export class TornadoContract {
     const note = new EvmNote(assetSymbol, depositSize, chainId, deposit.preimage);
 
     return {
-      note,
-      deposit
+      deposit,
+      note
     };
   }
 
@@ -193,10 +193,10 @@ export class TornadoContract {
     const zkpInput: ZKPTornInputWithMerkle = {
       ...zkpPublicInputs,
       nullifier: deposit.nullifier,
-      secret: deposit.secret,
       pathElements,
       pathIndices,
-      root: root as string
+      root: root as string,
+      secret: deposit.secret
     };
 
     const proofsData = await webSnarkUtils.genWitnessAndProve(
@@ -208,7 +208,7 @@ export class TornadoContract {
     );
     const { proof } = await webSnarkUtils.toSolidityInput(proofsData);
 
-    return { proof, input: zkpInput };
+    return { input: zkpInput, proof };
   }
 
   // function to call when generating ZKP with a relayer
@@ -265,10 +265,10 @@ export class TornadoContract {
     const zkpInput: ZKPTornInputWithMerkle = {
       ...zkpPublicInputs,
       nullifier: deposit.nullifier,
-      secret: deposit.secret,
       pathElements,
       pathIndices,
-      root: root as string
+      root: root as string,
+      secret: deposit.secret
     };
 
     const proofsData = await webSnarkUtils.genWitnessAndProve(
@@ -280,7 +280,7 @@ export class TornadoContract {
     );
     const { proof } = await webSnarkUtils.toSolidityInput(proofsData);
 
-    return { proof, input: zkpInput };
+    return { input: zkpInput, proof };
   }
 
   async withdraw (proof: any, zkp: ZKPTornInputWithMerkle) {

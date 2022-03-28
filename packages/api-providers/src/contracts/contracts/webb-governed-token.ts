@@ -37,8 +37,8 @@ export class WebbGovernedToken {
     const [symbol, name] = await Promise.all([this._contract.symbol(), this._contract.name()]);
 
     return {
-      symbol,
-      name
+      name,
+      symbol
     };
   }
 
