@@ -1,5 +1,6 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
+
 import { WebbError, WebbErrorCodes } from '../../webb-error';
 import { bufferToFixed } from './buffer-to-fixed';
 import { Deposit } from './make-deposit';

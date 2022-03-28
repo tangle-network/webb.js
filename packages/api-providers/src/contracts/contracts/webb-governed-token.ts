@@ -1,4 +1,8 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
 /* eslint-disable camelcase */
+
 import { LoggerService } from '@webb-tools/app-util';
 import { GovernedTokenWrapper, GovernedTokenWrapper__factory } from '@webb-tools/contracts';
 import { BigNumberish, Contract, PayableOverrides, providers, Signer } from 'ethers';

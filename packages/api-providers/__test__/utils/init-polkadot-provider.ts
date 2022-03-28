@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+
+// eslint-disable-next-line header/header
 import { Account, AccountsAdapter, NotificationPayload, PromiseOrT, RelayerConfig, relayerNameToChainId, WebbPolkadot, WebbRelayerBuilder } from '@webb-tools/api-providers';
 import { InternalChainId } from '@webb-tools/api-providers/chains';
 import { PolkadotProvider } from '@webb-tools/api-providers/ext-providers';

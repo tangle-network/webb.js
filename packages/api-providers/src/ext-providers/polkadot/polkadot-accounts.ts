@@ -1,5 +1,6 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
+
 import { InjectedAccount, InjectedExtension } from '@polkadot/extension-inject/types';
 
 import { Account, AccountsAdapter, PromiseOrT } from '../../account/Accounts.adapter';

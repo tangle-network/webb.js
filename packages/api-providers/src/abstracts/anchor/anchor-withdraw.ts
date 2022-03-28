@@ -1,5 +1,6 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
+
 import { InternalChainId } from '@webb-tools/api-providers/chains/chain-id.enum';
 
 import { MixerWithdraw } from '../mixer';

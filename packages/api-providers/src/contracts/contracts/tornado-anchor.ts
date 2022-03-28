@@ -1,4 +1,8 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+
 import { Log } from '@ethersproject/abstract-provider';
 import { fetchTornadoCircuitData, fetchTornadoProvingKey, retryPromise } from '@webb-tools/api-providers';
 import { LoggerService } from '@webb-tools/app-util';

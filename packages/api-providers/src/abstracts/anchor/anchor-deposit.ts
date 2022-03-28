@@ -1,5 +1,6 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
+
 import { DepositPayload, MixerDeposit, MixerSize } from '../mixer/mixer-deposit';
 import { WebbApiProvider } from '../webb-provider.interface';
 

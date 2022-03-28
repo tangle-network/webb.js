@@ -1,5 +1,6 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
+
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
 import { WebbCurrencyId } from '../../enums';

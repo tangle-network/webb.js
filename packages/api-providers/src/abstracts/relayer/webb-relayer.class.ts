@@ -1,5 +1,6 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
+
 import { getAnchorAddressForBridge } from '@webb-tools/api-providers';
 import { LoggerService } from '@webb-tools/app-util';
 import { Observable, Subject } from 'rxjs';

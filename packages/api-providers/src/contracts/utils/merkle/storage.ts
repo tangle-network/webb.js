@@ -1,5 +1,6 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
+
 export class Storage<T = Record<string, unknown>> {
   private db: T = {} as T;
 

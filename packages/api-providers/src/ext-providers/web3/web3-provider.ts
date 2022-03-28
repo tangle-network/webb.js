@@ -1,4 +1,8 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import { ProvideCapabilities } from '@webb-tools/api-providers';
 import { ethers } from 'ethers';

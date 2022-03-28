@@ -1,4 +1,8 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
 /* eslint-disable camelcase */
+
 import { Log } from '@ethersproject/abstract-provider';
 import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, MixerStorage } from '@webb-tools/api-providers/utils';
 import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise';

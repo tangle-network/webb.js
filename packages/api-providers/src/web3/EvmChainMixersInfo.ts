@@ -1,5 +1,6 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
+
 import { AppConfig, evmChainStorageFactory, MixerSize, MixerStorage } from '@webb-tools/api-providers';
 
 import { EVMChainId, evmIdIntoInternalChainId } from '../chains';

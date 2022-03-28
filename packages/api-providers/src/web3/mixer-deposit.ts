@@ -1,5 +1,6 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
+
 import { getEVMChainName, getNativeCurrencySymbol } from '@webb-tools/api-providers/utils';
 import { Note, NoteGenInput } from '@webb-tools/sdk-core';
 import utils from 'web3-utils';

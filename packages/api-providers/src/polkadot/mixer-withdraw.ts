@@ -1,4 +1,8 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+
 import { OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, WebbRelayer, WithdrawState } from '@webb-tools/api-providers';
 import { LoggerService } from '@webb-tools/app-util';
 import { Note, ProvingManager } from '@webb-tools/sdk-core';

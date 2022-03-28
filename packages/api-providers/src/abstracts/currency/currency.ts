@@ -1,5 +1,6 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
+
 import { ChainTypeId, InternalChainId } from '../../chains';
 import { WebbCurrencyId } from '../../enums';
 import { CurrencyConfig, CurrencyRole, CurrencyView } from '../../types/currency-config.interface';

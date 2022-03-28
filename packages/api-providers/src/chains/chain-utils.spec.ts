@@ -1,5 +1,6 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
+
 import { expect } from 'chai';
 
 import { ChainType, ChainTypeId } from './chain-id.enum';

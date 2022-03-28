@@ -1,5 +1,6 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
+
 import { fetchKeyForEdges, fetchWasmForEdges } from '../../ipfs/evm/anchors';
 import { AnchorWitnessInput } from './types';
 

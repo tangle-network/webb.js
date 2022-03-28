@@ -1,5 +1,6 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
+
 // eslint-disable-next-line  @typescript-eslint/no-var-requires
 const circomlib = require('tornado-circomlib');
 

@@ -1,5 +1,6 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
+
 import { AnchorBase, BridgeConfig, Currency, CurrencyRole, CurrencyType } from '@webb-tools/api-providers';
 
 import { AnchorApi } from '../abstracts';

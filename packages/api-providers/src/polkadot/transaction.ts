@@ -1,4 +1,8 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+
 import { NotificationHandler } from '@webb-tools/api-providers';
 import { EventBus, LoggerService } from '@webb-tools/app-util';
 import { uniqueId } from 'lodash';

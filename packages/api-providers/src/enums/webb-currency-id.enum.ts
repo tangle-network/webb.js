@@ -1,4 +1,8 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
 // Do NOT change the ordering of this enum and always add to the end. Otherwise notes may break.
+
 export enum WebbCurrencyId {
   /// Production edgeware token
   EDG,
