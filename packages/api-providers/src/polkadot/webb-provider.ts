@@ -46,12 +46,24 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
       anchor: {
         core: null,
         deposit: {
-          inner: new PolkadotBridgeDeposit(this),
-          enabled: true
+          enabled: true,
+          inner: new PolkadotBridgeDeposit(this)
         },
         withdraw: {
-          inner: new PolkadotAnchorWithdraw(this),
-          enabled: true
+          enabled: true,
+          inner: new PolkadotAnchorWithdraw(this)
+        }
+      },
+      anchorApi: new PolkadotAnchorApi(this, this.config.bridgeByAsset),
+      chainQuery: new PolkadotChainQuery(this),
+      mixer: {
+        deposit: {
+          enabled: true,
+          inner: new PolkadotMixerDeposit(this)
+        },
+        withdraw: {
+          enabled: true,
+          inner: new PolkadotMixerWithdraw(this)
         }
       },
       wrapUnwrap: {
@@ -59,19 +71,7 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
           enabled: false,
           inner: new PolkadotWrapUnwrap(this)
         }
-      },
-      mixer: {
-        deposit: {
-          inner: new PolkadotMixerDeposit(this),
-          enabled: true
-        },
-        withdraw: {
-          inner: new PolkadotMixerWithdraw(this),
-          enabled: true
-        }
-      },
-      chainQuery: new PolkadotChainQuery(this),
-      anchorApi: new PolkadotAnchorApi(this, this.config.bridgeByAsset)
+      }
     };
   }
 

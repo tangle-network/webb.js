@@ -49,21 +49,21 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
           : Currency.fromCurrencyId(webbPolkadot.config.currencies, Number(cId));
 
         return {
-          id,
           amount: amountNumber,
           currency: currency,
+          id,
           treeId
         };
       })
       .map(
         ({ amount, currency, treeId }) =>
           ({
-            id: treeId,
-            treeId,
-            value: amount,
-            title: amount + ` ${currency.view.symbol}`,
+            amount: amount,
             asset: currency.view.symbol,
-            amount: amount
+            id: treeId,
+            title: amount + ` ${currency.view.symbol}`,
+            treeId,
+            value: amount
           } as MixerSize)
       )
       .sort((a, b) => (a.amount > b.amount ? 1 : a.amount < b.amount ? -1 : 0));
@@ -91,20 +91,20 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
 
     logger.info(`Depositing to tree id ${treeId}`);
     const noteInput: NoteGenInput = {
-      protocol: 'mixer',
-      version: 'v2',
-      exponentiation: '5',
-      width: '3',
+      amount: String(amount.amount),
       backend: 'Arkworks',
-      hashFunction: 'Poseidon',
       curve: 'Bn254',
       denomination: `${denomination}`,
-      amount: String(amount.amount),
-      targetChain: chainIdType.toString(),
+      exponentiation: '5',
+      hashFunction: 'Poseidon',
+      protocol: 'mixer',
       sourceChain: chainIdType.toString(),
       sourceIdentifyingData: treeId.toString(),
+      targetChain: chainIdType.toString(),
       targetIdentifyingData: treeId.toString(),
-      tokenSymbol: amount.asset
+      tokenSymbol: amount.asset,
+      version: 'v2',
+      width: '3'
     };
 
     logger.info('noteInput in generateNote: ', noteInput);
@@ -122,8 +122,8 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
   async deposit (depositPayload: DepositPayload): Promise<void> {
     const tx = this.inner.txBuilder.build(
       {
-        section: 'mixerBn254',
-        method: 'deposit'
+        method: 'deposit',
+        section: 'mixerBn254'
       },
       depositPayload.params
     );

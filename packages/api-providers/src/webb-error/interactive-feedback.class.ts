@@ -43,10 +43,10 @@ export class ActionsBuilder {
   /// Adds an action for the builder actions
   action (name: string, handler: () => any, level: FeedbackLevel = 'info', id: string | null = null): ActionsBuilder {
     this._actions[name] = {
+      id,
       level,
-      onTrigger: handler,
       name,
-      id
+      onTrigger: handler
     };
 
     return this;

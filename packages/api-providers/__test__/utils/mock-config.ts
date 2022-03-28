@@ -10,7 +10,6 @@ const anchorsConfig: AppConfig['anchors'] = {
   [WebbCurrencyId.webbWETH]: [
     {
       amount: '0.1',
-      anchorTreeIds: {},
       anchorAddresses: {
         [InternalChainId.Ropsten]: '0x97747a4De7302Ff7Ee3334e33138879469BFEcf8',
         [InternalChainId.Rinkeby]: '0x09B722aA809A076027FA51902e431a8C03e3f8dF',
@@ -18,69 +17,70 @@ const anchorsConfig: AppConfig['anchors'] = {
         [InternalChainId.PolygonTestnet]: '0x12323BcABB342096669d80F968f7a31bdB29d4C4',
         [InternalChainId.OptimismTestnet]: '0xC44A4EcAC4f23b6F92485Cb1c90dBEd75a987BC8',
         [InternalChainId.ArbitrumTestnet]: '0xD8a8F9629a98EABFF31CfA9493f274A4D5e768Cd'
-      }
+      },
+      anchorTreeIds: {}
     }
   ],
   [WebbCurrencyId.WEBB]: [
     {
       amount: '10',
+      anchorAddresses: {},
       anchorTreeIds: {
         [InternalChainId.WebbDevelopment]: '3'
-      },
-      anchorAddresses: {}
+      }
     },
     {
       amount: '100',
+      anchorAddresses: {},
       anchorTreeIds: {
         [InternalChainId.WebbDevelopment]: '4'
-      },
-      anchorAddresses: {}
+      }
     },
     {
       amount: '1000',
+      anchorAddresses: {},
       anchorTreeIds: {
         [InternalChainId.WebbDevelopment]: '5'
-      },
-      anchorAddresses: {}
+      }
     }
   ],
   [WebbCurrencyId.webbDEV]: [
     {
       amount: '1',
-      anchorTreeIds: {},
       anchorAddresses: {
         [InternalChainId.HermesLocalnet]: '0x510C6297cC30A058F41eb4AF1BFC9953EaD8b577',
         [InternalChainId.AthenaLocalnet]: '0x7758F98C1c487E5653795470eEab6C4698bE541b'
-      }
+      },
+      anchorTreeIds: {}
     }
   ]
 };
 const chainsConfig: AppConfig['chains'] = {
   [InternalChainId.WebbDevelopment]: {
-    chainType: ChainType.Substrate,
-    id: InternalChainId.WebbDevelopment,
-    group: 'webb',
-    tag: 'dev',
     chainId: SubstrateChainId.Webb,
-    logo: undefined,
-    url: 'ws://127.0.0.1:9944',
-    name: 'Webb Development',
+    chainType: ChainType.Substrate,
     currencies: [WebbCurrencyId.WEBB],
-    nativeCurrencyId: WebbCurrencyId.WEBB
+    group: 'webb',
+    id: InternalChainId.WebbDevelopment,
+    logo: undefined,
+    name: 'Webb Development',
+    nativeCurrencyId: WebbCurrencyId.WEBB,
+    tag: 'dev',
+    url: 'ws://127.0.0.1:9944'
   },
   // this is the EVM edgeware
   [InternalChainId.EdgewareTestNet]: {
-    chainType: ChainType.EVM,
-    group: 'edgeware',
-    tag: 'test',
-    id: InternalChainId.EdgewareTestNet,
     chainId: EVMChainId.Beresheet,
-    name: 'Beresheet (Edgeware Testnet)',
-    url: 'wss://beresheet1.edgewa.re',
-    evmRpcUrls: ['https://beresheet.edgewa.re/evm'],
-    logo: undefined,
+    chainType: ChainType.EVM,
     currencies: [WebbCurrencyId.TEDG],
-    nativeCurrencyId: WebbCurrencyId.TEDG
+    evmRpcUrls: ['https://beresheet.edgewa.re/evm'],
+    group: 'edgeware',
+    id: InternalChainId.EdgewareTestNet,
+    logo: undefined,
+    name: 'Beresheet (Edgeware Testnet)',
+    nativeCurrencyId: WebbCurrencyId.TEDG,
+    tag: 'test',
+    url: 'wss://beresheet1.edgewa.re'
   },
   // [ChainId.Edgeware]: {
   // chainType: ChainType,
@@ -102,101 +102,101 @@ const chainsConfig: AppConfig['chains'] = {
   // },
 
   [InternalChainId.Rinkeby]: {
+    blockExplorerStub: 'https://rinkeby.etherscan.io',
+    chainId: EVMChainId.Rinkeby,
     chainType: ChainType.EVM,
+    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.WETH],
+    evmRpcUrls: ['https://rinkeby.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4'],
     group: 'eth',
     id: InternalChainId.Rinkeby,
-    chainId: EVMChainId.Rinkeby,
-    name: 'Rinkeby',
-    url: 'https://rinkeby.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4',
-    evmRpcUrls: ['https://rinkeby.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4'],
-    blockExplorerStub: 'https://rinkeby.etherscan.io',
     logo: undefined,
+    name: 'Rinkeby',
+    nativeCurrencyId: WebbCurrencyId.ETH,
     tag: 'test',
-    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.WETH],
-    nativeCurrencyId: WebbCurrencyId.ETH
+    url: 'https://rinkeby.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4'
   },
   [InternalChainId.Ropsten]: {
+    blockExplorerStub: 'https://ropsten.etherscan.io',
+    chainId: EVMChainId.Ropsten,
     chainType: ChainType.EVM,
+    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.WETH],
+    evmRpcUrls: ['https://ropsten.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4'],
     group: 'eth',
     id: InternalChainId.Ropsten,
-    chainId: EVMChainId.Ropsten,
-    name: 'Ropsten',
-    url: 'https://ropsten.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4',
-    evmRpcUrls: ['https://ropsten.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4'],
-    blockExplorerStub: 'https://ropsten.etherscan.io',
     logo: undefined,
+    name: 'Ropsten',
+    nativeCurrencyId: WebbCurrencyId.ETH,
     tag: 'test',
-    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.WETH],
-    nativeCurrencyId: WebbCurrencyId.ETH
+    url: 'https://ropsten.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4'
   },
   [InternalChainId.Goerli]: {
+    blockExplorerStub: 'https://goerli.etherscan.io',
+    chainId: EVMChainId.Goerli,
     chainType: ChainType.EVM,
+    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.WETH],
+    evmRpcUrls: ['https://goerli.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4'],
     group: 'eth',
     id: InternalChainId.Goerli,
-    chainId: EVMChainId.Goerli,
-    name: 'Goerli',
-    url: 'https://goerli.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4',
-    evmRpcUrls: ['https://goerli.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4'],
-    blockExplorerStub: 'https://goerli.etherscan.io',
     logo: undefined,
+    name: 'Goerli',
+    nativeCurrencyId: WebbCurrencyId.ETH,
     tag: 'test',
-    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.WETH],
-    nativeCurrencyId: WebbCurrencyId.ETH
+    url: 'https://goerli.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4'
   },
   [InternalChainId.Kovan]: {
+    blockExplorerStub: 'https://kovan.etherscan.io',
+    chainId: EVMChainId.Kovan,
     chainType: ChainType.EVM,
+    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.WETH],
+    evmRpcUrls: ['https://goerli.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4'],
     group: 'eth',
     id: InternalChainId.Kovan,
-    chainId: EVMChainId.Kovan,
-    name: 'Kovan',
-    url: 'https://kovan.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4',
-    evmRpcUrls: ['https://goerli.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4'],
-    blockExplorerStub: 'https://kovan.etherscan.io',
     logo: undefined,
+    name: 'Kovan',
+    nativeCurrencyId: WebbCurrencyId.ETH,
     tag: 'test',
-    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.WETH],
-    nativeCurrencyId: WebbCurrencyId.ETH
+    url: 'https://kovan.infura.io/v3/e54b7176271840f9ba62e842ff5d6db4'
   },
   [InternalChainId.OptimismTestnet]: {
+    blockExplorerStub: 'https://kovan-optimistic.etherscan.io',
+    chainId: EVMChainId.OptimismTestnet,
     chainType: ChainType.EVM,
+    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.WETH],
+    evmRpcUrls: ['https://kovan.optimism.io'],
     group: 'eth',
     id: InternalChainId.OptimismTestnet,
-    chainId: EVMChainId.OptimismTestnet,
-    name: 'Optimism Testnet',
-    url: 'https://kovan.optimism.io',
-    evmRpcUrls: ['https://kovan.optimism.io'],
-    blockExplorerStub: 'https://kovan-optimistic.etherscan.io',
     logo: undefined,
+    name: 'Optimism Testnet',
+    nativeCurrencyId: WebbCurrencyId.ETH,
     tag: 'test',
-    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.WETH],
-    nativeCurrencyId: WebbCurrencyId.ETH
+    url: 'https://kovan.optimism.io'
   },
   [InternalChainId.ArbitrumTestnet]: {
+    blockExplorerStub: 'https://testnet.arbiscan.io',
+    chainId: EVMChainId.ArbitrumTestnet,
     chainType: ChainType.EVM,
+    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.WETH],
+    evmRpcUrls: ['https://rinkeby.arbitrum.io/rpc'],
     group: 'eth',
     id: InternalChainId.ArbitrumTestnet,
-    chainId: EVMChainId.ArbitrumTestnet,
-    name: 'Arbitrum Testnet',
-    url: 'https://rinkeby.arbitrum.io/rpc',
-    evmRpcUrls: ['https://rinkeby.arbitrum.io/rpc'],
-    blockExplorerStub: 'https://testnet.arbiscan.io',
     logo: undefined,
+    name: 'Arbitrum Testnet',
+    nativeCurrencyId: WebbCurrencyId.ETH,
     tag: 'test',
-    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.WETH],
-    nativeCurrencyId: WebbCurrencyId.ETH
+    url: 'https://rinkeby.arbitrum.io/rpc'
   },
   [InternalChainId.HarmonyTestnet1]: {
+    chainId: EVMChainId.HarmonyTestnet1,
     chainType: ChainType.EVM,
+    currencies: [WebbCurrencyId.ONE],
+    evmRpcUrls: ['https://api.s1.b.hmny.io'],
     group: 'one',
     id: InternalChainId.HarmonyTestnet1,
-    chainId: EVMChainId.HarmonyTestnet1,
-    name: 'Harmony Testnet Shard 1',
-    tag: 'test',
-    url: 'https://api.s1.b.hmny.io',
-    evmRpcUrls: ['https://api.s1.b.hmny.io'],
     logo: undefined,
-    currencies: [WebbCurrencyId.ONE],
-    nativeCurrencyId: WebbCurrencyId.ONE
+    name: 'Harmony Testnet Shard 1',
+    nativeCurrencyId: WebbCurrencyId.ONE,
+    tag: 'test',
+    url: 'https://api.s1.b.hmny.io'
   },
   // [ChainId.HarmonyTestnet0]: {
   // chainType: ChainType,
@@ -217,17 +217,17 @@ const chainsConfig: AppConfig['chains'] = {
   //   nativeCurrencyId: WebbCurrencyId.ONE,
   // },
   [InternalChainId.HarmonyMainnet0]: {
+    chainId: EVMChainId.HarmonyMainnet0,
     chainType: ChainType.EVM,
+    currencies: [WebbCurrencyId.ONE],
+    evmRpcUrls: ['https://api.harmony.one'],
     group: 'one',
     id: InternalChainId.HarmonyMainnet0,
-    chainId: EVMChainId.HarmonyMainnet0,
-    name: 'Harmony Mainnet Shard 0',
-    tag: 'live',
-    url: 'https://api.harmony.one',
-    evmRpcUrls: ['https://api.harmony.one'],
     logo: undefined,
-    currencies: [WebbCurrencyId.ONE],
-    nativeCurrencyId: WebbCurrencyId.ONE
+    name: 'Harmony Mainnet Shard 0',
+    nativeCurrencyId: WebbCurrencyId.ONE,
+    tag: 'live',
+    url: 'https://api.harmony.one'
   },
   // [ChainId.EthereumMainNet]: {
   // chainType: ChainType,
@@ -248,103 +248,96 @@ const chainsConfig: AppConfig['chains'] = {
   //   nativeCurrencyId: WebbCurrencyId.ETH,
   // },
   [InternalChainId.Shiden]: {
+    blockExplorerStub: 'https://shiden.subscan.io',
+    chainId: EVMChainId.Shiden,
     chainType: ChainType.EVM,
+    currencies: [WebbCurrencyId.SDN],
+    evmRpcUrls: ['https://shiden.api.onfinality.io/public'],
     group: 'sdn',
     id: InternalChainId.Shiden,
-    chainId: EVMChainId.Shiden,
-    name: 'Shiden',
-    tag: 'live',
-    url: 'https://shiden.api.onfinality.io/public',
-    evmRpcUrls: ['https://shiden.api.onfinality.io/public'],
-    blockExplorerStub: 'https://shiden.subscan.io',
     logo: undefined,
-    currencies: [WebbCurrencyId.SDN],
-    nativeCurrencyId: WebbCurrencyId.SDN
+    name: 'Shiden',
+    nativeCurrencyId: WebbCurrencyId.SDN,
+    tag: 'live',
+    url: 'https://shiden.api.onfinality.io/public'
   },
   [InternalChainId.PolygonTestnet]: {
+    blockExplorerStub: 'https://mumbai.polygonscan.com/',
+    chainId: EVMChainId.PolygonTestnet,
     chainType: ChainType.EVM,
+    currencies: [WebbCurrencyId.MATIC, WebbCurrencyId.WETH],
+    evmRpcUrls: ['https://rpc-mumbai.maticvigil.com/'],
     group: 'matic',
     id: InternalChainId.PolygonTestnet,
-    chainId: EVMChainId.PolygonTestnet,
-    name: 'Polygon Testnet',
-    tag: 'test',
-    url: 'https://rpc-mumbai.maticvigil.com/',
-    evmRpcUrls: ['https://rpc-mumbai.maticvigil.com/'],
-    blockExplorerStub: 'https://mumbai.polygonscan.com/',
     logo: undefined,
-    currencies: [WebbCurrencyId.MATIC, WebbCurrencyId.WETH],
-    nativeCurrencyId: WebbCurrencyId.MATIC
+    name: 'Polygon Testnet',
+    nativeCurrencyId: WebbCurrencyId.MATIC,
+    tag: 'test',
+    url: 'https://rpc-mumbai.maticvigil.com/'
   },
   [InternalChainId.HermesLocalnet]: {
+    chainId: EVMChainId.HermesLocalnet,
     chainType: ChainType.EVM,
+    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.DEV],
+    evmRpcUrls: ['http://127.0.0.1:5001'],
     group: 'eth',
     id: InternalChainId.HermesLocalnet,
-    chainId: EVMChainId.HermesLocalnet,
-    name: 'Hermes Localnet',
-    tag: 'dev',
-    url: 'http://127.0.0.1:5001',
-    evmRpcUrls: ['http://127.0.0.1:5001'],
     logo: undefined,
-    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.DEV],
-    nativeCurrencyId: WebbCurrencyId.ETH
+    name: 'Hermes Localnet',
+    nativeCurrencyId: WebbCurrencyId.ETH,
+    tag: 'dev',
+    url: 'http://127.0.0.1:5001'
   },
   [InternalChainId.AthenaLocalnet]: {
+    chainId: EVMChainId.AthenaLocalnet,
     chainType: ChainType.EVM,
+    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.DEV],
+    evmRpcUrls: ['http://127.0.0.1:5002'],
     group: 'eth',
     id: InternalChainId.AthenaLocalnet,
-    chainId: EVMChainId.AthenaLocalnet,
-    name: 'Athena Localnet',
-    tag: 'dev',
-    url: 'http://127.0.0.1:5002',
-    evmRpcUrls: ['http://127.0.0.1:5002'],
     logo: undefined,
-    currencies: [WebbCurrencyId.ETH, WebbCurrencyId.DEV],
-    nativeCurrencyId: WebbCurrencyId.ETH
+    name: 'Athena Localnet',
+    nativeCurrencyId: WebbCurrencyId.ETH,
+    tag: 'dev',
+    url: 'http://127.0.0.1:5002'
   }
 };
 const bridgeConfigByAsset: AppConfig['bridgeByAsset'] = {
   [WebbCurrencyId.webbWETH]: {
-    asset: WebbCurrencyId.webbWETH,
-    anchors: anchorsConfig[WebbCurrencyId.webbWETH]
+    anchors: anchorsConfig[WebbCurrencyId.webbWETH],
+    asset: WebbCurrencyId.webbWETH
   },
   [WebbCurrencyId.WEBB]: {
-    asset: WebbCurrencyId.WEBB,
-    anchors: anchorsConfig[WebbCurrencyId.WEBB]
+    anchors: anchorsConfig[WebbCurrencyId.WEBB],
+    asset: WebbCurrencyId.WEBB
   },
   [WebbCurrencyId.webbDEV]: {
-    asset: WebbCurrencyId.webbDEV,
-    anchors: anchorsConfig[WebbCurrencyId.webbDEV]
+    anchors: anchorsConfig[WebbCurrencyId.webbDEV],
+    asset: WebbCurrencyId.webbDEV
   }
 };
 const currenciesConfig: AppConfig['currencies'] = {
   [WebbCurrencyId.EDG]: {
-    name: 'Edgeware token',
-    symbol: 'EDG',
+    addresses: new Map(),
     color: '',
-    id: WebbCurrencyId.EDG,
-    type: CurrencyType.ORML,
-    role: CurrencyRole.Wrappable,
     icon: undefined,
-    addresses: new Map()
+    id: WebbCurrencyId.EDG,
+    name: 'Edgeware token',
+    role: CurrencyRole.Wrappable,
+    symbol: 'EDG',
+    type: CurrencyType.ORML
   },
   [WebbCurrencyId.TEDG]: {
-    name: 'Edgeware testnet token',
-    symbol: 'tEDG',
+    addresses: new Map(),
     color: '',
-    id: WebbCurrencyId.TEDG,
-    type: CurrencyType.ORML,
-    role: CurrencyRole.Wrappable,
     icon: undefined,
-    addresses: new Map()
+    id: WebbCurrencyId.TEDG,
+    name: 'Edgeware testnet token',
+    role: CurrencyRole.Wrappable,
+    symbol: 'tEDG',
+    type: CurrencyType.ORML
   },
   [WebbCurrencyId.ETH]: {
-    name: 'Ethereum',
-    symbol: 'ETH',
-    color: '',
-    id: WebbCurrencyId.ETH,
-    type: CurrencyType.NATIVE,
-    role: CurrencyRole.Wrappable,
-    icon: undefined,
     addresses: new Map([
       [InternalChainId.Ropsten, zeroAddress],
       [InternalChainId.Rinkeby, zeroAddress],
@@ -354,52 +347,51 @@ const currenciesConfig: AppConfig['currencies'] = {
       [InternalChainId.ArbitrumTestnet, zeroAddress],
       [InternalChainId.HermesLocalnet, zeroAddress],
       [InternalChainId.AthenaLocalnet, zeroAddress]
-    ])
+    ]),
+    color: '',
+    icon: undefined,
+    id: WebbCurrencyId.ETH,
+    name: 'Ethereum',
+    role: CurrencyRole.Wrappable,
+    symbol: 'ETH',
+    type: CurrencyType.NATIVE
   },
   [WebbCurrencyId.ONE]: {
-    name: 'Harmony',
-    symbol: 'ONE',
-    color: '',
-    id: WebbCurrencyId.ONE,
-    type: CurrencyType.NATIVE,
-    role: CurrencyRole.Wrappable,
-    icon: undefined,
     addresses: new Map([
       [InternalChainId.HarmonyMainnet0, zeroAddress],
       [InternalChainId.HarmonyTestnet0, zeroAddress],
       [InternalChainId.HarmonyTestnet1, zeroAddress]
-    ])
+    ]),
+    color: '',
+    icon: undefined,
+    id: WebbCurrencyId.ONE,
+    name: 'Harmony',
+    role: CurrencyRole.Wrappable,
+    symbol: 'ONE',
+    type: CurrencyType.NATIVE
   },
   [WebbCurrencyId.WEBB]: {
     // IS THIS AN EVM CHAIN?
-    name: 'WEBB',
-    symbol: 'WEBB',
+    addresses: new Map([[InternalChainId.WebbDevelopment, ZERO]]),
     color: '',
-    id: WebbCurrencyId.WEBB,
-    type: CurrencyType.ORML,
-    role: CurrencyRole.Governable,
     icon: undefined,
-    addresses: new Map([[InternalChainId.WebbDevelopment, ZERO]])
+    id: WebbCurrencyId.WEBB,
+    name: 'WEBB',
+    role: CurrencyRole.Governable,
+    symbol: 'WEBB',
+    type: CurrencyType.ORML
   },
   [WebbCurrencyId.SDN]: {
-    name: 'Shiden',
-    symbol: 'SDN',
+    addresses: new Map([[InternalChainId.Shiden, zeroAddress]]),
     color: '',
-    id: WebbCurrencyId.SDN,
-    type: CurrencyType.NATIVE,
-    role: CurrencyRole.Wrappable,
     icon: undefined,
-    addresses: new Map([[InternalChainId.Shiden, zeroAddress]])
+    id: WebbCurrencyId.SDN,
+    name: 'Shiden',
+    role: CurrencyRole.Wrappable,
+    symbol: 'SDN',
+    type: CurrencyType.NATIVE
   },
   [WebbCurrencyId.WETH]: {
-    name: 'Wrapped Ethereum',
-    symbol: 'WETH',
-    color: '',
-    id: WebbCurrencyId.WETH,
-    type: CurrencyType.ERC20,
-    role: CurrencyRole.Wrappable,
-    imageUrl: 'https://www.polysa.finance/images/farms/weth.png',
-    icon: undefined,
     addresses: new Map([
       [InternalChainId.Ropsten, '0xc778417E063141139Fce010982780140Aa0cD5Ab'],
       [InternalChainId.Rinkeby, '0xc778417E063141139Fce010982780140Aa0cD5Ab'],
@@ -408,26 +400,27 @@ const currenciesConfig: AppConfig['currencies'] = {
       [InternalChainId.OptimismTestnet, '0xbC6F6b680bc61e30dB47721c6D1c5cde19C1300d'],
       [InternalChainId.ArbitrumTestnet, '0xEBbc3452Cc911591e4F18f3b36727Df45d6bd1f9'],
       [InternalChainId.PolygonTestnet, '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889']
-    ])
+    ]),
+    color: '',
+    icon: undefined,
+    id: WebbCurrencyId.WETH,
+    imageUrl: 'https://www.polysa.finance/images/farms/weth.png',
+    name: 'Wrapped Ethereum',
+    role: CurrencyRole.Wrappable,
+    symbol: 'WETH',
+    type: CurrencyType.ERC20
   },
   [WebbCurrencyId.MATIC]: {
-    name: 'Polygon',
-    symbol: 'MATIC',
+    addresses: new Map([[InternalChainId.PolygonTestnet, zeroAddress]]),
     color: '',
-    id: WebbCurrencyId.MATIC,
-    type: CurrencyType.NATIVE,
-    role: CurrencyRole.Wrappable,
     icon: undefined,
-    addresses: new Map([[InternalChainId.PolygonTestnet, zeroAddress]])
+    id: WebbCurrencyId.MATIC,
+    name: 'Polygon',
+    role: CurrencyRole.Wrappable,
+    symbol: 'MATIC',
+    type: CurrencyType.NATIVE
   },
   [WebbCurrencyId.webbWETH]: {
-    name: 'webbETH-test-1',
-    symbol: 'webbWETH',
-    color: '',
-    id: WebbCurrencyId.webbWETH,
-    type: CurrencyType.ERC20,
-    role: CurrencyRole.Governable,
-    icon: undefined,
     addresses: new Map([
       [InternalChainId.Ropsten, '0x105779076d17FAe5EAADF010CA677475549F49E4'],
       [InternalChainId.Rinkeby, '0x4e7D4BEe028655F2865d9D147cF7B609c516d39C'],
@@ -435,33 +428,40 @@ const currenciesConfig: AppConfig['currencies'] = {
       [InternalChainId.PolygonTestnet, '0x50A7b748F3C50F808a289cA041E48834A41A6d95'],
       [InternalChainId.OptimismTestnet, '0xEAF873F1F6c91fEf73d4839b5fC7954554BBE518'],
       [InternalChainId.ArbitrumTestnet, '0xD6F1E78B5F1Ebf8fF5a60C9d52eabFa73E5c5220']
-    ])
+    ]),
+    color: '',
+    icon: undefined,
+    id: WebbCurrencyId.webbWETH,
+    name: 'webbETH-test-1',
+    role: CurrencyRole.Governable,
+    symbol: 'webbWETH',
+    type: CurrencyType.ERC20
   },
   [WebbCurrencyId.DEV]: {
-    name: 'Development Token',
-    symbol: 'DEV',
-    color: '',
-    id: WebbCurrencyId.DEV,
-    type: CurrencyType.ERC20,
-    role: CurrencyRole.Wrappable,
-    icon: undefined,
     addresses: new Map([
       [InternalChainId.HermesLocalnet, '0x2946259E0334f33A064106302415aD3391BeD384'],
       [InternalChainId.AthenaLocalnet, '0xF2E246BB76DF876Cef8b38ae84130F4F55De395b']
-    ])
+    ]),
+    color: '',
+    icon: undefined,
+    id: WebbCurrencyId.DEV,
+    name: 'Development Token',
+    role: CurrencyRole.Wrappable,
+    symbol: 'DEV',
+    type: CurrencyType.ERC20
   },
   [WebbCurrencyId.webbDEV]: {
-    name: 'Webb Development Token',
-    symbol: 'webbDEV',
-    color: '',
-    id: WebbCurrencyId.webbDEV,
-    type: CurrencyType.ERC20,
-    role: CurrencyRole.Governable,
-    icon: undefined,
     addresses: new Map([
       [InternalChainId.HermesLocalnet, '0xD24260C102B5D128cbEFA0F655E5be3c2370677C'],
       [InternalChainId.AthenaLocalnet, '0xD30C8839c1145609E564b986F667b273Ddcb8496']
-    ])
+    ]),
+    color: '',
+    icon: undefined,
+    id: WebbCurrencyId.webbDEV,
+    name: 'Webb Development Token',
+    role: CurrencyRole.Governable,
+    symbol: 'webbDEV',
+    type: CurrencyType.ERC20
   }
 };
 
@@ -469,114 +469,114 @@ const mixersConfig: AppConfig['mixers'] = {
   [InternalChainId.Edgeware]: {
     tornMixers: [
       {
-        size: 10000,
         address: '0x2B9A7085Afba278BEc6bBfFb399A3C042ED05046',
-        symbol: 'EDG',
-        createdAtBlock: 8828000
+        createdAtBlock: 8828000,
+        size: 10000,
+        symbol: 'EDG'
       }
     ]
   },
   [InternalChainId.EdgewareTestNet]: {
     tornMixers: [
       {
-        size: 10,
         address: '0xf0EA8Fa17daCF79434d10C51941D8Fc24515AbE3',
-        symbol: 'tEDG',
-        createdAtBlock: 299740
+        createdAtBlock: 299740,
+        size: 10,
+        symbol: 'tEDG'
       },
       {
-        size: 100,
         address: '0xc0d863EE313636F067dCF89e6ea904AD5f8DEC65',
-        symbol: 'tEDG',
-        createdAtBlock: 299740
+        createdAtBlock: 299740,
+        size: 100,
+        symbol: 'tEDG'
       },
       {
-        size: 1000,
         address: '0xc7c6152214d0Db4e161Fa67fB62811Be7326834A',
-        symbol: 'tEDG',
-        createdAtBlock: 299740
+        createdAtBlock: 299740,
+        size: 1000,
+        symbol: 'tEDG'
       },
       {
-        size: 10000,
         address: '0xf0290d80880E3c59512e454E303FcD48f431acA3',
-        symbol: 'tEDG',
-        createdAtBlock: 299740
+        createdAtBlock: 299740,
+        size: 10000,
+        symbol: 'tEDG'
       }
     ]
   },
   [InternalChainId.Rinkeby]: {
     tornMixers: [
       {
-        size: 0.1,
         address: '0x626FEc5Ffa7Bf1EE8CEd7daBdE545630473E3ABb',
-        symbol: 'ETH',
-        createdAtBlock: 8896800 // should be hardcoded to deployed block number
+        createdAtBlock: 8896800, // should be hardcoded to deployed block number
+        size: 0.1,
+        symbol: 'ETH'
       },
       {
-        size: 1,
         address: '0x979cBd4917e81447983ef87591B9E1ab21727a61',
-        symbol: 'ETH',
-        createdAtBlock: 8896800
+        createdAtBlock: 8896800,
+        size: 1,
+        symbol: 'ETH'
       }
     ]
   },
   [InternalChainId.HarmonyTestnet1]: {
     tornMixers: [
       {
-        size: 100,
         address: '0x7cd1F52e5EEdf753e99D945276a725CE533AaD1a',
-        symbol: 'ONE',
-        createdAtBlock: 12040000
+        createdAtBlock: 12040000,
+        size: 100,
+        symbol: 'ONE'
       },
       {
-        size: 1000,
         address: '0xD7f9BB9957100310aD397D2bA31771D939BD4731',
-        symbol: 'ONE',
-        createdAtBlock: 12892487
+        createdAtBlock: 12892487,
+        size: 1000,
+        symbol: 'ONE'
       },
       {
-        size: 10000,
         address: '0xeE2eB8F142e48e5D1bDD34e0924Ed3B4aa0d4222',
-        symbol: 'ONE',
-        createdAtBlock: 12892648
+        createdAtBlock: 12892648,
+        size: 10000,
+        symbol: 'ONE'
       },
       {
-        size: 100000,
         address: '0x7cd173094eF78FFAeDee4e14576A73a79aA716ac',
-        symbol: 'ONE',
-        createdAtBlock: 12892840
+        createdAtBlock: 12892840,
+        size: 100000,
+        symbol: 'ONE'
       }
     ]
   },
   [InternalChainId.HarmonyMainnet0]: {
     tornMixers: [
       {
-        size: 100,
         address: '0x2B9A7085Afba278BEc6bBfFb399A3C042ED05046',
-        symbol: 'ONE',
-        createdAtBlock: 18796580
+        createdAtBlock: 18796580,
+        size: 100,
+        symbol: 'ONE'
       },
       {
-        size: 10000,
         address: '0x4b271E1E67B3eE56467599cd46f1F74A5a369c72',
-        symbol: 'ONE',
-        createdAtBlock: 18796580
+        createdAtBlock: 18796580,
+        size: 10000,
+        symbol: 'ONE'
       }
     ]
   },
   [InternalChainId.Shiden]: {
     tornMixers: [
       {
-        size: 10,
         address: '0x2B9A7085Afba278BEc6bBfFb399A3C042ED05046',
-        symbol: 'SDN',
-        createdAtBlock: 566000
+        createdAtBlock: 566000,
+        size: 10,
+        symbol: 'SDN'
       },
       {
-        size: 1000,
         address: '0x548555a3275B6fadD5d2B9740a7655cB7f856148',
-        symbol: 'SDN',
-        createdAtBlock: 568000
+        createdAtBlock: 568000,
+        size: 1000,
+        symbol: 'SDN'
       }
     ]
   }

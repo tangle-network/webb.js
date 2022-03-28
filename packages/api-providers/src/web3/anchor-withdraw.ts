@@ -107,11 +107,11 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
   async getRelayersByNote (evmNote: Note) {
     return this.inner.relayingManager.getRelayer({
       baseOn: 'evm',
-      chainId: Number(evmNote.note.targetChainId),
       bridgeSupport: {
         amount: Number(evmNote.note.amount),
         tokenSymbol: evmNote.note.tokenSymbol
-      }
+      },
+      chainId: Number(evmNote.note.targetChainId)
     });
   }
 
@@ -137,16 +137,14 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
     const input = {
       destinationChainId: activeChain,
-      secret: deposit.secret,
-      nullifier: deposit.nullifier,
-      nullifierHash: deposit.nullifierHash,
-
-      // Todo change this to the RELAYER address
-      relayer: account.address,
-      recipient: account.address,
-
       fee: 0,
-      refund: 0
+      nullifier: deposit.nullifier,
+      // Todo change this to the RELAYER address
+      nullifierHash: deposit.nullifierHash,
+      recipient: account.address,
+      refund: 0,
+      relayer: account.address,
+      secret: deposit.secret
     };
 
     logger.trace('input for zkp', input);
@@ -276,12 +274,12 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
     // get relayers for the source chain
     const sourceRelayers = this.inner.relayingManager.getRelayer({
-      chainId: chainTypeIdToInternalId(parseChainIdType(Number(note.sourceChainId))),
       baseOn: 'evm',
       bridgeSupport: {
         amount: Number(note.amount),
         tokenSymbol: note.tokenSymbol
-      }
+      },
+      chainId: chainTypeIdToInternalId(parseChainIdType(Number(note.sourceChainId)))
     });
 
     let leaves: string[] = [];
@@ -343,9 +341,9 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       this.inner.notificationHandler({
         description: 'Withdraw cancelled',
         key: 'mixer-withdraw-evm',
+        level: 'error',
         message: 'bridge:withdraw',
-        name: 'Transaction',
-        level: 'error'
+        name: 'Transaction'
       });
       this.emit('stateChange', WithdrawState.Ideal);
 
@@ -363,14 +361,14 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       logger.log('withdrawing through relayer');
       const input: ZKPWebbAnchorInputWithoutMerkle = {
         destinationChainId: Number(note.targetChainId),
-        secret: sourceDeposit.secret,
+        fee: 0,
         nullifier: sourceDeposit.nullifier,
         nullifierHash: sourceDeposit.nullifierHash,
 
-        relayer: String(activeRelayer?.beneficiary ? activeRelayer?.beneficiary : activeRelayer?.account!),
         recipient: recipient,
-        fee: 0,
-        refund: 0
+        refund: 0,
+        relayer: String(activeRelayer?.beneficiary ? activeRelayer?.beneficiary : activeRelayer?.account!),
+        secret: sourceDeposit.secret
       };
 
       let zkp;
@@ -384,9 +382,9 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
         this.inner.notificationHandler({
           description: 'Deposit not yet available',
           key: 'mixer-withdraw-evm',
+          level: 'error',
           message: 'bridge:withdraw',
-          name: 'Transaction',
-          level: 'error'
+          name: 'Transaction'
         });
 
         return '';
@@ -409,21 +407,21 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
       const chainInfo = {
         baseOn: 'evm' as RelayerCMDBase,
-        name: chainIdToRelayerName(destInternalId),
         contractAddress: destContractAddress,
-        endpoint: ''
+        endpoint: '',
+        name: chainIdToRelayerName(destInternalId)
       };
 
       const tx = relayedWithdraw.generateWithdrawRequest<typeof chainInfo, 'anchorRelayTx'>(
         chainInfo,
         `0x${proofBytes}`,
         {
-          fee: bufferToFixed(zkp.input.fee),
-          nullifierHash: bufferToFixed(zkp.input.nullifierHash),
           chain: chainInfo.name,
           contract: chainInfo.contractAddress,
-          refreshCommitment: '0x0000000000000000000000000000000000000000000000000000000000000000',
+          fee: bufferToFixed(zkp.input.fee),
+          nullifierHash: bufferToFixed(zkp.input.nullifierHash),
           recipient: zkp.input.recipient,
+          refreshCommitment: '0x0000000000000000000000000000000000000000000000000000000000000000',
           refund: bufferToFixed(zkp.input.refund),
           relayer: zkp.input.relayer,
           roots: relayerRoots
@@ -445,9 +443,9 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
             this.inner.notificationHandler({
               description: 'Withdraw success',
               key: 'mixer-withdraw-evm',
+              level: 'success',
               message: 'bridge:withdraw',
-              name: 'Transaction',
-              level: 'success'
+              name: 'Transaction'
             });
 
             break;
@@ -458,9 +456,9 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
             this.inner.notificationHandler({
               description: message || 'Withdraw failed',
               key: 'mixer-withdraw-evm',
+              level: 'error',
               message: 'bridge:withdraw',
-              name: 'Transaction',
-              level: 'error'
+              name: 'Transaction'
             });
 
             break;
@@ -486,15 +484,15 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
         const input = {
           destinationChainId: Number(note.targetChainId),
-          secret: sourceDeposit.secret,
+          fee: 0,
           nullifier: sourceDeposit.nullifier,
           nullifierHash: sourceDeposit.nullifierHash,
           // Todo change this to the realyer address
-          relayer: account.address,
-          recipient: recipient,
 
-          fee: 0,
-          refund: 0
+          recipient: recipient,
+          refund: 0,
+          relayer: account.address,
+          secret: sourceDeposit.secret
         };
 
         let zkpResults;
@@ -508,9 +506,9 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
           this.inner.notificationHandler({
             description: 'Deposit not yet available',
             key: 'mixer-withdraw-evm',
+            level: 'error',
             message: 'bridge:withdraw',
-            name: 'Transaction',
-            level: 'error'
+            name: 'Transaction'
           });
 
           return '';
@@ -536,13 +534,13 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       } catch (e) {
         this.emit('stateChange', WithdrawState.Ideal);
         this.inner.notificationHandler({
+          description: (e as any)?.code === 4001 ? 'Withdraw rejected' : 'Withdraw failed',
+          key: 'bridge-withdraw-evm',
+          level: 'error',
           message: `Bridge ${bridgeCurrency
             ?.getChainIds()
             .map((id) => getEVMChainNameFromInternal(this.config, id))
             .join('-')}:withdraw`,
-          description: (e as any)?.code === 4001 ? 'Withdraw rejected' : 'Withdraw failed',
-          key: 'bridge-withdraw-evm',
-          level: 'error',
           name: 'Transaction'
         });
 
@@ -551,13 +549,13 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     }
 
     this.inner.notificationHandler({
+      description: 'Withdraw done',
+      key: 'bridge-withdraw-evm',
+      level: 'success',
       message: `Bridge ${bridgeCurrency
         ?.getChainIds()
         .map((id) => getEVMChainNameFromInternal(this.config, id))
         .join('-')}:withdraw`,
-      description: 'Withdraw done',
-      key: 'bridge-withdraw-evm',
-      level: 'success',
       name: 'Transaction'
     });
 

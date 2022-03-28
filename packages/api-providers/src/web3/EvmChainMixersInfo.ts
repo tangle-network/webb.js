@@ -27,10 +27,10 @@ export class EvmChainMixersInfo {
 
     return tokenMixers.map((contract) => {
       return {
-        id: contract.address,
-        title: `${contract.size} ${contract.symbol}`,
         amount: contract.size,
-        asset: contract.symbol
+        asset: contract.symbol,
+        id: contract.address,
+        title: `${contract.size} ${contract.symbol}`
       };
     });
   }

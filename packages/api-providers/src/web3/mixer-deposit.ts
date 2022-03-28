@@ -19,16 +19,16 @@ export class Web3MixerDeposit extends MixerDeposit<WebbWeb3Provider, DepositPayl
     const evmChainId = parseChainIdType(chainId).chainId;
 
     this.inner.notificationHandler({
-      name: 'Transaction',
-      key: 'web3-mixer-deposit',
-      level: 'loading',
-      description: 'Depositing',
       data: {
-        chain: getEVMChainName(this.inner.config, evmChainId),
         amount: String(Number(depositPayload.note.amount)),
+        chain: getEVMChainName(this.inner.config, evmChainId),
         currency: depositPayload.note.tokenSymbol
       },
-      message: 'mixer:deposit'
+      description: 'Depositing',
+      key: 'web3-mixer-deposit',
+      level: 'loading',
+      message: 'mixer:deposit',
+      name: 'Transaction'
     });
     const [deposit, amount] = params;
     const providerEvmChainId = await this.inner.getChainId();
@@ -40,28 +40,28 @@ export class Web3MixerDeposit extends MixerDeposit<WebbWeb3Provider, DepositPayl
     try {
       await contract.deposit(deposit.commitment);
       this.inner.notificationHandler({
-        name: 'Transaction',
+        description: 'Deposit succeed',
         key: 'web3-mixer-deposit',
         level: 'success',
-        description: 'Deposit succeed',
-        message: 'mixer:deposit'
+        message: 'mixer:deposit',
+        name: 'Transaction'
       });
     } catch (e) {
       if ((e as any)?.code === 4001) {
         this.inner.notificationHandler({
-          name: 'Transaction',
+          description: 'User Rejected Deposit',
           key: 'web3-mixer-deposit',
           level: 'error',
-          description: 'User Rejected Deposit',
-          message: 'mixer:deposit'
+          message: 'mixer:deposit',
+          name: 'Transaction'
         });
       } else {
         this.inner.notificationHandler({
-          name: 'Transaction',
+          description: 'Deposit Failed',
           key: 'web3-mixer-deposit',
           level: 'error',
-          description: 'Deposit Failed',
-          message: 'mixer:deposit'
+          message: 'mixer:deposit',
+          name: 'Transaction'
         });
       }
     }
@@ -82,21 +82,21 @@ export class Web3MixerDeposit extends MixerDeposit<WebbWeb3Provider, DepositPayl
     const noteChain = computeChainIdType(ChainType.EVM, chainId);
     const secrets = deposit.preimage;
     const noteInput: NoteGenInput = {
-      protocol: 'mixer',
+      amount: String(depositSize),
+      backend: 'Circom',
+      curve: 'Bn254',
+      denomination: '18',
       exponentiation: '5',
-      width: '3',
-      targetChain: noteChain.toString(),
+      hashFunction: 'Poseidon',
+      protocol: 'mixer',
+      secrets: u8aToHex(secrets),
       sourceChain: noteChain.toString(),
       sourceIdentifyingData: mixerAddress,
+      targetChain: noteChain.toString(),
       targetIdentifyingData: mixerAddress,
-      amount: String(depositSize),
-      denomination: '18',
-      hashFunction: 'Poseidon',
-      curve: 'Bn254',
-      backend: 'Circom',
-      version: 'v2',
       tokenSymbol: mixerInfo.symbol,
-      secrets: u8aToHex(secrets)
+      version: 'v2',
+      width: '3'
     };
     const note = await Note.generateNote(noteInput);
 

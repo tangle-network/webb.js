@@ -153,37 +153,37 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
       const provingKey = await fetchSubstrateProvingKey();
       const isValidRelayer = Boolean(activeRelayer && activeRelayer.beneficiary);
       const proofInput: ProvingManagerSetupInput = {
+        fee: 0,
+        leafIndex,
         leaves,
         note,
-        leafIndex,
-        refund: 0,
-        fee: 0,
+        provingKey,
         recipient: recipientAccountHex.replace('0x', ''),
-        relayer: relayerAccountHex.replace('0x', ''),
-        provingKey
+        refund: 0,
+        relayer: relayerAccountHex.replace('0x', '')
       };
 
       if (isValidRelayer) {
         this.inner.notificationHandler({
-          level: 'loading',
-          name: 'Transaction',
           description: `Withdraw through ${activeRelayer!.endpoint} in progress`,
+          key: 'mixer-withdraw-sub',
+          level: 'loading',
           message: 'mixerBn254:withdraw',
-          key: 'mixer-withdraw-sub'
+          name: 'Transaction'
         });
       }
 
       const zkProofMetadata = await pm.prove(proofInput);
 
       const withdrawProof: WithdrawProof = {
-        id: String(treeId),
-        proofBytes: `0x${zkProofMetadata.proof}` as any,
-        root: `0x${zkProofMetadata.root}`,
-        nullifierHash: `0x${zkProofMetadata.nullifierHash}`,
-        recipient: recipient,
-        relayer: relayerAccountId,
         fee: 0,
-        refund: 0
+        id: String(treeId),
+        nullifierHash: `0x${zkProofMetadata.nullifierHash}`,
+        proofBytes: `0x${zkProofMetadata.proof}` as any,
+        recipient: recipient,
+        refund: 0,
+        relayer: relayerAccountId,
+        root: `0x${zkProofMetadata.root}`
       };
 
       // withdraw throw relayer
@@ -203,12 +203,12 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
           {
             chain: 'localnode',
             fee: withdrawProof.fee,
+            id: Number(treeId),
             nullifierHash: Array.from(hexToU8a(withdrawProof.nullifierHash)),
             recipient: withdrawProof.recipient,
             refund: withdrawProof.refund,
-            root: Array.from(hexToU8a(withdrawProof.root)),
             relayer: withdrawProof.relayer,
-            id: Number(treeId)
+            root: Array.from(hexToU8a(withdrawProof.root))
           }
         );
 
@@ -226,11 +226,11 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
               this.emit('stateChange', WithdrawState.Ideal);
 
               this.inner.notificationHandler({
-                level: 'success',
-                name: 'Transaction',
                 description: `TX hash: ${transactionString(message || '')}`,
+                key: 'mixer-withdraw-sub',
+                level: 'success',
                 message: 'mixerBn254:withdraw',
-                key: 'mixer-withdraw-sub'
+                name: 'Transaction'
               });
 
               break;
@@ -239,23 +239,23 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
               this.emit('stateChange', WithdrawState.Ideal);
 
               this.inner.notificationHandler({
-                level: 'success',
-                name: 'Transaction',
                 description: message || 'Withdraw failed',
+                key: 'mixer-withdraw-sub',
+                level: 'success',
                 message: 'mixerBn254:withdraw',
-                key: 'mixer-withdraw-sub'
+                name: 'Transaction'
               });
               break;
           }
         });
 
         this.inner.notificationHandler({
+          description: 'Sending TX to relayer',
+          key: 'mixer-withdraw-sub',
           level: 'loading',
           message: 'mixerBn254:withdraw',
-          description: 'Sending TX to relayer',
-          name: 'Transaction',
 
-          key: 'mixer-withdraw-sub'
+          name: 'Transaction'
         });
 
         relayerMixerTx.send(relayerWithdrawPayload);
@@ -275,8 +275,8 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
 
       const tx = this.inner.txBuilder.build(
         {
-          section: 'mixerBn254',
-          method: 'withdraw'
+          method: 'withdraw',
+          section: 'mixerBn254'
         },
         [
           withdrawProof.id,

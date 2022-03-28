@@ -42,16 +42,16 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       const sourceInternalId = evmIdIntoInternalChainId(sourceEvmId);
 
       this.inner.notificationHandler({
+        data: {
+          amount: note.amount,
+          chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
+          currency: currency.view.name
+        },
+        description: 'Depositing',
         key: 'bridge-deposit',
         level: 'loading',
-        name: 'Transaction',
-        description: 'Depositing',
         message: `bridge:${depositPayload.params[2] ? 'wrap and deposit' : 'deposit'}`,
-        data: {
-          chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
-          amount: note.amount,
-          currency: currency.view.name
-        }
+        name: 'Transaction'
       });
 
       const anchors = await this.bridgeApi.getAnchors();
@@ -78,11 +78,11 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
         if (requiredApproval) {
           this.inner.notificationHandler({
             description: 'Waiting for token approval',
-            persist: true,
+            key: 'waiting-approval',
             level: 'info',
-            name: 'Approval',
             message: 'Waiting for token approval',
-            key: 'waiting-approval'
+            name: 'Approval',
+            persist: true
           });
           const tokenInstance = await ERC20Factory.connect(
             depositPayload.params[2],
@@ -101,29 +101,29 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
           await contract.wrapAndDeposit(commitment, depositPayload.params[2]);
 
           this.inner.notificationHandler({
+            data: {
+              amount: note.amount,
+              chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
+              currency: currency.view.name
+            },
+            description: 'Depositing',
             key: 'bridge-deposit',
             level: 'success',
-            name: 'Transaction',
-            description: 'Depositing',
             message: `${currency.view.name}:wrap and deposit`,
-            data: {
-              chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
-              amount: note.amount,
-              currency: currency.view.name
-            }
+            name: 'Transaction'
           });
         } else {
           this.inner.notificationHandler({
+            data: {
+              amount: note.amount,
+              chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
+              currency: currency.view.name
+            },
+            description: 'Not enough token balance',
             key: 'bridge-deposit',
             level: 'error',
-            name: 'Transaction',
-            description: 'Not enough token balance',
             message: `${currency.view.name}:wrap and deposit`,
-            data: {
-              chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
-              amount: note.amount,
-              currency: currency.view.name
-            }
+            name: 'Transaction'
           });
         }
 
@@ -134,11 +134,11 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
         if (requiredApproval) {
           this.inner.notificationHandler({
             description: 'Waiting for token approval',
-            persist: true,
+            key: 'waiting-approval',
             level: 'info',
-            name: 'Approval',
             message: 'Waiting for token approval',
-            key: 'waiting-approval'
+            name: 'Approval',
+            persist: true
           });
           const tokenInstance = await contract.getWebbToken();
           const tx = await tokenInstance.approve(contract.inner.address, await contract.denomination);
@@ -152,29 +152,29 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
         if (enoughBalance) {
           await contract.deposit(commitment);
           this.inner.notificationHandler({
+            data: {
+              amount: note.amount,
+              chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
+              currency: currency.view.name
+            },
+            description: 'Depositing',
             key: 'bridge-deposit',
             level: 'success',
-            name: 'Transaction',
-            description: 'Depositing',
             message: `${currency.view.name}:deposit`,
-            data: {
-              chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
-              amount: note.amount,
-              currency: currency.view.name
-            }
+            name: 'Transaction'
           });
         } else {
           this.inner.notificationHandler({
+            data: {
+              amount: note.amount,
+              chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
+              currency: currency.view.name
+            },
+            description: 'Not enough token balance',
             key: 'bridge-deposit',
             level: 'error',
-            name: 'Transaction',
-            description: 'Not enough token balance',
             message: `${currency.view.name}deposit`,
-            data: {
-              chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
-              amount: note.amount,
-              currency: currency.view.name
-            }
+            name: 'Transaction'
           });
         }
       }
@@ -184,20 +184,20 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       if ((e)?.code === 4001) {
         this.inner.notificationHandler.remove('waiting-approval');
         this.inner.notificationHandler({
+          description: 'user rejected deposit',
           key: 'bridge-deposit',
           level: 'error',
-          name: 'Transaction',
-          description: 'user rejected deposit',
-          message: `${currency.view.name}:deposit`
+          message: `${currency.view.name}:deposit`,
+          name: 'Transaction'
         });
       } else {
         this.inner.notificationHandler.remove('waiting-approval');
         this.inner.notificationHandler({
+          description: 'Deposit Transaction Failed',
           key: 'bridge-deposit',
           level: 'error',
-          name: 'Transaction',
-          description: 'Deposit Transaction Failed',
-          message: `${currency.view.name}:deposit`
+          message: `${currency.view.name}:deposit`,
+          name: 'Transaction'
         });
       }
     }
@@ -209,10 +209,10 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
 
     if (currency) {
       return anchors.map((anchor) => ({
-        id: `Bridge=${anchor.amount}@${currency.view.name}`,
-        title: `${anchor.amount} ${currency.view.name}`,
         amount: Number(anchor.amount),
-        asset: String(currency.id)
+        asset: String(currency.id),
+        id: `Bridge=${anchor.amount}@${currency.view.name}`,
+        title: `${anchor.amount} ${currency.view.name}`
       }));
     }
 
@@ -295,21 +295,21 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
     const amount = String(anchorId).replace('Bridge=', '').split('@')[0];
 
     const noteInput: NoteGenInput = {
+      amount: amount,
+      backend: 'Circom',
+      curve: 'Bn254',
+      denomination: '18',
       exponentiation: '5',
-      width: '4',
+      hashFunction: 'Poseidon',
       protocol: 'anchor',
-      targetChain: destChainId.toString(),
+      secrets: `${bufferToFixed(destChainId, 6).substring(2)}:${deposit.nullifier}:${deposit.secret}`,
       sourceChain: sourceChainId.toString(),
       sourceIdentifyingData: srcAddress,
+      targetChain: destChainId.toString(),
       targetIdentifyingData: target,
-      amount: amount,
-      denomination: '18',
-      hashFunction: 'Poseidon',
-      curve: 'Bn254',
-      backend: 'Circom',
-      version: 'v2',
       tokenSymbol: tokenSymbol,
-      secrets: `${bufferToFixed(destChainId, 6).substring(2)}:${deposit.nullifier}:${deposit.secret}`
+      version: 'v2',
+      width: '4'
     };
 
     logger.info(`noteInput to generateNote: ${noteInput}`);

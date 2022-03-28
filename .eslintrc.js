@@ -40,7 +40,6 @@ module.exports = {
     '@typescript-eslint/restrict-plus-operands': 0,
     '@typescript-eslint/ban-ts-comment': 0,
     'header/header': 0,
-    'sort-keys': 0,
     "@typescript-eslint/require-await": 0,
     "@typescript-eslint/no-var-requires": 0,
   }

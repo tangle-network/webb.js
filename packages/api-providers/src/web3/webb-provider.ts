@@ -54,23 +54,19 @@ export class WebbWeb3Provider
     });
     this.connectedMixers = new EvmChainMixersInfo(this.config, chainId);
     this.methods = {
-      wrapUnwrap: {
-        core: {
-          enabled: true,
-          inner: new Web3WrapUnwrap(this)
-        }
-      },
       anchor: {
         core: null,
         deposit: {
-          inner: new Web3AnchorDeposit(this),
-          enabled: true
+          enabled: true,
+          inner: new Web3AnchorDeposit(this)
         },
         withdraw: {
-          inner: new Web3AnchorWithdraw(this),
-          enabled: true
+          enabled: true,
+          inner: new Web3AnchorWithdraw(this)
         }
       },
+      anchorApi: new Web3AnchorApi(this, this.config.bridgeByAsset),
+      chainQuery: new Web3ChainQuery(this),
       mixer: {
         deposit: {
           enabled: true,
@@ -81,8 +77,12 @@ export class WebbWeb3Provider
           inner: new Web3MixerWithdraw(this)
         }
       },
-      chainQuery: new Web3ChainQuery(this),
-      anchorApi: new Web3AnchorApi(this, this.config.bridgeByAsset)
+      wrapUnwrap: {
+        core: {
+          enabled: true,
+          inner: new Web3WrapUnwrap(this)
+        }
+      }
     };
   }
 
@@ -111,8 +111,8 @@ export class WebbWeb3Provider
   async destroy (): Promise<void> {
     await this.endSession();
     this.subscriptions = {
-      providerUpdate: [],
-      interactiveFeedback: []
+      interactiveFeedback: [],
+      providerUpdate: []
     };
   }
 
@@ -233,12 +233,12 @@ export class WebbWeb3Provider
           await this.web3Provider.addChain({
             chainId: `0x${evmChainId.toString(16)}`,
             chainName: chain.name,
-            rpcUrls: chain.evmRpcUrls!,
             nativeCurrency: {
               decimals: 18,
               name: currency.name,
               symbol: currency.symbol
-            }
+            },
+            rpcUrls: chain.evmRpcUrls!
           });
           // add network will prompt the switch, check evmId again and throw if user rejected
           const newChainId = await this.web3Provider.network;

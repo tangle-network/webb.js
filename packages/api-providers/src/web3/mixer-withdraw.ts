@@ -117,10 +117,10 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
       try {
         this.inner.notificationHandler({
           description: `Relaying withdraw through ${activeRelayer.endpoint}`,
+          key: 'mixer-withdraw-evm',
           level: 'loading',
           message: 'evm-mixer:withdraw',
-          name: 'Transaction',
-          key: 'mixer-withdraw-evm'
+          name: 'Transaction'
         });
 
         logger.info(`Withdrawing through relayer with address ${activeRelayer.endpoint}`);
@@ -133,9 +133,9 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
         logger.trace('Generating the zkp');
         const fees = await activeRelayer.fees(note);
         const zkpInputWithoutMerkleProof = fromDepositIntoZKPTornPublicInputs(deposit, {
+          fee: Number(fees?.totalFees),
           recipient,
-          relayer: activeRelayer.account ?? activeRelayer.beneficiary,
-          fee: Number(fees?.totalFees)
+          relayer: activeRelayer.account ?? activeRelayer.beneficiary
         });
 
         const relayerLeaves = await activeRelayer.getLeaves(chainEvmId.toString(16), mixerInfo.address);
@@ -156,10 +156,10 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
         if (this.cancelToken.cancelled) {
           this.inner.notificationHandler({
             description: 'Withdraw cancelled',
+            key: 'mixer-withdraw-evm',
             level: 'error',
             message: 'evm-mixer:withdraw',
-            name: 'Transaction',
-            key: 'mixer-withdraw-evm'
+            name: 'Transaction'
           });
           this.emit('stateChange', WithdrawState.Ideal);
 
@@ -173,9 +173,9 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
         logger.trace('initialized the withdraw WebSocket');
         const chainInput = {
           baseOn: 'evm' as RelayerCMDBase,
-          name: chainIdToRelayerName(chainId),
           contractAddress: mixerInfo.address,
-          endpoint: ''
+          endpoint: '',
+          name: chainIdToRelayerName(chainId)
         };
         const tx = relayedWithdraw.generateWithdrawRequest<typeof chainInput, 'tornadoRelayTx'>(chainInput, zkp.proof, {
           chain: chainIdToRelayerName(chainId),
@@ -201,10 +201,10 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
               this.emit('stateChange', WithdrawState.Ideal);
               this.inner.notificationHandler({
                 description: 'Withdraw success',
+                key: 'mixer-withdraw-evm',
                 level: 'success',
                 message: 'evm-mixer:withdraw',
-                name: 'Transaction',
-                key: 'mixer-withdraw-evm'
+                name: 'Transaction'
               });
 
               break;
@@ -214,10 +214,10 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
 
               this.inner.notificationHandler({
                 description: message || 'Withdraw failed',
+                key: 'mixer-withdraw-evm',
                 level: 'error',
                 message: 'evm-mixer:withdraw',
-                name: 'Transaction',
-                key: 'mixer-withdraw-evm'
+                name: 'Transaction'
               });
 
               break;
@@ -243,10 +243,10 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
 
         this.inner.notificationHandler({
           description: 'Withdraw failed',
+          key: 'mixer-withdraw-evm',
           level: 'error',
           message: 'evm-mixer:withdraw',
-          name: 'Transaction',
-          key: 'mixer-withdraw-evm'
+          name: 'Transaction'
         });
 
         if ((e as any)?.code === WebbErrorCodes.RelayerMisbehaving) {
@@ -258,10 +258,10 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
 
       this.inner.notificationHandler({
         description: 'Withdraw In Progress',
+        key: 'mixer-withdraw-evm',
         level: 'loading',
         message: 'evm-mixer:withdraw',
-        name: 'Transaction',
-        key: 'mixer-withdraw-evm'
+        name: 'Transaction'
       });
 
       const contract = await this.inner.getContractBySize(Number(evmNote.note.amount), evmNote.note.tokenSymbol);
@@ -305,10 +305,10 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
         if (this.cancelToken.cancelled) {
           this.inner.notificationHandler({
             description: 'Withdraw canceled',
+            key: 'mixer-withdraw-evm',
             level: 'error',
             message: 'evm-mixer:withdraw',
-            name: 'Transaction',
-            key: 'mixer-withdraw-evm'
+            name: 'Transaction'
           });
           this.emit('stateChange', WithdrawState.Ideal);
 
@@ -321,10 +321,10 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
 
         this.inner.notificationHandler({
           description: 'Withdraw success',
+          key: 'mixer-withdraw-evm',
           level: 'success',
           message: 'evm-mixer:withdraw',
-          name: 'Transaction',
-          key: 'mixer-withdraw-evm'
+          name: 'Transaction'
         });
 
         this.emit('stateChange', WithdrawState.Ideal);
@@ -337,10 +337,10 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
         if ((e as any)?.code === 4001) {
           this.inner.notificationHandler({
             description: 'Withdraw Rejected',
+            key: 'mixer-withdraw-evm',
             level: 'error',
             message: 'evm-mixer:withdraw',
-            name: 'Transaction',
-            key: 'mixer-withdraw-evm'
+            name: 'Transaction'
           });
 
           this.emit('stateChange', WithdrawState.Ideal);
@@ -350,10 +350,10 @@ export class Web3MixerWithdraw extends MixerWithdraw<WebbWeb3Provider> {
 
         this.inner.notificationHandler({
           description: 'Withdraw Failed',
+          key: 'mixer-withdraw-evm',
           level: 'error',
           message: 'evm-mixer:withdraw',
-          name: 'Transaction',
-          key: 'mixer-withdraw-evm'
+          name: 'Transaction'
         });
         throw e;
       }
