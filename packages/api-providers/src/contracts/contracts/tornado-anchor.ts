@@ -170,7 +170,7 @@ export class TornadoContract {
 
     // compare root against contract, and store if there is a match
     if (knownRoot) {
-      this.mixersInfo.setMixerStorage(this._contract.address, fetchedLeaves.lastQueriedBlock, [
+      await this.mixersInfo.setMixerStorage(this._contract.address, fetchedLeaves.lastQueriedBlock, [
         ...storedContractInfo.leaves,
         ...fetchedLeaves.newLeaves
       ]);

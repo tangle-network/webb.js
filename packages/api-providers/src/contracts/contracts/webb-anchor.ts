@@ -3,7 +3,7 @@ import { Log } from '@ethersproject/abstract-provider';
 import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, MixerStorage } from '@webb-tools/api-providers/utils';
 import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise';
 import { LoggerService } from '@webb-tools/app-util';
-import { ERC20, ERC20__factory, FixedDepositAnchor__factory } from '@webb-tools/contracts';
+import { ERC20, ERC20__factory as ERC20Factory, FixedDepositAnchor__factory } from '@webb-tools/contracts';
 import { BigNumber, Contract, providers, Signer } from 'ethers';
 import utils from 'web3-utils';
 
@@ -94,7 +94,7 @@ export class AnchorContract {
 
   async getWebbToken (): Promise<ERC20> {
     const tokenAddress = await this._contract.token();
-    const tokenInstance = ERC20__factory.connect(tokenAddress, this.signer);
+    const tokenInstance = ERC20Factory.connect(tokenAddress, this.signer);
 
     return tokenInstance;
   }
@@ -142,13 +142,12 @@ export class AnchorContract {
       if (tokenAddress === zeroAddress) {
         tokenBalance = await this.signer.getBalance();
       } else {
-        const tokenInstance = ERC20__factory.connect(tokenAddress, this.signer);
+        const tokenInstance = ERC20Factory.connect(tokenAddress, this.signer);
 
         tokenBalance = await tokenInstance.balanceOf(userAddress);
       }
-    }
-    // querying for balance of the webbToken
-    else {
+    } else {
+      // Querying for balance of the webbToken
       const tokenInstance = await this.getWebbToken();
 
       tokenBalance = await tokenInstance.balanceOf(userAddress);

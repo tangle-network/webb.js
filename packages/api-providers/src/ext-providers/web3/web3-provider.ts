@@ -171,7 +171,7 @@ export class Web3Provider<T = unknown> {
   }
 
   addToken (addTokenInput: AddToken) {
-    (this._inner.currentProvider as AbstractProvider).request?.({
+    return (this._inner.currentProvider as AbstractProvider).request?.({
       method: 'wallet_watchAsset',
       params: {
         type: 'ERC20', // Initially only supports ERC20, but eventually more!

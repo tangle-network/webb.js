@@ -153,7 +153,7 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       try {
-        await tx.send((result) => {
+        await tx.send(async (result) => {
           const status = result.status;
           const events = result.events.filter(({ event: { section } }) => section === 'system');
 
@@ -181,12 +181,12 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
                 }
 
                 this.isWrapped = true;
-                this.emitWithPayload('failed', message);
+                await this.emitWithPayload('failed', message);
                 reject(message);
               } else if (method === 'ExtrinsicSuccess') {
                 // todo return the TX hash
                 resolve('okay');
-                this.emitWithPayload('finalize', undefined);
+                await this.emitWithPayload('finalize', undefined);
                 this.isWrapped = true;
               }
             }
