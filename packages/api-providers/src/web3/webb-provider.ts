@@ -3,7 +3,6 @@ import {Note} from '@webb-tools/sdk-core';
 import {providers} from 'ethers';
 import {Eth} from 'web3-eth';
 import {Web3WrapUnwrap} from './wrap-unwrap';
-import {Web3BridgeDeposit} from './bridge-deposit';
 import {Web3MixerWithdraw} from './mixer-withdraw';
 import {Web3Accounts, Web3Provider} from '../ext-providers';
 import {Web3MixerDeposit} from './mixer-deposit';
@@ -13,15 +12,15 @@ import {EvmChainMixersInfo} from './EvmChainMixersInfo';
 import {
   AppConfig,
   MixerSize,
-  NotificationHandler,
+  NotificationHandler, Web3AnchorDeposit,
   WebbApiProvider,
   WebbMethods,
   WebbProviderEvents,
   WebbRelayerBuilder
 } from '@webb-tools/api-providers';
-import {Web3BridgeWithdraw} from './bridge-withdraw';
+import {Web3AnchorWithdraw} from './anchor-withdraw';
 import {Web3ChainQuery} from './chain-query';
-import {Web3BridgeApi} from './bridge-api';
+import {Web3AnchorApi} from './anchor-api';
 import {AccountsAdapter} from '../account/Accounts.adapter';
 import {AnchorContract, TornadoContract} from '../contracts/contracts';
 
@@ -66,14 +65,14 @@ export class WebbWeb3Provider
           inner: new Web3WrapUnwrap(this)
         }
       },
-      bridge: {
+      anchor: {
         core: null,
         deposit: {
-          inner: new Web3BridgeDeposit(this),
+          inner: new Web3AnchorDeposit(this),
           enabled: true
         },
         withdraw: {
-          inner: new Web3BridgeWithdraw(this),
+          inner: new Web3AnchorWithdraw(this),
           enabled: true
         }
       },
@@ -88,7 +87,7 @@ export class WebbWeb3Provider
         }
       },
       chainQuery: new Web3ChainQuery(this),
-      bridgeApi: new Web3BridgeApi(this, this.config.bridgeByAsset)
+      anchorApi: new Web3AnchorApi(this, this.config.bridgeByAsset)
     };
   }
 

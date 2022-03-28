@@ -2,7 +2,7 @@ import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { WebbError, WebbErrorCodes } from '../webb-error';
 import { WebbPolkadot } from './webb-provider';
 import { Note, ProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core';
-import {BridgeWithdraw, WithdrawState} from '../abstracts';
+import {AnchorWithdraw, WithdrawState} from '../abstracts';
 import { decodeAddress } from '@polkadot/keyring';
 import { InternalChainId } from '../chains';
 import { LoggerService } from '@webb-tools/app-util';
@@ -20,7 +20,7 @@ export type AnchorWithdrawProof = {
   refreshCommitment: string;
 };
 
-export class PolkadotBridgeWithdraw extends BridgeWithdraw<WebbPolkadot> {
+export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
   async fetchRPCTreeLeaves(treeId: string | number): Promise<Uint8Array[]> {
     logger.trace(`Fetching leaves for tree with id ${treeId}`);
     let done = false;
@@ -68,7 +68,7 @@ export class PolkadotBridgeWithdraw extends BridgeWithdraw<WebbPolkadot> {
       const parseNote = await Note.deserialize(note);
       const depositNote = parseNote.note;
       const amount = parseNote.note.amount;
-      const anchors = await this.inner.methods.bridgeApi.getAnchors();
+      const anchors = await this.inner.methods.anchorApi.getAnchors();
       const anchor = anchors.find((a) => a.amount === amount)!;
       const treeId = anchor.neighbours[InternalChainId.WebbDevelopment] as string;
 

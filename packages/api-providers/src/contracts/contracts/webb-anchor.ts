@@ -18,7 +18,7 @@ import {
 } from '../utils';
 import { generateWitness, proofAndVerify, zeroAddress } from './webb-utils';
 import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo';
-import { BridgeWitnessInput, ZKPWebbInputWithMerkle, ZKPWebbInputWithoutMerkle } from './types';
+import { AnchorWitnessInput, ZKPWebbAnchorInputWithMerkle, ZKPWebbAnchorInputWithoutMerkle } from './types';
 import { MerkleTree, PoseidonHasher } from '../utils/merkle';
 import {anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, MixerStorage} from "@webb-tools/api-providers/utils";
 import {retryPromise} from "@webb-tools/api-providers/utils/retry-promise";
@@ -323,7 +323,7 @@ export class AnchorContract {
     merkleProof: any,
     sourceEvmId: number,
     deposit: Deposit,
-    zkpInputWithoutMerkleProof: ZKPWebbInputWithoutMerkle
+    zkpInputWithoutMerkleProof: ZKPWebbAnchorInputWithoutMerkle
   ) {
     const { pathElements, pathIndex: pathIndices, root: merkleRoot } = merkleProof;
     const localRoot = await this._contract.getLastRoot();
@@ -334,7 +334,7 @@ export class AnchorContract {
     // in the merkle proof
     const neighborRoots = [...nr];
     neighborRoots[sourceChainRootIndex] = root;
-    const input: BridgeWitnessInput = {
+    const input: AnchorWitnessInput = {
       // public
       nullifierHash: deposit.nullifierHash,
       refreshCommitment: bufferToFixed('0'),
@@ -359,7 +359,7 @@ export class AnchorContract {
     return { proof: proof.proof, input: input, root };
   }
 
-  async generateZKP(deposit: Deposit, zkpInputWithoutMerkleProof: ZKPWebbInputWithoutMerkle) {
+  async generateZKP(deposit: Deposit, zkpInputWithoutMerkleProof: ZKPWebbAnchorInputWithoutMerkle) {
     logger.trace(`Generate zkp with args`, { deposit, zkpInputWithoutMerkleProof });
     /// which merkle root is the neighbor
     const merkleProof = await this.generateMerkleProof(deposit);
@@ -367,7 +367,7 @@ export class AnchorContract {
     const { pathElements, pathIndex: pathIndices, root } = merkleProof;
     const nr = await this._contract.getLatestNeighborRoots();
     logger.trace(`Latest Neighbor Roots`, nr);
-    const input: BridgeWitnessInput = {
+    const input: AnchorWitnessInput = {
       // public
       nullifierHash: deposit.nullifierHash,
       refreshCommitment: bufferToFixed('0'),
@@ -392,7 +392,7 @@ export class AnchorContract {
     return { proof: proof.proof, input: input, root };
   }
 
-  async withdraw(proof: any, zkp: ZKPWebbInputWithMerkle, pub: any): Promise<string> {
+  async withdraw(proof: any, zkp: ZKPWebbAnchorInputWithMerkle, pub: any): Promise<string> {
     const overrides = {
       gasLimit: 6000000
     };

@@ -7,16 +7,16 @@ import { WrapUnWrap } from './wrap-unwrap';
 import { WebbRelayerBuilder } from './relayer';
 import { AccountsAdapter } from '../account/Accounts.adapter';
 import { InteractiveFeedback } from '../webb-error';
-import {Bridge, BridgeDeposit, BridgeWithdraw} from './bridge';
-import { BridgeApi } from '@webb-tools/api-providers';
+import {Bridge, AnchorDeposit, AnchorWithdraw} from './anchor';
+import { AnchorApi } from '@webb-tools/api-providers';
 
 /// list of the apis that are available for  the provider
 export interface WebbMethods<T extends WebbApiProvider<any>> {
   mixer: WebbMixer<T>;
-  bridge: WebbBridge<T>;
+  anchor: WebbAnchor<T>;
   wrapUnwrap: WrapAndUnwrap<T>;
   chainQuery: ChainQuery<T>;
-  bridgeApi: BridgeApi<T, any>;
+  anchorApi: AnchorApi<T, any>;
 }
 
 export type WebbMethod<T extends EventBus<K>, K extends Record<string, unknown>> = {
@@ -37,12 +37,12 @@ export interface WrapAndUnwrap<T> {
     enabled: boolean;
   };
 }
-export interface WebbBridge<T extends WebbApiProvider<any>> {
+export interface WebbAnchor<T extends WebbApiProvider<any>> {
   core: Bridge | null;
   // deposit
-  deposit: WebbMethod<BridgeDeposit<T, DepositPayload>, MixerDepositEvents>;
+  deposit: WebbMethod<AnchorDeposit<T, DepositPayload>, MixerDepositEvents>;
   // withdraw
-  withdraw: WebbMethod<BridgeWithdraw<T>, MixerWithdrawEvents>;
+  withdraw: WebbMethod<AnchorWithdraw<T>, MixerWithdrawEvents>;
 }
 
 /// TODO improve this and add a spec

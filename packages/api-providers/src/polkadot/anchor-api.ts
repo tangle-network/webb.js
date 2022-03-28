@@ -1,11 +1,11 @@
-import { AnchorBase, BridgeApi } from '../abstracts';
+import { AnchorBase, AnchorApi } from '../abstracts';
 import { WebbPolkadot } from './webb-provider';
 import { BridgeConfig } from '../types/bridge-config.interface';
 import { Currency } from '@webb-tools/api-providers';
 import { ChainTypeId } from '../chains';
 import { CurrencyRole, CurrencyType } from '../types/currency-config.interface';
 
-export class PolkadotBridgeApi extends BridgeApi<WebbPolkadot, BridgeConfig> {
+export class PolkadotAnchorApi extends AnchorApi<WebbPolkadot, BridgeConfig> {
   private get activeBridgeAsset() {
     return this.store.activeBridge?.asset ?? null;
   }

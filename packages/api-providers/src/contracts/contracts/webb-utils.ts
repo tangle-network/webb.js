@@ -1,4 +1,4 @@
-import { BridgeWitnessInput } from './types';
+import { AnchorWitnessInput } from './types';
 import { fetchKeyForEdges, fetchWasmForEdges } from '../../ipfs/evm/anchors';
 
 
@@ -16,7 +16,7 @@ export const isZero = (value: string | number) => {
   }
   return value === ZERO;
 };
-export const generateWitness = async (input: BridgeWitnessInput, maxEdges: MaxEdges) => {
+export const generateWitness = async (input: AnchorWitnessInput, maxEdges: MaxEdges) => {
   try {
     const wasmBuf = await fetchWasmForEdges(maxEdges);
     const witnessCalculator = await require('../utils/witness-calculator')(wasmBuf);

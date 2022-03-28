@@ -7,7 +7,7 @@ import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
 import { BigNumber } from 'ethers';
 import { WebbWeb3Provider } from './webb-provider';
 import {Bridge, OptionalActiveRelayer, OptionalRelayer, WithdrawState} from '@webb-tools/api-providers';
-import {BridgeWithdraw} from '../abstracts';
+import {AnchorWithdraw} from '../abstracts';
 import { chainTypeIdToInternalId, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains';
 import { ActiveWebbRelayer, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer } from '@webb-tools/api-providers';
 import { webbCurrencyIdFromString } from '../enums';
@@ -16,7 +16,7 @@ import { depositFromAnchorNote } from '../contracts/utils/make-deposit';
 import { Web3Provider } from '../ext-providers';
 import { generateWithdrawProofCallData, hexStringToBytes } from '../contracts/utils/bridge-utils';
 import { bufferToFixed } from '../contracts/utils/buffer-to-fixed';
-import { AnchorContract, ZKPWebbInputWithoutMerkle } from '../contracts/contracts';
+import { AnchorContract, ZKPWebbAnchorInputWithoutMerkle } from '../contracts/contracts';
 import {
   anchorDeploymentBlock,
   bridgeCurrencyBridgeStorageFactory, chainIdToRelayerName,
@@ -26,7 +26,7 @@ import {
 
 const logger = LoggerService.get('Web3BridgeWithdraw');
 
-export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
+export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
   private get config() {
     return this.inner.config;
   }
@@ -248,9 +248,9 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
     this.emit('stateChange', WithdrawState.GeneratingZk);
 
     // Getting contracts data for source and dest chains
-    const bridgeCurrency = this.inner.methods.bridgeApi.currency;
+    const bridgeCurrency = this.inner.methods.anchorApi.currency;
     // await this.inner.methods.bridgeApi.setActiveBridge()
-    const availableAnchors = await this.inner.methods.bridgeApi.getAnchors();
+    const availableAnchors = await this.inner.methods.anchorApi.getAnchors();
     const selectedAnchor = availableAnchors.find((anchor) => anchor.amount === note.amount);
     const destContractAddress = selectedAnchor?.neighbours[destInternalId]! as string;
     const sourceContractAddress = selectedAnchor?.neighbours[sourceInternalId]! as string;
@@ -350,7 +350,7 @@ export class Web3BridgeWithdraw extends BridgeWithdraw<WebbWeb3Provider> {
 
     if (activeRelayer && activeRelayer !== null && (activeRelayer?.account || activeRelayer?.beneficiary)) {
       logger.log(`withdrawing through relayer`);
-      const input: ZKPWebbInputWithoutMerkle = {
+      const input: ZKPWebbAnchorInputWithoutMerkle = {
         destinationChainId: Number(note.targetChainId),
         secret: sourceDeposit.secret,
         nullifier: sourceDeposit.nullifier,

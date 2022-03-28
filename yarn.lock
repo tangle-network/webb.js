@@ -3896,6 +3896,15 @@
     "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
 
+"@webb-tools/contracts@0.1.7":
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/@webb-tools/contracts/-/contracts-0.1.7.tgz#f3de40053be2d71844d4b1c05a254ce3ca3a8fcd"
+  integrity sha512-pbBimVW2OrLaeZZ/yv/9DX+p4pV938QfWATg9aocJNoFBgsgsiyna58cKBiv+p4SSYofp4j8hYW3AZ2/lyW3Ww==
+  dependencies:
+    "@typechain/ethers-v5" "^7.0.1"
+    "@typechain/hardhat" "^2.3.0"
+    ethers "5.5.1"
+
 "@webb-tools/contracts@^0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@webb-tools/contracts/-/contracts-0.0.3.tgz#d794b771245bf6ca8993c0775e29aa0c623495f6"

@@ -32,7 +32,7 @@ export type ZKPWebbPublicInputs = {
   destinationChainId: number;
 };
 
-export type ZKPWebbInputWithoutMerkle = {
+export type ZKPWebbAnchorInputWithoutMerkle = {
   nullifierHash: string;
   relayer: string;
   recipient: string;
@@ -43,14 +43,14 @@ export type ZKPWebbInputWithoutMerkle = {
   destinationChainId: number;
 };
 
-export type ZKPWebbInputWithMerkle = {
+export type ZKPWebbAnchorInputWithMerkle = {
   /// merkle proof
   root: string;
   pathElements: string[];
   pathIndices: number[];
-} & ZKPWebbInputWithoutMerkle;
+} & ZKPWebbAnchorInputWithoutMerkle;
 
-export type BridgeWitnessInput = {
+export type AnchorWitnessInput = {
   nullifierHash: string;
   recipient: string;
   refreshCommitment: string;

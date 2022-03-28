@@ -10,10 +10,10 @@ import {
   WebbMethods,
   WebbProviderEvents
 } from '@webb-tools/api-providers';
-import { PolkadotBridgeApi } from './bridge-api';
-import { PolkadotBridgeDeposit } from './bridge-deposit';
+import { PolkadotAnchorApi } from './anchor-api';
+import { PolkadotBridgeDeposit } from './anchor-deposit';
 import { PolkadotMixerWithdraw } from './mixer-withdraw';
-import { PolkadotBridgeWithdraw } from './bridge-withdraw';
+import { PolkadotAnchorWithdraw } from './anchor-withdraw';
 import { ActionsBuilder, InteractiveFeedback, WebbError, WebbErrorCodes } from '../webb-error';
 import { PolkaTXBuilder } from './transaction';
 import { PolkadotMixerDeposit } from './mixer-deposit';
@@ -49,14 +49,14 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
     this.api = this.provider.api;
     this.txBuilder = this.provider.txBuilder;
     this.methods = {
-      bridge: {
+      anchor: {
         core: null,
         deposit: {
           inner: new PolkadotBridgeDeposit(this),
           enabled: true
         },
         withdraw: {
-          inner: new PolkadotBridgeWithdraw(this),
+          inner: new PolkadotAnchorWithdraw(this),
           enabled: true
         }
       },
@@ -77,7 +77,7 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
         }
       },
       chainQuery: new PolkadotChainQuery(this),
-      bridgeApi: new PolkadotBridgeApi(this, this.config.bridgeByAsset)
+      anchorApi: new PolkadotAnchorApi(this, this.config.bridgeByAsset)
     };
   }
 

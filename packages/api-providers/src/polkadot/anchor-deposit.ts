@@ -4,14 +4,14 @@ import { WebbError, WebbErrorCodes } from '../webb-error';
 import { WebbPolkadot } from './webb-provider';
 import { ChainType, computeChainIdType, InternalChainId, SubstrateChainId } from '../chains';
 import { Note, NoteGenInput } from '@webb-tools/sdk-core';
-import { BridgeApi } from '@webb-tools/api-providers';
+import { AnchorApi } from '@webb-tools/api-providers';
 import { BridgeConfig } from '../types/bridge-config.interface';
-import {BridgeDeposit, DepositPayload as IDepositPayload, MixerSize} from '../abstracts';
+import {AnchorDeposit, DepositPayload as IDepositPayload, MixerSize} from '../abstracts';
 const logger = LoggerService.get('PolkadotBridgeDeposit');
 
 type DepositPayload = IDepositPayload<Note, [number, string]>;
 
-export class PolkadotBridgeDeposit extends BridgeDeposit<WebbPolkadot, DepositPayload> {
+export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPayload> {
   async deposit(depositPayload: DepositPayload): Promise<void> {
     const tx = this.inner.txBuilder.build(
       {
@@ -89,7 +89,7 @@ export class PolkadotBridgeDeposit extends BridgeDeposit<WebbPolkadot, DepositPa
   }
 
   private get bridgeApi() {
-    return this.inner.methods.bridgeApi as BridgeApi<WebbPolkadot, BridgeConfig>;
+    return this.inner.methods.anchorApi as AnchorApi<WebbPolkadot, BridgeConfig>;
   }
 
   async getSizes(): Promise<MixerSize[]> {

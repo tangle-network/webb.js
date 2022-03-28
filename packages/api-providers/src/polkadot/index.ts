@@ -5,6 +5,6 @@ export * from './webb-provider';
 export * from './wrap-unwrap';
 export * from './chain-query';
 export * from './transaction'
-export * from './bridge-api'
-export * from './bridge-deposit'
-export * from './bridge-withdraw'
+export * from './anchor-api'
+export * from './anchor-deposit'
+export * from './anchor-withdraw'

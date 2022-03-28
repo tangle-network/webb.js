@@ -1,6 +1,6 @@
 import {LoggerService} from '@webb-tools/app-util';
 import {Note, NoteGenInput} from '@webb-tools/sdk-core';
-import {BridgeDeposit, Currency, DepositPayload as IDepositPayload, MixerSize} from '../abstracts';
+import {AnchorDeposit, Currency, DepositPayload as IDepositPayload, MixerSize} from '../abstracts';
 import {createAnchor2Deposit, Deposit} from '../contracts/utils/make-deposit';
 import {
   ChainType,
@@ -21,9 +21,9 @@ const logger = LoggerService.get('web3-bridge-deposit');
 
 type DepositPayload = IDepositPayload<Note, [Deposit, number | string, string?]>;
 
-export class Web3BridgeDeposit extends BridgeDeposit<WebbWeb3Provider, DepositPayload> {
+export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPayload> {
   private get bridgeApi() {
-    return this.inner.methods.bridgeApi;
+    return this.inner.methods.anchorApi;
   }
 
   private get config() {

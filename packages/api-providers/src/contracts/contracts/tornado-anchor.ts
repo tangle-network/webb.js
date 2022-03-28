@@ -16,7 +16,6 @@ import {bufferToFixed} from '../utils/buffer-to-fixed';
 import {abi} from '../abis/NativeAnchor.json';
 import {MerkleTree, MimcSpongeHasher} from '../utils/merkle';
 import {fetchTornadoCircuitData, fetchTornadoProvingKey, retryPromise} from "@webb-tools/api-providers";
-
 const webSnarkUtils = require('tornado-websnark/src/utils');
 type DepositEvent = [string, number, BigNumber];
 const logger = LoggerService.get('anchor');

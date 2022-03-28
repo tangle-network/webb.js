@@ -1,4 +1,4 @@
-export * from './bridge';
+export * from './anchor';
 export  * from './chain-query';
 export  * from './currency';
 

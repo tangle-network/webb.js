@@ -17,7 +17,7 @@ export type AnchorBase = {
   };
 };
 
-export abstract class BridgeApi<Api, BridgeConfigEntry> {
+export abstract class AnchorApi<Api, BridgeConfigEntry> {
   private readonly _store: BehaviorSubject<BridgeStore<BridgeConfigEntry>>;
   private readonly _watcher: Observable<BridgeStore<BridgeConfigEntry>>;
 

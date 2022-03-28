@@ -1,7 +1,7 @@
 import { DepositPayload, MixerDeposit } from '../mixer/mixer-deposit';
 import { WebbApiProvider } from '../webb-provider.interface';
 
-export abstract class BridgeDeposit<
+export abstract class AnchorDeposit<
   T extends WebbApiProvider<any>,
   K extends DepositPayload = DepositPayload<any>
 > extends MixerDeposit<T, K> {
