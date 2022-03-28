@@ -1,14 +1,14 @@
-import { u8aToHex } from '@polkadot/util';
-import { LoggerService } from '@webb-tools/app-util';
-import { WebbError, WebbErrorCodes } from '../webb-error';
-import { WebbPolkadot } from './webb-provider';
-import { ChainType, computeChainIdType, InternalChainId, SubstrateChainId } from '../chains';
-import { Note, NoteGenInput } from '@webb-tools/sdk-core';
-import { AnchorApi } from '@webb-tools/api-providers';
-import { BridgeConfig } from '../types/bridge-config.interface';
-import {AnchorDeposit, DepositPayload as IDepositPayload, MixerSize} from '../abstracts';
-const logger = LoggerService.get('PolkadotBridgeDeposit');
+import {u8aToHex} from '@polkadot/util';
+import {LoggerService} from '@webb-tools/app-util';
+import {WebbError, WebbErrorCodes} from '../webb-error';
+import {WebbPolkadot} from './webb-provider';
+import {ChainType, computeChainIdType, InternalChainId, SubstrateChainId} from '../chains';
+import {Note, NoteGenInput} from '@webb-tools/sdk-core';
+import {AnchorApi} from '@webb-tools/api-providers';
+import {BridgeConfig} from '../types/bridge-config.interface';
+import {AnchorDeposit, AnchorSize, DepositPayload as IDepositPayload} from '../abstracts';
 
+const logger = LoggerService.get('PolkadotBridgeDeposit');
 type DepositPayload = IDepositPayload<Note, [number, string]>;
 
 export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPayload> {
@@ -29,7 +29,7 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
   }
 
   async generateBridgeNote(
-    mixerId: number | string,
+    anchorId: number | string,
     destination: number,
     wrappableAssetAddress: string | undefined
   ): Promise<DepositPayload> {
@@ -45,7 +45,7 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
     // const chainId = this.inner.api.registry.chainSS58!;
     const chainId = SubstrateChainId.Webb;
     const sourceChainId = computeChainIdType(ChainType.Substrate, chainId);
-    const anchorPath = String(mixerId).replace('Bridge=', '').split('@');
+    const anchorPath = String(anchorId).replace('Bridge=', '').split('@');
     const amount = anchorPath[0];
     const anchorIndex = anchorPath[2];
     const anchors = await this.bridgeApi.getAnchors();
@@ -57,7 +57,7 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
       anchors,
       sourceChainId,
       destination,
-      mixerId
+       anchorId
     });
     const treeId = anchor.neighbours[InternalChainId.WebbDevelopment] as number; // TODO: Anchor in one chain the 0 id contains the treeId
     const noteInput: NoteGenInput = {
@@ -92,7 +92,7 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
     return this.inner.methods.anchorApi as AnchorApi<WebbPolkadot, BridgeConfig>;
   }
 
-  async getSizes(): Promise<MixerSize[]> {
+  async getSizes(): Promise<AnchorSize[]> {
     const anchors = await this.bridgeApi.getAnchors();
     const currency = this.bridgeApi.currency;
     if (currency) {

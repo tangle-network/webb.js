@@ -1,16 +1,19 @@
-import { DepositPayload, MixerDeposit } from '../mixer/mixer-deposit';
+import {DepositPayload, MixerDeposit, MixerSize} from '../mixer/mixer-deposit';
 import { WebbApiProvider } from '../webb-provider.interface';
+
+
+export type AnchorSize = MixerSize;
 
 export abstract class AnchorDeposit<
   T extends WebbApiProvider<any>,
   K extends DepositPayload = DepositPayload<any>
 > extends MixerDeposit<T, K> {
-  generateNote(mixerId: number | string): Promise<K> {
+  generateNote(anchorId: number | string): Promise<K> {
     throw new Error('api not ready:Not mixer api');
   }
 
   abstract generateBridgeNote(
-    mixerId: number | string,
+    anchorId: number | string,
     destination: number,
     wrappableAssetAddress?: string
   ): Promise<K>;

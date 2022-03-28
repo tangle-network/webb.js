@@ -244,7 +244,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
    *       the address of the webbToken
    * Note: This functione expects `destChainId` is EXPLICITLY the correctly computed
    *       target chain id with the type encoded in its value.
-   * @param mixerId - the mixerId
+   * @param anchorID - the anchorID
    * @param destChainId - encoded destination chain Id and chain type
    * @param wrappableAssetAddress - the address of the token to wrap into the bridge
    * @returns
@@ -252,12 +252,12 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
 
   /*
    *
-   *  Mixer id => the fixed deposit amount
+   *  Anchor id => the fixed deposit amount
    * destChainId => the Chain the token will be bridged to
    * If the wrappableAssetAddress is not provided, it is assumed to be the address of the webbToken
    * */
   async generateBridgeNote(
-    mixerId: number | string,
+    anchorId: number | string,
     destChainId: number,
     wrappableAssetAddress?: string
   ): Promise<DepositPayload> {
@@ -275,7 +275,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
     const destChainInternal = chainTypeIdToInternalId(parseChainIdType(destChainId));
     const target = currency.getAddress(destChainInternal);
     const srcAddress = currency.getAddress(srcChainInternal);
-    const amount = String(mixerId).replace('Bridge=', '').split('@')[0];
+    const amount = String(anchorId).replace('Bridge=', '').split('@')[0];
 
     const noteInput: NoteGenInput = {
       exponentiation: '5',
@@ -298,7 +298,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
     const note = await Note.generateNote(noteInput);
     return {
       note: note,
-      params: [deposit, mixerId, wrappableAssetAddress]
+      params: [deposit, anchorId, wrappableAssetAddress]
     };
   }
 }
