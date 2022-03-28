@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Currency } from '@webb-tools/api-providers';
+import { ERC20__factory as ERC20Factory } from '@webb-tools/contracts';
 import { ethers } from 'ethers';
 
 import { ChainQuery } from '../abstracts';
 import { evmIdIntoInternalChainId } from '../chains';
 import { zeroAddress } from '../contracts/contracts';
-import { ERC20Factory } from '../contracts/types';
 import { WebbCurrencyId } from '../enums';
 import { WebbWeb3Provider } from './webb-provider';
 

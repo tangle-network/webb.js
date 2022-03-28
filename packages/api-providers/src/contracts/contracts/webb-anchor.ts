@@ -7,12 +7,11 @@ import { Log } from '@ethersproject/abstract-provider';
 import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, MixerStorage } from '@webb-tools/api-providers/utils';
 import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise';
 import { LoggerService } from '@webb-tools/app-util';
-import { ERC20, ERC20__factory as ERC20Factory, FixedDepositAnchor__factory } from '@webb-tools/contracts';
+import { ERC20, ERC20__factory as ERC20Factory, FixedDepositAnchor, FixedDepositAnchor__factory } from '@webb-tools/contracts';
 import { BigNumber, Contract, providers, Signer } from 'ethers';
 import utils from 'web3-utils';
 
 import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo';
-import { FixedDepositAnchor } from '../types/FixedDepositAnchor';
 import { bufferToFixed, createAnchor2Deposit, createRootsBytes, Deposit, EvmNote, generateWithdrawProofCallData } from '../utils';
 import { MerkleTree, PoseidonHasher } from '../utils/merkle';
 import { AnchorWitnessInput, ZKPWebbAnchorInputWithMerkle, ZKPWebbAnchorInputWithoutMerkle } from './types';
@@ -440,17 +439,24 @@ export class AnchorContract {
       gasLimit: 6000000
     };
     const proofBytes = await generateWithdrawProofCallData(proof, pub);
+    const nullifierHash = bufferToFixed(zkp.nullifierHash);
+    const roots = createRootsBytes(pub.roots);
     const tx = await this._contract.withdraw(
-      `0x${proofBytes}`,
+      {
+        // TODO : Handle the _extDataHash as it should be
+        _extDataHash: '0x00',
+        _nullifierHash: nullifierHash,
+        _roots: roots,
+
+        proof: `0x${proofBytes}`
+      },
       {
         _fee: bufferToFixed(zkp.fee),
-        _nullifierHash: bufferToFixed(zkp.nullifierHash),
         _recipient: zkp.recipient,
-
         _refreshCommitment: bufferToFixed('0'),
         _refund: bufferToFixed(zkp.refund),
-        _relayer: zkp.relayer,
-        _roots: createRootsBytes(pub.roots)
+        _relayer: zkp.relayer
+
       },
       overrides
     );
