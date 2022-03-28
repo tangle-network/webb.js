@@ -1,8 +1,8 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { ZKPTornPublicInputs } from '../contracts';
 import { bufferToFixed, Deposit } from '../utils';
+import { ZKPTornPublicInputs } from '../wrappers';
 
 export type ZKPTornFromDepositInput = {
   relayer?: string;

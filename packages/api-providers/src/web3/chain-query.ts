@@ -7,7 +7,7 @@ import { ethers } from 'ethers';
 
 import { ChainQuery } from '../abstracts';
 import { evmIdIntoInternalChainId } from '../chains';
-import { zeroAddress } from '../contracts/contracts';
+import { zeroAddress } from '../contracts/wrappers';
 import { WebbCurrencyId } from '../enums';
 import { WebbWeb3Provider } from './webb-provider';
 

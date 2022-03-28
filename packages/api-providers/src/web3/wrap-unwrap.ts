@@ -3,14 +3,14 @@
 
 import { Amount, WrappingBalance, WrappingEvent } from '@webb-tools/api-providers';
 import { Bridge, Currency, MixerSize } from '@webb-tools/api-providers/abstracts';
+import { ERC20__factory as ERC20Factory } from '@webb-tools/contracts';
 import { ContractTransaction } from 'ethers';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import Web3 from 'web3';
 
 import { WrapUnWrap } from '../abstracts';
 import { evmIdIntoInternalChainId, InternalChainId } from '../chains';
-import { WebbGovernedToken, zeroAddress } from '../contracts/contracts';
-import {ERC20__factory as ERC20Factory } from '@webb-tools/contracts';
+import { WebbGovernedToken, zeroAddress } from '../contracts';
 import { WebbCurrencyId, webbCurrencyIdToString } from '../enums';
 import { CurrencyType } from '../types/currency-config.interface';
 import { WebbWeb3Provider } from './webb-provider';

@@ -5,7 +5,7 @@ import { AnchorBase, BridgeConfig, Currency, CurrencyRole, CurrencyType } from '
 
 import { AnchorApi } from '../abstracts';
 import { ChainTypeId, chainTypeIdToInternalId, evmIdIntoInternalChainId } from '../chains';
-import { WebbGovernedToken } from '../contracts/contracts';
+import { WebbGovernedToken } from '../contracts/wrappers';
 import { WebbWeb3Provider } from './webb-provider';
 
 export class Web3AnchorApi extends AnchorApi<WebbWeb3Provider, BridgeConfig> {

@@ -9,7 +9,7 @@ import { Eth } from 'web3-eth';
 
 import { AccountsAdapter } from '../account/Accounts.adapter';
 import { EVMChainId, evmIdIntoInternalChainId, parseChainIdType } from '../chains';
-import { AnchorContract, TornadoContract } from '../contracts/contracts';
+import { AnchorContract, TornadoContract } from '../contracts/wrappers';
 import { Web3Accounts, Web3Provider } from '../ext-providers';
 import { WebbError, WebbErrorCodes } from '../webb-error';
 import { Web3AnchorApi } from './anchor-api';
