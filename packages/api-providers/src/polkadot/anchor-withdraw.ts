@@ -1,13 +1,19 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+
+import { LoggerService } from '@webb-tools/app-util';
+import { Note, ProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core';
+
+import { decodeAddress } from '@polkadot/keyring';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
+
+import { AnchorWithdraw, WithdrawState } from '../abstracts';
+import { InternalChainId } from '../chains';
 import { WebbError, WebbErrorCodes } from '../webb-error';
 import { WebbPolkadot } from './webb-provider';
-import { Note, ProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core';
-import {AnchorWithdraw, WithdrawState} from '../abstracts';
-import { decodeAddress } from '@polkadot/keyring';
-import { InternalChainId } from '../chains';
-import { LoggerService } from '@webb-tools/app-util';
 
 const logger = LoggerService.get('PolkadotBridgeWithdraw');
+
 export type AnchorWithdrawProof = {
   id: string;
   proofBytes: string;
@@ -21,7 +27,7 @@ export type AnchorWithdrawProof = {
 };
 
 export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
-  async fetchRPCTreeLeaves(treeId: string | number): Promise<Uint8Array[]> {
+  async fetchRPCTreeLeaves (treeId: string | number): Promise<Uint8Array[]> {
     logger.trace(`Fetching leaves for tree with id ${treeId}`);
     let done = false;
     let from = 0;
@@ -30,39 +36,46 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
 
     while (done === false) {
       const treeLeaves: any[] = await (this.inner.api.rpc as any).mt.getLeaves(treeId, from, to);
+
       if (treeLeaves.length === 0) {
         done = true;
         break;
       }
+
       leaves.push(...treeLeaves.map((i) => i.toU8a()));
       from = to;
       to = to + 511;
     }
+
     return leaves;
   }
 
-  async fetchRoot(treeId: string) {
+  async fetchRoot (treeId: string) {
     logger.trace(`fetching metadata for tree id ${treeId}`);
     const storage =
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       await this.inner.api.query.merkleTreeBn254.trees(treeId);
+
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return storage.toHuman().root;
   }
 
-  async withdraw(note: string, recipient: string): Promise<string> {
+  async withdraw (note: string, recipient: string): Promise<string> {
     // TODO: implement cross chain
     // TODO: Integrate with Substrate relayer
     // TODO handle the cached roots
     try {
       const account = await this.inner.accounts.activeOrDefault;
+
       if (!account) {
         throw WebbError.from(WebbErrorCodes.NoAccountAvailable);
       }
+
       const accountId = account.address;
       const relayerAccountId = account.address;
+
       this.emit('stateChange', WithdrawState.GeneratingZk);
       logger.trace(`Withdraw using note ${note} , recipient ${recipient}`);
       const parseNote = await Note.deserialize(note);
@@ -76,6 +89,7 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
       const leaf = depositNote.getLeafCommitment();
       const leafHex = u8aToHex(leaf);
       const leafIndex = leaves.findIndex((leaf) => u8aToHex(leaf) === leafHex);
+
       logger.trace(leaves.map((i) => u8aToHex(i)));
       const worker = this.inner.wasmFactory('wasm-utils');
       const pm = new ProvingManager(worker);
@@ -98,6 +112,7 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
         refreshCommitment,
         roots: [hexToU8a(root), hexToU8a(root)]
       };
+
       logger.log('proofInput to webb.js: ', proofInput);
       const zkProofMetadata = await pm.prove(proofInput);
       const withdrawProof: AnchorWithdrawProof = {
@@ -132,7 +147,9 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
         parms
       );
       const hash = await tx.call(account.address);
+
       this.emit('stateChange', WithdrawState.Done);
+
       return hash || '';
     } catch (e) {
       this.emit('stateChange', WithdrawState.Failed);
@@ -140,12 +157,15 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
     }
   }
 }
-async function fetchSubstrateProvingKey() {
+
+async function fetchSubstrateProvingKey () {
   // TODO: change to anchor fixture
-  const IPFSUrl = `https://ipfs.io/ipfs/QmYDtGX7Wf5qUPEpGsgrX6oss2m2mm8vi7uzNdK4C9yJdZ`;
+  const IPFSUrl = 'https://ipfs.io/ipfs/QmYDtGX7Wf5qUPEpGsgrX6oss2m2mm8vi7uzNdK4C9yJdZ';
   const ipfsKeyRequest = await fetch(IPFSUrl);
   const circuitKeyArrayBuffer = await ipfsKeyRequest.arrayBuffer();
-  logger.info(`Done Fetching key`);
+
+  logger.info('Done Fetching key');
   const circuitKey = new Uint8Array(circuitKeyArrayBuffer);
+
   return circuitKey;
 }

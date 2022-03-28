@@ -1,24 +1,32 @@
-import { getEVMChainName } from './chain-utils';
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+import { AppConfig } from '@webb-tools/api-providers/abstracts';
+
 import { Storage } from '../storage';
-import {AppConfig} from "@webb-tools/api-providers/abstracts";
+import { getEVMChainName } from './chain-utils';
+
 export type MixerStorage = Record<string, { lastQueriedBlock: number; leaves: string[] }>;
+
 export const evmChainStorageFactory = (config: AppConfig, chainId: number) => {
   // localStorage will have key: <name of chain>, value: { Record<contractAddress: string, info: DynamicMixerInfoStore> }
   return Storage.newFromCache<MixerStorage>(getEVMChainName(config, chainId), {
-    async commit(key: string, data: MixerStorage): Promise<void> {
+    async commit (key: string, data: MixerStorage): Promise<void> {
       localStorage.setItem(key, JSON.stringify(data));
     },
-    async fetch(key: string): Promise<MixerStorage> {
+    async fetch (key: string): Promise<MixerStorage> {
       const storageCached = localStorage.getItem(key);
+
       if (storageCached) {
         return {
           ...JSON.parse(storageCached)
         };
       }
+
       return {};
     }
   });
 };
+
 export const anchorDeploymentBlock: Record<string, number> = {
   '0x97747a4de7302ff7ee3334e33138879469bfecf8': 11795573,
   '0x09b722aa809a076027fa51902e431a8c03e3f8df': 9973527,
@@ -35,16 +43,18 @@ type BridgeStorage = Record<string, { lastQueriedBlock: number; leaves: string[]
 export const bridgeCurrencyBridgeStorageFactory = () => {
   // localStorage will have key: <Currency name>, value: { Record<contractAddress: string, info: DynamicMixerInfoStore> }
   return Storage.newFromCache<BridgeStorage>('webb-bridge', {
-    async commit(key: string, data: BridgeStorage): Promise<void> {
+    async commit (key: string, data: BridgeStorage): Promise<void> {
       localStorage.setItem(key, JSON.stringify(data));
     },
-    async fetch(key: string): Promise<BridgeStorage> {
+    async fetch (key: string): Promise<BridgeStorage> {
       const storageCached = localStorage.getItem(key);
+
       if (storageCached) {
         return {
           ...JSON.parse(storageCached)
         };
       }
+
       return {};
     }
   });

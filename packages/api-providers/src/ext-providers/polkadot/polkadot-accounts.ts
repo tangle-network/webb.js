@@ -1,12 +1,15 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
 import { InjectedAccount, InjectedExtension } from '@polkadot/extension-inject/types';
+
 import { Account, AccountsAdapter, PromiseOrT } from '../../account/Accounts.adapter';
 
 export class PolkadotAccount extends Account<InjectedAccount> {
-  get avatar() {
+  get avatar () {
     return null;
   }
 
-  get name(): string {
+  get name (): string {
     return this.inner.name || this.address;
   }
 }
@@ -15,20 +18,23 @@ export class PolkadotAccounts extends AccountsAdapter<InjectedExtension, Injecte
   providerName = 'Polka';
   private activeAccount: null | PolkadotAccount = null;
 
-  async accounts() {
+  async accounts () {
     const accounts = await this._inner.accounts.get();
+
     return accounts.map((account) => new PolkadotAccount(account, account.address));
   }
 
-  get activeOrDefault() {
+  get activeOrDefault () {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise<PolkadotAccount | null>(async (resolve, reject) => {
       try {
         if (this.activeAccount) {
           return resolve(this.activeAccount);
         }
+
         const accounts = await this._inner.accounts.get();
         const defaultAccount = accounts[0] ? new PolkadotAccount(accounts[0], accounts[0].address) : null;
+
         resolve(defaultAccount);
       } catch (e) {
         reject(e);
@@ -36,9 +42,10 @@ export class PolkadotAccounts extends AccountsAdapter<InjectedExtension, Injecte
     });
   }
 
-  setActiveAccount(account: PolkadotAccount): PromiseOrT<void> {
+  setActiveAccount (account: PolkadotAccount): PromiseOrT<void> {
     console.log(account);
     this.activeAccount = account;
+
     return undefined;
   }
 }

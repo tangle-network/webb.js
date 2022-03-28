@@ -22,7 +22,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'prettier/prettier': 0,
     'header/header': [2, 'line', [
-      { pattern: ' Copyright 2022 @webb-tools/' },
+      {pattern: ' Copyright 2022 @webb-tools/'},
       ' SPDX-License-Identifier: Apache-2.0'
     ], 2],
     // disable some rules brought in by polkadot/dev
@@ -38,6 +38,10 @@ module.exports = {
     '@typescript-eslint/no-misused-promises': 0,
     '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/restrict-plus-operands': 0,
-    '@typescript-eslint/ban-ts-comment': 0
+    '@typescript-eslint/ban-ts-comment': 0,
+    'header/header': 0,
+    'sort-keys': 0,
+    "@typescript-eslint/require-await": 0,
+    "@typescript-eslint/no-var-requires": 0,
   }
 };

@@ -1,4 +1,7 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
 import { LoggerService } from '@webb-tools/app-util';
+
 import { WebbPolkadot } from '../../polkadot';
 
 export type ORMLAsset = {
@@ -9,11 +12,13 @@ export type ORMLAsset = {
 };
 
 const logger = LoggerService.get('currencies');
-export class ORMLCurrency {
-  constructor(private api: WebbPolkadot) {}
 
-  async list() {
+export class ORMLCurrency {
+  constructor (private api: WebbPolkadot) {}
+
+  async list () {
     const assets = await this.api.api.query.assetRegistry.assets.entries();
+
     return assets.map(([storageKey, i]) => ({
       // @ts-ignore
       ...i.toHuman(),
@@ -22,21 +27,27 @@ export class ORMLCurrency {
     })) as ORMLAsset[];
   }
 
-  async getBalance() {
+  async getBalance () {
     const activeAccount = await this.api.accounts.activeOrDefault;
+
     logger.info('active account', activeAccount);
     console.log(this.api.accounts);
+
     if (activeAccount) {
       const ormlBalances = await this.api.api.query.tokens.accounts.entries(activeAccount.address);
+
       logger.info(`ORML Balances ${ormlBalances.length}`, ormlBalances);
+
       return ormlBalances.map(([storageKey, balance]) => {
         const currencyId = storageKey[0];
+
         return {
           id: currencyId,
           balance: balance.toHuman()
         };
       });
     }
+
     return [];
   }
 }

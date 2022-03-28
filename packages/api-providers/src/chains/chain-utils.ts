@@ -1,9 +1,13 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
 import { WebbError, WebbErrorCodes } from '../webb-error';
 import { ChainType, ChainTypeId, EVMChainId, InternalChainId, SubstrateChainId } from './chain-id.enum';
 
 export const byteArrayToNum = (arr: number[]): number => {
   let n = 0;
-  for (let i of arr) n = n * 256 + i;
+
+  for (const i of arr) n = n * 256 + i;
+
   return n;
 };
 
@@ -14,29 +18,35 @@ export const byteArrayToNum = (arr: number[]): number => {
  */
 export const numToByteArray = (num: number, min: number): number[] => {
   let arr = [];
+
   while (num > 0) {
     arr.push(num % 256);
     num = Math.floor(num / 256);
   }
+
   arr.reverse();
+
   // maintain minimum number of bytes
   while (arr.length < min) {
     arr = [0, ...arr];
   }
+
   return arr;
 };
 
 export const computeChainIdType = (chainType: ChainType, chainId: number | InternalChainId): number => {
-  let chainTypeArray = numToByteArray(chainType, 2);
-  let chainIdArray = numToByteArray(chainId, 4);
-  let fullArray = [...chainTypeArray, ...chainIdArray];
+  const chainTypeArray = numToByteArray(chainType, 2);
+  const chainIdArray = numToByteArray(chainId, 4);
+  const fullArray = [...chainTypeArray, ...chainIdArray];
+
   return byteArrayToNum(fullArray);
 };
 
 export const parseChainIdType = (chainIdType: number): ChainTypeId => {
-  let byteArray = numToByteArray(chainIdType, 4);
-  let chainType = byteArrayToNum(byteArray.slice(0, 2));
-  let chainId = byteArrayToNum(byteArray.slice(2));
+  const byteArray = numToByteArray(chainIdType, 4);
+  const chainType = byteArrayToNum(byteArray.slice(0, 2));
+  const chainId = byteArrayToNum(byteArray.slice(2));
+
   return { chainType, chainId };
 };
 
@@ -101,7 +111,7 @@ export const evmIdIntoInternalChainId = (evmId: number | string): InternalChainI
   }
 };
 
-export const internalChainIdIntoEVMId = (chainId: InternalChainId | Number | String): EVMChainId => {
+export const internalChainIdIntoEVMId = (chainId: InternalChainId | number | string): EVMChainId => {
   switch (Number(chainId) as InternalChainId) {
     case InternalChainId.Edgeware:
       return EVMChainId.Edgeware;

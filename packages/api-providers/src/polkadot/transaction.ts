@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import { NotificationHandler } from '@webb-tools/api-providers';
 import { EventBus, LoggerService } from '@webb-tools/app-util';
 import { uniqueId } from 'lodash';
 
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/submittable/types';
+import { IKeyringPair } from '@polkadot/types/types';
 
 import { ReactElement } from '../types/abstracts';
-import { NotificationHandler } from '@webb-tools/api-providers';
-import { IKeyringPair } from '@polkadot/types/types';
+
 type AddressOrPair = string | IKeyringPair;
 
 export type QueueTxStatus =
@@ -64,48 +65,59 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
   public notificationKey = '';
   private transactionAddress: AddressOrPair | null = null;
   private isWrapped = false;
-  constructor(private apiPromise: ApiPromise, private path: MethodPath, private parms: P) {
+
+  constructor (private apiPromise: ApiPromise, private path: MethodPath, private parms: P) {
     super();
   }
 
-  async call(signAddress: AddressOrPair) {
+  async call (signAddress: AddressOrPair) {
     txLogger.info(`Sending ${this.path.section} ${this.path.method} transaction by`, signAddress, this.parms);
     this.transactionAddress = signAddress;
     const api = this.apiPromise;
+
     await api.isReady;
+
     if (!api.tx[this.path.section] || !api.tx[this.path.section][this.path.method]) {
       txLogger.error(`can not find api.tx.${this.path.section}.${this.path.method}`);
+
       return;
     }
+
     this.notificationKey = uniqueId(`${this.path.section}-${this.path.method}`);
+
     if ((signAddress as IKeyringPair)?.address === undefined) {
       // passed an account id or string of address
       const { web3FromAddress } = await import('@polkadot/extension-dapp');
       const injector = await web3FromAddress(signAddress as string);
+
       await api.setSigner(injector.signer);
     }
 
     const txResults = await api.tx[this.path.section][this.path.method](...this.parms).signAsync(signAddress, {
       nonce: -1
     });
-    this.emitWithPayload('beforeSend', undefined);
-    this.emitWithPayload('loading', '');
+
+    await this.emitWithPayload('beforeSend', undefined);
+    await this.emitWithPayload('loading', '');
     const hash = txResults.hash.toString();
+
     await this.send(txResults);
 
-    this.emitWithPayload('afterSend', undefined);
+    await this.emitWithPayload('afterSend', undefined);
     this.transactionAddress = null;
     txLogger.info(`Tx ${this.path.section} ${this.path.method} is Done: TX hash=`, hash);
+
     return hash;
   }
 
-  protected emitWithPayload<E extends keyof PolkadotTXEvents>(
+  protected async emitWithPayload<E extends keyof PolkadotTXEvents> (
     event: E,
     data: PolkadotTXEvents[E]['data']
-  ): void | Promise<void> {
+  ): Promise<void> {
     if (this.isWrapped) {
       return;
     }
+
     this.emit(event, {
       key: this.notificationKey,
       path: this.path,
@@ -114,9 +126,10 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
     } as any);
   }
 
-  private errorHandler(r: SubmittableResult) {
+  private errorHandler (r: SubmittableResult) {
     // @ts-ignore
     let message = r.dispatchError?.type || r.type || r.message;
+
     if (r.dispatchError?.isModule) {
       try {
         const mod = r.dispatchError.asModule;
@@ -129,22 +142,24 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
         message = Reflect.has(error as any, 'toString') ? (error as any)?.toString() : error;
       }
     }
+
+    // eslint-disable-next-line  @typescript-eslint/no-floating-promises
     this.emitWithPayload('failed', message);
+
     return message;
   }
 
-  private send(tx: SubmittableExtrinsic<any>) {
+  private async send (tx: SubmittableExtrinsic<any>) {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       try {
         await tx.send((result) => {
           const status = result.status;
           const events = result.events.filter(({ event: { section } }) => section === 'system');
+
           if (status.isInBlock || status.isFinalized) {
             for (const event of events) {
-              const {
-                event: { data, method }
-              } = event;
+              const { event: { data, method } } = event;
               const [dispatchError] = data as any;
 
               if (method === 'ExtrinsicFailed') {
@@ -158,11 +173,13 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
                     message = `${error.section}.${error.name}`;
                   } catch (error) {
                     const message = this.errorHandler(error as any);
+
                     reject(message);
                   }
                 } else if (dispatchError.isToken) {
                   message = `${dispatchError.type}.${dispatchError.asToken.type}`;
                 }
+
                 this.isWrapped = true;
                 this.emitWithPayload('failed', message);
                 reject(message);
@@ -178,7 +195,8 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
       } catch (e) {
         console.log(e);
         const errorMessage = this.errorHandler(e as any);
-        this.emitWithPayload('failed', errorMessage);
+
+        await this.emitWithPayload('failed', errorMessage);
         reject(errorMessage);
       }
     });
@@ -186,13 +204,14 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
 }
 
 export class PolkaTXBuilder {
-  constructor(private apiPromise: ApiPromise, private notificationHandler: NotificationHandler) {}
+  constructor (private apiPromise: ApiPromise, private notificationHandler: NotificationHandler) {
+  }
 
-  buildWithoutNotification<P extends Array<any>>({ method, section }: MethodPath, params: P): PolkadotTx<P> {
+  buildWithoutNotification<P extends Array<any>> ({ method, section }: MethodPath, params: P): PolkadotTx<P> {
     return new PolkadotTx<P>(this.apiPromise.clone(), { method, section }, params);
   }
 
-  build<P extends Array<any>>(path: MethodPath, params: P, notificationHandler?: NotificationHandler): PolkadotTx<P> {
+  build<P extends Array<any>> (path: MethodPath, params: P, notificationHandler?: NotificationHandler): PolkadotTx<P> {
     const tx = this.buildWithoutNotification(path, params);
     const handler = notificationHandler || this.notificationHandler;
 

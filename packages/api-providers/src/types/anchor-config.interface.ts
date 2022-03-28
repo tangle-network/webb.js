@@ -1,3 +1,5 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
 import { InternalChainId } from '../chains';
 
 export type ChainAddressConfig = { [key in InternalChainId]?: string };

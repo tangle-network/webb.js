@@ -1,23 +1,15 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+import { getAnchorAddressForBridge } from '@webb-tools/api-providers';
 import { LoggerService } from '@webb-tools/app-util';
 import { Observable, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import {
-  Capabilities,
-  EVMCMDKeys,
-  RelayedChainConfig,
-  RelayerCMDBase,
-  RelayerCMDKey,
-  RelayerConfig,
-  RelayerEVMCommands,
-  RelayerMessage,
-  RelayerSubstrateCommands,
-  SubstrateCMDKeys
-} from './types';
+
 import { InternalChainId } from '../../chains';
-import { AppConfig } from '../common';
-import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo';
 import { webbCurrencyIdFromString } from '../../enums';
-import {getAnchorAddressForBridge} from "@webb-tools/api-providers";
+import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo';
+import { AppConfig } from '../common';
+import { Capabilities, EVMCMDKeys, RelayedChainConfig, RelayerCMDBase, RelayerCMDKey, RelayerConfig, RelayerEVMCommands, RelayerMessage, RelayerSubstrateCommands, SubstrateCMDKeys } from './types';
 
 const logger = LoggerService.get('webb-relayer class');
 
@@ -81,12 +73,12 @@ export type RelayerCMDs<A extends RelayerCMDBase, C extends CMDSwitcher<A>> = A 
     ? RelayerEVMCommands[C]
     : never
   : C extends keyof RelayerSubstrateCommands
-  ? RelayerSubstrateCommands[C]
-  : never;
+    ? RelayerSubstrateCommands[C]
+    : never;
 
 export type WithdrawRelayerArgs<A extends RelayerCMDBase, C extends CMDSwitcher<A>> = Omit<
-  RelayerCMDs<A, C>,
-  keyof RelayedChainInput | 'proof'
+RelayerCMDs<A, C>,
+keyof RelayedChainInput | 'proof'
 >;
 export interface RelayerInfo {
   substrate: Record<string, RelayedChainConfig | null>;
@@ -106,7 +98,7 @@ export class WebbRelayerBuilder {
   private _listUpdated = new Subject<void>();
   public readonly listUpdated: Observable<void>;
 
-  private constructor(
+  private constructor (
     protected relayerConfigs: RelayerConfig[],
     private readonly chainNameAdapter: ChainNameIntoChainId,
     private appConfig: AppConfig
@@ -115,7 +107,7 @@ export class WebbRelayerBuilder {
   }
 
   /// Mapping the fetched relayers info to the Capabilities store
-  private static infoIntoCapabilities(
+  private static infoIntoCapabilities (
     _nfig: RelayerConfig,
     info: RelayerInfo,
     nameAdapter: ChainNameIntoChainId
@@ -127,38 +119,42 @@ export class WebbRelayerBuilder {
       supportedChains: {
         evm: info.evm
           ? Object.keys(info.evm)
-              .filter(
-                /**
+            .filter(
+              /**
                  * account is deprecated but it's kept here for backward compatibility
                  * */
-                (key) => (info.evm[key]?.account || info.evm[key]?.beneficiary) && nameAdapter(key, 'evm') != null
-              )
-              .reduce((m, key) => {
-                m.set(nameAdapter(key, 'evm'), info.evm[key]);
-                return m;
-              }, new Map())
+              (key) => (info.evm[key]?.account || info.evm[key]?.beneficiary) && nameAdapter(key, 'evm') != null
+            )
+            .reduce((m, key) => {
+              m.set(nameAdapter(key, 'evm'), info.evm[key]);
+
+              return m;
+            }, new Map())
           : new Map(),
         substrate: info.substrate
           ? Object.keys(info.substrate)
-              .filter((key) => info.substrate[key]?.beneficiary && nameAdapter(key, 'substrate') != null)
-              .reduce((m, key) => {
-                m.set(nameAdapter(key, 'substrate'), info.substrate[key]);
-                return m;
-              }, new Map())
+            .filter((key) => info.substrate[key]?.beneficiary && nameAdapter(key, 'substrate') != null)
+            .reduce((m, key) => {
+              m.set(nameAdapter(key, 'substrate'), info.substrate[key]);
+
+              return m;
+            }, new Map())
           : new Map()
       }
     };
   }
 
   /// fetch relayers
-  private async fetchCapabilitiesAndInsert(config: RelayerConfig) {
+  private async fetchCapabilitiesAndInsert (config: RelayerConfig) {
     this.capabilities[config.endpoint] = await this.fetchCapabilities(config.endpoint);
+
     return this.capabilities;
   }
 
-  public async fetchCapabilities(endpoint: string): Promise<Capabilities> {
+  public async fetchCapabilities (endpoint: string): Promise<Capabilities> {
     const res = await fetch(`${endpoint}/api/v1/info`);
     const info: RelayerInfo = await res.json();
+
     return WebbRelayerBuilder.infoIntoCapabilities(
       {
         endpoint
@@ -168,9 +164,11 @@ export class WebbRelayerBuilder {
     );
   }
 
-  public async addRelayer(endpoint: string) {
+  public async addRelayer (endpoint: string) {
     const c = await this.fetchCapabilitiesAndInsert({ endpoint });
+
     this._listUpdated.next();
+
     return c;
   }
 
@@ -178,7 +176,7 @@ export class WebbRelayerBuilder {
    * init the builder
    *  create new instance and fetch the relayers
    * */
-  static async initBuilder(
+  static async initBuilder (
     config: RelayerConfig[],
     chainNameAdapter: ChainNameIntoChainId,
     appConfig: AppConfig
@@ -198,6 +196,7 @@ export class WebbRelayerBuilder {
       })
     );
     console.log(relayerBuilder);
+
     return relayerBuilder;
   }
 
@@ -205,16 +204,18 @@ export class WebbRelayerBuilder {
    *  get a list of the suitable relaryes for a given query
    *  the list is randomized
    * */
-  getRelayer(query: RelayerQuery): WebbRelayer[] {
+  getRelayer (query: RelayerQuery): WebbRelayer[] {
     const { baseOn, bridgeSupport, chainId, contractAddress, ipService, tornadoSupport } = query;
     const relayers = Object.keys(this.capabilities)
       .filter((key) => {
         const capabilities = this.capabilities[key];
+
         if (ipService) {
           if (!capabilities.hasIpService) {
             return false;
           }
         }
+
         if (contractAddress && baseOn && chainId) {
           if (baseOn === 'evm') {
             return Boolean(
@@ -226,14 +227,16 @@ export class WebbRelayerBuilder {
             );
           }
         }
+
         if (tornadoSupport && baseOn && chainId) {
           if (baseOn === 'evm') {
-            const evmId = this.appConfig.chains[chainId].chainId!;
+            const evmId = this.appConfig.chains[chainId].chainId;
             const mixersInfoForChain = new EvmChainMixersInfo(this.appConfig, evmId);
             const mixerInfo = mixersInfoForChain.getTornMixerInfoBySize(
               tornadoSupport.amount,
               tornadoSupport.tokenSymbol
             );
+
             if (mixerInfo) {
               return Boolean(
                 capabilities.supportedChains[baseOn]
@@ -247,6 +250,7 @@ export class WebbRelayerBuilder {
             }
           }
         }
+
         if (bridgeSupport && baseOn && chainId) {
           if (baseOn === 'evm') {
             const bridgeAddress = getAnchorAddressForBridge(
@@ -255,6 +259,7 @@ export class WebbRelayerBuilder {
               bridgeSupport.amount,
               this.appConfig.bridgeByAsset
             );
+
             if (bridgeAddress) {
               return Boolean(
                 capabilities.supportedChains[baseOn]
@@ -268,19 +273,25 @@ export class WebbRelayerBuilder {
             }
           }
         }
+
         if (baseOn && chainId) {
           return Boolean(capabilities.supportedChains[baseOn].get(chainId));
         }
+
         if (baseOn && !chainId) {
           console.log(capabilities.supportedChains, baseOn);
+
           return capabilities.supportedChains[baseOn].size > 0;
         }
+
         return true;
       })
       .map((key) => {
         return new WebbRelayer(key, this.capabilities[key]);
       });
+
     shuffleRelayers(relayers);
+
     return relayers;
   }
 }
@@ -310,18 +321,21 @@ class RelayedWithdraw {
   readonly watcher: Observable<[RelayedWithdrawResult, string | undefined]>;
   private emitter: Subject<[RelayedWithdrawResult, string | undefined]> = new Subject();
 
-  constructor(private ws: WebSocket, private prefix: RelayerCMDKey) {
+  constructor (private ws: WebSocket, private prefix: RelayerCMDKey) {
     this.watcher = this.emitter.asObservable();
 
     ws.onmessage = ({ data }) => {
       const handledMessage = this.handleMessage(JSON.parse(data));
+
       this.status = handledMessage[0];
       this.emitter.next(handledMessage);
+
       if (this.status === RelayedWithdrawResult.CleanExit) {
         this.emitter.complete();
         this.ws.close();
       }
     };
+
     ws.onerror = (e) => {
       console.log(e);
     };
@@ -339,7 +353,7 @@ class RelayedWithdraw {
     }
   };
 
-  generateWithdrawRequest<T extends RelayedChainInput, C extends CMDSwitcher<T['baseOn']>>(
+  generateWithdrawRequest<T extends RelayedChainInput, C extends CMDSwitcher<T['baseOn']>> (
     chain: T,
     proof: RelayerCMDs<T['baseOn'], C>['proof'],
     args: WithdrawRelayerArgs<T['baseOn'], C>
@@ -355,15 +369,16 @@ class RelayedWithdraw {
     };
   }
 
-  send(withdrawRequest: any) {
+  send (withdrawRequest: any) {
     if (this.status !== RelayedWithdrawResult.PreFlight) {
       throw Error('there is a withdraw process running');
     }
+
     this.status = RelayedWithdrawResult.OnFlight;
     this.ws.send(JSON.stringify(withdrawRequest));
   }
 
-  await() {
+  await () {
     return this.watcher
       .pipe(
         filter(([next]) => {
@@ -373,35 +388,40 @@ class RelayedWithdraw {
       .toPromise();
   }
 
-  get currentStatus() {
+  get currentStatus () {
     return this.status;
   }
 }
 
 export class WebbRelayer {
-  constructor(readonly endpoint: string, readonly capabilities: Capabilities) {}
+  constructor (readonly endpoint: string, readonly capabilities: Capabilities) {}
 
-  async initWithdraw<Target extends RelayerCMDKey>(target: Target) {
+  async initWithdraw<Target extends RelayerCMDKey> (target: Target) {
     const ws = new WebSocket(this.endpoint.replace('http', 'ws') + '/ws');
+
     await new Promise((resolve, reject) => {
       ws.onopen = resolve;
       ws.onerror = reject;
     });
+
     /// insure the socket is open
     /// maybe removed soon
     for (;;) {
       if (ws.readyState === 1) {
         break;
       }
+
       await new Promise((resolve) => {
         setTimeout(resolve, 300);
       });
     }
+
     return new RelayedWithdraw(ws, target);
   }
 
-  async getIp(): Promise<string> {
+  async getIp (): Promise<string> {
     const req = await fetch(`${this.endpoint}/api/v1/ip`);
+
     if (req.ok) {
       return req.json();
     } else {
@@ -410,16 +430,20 @@ export class WebbRelayer {
   }
 
   // chainId should be formatted as a hex string
-  async getLeaves(chainId: string, contractAddress: string): Promise<RelayerLeaves> {
+  async getLeaves (chainId: string, contractAddress: string): Promise<RelayerLeaves> {
     const url = `${this.endpoint}/api/v1/leaves/${chainId}/${contractAddress}`;
+
     logger.info(`fetching info from: ${url}`);
     const req = await fetch(url);
+
     if (req.ok) {
       const jsonResponse = await req.json();
       const fetchedLeaves: string[] = jsonResponse.leaves;
       const lastQueriedBlock: string = jsonResponse.lastQueriedBlock;
       const lastQueriedBlockNumber: number = parseInt(lastQueriedBlock, 16);
+
       logger.info(`info fetched from relayer: ${fetchedLeaves} + ${lastQueriedBlockNumber}`);
+
       return {
         leaves: fetchedLeaves,
         lastQueriedBlock: lastQueriedBlockNumber
@@ -429,7 +453,7 @@ export class WebbRelayer {
     }
   }
 
-  static intoActiveWebRelayer(
+  static intoActiveWebRelayer (
     instance: WebbRelayer,
     query: { chain: InternalChainId; basedOn: 'evm' | 'substrate' },
     getFees: (note: string) => Promise<{ totalFees: string; withdrawFeePercentage: number } | undefined>
@@ -439,7 +463,7 @@ export class WebbRelayer {
 }
 
 export class ActiveWebbRelayer extends WebbRelayer {
-  constructor(
+  constructor (
     endpoint: string,
     capabilities: Capabilities,
     private query: { chain: InternalChainId; basedOn: 'evm' | 'substrate' },
@@ -448,20 +472,21 @@ export class ActiveWebbRelayer extends WebbRelayer {
     super(endpoint, capabilities);
   }
 
-  private get config() {
+  private get config () {
     const list = this.capabilities.supportedChains[this.query.basedOn];
+
     return list.get(this.query.chain);
   }
 
-  get gasLimit(): number | undefined {
+  get gasLimit (): number | undefined {
     return undefined;
   }
 
-  get account(): string | undefined {
+  get account (): string | undefined {
     return this.config?.account;
   }
 
-  get beneficiary(): string | undefined {
+  get beneficiary (): string | undefined {
     return this.config?.beneficiary;
   }
 

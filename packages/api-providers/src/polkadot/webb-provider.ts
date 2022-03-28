@@ -1,35 +1,29 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+import { ApiInitHandler, AppConfig, NotificationHandler, ProvideCapabilities, WasmFactory, WebbApiProvider, WebbMethods, WebbProviderEvents, WebbRelayerBuilder } from '@webb-tools/api-providers';
+import { EventBus } from '@webb-tools/app-util';
+
 import { ApiPromise } from '@polkadot/api';
 import { InjectedAccount, InjectedExtension } from '@polkadot/extension-inject/types';
-import {
-  ApiInitHandler,
-  AppConfig,
-  NotificationHandler,
-  ProvideCapabilities,
-  WasmFactory,
-  WebbApiProvider,
-  WebbMethods,
-  WebbProviderEvents
-} from '@webb-tools/api-providers';
+
+import { AccountsAdapter } from '../account/Accounts.adapter';
+import { PolkadotProvider } from '../ext-providers';
+import { ActionsBuilder, InteractiveFeedback, WebbError, WebbErrorCodes } from '../webb-error';
 import { PolkadotAnchorApi } from './anchor-api';
 import { PolkadotBridgeDeposit } from './anchor-deposit';
-import { PolkadotMixerWithdraw } from './mixer-withdraw';
 import { PolkadotAnchorWithdraw } from './anchor-withdraw';
-import { ActionsBuilder, InteractiveFeedback, WebbError, WebbErrorCodes } from '../webb-error';
-import { PolkaTXBuilder } from './transaction';
-import { PolkadotMixerDeposit } from './mixer-deposit';
-import { EventBus } from '@webb-tools/app-util';
 import { PolkadotChainQuery } from './chain-query';
-import { WebbRelayerBuilder } from '@webb-tools/api-providers';
-import { AccountsAdapter } from '../account/Accounts.adapter';
+import { PolkadotMixerDeposit } from './mixer-deposit';
+import { PolkadotMixerWithdraw } from './mixer-withdraw';
+import { PolkaTXBuilder } from './transaction';
 import { PolkadotWrapUnwrap } from './wrap-unwrap';
-import { PolkadotProvider } from '../ext-providers';
 
 export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbApiProvider<WebbPolkadot> {
   readonly methods: WebbMethods<WebbPolkadot>;
   readonly api: ApiPromise;
   readonly txBuilder: PolkaTXBuilder;
 
-  private constructor(
+  private constructor (
     apiPromise: ApiPromise,
     injectedExtension: InjectedExtension,
     readonly relayingManager: WebbRelayerBuilder,
@@ -83,14 +77,15 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
 
   capabilities?: ProvideCapabilities | undefined;
 
-  getProvider() {
+  getProvider () {
     return this.provider;
   }
 
-  async awaitMetaDataCheck() {
+  async awaitMetaDataCheck () {
     /// delay some time till the UI is instantiated and then check if the dApp needs to update extension meta data
     await new Promise((resolve) => setTimeout(resolve, 3000));
     const metaData = await this.provider.checkMetaDataUpdate();
+
     if (metaData) {
       /// feedback body
       const feedbackEntries = InteractiveFeedback.feedbackEntries([
@@ -111,12 +106,13 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
         },
         feedbackEntries
       );
+
       /// emit the feedback object
       this.emit('interactiveFeedback', feedback);
     }
   }
 
-  private async insureApiInterface() {
+  private async insureApiInterface () {
     // check for RPC
     console.log(this.api, 'api');
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -125,12 +121,13 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
     // merkle rpc
     const merklePallet = this.api.query.merkleTreeBn254;
     const mixerPallet = this.api.query.mixerBn254;
+
     if (!merklePallet || !merkleRPC || !mixerPallet) {
       throw WebbError.from(WebbErrorCodes.InsufficientProviderInterface);
     }
   }
 
-  static async init(
+  static async init (
     appName: string,
     endpoints: string[],
     errorHandler: ApiInitHandler,
@@ -152,14 +149,16 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
       accounts,
       wasmFactory
     );
+
     await instance.insureApiInterface();
     /// check metadata update
     await instance.awaitMetaDataCheck();
     await apiPromise.isReady;
+
     return instance;
   }
 
-  static async initWithCustomAccountsAdapter(
+  static async initWithCustomAccountsAdapter (
     appName: string,
     endpoints: string[],
     errorHandler: ApiInitHandler,
@@ -182,14 +181,16 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
       accounts,
       wasmFactory
     );
+
     await instance.insureApiInterface();
     /// check metadata update
     await instance.awaitMetaDataCheck();
     await apiPromise.isReady;
+
     return instance;
   }
 
-  async destroy(): Promise<void> {
+  async destroy (): Promise<void> {
     await this.provider.destroy();
   }
 }

@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { InjectedAccount, InjectedExtension } from '@polkadot/extension-inject/types';
-import { Account, AccountsAdapter, PromiseOrT } from '@webb-tools/api-providers/account/Accounts.adapter';
-import { RelayerConfig, WebbRelayerBuilder } from '@webb-tools/api-providers';
+import { Account, AccountsAdapter, NotificationPayload, PromiseOrT, RelayerConfig, relayerNameToChainId, WebbPolkadot, WebbRelayerBuilder } from '@webb-tools/api-providers';
 import { InternalChainId } from '@webb-tools/api-providers/chains';
-import { NotificationPayload, WebbPolkadot } from '@webb-tools/api-providers';
-import { InteractiveFeedback } from '@webb-tools/api-providers/webb-error';
-import { relayerNameToChainId } from '@webb-tools/api-providers';
-import { mockAppConfig } from './mock-config';
 import { PolkadotProvider } from '@webb-tools/api-providers/ext-providers';
+import { InteractiveFeedback } from '@webb-tools/api-providers/webb-error';
+
+import { InjectedAccount, InjectedExtension } from '@polkadot/extension-inject/types';
+
+import { mockAppConfig } from './mock-config';
 
 const relayerConfig: RelayerConfig[] = [
   {
@@ -26,7 +25,8 @@ const relayerConfig: RelayerConfig[] = [
     endpoint: 'https://relayer.bldnodes.org'
   }
 ];
-export function relayerSubstrateNameToChainId(name: string): InternalChainId {
+
+export function relayerSubstrateNameToChainId (name: string): InternalChainId {
   switch (name) {
     case 'localnode':
       return InternalChainId.WebbDevelopment;
@@ -37,30 +37,34 @@ export function relayerSubstrateNameToChainId(name: string): InternalChainId {
 
 const notificationHandler = (m: NotificationPayload) => {
   console.log(m);
+
   return Math.random();
 };
+
 notificationHandler.remove = (id: string | number) => {
   console.log(id);
 };
 
 class PolkadotAccounts extends AccountsAdapter<InjectedExtension, InjectedAccount> {
   private activeAccount: null | Account<InjectedAccount> = null;
-  accounts(): PromiseOrT<Account<InjectedExtension | InjectedAccount>[]> {
+  accounts (): PromiseOrT<Account<InjectedExtension | InjectedAccount>[]> {
     return [];
   }
 
-  get activeOrDefault(): Promise<Account<InjectedAccount> | null> | Account<InjectedAccount> | null {
+  get activeOrDefault (): Promise<Account<InjectedAccount> | null> | Account<InjectedAccount> | null {
     return this.activeAccount;
   }
 
   providerName = 'Polka';
 
-  setActiveAccount(account: Account<InjectedAccount>): PromiseOrT<void> {
+  setActiveAccount (account: Account<InjectedAccount>): PromiseOrT<void> {
     this.activeAccount = account;
+
     return undefined;
   }
 }
-export async function initPolkadotProvider(): Promise<WebbPolkadot> {
+
+export async function initPolkadotProvider (): Promise<WebbPolkadot> {
   const webbRelayerBuilder = await WebbRelayerBuilder.initBuilder(
     relayerConfig,
     (name, basedOn) => {
@@ -74,7 +78,7 @@ export async function initPolkadotProvider(): Promise<WebbPolkadot> {
   );
   const apiPromise = await PolkadotProvider.getApiPromise('Webb DApp', ['ws://127.0.0.1:9944'], {
     // @ts-ignore
-    onError(error: InteractiveFeedback): any {
+    onError (error: InteractiveFeedback): any {
       console.log(error.reason);
       console.log(error);
     }
@@ -83,7 +87,7 @@ export async function initPolkadotProvider(): Promise<WebbPolkadot> {
     'Webb DApp',
     ['ws://127.0.0.1:9944'],
     {
-      onError(error: InteractiveFeedback): any {
+      onError (error: InteractiveFeedback): any {
         console.log(error.reason);
         console.log(error);
       }
@@ -96,5 +100,6 @@ export async function initPolkadotProvider(): Promise<WebbPolkadot> {
     {} as any,
     () => null
   );
+
   return provider;
 }

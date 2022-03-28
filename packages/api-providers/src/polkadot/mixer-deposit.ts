@@ -1,33 +1,31 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import {LoggerService} from '@webb-tools/app-util';
-import {Note, NoteGenInput} from '@webb-tools/sdk-core';
-import {PalletMixerMixerMetadata} from '@webb-tools/types/interfaces/pallets';
+import { Currency, DepositPayload as TDepositPayload, MixerSize, ORMLCurrency } from '@webb-tools/api-providers';
+import { LoggerService } from '@webb-tools/app-util';
+import { Note, NoteGenInput } from '@webb-tools/sdk-core';
+import { PalletMixerMixerMetadata } from '@webb-tools/types/interfaces/pallets';
 
-import {u8aToHex} from '@polkadot/util';
+import { u8aToHex } from '@polkadot/util';
 
-import {WebbPolkadot} from './webb-provider';
-import {DepositPayload as TDepositPayload, MixerSize} from '@webb-tools/api-providers';
-import {MixerDeposit} from '../abstracts';
-import {ORMLCurrency} from '@webb-tools/api-providers';
-import {WebbError, WebbErrorCodes} from '../webb-error';
-import {Currency} from '@webb-tools/api-providers';
-import {ChainType, computeChainIdType, internalChainIdToChainId} from '../chains';
+import { MixerDeposit } from '../abstracts';
+import { ChainType, computeChainIdType, internalChainIdToChainId } from '../chains';
+import { WebbError, WebbErrorCodes } from '../webb-error';
+import { WebbPolkadot } from './webb-provider';
 
 type DepositPayload = TDepositPayload<Note, [number, string]>;
 const logger = LoggerService.get('tornado-deposit');
 
 export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayload> {
-  constructor(protected inner: WebbPolkadot) {
+  constructor (protected inner: WebbPolkadot) {
     super(inner);
   }
 
-  static async getSizes(webbPolkadot: WebbPolkadot): Promise<MixerSize[]> {
+  static async getSizes (webbPolkadot: WebbPolkadot): Promise<MixerSize[]> {
     const api = webbPolkadot.api;
     const ormlCurrency = new ORMLCurrency(webbPolkadot);
     const ormlAssets = await ormlCurrency.list();
     const data = await api.query.mixerBn254.mixers.entries();
     // @ts-ignore
-    const tokenProperty: Array<NativeTokenProperties> = await api.rpc.system.properties();
+    // const tokenProperty: Array<NativeTokenProperties> = await api.rpc.system.properties();
     const groupItem = data
       .map(([storageKey, info]) => {
         const mixerInfo = (info as unknown as PalletMixerMixerMetadata).toHuman();
@@ -36,6 +34,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
         // @ts-ignore
         const treeId = storageKey.toHuman()[0];
         const id = storageKey.toString() + treeId;
+
         console.log('id in getSizes: ', id);
         // parse number from amount string
         // TODO: Get and parse native / non-native token denomination
@@ -48,6 +47,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
             ormlAssets.find((asset) => Number(asset.id) === cId)!
           )
           : Currency.fromCurrencyId(webbPolkadot.config.currencies, Number(cId));
+
         return {
           id,
           amount: amountNumber,
@@ -56,7 +56,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
         };
       })
       .map(
-        ({amount, currency, treeId}) =>
+        ({ amount, currency, treeId }) =>
           ({
             id: treeId,
             treeId,
@@ -67,24 +67,28 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
           } as MixerSize)
       )
       .sort((a, b) => (a.amount > b.amount ? 1 : a.amount < b.amount ? -1 : 0));
+
     return groupItem;
   }
 
-  async getSizes() {
+  async getSizes () {
     return PolkadotMixerDeposit.getSizes(this.inner);
   }
 
-  async generateNote(mixerId: number, chainId: number): Promise<DepositPayload> {
+  async generateNote (mixerId: number, chainId: number): Promise<DepositPayload> {
     logger.info(`Depositing to mixer id ${mixerId}`);
     const chainIdType = computeChainIdType(ChainType.Substrate, internalChainIdToChainId(ChainType.Substrate, chainId));
     const sizes = await this.getSizes();
     const amount = sizes.find((size) => Number(size.id) === mixerId);
     const properties = await this.inner.api.rpc.system.properties();
     const denomination = properties.tokenDecimals.toHuman() || 12;
+
     if (!amount) {
       throw Error('amount not found! for mixer id ' + mixerId);
     }
+
     const treeId = amount.id;
+
     logger.info(`Depositing to tree id ${treeId}`);
     const noteInput: NoteGenInput = {
       protocol: 'mixer',
@@ -102,9 +106,11 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
       targetIdentifyingData: treeId.toString(),
       tokenSymbol: amount.asset
     };
-    logger.info(`noteInput in generateNote: `, noteInput);
+
+    logger.info('noteInput in generateNote: ', noteInput);
     const depositNote = await Note.generateNote(noteInput);
-    logger.info(`generated Note from input: `, depositNote.note);
+
+    logger.info('generated Note from input: ', depositNote.note);
     const leaf = depositNote.getLeaf();
 
     return {
@@ -113,7 +119,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     };
   }
 
-  async deposit(depositPayload: DepositPayload): Promise<void> {
+  async deposit (depositPayload: DepositPayload): Promise<void> {
     const tx = this.inner.txBuilder.build(
       {
         section: 'mixerBn254',
@@ -123,9 +129,11 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     );
 
     const account = await this.inner.accounts.activeOrDefault;
+
     if (!account) {
       throw WebbError.from(WebbErrorCodes.NoAccountAvailable);
     }
+
     tx.on('finalize', () => {
       console.log('deposit done');
     });

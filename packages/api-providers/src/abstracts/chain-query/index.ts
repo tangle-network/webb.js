@@ -2,7 +2,7 @@
 import { WebbCurrencyId } from '../../enums';
 
 export abstract class ChainQuery<Provider> {
-  constructor(protected inner: Provider) {}
+  constructor (protected inner: Provider) {}
 
   abstract tokenBalanceByCurrencyId(currency: WebbCurrencyId): Promise<string>;
   abstract tokenBalanceByAddress(address: string): Promise<string>;

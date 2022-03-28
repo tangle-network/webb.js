@@ -1,28 +1,23 @@
-import {EventBus} from '@webb-tools/app-util';
-import {Note} from '@webb-tools/sdk-core';
-import {providers} from 'ethers';
-import {Eth} from 'web3-eth';
-import {Web3WrapUnwrap} from './wrap-unwrap';
-import {Web3MixerWithdraw} from './mixer-withdraw';
-import {Web3Accounts, Web3Provider} from '../ext-providers';
-import {Web3MixerDeposit} from './mixer-deposit';
-import {WebbError, WebbErrorCodes} from '../webb-error';
-import {EVMChainId, evmIdIntoInternalChainId, parseChainIdType} from '../chains';
-import {EvmChainMixersInfo} from './EvmChainMixersInfo';
-import {
-  AppConfig,
-  MixerSize,
-  NotificationHandler, Web3AnchorDeposit,
-  WebbApiProvider,
-  WebbMethods,
-  WebbProviderEvents,
-  WebbRelayerBuilder
-} from '@webb-tools/api-providers';
-import {Web3AnchorWithdraw} from './anchor-withdraw';
-import {Web3ChainQuery} from './chain-query';
-import {Web3AnchorApi} from './anchor-api';
-import {AccountsAdapter} from '../account/Accounts.adapter';
-import {AnchorContract, TornadoContract} from '../contracts/contracts';
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+import { AppConfig, MixerSize, NotificationHandler, Web3AnchorDeposit, WebbApiProvider, WebbMethods, WebbProviderEvents, WebbRelayerBuilder } from '@webb-tools/api-providers';
+import { EventBus } from '@webb-tools/app-util';
+import { Note } from '@webb-tools/sdk-core';
+import { providers } from 'ethers';
+import { Eth } from 'web3-eth';
+
+import { AccountsAdapter } from '../account/Accounts.adapter';
+import { EVMChainId, evmIdIntoInternalChainId, parseChainIdType } from '../chains';
+import { AnchorContract, TornadoContract } from '../contracts/contracts';
+import { Web3Accounts, Web3Provider } from '../ext-providers';
+import { WebbError, WebbErrorCodes } from '../webb-error';
+import { Web3AnchorApi } from './anchor-api';
+import { Web3AnchorWithdraw } from './anchor-withdraw';
+import { Web3ChainQuery } from './chain-query';
+import { EvmChainMixersInfo } from './EvmChainMixersInfo';
+import { Web3MixerDeposit } from './mixer-deposit';
+import { Web3MixerWithdraw } from './mixer-withdraw';
+import { Web3WrapUnwrap } from './wrap-unwrap';
 
 export class WebbWeb3Provider
   extends EventBus<WebbProviderEvents<[number]>>
@@ -35,7 +30,7 @@ export class WebbWeb3Provider
     return null;
   };
 
-  private constructor(
+  private constructor (
     private web3Provider: Web3Provider,
     protected chainId: number,
     readonly relayingManager: WebbRelayerBuilder,
@@ -91,26 +86,29 @@ export class WebbWeb3Provider
     };
   }
 
-  getProvider(): Web3Provider {
+  getProvider (): Web3Provider {
     return this.web3Provider;
   }
 
-  async setChainListener() {
+  async setChainListener () {
     this.ethersProvider = this.web3Provider.intoEthersProvider();
+
     const handler = async () => {
       const chainId = await this.web3Provider.network;
+
       this.emit('providerUpdate', [chainId]);
     };
+
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.ethersProvider.provider?.on?.('chainChanged', handler);
   }
 
-  setStorage(chainId: number) {
+  setStorage (chainId: number) {
     this.connectedMixers = new EvmChainMixersInfo(this.config, chainId);
   }
 
-  async destroy(): Promise<void> {
+  async destroy (): Promise<void> {
     await this.endSession();
     this.subscriptions = {
       providerUpdate: [],
@@ -118,50 +116,56 @@ export class WebbWeb3Provider
     };
   }
 
-  async getChainId(): Promise<number> {
+  async getChainId (): Promise<number> {
     const chainId = (await this.ethersProvider.getNetwork()).chainId;
+
     return chainId;
   }
 
-  getMixers() {
+  getMixers () {
     return this.connectedMixers;
   }
 
-  getTornadoContractAddressByNote(note: Note) {
+  getTornadoContractAddressByNote (note: Note) {
     const evmId = parseChainIdType(Number(note.note.targetChainId)).chainId as EVMChainId;
     const availableMixers = new EvmChainMixersInfo(this.config, evmId);
     const mixer = availableMixers.getTornMixerInfoBySize(Number(note.note.amount), note.note.tokenSymbol);
+
     if (!mixer) {
       throw new Error('Mixer not found');
     }
+
     return mixer.address;
   }
 
-  async getContractByAddress(mixerAddress: string): Promise<TornadoContract> {
+  async getContractByAddress (mixerAddress: string): Promise<TornadoContract> {
     return new TornadoContract(this.connectedMixers, this.ethersProvider, mixerAddress);
   }
 
-  getWebbAnchorByAddress(address: string): AnchorContract {
+  getWebbAnchorByAddress (address: string): AnchorContract {
     return new AnchorContract(this.connectedMixers, this.ethersProvider, address);
   }
 
-  getWebbAnchorByAddressAndProvider(address: string, provider: providers.Web3Provider): AnchorContract {
+  getWebbAnchorByAddressAndProvider (address: string, provider: providers.Web3Provider): AnchorContract {
     return new AnchorContract(this.connectedMixers, provider, address, true);
   }
 
-  getMixerInfoBySize(mixerSize: number, tokenSymbol: string) {
+  getMixerInfoBySize (mixerSize: number, tokenSymbol: string) {
     const mixer = this.connectedMixers.getTornMixerInfoBySize(mixerSize, tokenSymbol);
+
     if (!mixer) {
       throw WebbError.from(WebbErrorCodes.MixerSizeNotFound);
     }
+
     return mixer;
   }
 
   // This function limits the mixer implementation to one type for the token/size pair.
   // Something like a poseidon hasher implementation instead of mimc hasher cannot
   // exist alongside each other.
-  async getContractBySize(mixerSize: number, tokenSymbol: string): Promise<TornadoContract> {
+  async getContractBySize (mixerSize: number, tokenSymbol: string): Promise<TornadoContract> {
     const mixer = this.connectedMixers.getTornMixerInfoBySize(mixerSize, tokenSymbol);
+
     if (!mixer) {
       throw WebbError.from(WebbErrorCodes.MixerSizeNotFound);
     }
@@ -169,16 +173,16 @@ export class WebbWeb3Provider
     return new TornadoContract(this.connectedMixers, this.ethersProvider, mixer.address);
   }
 
-  getEthersProvider(): providers.Web3Provider {
+  getEthersProvider (): providers.Web3Provider {
     return this.ethersProvider;
   }
 
-  getMixerSizes(tokenSymbol: string): Promise<MixerSize[]> {
+  getMixerSizes (tokenSymbol: string): Promise<MixerSize[]> {
     return Promise.resolve(this.connectedMixers.getTornMixerSizes(tokenSymbol));
   }
 
   // Init web3 provider with the `Web3Accounts` as the default account provider
-  static async init(
+  static async init (
     web3Provider: Web3Provider,
     chainId: number,
     relayerBuilder: WebbRelayerBuilder,
@@ -186,11 +190,12 @@ export class WebbWeb3Provider
     notification: NotificationHandler
   ) {
     const accounts = new Web3Accounts(web3Provider.eth);
+
     return new WebbWeb3Provider(web3Provider, chainId, relayerBuilder, appConfig, notification, accounts);
   }
 
   // Init web3 provider with a generic account provider
-  static async initWithCustomAccountAdapter(
+  static async initWithCustomAccountAdapter (
     web3Provider: Web3Provider,
     chainId: number,
     relayerBuilder: WebbRelayerBuilder,
@@ -201,15 +206,15 @@ export class WebbWeb3Provider
     return new WebbWeb3Provider(web3Provider, chainId, relayerBuilder, appConfig, notification, web3AccountProvider);
   }
 
-  get capabilities() {
+  get capabilities () {
     return this.web3Provider.capabilities;
   }
 
-  endSession(): Promise<void> {
+  endSession (): Promise<void> {
     return this.web3Provider.endSession();
   }
 
-  switchOrAddChain(evmChainId: number) {
+  switchOrAddChain (evmChainId: number) {
     return this.web3Provider
       .switchChain({
         chainId: `0x${evmChainId.toString(16)}`
@@ -224,6 +229,7 @@ export class WebbWeb3Provider
         // prompt to add the chain
         if (switchError.code === 4902) {
           const currency = this.config.currencies[chain.nativeCurrencyId];
+
           await this.web3Provider.addChain({
             chainId: `0x${evmChainId.toString(16)}`,
             chainName: chain.name,
@@ -246,7 +252,7 @@ export class WebbWeb3Provider
       });
   }
 
-  public get innerProvider() {
+  public get innerProvider () {
     return this.web3Provider;
   }
 }

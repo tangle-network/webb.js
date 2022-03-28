@@ -1,3 +1,5 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
 import { EventBus } from '@webb-tools/app-util';
 
 export type FeedbackLevel = 'error' | 'info' | 'warning' | 'success';
@@ -33,26 +35,25 @@ export class ActionsBuilder {
   /// list of actions of the `ActionsBuilder`
   private _actions: Record<string, Action> = {};
 
-  constructor() {}
-
   /// Static method for `init`
-  static init() {
+  static init () {
     return new ActionsBuilder();
   }
 
   /// Adds an action for the builder actions
-  action(name: string, handler: () => any, level: FeedbackLevel = 'info', id: string | null = null): ActionsBuilder {
+  action (name: string, handler: () => any, level: FeedbackLevel = 'info', id: string | null = null): ActionsBuilder {
     this._actions[name] = {
       level,
       onTrigger: handler,
       name,
-      id,
+      id
     };
+
     return this;
   }
 
   /// Access the actions to pass them to the constructor of the interactive feedback
-  actions() {
+  actions () {
     return this._actions;
   }
 }
@@ -60,20 +61,20 @@ export class ActionsBuilder {
 /// InteractiveFeedback a class that wrappers and error metadata and provide handlers for it
 /// A `canceled` event is trigger only once, when the state changes to be`_canceled=true`
 export class InteractiveFeedback extends EventBus<{ canceled: InteractiveFeedback }> {
-  private _canceled: boolean = false;
+  private _canceled = false;
   private selectedAction: Action | null = null;
 
   /// Create a new action builder for the InteractiveFeedback
-  static actionsBuilder() {
+  static actionsBuilder () {
     return ActionsBuilder.init();
   }
 
   /// Create the body for the InteractiveFeedback
-  static feedbackEntries(feedbackBody: FeedbackBody): FeedbackBody {
+  static feedbackEntries (feedbackBody: FeedbackBody): FeedbackBody {
     return feedbackBody;
   }
 
-  constructor(
+  constructor (
     /// Level of the InteractiveFeedback for customised view
     public readonly level: FeedbackLevel,
     /// Actions available for the InteractiveFeedback instance without the cancel action
@@ -89,15 +90,16 @@ export class InteractiveFeedback extends EventBus<{ canceled: InteractiveFeedbac
   }
 
   /// getter for the user to know if this is canceled
-  get canceled() {
+  get canceled () {
     return this._canceled;
   }
 
   /// cancel without calling the onCancel handler
-  cancelWithoutHandler() {
+  cancelWithoutHandler () {
     if (this._canceled) {
       return;
     }
+
     /// change the state of the interactive feedback to be canceled to prevent from a  re-trigger
     this._canceled = true;
     /// emit `canceled` event
@@ -105,10 +107,11 @@ export class InteractiveFeedback extends EventBus<{ canceled: InteractiveFeedbac
   }
 
   /// cancel this will trigger the `canceled` event and set the interactiveFeedback as canceled
-  cancel() {
+  cancel () {
     if (this._canceled) {
       return;
     }
+
     /// change the state of the interactive feedback to be canceled to prevent from a  re-trigger
     this._canceled = true;
     /// emit `canceled` event
@@ -117,22 +120,26 @@ export class InteractiveFeedback extends EventBus<{ canceled: InteractiveFeedbac
     this._onCancel();
   }
 
-  trigger<ActionKey extends keyof this['actions']>(key: ActionKey) {
+  trigger<ActionKey extends keyof this['actions']> (key: ActionKey) {
     if (this._canceled) {
       return;
     }
+
     // @ts-ignore
     const action = this.actions[key] as Action;
+
     if (action) {
       this.selectedAction = action;
+
       return action.onTrigger?.();
     }
   }
 
-  wait(): Promise<Action | null> {
+  wait (): Promise<Action | null> {
     if (this._canceled) {
       return Promise.resolve(null);
     }
+
     return new Promise((resolve) => {
       this.on('canceled', () => {
         resolve(this.selectedAction);

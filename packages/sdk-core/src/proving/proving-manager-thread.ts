@@ -7,7 +7,6 @@ import { ProofI } from '@webb-tools/sdk-core/proving/proving-manager';
 
 import { Note } from '../note';
 
-
 export type ProvingManagerSetupInput = {
   note: string;
   relayer: string;
@@ -32,16 +31,18 @@ export class ProvingManagerWrapper {
       self.addEventListener('message', async (event) => {
         const message = event.data as Partial<PMEvents>;
         const key = Object.keys(message)[0] as keyof PMEvents;
+
         switch (key) {
           case 'proof':
             {
               const input = message.proof!;
               const proof = await this.proof(input);
+
               (self as unknown as Worker).postMessage({
                 data: proof,
-            name: key
-                });
-              }
+                name: key
+              });
+            }
 
             break;
           case 'destroy':
@@ -52,25 +53,27 @@ export class ProvingManagerWrapper {
     }
   }
 
-  private get wasmBlob() {
+  private get wasmBlob () {
     return this.ctx === 'worker' ? import('@webb-tools/wasm-utils') : import('@webb-tools/wasm-utils/njs');
   }
 
-  private get proofBuilder() {
+  private get proofBuilder () {
     return this.wasmBlob.then((wasm) => {
       return wasm.ProofInputBuilder;
     });
   }
 
-  private async generateProof(proofInput: JsProofInput): Promise<Proof> {
+  private async generateProof (proofInput: JsProofInput): Promise<Proof> {
     const wasm = await this.wasmBlob;
+
     return wasm.generate_proof_js(proofInput);
   }
 
-  async proof(pmSetupInput: ProvingManagerSetupInput): Promise<ProofI> {
-    const Manager = await  this.proofBuilder;
+  async proof (pmSetupInput: ProvingManagerSetupInput): Promise<ProofI> {
+    const Manager = await this.proofBuilder;
     const pm = new Manager();
-    const {note} = await Note.deserialize(pmSetupInput.note);
+    const { note } = await Note.deserialize(pmSetupInput.note);
+
     // TODO: handle the prefix and validation
     pm.setLeaves(pmSetupInput.leaves);
     pm.setRelayer(pmSetupInput.relayer);
@@ -82,15 +85,16 @@ export class ProvingManagerWrapper {
     pm.setNote(note);
 
     if (pmSetupInput.roots) {
-      pm.setRoots(pmSetupInput.roots)
+      pm.setRoots(pmSetupInput.roots);
     }
 
     if (pmSetupInput.refreshCommitment) {
-      pm.setRefreshCommitment(pmSetupInput.refreshCommitment)
-
+      pm.setRefreshCommitment(pmSetupInput.refreshCommitment);
     }
+
     const proofInput = pm.build_js();
     const proof = await this.generateProof(proofInput);
+
     return {
       nullifierHash: proof.nullifierHash,
       proof: proof.proof,

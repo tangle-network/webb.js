@@ -1,6 +1,8 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
 import { InternalChainId } from '../chains';
 
-export function relayerSubstrateNameToChainId(name: string): InternalChainId {
+export function relayerSubstrateNameToChainId (name: string): InternalChainId {
   switch (name) {
     case 'localnode':
       return InternalChainId.WebbDevelopment;
@@ -9,7 +11,7 @@ export function relayerSubstrateNameToChainId(name: string): InternalChainId {
   throw new Error('unhandled relayed chain name  ' + name);
 }
 
-export function relayerNameToChainId(name: string): InternalChainId {
+export function relayerNameToChainId (name: string): InternalChainId {
   switch (name) {
     case 'beresheet':
       return InternalChainId.EdgewareTestNet;
@@ -64,7 +66,7 @@ enum RelayerChainName {
   PolygonTestnet = 'polygontestnet'
 }
 
-export function chainIdToRelayerName(id: InternalChainId): string {
+export function chainIdToRelayerName (id: InternalChainId): string {
   switch (id) {
     case InternalChainId.Edgeware:
       return RelayerChainName.Edgeware;
@@ -97,5 +99,6 @@ export function chainIdToRelayerName(id: InternalChainId): string {
     case InternalChainId.PolygonTestnet:
       return RelayerChainName.PolygonTestnet;
   }
+
   throw new Error(`unhandled Chain id ${id}`);
 }

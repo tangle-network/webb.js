@@ -1,8 +1,11 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
 import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
-import { pedersenHash } from './pedersen-hash';
-import { poseidonHash3 } from './poseidon-hash3';
+
 import { bufferToFixed } from './buffer-to-fixed';
 import { PoseidonHasher } from './merkle';
+import { pedersenHash } from './pedersen-hash';
+import { poseidonHash3 } from './poseidon-hash3';
 
 const tornSnarkjs = require('tornado-snarkjs');
 const utils = require('ffjavascript').utils;
@@ -21,14 +24,14 @@ export type Deposit = {
   chainId?: number;
 };
 
-export function createTornDeposit() {
+export function createTornDeposit () {
   const preimage = crypto.randomBytes(62);
   const nullifier = preimage.slice(0, 31);
   const secret = preimage.slice(31, 62);
   const commitment = bufferToFixed(pedersenHash(preimage));
   const nullifierHash = bufferToFixed(pedersenHash(nullifier));
 
-  let deposit: Deposit = {
+  const deposit: Deposit = {
     preimage,
     commitment,
     nullifierHash,
@@ -39,14 +42,16 @@ export function createTornDeposit() {
   return deposit;
 }
 
-export function createAnchor2Deposit(chainId: number) {
+export function createAnchor2Deposit (chainId: number) {
   const poseidonHasher = new PoseidonHasher();
   const preimage = crypto.randomBytes(62);
   const nullifier = leBuff2int(preimage.slice(0, 31));
   const secret = leBuff2int(preimage.slice(31, 62));
+
   console.log('chainId: ', chainId);
   const commitmentBN = poseidonHash3([chainId, nullifier, secret]);
   const nullifierHash = poseidonHasher.hash(null, nullifier, nullifier);
+
   console.log('secret: ', secret);
   console.log('nullifier: ', nullifier);
   console.log('commitmentBN: ', commitmentBN);
@@ -54,7 +59,7 @@ export function createAnchor2Deposit(chainId: number) {
 
   console.log('commitment when creating deposit note: ', commitment);
 
-  let deposit: Deposit = {
+  const deposit: Deposit = {
     preimage,
     commitment,
     nullifierHash,
@@ -62,10 +67,11 @@ export function createAnchor2Deposit(chainId: number) {
     secret: bufferToFixed(secret).substring(2),
     chainId: chainId
   };
+
   return deposit;
 }
 
-export function depositFromAnchorNote(note: DepositNote): Deposit {
+export function depositFromAnchorNote (note: DepositNote): Deposit {
   const poseidonHasher = new PoseidonHasher();
   const noteSecretParts = note.secrets.split(':');
   const chainId = Number(note.targetChainId);
@@ -77,7 +83,7 @@ export function depositFromAnchorNote(note: DepositNote): Deposit {
   const nullifierHash = poseidonHasher.hash(null, nullifier, nullifier);
   const commitment = bufferToFixed(commitmentBN);
 
-  let deposit: Deposit = {
+  const deposit: Deposit = {
     preimage,
     commitment,
     nullifierHash,
@@ -85,11 +91,12 @@ export function depositFromAnchorNote(note: DepositNote): Deposit {
     secret: bufferToFixed(secret),
     chainId: chainId
   };
+
   return deposit;
 }
 
 /// todo change to tornado
-export function depositFromPreimage(hexString: string): Deposit {
+export function depositFromPreimage (hexString: string): Deposit {
   const preImage = Buffer.from(hexString, 'hex');
   const commitment = pedersenHash(preImage);
   const nullifier = tornSnarkjs.bigInt.leBuff2int(preImage.slice(0, 31));
@@ -103,5 +110,6 @@ export function depositFromPreimage(hexString: string): Deposit {
     nullifier: nullifier,
     secret: secret
   };
+
   return deposit;
 }

@@ -1,4 +1,6 @@
-import {getCachedFixtureURI, withLocalFixtures} from "@webb-tools/api-providers";
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+import { getCachedFixtureURI, withLocalFixtures } from '@webb-tools/api-providers';
 
 export const fetchWasmForEdges = async (maxEdges: number) => {
   let ipfsHash: string;
@@ -35,10 +37,12 @@ export const fetchWasmForEdges = async (maxEdges: number) => {
     if (withLocalFixtures()) {
       const cachedWasmRequest = await fetch(cachedURI);
       const wasmBuf = await cachedWasmRequest.arrayBuffer();
+
       return wasmBuf;
     } else {
       const ipfsWasmRequest = await fetch(`https://ipfs.io/ipfs/${ipfsHash}`);
       const wasmBuf = await ipfsWasmRequest.arrayBuffer();
+
       return wasmBuf;
     }
   } catch (e) {
@@ -83,11 +87,13 @@ export const fetchKeyForEdges = async (maxEdges: number) => {
       const cachedKeyRequest = await fetch(cachedURI);
       const cachedKeyArrayBuffer = await cachedKeyRequest.arrayBuffer();
       const cachedKey = new Uint8Array(cachedKeyArrayBuffer);
+
       return cachedKey;
     } else {
       const ipfsKeyRequest = await fetch(`https://ipfs.io/ipfs/${ipfsHash}`);
       const circuitKeyArrayBuffer = await ipfsKeyRequest.arrayBuffer();
       const circuitKey = new Uint8Array(circuitKeyArrayBuffer);
+
       return circuitKey;
     }
   } catch (e) {

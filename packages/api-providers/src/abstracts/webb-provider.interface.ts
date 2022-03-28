@@ -1,14 +1,16 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+import { AnchorApi } from '@webb-tools/api-providers';
 import { EventBus } from '@webb-tools/app-util';
 
-import { DepositPayload, MixerDeposit, MixerDepositEvents, MixerWithdraw, MixerWithdrawEvents } from './mixer';
-import { ChainQuery } from './chain-query';
-import { AppConfig } from './common';
-import { WrapUnWrap } from './wrap-unwrap';
-import { WebbRelayerBuilder } from './relayer';
 import { AccountsAdapter } from '../account/Accounts.adapter';
 import { InteractiveFeedback } from '../webb-error';
-import {Bridge, AnchorDeposit, AnchorWithdraw} from './anchor';
-import { AnchorApi } from '@webb-tools/api-providers';
+import { AnchorDeposit, AnchorWithdraw, Bridge } from './anchor';
+import { ChainQuery } from './chain-query';
+import { AppConfig } from './common';
+import { DepositPayload, MixerDeposit, MixerDepositEvents, MixerWithdraw, MixerWithdrawEvents } from './mixer';
+import { WebbRelayerBuilder } from './relayer';
+import { WrapUnWrap } from './wrap-unwrap';
 
 /// list of the apis that are available for  the provider
 export interface WebbMethods<T extends WebbApiProvider<any>> {

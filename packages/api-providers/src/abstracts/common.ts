@@ -1,9 +1,11 @@
-import { WalletConfig } from '../types/wallet-config.interface';
-import { MixerConfig } from '../types/mixer-config.interface';
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
 import { AnchorConfigEntry } from '../types/anchor-config.interface';
 import { BridgeConfig } from '../types/bridge-config.interface';
-import { CurrencyConfig } from '../types/currency-config.interface';
 import { ChainConfig } from '../types/chain-config.interface';
+import { CurrencyConfig } from '../types/currency-config.interface';
+import { MixerConfig } from '../types/mixer-config.interface';
+import { WalletConfig } from '../types/wallet-config.interface';
 
 export type Chain = ChainConfig & {
   wallets: Record<number, Wallet>;

@@ -1,41 +1,39 @@
-import {LoggerService} from '@webb-tools/app-util';
-import {Note, NoteGenInput} from '@webb-tools/sdk-core';
-import {AnchorDeposit, Currency, DepositPayload as IDepositPayload, MixerSize} from '../abstracts';
-import {createAnchor2Deposit, Deposit} from '../contracts/utils/make-deposit';
-import {
-  ChainType,
-  chainTypeIdToInternalId,
-  computeChainIdType,
-  evmIdIntoInternalChainId,
-  InternalChainId,
-  parseChainIdType
-} from '../chains';
-import {WebbGovernedToken} from '../contracts/contracts';
-import {WebbWeb3Provider} from './webb-provider';
-import {bufferToFixed} from '../contracts/utils/buffer-to-fixed';
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+import { getEVMChainNameFromInternal } from '@webb-tools/api-providers/utils';
+import { LoggerService } from '@webb-tools/app-util';
+import { Note, NoteGenInput } from '@webb-tools/sdk-core';
+
+import { AnchorDeposit, Currency, DepositPayload as IDepositPayload, MixerSize } from '../abstracts';
+import { ChainType, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains';
+import { WebbGovernedToken } from '../contracts/contracts';
 // eslint-disable-next-line camelcase
-import {ERC20__factory} from '../contracts/types';
-import {getEVMChainNameFromInternal} from "@webb-tools/api-providers/utils";
+import { ERC20Factory } from '../contracts/types';
+import { bufferToFixed } from '../contracts/utils/buffer-to-fixed';
+import { createAnchor2Deposit, Deposit } from '../contracts/utils/make-deposit';
+import { WebbWeb3Provider } from './webb-provider';
 
 const logger = LoggerService.get('web3-bridge-deposit');
 
 type DepositPayload = IDepositPayload<Note, [Deposit, number | string, string?]>;
 
 export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPayload> {
-  private get bridgeApi() {
+  private get bridgeApi () {
     return this.inner.methods.anchorApi;
   }
 
-  private get config() {
+  private get config () {
     return this.inner.config;
   }
 
-  async deposit(depositPayload: DepositPayload): Promise<void> {
+  async deposit (depositPayload: DepositPayload): Promise<void> {
     const bridge = this.bridgeApi.activeBridge;
     const currency = this.bridgeApi.currency;
+
     if (!bridge || !currency) {
       throw new Error('api not ready');
     }
+
     try {
       const commitment = depositPayload.params[0].commitment;
       const note = depositPayload.note.note;
@@ -59,19 +57,24 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       const anchors = await this.bridgeApi.getAnchors();
       // Find the Anchor for this bridge amount
       const anchor = anchors.find((anchor) => anchor.amount === note.amount);
+
       if (!anchor) {
         throw new Error('not Anchor for amount' + note.amount);
       }
+
       // Get the contract address for the destination chain
       const contractAddress = anchor.neighbours[sourceInternalId];
+
       if (!contractAddress) {
         throw new Error(`No Anchor for the chain ${note.targetChainId}`);
       }
+
       const contract = this.inner.getWebbAnchorByAddress(contractAddress as string);
 
       // If a wrappableAsset was selected, perform a wrapAndDeposit
       if (depositPayload.params[2]) {
         const requiredApproval = await contract.isWrappableTokenApprovalRequired(depositPayload.params[2]);
+
         if (requiredApproval) {
           this.inner.notificationHandler({
             description: 'Waiting for token approval',
@@ -81,17 +84,19 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
             message: 'Waiting for token approval',
             key: 'waiting-approval'
           });
-          const tokenInstance = await ERC20__factory.connect(
+          const tokenInstance = await ERC20Factory.connect(
             depositPayload.params[2],
             this.inner.getEthersProvider().getSigner()
           );
           const webbToken = await contract.getWebbToken();
           const tx = await tokenInstance.approve(webbToken.address, await contract.denomination);
+
           await tx.wait();
           this.inner.notificationHandler.remove('waiting-approval');
         }
 
         const enoughBalance = await contract.hasEnoughBalance(depositPayload.params[2]);
+
         if (enoughBalance) {
           await contract.wrapAndDeposit(commitment, depositPayload.params[2]);
 
@@ -121,9 +126,11 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
             }
           });
         }
+
         return;
       } else {
         const requiredApproval = await contract.isWebbTokenApprovalRequired();
+
         if (requiredApproval) {
           this.inner.notificationHandler({
             description: 'Waiting for token approval',
@@ -135,11 +142,13 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
           });
           const tokenInstance = await contract.getWebbToken();
           const tx = await tokenInstance.approve(contract.inner.address, await contract.denomination);
+
           await tx.wait();
           this.inner.notificationHandler.remove('waiting-approval');
         }
 
         const enoughBalance = await contract.hasEnoughBalance();
+
         if (enoughBalance) {
           await contract.deposit(commitment);
           this.inner.notificationHandler({
@@ -171,7 +180,8 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       }
     } catch (e: any) {
       console.log(e);
-      if ((e as any)?.code === 4001) {
+
+      if ((e)?.code === 4001) {
         this.inner.notificationHandler.remove('waiting-approval');
         this.inner.notificationHandler({
           key: 'bridge-deposit',
@@ -193,9 +203,10 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
     }
   }
 
-  async getSizes(): Promise<MixerSize[]> {
+  async getSizes (): Promise<MixerSize[]> {
     const anchors = await this.bridgeApi.getAnchors();
     const currency = this.bridgeApi.currency;
+
     if (currency) {
       return anchors.map((anchor) => ({
         id: `Bridge=${anchor.amount}@${currency.view.name}`,
@@ -204,15 +215,18 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
         asset: String(currency.id)
       }));
     }
+
     return [];
   }
 
-  async getWrappableAssets(chainId: InternalChainId): Promise<Currency[]> {
+  async getWrappableAssets (chainId: InternalChainId): Promise<Currency[]> {
     const bridge = this.bridgeApi.activeBridge;
 
     logger.log('getWrappableAssets of chain: ', chainId);
+
     if (bridge) {
       const wrappedTokenAddress = bridge.getTokenAddress(chainId);
+
       if (!wrappedTokenAddress) return [];
 
       // Get the available token addresses which can wrap into the wrappedToken
@@ -224,6 +238,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       // If the tokenAddress matches one of the wrappableCurrencies, return it
       const wrappableCurrencyIds = this.config.chains[chainId].currencies.filter((currencyId) => {
         const wrappableTokenAddress = this.config.currencies[currencyId].addresses.get(chainId);
+
         return wrappableTokenAddress && tokenAddresses.includes(wrappableTokenAddress);
       });
 
@@ -235,6 +250,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
 
       return wrappableCurrencies;
     }
+
     return [];
   }
 
@@ -256,7 +272,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
    * destChainId => the Chain the token will be bridged to
    * If the wrappableAssetAddress is not provided, it is assumed to be the address of the webbToken
    * */
-  async generateBridgeNote(
+  async generateBridgeNote (
     anchorId: number | string,
     destChainId: number,
     wrappableAssetAddress?: string
@@ -267,6 +283,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
     if (!bridge || !currency) {
       throw new Error('api not ready');
     }
+
     const tokenSymbol = currency.view.symbol;
     const sourceEvmId = await this.inner.getChainId();
     const sourceChainId = computeChainIdType(ChainType.EVM, sourceEvmId);
@@ -294,8 +311,10 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       tokenSymbol: tokenSymbol,
       secrets: `${bufferToFixed(destChainId, 6).substring(2)}:${deposit.nullifier}:${deposit.secret}`
     };
+
     logger.info(`noteInput to generateNote: ${noteInput}`);
     const note = await Note.generateNote(noteInput);
+
     return {
       note: note,
       params: [deposit, anchorId, wrappableAssetAddress]

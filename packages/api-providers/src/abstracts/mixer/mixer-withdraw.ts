@@ -1,9 +1,12 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+import { WebbApiProvider } from '@webb-tools/api-providers';
 import { EventBus } from '@webb-tools/app-util';
 import { Note } from '@webb-tools/sdk-core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { ActiveWebbRelayer, WebbRelayer } from '../relayer';
+
 import { InternalChainId } from '../../chains';
-import { WebbApiProvider } from '@webb-tools/api-providers';
+import { ActiveWebbRelayer, WebbRelayer } from '../relayer';
 
 export enum WithdrawState {
   Cancelling,
@@ -41,44 +44,45 @@ export abstract class MixerWithdraw<T extends WebbApiProvider<any>> extends Even
   private _activeRelayer: OptionalActiveRelayer = null;
   cancelToken: CancelToken = { cancelled: false };
 
-  constructor(protected inner: T) {
+  constructor (protected inner: T) {
     super();
     this.watcher = this.emitter.asObservable();
   }
 
-  get hasRelayer(): Promise<boolean> {
+  get hasRelayer (): Promise<boolean> {
     return Promise.resolve(false);
   }
 
-  get activeRelayer(): [OptionalActiveRelayer, Observable<OptionalActiveRelayer>] {
+  get activeRelayer (): [OptionalActiveRelayer, Observable<OptionalActiveRelayer>] {
     return [this._activeRelayer, this.watcher];
   }
 
-  mapRelayerIntoActive(relayer: OptionalRelayer): Promise<OptionalActiveRelayer> {
+  mapRelayerIntoActive (relayer: OptionalRelayer): Promise<OptionalActiveRelayer> {
     return Promise.resolve(null);
   }
 
-  public async setActiveRelayer(relayer: OptionalRelayer) {
+  public async setActiveRelayer (relayer: OptionalRelayer) {
     this._activeRelayer = await this.mapRelayerIntoActive(relayer);
     this.emitter.next(this._activeRelayer);
   }
 
   // todo switch to the reactive api
-  get relayers(): Promise<WebbRelayer[]> {
+  get relayers (): Promise<WebbRelayer[]> {
     return Promise.resolve([]);
   }
 
-  getRelayersByNote(note: Note): Promise<WebbRelayer[]> {
+  getRelayersByNote (note: Note): Promise<WebbRelayer[]> {
     return Promise.resolve([]);
   }
 
-  getRelayersByChainAndAddress(chainId: InternalChainId, address: string): Promise<WebbRelayer[]> {
+  getRelayersByChainAndAddress (chainId: InternalChainId, address: string): Promise<WebbRelayer[]> {
     return Promise.resolve([]);
   }
 
-  cancelWithdraw(): Promise<void> {
+  cancelWithdraw (): Promise<void> {
     this.cancelToken.cancelled = true;
     this.emit('stateChange', WithdrawState.Cancelling);
+
     return Promise.resolve(undefined);
   }
 

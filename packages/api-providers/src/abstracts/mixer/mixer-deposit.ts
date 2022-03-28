@@ -1,3 +1,5 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
 import { EventBus } from '@webb-tools/app-util';
 
 import { Note } from './note';
@@ -24,7 +26,7 @@ export abstract class MixerDeposit<
   T = any,
   K extends DepositPayload = DepositPayload<any>
 > extends EventBus<MixerDepositEvents> {
-  constructor(protected inner: T) {
+  constructor (protected inner: T) {
     super();
   }
 

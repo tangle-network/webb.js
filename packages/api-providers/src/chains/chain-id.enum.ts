@@ -50,7 +50,7 @@ export enum InternalChainId {
 }
 
 export enum EVMChainId {
-  /*Default EVM Chains on MetaMask*/
+  /* Default EVM Chains on MetaMask */
   EthereumMainNet = 1,
   Ropsten = 3,
   Rinkeby = 4,
@@ -58,7 +58,7 @@ export enum EVMChainId {
   Goerli = 5,
   Ganache = 1337,
 
-  /*Added EVM Chains on MetaMask*/
+  /* Added EVM Chains on MetaMask */
   Edgeware = 2021,
   Beresheet = 2022,
   HarmonyTestnet0 = 1666700000,

@@ -1,12 +1,14 @@
-export abstract class Account<T extends unknown = unknown> {
-  constructor(protected readonly _inner: T, public readonly address: string) {}
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+export abstract class Account<T = unknown> {
+  constructor (protected readonly _inner: T, public readonly address: string) {}
 
   // TODO abstract create react element
   abstract get avatar(): unknown;
 
   abstract get name(): string;
 
-  protected get inner() {
+  protected get inner () {
     return this._inner;
   }
 }
@@ -18,10 +20,10 @@ export abstract class Account<T extends unknown = unknown> {
 
 export type PromiseOrT<T> = Promise<T> | T;
 
-export abstract class AccountsAdapter<T extends unknown = unknown, K = unknown> {
+export abstract class AccountsAdapter<T = unknown, K = unknown> {
   abstract providerName: string;
 
-  constructor(protected readonly _inner: T) {}
+  constructor (protected readonly _inner: T) {}
 
   abstract get activeOrDefault(): Promise<Account<K> | null> | Account<K> | null;
 
@@ -29,7 +31,7 @@ export abstract class AccountsAdapter<T extends unknown = unknown, K = unknown> 
 
   abstract setActiveAccount(account: Account): PromiseOrT<void>;
 
-  protected get inner() {
+  protected get inner () {
     return this._inner;
   }
 }

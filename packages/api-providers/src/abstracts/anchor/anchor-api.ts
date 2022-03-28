@@ -1,8 +1,8 @@
+// Copyright 2022 @webb-tools/
+// SPDX-License-Identifier: Apache-2.0
+import { ChainTypeId, chainTypeIdToInternalId, Currency, InternalChainId } from '@webb-tools/api-providers';
+import { WebbCurrencyId } from '@webb-tools/api-providers/enums';
 import { BehaviorSubject, Observable } from 'rxjs';
-import {WebbCurrencyId} from "@webb-tools/api-providers/enums";
-import {ChainTypeId, chainTypeIdToInternalId, InternalChainId} from "@webb-tools/api-providers";
-import {Currency} from "@webb-tools/api-providers";
-
 
 export type BridgeCurrencyIndex = string | number | WebbCurrencyId;
 
@@ -21,27 +21,27 @@ export abstract class AnchorApi<Api, BridgeConfigEntry> {
   private readonly _store: BehaviorSubject<BridgeStore<BridgeConfigEntry>>;
   private readonly _watcher: Observable<BridgeStore<BridgeConfigEntry>>;
 
-  public constructor(protected inner: Api, initialStore: Record<BridgeCurrencyIndex, BridgeConfigEntry>) {
+  public constructor (protected inner: Api, initialStore: Record<BridgeCurrencyIndex, BridgeConfigEntry>) {
     this._store = new BehaviorSubject({
       config: initialStore
     });
     this._watcher = this._store.asObservable();
   }
 
-  get $store() {
+  get $store () {
     return this._watcher;
   }
 
-  get store(): BridgeStore<BridgeConfigEntry> {
+  get store (): BridgeStore<BridgeConfigEntry> {
     return this._store.value;
   }
 
-  get bridgeIds() {
+  get bridgeIds () {
     return Object.keys(this.store.config) as BridgeCurrencyIndex[];
   }
 
   // eslint-disable-next-line @typescript-eslint/adjacent-overload-signatures
-  set store(next: Partial<BridgeStore<BridgeConfigEntry>>) {
+  set store (next: Partial<BridgeStore<BridgeConfigEntry>>) {
     this._store.next({ ...this.store, ...next });
   }
 
@@ -52,13 +52,13 @@ export abstract class AnchorApi<Api, BridgeConfigEntry> {
   // For evm
   abstract getTokenAddress(chainId: ChainTypeId): string | null;
 
-  get activeBridge(): BridgeConfigEntry | undefined {
+  get activeBridge (): BridgeConfigEntry | undefined {
     return this.store.activeBridge;
   }
 
   abstract getAnchors(): Promise<AnchorBase[]>;
 
-  setActiveBridge(activeBridge: BridgeConfigEntry | undefined) {
+  setActiveBridge (activeBridge: BridgeConfigEntry | undefined) {
     this.store = {
       ...this.store,
       activeBridge: activeBridge
@@ -70,9 +70,10 @@ export abstract class AnchorApi<Api, BridgeConfigEntry> {
   /*
    *  Get all Bridge tokens for a given chain
    * */
-  async getTokensOfChain(chainId: ChainTypeId): Promise<Currency[]> {
+  async getTokensOfChain (chainId: ChainTypeId): Promise<Currency[]> {
     const tokens = await this.getCurrencies();
     const internalChainId = chainTypeIdToInternalId(chainId);
+
     return tokens.filter((token) => token.hasChain(internalChainId));
   }
 }
