@@ -6,7 +6,6 @@ import { expect } from 'chai';
 import { ChainType, ChainTypeId } from './chain-id.enum';
 import { byteArrayToNum, computeChainIdType, numToByteArray, parseChainIdType } from './chain-utils';
 
-// TODO: Move utils and tests to webb.js
 describe('test various conversion functions', () => {
   it('byte array to num converts correctly', () => {
     const arr = [2, 0, 0, 0, 122, 105];
