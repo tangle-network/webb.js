@@ -1,16 +1,17 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
+// @ts-ignore
+import * as snarkjs from 'snarkjs';
+
 import { fetchKeyForEdges, fetchWasmForEdges } from '../../ipfs/evm/anchors';
 import { AnchorWitnessInput } from './types';
-
-const groth16 = require('snarkjs/src/groth16');
-const zkey = require('snarkjs/src/zkey');
 
 type MaxEdges = 1 | 2 | 3 | 4 | 5;
 
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
 export const ZERO = 'ZERO';
+const { groth16, zkey } = snarkjs;
 
 export const isZero = (value: string | number) => {
   if (value === zeroAddress) {
