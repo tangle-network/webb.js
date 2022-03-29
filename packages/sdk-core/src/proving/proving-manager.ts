@@ -19,7 +19,7 @@ export class ProvingManager {
     return ProvingManager.proofWithoutWorker(input);
   }
 
-  private static proofWithoutWorker (input: ProvingManagerSetupInput) {
+  private static proveWithoutWorker (input: ProvingManagerSetupInput) {
     const pm = new ProvingManagerWrapper('direct-call');
 
     return pm.proof(input);
