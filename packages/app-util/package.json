@@ -5,6 +5,7 @@
   "author": "Webb Developers <drew@webb.tools>",
   "main": "index.js",
   "license": "Apache-2.0",
+  "type": "module",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"

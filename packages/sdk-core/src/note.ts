@@ -64,9 +64,9 @@ export class Note {
    */
   private static get wasm () {
     if (typeof process !== 'undefined' && process.versions != null && process.versions.node != null) {
-      return import('@webb-tools/wasm-utils/njs');
+      return import('@webb-tools/wasm-utils/njs/wasm-utils-njs.js');
     } else {
-      return import('@webb-tools/wasm-utils');
+      return import('@webb-tools/wasm-utils/wasm-utils.js');
     }
   }
 

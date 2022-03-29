@@ -53,26 +53,26 @@ const executeSync = (cmd) => {
   }
 }
 
-const CONFIGS = ['babel.config.js', 'babel.config.cjs'];
 const CPX = ['css', 'gif', 'hbs', 'jpg', 'js', 'json', 'png', 'svg', 'd.ts']
   .map((ext) => `src/**/*.${ext}`)
   .concat('package.json');
 
-console.log('$ polkadot-dev-build-ts', process.argv.slice(2).join(' '));
 
 function buildWebpack() {
   executeSync('yarn polkadot-exec-webpack --config webpack.config.js --mode production');
 }
 
-async function buildBabel(dir) {
-  // Get Root Configs
-  const configs = CONFIGS.map((c) => path.join(process.cwd(), `../../${c}`));
-  const babelConfig = configs.find((f) => fs.existsSync(f)) || configs[0];
-  // Get local configs
-  const localConfigs = CONFIGS.map((c) => path.join(process.cwd(), c));
-  const localBabelConfig = localConfigs.find((f) => fs.existsSync(f));
+// build the 
+async function buildBabel(dir, type) {
+  // babel configuration names are one of these two
+  const configFileName = type === 'esm' ? 'babel-config-esm.cjs' : 'babel-config-cjs.cjs';
+
+  // Get Config Options:
+  const rootConfig = path.join(process.cwd(), `../../${configFileName}`);
+  const potentialLocalConfig = path.join(process.cwd(), configFileName);
+
   // Prefer to use local config over the root one.
-  const conf = localBabelConfig || babelConfig;
+  const conf = fs.existsSync(potentialLocalConfig) ? potentialLocalConfig : rootConfig;
 
   await babel({
     babelOptions: {
@@ -83,7 +83,7 @@ async function buildBabel(dir) {
       filenames: ['src'],
       ignore: '**/*.d.ts',
       outDir: path.join(process.cwd(), 'build'),
-      outFileExtension: '.js'
+      outFileExtension: type === 'esm' ? '.js' : '.cjs'
     }
   });
 
@@ -96,10 +96,6 @@ async function buildJs(dir) {
   if (!fs.existsSync(path.join(process.cwd(), '.skip-build'))) {
     const { name, version } = require(path.join(process.cwd(), './package.json'));
 
-    // if (!name.startsWith('@polkadot/')) {
-    //   return;
-    // }
-
     console.log(`*** ${name} ${version}`);
 
     mkdirp.sync('build');
@@ -107,7 +103,8 @@ async function buildJs(dir) {
     if (fs.existsSync(path.join(process.cwd(), 'public'))) {
       buildWebpack(dir);
     } else {
-      await buildBabel(dir);
+      await buildBabel(dir, 'esm');
+      await buildBabel(dir, 'cjs');
     }
 
     console.log();
