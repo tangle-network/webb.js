@@ -27,6 +27,7 @@ type PMEvents = {
 
 export class ProvingManagerWrapper {
   constructor (private ctx: 'worker' | 'direct-call' = 'worker') {
+    // if the Manager is running in side worker it registers an event listener
     if (ctx === 'worker') {
       self.addEventListener('message', async (event) => {
         const message = event.data as Partial<PMEvents>;

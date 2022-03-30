@@ -7,8 +7,17 @@ import { Proof } from '@webb-tools/wasm-utils';
 export type ProofI = Omit<Proof, 'free'>;
 
 export class ProvingManager {
-  constructor (private readonly worker: Worker | null | undefined) {}
+  constructor (
+    private readonly worker: Worker | null | undefined // Optional WebWorker
+  ) {}
 
+  /**
+   * @param {ProvingManagerSetupInput} input
+   * @returns {ProofI}
+   * @description Checks the current {ProvingManager} status wither it is proving with a Worker(browser) or directly(Nodejs),
+   * accordingly it will run to write private function
+   * {ProvingManager.proveWithWorker} for browser,And {ProvingManager.proveWithoutWorker} for Nodejs
+   * */
   public prove (input: ProvingManagerSetupInput) {
     const worker = this.worker;
 
@@ -20,6 +29,7 @@ export class ProvingManager {
   }
 
   private static proveWithoutWorker (input: ProvingManagerSetupInput) {
+    // If the worker CTX is direct-call
     const pm = new ProvingManagerWrapper('direct-call');
 
     return pm.proof(input);
