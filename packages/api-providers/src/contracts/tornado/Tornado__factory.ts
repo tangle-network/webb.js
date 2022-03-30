@@ -4,7 +4,7 @@
 
 import { Contract, Signer, utils } from 'ethers';
 import { Provider } from '@ethersproject/providers';
-import type { Tornado, TornadoInterface } from '../Tornado';
+import type { Tornado, TornadoInterface } from '../tornado';
 
 const _abi = [
   {
