@@ -1,29 +1,35 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { AnchorApi } from '@webb-tools/api-providers';
-import { EventBus } from '@webb-tools/app-util';
+import {AnchorApi} from '@webb-tools/api-providers';
+import {EventBus} from '@webb-tools/app-util';
 
-import { AccountsAdapter } from '../account/Accounts.adapter';
-import { InteractiveFeedback } from '../webb-error';
-import { AnchorDeposit, AnchorWithdraw, Bridge } from './anchor';
-import { ChainQuery } from './chain-query';
-import { AppConfig } from './common';
-import { DepositPayload, MixerDeposit, MixerDepositEvents, MixerWithdraw, MixerWithdrawEvents } from './mixer';
-import { WebbRelayerBuilder } from './relayer';
-import { WrapUnWrap } from './wrap-unwrap';
+import {AccountsAdapter} from '../account/Accounts.adapter';
+import {InteractiveFeedback} from '../webb-error';
+import {AnchorDeposit, AnchorWithdraw, Bridge} from './anchor';
+import {ChainQuery} from './chain-query';
+import {AppConfig} from './common';
+import {DepositPayload, MixerDeposit, MixerDepositEvents, MixerWithdraw, MixerWithdrawEvents} from './mixer';
+import {WebbRelayerBuilder} from './relayer';
+import {WrapUnWrap} from './wrap-unwrap';
 
 /// list of the apis that are available for  the provider
 export interface WebbMethods<T extends WebbApiProvider<any>> {
+  // Mixer API
   mixer: WebbMixer<T>;
+  // Anchor/Bridge API
   anchor: WebbAnchor<T>;
+  // Wrap and unwrap API
   wrapUnwrap: WrapAndUnwrap<T>;
+  // Chain query : an API for querying storage used currently for balances
   chainQuery: ChainQuery<T>;
+  // Anchor API developed initially for to handle the difference between
+  // web3 (Chains that depend on static configs) and chains that will need to query the anchor
   anchorApi: AnchorApi<T, any>;
 }
 
 export type WebbMethod<T extends EventBus<K>, K extends Record<string, unknown>> = {
-  // the underlying provider for the methods
+  // The underlying provider for the methods
   inner: T;
   enabled: boolean;
 };
@@ -34,12 +40,14 @@ export interface WebbMixer<T extends WebbApiProvider<any>> {
   // withdraw
   withdraw: WebbMethod<MixerWithdraw<T>, MixerWithdrawEvents>;
 }
+
 export interface WrapAndUnwrap<T> {
   core: {
     inner: WrapUnWrap<T>;
     enabled: boolean;
   };
 }
+
 export interface WebbAnchor<T extends WebbApiProvider<any>> {
   core: Bridge | null;
   // deposit
@@ -79,10 +87,15 @@ export type NotificationKey = string | number;
 export type VariantType = 'default' | 'error' | 'success' | 'warning' | 'info';
 
 export type NotificationData = {
+  // Either the Notification is kept for future manual removal or by an event
   persist: boolean;
+  // Main message/ title for the notification
   message: string;
+  // Description about the Notification
   description: string;
+  // Notification variant that can be used to style the notification
   variant: VariantType;
+  // Arbitrary action that can be used  for clicking the notification (Not implemented)
   action: string;
 };
 
@@ -91,7 +104,9 @@ export type NotificationApi = {
   remove(key: NotificationKey): void;
 };
 type MethodPath = {
+  // Main section for the Transaction
   section: string;
+  // The call name
   method: string;
 };
 
@@ -141,6 +156,7 @@ export type NotificationHandler = ((notification: NotificationPayload) => string
  * @params
  * */
 export type WasmFactory = (name?: string) => Worker | null;
+
 export interface WebbApiProvider<T> extends EventBus<WebbProviderEvents> {
   /// Accounts Adapter will have all methods related to the provider accounts
   accounts: AccountsAdapter<any>;
@@ -151,13 +167,14 @@ export interface WebbApiProvider<T> extends EventBus<WebbProviderEvents> {
   destroy(): Promise<void> | void;
 
   capabilities?: ProvideCapabilities;
-
+  // Clean up for the provider that will remove the side effects
   endSession?(): Promise<void>;
 
   /// relayer
   relayingManager: WebbRelayerBuilder;
 
   getProvider(): any;
+
   // Configs
   config: AppConfig;
   // Notification handler

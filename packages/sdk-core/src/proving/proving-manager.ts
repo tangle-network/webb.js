@@ -16,7 +16,7 @@ export class ProvingManager {
       return ProvingManager.proveWithWorker(input, worker);
     }
 
-    return ProvingManager.proofWithoutWorker(input);
+    return ProvingManager.proveWithoutWorker(input);
   }
 
   private static proveWithoutWorker (input: ProvingManagerSetupInput) {

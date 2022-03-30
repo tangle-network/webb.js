@@ -129,13 +129,13 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
   }
 
   static async init (
-    appName: string,
-    endpoints: string[],
-    errorHandler: ApiInitHandler,
-    relayerBuilder: WebbRelayerBuilder,
-    appConfig: AppConfig,
-    notification: NotificationHandler,
-    wasmFactory: WasmFactory
+    appName: string, // App name Arbitrary name
+    endpoints: string[], // Endpoints of the substrate node
+    errorHandler: ApiInitHandler, // Error handler that will be used to catch errors while initializing the provider
+    relayerBuilder: WebbRelayerBuilder, // Webb Relayer builder for relaying withdraw
+    appConfig: AppConfig, // The whole and current app configuration
+    notification: NotificationHandler, // Notification handler that will be used for the provider
+    wasmFactory: WasmFactory // A Factory Fn that wil return wasm worker that would be supplied eventually to the `sdk-core`
   ): Promise<WebbPolkadot> {
     const [apiPromise, injectedExtension] = await PolkadotProvider.getParams(appName, endpoints, errorHandler.onError);
     const provider = new PolkadotProvider(apiPromise, injectedExtension, new PolkaTXBuilder(apiPromise, notification));
@@ -160,12 +160,12 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
   }
 
   static async initWithCustomAccountsAdapter (
-    appName: string,
-    endpoints: string[],
-    errorHandler: ApiInitHandler,
-    relayerBuilder: WebbRelayerBuilder,
-    appConfig: AppConfig,
-    notification: NotificationHandler,
+    appName: string, // App name Arbitrary name
+    endpoints: string[], // Endpoints of the substrate node
+    errorHandler: ApiInitHandler, // Error handler that will be used to catch errors while initializing the provider
+    relayerBuilder: WebbRelayerBuilder, // Webb Relayer builder for relaying withdraw
+    appConfig: AppConfig, // The whole and current app configuration
+    notification: NotificationHandler, // Notification handler that will be used for the provider
     accounts: AccountsAdapter<InjectedExtension, InjectedAccount>,
     apiPromise: ApiPromise,
     injectedExtension: InjectedExtension,
