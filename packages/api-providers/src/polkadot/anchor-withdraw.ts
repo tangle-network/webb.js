@@ -160,7 +160,7 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
 
 async function fetchSubstrateProvingKey () {
   // TODO: change to anchor fixture
-  const IPFSUrl = 'https://ipfs.io/ipfs/QmYDtGX7Wf5qUPEpGsgrX6oss2m2mm8vi7uzNdK4C9yJdZ';
+  const IPFSUrl = 'https://ipfs.io/ipfs/QmXRGKJZvFpCRw5ZvdxoeXtyteof4w1tPrdu9Jopz8YzB3';
   const ipfsKeyRequest = await fetch(IPFSUrl);
   const circuitKeyArrayBuffer = await ipfsKeyRequest.arrayBuffer();
 
