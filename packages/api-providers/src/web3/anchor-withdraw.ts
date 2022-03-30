@@ -13,10 +13,10 @@ import { BigNumber } from 'ethers';
 
 import { AnchorWithdraw } from '../abstracts';
 import { chainTypeIdToInternalId, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains';
-import { AnchorContract, ZKPWebbAnchorInputWithoutMerkle } from '../contracts/wrappers';
 import { generateWithdrawProofCallData, hexStringToBytes } from '../contracts/utils/bridge-utils';
 import { bufferToFixed } from '../contracts/utils/buffer-to-fixed';
 import { depositFromAnchorNote } from '../contracts/utils/make-deposit';
+import { AnchorContract, ZKPWebbAnchorInputWithoutMerkle } from '../contracts/wrappers';
 import { webbCurrencyIdFromString } from '../enums';
 import { Web3Provider } from '../ext-providers';
 import { WebbError, WebbErrorCodes } from '../webb-error';
