@@ -241,7 +241,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
       this.emit('disconnected', undefined);
     });
 
-    this.injectedExtension.accounts.subscribe((accounts) => {
+    this.injectedExtension.accounts?.subscribe((accounts) => {
       const polkadotAccounts = accounts.map((account) => new PolkadotAccount(account, account.address));
 
       this.emit('accountsChange', polkadotAccounts);

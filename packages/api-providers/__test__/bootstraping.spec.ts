@@ -5,7 +5,9 @@ import { expect } from 'chai';
 
 import { initPolkadotProvider } from './utils/init-polkadot-provider';
 
-describe('Bootstrap providers', () => {
+describe('Bootstrap providers', function () {
+  this.timeout(120_000);
+
   it('Should init Polkadot provider', async () => {
     const provider = await initPolkadotProvider();
     const chainProperties = await provider.api.rpc.system.properties();
