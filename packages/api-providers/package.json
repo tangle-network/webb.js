@@ -1,7 +1,7 @@
 {
-  "name": "@webb-tools/app-providers",
+  "name": "@webb-tools/api-providers",
   "version": "0.1.4-44",
-  "description": "dApp provider  to work with Webb",
+  "description": "dApp provider to work with Webb",
   "author": "Webb Developers <drew@webb.tools>",
   "main": "index.js",
   "license": "Apache-2.0",
