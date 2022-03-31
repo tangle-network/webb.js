@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
-
 import { OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, WebbRelayer, WithdrawState } from '@webb-tools/api-providers';
+import { fetchSubstrateTornadoProvingKey } from '@webb-tools/api-providers/ipfs/substrate/tornado';
 import { LoggerService } from '@webb-tools/app-util';
 import { Note, ProvingManager } from '@webb-tools/sdk-core';
 import { ProvingManagerSetupInput } from '@webb-tools/sdk-core/proving/proving-manager-thread';
@@ -22,17 +22,6 @@ const logger = LoggerService.get('PolkadotMixerWithdraw');
 const transactionString = (hexString: string) => {
   return `${hexString.slice(0, 6)}...${hexString.slice(hexString.length - 4, hexString.length)}`;
 };
-
-async function fetchSubstrateProvingKey () {
-  const IPFSUrl = 'https://ipfs.io/ipfs/QmYDtGX7Wf5qUPEpGsgrX6oss2m2mm8vi7uzNdK4C9yJdZ';
-  const ipfsKeyRequest = await fetch(IPFSUrl);
-  const circuitKeyArrayBuffer = await ipfsKeyRequest.arrayBuffer();
-
-  logger.info(`Done Fetching key from ${ipfsKeyRequest.url}`);
-  const circuitKey = new Uint8Array(circuitKeyArrayBuffer);
-
-  return circuitKey;
-}
 
 type WithdrawProof = {
   id: string;
@@ -154,7 +143,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
       const relayerAccountId = activeRelayer ? activeRelayer.beneficiary! : recipient;
       const relayerAccountHex = u8aToHex(decodeAddress(relayerAccountId));
       // fetching the proving key
-      const provingKey = await fetchSubstrateProvingKey();
+      const provingKey = await fetchSubstrateTornadoProvingKey();
       const isValidRelayer = Boolean(activeRelayer && activeRelayer.beneficiary);
       const proofInput: ProvingManagerSetupInput = {
         fee: 0,

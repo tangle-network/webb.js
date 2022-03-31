@@ -1,6 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
+import { fetchSubstrateAnchorProvingKey } from '@webb-tools/api-providers/ipfs/substrate/anchor';
 import { LoggerService } from '@webb-tools/app-util';
 import { Note, ProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core';
 
@@ -96,7 +97,7 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
 
       const recipientAccountHex = u8aToHex(decodeAddress(recipient));
       const relayerAccountHex = u8aToHex(decodeAddress(recipient));
-      const provingKey = await fetchSubstrateProvingKey();
+      const provingKey = await fetchSubstrateAnchorProvingKey();
       const refreshCommitment = '0000000000000000000000000000000000000000000000000000000000000000';
       const root = await this.fetchRoot(treeId);
 
@@ -156,16 +157,4 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
       throw e;
     }
   }
-}
-
-async function fetchSubstrateProvingKey () {
-  // TODO: change to anchor fixture
-  const IPFSUrl = 'https://ipfs.io/ipfs/QmYDtGX7Wf5qUPEpGsgrX6oss2m2mm8vi7uzNdK4C9yJdZ';
-  const ipfsKeyRequest = await fetch(IPFSUrl);
-  const circuitKeyArrayBuffer = await ipfsKeyRequest.arrayBuffer();
-
-  logger.info('Done Fetching key');
-  const circuitKey = new Uint8Array(circuitKeyArrayBuffer);
-
-  return circuitKey;
 }
