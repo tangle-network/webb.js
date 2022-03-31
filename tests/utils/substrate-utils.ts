@@ -397,6 +397,7 @@ export async function withdrawAnchorBnx5_4(
     'fixed-anchor',
     'bn254',
     'x5',
+    '2',
     'proving_key_uncompressed.bin'
   );
   const pk = fs.readFileSync(pkPath);

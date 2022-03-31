@@ -12,7 +12,7 @@
   "compilerOptions": {
     "types": ["mocha", "node"],
     "declaration": true,
-    "target": "ES2020",
+    "target": "esnext",
     "module": "CommonJS",
     "jsx": "preserve",
     "strict": true,
@@ -24,6 +24,9 @@
     "experimentalDecorators": true,
     "baseUrl": ".",
     "allowJs": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
     "paths": {
       "@webb-tools/api": [
         "packages/api/src"
@@ -60,10 +63,15 @@
       ],
       "@webb-tools/wasm-utils/*": [
         "packages/wasm-utils/build/*"
+      ],
+      "@webb-tools/api-providers": [
+        "packages/api-providers/src"
+      ],
+      "@webb-tools/api-providers/*": [
+        "packages/api-providers/src/*"
       ]
     },
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
+
     "typeRoots": [
       "./node_modules/@polkadot/ts",
       "./node_modules/@types"

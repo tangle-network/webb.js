@@ -1,0 +1,29 @@
+{
+  "name": "@webb-tools/app-providers",
+  "version": "0.1.4-39",
+  "description": "dApp provider  to work with Webb",
+  "author": "Webb Developers <drew@webb.tools>",
+  "main": "index.js",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "repository": "https://github.com/webb-tools/webb.js.git",
+  "dependencies": {
+    "@babel/runtime": "^7.10.2",
+    "@polkadot/extension-dapp": "^0.35.0-beta.35",
+    "@walletconnect/web3-provider": "^1.7.5",
+    "bignumber.js": "^9.0.0",
+    "tornado-circomlib": "git+https://github.com/webb-tools/tornado-circomlib.git",
+    "tornado-snarkjs": "git+https://github.com/tornadocash/snarkjs.git#869181cfaf7526fe8972073d31655493a04326d5",
+    "tornado-websnark": "git+https://github.com/webb-tools/websnark.git",
+    "snarkjs": "^0.4.6",
+    "@webb-tools/contracts": "0.1.7",
+    "@webb-tools/utils": "0.1.6"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.0",
+    "chai": "^4.3.6"
+  }
+}
