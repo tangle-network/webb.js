@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 
 import { parseUnits } from '@ethersproject/units';
-import { ActiveWebbRelayer, Bridge, OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer, WithdrawState } from '@webb-tools/api-providers';
+import { Bridge, OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer, WithdrawState } from '@webb-tools/api-providers';
 import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, chainIdToRelayerName, getAnchorAddressForBridge, getEVMChainName, getEVMChainNameFromInternal, MixerStorage } from '@webb-tools/api-providers/utils';
 import { LoggerService } from '@webb-tools/app-util';
 import { Note } from '@webb-tools/sdk-core';
@@ -237,8 +237,6 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     // const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
     const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
 
-    throw new Error('no storage');
-
     // Setup a provider for the source chain
     const sourceChainIdType = parseChainIdType(Number(note.sourceChainId));
     const sourceEvmId = sourceChainIdType.chainId;
@@ -261,6 +259,8 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     const bridgeCurrency = this.inner.methods.anchorApi.currency;
     // await this.inner.methods.bridgeApi.setActiveBridge()
     const availableAnchors = await this.inner.methods.anchorApi.getAnchors();
+
+    console.log('availableAnchors length: ', availableAnchors.length);
     const selectedAnchor = availableAnchors.find((anchor) => anchor.amount === note.amount);
     const destContractAddress = selectedAnchor?.neighbours[destInternalId]! as string;
     const sourceContractAddress = selectedAnchor?.neighbours[sourceInternalId]! as string;
@@ -405,7 +405,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       const relayerRootsBytes = hexStringToBytes(relayerRootString);
       const relayerRoots = Array.from(relayerRootsBytes);
 
-      const relayedWithdraw = await (activeRelayer as ActiveWebbRelayer).initWithdraw('anchorRelayTx');
+      const relayedWithdraw = await activeRelayer.initWithdraw('anchorRelayTx');
 
       logger.trace('initialized the withdraw WebSocket');
 

@@ -19,7 +19,8 @@
     "tornado-snarkjs": "git+https://github.com/tornadocash/snarkjs.git#869181cfaf7526fe8972073d31655493a04326d5",
     "tornado-websnark": "git+https://github.com/webb-tools/websnark.git",
     "snarkjs": "^0.4.6",
-    "@webb-tools/contracts": "0.1.7"
+    "@webb-tools/contracts": "0.1.7",
+    "@webb-tools/utils": "0.1.6"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",

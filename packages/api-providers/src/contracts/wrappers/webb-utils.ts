@@ -11,7 +11,7 @@ type MaxEdges = 1 | 2 | 3 | 4 | 5;
 
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
 export const ZERO = 'ZERO';
-const { groth16, zkey } = snarkjs;
+const { groth16, zKey } = snarkjs;
 
 export const isZero = (value: string | number) => {
   if (value === zeroAddress) {
@@ -38,7 +38,7 @@ export const proofAndVerify = async (witness: any, maxEdges: MaxEdges) => {
   console.log(witness);
   const circuitKey = await fetchKeyForEdges(maxEdges);
   const res = await groth16.prove(circuitKey, witness);
-  const vKey = await zkey.exportVerificationKey(circuitKey);
+  const vKey = await zKey.exportVerificationKey(circuitKey);
   const verificationResults = await groth16.verify(vKey, res.publicSignals, res.proof);
 
   if (verificationResults) {

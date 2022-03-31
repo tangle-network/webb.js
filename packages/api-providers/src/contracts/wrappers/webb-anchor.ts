@@ -8,6 +8,7 @@ import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, MixerStorage
 import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise';
 import { LoggerService } from '@webb-tools/app-util';
 import { ERC20, ERC20__factory as ERC20Factory, FixedDepositAnchor, FixedDepositAnchor__factory } from '@webb-tools/contracts';
+import { getFixedAnchorExtDataHash } from '@webb-tools/utils';
 import { BigNumber, Contract, providers, Signer } from 'ethers';
 import utils from 'web3-utils';
 
@@ -441,13 +442,18 @@ export class AnchorContract {
     const proofBytes = await generateWithdrawProofCallData(proof, pub);
     const nullifierHash = bufferToFixed(zkp.nullifierHash);
     const roots = createRootsBytes(pub.roots);
+    const extDataHash = getFixedAnchorExtDataHash({
+      _fee: bufferToFixed(zkp.fee),
+      _recipient: zkp.recipient,
+      _refreshCommitment: bufferToFixed('0'),
+      _refund: bufferToFixed(zkp.refund),
+      _relayer: zkp.relayer
+    });
     const tx = await this._contract.withdraw(
       {
-        // TODO : Handle the _extDataHash as it should be
-        _extDataHash: '0x00',
+        _extDataHash: extDataHash.toHexString(),
         _nullifierHash: nullifierHash,
         _roots: roots,
-
         proof: `0x${proofBytes}`
       },
       {
@@ -456,7 +462,6 @@ export class AnchorContract {
         _refreshCommitment: bufferToFixed('0'),
         _refund: bufferToFixed(zkp.refund),
         _relayer: zkp.relayer
-
       },
       overrides
     );
