@@ -23,7 +23,6 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "baseUrl": ".",
-    "allowJs": true, //
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true, //

@@ -55,7 +55,7 @@ export class ProvingManagerWrapper {
   }
 
   private get wasmBlob () {
-    return this.ctx === 'worker' ? import('@webb-tools/wasm-utils') : import('@webb-tools/wasm-utils/njs');
+    return this.ctx === 'worker' ? import('@webb-tools/wasm-utils/wasm-utils.js') : import('@webb-tools/wasm-utils/njs/wasm-utils-njs.js');
   }
 
   private get proofBuilder () {

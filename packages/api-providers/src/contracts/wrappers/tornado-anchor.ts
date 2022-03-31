@@ -13,7 +13,7 @@ import { EVMChainId } from '../../chains';
 import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo';
 import { WebbError, WebbErrorCodes } from '../../webb-error';
 import { Tornado } from '../tornado';
-import { abi } from '../tornado/NativeAnchor.json';
+import tornadoArtifact from '../tornado/NativeAnchor.json';
 import { bufferToFixed } from '../utils/buffer-to-fixed';
 import { EvmNote } from '../utils/evm-note';
 import { createTornDeposit, Deposit } from '../utils/make-deposit';
@@ -32,7 +32,7 @@ export class TornadoContract {
 
   constructor (private mixersInfo: EvmChainMixersInfo, private web3Provider: providers.Web3Provider, address: string) {
     this.signer = this.web3Provider.getSigner();
-    this._contract = new Contract(address, abi, this.signer) as any;
+    this._contract = new Contract(address, tornadoArtifact.abi, this.signer) as any;
   }
 
   get getLastRoot () {
