@@ -26,48 +26,54 @@ type PMEvents = {
 };
 
 export class ProvingManagerWrapper {
-  constructor () {
-    self.addEventListener('message', async (event) => {
-      const message = event.data as Partial<PMEvents>;
-      const key = Object.keys(message)[0] as keyof PMEvents;
+  constructor (private ctx: 'worker' | 'direct-call' = 'worker') {
+    // if the Manager is running in side worker it registers an event listener
+    if (ctx === 'worker') {
+      self.addEventListener('message', async (event) => {
+        const message = event.data as Partial<PMEvents>;
+        const key = Object.keys(message)[0] as keyof PMEvents;
 
-      switch (key) {
-        case 'proof': {
-          const input = message.proof!;
-          const proof = await this.proof(input);
+        switch (key) {
+          case 'proof':
+            {
+              const input = message.proof!;
+              const proof = await this.proof(input);
 
-          (self as unknown as Worker).postMessage({
-            data: proof,
-            name: key
-          });
+              (self as unknown as Worker).postMessage({
+                data: proof,
+                name: key
+              });
+            }
+
+            break;
+          case 'destroy':
+            (self as unknown as Worker).terminate();
+            break;
         }
-
-          break;
-        case 'destroy':
-          (self as unknown as Worker).terminate();
-          break;
-      }
-    });
+      });
+    }
   }
 
-  private static get proofBuilder () {
-    return import('@webb-tools/wasm-utils').then((wasm) => {
+  private get wasmBlob () {
+    return this.ctx === 'worker' ? import('@webb-tools/wasm-utils') : import('@webb-tools/wasm-utils/njs');
+  }
+
+  private get proofBuilder () {
+    return this.wasmBlob.then((wasm) => {
       return wasm.ProofInputBuilder;
     });
   }
 
-  private static async generateProof (proofInput: JsProofInput): Promise<Proof> {
-    const wasm = await import('@webb-tools/wasm-utils');
+  private async generateProof (proofInput: JsProofInput): Promise<Proof> {
+    const wasm = await this.wasmBlob;
 
     return wasm.generate_proof_js(proofInput);
   }
 
   async proof (pmSetupInput: ProvingManagerSetupInput): Promise<ProofI> {
-    const Manager = await ProvingManagerWrapper.proofBuilder;
+    const Manager = await this.proofBuilder;
     const pm = new Manager();
     const { note } = await Note.deserialize(pmSetupInput.note);
-
-    console.log('pmSetupInput: ', pmSetupInput);
 
     // TODO: handle the prefix and validation
     pm.setLeaves(pmSetupInput.leaves);
@@ -88,7 +94,7 @@ export class ProvingManagerWrapper {
     }
 
     const proofInput = pm.build_js();
-    const proof = await ProvingManagerWrapper.generateProof(proofInput);
+    const proof = await this.generateProof(proofInput);
 
     return {
       nullifierHash: proof.nullifierHash,
