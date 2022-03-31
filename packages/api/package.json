@@ -2,10 +2,11 @@
   "name": "@webb-tools/api",
   "version": "0.1.4-45",
   "description": "Webb JS API",
-  "main": "index.js",
+  "main": "index.cjs",
+  "module": "index.js",
+  "type": "module",
   "author": "Webb Developers <drew@webb.tools>",
   "license": "Apache-2.0",
-  "type": "module",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"

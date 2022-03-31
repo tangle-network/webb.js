@@ -4,8 +4,8 @@
 /* eslint-disable camelcase */
 
 import { Log } from '@ethersproject/abstract-provider';
-import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, MixerStorage } from '@webb-tools/api-providers/utils';
-import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise';
+import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, MixerStorage } from '@webb-tools/api-providers/utils/index.js';
+import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise.js';
 import { LoggerService } from '@webb-tools/app-util';
 import { ERC20, ERC20__factory as ERC20Factory, FixedDepositAnchor, FixedDepositAnchor__factory } from '@webb-tools/contracts';
 import { getFixedAnchorExtDataHash } from '@webb-tools/utils';

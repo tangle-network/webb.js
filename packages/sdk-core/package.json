@@ -2,9 +2,10 @@
   "name": "@webb-tools/sdk-core",
   "version": "0.1.4-45",
   "description": "the core of webb tools sdk",
-  "main": "index.js",
   "author": "Webb Developers <drew@webb.tools>",
   "license": "Apache-2.0",
+  "main": "index.cjs",
+  "module": "index.js",
   "type": "module",
   "publishConfig": {
     "access": "public",

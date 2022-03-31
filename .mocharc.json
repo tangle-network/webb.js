@@ -1,0 +1,6 @@
+{
+  "extension": ["ts"],
+  "spec": "packages/**/*.spec.ts",
+  "loader": "./loader.js",
+  "ignore": ["node_modules/**"]
+}

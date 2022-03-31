@@ -13,7 +13,7 @@
     "types": ["mocha", "node"],
     "declaration": true,
     "target": "ESNext",
-    "module": "CommonJS",
+    "module": "ESNext",
     "jsx": "preserve",
     "strict": true,
     "noImplicitAny": true,

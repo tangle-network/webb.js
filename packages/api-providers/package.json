@@ -3,7 +3,9 @@
   "version": "0.1.4-45",
   "description": "dApp provider to work with Webb",
   "author": "Webb Developers <drew@webb.tools>",
-  "main": "index.js",
+  "main": "index.cjs",
+  "module": "index.js",
+  "type": "module",
   "license": "Apache-2.0",
   "publishConfig": {
     "access": "public",
