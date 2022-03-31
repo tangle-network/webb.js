@@ -3992,6 +3992,19 @@
     "@webb-tools/contracts" "^0.0.3"
     ethers "5.5.1"
 
+"@webb-tools/utils@0.1.6":
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/@webb-tools/utils/-/utils-0.1.6.tgz#7d18eff3ffd4b7b72f06e20bf789e58ead8f7157"
+  integrity sha512-p+ySqyc/JMq9iz8nCbmaXRDz/a77JFQcNiN7OegpPmdxGzU8UCcviUgt/WFzdEsDu9hT4j+TIx6bpuZ/i5m9Kw==
+  dependencies:
+    bn.js "4.11.6"
+    circomlibjs "^0.0.8"
+    elliptic "^6.5.3"
+    eth-sig-util "^3.0.1"
+    ethers "5.5.1"
+    ffjavascript "^0.2.43"
+    maci-crypto "^0.9.1"
+
 "@webb-tools/utils@^0.0.2":
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/@webb-tools/utils/-/utils-0.0.2.tgz#382f0eee88a82705c0819108faa52bbdad971c18"
