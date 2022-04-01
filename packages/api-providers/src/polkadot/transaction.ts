@@ -3,15 +3,17 @@
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { NotificationHandler } from '@webb-tools/api-providers';
-import { EventBus, LoggerService } from '@webb-tools/app-util';
-import { uniqueId } from 'lodash';
+import { NotificationHandler } from '@webb-tools/api-providers/index.js';
+import { EventBus, LoggerService } from '@webb-tools/app-util/index.js';
+import lodash from 'lodash';
 
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/submittable/types';
 import { IKeyringPair } from '@polkadot/types/types';
 
-import { ReactElement } from '../types/abstracts';
+import { ReactElement } from '../types/abstracts.js';
+
+const { uniqueId } = lodash;
 
 type AddressOrPair = string | IKeyringPair;
 

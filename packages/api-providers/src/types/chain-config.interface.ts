@@ -1,9 +1,9 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainType } from '../chains';
-import { WebbCurrencyId } from '../enums';
-import { ReactElement } from './abstracts';
+import { ChainType } from '../chains/index.js';
+import { WebbCurrencyId } from '../enums/index.js';
+import { ReactElement } from './abstracts.js';
 
 export interface ChainConfig {
   id: number;

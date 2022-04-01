@@ -1,15 +1,15 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { Currency } from '@webb-tools/api-providers';
+import { Currency } from '@webb-tools/api-providers/index.js';
 import { ERC20__factory as ERC20Factory } from '@webb-tools/contracts';
 import { ethers } from 'ethers';
 
-import { ChainQuery } from '../abstracts';
-import { evmIdIntoInternalChainId } from '../chains';
-import { zeroAddress } from '../contracts/wrappers';
-import { WebbCurrencyId } from '../enums';
-import { WebbWeb3Provider } from './webb-provider';
+import { ChainQuery } from '../abstracts/index.js';
+import { evmIdIntoInternalChainId } from '../chains/index.js';
+import { zeroAddress } from '../contracts/wrappers/index.js';
+import { WebbCurrencyId } from '../enums/index.js';
+import { WebbWeb3Provider } from './webb-provider.js';
 
 export class Web3ChainQuery extends ChainQuery<WebbWeb3Provider> {
   constructor (protected inner: WebbWeb3Provider) {

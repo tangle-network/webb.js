@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { Storage } from '../storage';
+import { Storage } from '../storage/index.js';
 
 export type NetworkStore = {
   networksConfig: Record<

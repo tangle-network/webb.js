@@ -3,9 +3,9 @@
 
 import type { JsProofInput, Leaves, Proof } from '@webb-tools/wasm-utils';
 
-import { ProofI } from '@webb-tools/sdk-core/proving/proving-manager';
+import { ProofI } from '@webb-tools/sdk-core/proving/proving-manager.js';
 
-import { Note } from '../note';
+import { Note } from '../note.js';
 
 export type ProvingManagerSetupInput = {
   note: string;

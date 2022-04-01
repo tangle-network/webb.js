@@ -1,17 +1,17 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { fetchSubstrateAnchorProvingKey } from '@webb-tools/api-providers/ipfs/substrate/anchor';
-import { LoggerService } from '@webb-tools/app-util';
-import { Note, ProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core';
+import { fetchSubstrateAnchorProvingKey } from '@webb-tools/api-providers/ipfs/substrate/anchor.js';
+import { LoggerService } from '@webb-tools/app-util/index.js';
+import { Note, ProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core/index.js';
 
 import { decodeAddress } from '@polkadot/keyring';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
-import { AnchorWithdraw, WithdrawState } from '../abstracts';
-import { InternalChainId } from '../chains';
-import { WebbError, WebbErrorCodes } from '../webb-error';
-import { WebbPolkadot } from './webb-provider';
+import { AnchorWithdraw, WithdrawState } from '../abstracts/index.js';
+import { InternalChainId } from '../chains/index.js';
+import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
+import { WebbPolkadot } from './webb-provider.js';
 
 const logger = LoggerService.get('PolkadotBridgeWithdraw');
 

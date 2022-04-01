@@ -3,8 +3,8 @@
 
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
-import { WebbCurrencyId } from '../../enums';
-import { MixerSize } from '../mixer';
+import { WebbCurrencyId } from '../../enums/index.js';
+import { MixerSize } from '../mixer/index.js';
 
 /**
  *

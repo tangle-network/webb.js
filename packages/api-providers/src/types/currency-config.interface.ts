@@ -1,9 +1,9 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { InternalChainId } from '../chains';
-import { WebbCurrencyId } from '../enums';
-import { ReactElement } from './abstracts';
+import { InternalChainId } from '../chains/index.js';
+import { WebbCurrencyId } from '../enums/index.js';
+import { ReactElement } from './abstracts.js';
 
 // The CurrencyType distinguishes how to interact with a particular currency in terms of
 // web3 api calls.

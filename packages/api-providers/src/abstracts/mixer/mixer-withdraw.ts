@@ -1,13 +1,13 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { WebbApiProvider } from '@webb-tools/api-providers';
-import { EventBus } from '@webb-tools/app-util';
-import { Note } from '@webb-tools/sdk-core';
+import { WebbApiProvider } from '@webb-tools/api-providers/index.js';
+import { EventBus } from '@webb-tools/app-util/index.js';
+import { Note } from '@webb-tools/sdk-core/index.js';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { InternalChainId } from '../../chains';
-import { ActiveWebbRelayer, WebbRelayer } from '../relayer';
+import { InternalChainId } from '../../chains/index.js';
+import { ActiveWebbRelayer, WebbRelayer } from '../relayer/index.js';
 
 export enum WithdrawState {
   Cancelling, // Withdraw canceled

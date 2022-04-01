@@ -1,11 +1,11 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { AppConfig, evmChainStorageFactory, MixerSize, MixerStorage } from '@webb-tools/api-providers';
+import { AppConfig, evmChainStorageFactory, MixerSize, MixerStorage } from '@webb-tools/api-providers/index.js';
 
-import { EVMChainId, evmIdIntoInternalChainId } from '../chains';
-import { Storage } from '../storage';
-import { MixerConfig } from '../types/mixer-config.interface';
+import { EVMChainId, evmIdIntoInternalChainId } from '../chains/index.js';
+import { Storage } from '../storage/index.js';
+import { MixerConfig } from '../types/mixer-config.interface.js';
 
 export type LeafIntervalInfo = {
   startingBlock: number;

@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { expect } from 'chai';
 
-import { Note, NoteGenInput } from '../note';
+import { Note, NoteGenInput } from '../note.js';
 
 describe('Note class', () => {
   it.only('should test constructor from `NoteGenInput`', async () => {

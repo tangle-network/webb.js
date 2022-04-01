@@ -3,7 +3,7 @@
 
 import { Eth } from 'web3-eth';
 
-import { Account, AccountsAdapter, PromiseOrT } from '../../account/Accounts.adapter';
+import { Account, AccountsAdapter, PromiseOrT } from '../../account/Accounts.adapter.js';
 
 export class Web3Account extends Account<Eth> {
   get avatar () {

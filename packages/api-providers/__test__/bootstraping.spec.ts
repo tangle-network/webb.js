@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { initPolkadotProvider } from './utils/init-polkadot-provider';
+import { initPolkadotProvider } from './utils/init-polkadot-provider.js';
 
 describe('Bootstrap providers', function () {
   this.timeout(120_000);

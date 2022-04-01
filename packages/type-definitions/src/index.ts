@@ -1,12 +1,12 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { jsonrpcFromDefs, typesAliasFromDefs, typesFromDefs } from '@open-web3/orml-type-definitions/utils';
+import { jsonrpcFromDefs, typesAliasFromDefs, typesFromDefs } from '@open-web3/orml-type-definitions/utils/index.js';
 
-import versioned from './types-known/versioned';
-import merkle from './merkle';
-import mixer from './mixer';
-import pallets from './pallets';
+import versioned from './types-known/versioned.js';
+import merkle from './merkle.js';
+import mixer from './mixer.js';
+import pallets from './pallets.js';
 
 // FIXME: currently we cannot override this in runtime definations because the code generation script cannot handle overrides
 // This will make it behave correctly in runtime, but wrong types in TS defination.

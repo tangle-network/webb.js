@@ -3,8 +3,8 @@
 
 import { expect } from 'chai';
 
-import { ChainType, ChainTypeId } from './chain-id.enum';
-import { byteArrayToNum, computeChainIdType, numToByteArray, parseChainIdType } from './chain-utils';
+import { ChainType, ChainTypeId } from './chain-id.enum.js';
+import { byteArrayToNum, computeChainIdType, numToByteArray, parseChainIdType } from './chain-utils.js';
 
 describe('test various conversion functions', () => {
   it('byte array to num converts correctly', () => {

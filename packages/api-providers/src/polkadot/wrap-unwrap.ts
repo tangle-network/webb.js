@@ -1,12 +1,12 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { Amount, MixerSize, WrappingBalance, WrappingEvent } from '@webb-tools/api-providers';
+import { Amount, MixerSize, WrappingBalance, WrappingEvent } from '@webb-tools/api-providers/index.js';
 import { Observable } from 'rxjs';
 
-import { WrapUnWrap } from '../abstracts';
-import { WebbCurrencyId } from '../enums';
-import { WebbPolkadot } from './webb-provider';
+import { WrapUnWrap } from '../abstracts/index.js';
+import { WebbCurrencyId } from '../enums/index.js';
+import { WebbPolkadot } from './webb-provider.js';
 
 export class PolkadotWrapUnwrap extends WrapUnWrap<WebbPolkadot> {
   canWrap (wrapPayload: any): Promise<boolean> {

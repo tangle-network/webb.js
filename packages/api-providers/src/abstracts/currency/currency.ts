@@ -1,11 +1,11 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainTypeId, InternalChainId } from '../../chains';
-import { WebbCurrencyId } from '../../enums';
-import { CurrencyConfig, CurrencyRole, CurrencyView } from '../../types/currency-config.interface';
-import { AppConfig } from '../common';
-import { ORMLAsset } from './orml-currency';
+import { ChainTypeId, InternalChainId } from '../../chains/index.js';
+import { WebbCurrencyId } from '../../enums/index.js';
+import { CurrencyConfig, CurrencyRole, CurrencyView } from '../../types/currency-config.interface.js';
+import { AppConfig } from '../common.js';
+import { ORMLAsset } from './orml-currency.js';
 
 export abstract class CurrencyContent {
   abstract get view(): CurrencyView;

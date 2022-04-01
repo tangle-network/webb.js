@@ -1,12 +1,12 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { InternalChainId } from '../../chains';
-import { WebbCurrencyId } from '../../enums';
-import { BridgeConfig } from '../../types/bridge-config.interface';
-import { CurrencyRole } from '../../types/currency-config.interface';
-import { AppConfig } from '../common';
-import { Currency } from '../currency/currency';
+import { InternalChainId } from '../../chains/index.js';
+import { WebbCurrencyId } from '../../enums/index.js';
+import { BridgeConfig } from '../../types/bridge-config.interface.js';
+import { CurrencyRole } from '../../types/currency-config.interface.js';
+import { AppConfig } from '../common.js';
+import { Currency } from '../currency/currency.js';
 
 export class Bridge {
   private constructor (private bridgeConfig: BridgeConfig, private readonly appConfig: AppConfig) {}

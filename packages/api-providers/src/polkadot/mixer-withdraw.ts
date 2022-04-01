@@ -2,20 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
-import { OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, WebbRelayer, WithdrawState } from '@webb-tools/api-providers';
-import { fetchSubstrateTornadoProvingKey } from '@webb-tools/api-providers/ipfs/substrate/tornado';
-import { LoggerService } from '@webb-tools/app-util';
-import { Note, ProvingManager } from '@webb-tools/sdk-core';
-import { ProvingManagerSetupInput } from '@webb-tools/sdk-core/proving/proving-manager-thread';
+import { OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, WebbRelayer, WithdrawState } from '@webb-tools/api-providers/index.js';
+import { fetchSubstrateTornadoProvingKey } from '@webb-tools/api-providers/ipfs/substrate/tornado.js';
+import { LoggerService } from '@webb-tools/app-util/index.js';
+import { Note, ProvingManager } from '@webb-tools/sdk-core/index.js';
+import { ProvingManagerSetupInput } from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
 
 import { decodeAddress } from '@polkadot/keyring';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
-import { MixerWithdraw } from '../abstracts';
-import { InternalChainId } from '../chains';
-import { WebbError, WebbErrorCodes } from '../webb-error';
-import { WebbPolkadot } from './webb-provider';
-import { PolkadotMixerDeposit } from '.';
+import { MixerWithdraw } from '../abstracts/index.js';
+import { InternalChainId } from '../chains/index.js';
+import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
+import { PolkadotMixerDeposit } from './index.js';
+import { WebbPolkadot } from './webb-provider.js';
 
 const logger = LoggerService.get('PolkadotMixerWithdraw');
 

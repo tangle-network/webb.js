@@ -1,12 +1,12 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { AnchorConfigEntry } from '../types/anchor-config.interface';
-import { BridgeConfig } from '../types/bridge-config.interface';
-import { ChainConfig } from '../types/chain-config.interface';
-import { CurrencyConfig } from '../types/currency-config.interface';
-import { MixerConfig } from '../types/mixer-config.interface';
-import { WalletConfig } from '../types/wallet-config.interface';
+import { AnchorConfigEntry } from '../types/anchor-config.interface.js';
+import { BridgeConfig } from '../types/bridge-config.interface.js';
+import { ChainConfig } from '../types/chain-config.interface.js';
+import { CurrencyConfig } from '../types/currency-config.interface.js';
+import { MixerConfig } from '../types/mixer-config.interface.js';
+import { WalletConfig } from '../types/wallet-config.interface.js';
 
 export type Chain = ChainConfig & {
   wallets: Record<number, Wallet>;

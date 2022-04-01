@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { LoggerService } from '@webb-tools/app-util';
+import { LoggerService } from '@webb-tools/app-util/index.js';
 
 export type AppMode = 'development' | 'production';
 const appLogger = LoggerService.get('App');

@@ -3,17 +3,19 @@
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { options } from '@webb-tools/api';
-import { ApiInitHandler } from '@webb-tools/api-providers';
-import { EventBus, LoggerService } from '@webb-tools/app-util';
-import { isNumber } from 'lodash';
+import { options } from '@webb-tools/api/index.js';
+import { ApiInitHandler } from '@webb-tools/api-providers/index.js';
+import { EventBus, LoggerService } from '@webb-tools/app-util/index.js';
+import lodash from 'lodash';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { InjectedExtension } from '@polkadot/extension-inject/types';
 
-import { PolkaTXBuilder } from '../../polkadot';
-import { InteractiveFeedback, WebbError, WebbErrorCodes } from '../../webb-error';
-import { PolkadotAccount, PolkadotAccounts } from './polkadot-accounts';
+import { PolkaTXBuilder } from '../../polkadot/index.js';
+import { InteractiveFeedback, WebbError, WebbErrorCodes } from '../../webb-error/index.js';
+import { PolkadotAccount, PolkadotAccounts } from './polkadot-accounts.js';
+
+const { isNumber } = lodash;
 
 type ExtensionProviderEvents = {
   connected: undefined;

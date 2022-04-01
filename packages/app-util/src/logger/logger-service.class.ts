@@ -1,9 +1,9 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { LoggerEvent } from './logger-event.class';
-import { Color } from './logs-colors.enum';
-import { LogLevel } from './logs-level.enum';
+import { LoggerEvent } from './logger-event.class.js';
+import { Color } from './logs-colors.enum.js';
+import { LogLevel } from './logs-level.enum.js';
 
 type LoggersMaps = Record<string, LoggerService>;
 type LoggerFn = (...message: any[]) => void;

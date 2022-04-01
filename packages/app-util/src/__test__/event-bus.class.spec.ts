@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { EventBus } from '../shared/event-bus.class';
+import { EventBus } from '../shared/event-bus.class.js';
 
 class TestEvent extends EventBus<{ log: number }> {
   override readonly sendEvent: EventBus<{ log: number }>['emit'];

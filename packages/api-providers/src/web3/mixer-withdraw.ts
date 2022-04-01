@@ -2,18 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { parseUnits } from '@ethersproject/units';
-import { chainIdToRelayerName, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer } from '@webb-tools/api-providers';
-import { LoggerService } from '@webb-tools/app-util';
-import { Note } from '@webb-tools/sdk-core';
+import { chainIdToRelayerName, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer } from '@webb-tools/api-providers/index.js';
+import { LoggerService } from '@webb-tools/app-util/index.js';
+import { Note } from '@webb-tools/sdk-core/index.js';
 import { BigNumber } from 'ethers';
 
-import { MixerWithdraw, OptionalActiveRelayer, OptionalRelayer, WithdrawState } from '../abstracts';
-import { chainTypeIdToInternalId, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains';
-import { bufferToFixed } from '../contracts/utils/buffer-to-fixed';
-import { depositFromPreimage } from '../contracts/utils/make-deposit';
-import { fromDepositIntoZKPTornPublicInputs } from '../contracts/utils/zkp-adapters';
-import { WebbError, WebbErrorCodes } from '../webb-error';
-import { WebbWeb3Provider } from './webb-provider';
+import { MixerWithdraw, OptionalActiveRelayer, OptionalRelayer, WithdrawState } from '../abstracts/index.js';
+import { chainTypeIdToInternalId, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains/index.js';
+import { bufferToFixed } from '../contracts/utils/buffer-to-fixed.js';
+import { depositFromPreimage } from '../contracts/utils/make-deposit.js';
+import { fromDepositIntoZKPTornPublicInputs } from '../contracts/utils/zkp-adapters.js';
+import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
+import { WebbWeb3Provider } from './webb-provider.js';
 
 const logger = LoggerService.get('Web3MixerWithdraw');
 

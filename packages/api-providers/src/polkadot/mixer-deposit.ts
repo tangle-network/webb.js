@@ -3,17 +3,17 @@
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { Currency, DepositPayload as TDepositPayload, MixerSize, ORMLCurrency } from '@webb-tools/api-providers';
-import { LoggerService } from '@webb-tools/app-util';
-import { Note, NoteGenInput } from '@webb-tools/sdk-core';
-import { PalletMixerMixerMetadata } from '@webb-tools/types/interfaces/pallets';
+import { Currency, DepositPayload as TDepositPayload, MixerSize, ORMLCurrency } from '@webb-tools/api-providers/index.js';
+import { LoggerService } from '@webb-tools/app-util/index.js';
+import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
+import { PalletMixerMixerMetadata } from '@webb-tools/types/interfaces/pallets/index.js';
 
 import { u8aToHex } from '@polkadot/util';
 
-import { MixerDeposit } from '../abstracts';
-import { ChainType, computeChainIdType, internalChainIdToChainId } from '../chains';
-import { WebbError, WebbErrorCodes } from '../webb-error';
-import { WebbPolkadot } from './webb-provider';
+import { MixerDeposit } from '../abstracts/index.js';
+import { ChainType, computeChainIdType, internalChainIdToChainId } from '../chains/index.js';
+import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
+import { WebbPolkadot } from './webb-provider.js';
 
 type DepositPayload = TDepositPayload<Note, [number, string]>;
 const logger = LoggerService.get('tornado-deposit');

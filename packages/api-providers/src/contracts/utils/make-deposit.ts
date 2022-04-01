@@ -2,17 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
+import crypto from 'crypto';
+// @ts-ignore
+import * as ff from 'ffjavascript';
+// @ts-ignore
+import tornSnarkjs from 'tornado-snarkjs';
 
-import { bufferToFixed } from './buffer-to-fixed';
-import { PoseidonHasher } from './merkle';
-import { pedersenHash } from './pedersen-hash';
-import { poseidonHash3 } from './poseidon-hash3';
+import { PoseidonHasher } from './merkle/index.js';
+import { bufferToFixed } from './buffer-to-fixed.js';
+import { pedersenHash } from './pedersen-hash.js';
+import { poseidonHash3 } from './poseidon-hash3.js';
 
-const tornSnarkjs = require('tornado-snarkjs');
-const utils = require('ffjavascript').utils;
+const { utils } = ff;
 const { leBuff2int } = utils;
 
-const crypto = require('crypto');
 // const utils = require('ffjavascript').utils;
 // const rbigint = (nbytes: number) => utils.leBuff2int(crypto.randomBytes(nbytes));
 

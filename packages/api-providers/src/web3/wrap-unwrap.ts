@@ -1,19 +1,18 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { Amount, WrappingBalance, WrappingEvent } from '@webb-tools/api-providers';
-import { Bridge, Currency, MixerSize } from '@webb-tools/api-providers/abstracts';
+import { Bridge, Currency, MixerSize, WrapUnWrap } from '@webb-tools/api-providers/abstracts/index.js';
+import { Amount, WrappingBalance, WrappingEvent } from '@webb-tools/api-providers/index.js';
 import { ERC20__factory as ERC20Factory } from '@webb-tools/contracts';
 import { ContractTransaction } from 'ethers';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import Web3 from 'web3';
 
-import { WrapUnWrap } from '../abstracts';
-import { evmIdIntoInternalChainId, InternalChainId } from '../chains';
-import { WebbGovernedToken, zeroAddress } from '../contracts';
-import { WebbCurrencyId, webbCurrencyIdToString } from '../enums';
-import { CurrencyType } from '../types/currency-config.interface';
-import { WebbWeb3Provider } from './webb-provider';
+import { evmIdIntoInternalChainId, InternalChainId } from '../chains/index.js';
+import { WebbGovernedToken, zeroAddress } from '../contracts/index.js';
+import { WebbCurrencyId, webbCurrencyIdToString } from '../enums/index.js';
+import { CurrencyType } from '../types/currency-config.interface.js';
+import { WebbWeb3Provider } from './webb-provider.js';
 
 export type Web3WrapPayload = Amount;
 export type Web3UnwrapPayload = Amount;

@@ -1,10 +1,10 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { AppConfig } from '@webb-tools/api-providers';
+import { AppConfig } from '@webb-tools/api-providers/index.js';
 
-import { InternalChainId } from '../chains';
-import { WebbCurrencyId } from '../enums';
+import { InternalChainId } from '../chains/index.js';
+import { WebbCurrencyId } from '../enums/index.js';
 
 export const getAnchorAddressForBridge = (
   assetId: WebbCurrencyId,

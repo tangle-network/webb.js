@@ -1,12 +1,12 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { AnchorBase, BridgeConfig, Currency, CurrencyRole, CurrencyType } from '@webb-tools/api-providers';
+import { AnchorBase, BridgeConfig, Currency, CurrencyRole, CurrencyType } from '@webb-tools/api-providers/index.js';
 
-import { AnchorApi } from '../abstracts';
-import { ChainTypeId, chainTypeIdToInternalId, evmIdIntoInternalChainId } from '../chains';
-import { WebbGovernedToken } from '../contracts/wrappers';
-import { WebbWeb3Provider } from './webb-provider';
+import { AnchorApi } from '../abstracts/index.js';
+import { ChainTypeId, chainTypeIdToInternalId, evmIdIntoInternalChainId } from '../chains/index.js';
+import { WebbGovernedToken } from '../contracts/wrappers/index.js';
+import { WebbWeb3Provider } from './webb-provider.js';
 
 export class Web3AnchorApi extends AnchorApi<WebbWeb3Provider, BridgeConfig> {
   getTokenAddress (chainTypeId: ChainTypeId): string | null {

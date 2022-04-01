@@ -6,17 +6,17 @@
 import { Log } from '@ethersproject/abstract-provider';
 import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, MixerStorage } from '@webb-tools/api-providers/utils/index.js';
 import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise.js';
-import { LoggerService } from '@webb-tools/app-util';
+import { LoggerService } from '@webb-tools/app-util/index.js';
 import { ERC20, ERC20__factory as ERC20Factory, FixedDepositAnchor, FixedDepositAnchor__factory } from '@webb-tools/contracts';
 import { getFixedAnchorExtDataHash } from '@webb-tools/utils';
 import { BigNumber, Contract, providers, Signer } from 'ethers';
 import utils from 'web3-utils';
 
-import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo';
-import { bufferToFixed, createAnchor2Deposit, createRootsBytes, Deposit, EvmNote, generateWithdrawProofCallData } from '../utils';
-import { MerkleTree, PoseidonHasher } from '../utils/merkle';
-import { AnchorWitnessInput, ZKPWebbAnchorInputWithMerkle, ZKPWebbAnchorInputWithoutMerkle } from './types';
-import { generateWitness, proofAndVerify, zeroAddress } from './webb-utils';
+import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo.js';
+import { bufferToFixed, createAnchor2Deposit, createRootsBytes, Deposit, EvmNote, generateWithdrawProofCallData } from '../utils/index.js';
+import { MerkleTree, PoseidonHasher } from '../utils/merkle/index.js';
+import { AnchorWitnessInput, ZKPWebbAnchorInputWithMerkle, ZKPWebbAnchorInputWithoutMerkle } from './types.js';
+import { generateWitness, proofAndVerify, zeroAddress } from './webb-utils.js';
 
 type DepositEvent = [string, number, BigNumber];
 const logger = LoggerService.get('AnchorContract');

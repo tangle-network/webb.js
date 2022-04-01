@@ -1,10 +1,10 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { AppConfig } from '@webb-tools/api-providers';
+import { AppConfig } from '@webb-tools/api-providers/index.js';
 
-import { ChainTypeId, chainTypeIdToInternalId, InternalChainId } from '../chains';
-import { WebbError, WebbErrorCodes } from '../webb-error';
+import { ChainTypeId, chainTypeIdToInternalId, InternalChainId } from '../chains/index.js';
+import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
 
 export const getEVMChainName = (config: AppConfig, evmId: number): string => {
   const chain = Object.values(config.chains).find((chainsConfig) => chainsConfig.chainId === evmId);
