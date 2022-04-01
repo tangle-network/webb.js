@@ -9,7 +9,7 @@ import { PoseidonHasher3 } from './poseidon-hash3.js';
  * SPDX-License-Identifier: GPL-3.0-or-later-only
  */
 
-import ethers from 'ethers';
+import { ethers } from 'ethers';
 import crypto from 'crypto';
 import * as ff from 'ffjavascript';
 const { utils } = ff;
