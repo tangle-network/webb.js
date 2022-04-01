@@ -1,0 +1,6 @@
+{
+  "extension": ["ts"],
+  "loader": "./loader.js",
+  "ignore": ["node_modules/**"],
+	"node-option": ["experimental-json-modules", "loader=./loader.js"]
+}
