@@ -1,7 +1,0 @@
-{
-  "extension": ["ts"],
-  "spec": "packages/**/*.spec.ts",
-  "loader": "./loader.js",
-  "package": "./tsconfig.json",
-  "ignore": ["node_modules/**"]
-}

@@ -27,10 +27,9 @@ export function resolve (specifier, ctx, defaultResolve) {
 }
 
 // specify a custom loader for node.js extension-less files
-// to get mocha binary to work with ESM: https://github.com/nodejs/node/issues/33226
+// to get mocha binary to work with ts-node esm loader: https://github.com/nodejs/node/issues/33226
 
 export async function load(resolvedUrl, context, defaultLoad) {
-  console.log('inside loader');
   const url = new URL(resolvedUrl);
   const ext = path.extname(url.pathname);
   const parentDir = path

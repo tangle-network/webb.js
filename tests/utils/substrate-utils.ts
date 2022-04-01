@@ -5,14 +5,14 @@ import {
   generate_proof_js,
   JsNote,
   JsNoteBuilder,
+  OperationError,
   ProofInputBuilder,
-} from '@webb-tools/wasm-utils/njs';
+} from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/keyring';
 import path from 'path';
 import fs from 'fs';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { OperationError } from '@webb-tools/wasm-utils/njs';
 import { BigNumber } from 'ethers';
 
 /// <reference path="@webb-tools/types/interfaces/types.d.ts"

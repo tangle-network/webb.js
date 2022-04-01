@@ -59,7 +59,7 @@ const CPX = ['css', 'gif', 'hbs', 'jpg', 'js', 'json', 'png', 'svg', 'd.ts']
 
 
 function buildWebpack() {
-  executeSync('yarn polkadot-exec-webpack --config webpack.config.js --mode production');
+  executeSync('yarn polkadot-exec-webpack --config webpack.config.cjs --mode production');
 }
 
 async function buildBabel(dir) {

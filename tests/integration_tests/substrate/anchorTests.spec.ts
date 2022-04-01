@@ -1,4 +1,4 @@
-import { JsNote, OperationError } from '@webb-tools/wasm-utils/njs';
+import { JsNote, OperationError } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { ApiPromise } from '@polkadot/api';
 import { Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -12,7 +12,7 @@ import {
   startWebbNode,
   transferBalance,
   withdrawAnchorBnx5_4,
-} from '../../utils';
+} from '../../utils/index.js';
 
 let apiPromise: ApiPromise | null = null;
 let keyring: {
