@@ -27,44 +27,23 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true, //
     "paths": {
-      "@webb-tools/api": [
-        "packages/api/src"
-      ],
       "@webb-tools/api/*": [
         "packages/api/src/*"
-      ],
-      "@webb-tools/types": [
-        "packages/types/src"
       ],
       "@webb-tools/types/*": [
         "packages/types/src/*"
       ],
-      "@webb-tools/type-definitions": [
-        "packages/type-definitions/src"
-      ],
       "@webb-tools/type-definitions/*": [
         "packages/type-definitions/src/*"
-      ],
-      "@webb-tools/sdk-core": [
-        "packages/sdk-core/src"
       ],
       "@webb-tools/sdk-core/*": [
         "packages/sdk-core/src/*"
       ],
-      "@webb-tools/app-util": [
-        "packages/app-util/src"
-      ],
       "@webb-tools/app-util/*": [
         "packages/app-util/src/*"
       ],
-      "@webb-tools/wasm-utils": [
-        "packages/wasm-utils/build"
-      ],
       "@webb-tools/wasm-utils/*": [
         "packages/wasm-utils/build/*"
-      ],
-      "@webb-tools/api-providers": [
-        "packages/api-providers/src"
       ],
       "@webb-tools/api-providers/*": [
         "packages/api-providers/src/*"
