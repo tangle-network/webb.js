@@ -40,6 +40,7 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
   async generateBridgeNote (
     anchorId: number | string,
     destination: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     wrappableAssetAddress: string | undefined
   ): Promise<DepositPayload> {
     const currency = this.bridgeApi.currency;

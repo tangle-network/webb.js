@@ -79,6 +79,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
             resolve(wsProvider);
           });
           wsProvider.on('error', (e) => {
+            console.log(e);
             reject(new Error('WS Error '));
           });
         });

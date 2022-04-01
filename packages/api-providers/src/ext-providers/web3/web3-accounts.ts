@@ -30,6 +30,7 @@ export class Web3Accounts extends AccountsAdapter<Eth> {
     return defaultAccount ? new Web3Account(this.inner, defaultAccount) : null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setActiveAccount (account: Account): PromiseOrT<void> {
     return undefined;
   }

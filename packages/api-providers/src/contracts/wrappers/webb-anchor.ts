@@ -18,7 +18,6 @@ import { MerkleTree, PoseidonHasher } from '../utils/merkle/index.js';
 import { AnchorWitnessInput, ZKPWebbAnchorInputWithMerkle, ZKPWebbAnchorInputWithoutMerkle } from './types.js';
 import { generateWitness, proofAndVerify, zeroAddress } from './webb-utils.js';
 
-type DepositEvent = [string, number, BigNumber];
 const logger = LoggerService.get('AnchorContract');
 
 export interface IPublicInputs {
@@ -103,7 +102,7 @@ export class AnchorContract {
     return tokenInstance;
   }
 
-  async isWebbTokenApprovalRequired (onComplete?: (event: DepositEvent) => void) {
+  async isWebbTokenApprovalRequired () {
     const userAddress = await this.signer.getAddress();
     const tokenInstance = await this.getWebbToken();
     const tokenAllowance = await tokenInstance.allowance(userAddress, this._contract.address);
@@ -164,7 +163,7 @@ export class AnchorContract {
     return true;
   }
 
-  async approve (tokenInstance: Contract, onComplete?: (event: DepositEvent) => void) {
+  async approve (tokenInstance: Contract) {
     // check the approved spending before attempting deposit
     if (tokenInstance == null) return;
 
@@ -176,7 +175,7 @@ export class AnchorContract {
     }
   }
 
-  async deposit (commitment: string, _onComplete?: (event: DepositEvent) => void) {
+  async deposit (commitment: string) {
     const overrides = {};
     const recipient = await this._contract.deposit(commitment, overrides);
 

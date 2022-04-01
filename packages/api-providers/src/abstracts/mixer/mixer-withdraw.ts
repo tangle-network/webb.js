@@ -74,7 +74,7 @@ export abstract class MixerWithdraw<T extends WebbApiProvider<any>> extends Even
    * This is a default implemented function that must be overridden if the instance is meant to use the relayer
    * It maps a relayer to the active relayer type that can be used for relaying withdrawing
    * */
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   mapRelayerIntoActive (relayer: OptionalRelayer): Promise<OptionalActiveRelayer> {
     return Promise.resolve(null);
   }
@@ -97,6 +97,7 @@ export abstract class MixerWithdraw<T extends WebbApiProvider<any>> extends Even
    * It will get a relayer by the note mapping  with relayers capabilities
    *
    * */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getRelayersByNote (note: Note): Promise<WebbRelayer[]> {
     return Promise.resolve([]);
   }
@@ -106,6 +107,7 @@ export abstract class MixerWithdraw<T extends WebbApiProvider<any>> extends Even
    * It will get a relayer by the chain id and contract-address/tree-id  mapping the note metadata with relayers capabilities
    *
    * */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getRelayersByChainAndAddress (chainId: InternalChainId, address: string): Promise<WebbRelayer[]> {
     return Promise.resolve([]);
   }

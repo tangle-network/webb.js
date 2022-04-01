@@ -5,6 +5,8 @@ module.exports = {
   ignorePatterns: [
     '.eslintrc.cjs',
     '.eslintrc.js',
+    'babel-config-esm.cjs',
+    'loader.js',
     '.github/**',
     '.vscode/**',
     '.yarn/**',

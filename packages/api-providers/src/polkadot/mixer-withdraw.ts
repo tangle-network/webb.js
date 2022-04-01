@@ -50,6 +50,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getRelayersByNote (evmNote: Note) {
     return Promise.resolve(
       this.inner.relayingManager.getRelayer({
@@ -58,6 +59,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getRelayersByChainAndAddress (_chainId: InternalChainId, _address: string) {
     // TODO: ! why don't we use ChainId and address?
     return this.inner.relayingManager.getRelayer({});
@@ -255,7 +257,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
         const results = await relayerMixerTx.await();
 
         if (results) {
-          const [_relayerResults, message] = results;
+          const [, message] = results;
 
           return message ?? '';
         }

@@ -14,6 +14,7 @@ export class PolkadotAnchorApi extends AnchorApi<WebbPolkadot, BridgeConfig> {
     return this.store.activeBridge?.asset ?? null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getTokenAddress (chainId: ChainTypeId): string | null {
     return null;
   }
@@ -47,6 +48,7 @@ export class PolkadotAnchorApi extends AnchorApi<WebbPolkadot, BridgeConfig> {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getWrappableAssets (chainId: ChainTypeId): Promise<Currency[]> {
     return [];
   }
