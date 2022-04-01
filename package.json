@@ -16,7 +16,7 @@
   },
   "scripts": {
     "pumbp": "./scripts/update-version.js prerelease",
-    "build": "yarn build:interfaces && yarn build-ts:dev",
+    "build": "yarn build-ts:dev",
     "build-ts:dev": "node ./scripts/webb-build-dev.cjs",
     "build:release": "node ./scripts/webb-build-release.cjs",
     "build:interfaces": "ts-node-script -r tsconfig-paths/register packages/types/scripts/generate.ts && ts-node-script -r tsconfig-paths/register packages/type-definitions/scripts/generate.ts",
@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",
+    "@babel/plugin-syntax-import-assertions": "^7.16.7",
     "@babel/register": "^7.17.0",
     "@babel/runtime": "^7.17.2",
     "@ethersproject/experimental": "^5.5.0",

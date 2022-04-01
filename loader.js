@@ -26,13 +26,6 @@ export function resolve (specifier, ctx, defaultResolve) {
   return resolveTs(specifier, ctx, defaultResolve)
 }
 
-// export function resolve (specifier, ctx, defaultResolve) {
-//   const match = matchPath(specifier)
-//   return match
-//     ? resolveTs(pathToFileURL(`${match}`).href, ctx, defaultResolve)
-//     : resolveTs(specifier, ctx, defaultResolve)
-// }
-
 // specify a custom loader for node.js extension-less files
 // to get mocha binary to work with ESM: https://github.com/nodejs/node/issues/33226
 
