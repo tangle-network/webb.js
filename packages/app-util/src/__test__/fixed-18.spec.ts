@@ -4,7 +4,7 @@
 import BigNumber from 'bignumber.js';
 import { expect } from 'chai';
 
-import { Fixed18 } from '../fixed-18';
+import { Fixed18 } from '../fixed-18.js';
 
 describe('fixed 128 constructor', () => {
   it('constructor should work', () => {

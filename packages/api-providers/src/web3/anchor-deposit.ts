@@ -1,18 +1,18 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { getEVMChainNameFromInternal } from '@webb-tools/api-providers/utils';
-import { LoggerService } from '@webb-tools/app-util';
+import { getEVMChainNameFromInternal } from '@webb-tools/api-providers/utils/index.js';
+import { LoggerService } from '@webb-tools/app-util/index.js';
 // eslint-disable-next-line camelcase
 import { ERC20__factory as ERC20Factory } from '@webb-tools/contracts';
-import { Note, NoteGenInput } from '@webb-tools/sdk-core';
+import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
 
-import { AnchorDeposit, Currency, DepositPayload as IDepositPayload, MixerSize } from '../abstracts';
-import { ChainType, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains';
-import { bufferToFixed } from '../contracts/utils/buffer-to-fixed';
-import { createAnchor2Deposit, Deposit } from '../contracts/utils/make-deposit';
-import { WebbGovernedToken } from '../contracts/wrappers';
-import { WebbWeb3Provider } from './webb-provider';
+import { AnchorDeposit, Currency, DepositPayload as IDepositPayload, MixerSize } from '../abstracts/index.js';
+import { ChainType, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains/index.js';
+import { bufferToFixed } from '../contracts/utils/buffer-to-fixed.js';
+import { createAnchor2Deposit, Deposit } from '../contracts/utils/make-deposit.js';
+import { WebbGovernedToken } from '../contracts/wrappers/index.js';
+import { WebbWeb3Provider } from './webb-provider.js';
 
 const logger = LoggerService.get('web3-bridge-deposit');
 

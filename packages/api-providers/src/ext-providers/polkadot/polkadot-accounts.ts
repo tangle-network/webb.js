@@ -3,7 +3,7 @@
 
 import { InjectedAccount, InjectedExtension } from '@polkadot/extension-inject/types';
 
-import { Account, AccountsAdapter, PromiseOrT } from '../../account/Accounts.adapter';
+import { Account, AccountsAdapter, PromiseOrT } from '../../account/Accounts.adapter.js';
 
 export class PolkadotAccount extends Account<InjectedAccount> {
   get avatar () {

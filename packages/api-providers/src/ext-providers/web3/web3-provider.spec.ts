@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { Web3Provider } from './web3-provider';
+import { Web3Provider } from './web3-provider.js';
 
 describe('Initialize Web3', () => {
   it('Is constructable from HTTP', async () => {

@@ -1,14 +1,15 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { Amount, MixerSize, WrappingBalance, WrappingEvent } from '@webb-tools/api-providers';
+import { Amount, MixerSize, WrappingBalance, WrappingEvent } from '@webb-tools/api-providers/index.js';
 import { Observable } from 'rxjs';
 
-import { WrapUnWrap } from '../abstracts';
-import { WebbCurrencyId } from '../enums';
-import { WebbPolkadot } from './webb-provider';
+import { WrapUnWrap } from '../abstracts/index.js';
+import { WebbCurrencyId } from '../enums/index.js';
+import { WebbPolkadot } from './webb-provider.js';
 
 export class PolkadotWrapUnwrap extends WrapUnWrap<WebbPolkadot> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   canWrap (wrapPayload: any): Promise<boolean> {
     return Promise.resolve(false);
   }
@@ -21,10 +22,12 @@ export class PolkadotWrapUnwrap extends WrapUnWrap<WebbPolkadot> {
     return Promise.resolve('');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   unwrap (unwrapPayload: any): Promise<string> {
     return Promise.resolve('');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   wrap (wrapPayload: any): Promise<string> {
     return Promise.resolve('');
   }
@@ -33,6 +36,7 @@ export class PolkadotWrapUnwrap extends WrapUnWrap<WebbPolkadot> {
     return new Observable();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   canUnWrap (unwrapPayload: Amount): Promise<boolean> {
     return Promise.resolve(false);
   }

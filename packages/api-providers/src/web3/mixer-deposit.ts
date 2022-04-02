@@ -1,16 +1,16 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { getEVMChainName, getNativeCurrencySymbol } from '@webb-tools/api-providers/utils';
-import { Note, NoteGenInput } from '@webb-tools/sdk-core';
+import { getEVMChainName, getNativeCurrencySymbol } from '@webb-tools/api-providers/utils/index.js';
+import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
 import utils from 'web3-utils';
 
 import { u8aToHex } from '@polkadot/util';
 
-import { DepositPayload as IDepositPayload, MixerDeposit, MixerSize } from '../abstracts';
-import { ChainType, computeChainIdType, parseChainIdType } from '../chains';
-import { createTornDeposit, Deposit } from '../contracts/utils/make-deposit';
-import { WebbWeb3Provider } from './webb-provider';
+import { DepositPayload as IDepositPayload, MixerDeposit, MixerSize } from '../abstracts/index.js';
+import { ChainType, computeChainIdType, parseChainIdType } from '../chains/index.js';
+import { createTornDeposit, Deposit } from '../contracts/utils/make-deposit.js';
+import { WebbWeb3Provider } from './webb-provider.js';
 
 type DepositPayload = IDepositPayload<Note, [Deposit, number]>;
 

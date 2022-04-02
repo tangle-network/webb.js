@@ -1,23 +1,23 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiInitHandler, AppConfig, NotificationHandler, ProvideCapabilities, WasmFactory, WebbApiProvider, WebbMethods, WebbProviderEvents, WebbRelayerBuilder } from '@webb-tools/api-providers';
-import { EventBus } from '@webb-tools/app-util';
+import { ApiInitHandler, AppConfig, NotificationHandler, ProvideCapabilities, WasmFactory, WebbApiProvider, WebbMethods, WebbProviderEvents, WebbRelayerBuilder } from '@webb-tools/api-providers/index.js';
+import { EventBus } from '@webb-tools/app-util/index.js';
 
 import { ApiPromise } from '@polkadot/api';
 import { InjectedAccount, InjectedExtension } from '@polkadot/extension-inject/types';
 
-import { AccountsAdapter } from '../account/Accounts.adapter';
-import { PolkadotProvider } from '../ext-providers';
-import { ActionsBuilder, InteractiveFeedback, WebbError, WebbErrorCodes } from '../webb-error';
-import { PolkadotAnchorApi } from './anchor-api';
-import { PolkadotBridgeDeposit } from './anchor-deposit';
-import { PolkadotAnchorWithdraw } from './anchor-withdraw';
-import { PolkadotChainQuery } from './chain-query';
-import { PolkadotMixerDeposit } from './mixer-deposit';
-import { PolkadotMixerWithdraw } from './mixer-withdraw';
-import { PolkaTXBuilder } from './transaction';
-import { PolkadotWrapUnwrap } from './wrap-unwrap';
+import { AccountsAdapter } from '../account/Accounts.adapter.js';
+import { PolkadotProvider } from '../ext-providers/index.js';
+import { ActionsBuilder, InteractiveFeedback, WebbError, WebbErrorCodes } from '../webb-error/index.js';
+import { PolkadotAnchorApi } from './anchor-api.js';
+import { PolkadotBridgeDeposit } from './anchor-deposit.js';
+import { PolkadotAnchorWithdraw } from './anchor-withdraw.js';
+import { PolkadotChainQuery } from './chain-query.js';
+import { PolkadotMixerDeposit } from './mixer-deposit.js';
+import { PolkadotMixerWithdraw } from './mixer-withdraw.js';
+import { PolkaTXBuilder } from './transaction.js';
+import { PolkadotWrapUnwrap } from './wrap-unwrap.js';
 
 export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbApiProvider<WebbPolkadot> {
   readonly methods: WebbMethods<WebbPolkadot>;

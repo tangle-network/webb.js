@@ -4,23 +4,23 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 
 import { parseUnits } from '@ethersproject/units';
-import { Bridge, OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer, WithdrawState } from '@webb-tools/api-providers';
-import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, chainIdToRelayerName, getAnchorAddressForBridge, getEVMChainName, getEVMChainNameFromInternal, MixerStorage } from '@webb-tools/api-providers/utils';
-import { LoggerService } from '@webb-tools/app-util';
-import { Note } from '@webb-tools/sdk-core';
+import { Bridge, OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer, WithdrawState } from '@webb-tools/api-providers/index.js';
+import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, chainIdToRelayerName, getAnchorAddressForBridge, getEVMChainName, getEVMChainNameFromInternal, MixerStorage } from '@webb-tools/api-providers/utils/index.js';
+import { LoggerService } from '@webb-tools/app-util/index.js';
+import { Note } from '@webb-tools/sdk-core/index.js';
 import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
 import { BigNumber } from 'ethers';
 
-import { AnchorWithdraw } from '../abstracts';
-import { chainTypeIdToInternalId, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains';
-import { generateWithdrawProofCallData, hexStringToBytes } from '../contracts/utils/bridge-utils';
-import { bufferToFixed } from '../contracts/utils/buffer-to-fixed';
-import { depositFromAnchorNote } from '../contracts/utils/make-deposit';
-import { AnchorContract, ZKPWebbAnchorInputWithoutMerkle } from '../contracts/wrappers';
-import { webbCurrencyIdFromString } from '../enums';
-import { Web3Provider } from '../ext-providers';
-import { WebbError, WebbErrorCodes } from '../webb-error';
-import { WebbWeb3Provider } from './webb-provider';
+import { AnchorWithdraw } from '../abstracts/index.js';
+import { chainTypeIdToInternalId, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains/index.js';
+import { generateWithdrawProofCallData, hexStringToBytes } from '../contracts/utils/bridge-utils.js';
+import { bufferToFixed } from '../contracts/utils/buffer-to-fixed.js';
+import { depositFromAnchorNote } from '../contracts/utils/make-deposit.js';
+import { AnchorContract, ZKPWebbAnchorInputWithoutMerkle } from '../contracts/wrappers/index.js';
+import { webbCurrencyIdFromString } from '../enums/index.js';
+import { Web3Provider } from '../ext-providers/index.js';
+import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
+import { WebbWeb3Provider } from './webb-provider.js';
 
 const logger = LoggerService.get('Web3BridgeWithdraw');
 

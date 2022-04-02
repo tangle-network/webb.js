@@ -1,8 +1,8 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { Chain, Wallet } from './common';
-import { WebbApiProvider } from './webb-provider.interface';
+import { Chain, Wallet } from './common.js';
+import { WebbApiProvider } from './webb-provider.interface.js';
 
 export interface WebbContextState<T = unknown> {
   wallets: Record<number, Wallet>;

@@ -1,19 +1,20 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { Currency } from '@webb-tools/api-providers';
+import { Currency } from '@webb-tools/api-providers/index.js';
 
-import { AnchorApi, AnchorBase } from '../abstracts';
-import { ChainTypeId } from '../chains';
-import { BridgeConfig } from '../types/bridge-config.interface';
-import { CurrencyRole, CurrencyType } from '../types/currency-config.interface';
-import { WebbPolkadot } from './webb-provider';
+import { AnchorApi, AnchorBase } from '../abstracts/index.js';
+import { ChainTypeId } from '../chains/index.js';
+import { BridgeConfig } from '../types/bridge-config.interface.js';
+import { CurrencyRole, CurrencyType } from '../types/currency-config.interface.js';
+import { WebbPolkadot } from './webb-provider.js';
 
 export class PolkadotAnchorApi extends AnchorApi<WebbPolkadot, BridgeConfig> {
   private get activeBridgeAsset () {
     return this.store.activeBridge?.asset ?? null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getTokenAddress (chainId: ChainTypeId): string | null {
     return null;
   }
@@ -47,6 +48,7 @@ export class PolkadotAnchorApi extends AnchorApi<WebbPolkadot, BridgeConfig> {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getWrappableAssets (chainId: ChainTypeId): Promise<Currency[]> {
     return [];
   }

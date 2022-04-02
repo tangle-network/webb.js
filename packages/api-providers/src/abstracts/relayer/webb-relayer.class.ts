@@ -1,16 +1,16 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { getAnchorAddressForBridge } from '@webb-tools/api-providers';
-import { LoggerService } from '@webb-tools/app-util';
+import { getAnchorAddressForBridge } from '@webb-tools/api-providers/index.js';
+import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Observable, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-import { InternalChainId } from '../../chains';
-import { webbCurrencyIdFromString } from '../../enums';
-import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo';
-import { AppConfig } from '../common';
-import { Capabilities, EVMCMDKeys, RelayedChainConfig, RelayerCMDBase, RelayerCMDKey, RelayerConfig, RelayerEVMCommands, RelayerMessage, RelayerSubstrateCommands, SubstrateCMDKeys } from './types';
+import { InternalChainId } from '../../chains/index.js';
+import { webbCurrencyIdFromString } from '../../enums/index.js';
+import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo.js';
+import { AppConfig } from '../common.js';
+import { Capabilities, EVMCMDKeys, RelayedChainConfig, RelayerCMDBase, RelayerCMDKey, RelayerConfig, RelayerEVMCommands, RelayerMessage, RelayerSubstrateCommands, SubstrateCMDKeys } from './types.js';
 
 const logger = LoggerService.get('webb-relayer class');
 

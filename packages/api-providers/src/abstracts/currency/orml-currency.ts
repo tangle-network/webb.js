@@ -1,9 +1,9 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { LoggerService } from '@webb-tools/app-util';
+import { LoggerService } from '@webb-tools/app-util/index.js';
 
-import { WebbPolkadot } from '../../polkadot';
+import { WebbPolkadot } from '../../polkadot/index.js';
 
 export type ORMLAsset = {
   existentialDeposit: string;

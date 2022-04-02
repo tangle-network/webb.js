@@ -1,8 +1,8 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { getCachedFixtureURI, withLocalFixtures } from '@webb-tools/api-providers';
-import { LoggerService } from '@webb-tools/app-util';
+import { getCachedFixtureURI, withLocalFixtures } from '@webb-tools/api-providers/index.js';
+import { LoggerService } from '@webb-tools/app-util/index.js';
 
 const logger = LoggerService.get('IPFS');
 

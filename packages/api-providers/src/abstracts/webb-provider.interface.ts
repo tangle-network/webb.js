@@ -1,17 +1,17 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { AnchorApi } from '@webb-tools/api-providers';
-import { EventBus } from '@webb-tools/app-util';
+import { AnchorApi } from '@webb-tools/api-providers/index.js';
+import { EventBus } from '@webb-tools/app-util/index.js';
 
-import { AccountsAdapter } from '../account/Accounts.adapter';
-import { InteractiveFeedback } from '../webb-error';
-import { AnchorDeposit, AnchorWithdraw, Bridge } from './anchor';
-import { ChainQuery } from './chain-query';
-import { AppConfig } from './common';
-import { DepositPayload, MixerDeposit, MixerDepositEvents, MixerWithdraw, MixerWithdrawEvents } from './mixer';
-import { WebbRelayerBuilder } from './relayer';
-import { WrapUnWrap } from './wrap-unwrap';
+import { AccountsAdapter } from '../account/Accounts.adapter.js';
+import { InteractiveFeedback } from '../webb-error/index.js';
+import { AnchorDeposit, AnchorWithdraw, Bridge } from './anchor/index.js';
+import { ChainQuery } from './chain-query/index.js';
+import { DepositPayload, MixerDeposit, MixerDepositEvents, MixerWithdraw, MixerWithdrawEvents } from './mixer/index.js';
+import { WebbRelayerBuilder } from './relayer/index.js';
+import { WrapUnWrap } from './wrap-unwrap/index.js';
+import { AppConfig } from './common.js';
 
 /// list of the apis that are available for  the provider
 export interface WebbMethods<T extends WebbApiProvider<any>> {

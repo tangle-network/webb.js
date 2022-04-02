@@ -4,23 +4,23 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import { Log } from '@ethersproject/abstract-provider';
-import { fetchTornadoCircuitData, fetchTornadoProvingKey, retryPromise } from '@webb-tools/api-providers';
-import { LoggerService } from '@webb-tools/app-util';
+import { fetchTornadoCircuitData, fetchTornadoProvingKey, retryPromise } from '@webb-tools/api-providers/index.js';
+import { LoggerService } from '@webb-tools/app-util/index.js';
 import { BigNumber, Contract, providers, Signer } from 'ethers';
+// @ts-ignore
+import tornWebSnark from 'tornado-websnark';
 import utils from 'web3-utils';
 
-import { EVMChainId } from '../../chains';
-import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo';
-import { WebbError, WebbErrorCodes } from '../../webb-error';
-import { Tornado } from '../tornado';
-import { abi } from '../tornado/NativeAnchor.json';
-import { bufferToFixed } from '../utils/buffer-to-fixed';
-import { EvmNote } from '../utils/evm-note';
-import { createTornDeposit, Deposit } from '../utils/make-deposit';
-import { MerkleTree, MimcSpongeHasher } from '../utils/merkle';
-import { ZKPTornInputWithMerkle, ZKPTornPublicInputs } from './types';
-
-const webSnarkUtils = require('tornado-websnark/src/utils');
+import { EVMChainId } from '../../chains/index.js';
+import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo.js';
+import { WebbError, WebbErrorCodes } from '../../webb-error/index.js';
+import { Tornado } from '../tornado/index.js';
+import tornadoArtifact from '../tornado/NativeAnchor.json' assert {type: 'json'};
+import { bufferToFixed } from '../utils/buffer-to-fixed.js';
+import { EvmNote } from '../utils/evm-note.js';
+import { createTornDeposit, Deposit } from '../utils/make-deposit.js';
+import { MerkleTree, MimcSpongeHasher } from '../utils/merkle/index.js';
+import { ZKPTornInputWithMerkle, ZKPTornPublicInputs } from './types.js';
 
 type DepositEvent = [string, number, BigNumber];
 const logger = LoggerService.get('anchor');
@@ -32,7 +32,7 @@ export class TornadoContract {
 
   constructor (private mixersInfo: EvmChainMixersInfo, private web3Provider: providers.Web3Provider, address: string) {
     this.signer = this.web3Provider.getSigner();
-    this._contract = new Contract(address, abi, this.signer) as any;
+    this._contract = new Contract(address, tornadoArtifact.abi, this.signer) as any;
   }
 
   get getLastRoot () {
@@ -203,14 +203,14 @@ export class TornadoContract {
       secret: deposit.secret
     };
 
-    const proofsData = await webSnarkUtils.genWitnessAndProve(
+    const proofsData = await tornWebSnark.utils.genWitnessAndProve(
       // @ts-ignore
       window.groth16,
       zkpInput,
       circuitData,
       provingKey
     );
-    const { proof } = await webSnarkUtils.toSolidityInput(proofsData);
+    const { proof } = await tornWebSnark.utils.toSolidityInput(proofsData);
 
     return { input: zkpInput, proof };
   }
@@ -275,14 +275,14 @@ export class TornadoContract {
       secret: deposit.secret
     };
 
-    const proofsData = await webSnarkUtils.genWitnessAndProve(
+    const proofsData = await tornWebSnark.utils.genWitnessAndProve(
       // @ts-ignore
       window.groth16,
       zkpInput,
       circuitData,
       provingKey
     );
-    const { proof } = await webSnarkUtils.toSolidityInput(proofsData);
+    const { proof } = await tornWebSnark.utils.toSolidityInput(proofsData);
 
     return { input: zkpInput, proof };
   }

@@ -3,7 +3,7 @@
 
 // The chain query class returns information from the selected provider
 
-import { WebbCurrencyId } from '../../enums';
+import { WebbCurrencyId } from '../../enums/index.js';
 
 export abstract class ChainQuery<Provider> {
   constructor (protected inner: Provider) {}

@@ -1,8 +1,8 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { EventBus } from '../shared/event-bus.class';
-import { LogLevel } from './logs-level.enum';
+import { EventBus } from '../shared/event-bus.class.js';
+import { LogLevel } from './logs-level.enum.js';
 
 export type LogEvent = {
   log: {

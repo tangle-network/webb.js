@@ -12,8 +12,8 @@
   "compilerOptions": {
     "types": ["mocha", "node"],
     "declaration": true,
-    "target": "esnext",
-    "module": "CommonJS",
+    "target": "ESNext",
+    "module": "ESNext",
     "jsx": "preserve",
     "strict": true,
     "noImplicitAny": true,
@@ -23,10 +23,9 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "baseUrl": ".",
-    "allowJs": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": true, //
     "paths": {
       "@webb-tools/api": [
         "packages/api/src"

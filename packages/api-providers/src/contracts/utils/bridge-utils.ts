@@ -2,23 +2,24 @@
 /* tslint:disable */
 // TODO resole eslint issue and merge this to protocol solidity
 //@ts-nocheck
-import { PoseidonHasher3 } from './poseidon-hash3';
+import { PoseidonHasher3 } from './poseidon-hash3.js';
 
 /**
  * Copyright 2021 Webb Technologies
  * SPDX-License-Identifier: GPL-3.0-or-later-only
  */
 
-const Ethers = require('ethers');
-const crypto = require('crypto');
-const utils = require('ffjavascript').utils;
+import { ethers } from 'ethers';
+import crypto from 'crypto';
+import * as ff from 'ffjavascript';
+const { utils } = ff;
 
 const { leBuff2int, unstringifyBigInts } = utils;
 const rbigint = (nbytes) => leBuff2int(crypto.randomBytes(nbytes));
 const poseidonHasher = new PoseidonHasher3();
 const blankFunctionSig = '0x00000000';
 const blankFunctionDepositerOffset = 0;
-const AbiCoder = new Ethers.utils.AbiCoder();
+const AbiCoder = new ethers.utils.AbiCoder();
 
 function bigNumberToPaddedBytes(num, digits = 32) {
   var n = num.toString(16).replace(/^0x/, '');
@@ -29,7 +30,7 @@ function bigNumberToPaddedBytes(num, digits = 32) {
 }
 
 const toHex = (covertThis, padding) => {
-  return Ethers.utils.hexZeroPad(Ethers.utils.hexlify(covertThis), padding);
+  return ethers.utils.hexZeroPad(ethers.utils.hexlify(covertThis), padding);
 };
 
 const toFixedHex = (number, length = 32) =>
@@ -116,7 +117,7 @@ const assertObjectsMatch = (expectedObj, actualObj) => {
       // Also handles when Truffle returns hex number when expecting uint/int
       if (
         (typeof expectedValue === 'number' && typeof actualValue === 'string') ||
-        (Ethers.utils.isHexString(actualValue) && typeof expectedValue === 'number')
+        (ethers.utils.isHexString(actualValue) && typeof expectedValue === 'number')
       ) {
         actualValue = parseInt(actualValue);
       }
@@ -132,8 +133,8 @@ const assertObjectsMatch = (expectedObj, actualObj) => {
 //uint72 nonceAndID = (uint72(depositNonce) << 8) | uint72(chainID);
 const nonceAndId = (nonce, id) => {
   return (
-    Ethers.utils.hexZeroPad(Ethers.utils.hexlify(nonce), 8) +
-    Ethers.utils.hexZeroPad(Ethers.utils.hexlify(id), 1).substr(2)
+    ethers.utils.hexZeroPad(ethers.utils.hexlify(nonce), 8) +
+    ethers.utils.hexZeroPad(ethers.utils.hexlify(id), 1).substr(2)
   );
 };
 

@@ -3,7 +3,7 @@
 
 import { Eth } from 'web3-eth';
 
-import { Account, AccountsAdapter, PromiseOrT } from '../../account/Accounts.adapter';
+import { Account, AccountsAdapter, PromiseOrT } from '../../account/Accounts.adapter.js';
 
 export class Web3Account extends Account<Eth> {
   get avatar () {
@@ -30,6 +30,7 @@ export class Web3Accounts extends AccountsAdapter<Eth> {
     return defaultAccount ? new Web3Account(this.inner, defaultAccount) : null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setActiveAccount (account: Account): PromiseOrT<void> {
     return undefined;
   }

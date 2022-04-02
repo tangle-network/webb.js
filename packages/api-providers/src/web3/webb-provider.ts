@@ -1,24 +1,24 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { AppConfig, MixerSize, NotificationHandler, Web3AnchorDeposit, WebbApiProvider, WebbMethods, WebbProviderEvents, WebbRelayerBuilder } from '@webb-tools/api-providers';
-import { EventBus } from '@webb-tools/app-util';
+import { AppConfig, MixerSize, NotificationHandler, Web3AnchorDeposit, WebbApiProvider, WebbMethods, WebbProviderEvents, WebbRelayerBuilder } from '@webb-tools/api-providers/index.js';
+import { EventBus } from '@webb-tools/app-util/index.js';
 import { Note } from '@webb-tools/sdk-core';
 import { providers } from 'ethers';
 import { Eth } from 'web3-eth';
 
-import { AccountsAdapter } from '../account/Accounts.adapter';
-import { EVMChainId, evmIdIntoInternalChainId, parseChainIdType } from '../chains';
-import { AnchorContract, TornadoContract } from '../contracts/wrappers';
-import { Web3Accounts, Web3Provider } from '../ext-providers';
-import { WebbError, WebbErrorCodes } from '../webb-error';
-import { Web3AnchorApi } from './anchor-api';
-import { Web3AnchorWithdraw } from './anchor-withdraw';
-import { Web3ChainQuery } from './chain-query';
-import { EvmChainMixersInfo } from './EvmChainMixersInfo';
-import { Web3MixerDeposit } from './mixer-deposit';
-import { Web3MixerWithdraw } from './mixer-withdraw';
-import { Web3WrapUnwrap } from './wrap-unwrap';
+import { AccountsAdapter } from '../account/Accounts.adapter.js';
+import { EVMChainId, evmIdIntoInternalChainId, parseChainIdType } from '../chains/index.js';
+import { AnchorContract, TornadoContract } from '../contracts/wrappers/index.js';
+import { Web3Accounts, Web3Provider } from '../ext-providers/index.js';
+import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
+import { Web3AnchorApi } from './anchor-api.js';
+import { Web3AnchorWithdraw } from './anchor-withdraw.js';
+import { Web3ChainQuery } from './chain-query.js';
+import { EvmChainMixersInfo } from './EvmChainMixersInfo.js';
+import { Web3MixerDeposit } from './mixer-deposit.js';
+import { Web3MixerWithdraw } from './mixer-withdraw.js';
+import { Web3WrapUnwrap } from './wrap-unwrap.js';
 
 export class WebbWeb3Provider
   extends EventBus<WebbProviderEvents<[number]>>

@@ -1,5 +1,5 @@
 import { execSync, spawn, SpawnOptionsWithoutStdio } from 'child_process';
-import { sleep } from './index';
+import { sleep } from './index.js';
 
 function spawnWithLogger(
   command: string,

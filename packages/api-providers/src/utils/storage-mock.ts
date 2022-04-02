@@ -1,10 +1,10 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { AppConfig } from '@webb-tools/api-providers/abstracts';
+import { AppConfig } from '@webb-tools/api-providers/abstracts/index.js';
 
-import { Storage } from '../storage';
-import { getEVMChainName } from './chain-utils';
+import { Storage } from '../storage/index.js';
+import { getEVMChainName } from './chain-utils.js';
 
 export type MixerStorage = Record<string, { lastQueriedBlock: number; leaves: string[] }>;
 

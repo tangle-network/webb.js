@@ -1,8 +1,8 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { WebbError, WebbErrorCodes } from '../webb-error';
-import { ChainType, ChainTypeId, EVMChainId, InternalChainId, SubstrateChainId } from './chain-id.enum';
+import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
+import { ChainType, ChainTypeId, EVMChainId, InternalChainId, SubstrateChainId } from './chain-id.enum.js';
 
 export const byteArrayToNum = (arr: number[]): number => {
   let n = 0;

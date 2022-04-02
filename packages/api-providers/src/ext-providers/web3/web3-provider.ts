@@ -4,12 +4,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import WalletConnectProvider from '@walletconnect/web3-provider';
-import { ProvideCapabilities } from '@webb-tools/api-providers';
+import { ProvideCapabilities } from '@webb-tools/api-providers/index.js';
 import { ethers } from 'ethers';
 import Web3 from 'web3';
 import { AbstractProvider } from 'web3-core';
 
-import { WebbError, WebbErrorCodes } from '../../webb-error';
+import { WebbError, WebbErrorCodes } from '../../webb-error/index.js';
 
 export type AddToken = { address: string; symbol: string; decimals: number; image: string };
 export interface AddEthereumChainParameter {

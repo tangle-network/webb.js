@@ -3,7 +3,7 @@
   "name": "@webb-tools/wasm-utils",
   "version": "0.1.4-45",
   "scripts": {
-    "build": "rimraf build pkg && webpack",
+    "build": "rimraf build pkg && NODE_OPTIONS=\"--loader ../../loader.js\" webpack --config webpack.config.cjs",
     "start": "rimraf build pkg && webpack-dev-server --open -d",
     "test": "wasm-pack test --release --node "
   },

@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { getCachedFixtureURI, withLocalFixtures } from '@webb-tools/api-providers';
+import { getCachedFixtureURI, withLocalFixtures } from '@webb-tools/api-providers/index.js';
 
 export const fetchTornadoCircuitData = async () => {
   const IPFSUrl = 'https://ipfs.io/ipfs/QmbX8PzkcU1SQwUis3zDWEKsn8Yjgy2vALNeghVM2uh31B';

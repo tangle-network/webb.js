@@ -1,17 +1,17 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { AnchorApi } from '@webb-tools/api-providers';
-import { LoggerService } from '@webb-tools/app-util';
-import { Note, NoteGenInput } from '@webb-tools/sdk-core';
+import { AnchorApi } from '@webb-tools/api-providers/index.js';
+import { LoggerService } from '@webb-tools/app-util/index.js';
+import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
 
 import { u8aToHex } from '@polkadot/util';
 
-import { AnchorDeposit, AnchorSize, DepositPayload as IDepositPayload } from '../abstracts';
-import { ChainType, computeChainIdType, InternalChainId, SubstrateChainId } from '../chains';
-import { BridgeConfig } from '../types/bridge-config.interface';
-import { WebbError, WebbErrorCodes } from '../webb-error';
-import { WebbPolkadot } from './webb-provider';
+import { AnchorDeposit, AnchorSize, DepositPayload as IDepositPayload } from '../abstracts/index.js';
+import { ChainType, computeChainIdType, InternalChainId, SubstrateChainId } from '../chains/index.js';
+import { BridgeConfig } from '../types/bridge-config.interface.js';
+import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
+import { WebbPolkadot } from './webb-provider.js';
 
 const logger = LoggerService.get('PolkadotBridgeDeposit');
 
@@ -40,6 +40,7 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
   async generateBridgeNote (
     anchorId: number | string,
     destination: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     wrappableAssetAddress: string | undefined
   ): Promise<DepositPayload> {
     const currency = this.bridgeApi.currency;

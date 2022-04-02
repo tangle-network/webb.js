@@ -1,7 +1,8 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-const circomlib = require('circomlibjs');
+// @ts-ignore
+import circomlib from 'circomlibjs';
 
 const hashLeftRight = (left: bigint, right: bigint) => {
   return circomlib.poseidon([left, right]);
@@ -16,7 +17,7 @@ export function poseidonHash3 (inputs: any[]) {
 }
 
 export class PoseidonHasher3 {
-  hash (level: any, left: any, right: any) {
+  hash (_level: any, left: any, right: any) {
     return hashLeftRight(BigInt(left), BigInt(right)).toString();
   }
 

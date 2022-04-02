@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { EventBus } from '@webb-tools/app-util';
+import { EventBus } from '@webb-tools/app-util/index.js';
 
 export type FeedbackLevel = 'error' | 'info' | 'warning' | 'success';
 export type Action = {

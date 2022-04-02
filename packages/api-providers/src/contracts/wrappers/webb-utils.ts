@@ -4,8 +4,8 @@
 // @ts-ignore
 import * as snarkjs from 'snarkjs';
 
-import { fetchKeyForEdges, fetchWasmForEdges } from '../../ipfs/evm/anchors';
-import { AnchorWitnessInput } from './types';
+import { fetchKeyForEdges, fetchWasmForEdges } from '../../ipfs/evm/anchors.js';
+import { AnchorWitnessInput } from './types.js';
 
 type MaxEdges = 1 | 2 | 3 | 4 | 5;
 
