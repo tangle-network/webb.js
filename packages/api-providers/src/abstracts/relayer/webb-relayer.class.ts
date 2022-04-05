@@ -202,8 +202,9 @@ export class WebbRelayerBuilder {
   }
 
   /*
-   *  get a list of the suitable relaryes for a given query
+   *  get a list of the suitable relayers for a given query
    *  the list is randomized
+   *  Accepts a 'RelayerQuery' object with optional, indexible fields.
    * */
   getRelayer (query: RelayerQuery): WebbRelayer[] {
     const { baseOn, bridgeSupport, chainId, contractAddress, ipService, tornadoSupport } = query;
@@ -254,20 +255,20 @@ export class WebbRelayerBuilder {
 
         if (bridgeSupport && baseOn && chainId) {
           if (baseOn === 'evm') {
-            const bridgeAddress = getAnchorAddressForBridge(
+            const anchorAddress = getAnchorAddressForBridge(
               webbCurrencyIdFromString(bridgeSupport.tokenSymbol),
               chainId,
               bridgeSupport.amount,
               this.appConfig.bridgeByAsset
             );
 
-            if (bridgeAddress) {
+            console.log('anchorAddress: ', anchorAddress);
+
+            if (anchorAddress) {
               return Boolean(
                 capabilities.supportedChains[baseOn]
                   .get(chainId)
-                  ?.contracts?.find(
-                    (contract) => contract.address === bridgeAddress.toLowerCase() && contract.eventsWatcher.enabled
-                  )
+                  ?.contracts?.find((contract) => contract.address === anchorAddress.toLowerCase())
               );
             } else {
               return false;

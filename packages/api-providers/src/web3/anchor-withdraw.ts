@@ -47,9 +47,10 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       async (note: string) => {
         const depositNote = await Note.deserialize(note);
         const evmNote = depositNote.note;
+        const internalId = chainTypeIdToInternalId(parseChainIdType(Number(depositNote.note.targetChainId)));
         const contractAddress = await getAnchorAddressForBridge(
           webbCurrencyIdFromString(evmNote.tokenSymbol),
-          Number(evmNote.targetChainId),
+          internalId,
           Number(evmNote.amount),
           this.config.bridgeByAsset
         );
@@ -61,7 +62,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
         // Given the note, iterate over the relayer's supported contracts and find the corresponding configuration
         // for the contract.
         const supportedContract = relayer.capabilities.supportedChains.evm
-          .get(Number(evmNote.targetChainId))
+          .get(internalId)
           ?.contracts.find(({ address, size }) => {
             // Match on the relayer configuration as well as note
             return address.toLowerCase() === contractAddress.toLowerCase() && size === Number(evmNote.amount);
@@ -109,13 +110,16 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
   }
 
   async getRelayersByNote (evmNote: Note) {
+    const chainTypeId = Number(evmNote.note.targetChainId);
+    const internalId = chainTypeIdToInternalId(parseChainIdType(chainTypeId));
+
     return this.inner.relayingManager.getRelayer({
       baseOn: 'evm',
       bridgeSupport: {
         amount: Number(evmNote.note.amount),
         tokenSymbol: evmNote.note.tokenSymbol
       },
-      chainId: Number(evmNote.note.targetChainId)
+      chainId: internalId
     });
   }
 
