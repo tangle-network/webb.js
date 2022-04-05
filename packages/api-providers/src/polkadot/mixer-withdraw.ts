@@ -181,7 +181,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
         root: `0x${zkProofMetadata.root}`
       };
 
-      // withdraw throw relayer
+      // withdraw through relayer
       if (isValidRelayer) {
         logger.info('withdrawing through relayer', activeRelayer);
         this.emit('stateChange', WithdrawState.SendingTransaction);
