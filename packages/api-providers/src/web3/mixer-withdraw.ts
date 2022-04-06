@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { depositFromAnchorNote, getEVMChainNameFromInternal, webbCurrencyIdFromString } from '@webb-tools/api-providers/index.js';
+import { depositFromAnchorNote, webbCurrencyIdFromString } from '@webb-tools/api-providers/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note } from '@webb-tools/sdk-core/index.js';
 
@@ -52,11 +52,8 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
     };
 
     logger.trace('input for zkp', input);
-    const section = `Bridge ${bridge.currency
-      .getChainIds()
-      .map((id) => getEVMChainNameFromInternal(this.config, id))
-      .join('-')}`;
-    const key = 'web3-bridge-withdraw';
+    const section = `Mixer ${bridge.currency.view.symbol}`;
+    const key = 'web3-mixer-withdraw';
 
     this.emit('stateChange', WithdrawState.GeneratingZk);
     const zkpResults = await contract.generateZKP(deposit, input);
@@ -65,7 +62,7 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
       description: 'Withdraw in progress',
       key,
       level: 'loading',
-      message: `${section}:withdraw`,
+      message: `${section} withdraw`,
       name: 'Transaction'
     });
 
@@ -75,7 +72,7 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
         description: 'Withdraw canceled',
         key,
         level: 'error',
-        message: `${section}:withdraw`,
+        message: `${section} withdraw`,
         name: 'Transaction'
       });
       this.emit('stateChange', WithdrawState.Ideal);
@@ -112,7 +109,7 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
         description: (e as any)?.code === 4001 ? 'Withdraw rejected' : 'Withdraw failed',
         key,
         level: 'error',
-        message: `${section}:withdraw`,
+        message: `${section} withdraw`,
         name: 'Transaction'
       });
 
@@ -124,7 +121,7 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
       description: recipient,
       key,
       level: 'success',
-      message: `${section}:withdraw`,
+      message: `${section} withdraw`,
       name: 'Transaction'
     });
 
