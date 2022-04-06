@@ -25,7 +25,7 @@ import { WebbWeb3Provider } from './webb-provider.js';
 const logger = LoggerService.get('Web3BridgeWithdraw');
 
 export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
-  private get config () {
+  protected get config () {
     return this.inner.config;
   }
 

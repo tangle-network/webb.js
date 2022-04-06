@@ -19,11 +19,11 @@ const logger = LoggerService.get('web3-bridge-deposit');
 type DepositPayload = IDepositPayload<Note, [Deposit, number | string, string?]>;
 
 export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPayload> {
-  private get bridgeApi () {
+  protected get bridgeApi () {
     return this.inner.methods.anchorApi;
   }
 
-  private get config () {
+  protected get config () {
     return this.inner.config;
   }
 
@@ -39,7 +39,6 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       const commitment = depositPayload.params[0].commitment;
       const note = depositPayload.note.note;
       const sourceEvmId = await this.inner.getChainId();
-      // const _sourceChainId = computeChainIdType(ChainType.EVM, sourceEvmId);
       const sourceInternalId = evmIdIntoInternalChainId(sourceEvmId);
 
       this.inner.notificationHandler({

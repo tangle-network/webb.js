@@ -1,21 +1,18 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { AppConfig, MixerSize, NotificationHandler, Web3AnchorDeposit, WebbApiProvider, WebbMethods, WebbProviderEvents, WebbRelayerBuilder } from '@webb-tools/api-providers/index.js';
+import { AppConfig, NotificationHandler, Web3AnchorDeposit, WebbApiProvider, WebbMethods, WebbProviderEvents, WebbRelayerBuilder } from '@webb-tools/api-providers/index.js';
 import { EventBus } from '@webb-tools/app-util/index.js';
-import { Note } from '@webb-tools/sdk-core';
 import { providers } from 'ethers';
 import { Eth } from 'web3-eth';
 
 import { AccountsAdapter } from '../account/Accounts.adapter.js';
-import { EVMChainId, evmIdIntoInternalChainId, parseChainIdType } from '../chains/index.js';
-import { AnchorContract, TornadoContract } from '../contracts/wrappers/index.js';
+import { evmIdIntoInternalChainId } from '../chains/index.js';
+import { AnchorContract } from '../contracts/wrappers/index.js';
 import { Web3Accounts, Web3Provider } from '../ext-providers/index.js';
-import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
 import { Web3AnchorApi } from './anchor-api.js';
 import { Web3AnchorWithdraw } from './anchor-withdraw.js';
 import { Web3ChainQuery } from './chain-query.js';
-import { EvmChainMixersInfo } from './EvmChainMixersInfo.js';
 import { Web3MixerDeposit } from './mixer-deposit.js';
 import { Web3MixerWithdraw } from './mixer-withdraw.js';
 import { Web3WrapUnwrap } from './wrap-unwrap.js';
@@ -25,7 +22,6 @@ export class WebbWeb3Provider
   implements WebbApiProvider<WebbWeb3Provider> {
   readonly methods: WebbMethods<WebbWeb3Provider>;
   private ethersProvider: providers.Web3Provider;
-  private connectedMixers: EvmChainMixersInfo;
   // TODO: make the factory configurable if the web3 interface in need of this functionality
   readonly wasmFactory = () => {
     return null;
@@ -53,7 +49,6 @@ export class WebbWeb3Provider
     this.ethersProvider.provider?.on?.('accountsChanged', () => {
       this.emit('newAccounts', this.accounts);
     });
-    this.connectedMixers = new EvmChainMixersInfo(this.config, chainId);
     this.methods = {
       anchor: {
         core: null,
@@ -105,10 +100,6 @@ export class WebbWeb3Provider
     this.ethersProvider.provider?.on?.('chainChanged', handler);
   }
 
-  setStorage (chainId: number) {
-    this.connectedMixers = new EvmChainMixersInfo(this.config, chainId);
-  }
-
   async destroy (): Promise<void> {
     await this.endSession();
     this.subscriptions = {
@@ -123,63 +114,16 @@ export class WebbWeb3Provider
     return chainId;
   }
 
-  getMixers () {
-    return this.connectedMixers;
-  }
-
-  getTornadoContractAddressByNote (note: Note) {
-    const evmId = parseChainIdType(Number(note.note.targetChainId)).chainId as EVMChainId;
-    const availableMixers = new EvmChainMixersInfo(this.config, evmId);
-    const mixer = availableMixers.getTornMixerInfoBySize(Number(note.note.amount), note.note.tokenSymbol);
-
-    if (!mixer) {
-      throw new Error('Mixer not found');
-    }
-
-    return mixer.address;
-  }
-
-  async getContractByAddress (mixerAddress: string): Promise<TornadoContract> {
-    return new TornadoContract(this.connectedMixers, this.ethersProvider, mixerAddress);
-  }
-
   getWebbAnchorByAddress (address: string): AnchorContract {
-    return new AnchorContract(this.connectedMixers, this.ethersProvider, address);
+    return new AnchorContract(this.ethersProvider, address);
   }
 
   getWebbAnchorByAddressAndProvider (address: string, provider: providers.Web3Provider): AnchorContract {
-    return new AnchorContract(this.connectedMixers, provider, address, true);
-  }
-
-  getMixerInfoBySize (mixerSize: number, tokenSymbol: string) {
-    const mixer = this.connectedMixers.getTornMixerInfoBySize(mixerSize, tokenSymbol);
-
-    if (!mixer) {
-      throw WebbError.from(WebbErrorCodes.MixerSizeNotFound);
-    }
-
-    return mixer;
-  }
-
-  // This function limits the mixer implementation to one type for the token/size pair.
-  // Something like a poseidon hasher implementation instead of mimc hasher cannot
-  // exist alongside each other.
-  async getContractBySize (mixerSize: number, tokenSymbol: string): Promise<TornadoContract> {
-    const mixer = this.connectedMixers.getTornMixerInfoBySize(mixerSize, tokenSymbol);
-
-    if (!mixer) {
-      throw WebbError.from(WebbErrorCodes.MixerSizeNotFound);
-    }
-
-    return new TornadoContract(this.connectedMixers, this.ethersProvider, mixer.address);
+    return new AnchorContract(provider, address, true);
   }
 
   getEthersProvider (): providers.Web3Provider {
     return this.ethersProvider;
-  }
-
-  getMixerSizes (tokenSymbol: string): Promise<MixerSize[]> {
-    return Promise.resolve(this.connectedMixers.getTornMixerSizes(tokenSymbol));
   }
 
   // Init web3 provider with the `Web3Accounts` as the default account provider

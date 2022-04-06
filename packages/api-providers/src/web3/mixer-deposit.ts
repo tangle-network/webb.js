@@ -1,67 +1,184 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { getEVMChainName, getNativeCurrencySymbol } from '@webb-tools/api-providers/utils/index.js';
-import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
-import utils from 'web3-utils';
+import { getEVMChainName, getEVMChainNameFromInternal } from '@webb-tools/api-providers/utils/index.js';
+import { ERC20__factory as ERC20Factory } from '@webb-tools/contracts';
+import { Note } from '@webb-tools/sdk-core/index.js';
 
-import { u8aToHex } from '@polkadot/util';
+import { DepositPayload as IDepositPayload, MixerSize } from '../abstracts/index.js';
+import { evmIdIntoInternalChainId } from '../chains/index.js';
+import { Deposit } from '../contracts/utils/make-deposit.js';
+import { Web3AnchorDeposit } from './anchor-deposit.js';
 
-import { DepositPayload as IDepositPayload, MixerDeposit, MixerSize } from '../abstracts/index.js';
-import { ChainType, computeChainIdType, parseChainIdType } from '../chains/index.js';
-import { createTornDeposit, Deposit } from '../contracts/utils/make-deposit.js';
-import { WebbWeb3Provider } from './webb-provider.js';
+type DepositPayload = IDepositPayload<Note, [Deposit, number | string, string?]>;
 
-type DepositPayload = IDepositPayload<Note, [Deposit, number]>;
+// The Web3 version of a mixer deposit is simply an anchor deposit where src and target chainID are the same.
+export class Web3MixerDeposit extends Web3AnchorDeposit {
+  // Override the deposit in AnchorDeposit to emit different notifications
+  async deposit (depositPayload: DepositPayload): Promise<void> {
+    const bridge = this.bridgeApi.activeBridge;
+    const currency = this.bridgeApi.currency;
 
-export class Web3MixerDeposit extends MixerDeposit<WebbWeb3Provider, DepositPayload> {
-  async deposit ({ note: depositPayload, params }: DepositPayload): Promise<void> {
-    const chainId = Number(depositPayload.note.targetChainId);
-    const evmChainId = parseChainIdType(chainId).chainId;
-
-    this.inner.notificationHandler({
-      data: {
-        amount: String(Number(depositPayload.note.amount)),
-        chain: getEVMChainName(this.inner.config, evmChainId),
-        currency: depositPayload.note.tokenSymbol
-      },
-      description: 'Depositing',
-      key: 'web3-mixer-deposit',
-      level: 'loading',
-      message: 'mixer:deposit',
-      name: 'Transaction'
-    });
-    const [deposit, amount] = params;
-    const providerEvmChainId = await this.inner.getChainId();
-    const contract = await this.inner.getContractBySize(
-      amount,
-      getNativeCurrencySymbol(this.inner.config, providerEvmChainId)
-    );
+    if (!bridge || !currency) {
+      throw new Error('api not ready');
+    }
 
     try {
-      await contract.deposit(deposit.commitment);
+      const commitment = depositPayload.params[0].commitment;
+      const note = depositPayload.note.note;
+      const sourceEvmId = await this.inner.getChainId();
+      const sourceInternalId = evmIdIntoInternalChainId(sourceEvmId);
+
       this.inner.notificationHandler({
-        description: 'Deposit succeed',
-        key: 'web3-mixer-deposit',
-        level: 'success',
-        message: 'mixer:deposit',
+        data: {
+          amount: String(Number(note.amount)),
+          chain: getEVMChainName(this.inner.config, sourceEvmId),
+          currency: note.tokenSymbol
+        },
+        description: 'Depositing',
+        key: 'mixer-deposit',
+        level: 'loading',
+        message: 'mixer deposit',
         name: 'Transaction'
       });
-    } catch (e) {
-      if ((e as any)?.code === 4001) {
+      const anchors = await this.bridgeApi.getAnchors();
+      // Find the Anchor for this bridge amount
+      const anchor = anchors.find((anchor) => anchor.amount === note.amount);
+
+      if (!anchor) {
+        throw new Error('not Anchor for amount' + note.amount);
+      }
+
+      // Get the contract address for the destination chain
+      const contractAddress = anchor.neighbours[sourceInternalId];
+
+      if (!contractAddress) {
+        throw new Error(`No Anchor for the chain ${note.targetChainId}`);
+      }
+
+      const contract = this.inner.getWebbAnchorByAddress(contractAddress as string);
+
+      // If a wrappableAsset was selected, perform a wrapAndDeposit
+      if (depositPayload.params[2]) {
+        const requiredApproval = await contract.isWrappableTokenApprovalRequired(depositPayload.params[2]);
+
+        if (requiredApproval) {
+          this.inner.notificationHandler({
+            description: 'Waiting for token approval',
+            key: 'waiting-approval',
+            level: 'info',
+            message: 'Waiting for token approval',
+            name: 'Approval',
+            persist: true
+          });
+          const tokenInstance = await ERC20Factory.connect(
+            depositPayload.params[2],
+            this.inner.getEthersProvider().getSigner()
+          );
+          const webbToken = await contract.getWebbToken();
+          const tx = await tokenInstance.approve(webbToken.address, await contract.denomination);
+
+          await tx.wait();
+          this.inner.notificationHandler.remove('waiting-approval');
+        }
+
+        const enoughBalance = await contract.hasEnoughBalance(depositPayload.params[2]);
+
+        if (enoughBalance) {
+          await contract.wrapAndDeposit(commitment, depositPayload.params[2]);
+
+          this.inner.notificationHandler({
+            data: {
+              amount: note.amount,
+              chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
+              currency: currency.view.name
+            },
+            description: 'Depositing',
+            key: 'mixer-deposit',
+            level: 'success',
+            message: `${currency.view.name} wrap and deposit`,
+            name: 'Transaction'
+          });
+        } else {
+          this.inner.notificationHandler({
+            data: {
+              amount: note.amount,
+              chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
+              currency: currency.view.name
+            },
+            description: 'Not enough token balance',
+            key: 'mixer-deposit',
+            level: 'error',
+            message: `${currency.view.name} wrap and deposit`,
+            name: 'Transaction'
+          });
+        }
+
+        return;
+      } else {
+        const requiredApproval = await contract.isWebbTokenApprovalRequired();
+
+        if (requiredApproval) {
+          this.inner.notificationHandler({
+            description: 'Waiting for token approval',
+            key: 'waiting-approval',
+            level: 'info',
+            message: 'Waiting for token approval',
+            name: 'Approval',
+            persist: true
+          });
+          const tokenInstance = await contract.getWebbToken();
+          const tx = await tokenInstance.approve(contract.inner.address, await contract.denomination);
+
+          await tx.wait();
+          this.inner.notificationHandler.remove('waiting-approval');
+        }
+
+        const enoughBalance = await contract.hasEnoughBalance();
+
+        if (enoughBalance) {
+          await contract.deposit(commitment);
+          this.inner.notificationHandler({
+            description: 'Deposit succeed',
+            key: 'mixer-deposit',
+            level: 'success',
+            message: `${currency.view.name} deposit`,
+            name: 'Transaction'
+          });
+        } else {
+          this.inner.notificationHandler({
+            data: {
+              amount: note.amount,
+              chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
+              currency: currency.view.name
+            },
+            description: 'Not enough token balance',
+            key: 'mixer-deposit',
+            level: 'error',
+            message: `${currency.view.name} deposit`,
+            name: 'Transaction'
+          });
+        }
+      }
+    } catch (e: any) {
+      console.log(e);
+
+      if ((e)?.code === 4001) {
+        this.inner.notificationHandler.remove('waiting-approval');
         this.inner.notificationHandler({
           description: 'User Rejected Deposit',
-          key: 'web3-mixer-deposit',
+          key: 'mixer-deposit',
           level: 'error',
-          message: 'mixer:deposit',
+          message: `${currency.view.name} deposit`,
           name: 'Transaction'
         });
       } else {
+        this.inner.notificationHandler.remove('waiting-approval');
         this.inner.notificationHandler({
-          description: 'Deposit Failed',
-          key: 'web3-mixer-deposit',
+          description: 'Deposit Transaction Failed',
+          key: 'mixer-deposit',
           level: 'error',
-          message: 'mixer:deposit',
+          message: `${currency.view.name} deposit`,
           name: 'Transaction'
         });
       }
@@ -69,47 +186,28 @@ export class Web3MixerDeposit extends MixerDeposit<WebbWeb3Provider, DepositPayl
   }
 
   async generateNote (mixerAddress: string): Promise<DepositPayload> {
-    const contract = await this.inner.getContractByAddress(mixerAddress);
-    const mixerInfo = this.inner.getMixers().getMixerInfoByAddress(mixerAddress);
-
-    if (!mixerInfo) {
-      throw new Error('mixer not found from storage');
-    }
-
-    const depositSizeBN = await contract.denomination;
-    const depositSize = Number.parseFloat(utils.fromWei(depositSizeBN.toString(), 'ether'));
     const chainId = await this.inner.getChainId();
-    const deposit = createTornDeposit();
-    const noteChain = computeChainIdType(ChainType.EVM, chainId);
-    const secrets = deposit.preimage;
-    const noteInput: NoteGenInput = {
-      amount: String(depositSize),
-      backend: 'Circom',
-      curve: 'Bn254',
-      denomination: '18',
-      exponentiation: '5',
-      hashFunction: 'Poseidon',
-      protocol: 'mixer',
-      secrets: u8aToHex(secrets),
-      sourceChain: noteChain.toString(),
-      sourceIdentifyingData: mixerAddress,
-      targetChain: noteChain.toString(),
-      targetIdentifyingData: mixerAddress,
-      tokenSymbol: mixerInfo.symbol,
-      version: 'v2',
-      width: '3'
-    };
-    const note = await Note.generateNote(noteInput);
+    const generatedNote = await this.generateBridgeNote(mixerAddress, chainId);
 
     return {
-      note: note,
-      params: [deposit, mixerInfo.size]
+      note: generatedNote.note,
+      params: generatedNote.params
     };
   }
 
   async getSizes (): Promise<MixerSize[]> {
-    const chainId = await this.inner.getChainId();
+    const anchors = await this.bridgeApi.getAnchors();
+    const currency = this.bridgeApi.currency;
 
-    return this.inner.getMixerSizes(getNativeCurrencySymbol(this.inner.config, chainId));
+    if (currency) {
+      return anchors.map((anchor) => ({
+        amount: Number(anchor.amount),
+        asset: String(currency.id),
+        id: `Bridge=${anchor.amount}@${currency.view.name}`,
+        title: `${anchor.amount} ${currency.view.name}`
+      }));
+    }
+
+    return [];
   }
 }

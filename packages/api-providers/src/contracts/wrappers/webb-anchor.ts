@@ -10,10 +10,8 @@ import { LoggerService } from '@webb-tools/app-util/index.js';
 import { ERC20, ERC20__factory as ERC20Factory, FixedDepositAnchor, FixedDepositAnchor__factory } from '@webb-tools/contracts';
 import { getFixedAnchorExtDataHash } from '@webb-tools/utils';
 import { BigNumber, Contract, providers, Signer } from 'ethers';
-import utils from 'web3-utils';
 
-import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo.js';
-import { bufferToFixed, createAnchor2Deposit, createRootsBytes, Deposit, EvmNote, generateWithdrawProofCallData } from '../utils/index.js';
+import { bufferToFixed, createRootsBytes, Deposit, generateWithdrawProofCallData } from '../utils/index.js';
 import { MerkleTree, PoseidonHasher } from '../utils/merkle/index.js';
 import { AnchorWitnessInput, ZKPWebbAnchorInputWithMerkle, ZKPWebbAnchorInputWithoutMerkle } from './types.js';
 import { generateWitness, proofAndVerify, zeroAddress } from './webb-utils.js';
@@ -35,7 +33,6 @@ export class AnchorContract {
   private readonly signer: Signer;
 
   constructor (
-    public mixersInfo: EvmChainMixersInfo,
     private web3Provider: providers.Web3Provider,
     address: string,
     useProvider = false
@@ -63,18 +60,6 @@ export class AnchorContract {
 
   get inner () {
     return this._contract;
-  }
-
-  async createDeposit (assetSymbol: string, chainId: number): Promise<{ note: EvmNote; deposit: Deposit }> {
-    const deposit = createAnchor2Deposit(chainId);
-    const depositSizeBN = await this.denomination;
-    const depositSize = Number.parseFloat(utils.fromWei(depositSizeBN.toString(), 'ether'));
-    const note = new EvmNote(assetSymbol, depositSize, chainId, deposit.preimage);
-
-    return {
-      deposit,
-      note
-    };
   }
 
   static createTreeWithRoot (leaves: string[], targetRoot: string): MerkleTree | undefined {

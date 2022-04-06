@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // @ts-ignore
-import * as snarkjs from 'tornado-snarkjs';
+import * as snarkjs from 'snarkjs';
 
 const { bigInt } = snarkjs;
 
