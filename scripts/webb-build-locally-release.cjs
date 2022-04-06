@@ -184,4 +184,5 @@ runTest();
 runBuild();
 
 // gitPush();
+execSync("node ./generate-docs")
 loopFunc(npmPublish);
