@@ -32,7 +32,7 @@
     "check-deps": "./node_modules/@open-web3/util/scripts/check-deps.js yarn.lock @polkadot/ @open-web3/",
     "update-metadata": "ts-node-script -r tsconfig-paths/register packages/types/scripts/updateMetadata.ts",
     "example:mixer": "ts-node -r tsconfig-paths/register examples/mixer.ts",
-    "script": "ts-node-script -r tsconfig-paths/register",
+    "script": "NODE_OPTIONS=\"loader=./loader.js\" node",
     "format": "prettier --write \"packages/**/*.{ts,js,jsx,tsx}\" && cargo fmt --manifest-path packages/wasm-utils/Cargo.toml",
     "generate:meta": "ts-node --skip-project node_modules/.bin/polkadot-types-from-chain --package sample-polkadotjs-typegen/interfaces --endpoint ./packages/types/src/metadata/edgware.json --output ./interfaces --strict"
   },

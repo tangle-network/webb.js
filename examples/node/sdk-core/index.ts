@@ -1,7 +1,7 @@
-import { Note, NoteGenInput, u8aToHex} from '@webb-tools/sdk-core';
-import {preparePolkadotApi, transferBalance} from "../utils";
+import { Note, NoteGenInput, u8aToHex} from '@webb-tools/sdk-core/build/index.js';
+import {preparePolkadotApi, transferBalance} from "../utils.js";
 import {Keyring} from "@polkadot/keyring";
-import {polkadotTx} from "../../../tests/utils";
+import {polkadotTx} from "../../../tests/utils/index.js";
 
 
 async function main(){
