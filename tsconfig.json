@@ -26,6 +26,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true, //
+    
     "paths": {
       "@webb-tools/api": [
         "packages/api/src"
