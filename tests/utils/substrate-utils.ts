@@ -448,7 +448,7 @@ export async function withdrawMixerBnX5_3(
 
   const addressHex = u8aToHex(decodeAddress(accountId));
   const relayerAddressHex = u8aToHex(decodeAddress(relayerAccountId));
-  // fetch leaves
+  // Fetch leaves
   const leaves = await fetchRPCTreeLeaves(api, 0);
   const proofInputBuilder = new ProofInputBuilder();
   const leafHex = u8aToHex(note.getLeafCommitment());

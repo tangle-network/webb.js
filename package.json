@@ -34,6 +34,7 @@
     "example:mixer": "ts-node -r tsconfig-paths/register examples/mixer.ts",
     "script": "NODE_OPTIONS=\"loader=./loader.js\" node",
     "format": "prettier --write \"packages/**/*.{ts,js,jsx,tsx}\" && cargo fmt --manifest-path packages/wasm-utils/Cargo.toml",
+    "doc": "node ./scripts/generate-docs.cjs",
     "generate:meta": "ts-node --skip-project node_modules/.bin/polkadot-types-from-chain --package sample-polkadotjs-typegen/interfaces --endpoint ./packages/types/src/metadata/edgware.json --output ./interfaces --strict"
   },
   "devDependencies": {

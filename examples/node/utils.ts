@@ -95,6 +95,7 @@ export async function preparePolkadotApi() {
   });
   return api.isReady;
 }
+
 export async function transferBalance(
   api: ApiPromise,
   source: KeyringPair,
@@ -112,19 +113,29 @@ export async function transferBalance(
   }
 }
 
-export async function transferBalance(
+
+export async function fetchRPCTreeLeaves(
   api: ApiPromise,
-  source: KeyringPair,
-  receiverPairs: KeyringPair[],
-  number: number = 1000
-) {
-  // transfer to alice
-  for (const receiverPair of receiverPairs) {
-    await polkadotTx(
-      api,
-      { section: 'balances', method: 'transfer' },
-      [receiverPair.address, currencyToUnitI128(number).toString()],
-      source
+  treeId: string | number
+): Promise<Uint8Array[]> {
+  let done = false;
+  let from = 0;
+  let to = 511;
+  const leaves: Uint8Array[] = [];
+
+  while (done === false) {
+    const treeLeaves: any[] = await (api.rpc as any).mt.getLeaves(
+      treeId,
+      from,
+      to
     );
+    if (treeLeaves.length === 0) {
+      done = true;
+      break;
+    }
+    leaves.push(...treeLeaves.map((i) => i.toU8a()));
+    from = to;
+    to = to + 511;
   }
+  return leaves;
 }
