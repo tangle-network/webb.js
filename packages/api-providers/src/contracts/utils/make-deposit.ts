@@ -1,6 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
+import { IAnchorDepositInfo } from '@webb-tools/interfaces';
 import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
 import crypto from 'crypto';
 // @ts-ignore
@@ -12,18 +13,6 @@ import { poseidonHash3 } from './poseidon-hash3.js';
 
 const { utils } = ff;
 const { leBuff2int } = utils;
-
-// const utils = require('ffjavascript').utils;
-// const rbigint = (nbytes: number) => utils.leBuff2int(crypto.randomBytes(nbytes));
-
-export type Deposit = {
-  preimage: Uint8Array;
-  commitment: string;
-  nullifierHash: string;
-  secret: string;
-  nullifier: string;
-  chainId?: number;
-};
 
 export function createAnchor2Deposit (chainId: number) {
   const poseidonHasher = new PoseidonHasher();
@@ -42,37 +31,33 @@ export function createAnchor2Deposit (chainId: number) {
 
   console.log('commitment when creating deposit note: ', commitment);
 
-  const deposit: Deposit = {
-    chainId: chainId,
+  const deposit: IAnchorDepositInfo = {
+    chainID: BigInt(chainId),
     commitment,
-    nullifier: bufferToFixed(nullifier).substring(2),
+    nullifier: nullifier,
     nullifierHash,
-    preimage,
-    secret: bufferToFixed(secret).substring(2)
+    secret: secret
   };
 
   return deposit;
 }
 
-export function depositFromAnchorNote (note: DepositNote): Deposit {
+export function depositFromAnchorNote (note: DepositNote): IAnchorDepositInfo {
   const poseidonHasher = new PoseidonHasher();
   const noteSecretParts = note.secrets.split(':');
   const chainId = Number(note.targetChainId);
-  const preimageString = note.secrets.replaceAll(':', '');
-  const preimage = Buffer.from(preimageString);
   const nullifier = '0x' + noteSecretParts[1];
   const secret = '0x' + noteSecretParts[2];
   const commitmentBN = poseidonHash3([chainId, nullifier, secret]);
   const nullifierHash = poseidonHasher.hash(null, nullifier, nullifier);
   const commitment = bufferToFixed(commitmentBN);
 
-  const deposit: Deposit = {
-    chainId: chainId,
+  const deposit: IAnchorDepositInfo = {
+    chainID: BigInt(chainId),
     commitment,
-    nullifier: bufferToFixed(nullifier),
+    nullifier: BigInt(bufferToFixed(nullifier)),
     nullifierHash,
-    preimage,
-    secret: bufferToFixed(secret)
+    secret: BigInt(bufferToFixed(secret))
   };
 
   return deposit;

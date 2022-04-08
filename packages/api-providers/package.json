@@ -16,8 +16,10 @@
     "@babel/runtime": "^7.10.2",
     "@polkadot/extension-dapp": "^0.35.0-beta.35",
     "@walletconnect/web3-provider": "^1.7.5",
-    "@webb-tools/contracts": "0.1.7",
-    "@webb-tools/utils": "0.1.7",
+    "@webb-tools/contracts": "file:../../../protocol-solidity/packages/contracts",
+    "@webb-tools/utils": "file:../../../protocol-solidity/packages/utils",
+    "@webb-tools/anchors": "file:../../../protocol-solidity/packages/anchors",
+    "@webb-tools/interfaces": "file:../../../protocol-solidity/packages/interfaces",
     "bignumber.js": "^9.0.0",
     "snarkjs": "^0.4.16"
   },

@@ -5,22 +5,24 @@ import { getEVMChainNameFromInternal } from '@webb-tools/api-providers/utils/ind
 import { LoggerService } from '@webb-tools/app-util/index.js';
 // eslint-disable-next-line camelcase
 import { ERC20__factory as ERC20Factory } from '@webb-tools/contracts';
+import { IAnchorDepositInfo } from '@webb-tools/interfaces';
 import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
 
-import { AnchorDeposit, Currency, DepositPayload as IDepositPayload, MixerSize } from '../abstracts/index.js';
-import { ChainType, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains/index.js';
+import { AnchorApi, AnchorDeposit, Currency, DepositPayload as IDepositPayload, MixerSize } from '../abstracts/index.js';
+import { ChainType, ChainTypeId, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, InternalChainId, internalChainIdIntoEVMId, parseChainIdType } from '../chains/index.js';
 import { bufferToFixed } from '../contracts/utils/buffer-to-fixed.js';
-import { createAnchor2Deposit, Deposit } from '../contracts/utils/make-deposit.js';
+import { createAnchor2Deposit } from '../contracts/utils/make-deposit.js';
 import { WebbGovernedToken } from '../contracts/wrappers/index.js';
+import { BridgeConfig } from '../index.js';
 import { WebbWeb3Provider } from './webb-provider.js';
 
 const logger = LoggerService.get('web3-bridge-deposit');
 
-type DepositPayload = IDepositPayload<Note, [Deposit, number | string, string?]>;
+type DepositPayload = IDepositPayload<Note, [IAnchorDepositInfo, number | string, string?]>;
 
 export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPayload> {
   protected get bridgeApi () {
-    return this.inner.methods.anchorApi;
+    return this.inner.methods.anchorApi as AnchorApi<WebbWeb3Provider, BridgeConfig>;
   }
 
   protected get config () {
@@ -160,7 +162,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
             description: 'Depositing',
             key: 'bridge-deposit',
             level: 'success',
-            message: `${currency.view.name}:deposit`,
+            message: `${currency.view.name} deposit`,
             name: 'Transaction'
           });
         } else {
@@ -173,7 +175,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
             description: 'Not enough token balance',
             key: 'bridge-deposit',
             level: 'error',
-            message: `${currency.view.name}deposit`,
+            message: 'Not enough token balance',
             name: 'Transaction'
           });
         }
@@ -220,12 +222,16 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
   }
 
   async getWrappableAssets (chainId: InternalChainId): Promise<Currency[]> {
-    const bridge = this.bridgeApi.activeBridge;
+    const bridge = this.bridgeApi;
 
     logger.log('getWrappableAssets of chain: ', chainId);
+    const chainIdType: ChainTypeId = {
+      chainId: internalChainIdIntoEVMId(chainId),
+      chainType: ChainType.EVM
+    };
 
     if (bridge) {
-      const wrappedTokenAddress = bridge.getTokenAddress(chainId);
+      const wrappedTokenAddress = bridge.getTokenAddress(chainIdType);
 
       if (!wrappedTokenAddress) return [];
 
@@ -302,7 +308,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       exponentiation: '5',
       hashFunction: 'Poseidon',
       protocol: 'anchor',
-      secrets: `${bufferToFixed(destChainId, 6).substring(2)}:${deposit.nullifier}:${deposit.secret}`,
+      secrets: `${bufferToFixed(destChainId, 6).substring(2)}:${deposit.nullifier.toString(16)}:${deposit.secret.toString(16)}`,
       sourceChain: sourceChainId.toString(),
       sourceIdentifyingData: srcAddress,
       targetChain: destChainId.toString(),
@@ -312,7 +318,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       width: '4'
     };
 
-    logger.info(`noteInput to generateNote: ${noteInput}`);
+    console.log(`noteInput to generateNote: ${noteInput}`);
     const note = await Note.generateNote(noteInput);
 
     return {

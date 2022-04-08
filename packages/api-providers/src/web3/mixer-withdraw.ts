@@ -1,19 +1,22 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { depositFromAnchorNote, webbCurrencyIdFromString } from '@webb-tools/api-providers/index.js';
+import { Anchor } from '@webb-tools/anchors';
+import * as witnessCalculatorFile from '@webb-tools/api-providers/contracts/utils/witness-calculator.js';
+import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, depositFromAnchorNote, MixerStorage } from '@webb-tools/api-providers/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note } from '@webb-tools/sdk-core/index.js';
 
-import { Bridge, WithdrawState } from '../abstracts/index.js';
+import { WithdrawState } from '../abstracts/index.js';
 import { evmIdIntoInternalChainId } from '../chains/index.js';
+import { fetchKeyForEdges, fetchWasmForEdges } from '../ipfs/evm/index.js';
 import { Web3AnchorWithdraw } from './anchor-withdraw.js';
 
 const logger = LoggerService.get('Web3MixerWithdraw');
 
 // The Web3Mixer Withdraw uses anchor withdraw, with the same target and source chain id.
 export class Web3MixerWithdraw extends Web3AnchorWithdraw {
-  // Withdraw is overriden to emit notifications specific to the
+  // Withdraw is overriden to emit notifications specific to 'mixer'
   async withdraw (note: string, recipient: string): Promise<string> {
     logger.trace(`Withdraw using note ${note} , recipient ${recipient}`);
 
@@ -22,41 +25,22 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
 
     this.cancelToken.cancelled = false;
 
-    const bridgeCurrencyId = webbCurrencyIdFromString(depositNote.tokenSymbol);
-    const bridge = Bridge.from(bridgeCurrencyId, this.inner.config);
+    const activeBridge = this.bridgeApi.activeBridge;
 
+    if (!activeBridge) {
+      throw new Error('No activeBridge set on the web3 anchor api');
+    }
+
+    // Parse the intended target address for the note
     const activeChain = await this.inner.getChainId();
     const internalId = evmIdIntoInternalChainId(activeChain);
-
-    const contractAddresses = bridge.anchors.find((anchor) => anchor.amount === depositNote.amount)!;
+    const contractAddresses = activeBridge.anchors.find((anchor) => anchor.amount === depositNote.amount)!;
     const contractAddress = contractAddresses.anchorAddresses[internalId]!;
 
+    // create the Anchor instance
     const contract = this.inner.getWebbAnchorByAddress(contractAddress);
-    const accounts = await this.inner.accounts.accounts();
-    const account = accounts[0];
-
-    const deposit = depositFromAnchorNote(depositNote);
-
-    logger.info(`Commitment for withdraw is ${deposit.commitment}`);
-
-    const input = {
-      destinationChainId: activeChain,
-      fee: 0,
-      nullifier: deposit.nullifier,
-      // Todo change this to the RELAYER address
-      nullifierHash: deposit.nullifierHash,
-      recipient: account.address,
-      refund: 0,
-      relayer: account.address,
-      secret: deposit.secret
-    };
-
-    logger.trace('input for zkp', input);
-    const section = `Mixer ${bridge.currency.view.symbol}`;
+    const section = `Mixer ${activeBridge.asset}`;
     const key = 'web3-mixer-withdraw';
-
-    this.emit('stateChange', WithdrawState.GeneratingZk);
-    const zkpResults = await contract.generateZKP(deposit, input);
 
     this.inner.notificationHandler({
       description: 'Withdraw in progress',
@@ -65,6 +49,53 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
       message: `${section} withdraw`,
       name: 'Transaction'
     });
+
+    // Fetch the leaves that we already have in storage
+    const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
+    const storedContractInfo: MixerStorage[0] = (await bridgeStorageStorage.get(
+      contractAddress.toLowerCase()
+    )) || {
+      lastQueriedBlock: anchorDeploymentBlock[contractAddress.toLowerCase()] || 0,
+      leaves: [] as string[]
+    };
+
+    let allLeaves: string[] = [];
+
+    // Fetch the new leaves - from a relayer or from the chain directly.
+    // TODO: Fetch the leaves from the relayer
+    // eslint-disable-next-line no-constant-condition
+    if (/* this.activeRelayer */ false) {
+      // fetch the new leaves (all leaves) from the relayer
+    } else {
+      // fetch the new leaves from on-chain
+      const depositLeaves = await contract.getDepositLeaves(storedContractInfo.lastQueriedBlock, await this.inner.getBlockNumber());
+
+      allLeaves = [...storedContractInfo.leaves, ...depositLeaves.newLeaves];
+    }
+
+    // Fetch the information for public inputs into the proof
+    const accounts = await this.inner.accounts.accounts();
+    const account = accounts[0];
+
+    // Fetch the information for private inputs into the proof
+    const deposit = depositFromAnchorNote(depositNote);
+    const leafIndex = allLeaves.findIndex((commitment) => commitment === deposit.commitment);
+
+    // Fetch the zero knowledge files required for creating witnesses and verifying.
+    const maxEdges = await contract.inner.maxEdges();
+    const wasmBuf = await fetchWasmForEdges(maxEdges);
+    const witnessCalculator = await witnessCalculatorFile.builder(wasmBuf, {});
+    const circuitKey = await fetchKeyForEdges(maxEdges);
+
+    // This anchor wrapper from protocol-solidity is used for public inputs generation
+    const anchorWrapper = await Anchor.connect(contractAddress, {
+      wasm: Buffer.from(wasmBuf),
+      witnessCalculator,
+      zkey: circuitKey
+    }, this.inner.getEthersProvider().getSigner());
+
+    this.emit('stateChange', WithdrawState.GeneratingZk);
+    const withdrawSetup = await anchorWrapper.setupWithdraw(deposit, leafIndex, account.address, account.address, BigInt(0), 0);
 
     // Check for cancelled here, abort if it was set.
     if (this.cancelToken.cancelled) {
@@ -85,23 +116,14 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
     this.emit('stateChange', WithdrawState.SendingTransaction);
 
     try {
-      txHash = await contract.withdraw(
-        zkpResults.proof,
-        {
-          destinationChainId: Number(depositNote.targetChainId),
-          fee: input.fee,
-          nullifier: input.nullifier,
-          nullifierHash: input.nullifierHash,
-          pathElements: zkpResults.input.pathElements,
-          pathIndices: zkpResults.input.pathIndices,
-          recipient: input.recipient,
-          refund: input.refund,
-          relayer: input.relayer,
-          root: zkpResults.root as any,
-          secret: zkpResults.input.secret
-        },
-        zkpResults.input
+      const tx = await contract.inner.withdraw(
+        withdrawSetup.publicInputs,
+        withdrawSetup.extData,
+        { gasLimit: '0x5B8D80' }
       );
+      const receipt = await tx.wait();
+
+      txHash = receipt.transactionHash;
     } catch (e) {
       this.emit('stateChange', WithdrawState.Ideal);
 

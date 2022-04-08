@@ -3,14 +3,14 @@
 
 import { getEVMChainName, getEVMChainNameFromInternal } from '@webb-tools/api-providers/utils/index.js';
 import { ERC20__factory as ERC20Factory } from '@webb-tools/contracts';
+import { IAnchorDepositInfo } from '@webb-tools/interfaces';
 import { Note } from '@webb-tools/sdk-core/index.js';
 
 import { DepositPayload as IDepositPayload, MixerSize } from '../abstracts/index.js';
 import { evmIdIntoInternalChainId } from '../chains/index.js';
-import { Deposit } from '../contracts/utils/make-deposit.js';
 import { Web3AnchorDeposit } from './anchor-deposit.js';
 
-type DepositPayload = IDepositPayload<Note, [Deposit, number | string, string?]>;
+type DepositPayload = IDepositPayload<Note, [IAnchorDepositInfo, number | string, string?]>;
 
 // The Web3 version of a mixer deposit is simply an anchor deposit where src and target chainID are the same.
 export class Web3MixerDeposit extends Web3AnchorDeposit {

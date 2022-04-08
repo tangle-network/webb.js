@@ -114,6 +114,12 @@ export class WebbWeb3Provider
     return chainId;
   }
 
+  async getBlockNumber (): Promise<number> {
+    const blockNumber = await this.ethersProvider.getBlockNumber();
+
+    return blockNumber;
+  }
+
   getWebbAnchorByAddress (address: string): AnchorContract {
     return new AnchorContract(this.ethersProvider, address);
   }

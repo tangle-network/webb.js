@@ -2,40 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { InternalChainId } from '../../chains/index.js';
-import { WebbCurrencyId } from '../../enums/index.js';
-import { BridgeConfig } from '../../types/bridge-config.interface.js';
 import { CurrencyRole } from '../../types/currency-config.interface.js';
 import { AppConfig } from '../common.js';
 import { Currency } from '../currency/currency.js';
 
+// This bridge class exposes methods which retrieve information from a passed config.
 export class Bridge {
-  private constructor (private bridgeConfig: BridgeConfig, private readonly appConfig: AppConfig) {}
-
-  static from (bridgeCurrency: WebbCurrencyId, appConfig: AppConfig): Bridge {
-    console.log('WebbCurrencyId in Bridge static constructor: ', bridgeCurrency);
-    const bridgeConfig = appConfig.bridgeByAsset[bridgeCurrency];
-
-    return new Bridge(bridgeConfig, appConfig);
-  }
-
-  /*
-   *  Get the bridge privy pools
-   * */
-  get anchors () {
-    return this.bridgeConfig.anchors;
-  }
-
-  /*
-   *  Get the bridge currency
-   * */
-  get currency () {
-    return Currency.fromCurrencyId(this.appConfig.currencies, this.bridgeConfig.asset);
-  }
-
-  getTokenAddress (chainId: InternalChainId) {
-    return this.appConfig.currencies[this.bridgeConfig.asset].addresses.get(chainId);
-  }
-
   /*
    *  Get all Bridge tokens
    * */
