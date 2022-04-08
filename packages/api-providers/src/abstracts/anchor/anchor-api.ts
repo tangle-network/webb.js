@@ -17,7 +17,9 @@ export type AnchorBase = {
     [key in InternalChainId]?: string | number;
   };
 };
-
+/**
+ * Anchor api
+ * */
 export abstract class AnchorApi<Api, BridgeConfigEntry> {
   private readonly _store: BehaviorSubject<BridgeStore<BridgeConfigEntry>>;
   private readonly _watcher: Observable<BridgeStore<BridgeConfigEntry>>;

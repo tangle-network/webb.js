@@ -73,7 +73,7 @@ export class Note {
   /**
    * Deserializes a note from a string.
    *
-   * @param value A serialized note.
+   * @param value - A serialized note.
    * @returns A note class instance.
    */
   public static async deserialize (value: string): Promise<Note> {
@@ -146,7 +146,7 @@ export class Note {
    *
    * const note = await Note.generateNote(input);
    * ```
-   * @param noteGenInput The input data for generating a note.
+   * @param noteGenInput - The input data for generating a note.
    * @returns
    */
   public static async generateNote (noteGenInput: NoteGenInput): Promise<Note> {
