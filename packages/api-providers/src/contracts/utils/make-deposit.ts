@@ -60,5 +60,12 @@ export function depositFromAnchorNote (note: DepositNote): IAnchorDepositInfo {
     secret: BigInt(bufferToFixed(secret))
   };
 
+  console.log(`IAnchorDepositInfo, deposit in depositFromAnchorNote:
+  \n chainID ${deposit.chainID}
+  \n commitment ${deposit.commitment}
+  \n nullifier ${deposit.nullifier}
+  \n nullifierHash ${deposit.nullifierHash}
+  \n secret ${deposit.secret}`);
+
   return deposit;
 }

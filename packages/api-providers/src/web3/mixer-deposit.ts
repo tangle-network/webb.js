@@ -7,7 +7,7 @@ import { IAnchorDepositInfo } from '@webb-tools/interfaces';
 import { Note } from '@webb-tools/sdk-core/index.js';
 
 import { DepositPayload as IDepositPayload, MixerSize } from '../abstracts/index.js';
-import { evmIdIntoInternalChainId } from '../chains/index.js';
+import { ChainType, computeChainIdType, evmIdIntoInternalChainId } from '../chains/index.js';
 import { Web3AnchorDeposit } from './anchor-deposit.js';
 
 type DepositPayload = IDepositPayload<Note, [IAnchorDepositInfo, number | string, string?]>;
@@ -186,8 +186,9 @@ export class Web3MixerDeposit extends Web3AnchorDeposit {
   }
 
   async generateNote (mixerAddress: string): Promise<DepositPayload> {
-    const chainId = await this.inner.getChainId();
-    const generatedNote = await this.generateBridgeNote(mixerAddress, chainId);
+    const evmId = await this.inner.getChainId();
+    const chainIdType = computeChainIdType(ChainType.EVM, evmId);
+    const generatedNote = await this.generateBridgeNote(mixerAddress, chainIdType);
 
     return {
       note: generatedNote.note,

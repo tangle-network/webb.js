@@ -395,6 +395,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     // Fetch the zero knowledge files required for creating witnesses and verifying.
     const maxEdges = await destAnchor.inner.maxEdges();
     const wasmBuf = await fetchWasmForEdges(maxEdges);
+
     console.log('wasm for edges fetched');
     const witnessCalculator = await witnessCalculatorFile.builder(wasmBuf, {});
     const circuitKey = await fetchKeyForEdges(maxEdges);
