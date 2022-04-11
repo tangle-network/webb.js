@@ -1,5 +1,8 @@
 ## How to install
+Wasm utils for generating zero-knowledge proof and deposit notes , it's built with [rust](https://www.rust-lang.org/) and [wasm-bindgen](https://github.com/rustwasm/wasm-bindgen)
+it's consumed by the `sdk-core`
 
+## Install packages
 ```sh
 yarn
 ```
@@ -14,6 +17,7 @@ Run wasm tests
 ```sh
 yarn test
 ```
+Run typescript tests
 ```
 yarn test:ts
 ```

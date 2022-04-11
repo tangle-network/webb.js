@@ -35,7 +35,6 @@ For the browser it runs inside wasm
 # Proving Manager
 Proving manager uses `wasm-utils`, it runs in a Worker, or directly in the browser
 ```ts
-
   const provingInput: ProvingManagerSetupInput = {
     leafIndex: 0,
     provingKey: Uint8Array.from([]),
@@ -50,6 +49,4 @@ Proving manager uses `wasm-utils`, it runs in a Worker, or directly in the brows
     // Run throw nodejs
     const pm = new ProvingManager('direct-call');
     const proofMangager = await pm.prove(proofInput);
-
-
 ```

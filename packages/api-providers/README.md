@@ -1,3 +1,10 @@
 # @webb-tools/api-providers
 
-Utilities to work with Webb Network
+API providers for webb protocol , this package facilitates building apps on top of webb.
+
+# Api interface
+
+All APIs implement the interface `WebbApiProvider`, there are providers implemnted for both
+web3,and polkadot.
+
+
