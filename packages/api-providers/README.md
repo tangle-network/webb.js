@@ -4,7 +4,7 @@ API providers for webb protocol , this package facilitates building apps on top 
 
 # Api interface
 
-All APIs implement the interface `WebbApiProvider`, there are providers implemnted for both
+All APIs implement the interface `WebbApiProvider`, there are providers implemented for both
 web3,and polkadot.
 
 
