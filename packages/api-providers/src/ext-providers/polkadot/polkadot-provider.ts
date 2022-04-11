@@ -31,7 +31,7 @@ const logger = LoggerService.get('Polkadot-Provider');
 
 /**
  * Polkadot provider
- * */
+ **/
 export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
   private _accounts: PolkadotAccounts;
 
@@ -51,7 +51,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
    * @param endPoints - URLs for the substrate node
    * @param apiInitHandler - Error handler for stage of instantiating a provider
    * @param txBuilder - Transaction builder
-   * */
+   **/
   static async fromExtension (
     appName: string,
     endPoints: string[],
@@ -73,7 +73,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
    * @param appName - Name of the application
    * @param endPoints - URLs for the substrate node
    * @param onError - Error handler for stage of instantiating a provider
-   * */
+   **/
   static async getApiPromise (
     appName: string,
     endPoints: string[],
@@ -106,8 +106,8 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
       /**
        *  Infinite Looping till
        *  1- The ws connection is established
-       *  2- The user killed the connection , no other retires
-       * */
+       *  2- The user killed the connection, no other retires
+       **/
       // global interActiveFeedback for access on multiple scopes
       let interActiveFeedback: InteractiveFeedback;
 
@@ -232,7 +232,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
    * @param appName - Name of the application
    * @param endPoints - URLs for the substrate node
    * @param onError - Error handler for stage of instantiating a provider
-   * */
+   **/
   static async getParams (
     appName: string,
     endPoints: string[],
@@ -301,7 +301,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
 
   /**
    * Get MetaData of the ext provider
-   * */
+   **/
   getMetaData () {
     if (!this.apiPromise.isConnected) return;
     const metadataDef = {
@@ -323,7 +323,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
 
   /**
    *  Checks if MetaData has changed on the api and update it in the browser extension
-   * */
+   **/
   async checkMetaDataUpdate () {
     const metadataDef = this.getMetaData();
     const known = await this.injectedExtension?.metadata?.get();

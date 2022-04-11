@@ -15,13 +15,13 @@ import { Note } from '../note.js';
  * @param recipient - Recipient account id converted to hex string (Without a `0x` prefix)
  * @param leaves - Leaves for generating the merkle path
  * @param leafIndex - The index of  the Leaf commitment
- * @param fee - !fee
- * @param refund -!fee
- * @param provingKey -Proving key bytes to pass in to the Zero-knowledge proof generation
+ * @param fee - The fee for the transaction
+ * @param refund - The refund for the transaction
+ * @param provingKey - Proving key bytes to pass in to the Zero-knowledge proof generation
  * @param roots - Roots for anchor API
  * @param roots - Roots for anchor a
  * @param refreshCommitment - Refresh commitment in hex representation ( without prefix `0x` ) Required for anchor, ignored for the mixer
- * */
+ **/
 export type ProvingManagerSetupInput = {
   note: string;
   relayer: string;
@@ -46,7 +46,7 @@ export class ProvingManagerWrapper {
    * @param ctx  - Context of the Proving manager
    * Defaults to worker mode assuming that the Proving manager is running in the browser
    * if it's set to direct-call which is done in nodejs then this is running without worker
-   * */
+   **/
   constructor (private ctx: 'worker' | 'direct-call' = 'worker') {
     // if the Manager is running in side worker it registers an event listener
     if (ctx === 'worker') {
@@ -77,9 +77,11 @@ export class ProvingManagerWrapper {
   /**
    * Getter for wasm blob
    * for worker wasm it will resolve the browser build of wasm-utils,and Nodejs build for direct-call
-   * */
+   **/
   private get wasmBlob () {
-    return this.ctx === 'worker' ? import('@webb-tools/wasm-utils/wasm-utils.js') : import('@webb-tools/wasm-utils/njs/wasm-utils-njs.js');
+    return this.ctx === 'worker'
+      ? import('@webb-tools/wasm-utils/wasm-utils.js')
+      : import('@webb-tools/wasm-utils/njs/wasm-utils-njs.js');
   }
 
   private get proofBuilder () {
@@ -96,7 +98,7 @@ export class ProvingManagerWrapper {
 
   /**
    * Generate the Zero-knowledge proof from the proof input
-   * */
+   **/
   async proof (pmSetupInput: ProvingManagerSetupInput): Promise<ProofI> {
     const Manager = await this.proofBuilder;
     const pm = new Manager();

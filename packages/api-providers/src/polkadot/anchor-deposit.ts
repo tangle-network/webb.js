@@ -18,7 +18,7 @@ const logger = LoggerService.get('PolkadotBridgeDeposit');
 type DepositPayload = IDepositPayload<Note, [number, string]>;
 /**
  * Webb Anchor API implementation for Polkadot
- * */
+ **/
 export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPayload> {
   async deposit (depositPayload: DepositPayload): Promise<void> {
     const tx = this.inner.txBuilder.build(

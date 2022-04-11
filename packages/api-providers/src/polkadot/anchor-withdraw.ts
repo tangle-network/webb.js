@@ -25,7 +25,7 @@ const logger = LoggerService.get('PolkadotBridgeWithdraw');
  * @param fee - Fee value, should be the same as used while generating the zkp
  * @param refund - Refund value, should be the same as used while generating the zkp
  * @param refreshCommitment - Refresh commitment should be the same as used while generating  the zkp
- * */
+ **/
 export type AnchorWithdrawProof = {
   id: string;
   proofBytes: string;
@@ -90,7 +90,7 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
       const relayerAccountId = account.address;
 
       this.emit('stateChange', WithdrawState.GeneratingZk);
-      logger.trace(`Withdraw using note ${note} , recipient ${recipient}`);
+      logger.trace(`Withdraw using note ${note}, recipient ${recipient}`);
       const parseNote = await Note.deserialize(note);
       const depositNote = parseNote.note;
       const amount = parseNote.note.amount;

@@ -10,7 +10,7 @@ import { ORMLAsset } from './orml-currency.js';
 
 /**
  * The abstract class for representing the values need to display a Currency on the UI
- * */
+ **/
 export abstract class CurrencyContent {
   abstract get view(): CurrencyView;
 }
@@ -18,7 +18,7 @@ export abstract class CurrencyContent {
 /**
  *
  * This currency class assumes that instances are wrappable assets.
- * */
+ **/
 export class Currency extends CurrencyContent {
   constructor (private data: Omit<CurrencyConfig, 'id'> & { id: string | WebbCurrencyId }) {
     super();

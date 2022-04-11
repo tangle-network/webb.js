@@ -9,14 +9,14 @@ export type Subscription<T extends Event = Event> = {
 export abstract class EventBus<T extends Event> {
   /**
    * Optionally expose the `emit` functionality outside the implementor
-   * */
+   **/
   sendEvent: undefined | (<E extends keyof T>(event: E, data: T[E]) => void) = undefined;
   protected subscriptions: Subscription<T> = {};
 
   /**
    * @description register an event and pass a callback
-   * @return Void|Function  , Void if the handler is already registered or Function if the handler is registered
-   * */
+   * @return Void|Function , Void if the handler is already registered or Function if the handler is registered
+   **/
   on<E extends keyof T> (event: E, cb: (val: T[E]) => void): () => void {
     const listeners = this.subscriptions[event];
 
@@ -29,7 +29,7 @@ export abstract class EventBus<T extends Event> {
 
   /**
    * emit an event
-   * */
+   **/
   protected emit<E extends keyof T> (event: E, data: T[E]): void {
     this.subscriptions[event]?.forEach((cb) => cb(data));
   }
@@ -37,7 +37,7 @@ export abstract class EventBus<T extends Event> {
   /**
    *  Unregister the listener for an event
    *  the reference of the callback function
-   * */
+   **/
   protected off<E extends keyof T> (event: E, cb: (val: T[E]) => void): void {
     const listeners = this.subscriptions[event];
 

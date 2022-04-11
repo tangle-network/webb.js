@@ -65,7 +65,7 @@ export function startWebbNode(): KillTask {
       execSync(`docker network rm ${DOCKER_NETWORK_NAME}`);
     } catch (e) {
       console.log(e);
-      console.log('Field to removed the docker network , Error ignored ');
+      console.log('Field to removed the docker network, Error ignored ');
     }
   };
 }

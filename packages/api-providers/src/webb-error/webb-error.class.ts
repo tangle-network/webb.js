@@ -52,7 +52,7 @@ export class WebbError extends Error {
     return new WebbError(code);
   }
 
-  /// Static method to ge the error of the map if it's there , or create it and append the map
+  /// Static method to ge the error of the map if it's there, or create it and append the map
   static getErrorMessage (code: WebbErrorCodes): WebbErrorMessage {
     const errorMessage = WebbError.errorMessageMap.get(code);
 

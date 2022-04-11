@@ -18,7 +18,7 @@ export class ProvingManager {
    * `ProvingManager.proveWithWorker` for browser,And `ProvingManager.proveWithoutWorker` for Nodejs
    *
    * @param  input - input for the manager
-   * */
+   **/
   public prove(input: ProvingManagerSetupInput) {
     const worker = this.worker;
 

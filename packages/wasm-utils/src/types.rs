@@ -84,7 +84,7 @@ impl fmt::Display for OperationError {
 	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
 		write!(
 			f,
-			"Code {} , message {} , data {}",
+			"Code {}, message {}, data {}",
 			self.code.clone() as u32,
 			self.error_message.clone(),
 			self.data()

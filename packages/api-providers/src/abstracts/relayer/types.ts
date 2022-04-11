@@ -5,20 +5,20 @@ import {InternalChainId} from '../../chains/index.js';
 
 /**
  * Relayer configuration for a chain
- * @param account - Relayer account that is going to be used to do the transaction
- * @param beneficiary - Relayer account that will receive the reward fo doing a transaction
+ * @param account - Relayer account that is going to be used to sign the transaction
+ * @param beneficiary - Account that will receive the reward for relaying a transaction
  * @param contracts -  List of contracts supported by a relayer
- * */
+ **/
 export type RelayedChainConfig = {
   account: string;
   beneficiary?: string;
   contracts: Contract[];
 };
 /**
- * Relayer capabilities , it's fetched from the relayer over http
+ * Relayer capabilities, it's fetched from the relayer over http
  *  @param hasIpService - indicates if the relayer has support for IP address
  *  @param supportChains - A map for supported chains for both evm and substrate
- * */
+ **/
 export type Capabilities = {
   hasIpService: boolean;
   supportedChains: {
@@ -26,16 +26,17 @@ export type Capabilities = {
     evm: Map<InternalChainId, RelayedChainConfig>;
   };
 };
+
 /**
  * Relayer contract info, it indicates what support the relayer is doing for a given contract
  * @param contract - ?
  * @param address - Contract address
  * @param deployedAt - The block number the contract was deployed at
  * @param eventsWatcher - The status  of the event watcher for the contract
- * @param size - ?
+ * @param size - The anchor's size
  * @param withdrawFeePercentage - Relayer fee percentage used to estimate transaction costs
  * @param linkedAnchor - Linked anchors that a relayer is supporting
- * */
+ **/
 export interface Contract {
   contract: string;
   address: string;
@@ -54,7 +55,7 @@ export interface LinkedAnchor {
  * Contract events watcher configuration
  * @param enabled - If the event watcher is enabled at all
  * @param pollingInterval - The interval the Relayer is reaching out to node/contracts for new events
- * */
+ **/
 export interface EventsWatcher {
   enabled: boolean;
   pollingInterval: number;
@@ -64,7 +65,7 @@ export interface EventsWatcher {
  * Relayer configuration
  * it's now the endpoint and info/metada ..etc is fetched via http
  * @param endpoint - relayer http endpoint
- * */
+ **/
 export type RelayerConfig = {
   endpoint: string;
 };
@@ -75,7 +76,7 @@ export type RelayerConfig = {
  * @param errored - The Relayed withdraw transaction has failed
  * @param connected - The relayer has connected
  * @param connecting - The relayer is attempting to connect
- * */
+ **/
 export interface Withdraw {
   finalized?: Finalized;
   errored?: Errored;
@@ -86,7 +87,7 @@ export interface Withdraw {
 /**
  * Relayer withdraw finalization payload
  * @param txHash - Withdraw transaction hash
- * */
+ **/
 export interface Finalized {
   txHash: string;
 }
@@ -94,17 +95,17 @@ export interface Finalized {
 /**
  * Relayer withdraw error payload
  * @param reason - Reason for transaction failure
- * */
+ **/
 export interface Errored {
   reason: string;
 }
 
 /**
- * General relayer WebSocket message , for each event it can be on of `withdraw`, `error` , or `network`
+ * General relayer WebSocket message, for each event it can be on of `withdraw`, `error`, or `network`
  * @param withdraw - Withdraw event of the message
  * @param error - General relayer error message
  * @param network - Relayer network status update
- * */
+ **/
 export type RelayerMessage = {
   withdraw?: Withdraw;
   error?: string;
@@ -113,8 +114,8 @@ export type RelayerMessage = {
 
 /**
  * Relayer command key
- * it can be evm , or substrate  it's used to format the Web Socket for the relayer
- * */
+ * it can be evm, or substrate  it's used to format the Web Socket for the relayer
+ **/
 export type RelayerCMDBase = 'evm' | 'substrate';
 
 /**
@@ -137,7 +138,7 @@ export type RelayerCMDBase = 'evm' | 'substrate';
  * const proofForRelayerSubmission = Array.from(proof);
  * ```
  *
- * */
+ **/
 export type MixerRelayTx = {
   chain: string;
   // Tree ID (Mixer tree id)
@@ -172,7 +173,7 @@ export type MixerRelayTx = {
  * const proofForRelayerSubmission = Array.from(proof);
  * ```
  *
- * */
+ **/
 type TornadoRelayTransaction = {
   chain: string;
   // The target contract.
@@ -189,24 +190,24 @@ type TornadoRelayTransaction = {
   root: string;
 };
 /**
- * Anchor relayer transaction payload it's similar to mixer/tornado , but don't have the value `root`
+ * Anchor relayer transaction payload it's similar to mixer/tornado, but don't have the value `root`
  * @param refreshCommitment - Refresh commitment is used to link the value of the commitment to anchor (to the refreshCommitment),
  * if it passed as zero nothing will happen unless a real value is passed thus a new note isn't generated
  * @param roots - roots bytes array
- * */
+ **/
 type AnchorRelayTransaction = Omit<TornadoRelayTransaction, 'root'> & {
   refreshCommitment: string;
   roots: Array<number>;
 };
 /**
  * Relayed transaction for substrate
- * */
+ **/
 export type RelayerSubstrateCommands = {
   mixerRelayTx: MixerRelayTx;
 };
 /**
  * Relayed transaction for EVM
- * */
+ **/
 export type RelayerEVMCommands = {
   tornadoRelayTx: TornadoRelayTransaction;
   anchorRelayTx: AnchorRelayTransaction;

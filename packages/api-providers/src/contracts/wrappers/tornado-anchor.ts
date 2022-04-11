@@ -151,7 +151,7 @@ export class TornadoContract {
    *  3- Insert the missing leaves
    *  4- Compare against historical roots before adding to local storage
    *  5- return the path to the leaf.
-   * */
+   **/
   async generateMerkleProof (deposit: Deposit) {
     const storedContractInfo = await this.mixersInfo.getMixerStorage(this._contract.address);
     const treeHeight = await this._contract.levels();

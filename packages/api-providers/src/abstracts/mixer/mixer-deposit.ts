@@ -42,7 +42,7 @@ export abstract class MixerDeposit<T extends WebbApiProvider<any> = WebbApiProvi
    * the mixerId is passed as a param but the list of mixerId's is got via the `getSizes` call
    * @param mixerId - Mixer size identifier
    * @param chainId - optional chainId
-   * */
+   **/
   abstract generateNote(mixerId: number | string, chainId?: number | string): Promise<K>;
 
   /**
@@ -50,7 +50,7 @@ export abstract class MixerDeposit<T extends WebbApiProvider<any> = WebbApiProvi
    * The implementation should
    * - Mutate the `loading` status of the instance
    * - Use the event bus to emit the status of the transaction
-   * */
+   **/
   // TODO: update the impls to return the TX hash instead of void
   abstract deposit(depositPayload: K): Promise<void>;
 

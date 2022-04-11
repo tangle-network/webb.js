@@ -574,7 +574,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
   }
 
   async withdraw (note: string, recipient: string): Promise<string> {
-    logger.trace(`Withdraw using note ${note} , recipient ${recipient}`);
+    logger.trace(`Withdraw using note ${note}, recipient ${recipient}`);
 
     const parseNote = await Note.deserialize(note);
     const depositNote = parseNote.note;
