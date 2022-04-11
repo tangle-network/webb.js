@@ -7,7 +7,6 @@ import path from "path";
 import fs from "fs";
 import {hexToU8a} from "@polkadot/util";
 import {WithdrawProof} from "../../../tests/utils";
-import {} from '@webb-tools/api'
 
 
 async function mixerBn254() {
@@ -84,7 +83,8 @@ async function mixerBn254() {
     leaves,
     recipient: addressHex.replace('0x', ''),
     relayer: relayerAddressHex.replace('0x', '')
-  }
+  };
+
   // Proof
   const proof = await pm.prove(provingInput)
 

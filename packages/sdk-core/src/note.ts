@@ -112,8 +112,8 @@ export class Note {
   }
 
   /**
-   * Get's the leaf commitment of the note depending
-   * of the protocol.
+   * Gets the leaf commitment of the note depending
+   * on the protocol.
    *
    * @returns Returns the leaf commitment of the note.
    */

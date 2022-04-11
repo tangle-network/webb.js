@@ -26,6 +26,7 @@
     "wasm:test": "wasm-pack test --release --node ./packages/wasm-utils ",
     "test": "yarn test:unit && yarn test:integration && yarn wasm:test",
     "test:unit": "mocha 'packages/**/*.spec.ts' --exit",
+    "test:wasm": "mocha 'packages/**/*.spec.ts' --exit",
     "test:providers": "mocha 'packages/api-providers/**/*.spec.ts' --exit",
     "test:integration": "mocha 'tests/integration_tests/**/*.ts' --exit",
     "test:perf": "cross-env NODE_OPTIONS=--experimental-wasm-modules jest --config ./jest.perf.config.js",

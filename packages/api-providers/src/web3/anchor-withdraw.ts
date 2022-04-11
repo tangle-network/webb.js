@@ -241,7 +241,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     // const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
     const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
 
-    // Setup a provider for the source chain
+    // Set up a provider for the source chain
     const sourceChainIdType = parseChainIdType(Number(note.sourceChainId));
     const sourceEvmId = sourceChainIdType.chainId;
     const sourceInternalId = evmIdIntoInternalChainId(sourceEvmId);

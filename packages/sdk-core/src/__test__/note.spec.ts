@@ -8,6 +8,7 @@ import { Note, NoteGenInput } from '../note.js';
 
 describe('Note class', () => {
   it.only('should test constructor from `NoteGenInput`', async () => {
+
     const noteInput: NoteGenInput = {
       amount: '1',
       backend: 'Circom',
@@ -39,6 +40,7 @@ describe('Note class', () => {
     expect(note.note.hashFunction).to.deep.equal('Poseidon');
     expect(note.note.curve).to.deep.equal('Bn254');
     expect(note.note.tokenSymbol).to.deep.equal('WEBB');
+
   });
 
   it.only('should test serializing and deserializing', async () => {

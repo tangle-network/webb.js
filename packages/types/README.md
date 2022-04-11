@@ -1,3 +1,3 @@
 # @webb-tools/types
 
-Polkadot.js type definations for Webb Network
+Polkadot.js type definitions for Webb Network
