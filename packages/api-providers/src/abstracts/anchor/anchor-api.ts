@@ -18,7 +18,9 @@ export type AnchorBase = {
   };
 };
 /**
- * Anchor api
+ * Providers the data related to the Anchors it can be implemented over the static configurations or fetching on chain data
+ * @param currency - Active bridge asset
+ * @param Currencies -
  * */
 export abstract class AnchorApi<Api, BridgeConfigEntry> {
   private readonly _store: BehaviorSubject<BridgeStore<BridgeConfigEntry>>;

@@ -16,7 +16,9 @@ import { WebbPolkadot } from './webb-provider.js';
 const logger = LoggerService.get('PolkadotBridgeDeposit');
 
 type DepositPayload = IDepositPayload<Note, [number, string]>;
-
+/**
+ * Webb Anchor API implementation for Polkadot
+ * */
 export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPayload> {
   async deposit (depositPayload: DepositPayload): Promise<void> {
     const tx = this.inner.txBuilder.build(
@@ -43,8 +45,9 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     wrappableAssetAddress: string | undefined
   ): Promise<DepositPayload> {
+    // Get the currency bridge currency
     const currency = this.bridgeApi.currency;
-
+    // No currency is selected on the API
     if (!currency) {
       logger.error('Not currency/active bridge available');
       throw new Error('api not ready');
@@ -72,6 +75,7 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
       sourceChainId
     });
     const treeId = anchor.neighbours[InternalChainId.WebbDevelopment] as number; // TODO: Anchor in one chain the 0 id contains the treeId
+    // Create the note gen input
     const noteInput: NoteGenInput = {
       amount: amount,
       backend: 'Arkworks',

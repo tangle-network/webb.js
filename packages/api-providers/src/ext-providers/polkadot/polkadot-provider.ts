@@ -29,6 +29,9 @@ type ExtensionProviderEvents = {
 };
 const logger = LoggerService.get('Polkadot-Provider');
 
+/**
+ * Polkadot provider
+ * */
 export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
   private _accounts: PolkadotAccounts;
 
@@ -42,12 +45,20 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
     this._accounts = new PolkadotAccounts(this.injectedExtension);
   }
 
+  /**
+   * Create a provider from browser extension
+   * @param appName - Name of the application
+   * @param endPoints - URLs for the substrate node
+   * @param apiInitHandler - Error handler for stage of instantiating a provider
+   * @param txBuilder - Transaction builder
+   * */
   static async fromExtension (
     appName: string,
-    [endPoint, ...allEndPoints]: string[],
+    endPoints: string[],
     apiInitHandler: ApiInitHandler,
     txBuilder: PolkaTXBuilder
   ): Promise<PolkadotProvider> {
+    const [endPoint, ...allEndPoints] = endPoints;
     const [apiPromise, currentExtensions] = await PolkadotProvider.getParams(
       appName,
       [endPoint, ...allEndPoints],
@@ -57,11 +68,18 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
     return new PolkadotProvider(apiPromise, currentExtensions, txBuilder);
   }
 
+  /**
+   * Get the api Promise
+   * @param appName - Name of the application
+   * @param endPoints - URLs for the substrate node
+   * @param onError - Error handler for stage of instantiating a provider
+   * */
   static async getApiPromise (
     appName: string,
-    [endPoint, ...allEndPoints]: string[],
+    endPoints: string[],
     onError: ApiInitHandler['onError']
   ) {
+    const [endPoint, ...allEndPoints] = endPoints;
     // eslint-disable-next-line no-async-promise-executor
     const wsProvider = await new Promise<WsProvider>(async (resolve, reject) => {
       let wsProvider: WsProvider;
@@ -69,9 +87,9 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
       let keepRetrying = true;
       let reportNewInteractiveError = true;
 
-      /// Listen for events from the websocket provider to the connect and disconnect and return a promise for blocking
+      // Listen for events from the websocket provider to the connect and disconnect and return a promise for blocking
       const connectWs = async (wsProvider: WsProvider) => {
-        /// perform a connection that won't reconnect if the connection failed to establish or due to broken-pipe (Ping connection)
+        // perform a connection that won't reconnect if the connection failed to establish or due to broken-pipe (Ping connection)
         await wsProvider.connect();
 
         return new Promise((resolve, reject) => {
@@ -90,7 +108,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
        *  1- The ws connection is established
        *  2- The user killed the connection , no other retires
        * */
-      /// global interActiveFeedback for access on multiple scopes
+      // global interActiveFeedback for access on multiple scopes
       let interActiveFeedback: InteractiveFeedback;
 
       logger.trace('Trying to connect to ', [endPoint, ...allEndPoints], `Try: ${tryNumber}`);
@@ -173,6 +191,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
 
     const apiPromise = await ApiPromise.create({
       provider: wsProvider,
+      // Custom RPCs
       rpc: {
         mt: {
           getLeaves: {
@@ -208,22 +227,33 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
     return apiPromise;
   }
 
+  /**
+   * Get provider params
+   * @param appName - Name of the application
+   * @param endPoints - URLs for the substrate node
+   * @param onError - Error handler for stage of instantiating a provider
+   * */
   static async getParams (
     appName: string,
-    [endPoint, ...allEndPoints]: string[],
+    endPoints: string[],
     onError: ApiInitHandler['onError']
   ): Promise<[ApiPromise, InjectedExtension]> {
+    const [endPoint, ...allEndPoints] = endPoints;
+    // Import web3Enable for hooking with the browser extension
     const { web3Enable } = await import('@polkadot/extension-dapp');
+    // Enable the app
     const extensions = await web3Enable(appName);
 
     logger.info('Extensions', extensions);
 
+    // Check for extensions length to insure polkadot extension is installed
     if (extensions.length === 0) {
       logger.warn('Polkadot extension isn\'t installed');
       throw WebbError.from(WebbErrorCodes.PolkaDotExtensionNotInstalled);
     }
 
     const currentExtensions = extensions[0];
+    // Initialize an ApiPromise
     const apiPromise = await PolkadotProvider.getApiPromise(appName, [endPoint, ...allEndPoints], onError);
 
     return [apiPromise, currentExtensions];
@@ -269,6 +299,9 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
     return this.injectedExtension.metadata?.provide(metaData);
   }
 
+  /**
+   * Get MetaData of the ext provider
+   * */
   getMetaData () {
     if (!this.apiPromise.isConnected) return;
     const metadataDef = {
@@ -288,6 +321,9 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
     return metadataDef;
   }
 
+  /**
+   *  Checks if MetaData has changed on the api and update it in the browser extension
+   * */
   async checkMetaDataUpdate () {
     const metadataDef = this.getMetaData();
     const known = await this.injectedExtension?.metadata?.get();

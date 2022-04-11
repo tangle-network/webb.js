@@ -7,6 +7,7 @@ import path from "path";
 import fs from "fs";
 import {hexToU8a} from "@polkadot/util";
 import {WithdrawProof} from "../../../tests/utils";
+import {} from '@webb-tools/api'
 
 
 async function mixerBn254() {

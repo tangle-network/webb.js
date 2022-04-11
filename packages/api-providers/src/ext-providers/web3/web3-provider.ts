@@ -35,7 +35,10 @@ export interface ClientMetaData {
   icons: string[];
   name: string;
 }
-
+/**
+ * Web3Provider a wrapper class for many views of the web3 provider
+ * @param helperApi - An api used to do functionalities other than Web3 Ex: WalletConnect.
+ * */
 export class Web3Provider<T = unknown> {
   private helperApi: T | null = null;
   private _capabilities: ProvideCapabilities = {
@@ -47,6 +50,9 @@ export class Web3Provider<T = unknown> {
 
   private constructor (private _inner: Web3, readonly clientMeta: ClientMetaData | null = null) {}
 
+  /**
+   * Getter for the web3 provider inject by MetaMask
+   * */
   static get currentProvider () {
     // @ts-ignore
     if (typeof window !== 'undefined' && typeof window.web3 !== 'undefined') {
@@ -61,12 +67,16 @@ export class Web3Provider<T = unknown> {
     throw WebbError.from(WebbErrorCodes.MetaMaskExtensionNotInstalled);
   }
 
+  /**
+   * Initialize web3 provider from extension
+   * */
   static async fromExtension () {
     // @ts-ignore
     if (typeof window !== 'undefined' && typeof window.web3 !== 'undefined') {
       // @ts-ignore
       const provider = Web3Provider.currentProvider;
 
+      // Enable the api
       await provider.enable();
       const web3Provider = new Web3Provider(new Web3(provider), {
         description: 'MetaMask',
@@ -88,6 +98,9 @@ export class Web3Provider<T = unknown> {
     throw WebbError.from(WebbErrorCodes.MetaMaskExtensionNotInstalled);
   }
 
+  /**
+   * Create a web3 provider from url  consuming `HttpProvider`
+   * */
   static fromUri (url: string) {
     const HttpProvider = new Web3.providers.HttpProvider(url);
     const web3 = new Web3(HttpProvider);
