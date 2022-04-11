@@ -185,10 +185,10 @@ export class Web3MixerDeposit extends Web3AnchorDeposit {
     }
   }
 
-  async generateNote (mixerAddress: string): Promise<DepositPayload> {
+  async generateNote (mixerId: string): Promise<DepositPayload> {
     const evmId = await this.inner.getChainId();
     const chainIdType = computeChainIdType(ChainType.EVM, evmId);
-    const generatedNote = await this.generateBridgeNote(mixerAddress, chainIdType);
+    const generatedNote = await this.generateBridgeNote(mixerId, chainIdType);
 
     return {
       note: generatedNote.note,

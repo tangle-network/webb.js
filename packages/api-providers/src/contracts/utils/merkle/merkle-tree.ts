@@ -72,7 +72,7 @@ class UpdateTraverser implements TraverserHandler {
 
 class PathTraverser implements TraverserHandler {
   public pathElements: any[] = [];
-  public pathIndex: number[] = [];
+  public pathIndices: number[] = [];
 
   constructor (private prefix: string, private storage: Storage, private zeroValues: any) {
   }
@@ -84,7 +84,7 @@ class PathTraverser implements TraverserHandler {
     ) as any;
 
     this.pathElements.push(sibling);
-    this.pathIndex.push(elementIndex % 2);
+    this.pathIndices.push(elementIndex % 2);
   }
 }
 
@@ -226,7 +226,7 @@ export class MerkleTree {
     return {
       element,
       pathElements: traverser.pathElements,
-      pathIndex: traverser.pathIndex,
+      pathIndices: traverser.pathIndices,
       root
     };
   }

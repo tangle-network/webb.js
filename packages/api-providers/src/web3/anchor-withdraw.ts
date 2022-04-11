@@ -396,6 +396,8 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     const maxEdges = await destAnchor.inner.maxEdges();
     const wasmBuf = await fetchWasmForEdges(maxEdges);
 
+    console.log('wasmBuf: ', wasmBuf);
+
     console.log('wasm for edges fetched');
     const witnessCalculator = await witnessCalculatorFile.builder(wasmBuf, {});
     const circuitKey = await fetchKeyForEdges(maxEdges);
@@ -424,6 +426,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     const merkleProof = linkedMerkleProof.path;
 
     // setup the cross chain withdraw with the generated merkle proof
+    console.log('before setupBridgedWithdraw');
     this.emit('stateChange', WithdrawState.GeneratingZk);
     const withdrawSetup = await anchorWrapper.setupBridgedWithdraw(sourceDeposit, merkleProof, account.address, account.address, BigInt(0), 0);
 

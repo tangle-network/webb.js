@@ -346,7 +346,7 @@ export class AnchorContract {
     deposit: IAnchorDepositInfo,
     zkpInputWithoutMerkleProof: ZKPWebbAnchorInputWithoutMerkle
   ) {
-    const { pathElements, pathIndex: pathIndices, root: merkleRoot } = merkleProof;
+    const { pathElements, pathIndices, root: merkleRoot } = merkleProof;
     const localRoot = await this._contract.getLastRoot();
     const nr = await this._contract.getLatestNeighborRoots();
     const sourceChainRootIndex = (await this._contract.edgeIndex(sourceEvmId)).toNumber();
