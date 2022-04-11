@@ -20,16 +20,9 @@ export function createAnchor2Deposit (chainId: number) {
   const nullifier = leBuff2int(preimage.slice(0, 31));
   const secret = leBuff2int(preimage.slice(31, 62));
 
-  console.log('chainId: ', chainId);
   const commitmentBN = poseidonHash3([chainId, nullifier, secret]);
   const nullifierHash = poseidonHasher.hash(null, nullifier, nullifier);
-
-  console.log('secret: ', secret);
-  console.log('nullifier: ', nullifier);
-  console.log('commitmentBN: ', commitmentBN);
   const commitment = bufferToFixed(commitmentBN);
-
-  console.log('commitment when creating deposit note: ', commitment);
 
   const deposit: IAnchorDepositInfo = {
     chainID: BigInt(chainId),
@@ -59,13 +52,6 @@ export function depositFromAnchorNote (note: DepositNote): IAnchorDepositInfo {
     nullifierHash,
     secret: BigInt(bufferToFixed(secret))
   };
-
-  console.log(`IAnchorDepositInfo, deposit in depositFromAnchorNote:
-  \n chainID ${deposit.chainID}
-  \n commitment ${deposit.commitment}
-  \n nullifier ${deposit.nullifier}
-  \n nullifierHash ${deposit.nullifierHash}
-  \n secret ${deposit.secret}`);
 
   return deposit;
 }
