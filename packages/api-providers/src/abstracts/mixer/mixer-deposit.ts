@@ -41,7 +41,7 @@ export abstract class MixerDeposit<T extends WebbApiProvider<any> = WebbApiProvi
    * and the params {mixerId},{chainId} to generate the wright deposit note and the Payload {K}
    * the mixerId is passed as a param but the list of mixerId's is got via the {getSizes} call
    * */
-  abstract generateNote(mixerId: number | string, chainId?: number | string): Promise<K>;
+  abstract generateNote(mixerId: number | string, chainIdType?: number): Promise<K>;
 
   /**
    * The deposit call it should receive the payload of type {K}

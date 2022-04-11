@@ -76,7 +76,7 @@ export type MixerRelayTx = {
   refund: number;
 };
 
-type TornadoRelayTransaction = {
+type AnchorRelayTransaction = {
   chain: string;
   // The target contract.
   contract: string;
@@ -89,9 +89,6 @@ type TornadoRelayTransaction = {
   // Fixed length Hex string
   refund: string;
   relayer: string;
-  root: string;
-};
-type AnchorRelayTransaction = Omit<TornadoRelayTransaction, 'root'> & {
   refreshCommitment: string;
   roots: Array<number>;
 };
@@ -99,7 +96,6 @@ export type RelayerSubstrateCommands = {
   mixerRelayTx: MixerRelayTx;
 };
 export type RelayerEVMCommands = {
-  tornadoRelayTx: TornadoRelayTransaction;
   anchorRelayTx: AnchorRelayTransaction;
 };
 export type EVMCMDKeys = keyof RelayerEVMCommands;

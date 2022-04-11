@@ -8,7 +8,6 @@ import { filter } from 'rxjs/operators';
 
 import { InternalChainId } from '../../chains/index.js';
 import { webbCurrencyIdFromString } from '../../enums/index.js';
-import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo.js';
 import { AppConfig } from '../common.js';
 import { Capabilities, EVMCMDKeys, RelayedChainConfig, RelayerCMDBase, RelayerCMDKey, RelayerConfig, RelayerEVMCommands, RelayerMessage, RelayerSubstrateCommands, SubstrateCMDKeys } from './types.js';
 
@@ -38,7 +37,6 @@ type RelayerQuery = {
   ipService?: true;
   chainId?: InternalChainId;
   contractAddress?: string;
-  tornadoSupport?: MixerQuery;
   bridgeSupport?: MixerQuery;
 };
 
@@ -49,14 +47,7 @@ export type RelayedChainInput = {
   // TODO: change to just contract
   contractAddress: string;
 };
-export type TornadoRelayerWithdrawArgs = {
-  root: string;
-  nullifierHash: string;
-  recipient: string;
-  relayer: string;
-  fee: string;
-  refund: string;
-};
+
 export type BridgeRelayerWithdrawArgs = {
   roots: number[];
   refreshCommitment: string;
@@ -66,7 +57,7 @@ export type BridgeRelayerWithdrawArgs = {
   fee: string;
   refund: string;
 };
-export type ContractBase = 'tornado' | 'anchor';
+export type ContractBase = 'anchor';
 type CMDSwitcher<T extends RelayerCMDBase> = T extends 'evm' ? EVMCMDKeys : SubstrateCMDKeys;
 
 export type RelayerCMDs<A extends RelayerCMDBase, C extends CMDSwitcher<A>> = A extends 'evm'
@@ -207,7 +198,7 @@ export class WebbRelayerBuilder {
    *  Accepts a 'RelayerQuery' object with optional, indexible fields.
    * */
   getRelayer (query: RelayerQuery): WebbRelayer[] {
-    const { baseOn, bridgeSupport, chainId, contractAddress, ipService, tornadoSupport } = query;
+    const { baseOn, bridgeSupport, chainId, contractAddress, ipService } = query;
     const relayers = Object.keys(this.capabilities)
       .filter((key) => {
         const capabilities = this.capabilities[key];
@@ -227,29 +218,6 @@ export class WebbRelayerBuilder {
                   (contract) => contract.address === contractAddress.toLowerCase() && contract.eventsWatcher.enabled
                 )
             );
-          }
-        }
-
-        if (tornadoSupport && baseOn && chainId) {
-          if (baseOn === 'evm') {
-            const evmId = this.appConfig.chains[chainId].chainId;
-            const mixersInfoForChain = new EvmChainMixersInfo(this.appConfig, evmId);
-            const mixerInfo = mixersInfoForChain.getTornMixerInfoBySize(
-              tornadoSupport.amount,
-              tornadoSupport.tokenSymbol
-            );
-
-            if (mixerInfo) {
-              return Boolean(
-                capabilities.supportedChains[baseOn]
-                  .get(chainId)
-                  ?.contracts?.find(
-                    (contract) => contract.address === mixerInfo.address.toLowerCase() && contract.eventsWatcher.enabled
-                  )
-              );
-            } else {
-              return false;
-            }
           }
         }
 

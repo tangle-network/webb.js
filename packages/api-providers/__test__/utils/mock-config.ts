@@ -466,122 +466,6 @@ const currenciesConfig: AppConfig['currencies'] = {
   }
 };
 
-const mixersConfig: AppConfig['mixers'] = {
-  [InternalChainId.Edgeware]: {
-    tornMixers: [
-      {
-        address: '0x2B9A7085Afba278BEc6bBfFb399A3C042ED05046',
-        createdAtBlock: 8828000,
-        size: 10000,
-        symbol: 'EDG'
-      }
-    ]
-  },
-  [InternalChainId.EdgewareTestNet]: {
-    tornMixers: [
-      {
-        address: '0xf0EA8Fa17daCF79434d10C51941D8Fc24515AbE3',
-        createdAtBlock: 299740,
-        size: 10,
-        symbol: 'tEDG'
-      },
-      {
-        address: '0xc0d863EE313636F067dCF89e6ea904AD5f8DEC65',
-        createdAtBlock: 299740,
-        size: 100,
-        symbol: 'tEDG'
-      },
-      {
-        address: '0xc7c6152214d0Db4e161Fa67fB62811Be7326834A',
-        createdAtBlock: 299740,
-        size: 1000,
-        symbol: 'tEDG'
-      },
-      {
-        address: '0xf0290d80880E3c59512e454E303FcD48f431acA3',
-        createdAtBlock: 299740,
-        size: 10000,
-        symbol: 'tEDG'
-      }
-    ]
-  },
-  [InternalChainId.Rinkeby]: {
-    tornMixers: [
-      {
-        address: '0x626FEc5Ffa7Bf1EE8CEd7daBdE545630473E3ABb',
-        createdAtBlock: 8896800, // should be hardcoded to deployed block number
-        size: 0.1,
-        symbol: 'ETH'
-      },
-      {
-        address: '0x979cBd4917e81447983ef87591B9E1ab21727a61',
-        createdAtBlock: 8896800,
-        size: 1,
-        symbol: 'ETH'
-      }
-    ]
-  },
-  [InternalChainId.HarmonyTestnet1]: {
-    tornMixers: [
-      {
-        address: '0x7cd1F52e5EEdf753e99D945276a725CE533AaD1a',
-        createdAtBlock: 12040000,
-        size: 100,
-        symbol: 'ONE'
-      },
-      {
-        address: '0xD7f9BB9957100310aD397D2bA31771D939BD4731',
-        createdAtBlock: 12892487,
-        size: 1000,
-        symbol: 'ONE'
-      },
-      {
-        address: '0xeE2eB8F142e48e5D1bDD34e0924Ed3B4aa0d4222',
-        createdAtBlock: 12892648,
-        size: 10000,
-        symbol: 'ONE'
-      },
-      {
-        address: '0x7cd173094eF78FFAeDee4e14576A73a79aA716ac',
-        createdAtBlock: 12892840,
-        size: 100000,
-        symbol: 'ONE'
-      }
-    ]
-  },
-  [InternalChainId.HarmonyMainnet0]: {
-    tornMixers: [
-      {
-        address: '0x2B9A7085Afba278BEc6bBfFb399A3C042ED05046',
-        createdAtBlock: 18796580,
-        size: 100,
-        symbol: 'ONE'
-      },
-      {
-        address: '0x4b271E1E67B3eE56467599cd46f1F74A5a369c72',
-        createdAtBlock: 18796580,
-        size: 10000,
-        symbol: 'ONE'
-      }
-    ]
-  },
-  [InternalChainId.Shiden]: {
-    tornMixers: [
-      {
-        address: '0x2B9A7085Afba278BEc6bBfFb399A3C042ED05046',
-        createdAtBlock: 566000,
-        size: 10,
-        symbol: 'SDN'
-      },
-      {
-        address: '0x548555a3275B6fadD5d2B9740a7655cB7f856148',
-        createdAtBlock: 568000,
-        size: 1000,
-        symbol: 'SDN'
-      }
-    ]
-  }
-};
 const walletsConfig: AppConfig['wallet'] = {};
 
 export const mockAppConfig: AppConfig = {
@@ -589,6 +473,5 @@ export const mockAppConfig: AppConfig = {
   bridgeByAsset: bridgeConfigByAsset,
   chains: chainsConfig,
   currencies: currenciesConfig,
-  mixers: mixersConfig,
   wallet: walletsConfig
 };

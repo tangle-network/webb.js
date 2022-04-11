@@ -5,6 +5,7 @@
 import * as snarkjs from 'snarkjs';
 
 import { fetchKeyForEdges, fetchWasmForEdges } from '../../ipfs/evm/anchors.js';
+import * as witnessCalculatorFile from '../utils/witness-calculator.js';
 import { AnchorWitnessInput } from './types.js';
 
 type MaxEdges = 1 | 2 | 3 | 4 | 5;
@@ -24,7 +25,7 @@ export const isZero = (value: string | number) => {
 export const generateWitness = async (input: AnchorWitnessInput, maxEdges: MaxEdges) => {
   try {
     const wasmBuf = await fetchWasmForEdges(maxEdges);
-    const witnessCalculator = await require('../utils/witness-calculator')(wasmBuf);
+    const witnessCalculator = await witnessCalculatorFile.builder(wasmBuf, {});
     const buff = await witnessCalculator.calculateWTNSBin(input, 0);
 
     return buff;
