@@ -29,7 +29,7 @@ export type Capabilities = {
 
 /**
  * Relayer contract info, it indicates what support the relayer is doing for a given contract
- * @param contract - ?
+ * @param contract - The type of contract/system that the relayer supports (Anchor, SignatureBridge)
  * @param address - Contract address
  * @param deployedAt - The block number the contract was deployed at
  * @param eventsWatcher - The status  of the event watcher for the contract
