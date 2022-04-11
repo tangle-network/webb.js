@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/api-providers",
-  "version": "0.1.4-47",
+  "version": "0.1.4-48",
   "description": "dApp provider to work with Webb",
   "author": "Webb Developers <drew@webb.tools>",
   "main": "index.cjs",
@@ -16,10 +16,10 @@
     "@babel/runtime": "^7.10.2",
     "@polkadot/extension-dapp": "^0.35.0-beta.35",
     "@walletconnect/web3-provider": "^1.7.5",
-    "@webb-tools/contracts": "0.1.7",
-    "@webb-tools/utils": "0.1.7",
     "@webb-tools/anchors": "0.1.11",
+    "@webb-tools/contracts": "0.1.7",
     "@webb-tools/interfaces": "0.1.9",
+    "@webb-tools/utils": "0.1.7",
     "bignumber.js": "^9.0.0",
     "snarkjs": "0.4.16"
   },
