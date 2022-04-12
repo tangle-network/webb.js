@@ -27,9 +27,9 @@ export type WrappingBalance = {
 
 /**
  * Webb wrap unwrap functionality
- * Stores two tokens of type {WrappingTokenId}
+ * Stores two tokens of type WrappingTokenId
  * currentToken, otherEdgeToken
- *  wrap => Governwrapper<currentToken> and use otherEdgeToken as parameter
+ *  wrap  Governwrapper<currentToken> and use otherEdgeToken as parameter
  *  unwrap Governwrapper<otherEdgeToken> and use currentToken as parameter
  **/
 

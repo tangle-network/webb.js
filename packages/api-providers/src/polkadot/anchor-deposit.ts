@@ -47,6 +47,7 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
   ): Promise<DepositPayload> {
     // Get the currency bridge currency
     const currency = this.bridgeApi.currency;
+
     // No currency is selected on the API
     if (!currency) {
       logger.error('Not currency/active bridge available');

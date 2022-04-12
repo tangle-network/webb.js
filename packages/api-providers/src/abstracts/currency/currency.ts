@@ -7,7 +7,6 @@ import { CurrencyConfig, CurrencyRole, CurrencyView } from '../../types/currency
 import { AppConfig } from '../common.js';
 import { ORMLAsset } from './orml-currency.js';
 
-
 /**
  * The abstract class for representing the values need to display a Currency on the UI
  **/

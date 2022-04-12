@@ -35,6 +35,7 @@ The note contains data about a deposit
 # Proving Manager
 Proving manager uses `wasm-utils`, it runs in a Worker, or directly in the browser
 ```ts
+
   const provingInput: ProvingManagerSetupInput = {
     leafIndex: 0,
     provingKey: Uint8Array.from([]),
@@ -46,6 +47,7 @@ Proving manager uses `wasm-utils`, it runs in a Worker, or directly in the brows
     relayer: `4094436fd8a3d5541d3f3c08922d63eb3be5761be8a9e7c28c89445c358cb669`,
     refreshCommitment:`0000000000000000000000000000000000000000000000000000000000000000`
   };
+
     // Run throw nodejs
     const pm = new ProvingManager('direct-call');
     const proofMangager = await pm.prove(proofInput);

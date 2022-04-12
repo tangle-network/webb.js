@@ -45,8 +45,8 @@ export type CancelToken = {
 
 /**
  * Mixer withdraw abstract
- * The underlying method should be implemented to  get a functioning mixerWithdraw for a {WebbApiProvider}
- * @param {T} the provider WebbApiProvider
+ * The underlying method should be implemented to  get a functioning mixerWithdraw for a `WebbApiProvider`
+ * @param T - the provider WebbApiProvider
  */
 export abstract class MixerWithdraw<T extends WebbApiProvider<any>> extends EventBus<MixerWithdrawEvents> {
   state: WithdrawState = WithdrawState.Ideal;
@@ -124,7 +124,7 @@ export abstract class MixerWithdraw<T extends WebbApiProvider<any>> extends Even
   /**
    * This should be implemented to do the Transaction call for the withdraw
    * it should do the side effects on the instance
-   * - Mutate the {loading} status of the instance
+   * - Mutate the `loading` status of the instance
    * - Use the event bus to emit the status of the transaction
    * - Switch logic for relayer usage
    **/

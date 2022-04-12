@@ -48,7 +48,7 @@ export const options = ({ types = {},
 
 /**
  *
- * @param chainTypes An object containing the `types` and `typesBundle` of another chain
+ * @param chainTypes - An object containing the `types` and `typesBundle` of another chain
  * @returns The `ApiOptions` of the chain with Webb's types added.
  */
 export const optionsWithChain = (chainTypes: any) => ({ types = {},

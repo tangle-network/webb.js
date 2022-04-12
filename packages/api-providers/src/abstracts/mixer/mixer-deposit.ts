@@ -46,7 +46,7 @@ export abstract class MixerDeposit<T extends WebbApiProvider<any> = WebbApiProvi
   abstract generateNote(mixerId: number | string, chainId?: number | string): Promise<K>;
 
   /**
-   * The deposit call it should receive the payload of type {K}
+   * The deposit call it should receive the payload of type `K`
    * The implementation should
    * - Mutate the `loading` status of the instance
    * - Use the event bus to emit the status of the transaction

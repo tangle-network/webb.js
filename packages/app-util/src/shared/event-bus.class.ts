@@ -14,8 +14,8 @@ export abstract class EventBus<T extends Event> {
   protected subscriptions: Subscription<T> = {};
 
   /**
-   * @description register an event and pass a callback
-   * @return Void|Function , Void if the handler is already registered or Function if the handler is registered
+   * Register an event and pass a callback
+   * @returns Void|Function , Void if the handler is already registered or Function if the handler is registered
    **/
   on<E extends keyof T> (event: E, cb: (val: T[E]) => void): () => void {
     const listeners = this.subscriptions[event];

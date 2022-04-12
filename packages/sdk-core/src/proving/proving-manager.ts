@@ -1,13 +1,13 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import {ProvingManagerSetupInput, ProvingManagerWrapper} from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
-import {Proof} from '@webb-tools/wasm-utils';
+import { ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
+import { Proof } from '@webb-tools/wasm-utils';
 
 export type ProofI = Omit<Proof, 'free'>;
 
 export class ProvingManager {
-  constructor(
+  constructor (
     private readonly worker: Worker | null | undefined // Optional WebWorker
   ) {
   }
@@ -19,7 +19,7 @@ export class ProvingManager {
    *
    * @param  input - input for the manager
    **/
-  public prove(input: ProvingManagerSetupInput) {
+  public prove (input: ProvingManagerSetupInput) {
     const worker = this.worker;
 
     if (worker) {
@@ -29,14 +29,14 @@ export class ProvingManager {
     return ProvingManager.proveWithoutWorker(input);
   }
 
-  private static proveWithoutWorker(input: ProvingManagerSetupInput) {
+  private static proveWithoutWorker (input: ProvingManagerSetupInput) {
     // If the worker CTX is direct-call
     const pm = new ProvingManagerWrapper('direct-call');
 
     return pm.proof(input);
   }
 
-  private static proveWithWorker(input: ProvingManagerSetupInput, worker: Worker): Promise<ProofI> {
+  private static proveWithWorker (input: ProvingManagerSetupInput, worker: Worker): Promise<ProofI> {
     return new Promise<ProofI>((resolve, reject) => {
       try {
         worker.addEventListener('message', (e) => {

@@ -11,5 +11,5 @@ const options = options({
   provider: wsProvider
 });
 
-const apiPromise = ApiPromise.create(options)
+const apiPromise = ApiPromise.create(options);
 ```

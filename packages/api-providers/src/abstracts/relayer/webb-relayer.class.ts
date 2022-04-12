@@ -111,7 +111,6 @@ export class WebbRelayerBuilder {
   private _listUpdated = new Subject<void>();
   public readonly listUpdated: Observable<void>;
 
-
   private constructor (
     protected relayerConfigs: RelayerConfig[],
     private readonly chainNameAdapter: ChainNameIntoChainId,

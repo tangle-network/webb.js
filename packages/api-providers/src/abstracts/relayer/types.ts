@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import {InternalChainId} from '../../chains/index.js';
+import { InternalChainId } from '../../chains/index.js';
 
 /**
  * Relayer configuration for a chain
