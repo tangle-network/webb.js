@@ -156,7 +156,7 @@ export type MixerRelayTx = {
 
 /**
  * Anchor relayer transaction payload it's similar to mixer/tornado, but don't have the value `root`
- * @parms chain - Chain name
+ * @param chain - Chain name
  * @param contract - The target contract.
  * @param proof - Proof bytes
  * @param fee - Fee value
