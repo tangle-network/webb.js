@@ -17,7 +17,7 @@ export enum WithdrawState {
 
   SendingTransaction, // There is a withdraw in progress, and it's on the step Sending the Transaction whether directly or through relayers
 
-  Done, // the withdraw is Done and seceded, the next tic the instance should be ideal
+  Done, // the withdraw is Done and succeeded, the next tic the instance should be ideal
   Failed // the withdraw is Done with a failure, the next tic the instance should be ideal
 }
 
