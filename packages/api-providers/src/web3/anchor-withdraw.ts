@@ -286,7 +286,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     // const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
     const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
 
-    // Setup a provider for the source chain
+    // Set up a provider for the source chain
     const sourceChainIdType = parseChainIdType(Number(note.sourceChainId));
     const sourceEvmId = sourceChainIdType.chainId;
     const sourceInternalId = evmIdIntoInternalChainId(sourceEvmId);
@@ -602,7 +602,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
   // needs to be constructed in the cross-chain scenario.
   // Zero knowledge files are fetched in both withdraw flows.
   async withdraw (note: string, recipient: string): Promise<string> {
-    logger.trace(`Withdraw using note ${note} , recipient ${recipient}`);
+    logger.trace(`Withdraw using note ${note}, recipient ${recipient}`);
 
     const parseNote = await Note.deserialize(note);
     const depositNote = parseNote.note;

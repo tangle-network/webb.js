@@ -31,7 +31,16 @@ type MixerQuery = {
   amount: number;
   tokenSymbol: string;
 };
-
+/**
+ * Relayer query object all the values are optional
+ *
+ * @param baseOn - Whither relayer supports evm or substrate.
+ * @param ipService - Whither relayer supports the IP service
+ * @param chainId - Relayer supportedChains has a chainId
+ * @param contractAddress - Relayer supports the contract address
+ * @param tornadoSupport - Relayer has support for  a contract with the amount and symbol `MixerQuery`
+ * @param bridgeSupport - Relayer has support a contract with the amount and symbol `MixerQuery`
+ **/
 type RelayerQuery = {
   baseOn?: 'evm' | 'substrate';
   ipService?: true;
@@ -68,10 +77,9 @@ export type RelayerCMDs<A extends RelayerCMDBase, C extends CMDSwitcher<A>> = A 
     ? RelayerSubstrateCommands[C]
     : never;
 
-export type WithdrawRelayerArgs<A extends RelayerCMDBase, C extends CMDSwitcher<A>> = Omit<
-RelayerCMDs<A, C>,
-keyof RelayedChainInput | 'proof'
->;
+export type WithdrawRelayerArgs<A extends RelayerCMDBase, C extends CMDSwitcher<A>> = Omit<RelayerCMDs<A, C>,
+keyof RelayedChainInput | 'proof'>;
+
 export interface RelayerInfo {
   substrate: Record<string, RelayedChainConfig | null>;
   evm: Record<string, RelayedChainConfig | null>;
@@ -80,12 +88,15 @@ export interface RelayerInfo {
 export type ChainNameIntoChainId = (name: string, basedOn: 'evm' | 'substrate') => InternalChainId | null;
 
 /**
- *  Webb relayers manager
- *  this will fetch/mange/provide this relayers and there capabilities
+ * Webb relayers manager
+ * this will fetch/mange/provide this relayers and there capabilities
  *
- * */
+ * @param capabilities - storage for relayers capabilities
+ * @param relayerConfigs - The whole relayers configuration of the project
+ * @param chainNameAdapter - An adapter for getting the  InternalChainId of the chain name and the base
+ * @param appConfig - App config is used for looking up configuration values for issuing queries on the relayers
+ **/
 export class WebbRelayerBuilder {
-  /// storage for relayers capabilities
   private capabilities: Record<RelayerConfig['endpoint'], Capabilities> = {};
   private _listUpdated = new Subject<void>();
   public readonly listUpdated: Observable<void>;
@@ -98,7 +109,9 @@ export class WebbRelayerBuilder {
     this.listUpdated = this._listUpdated.asObservable();
   }
 
-  /// Mapping the fetched relayers info to the Capabilities store
+  /**
+   * Mapping the fetched relayers info to the Capabilities store
+   **/
   private static infoIntoCapabilities (
     _nfig: RelayerConfig,
     info: RelayerInfo,
@@ -113,8 +126,8 @@ export class WebbRelayerBuilder {
           ? Object.keys(info.evm)
             .filter(
               /**
-                 * account is deprecated but it's kept here for backward compatibility
-                 * */
+               * account is deprecated but it's kept here for backward compatibility
+               **/
               (key) => (info.evm[key]?.account || info.evm[key]?.beneficiary) && nameAdapter(key, 'evm') != null
             )
             .reduce((m, key) => {
@@ -167,7 +180,7 @@ export class WebbRelayerBuilder {
   /**
    * init the builder
    *  create new instance and fetch the relayers
-   * */
+   **/
   static async initBuilder (
     config: RelayerConfig[],
     chainNameAdapter: ChainNameIntoChainId,
@@ -196,7 +209,7 @@ export class WebbRelayerBuilder {
    *  get a list of the suitable relayers for a given query
    *  the list is randomized
    *  Accepts a 'RelayerQuery' object with optional, indexible fields.
-   * */
+   **/
   getRelayer (query: RelayerQuery): WebbRelayer[] {
     const { baseOn, bridgeSupport, chainId, contractAddress, ipService } = query;
     const relayers = Object.keys(this.capabilities)
@@ -266,28 +279,55 @@ export class WebbRelayerBuilder {
   }
 }
 
+/**
+ * Relayer withdraw status
+ *
+ * @param PreFlight - the withdraw hasnt yet started
+ * @param OnFlight - the withdraw has been submitted to the relayers and no response yet
+ * @param Continue - the withdraw is being processed
+ * @param CleanExit - the withdraw is done with success
+ * @param Errored - failed to create the withdraw
+ **/
 export enum RelayedWithdrawResult {
-  /// the withdraw hasnt yet started
   PreFlight,
-  /// the withdraw has been submitted to the relayers and no response yet
   OnFlight,
-  // the withdraw is being processed
   Continue,
-  /// the withdraw is done with success
   CleanExit,
-  /// failed to create the withdraw
   Errored
 }
 
+/**
+ * Fetching leaves from the relayer is faster than querying a chain's node.
+ * The relayer will return it's state for the given merkle tree - all of the leaves up to the latest synced block value.
+ *
+ * @param leaves - Array of hex representation of the leaves
+ * @param lastQueriedBlock - Block number at which that last update of the leaves occurred in the relayer side
+ **/
 type RelayerLeaves = {
   leaves: string[];
   lastQueriedBlock: number;
 };
 
+/**
+ * Relayed withdraw is integrating with a relayer for doing the Withdrawal transaction without the user/owner of the commitment
+ * have ot do it directly for more privacy, it's connected to the relayer via WebSocket, a new instance is instantiated for every transaction relaying
+ * @param status - Status for the relayed Withdraw initially it's `PreFlight`
+ * @param wacher - watch for the current withdraw status [Status, Error or transaction hash]
+ * @param prefix - Prefix is used in the Record as a key for indicating the command that the relayer will parse
+ * ```typescript
+ * // anchorRelayTx is a prefix
+ * const relayerAnchorPayload  = {
+ *  emv:{
+ *   anchorRelayTx:{
+ *       ...
+ *     }
+ *    }
+ * }
+ * ```
+ *
+ **/
 class RelayedWithdraw {
-  /// status of the withdraw
   private status: RelayedWithdrawResult = RelayedWithdrawResult.PreFlight;
-  /// watch for the current withdraw status
   readonly watcher: Observable<[RelayedWithdrawResult, string | undefined]>;
   private emitter: Subject<[RelayedWithdrawResult, string | undefined]> = new Subject();
 
@@ -364,7 +404,8 @@ class RelayedWithdraw {
 }
 
 export class WebbRelayer {
-  constructor (readonly endpoint: string, readonly capabilities: Capabilities) {}
+  constructor (readonly endpoint: string, readonly capabilities: Capabilities) {
+  }
 
   async initWithdraw<Target extends RelayerCMDKey> (target: Target) {
     const ws = new WebSocket(this.endpoint.replace('http', 'ws') + '/ws');
@@ -376,7 +417,7 @@ export class WebbRelayer {
 
     /// insure the socket is open
     /// maybe removed soon
-    for (;;) {
+    for (; ;) {
       if (ws.readyState === 1) {
         break;
       }

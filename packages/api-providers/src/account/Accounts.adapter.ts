@@ -17,7 +17,7 @@ export abstract class Account<T = unknown> {
 /*
  * This class is wrapping the accounts and accounts meta data
  * form multiple providers into a single interface
- * */
+ **/
 
 export type PromiseOrT<T> = Promise<T> | T;
 

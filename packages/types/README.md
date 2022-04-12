@@ -1,3 +1,3 @@
 # @webb-tools/types
 
-Polkadot.js type definations for Webb Network
+Decorating typescript types before generating the augmented api types

@@ -10,7 +10,7 @@ import { AnchorDeposit, AnchorWithdraw, Bridge } from './anchor/index.js';
 import { ChainQuery } from './chain-query/index.js';
 import { DepositPayload, MixerDeposit, MixerDepositEvents, MixerWithdraw, MixerWithdrawEvents } from './mixer/index.js';
 import { WebbRelayerBuilder } from './relayer/index.js';
-import { WrapUnWrap } from './wrap-unwrap/index.js';
+import { WrapUnwrap } from './wrap-unwrap/index.js';
 import { AppConfig } from './common.js';
 
 /// list of the apis that are available for  the provider
@@ -43,7 +43,7 @@ export interface WebbMixer<T extends WebbApiProvider<any>> {
 
 export interface WrapAndUnwrap<T> {
   core: {
-    inner: WrapUnWrap<T>;
+    inner: WrapUnwrap<T>;
     enabled: boolean;
   };
 }
@@ -63,7 +63,7 @@ export type ApiInitHandler = {
   /*
    * For instance Polkadot provider the dApp will prepare the parameters for the provider
    * This process may have an error
-   * */
+   **/
   onError(error: InteractiveFeedback): any;
 };
 
@@ -85,17 +85,20 @@ export type ProvideCapabilities = {
 
 export type NotificationKey = string | number;
 export type VariantType = 'default' | 'error' | 'success' | 'warning' | 'info';
-
+/**
+ * Notification data
+ *
+ * @param persist - Either the Notification is kept for future manual removal or by an event
+ * @param message - Main message/ title for the notification
+ * @param description - Description about the Notification
+ * @param variant - Notification variant that can be used to style the notification
+ * @param action - Arbitrary action that can be used  for clicking the notification (Not implemented)
+ **/
 export type NotificationData = {
-  // Either the Notification is kept for future manual removal or by an event
   persist: boolean;
-  // Main message/ title for the notification
   message: string;
-  // Description about the Notification
   description: string;
-  // Notification variant that can be used to style the notification
   variant: VariantType;
-  // Arbitrary action that can be used  for clicking the notification (Not implemented)
   action: string;
 };
 
@@ -119,31 +122,37 @@ export type TXNotificationPayload<T = undefined> = {
   // More metadata for the transaction path (EX Anchor::Deposit ,VAnchor::Withdraw)
   path: MethodPath;
 };
-// Transaction notification
+/**
+ * Transaction notification provider
+ *
+ * @param loading - Transaction status is in progress
+ * @param failed - Transaction failed
+ * @param finalize - Transaction Done with success
+ **/
 export type TXNotification = {
-  // Transaction status is in progress
   loading(payload: TXNotificationPayload<any>): NotificationKey;
-  // Transaction failed
   failed(payload: TXNotificationPayload<any>): NotificationKey;
-  // Transaction Done with success
   finalize(payload: TXNotificationPayload<any>): NotificationKey;
 };
 export type NotificationLevel = 'loading' | 'error' | 'success' | 'warning' | 'info';
-
+/**
+ * Notification emitted from the webb provider
+ *
+ * @param message - Title of the notification
+ * @param description - details about the notification
+ * @param name - Event name/ event identifier
+ * @param key - key for a given notification can be used to remove/dismiss a notification
+ * @param level - level
+ * @param data - Record for more metadata
+ * @param persist - if true the notification will be dismissed by the user or with another action
+ **/
 export type NotificationPayload = {
-  // Title of the notification
   message: string;
-  // details about the notification
   description: string;
-  // Event name/ event identifier
   name: 'Transaction' | 'Approval';
-  // key for a given notification can be used to remove/dismiss a notification
   key: string;
-  // level
   level: NotificationLevel;
-  // Record for more metadata
   data?: Record<string, string>;
-  // if true the notification will be dismissed by the user or with another action
   persist?: boolean;
 };
 // Function call to register a notification
@@ -151,26 +160,36 @@ export type NotificationHandler = ((notification: NotificationPayload) => string
   // remove the notification programmatically
   remove(key: string | number): void;
 };
-/*
+/**
  * Wasm factory
- * @params
- * */
+ * @param name - optional name to map an action to a worker currently there's only sdk-core
+ **/
 export type WasmFactory = (name?: string) => Worker | null;
 
+/**
+ * The representation of an api provider
+ *
+ * @param accounts - Accounts Adapter will have all methods related to the provider accounts.
+ * @param methods - All of the available methods  of the API provider.
+ * @param destroy -  A hook will be called to drop the provider and do cleanup listeners etc.
+ * @param capabilities - Manifesto of the supported actions of the provider.
+ * @param endSession - Clean up for the provider that will remove the side effects.
+ * @param relayingManager - Object used by the provider for sending transactions or queries to a compatible relayer.
+ * @param getProvider - A getter method for getting the underlying provider
+ * @param notificationHandler - Function for emitting notification of the current provider process
+ * @param wasmFactory - Provider of the wasm workers
+ *
+ **/
 export interface WebbApiProvider<T> extends EventBus<WebbProviderEvents> {
-  /// Accounts Adapter will have all methods related to the provider accounts
   accounts: AccountsAdapter<any>;
-  /// All of the available methods and api of the provider
   methods: WebbMethods<WebbApiProvider<T>>;
 
-  /// A hook will be called to drop the provider and do cleanup listeners etc..
   destroy(): Promise<void> | void;
 
   capabilities?: ProvideCapabilities;
-  // Clean up for the provider that will remove the side effects
+
   endSession?(): Promise<void>;
 
-  /// relayer
   relayingManager: WebbRelayerBuilder;
 
   getProvider(): any;

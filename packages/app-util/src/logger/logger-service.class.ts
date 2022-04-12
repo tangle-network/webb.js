@@ -58,7 +58,7 @@ export class LoggerService {
       const date = new Date();
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      return [`${color}[${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}] , [${this.ctx}] `, ...message];
+      return [`${color}[${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}], [${this.ctx}] `, ...message];
     }
   };
 

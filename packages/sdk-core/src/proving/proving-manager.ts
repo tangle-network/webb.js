@@ -9,15 +9,16 @@ export type ProofI = Omit<Proof, 'free'>;
 export class ProvingManager {
   constructor (
     private readonly worker: Worker | null | undefined // Optional WebWorker
-  ) {}
+  ) {
+  }
 
   /**
-   * @param {ProvingManagerSetupInput} input
-   * @returns {ProofI}
-   * @description Checks the current {ProvingManager} status wither it is proving with a Worker(browser) or directly(Nodejs),
+   * Checks the current `ProvingManager` status wither it is proving with a Worker(browser) or directly(Nodejs),
    * accordingly it will run to write private function
-   * {ProvingManager.proveWithWorker} for browser,And {ProvingManager.proveWithoutWorker} for Nodejs
-   * */
+   * `ProvingManager.proveWithWorker` for browser,And `ProvingManager.proveWithoutWorker` for Nodejs
+   *
+   * @param  input - input for the manager
+   **/
   public prove (input: ProvingManagerSetupInput) {
     const worker = this.worker;
 

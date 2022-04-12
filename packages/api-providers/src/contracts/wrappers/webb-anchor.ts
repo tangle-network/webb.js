@@ -263,7 +263,7 @@ export class AnchorContract {
    *  3- Insert the missing leaves
    *  4- Compare against historical roots before adding to local storage
    *  5- return the path to the leaf.
-   * */
+   **/
 
   async generateMerkleProof (deposit: IAnchorDepositInfo) {
     const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
