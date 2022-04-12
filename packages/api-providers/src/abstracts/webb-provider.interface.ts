@@ -175,7 +175,7 @@ export type WasmFactory = (name?: string) => Worker | null;
  * @param capabilities - Manifesto of the supported actions of the provider.
  * @param endSession - Clean up for the provider that will remove the side effects.
  * @param relayingManager - Clean up for the provider that will remove the side effects
- * @param getProvider - A getter method for getting the underline provider
+ * @param getProvider - A getter method for getting the underlying provider
  * @param notificationHandler - Function for emitting notification of the current provider process
  * @param wasmFactory - Provider of the wasm workers
  *
