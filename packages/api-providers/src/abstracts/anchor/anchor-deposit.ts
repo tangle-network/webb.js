@@ -6,7 +6,7 @@ import { WebbApiProvider } from '../webb-provider.interface.js';
 
 export type AnchorSize = MixerSize;
 
-// Todo: should we extract the interface of MixerDeposit on another class and rename `generateBridgeNote` to generate note?
+// Todo: should we extract the interface of MixerDeposit on another class and rename `generateBridgeNote` to generate note
 
 /**
  * Anchor deposit abstract interface as fixed anchor share similar functionality as the mixer
