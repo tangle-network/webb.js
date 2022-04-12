@@ -334,7 +334,7 @@ export enum RelayedWithdrawResult {
  * Fetching leaves from the relayer is faster than querying a chain's node.
  * The relayer will return it's state for the given merkle tree - all of the leaves up to the latest synced block value.
  *
- * @param leaves - Array of hex representation of the leave
+ * @param leaves - Array of hex representation of the leaves
  * @param lastQueriedBlock - Block number at which that last update of the leaves occurred in the relayer side
  **/
 type RelayerLeaves = {
