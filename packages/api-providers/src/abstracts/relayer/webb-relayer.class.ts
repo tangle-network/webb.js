@@ -8,7 +8,6 @@ import { filter } from 'rxjs/operators';
 
 import { InternalChainId } from '../../chains/index.js';
 import { webbCurrencyIdFromString } from '../../enums/index.js';
-import { EvmChainMixersInfo } from '../../web3/EvmChainMixersInfo.js';
 import { AppConfig } from '../common.js';
 import { Capabilities, EVMCMDKeys, RelayedChainConfig, RelayerCMDBase, RelayerCMDKey, RelayerConfig, RelayerEVMCommands, RelayerMessage, RelayerSubstrateCommands, SubstrateCMDKeys } from './types.js';
 

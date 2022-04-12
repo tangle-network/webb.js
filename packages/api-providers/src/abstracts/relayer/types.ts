@@ -115,6 +115,7 @@ export type RelayerMessage = {
 /**
  * Relayer command key
  * it can be evm, or substrate  it's used to format the Web Socket for the relayer
+ *
  **/
 export type RelayerCMDBase = 'evm' | 'substrate';
 
@@ -137,7 +138,6 @@ export type RelayerCMDBase = 'evm' | 'substrate';
  * // The way to send the proof to the relayer
  * const proofForRelayerSubmission = Array.from(proof);
  * ```
- *
  **/
 export type MixerRelayTx = {
   chain: string;
@@ -153,52 +153,32 @@ export type MixerRelayTx = {
   fee: number;
   refund: number;
 };
-/**
- * Relayer Mixer transaction payload (EVM payload)
- * @param chain - chain name
- * @param contract - Tornado Contract address
- * @param proof  - An Array of bytes from the proof
- * @param root  - Tree Root from the merkle path
- * @param nullifierHash - Nullifier hash
- * @param recipient - Recipient address
- * @param relayer - Relayer  address
- * @param fee - relayer fee
- * @param refund - .
- *
- * `proof` ,`root` ,and nullifierHash are obtained from `sdk-core` .
- * For `proof` and `root` the type can be ontained from `Uint8Array` in the next example
- * ```typescript
- * const proof:UnitArray = ...;
- * // The way to send the proof to the relayer
- * const proofForRelayerSubmission = Array.from(proof);
- * ```
- *
- **/
-type AnchorRelayTransaction = {
-  chain: string;
-  // The target contract.
-  contract: string;
-  // Proof bytes
-  proof: string;
-  // Fixed length Hex string
-  fee: string;
-  nullifierHash: string;
-  recipient: string;
-  // Fixed length Hex string
-  refund: string;
-  relayer: string;
-  root: string;
-};
+
 /**
  * Anchor relayer transaction payload it's similar to mixer/tornado, but don't have the value `root`
+ * @parms chain - Chain name
+ * @param contract - The target contract.
+ * @param proof - Proof bytes
+ * @param fee - Fee value
+ * @param refund - Refund value
+ * @param relayer - Relayer address
  * @param refreshCommitment - Refresh commitment is used to link the value of the commitment to anchor (to the refreshCommitment),
  * if it passed as zero nothing will happen unless a real value is passed thus a new note isn't generated
  * @param roots - roots bytes array
  **/
-type AnchorRelayTransaction = Omit<TornadoRelayTransaction, 'root'> & {
+type AnchorRelayTransaction = {
+  chain: string;
+  contract: string;
+  proof: string;
+  fee: string;
+  nullifierHash: string;
+  recipient: string;
+  refund: string;
+  relayer: string;
   refreshCommitment: string;
   roots: Array<number>;
 };
+
 /**
  * Relayed transaction for substrate
  **/
