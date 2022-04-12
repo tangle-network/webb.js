@@ -174,7 +174,7 @@ export type WasmFactory = (name?: string) => Worker | null;
  * @param destroy -  A hook will be called to drop the provider and do cleanup listeners etc.
  * @param capabilities - Manifesto of the supported actions of the provider.
  * @param endSession - Clean up for the provider that will remove the side effects.
- * @param relayingManager - Clean up for the provider that will remove the side effects
+ * @param relayingManager - Object used by the provider for sending transactions or queries to a compatible relayer.
  * @param getProvider - A getter method for getting the underlying provider
  * @param notificationHandler - Function for emitting notification of the current provider process
  * @param wasmFactory - Provider of the wasm workers
