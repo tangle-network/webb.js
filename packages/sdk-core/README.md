@@ -4,8 +4,7 @@
 The package provides a cleaner API to the underlying `wasm-utils`
 
 # Deposit note
-The note contain the data.
-For the browser it runs inside wasm
+The note contains data about a deposit
 
 # Note
 ```ts
