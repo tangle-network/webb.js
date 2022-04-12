@@ -11,7 +11,6 @@ import { PalletMixerMixerMetadata } from '@webb-tools/types/interfaces/pallets/i
 import { u8aToHex } from '@polkadot/util';
 
 import { MixerDeposit } from '../abstracts/index.js';
-import { ChainType, computeChainIdType, internalChainIdToChainId } from '../chains/index.js';
 import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
 import { WebbPolkadot } from './webb-provider.js';
 
@@ -79,9 +78,8 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     return PolkadotMixerDeposit.getSizes(this.inner);
   }
 
-  async generateNote (mixerId: number, chainId: number): Promise<DepositPayload> {
+  async generateNote (mixerId: number, chainIdType: number): Promise<DepositPayload> {
     logger.info(`Depositing to mixer id ${mixerId}`);
-    const chainIdType = computeChainIdType(ChainType.Substrate, internalChainIdToChainId(ChainType.Substrate, chainId));
     const sizes = await this.getSizes();
     const amount = sizes.find((size) => Number(size.id) === mixerId);
     const properties = await this.inner.api.rpc.system.properties();

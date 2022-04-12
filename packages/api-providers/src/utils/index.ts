@@ -3,7 +3,6 @@
 
 export * from './anchor-utils.js';
 export * from './chain-utils.js';
-export * from './fixtures.js';
 export * from './relayer-utils.js';
 export * from './retry-promise.js';
 export * from './storage-mock.js';

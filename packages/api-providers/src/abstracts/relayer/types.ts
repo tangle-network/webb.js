@@ -174,7 +174,7 @@ export type MixerRelayTx = {
  * ```
  *
  **/
-type TornadoRelayTransaction = {
+type AnchorRelayTransaction = {
   chain: string;
   // The target contract.
   contract: string;
@@ -209,7 +209,6 @@ export type RelayerSubstrateCommands = {
  * Relayed transaction for EVM
  **/
 export type RelayerEVMCommands = {
-  tornadoRelayTx: TornadoRelayTransaction;
   anchorRelayTx: AnchorRelayTransaction;
 };
 export type EVMCMDKeys = keyof RelayerEVMCommands;

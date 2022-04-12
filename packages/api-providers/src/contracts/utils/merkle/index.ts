@@ -3,5 +3,4 @@
 
 export * from './storage.js';
 export * from './merkle-tree.js';
-export * from './sponge-hasher.js';
 export * from './poseidon-hasher.js';

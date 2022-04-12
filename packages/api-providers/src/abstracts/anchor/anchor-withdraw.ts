@@ -5,7 +5,7 @@ import { InternalChainId } from '@webb-tools/api-providers/chains/chain-id.enum.
 
 import { MixerWithdraw } from '../mixer/index.js';
 import { WebbApiProvider } from '../webb-provider.interface.js';
-import { Bridge } from './anchor.js';
+import { Bridge } from './bridge.js';
 
 export abstract class AnchorWithdraw<T extends WebbApiProvider<any>> extends MixerWithdraw<T> {
   get tokens () {
