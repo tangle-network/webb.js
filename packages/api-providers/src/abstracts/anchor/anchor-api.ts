@@ -21,7 +21,7 @@ export type AnchorBase = {
  * Providers the data related to the Anchors it can be implemented over the static configurations or fetching on chain data
  * @param currency - Active bridge asset
  * @param Currencies -
- * */
+ **/
 export abstract class AnchorApi<Api, BridgeConfigEntry> {
   private readonly _store: BehaviorSubject<BridgeStore<BridgeConfigEntry>>;
   private readonly _watcher: Observable<BridgeStore<BridgeConfigEntry>>;
@@ -74,7 +74,7 @@ export abstract class AnchorApi<Api, BridgeConfigEntry> {
 
   /*
    *  Get all Bridge tokens for a given chain
-   * */
+   **/
   async getTokensOfChain (chainId: ChainTypeId): Promise<Currency[]> {
     const tokens = await this.getCurrencies();
     const internalChainId = chainTypeIdToInternalId(chainId);

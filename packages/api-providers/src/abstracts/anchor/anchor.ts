@@ -20,14 +20,14 @@ export class Bridge {
 
   /*
    *  Get the bridge privy pools
-   * */
+   **/
   get anchors () {
     return this.bridgeConfig.anchors;
   }
 
   /*
    *  Get the bridge currency
-   * */
+   **/
   get currency () {
     return Currency.fromCurrencyId(this.appConfig.currencies, this.bridgeConfig.asset);
   }
@@ -38,7 +38,7 @@ export class Bridge {
 
   /*
    *  Get all Bridge tokens
-   * */
+   **/
   static getTokens (currenciesConfig: AppConfig['currencies']): Currency[] {
     const bridgeCurrenciesConfig = Object.values(currenciesConfig).filter((i) => i.role === CurrencyRole.Governable);
 
@@ -49,7 +49,7 @@ export class Bridge {
 
   /*
    *  Get all Bridge tokens for a given chain
-   * */
+   **/
   static getTokensOfChain (currenciesConfig: AppConfig['currencies'], chainId: InternalChainId): Currency[] {
     const tokens = Bridge.getTokens(currenciesConfig);
 

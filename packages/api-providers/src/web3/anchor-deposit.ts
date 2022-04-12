@@ -272,7 +272,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
    *  Anchor id => the fixed deposit amount
    * destChainId => the Chain the token will be bridged to
    * If the wrappableAssetAddress is not provided, it is assumed to be the address of the webbToken
-   * */
+   **/
   async generateBridgeNote (
     anchorId: number | string,
     destChainId: number,

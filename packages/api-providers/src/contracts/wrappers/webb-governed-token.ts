@@ -4,7 +4,7 @@
 /* eslint-disable camelcase */
 
 import { LoggerService } from '@webb-tools/app-util/index.js';
-import { GovernedTokenWrapper, GovernedTokenWrapper__factory } from '@webb-tools/contracts';
+import { GovernedTokenwrapper, GovernedTokenwrapper__factory } from '@webb-tools/contracts';
 import { BigNumberish, Contract, PayableOverrides, providers, Signer } from 'ethers';
 
 import { zeroAddress } from './webb-utils.js';
@@ -20,13 +20,13 @@ function checkNativeAddress (tokenAddress: string): boolean {
 }
 
 export class WebbGovernedToken {
-  private _contract: GovernedTokenWrapper;
+  private _contract: GovernedTokenwrapper;
   private readonly signer: Signer;
 
   constructor (private web3Provider: providers.Web3Provider, address: string) {
     this.signer = this.web3Provider.getSigner();
     logger.info(`Init with address ${address} `);
-    this._contract = new Contract(address, GovernedTokenWrapper__factory.abi, this.signer) as any;
+    this._contract = new Contract(address, GovernedTokenwrapper__factory.abi, this.signer) as any;
   }
 
   get address () {
@@ -114,7 +114,7 @@ export class WebbGovernedToken {
 
   // Checks if the governed token wraps a particular token.
   // Does NOT check if allowances for ERC20s are satisfied.
-  async canWrap (tokenAddress: string) {
+  async canwrap (tokenAddress: string) {
     const tokens = await this._contract.getTokens();
 
     if (tokens.includes(tokenAddress)) {

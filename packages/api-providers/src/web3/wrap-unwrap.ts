@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { Bridge, Currency, MixerSize, WrapUnWrap } from '@webb-tools/api-providers/abstracts/index.js';
+import { Bridge, Currency, MixerSize, WrapUnwrap } from '@webb-tools/api-providers/abstracts/index.js';
 import { Amount, WrappingBalance, WrappingEvent } from '@webb-tools/api-providers/index.js';
 import { ERC20__factory as ERC20Factory } from '@webb-tools/contracts';
 import { ContractTransaction } from 'ethers';
@@ -21,7 +21,7 @@ const defaultBalance: WrappingBalance = {
   tokenId: undefined
 };
 
-export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
+export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
   private _balances = new BehaviorSubject<[WrappingBalance, WrappingBalance]>([defaultBalance, defaultBalance]);
   private _liquidity = new BehaviorSubject<[WrappingBalance, WrappingBalance]>([defaultBalance, defaultBalance]);
   private _currentChainId = new BehaviorSubject<InternalChainId | null>(null);
@@ -95,12 +95,12 @@ export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
       });
 
       if (governedCurrency) {
-        const webbGovernedToken = this.governedTokenWrapper(governedCurrency);
+        const webbGovernedToken = this.governedTokenwrapper(governedCurrency);
 
         return wrappableCurrencies.filter((token) => {
           const tokenAddress = this.config.currencies[token].addresses.get(this.currentChainId!)!;
 
-          return webbGovernedToken.canWrap(tokenAddress);
+          return webbGovernedToken.canwrap(tokenAddress);
         });
       } else {
         return wrappableCurrencies;
@@ -120,10 +120,10 @@ export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
     return [];
   }
 
-  async canUnWrap (unwrapPayload: Web3UnwrapPayload): Promise<boolean> {
+  async canUnwrap (unwrapPayload: Web3UnwrapPayload): Promise<boolean> {
     const { amount } = unwrapPayload;
     const governedTokenId = this.governedToken!;
-    const webbGovernedToken = this.governedTokenWrapper(governedTokenId);
+    const webbGovernedToken = this.governedTokenwrapper(governedTokenId);
 
     const account = await this.inner.accounts.accounts();
     const currentAccount = account[0];
@@ -138,7 +138,7 @@ export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
     const wrappableTokenId = this.wrappableToken!;
     const amount = Web3.utils.toWei(String(amountNumber), 'ether');
 
-    const webbGovernedToken = this.governedTokenWrapper(governedTokenId);
+    const webbGovernedToken = this.governedTokenwrapper(governedTokenId);
 
     try {
       this.inner.notificationHandler({
@@ -147,7 +147,7 @@ export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
         )} to ${webbCurrencyIdToString(wrappableTokenId)}`,
         key: 'unwrap-asset',
         level: 'loading',
-        message: 'GovernedTokenWrapper:unwrap',
+        message: 'GovernedTokenwrapper:unwrap',
         name: 'Transaction'
       });
       const tx = await webbGovernedToken.unwrap(
@@ -162,7 +162,7 @@ export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
         )} to ${webbCurrencyIdToString(wrappableTokenId)}`,
         key: 'unwrap-asset',
         level: 'success',
-        message: 'GovernedTokenWrapper:unwrap',
+        message: 'GovernedTokenwrapper:unwrap',
         name: 'Transaction'
       });
 
@@ -175,7 +175,7 @@ export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
         )} to ${webbCurrencyIdToString(wrappableTokenId)}`,
         key: 'unwrap-asset',
         level: 'error',
-        message: 'GovernedTokenWrapper:unwrap',
+        message: 'GovernedTokenwrapper:unwrap',
         name: 'Transaction'
       });
 
@@ -183,17 +183,17 @@ export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
     }
   }
 
-  async canWrap (): Promise<boolean> {
+  async canwrap (): Promise<boolean> {
     const governedToken = this.governedToken!;
     const wrappableToken = this.wrappableToken!;
-    const webbGovernedToken = this.governedTokenWrapper(governedToken);
+    const webbGovernedToken = this.governedTokenwrapper(governedToken);
 
     if (this.config.currencies[wrappableToken].type === CurrencyType.NATIVE) {
       return webbGovernedToken.isNativeAllowed();
     } else {
       const tokenAddress = this.config.currencies[governedToken].addresses.get(this.currentChainId!)!;
 
-      return webbGovernedToken.canWrap(tokenAddress);
+      return webbGovernedToken.canwrap(tokenAddress);
     }
   }
 
@@ -202,7 +202,7 @@ export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
 
     const wrappableTokenId = this.wrappableToken!;
     const governableTokenId = this.governedToken!;
-    const webbGovernedToken = this.governedTokenWrapper(governableTokenId);
+    const webbGovernedToken = this.governedTokenwrapper(governableTokenId);
     const amount = Web3.utils.toWei(String(amountNumber), 'ether');
 
     try {
@@ -212,7 +212,7 @@ export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
         )} to ${webbCurrencyIdToString(governableTokenId)}`,
         key: 'wrap-asset',
         level: 'loading',
-        message: 'GovernedTokenWrapper:wrap',
+        message: 'GovernedTokenwrapper:wrap',
         name: 'Transaction'
       });
       console.log('address of token to wrap into webbGovernedToken', this.getAddressFromWrapTokenId(wrappableTokenId));
@@ -254,7 +254,7 @@ export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
         )} to ${webbCurrencyIdToString(governableTokenId)}`,
         key: 'wrap-asset',
         level: 'success',
-        message: 'GovernedTokenWrapper:wrap',
+        message: 'GovernedTokenwrapper:wrap',
         name: 'Transaction'
       });
 
@@ -267,7 +267,7 @@ export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
         )} to ${webbCurrencyIdToString(governableTokenId)}`,
         key: 'wrap-asset',
         level: 'error',
-        message: 'GovernedTokenWrapper:wrap',
+        message: 'GovernedTokenwrapper:wrap',
         name: 'Transaction'
 
       });
@@ -283,7 +283,7 @@ export class Web3WrapUnwrap extends WrapUnWrap<WebbWeb3Provider> {
     return address;
   }
 
-  governedTokenWrapper (id: WebbCurrencyId): WebbGovernedToken {
+  governedTokenwrapper (id: WebbCurrencyId): WebbGovernedToken {
     const contractAddress = this.getAddressFromWrapTokenId(id);
 
     return new WebbGovernedToken(this.inner.getEthersProvider(), contractAddress);

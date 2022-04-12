@@ -41,7 +41,7 @@ type MixerQuery = {
  * @param contractAddress - Relayer supports the contract address
  * @param tornadoSupport - Relayer has support for  a contract with the amount and symbol `MixerQuery`
  * @param bridgeSupport - Relayer has support a contract with the amount and symbol `MixerQuery`
- * */
+ **/
 type RelayerQuery = {
   baseOn?: 'evm' | 'substrate';
   ipService?: true;
@@ -98,14 +98,14 @@ export interface RelayerInfo {
 export type ChainNameIntoChainId = (name: string, basedOn: 'evm' | 'substrate') => InternalChainId | null;
 
 /**
- *  Webb relayers manager
- *  this will fetch/mange/provide this relayers and there capabilities
+ * Webb relayers manager
+ * this will fetch/mange/provide this relayers and there capabilities
  *
  * @param capabilities - storage for relayers capabilities
  * @param relayerConfigs - The whole relayers configuration of the project
  * @param chainNameAdapter - An adapter for getting the  InternalChainId of the chain name and the base
- * @param appConfig - App config is used for misc pursues
- * */
+ * @param appConfig - App config is used for looking up configuration values for issuing queries on the relayers
+ **/
 export class WebbRelayerBuilder {
   private capabilities: Record<RelayerConfig['endpoint'], Capabilities> = {};
   private _listUpdated = new Subject<void>();
@@ -122,7 +122,7 @@ export class WebbRelayerBuilder {
 
   /**
    * Mapping the fetched relayers info to the Capabilities store
-   * */
+   **/
   private static infoIntoCapabilities (
     _nfig: RelayerConfig,
     info: RelayerInfo,
@@ -138,7 +138,7 @@ export class WebbRelayerBuilder {
             .filter(
               /**
                * account is deprecated but it's kept here for backward compatibility
-               * */
+               **/
               (key) => (info.evm[key]?.account || info.evm[key]?.beneficiary) && nameAdapter(key, 'evm') != null
             )
             .reduce((m, key) => {
@@ -191,7 +191,7 @@ export class WebbRelayerBuilder {
   /**
    * init the builder
    *  create new instance and fetch the relayers
-   * */
+   **/
   static async initBuilder (
     config: RelayerConfig[],
     chainNameAdapter: ChainNameIntoChainId,
@@ -220,7 +220,7 @@ export class WebbRelayerBuilder {
    *  get a list of the suitable relayers for a given query
    *  the list is randomized
    *  Accepts a 'RelayerQuery' object with optional, indexible fields.
-   * */
+   **/
   getRelayer (query: RelayerQuery): WebbRelayer[] {
     const { baseOn, bridgeSupport, chainId, contractAddress, ipService, tornadoSupport } = query;
     const relayers = Object.keys(this.capabilities)
@@ -321,7 +321,7 @@ export class WebbRelayerBuilder {
  * @param Continue - the withdraw is being processed
  * @param CleanExit - the withdraw is done with success
  * @param Errored - failed to create the withdraw
- * */
+ **/
 export enum RelayedWithdrawResult {
   PreFlight,
   OnFlight,
@@ -331,12 +331,12 @@ export enum RelayedWithdrawResult {
 }
 
 /**
- * Fetching relayer from the relayer is faster that from node/contract
- * it will return the whole leaves, And what block number is used in the last pulling of leaves
+ * Fetching leaves from the relayer is faster than querying a chain's node.
+ * The relayer will return it's state for the given merkle tree - all of the leaves up to the latest synced block value.
  *
- * @param leaves - Array of hex representation of the leave
+ * @param leaves - Array of hex representation of the leaves
  * @param lastQueriedBlock - Block number at which that last update of the leaves occurred in the relayer side
- * */
+ **/
 type RelayerLeaves = {
   leaves: string[];
   lastQueriedBlock: number;
@@ -359,7 +359,7 @@ type RelayerLeaves = {
  * }
  * ```
  *
- * */
+ **/
 class RelayedWithdraw {
   private status: RelayedWithdrawResult = RelayedWithdrawResult.PreFlight;
   readonly watcher: Observable<[RelayedWithdrawResult, string | undefined]>;

@@ -4,13 +4,13 @@
 import { Amount, MixerSize, WrappingBalance, WrappingEvent } from '@webb-tools/api-providers/index.js';
 import { Observable } from 'rxjs';
 
-import { WrapUnWrap } from '../abstracts/index.js';
+import { WrapUnwrap } from '../abstracts/index.js';
 import { WebbCurrencyId } from '../enums/index.js';
 import { WebbPolkadot } from './webb-provider.js';
 
-export class PolkadotWrapUnwrap extends WrapUnWrap<WebbPolkadot> {
+export class PolkadotWrapUnwrap extends WrapUnwrap<WebbPolkadot> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  canWrap (wrapPayload: any): Promise<boolean> {
+  canwrap (wrapPayload: any): Promise<boolean> {
     return Promise.resolve(false);
   }
 
@@ -37,7 +37,7 @@ export class PolkadotWrapUnwrap extends WrapUnWrap<WebbPolkadot> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  canUnWrap (unwrapPayload: Amount): Promise<boolean> {
+  canUnwrap (unwrapPayload: Amount): Promise<boolean> {
     return Promise.resolve(false);
   }
 
