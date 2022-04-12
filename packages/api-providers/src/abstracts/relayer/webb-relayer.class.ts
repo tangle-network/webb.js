@@ -104,7 +104,7 @@ export type ChainNameIntoChainId = (name: string, basedOn: 'evm' | 'substrate') 
  * @param capabilities - storage for relayers capabilities
  * @param relayerConfigs - The whole relayers configuration of the project
  * @param chainNameAdapter - An adapter for getting the  InternalChainId of the chain name and the base
- * @param appConfig - App config is used for misc pursues
+ * @param appConfig - App config is used for looking up configuration values for issuing queries on the relayers
  **/
 export class WebbRelayerBuilder {
   private capabilities: Record<RelayerConfig['endpoint'], Capabilities> = {};
