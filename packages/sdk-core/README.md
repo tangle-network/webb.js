@@ -1,6 +1,7 @@
 # @webb-tools/sdk-core
 
-#  helpers for Zero-Knowledge and deposit notes it uses `wasm-utils`, and provider easier API
+#  Helpers for Zero-Knowledge and Note generation
+The package provides a cleaner API to the underlying `wasm-utils`
 
 # Deposit note
 The note contain the data.
