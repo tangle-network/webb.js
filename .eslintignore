@@ -1,9 +1,0 @@
-**/build/*
-**/coverage/*
-**/node_modules/*
-**/examples/*
-packages/types/src/metadata/static-latest.ts
-**/target/*
-/tests/*
-babel.config.js
-/doc/*
