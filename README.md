@@ -5,7 +5,7 @@
   </a>
   </div>
 <p align="center">
-    <strong>🚀 Webb Tools API </strong>
+    <strong>🚀 Webb Tools API 🚀 </strong>
     <br />
     <sub> ⚠️ Beta Software ⚠️ </sub>
 </p>
@@ -56,9 +56,34 @@ packages/
 
 ## Prerequisites
 
-This repository makes use of node.js and requires version 16. To install binaries, installers, and source tarballs, please visit https://nodejs.org/en/download/.
+This repository makes use of node.js, yarn, Rust, and requires version 16. To install node.js binaries, installers, and source tarballs, please visit https://nodejs.org/en/download/. Once node.js is installed you may proceed to install [`yarn`](https://classic.yarnpkg.com/en/docs/install):
 
-Great! Now your Node environment is ready! 🚀🚀
+```
+npm install --global yarn
+```
+
+Great! Now your **Node** environment is ready! 🚀🚀
+
+To install Rust, we will make use of <https://rustup.rs> installer and the `rustup` tool to manage the Rust toolchain.
+
+First install and configure `rustup`:
+
+```bash
+# Install
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# Configure
+source ~/.cargo/env
+```
+
+Configure the Rust toolchain to default to the nightly version, add nightly and the nightly wasm target:
+
+```bash
+rustup default nightly
+rustup update
+rustup update nightly
+```
+
+Great! Now your **Rust** environment is ready! 🦀 🦀
 
 ## Installation 💻
 
@@ -78,8 +103,7 @@ yarn build
 
 <h2 style="border-bottom:none"> Quick Start ⚡ </h2>
 
-- [ ] TODO: @dutterbutter add additional usage instruction / documentation
-
+In order to make use of `@webb-tools/api` you will need to have a node available and running. Below we assume you have started a node locally, but you may also make use of our deployed [Standalone Testnet here](https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fstandalone1.webb.tools#/explorer).
 #### Install package dependencies
 
 ```bash
@@ -94,6 +118,7 @@ import { WsProvider } from '@polkadot/rpc-provider';
 import { options } from '@webb-tools/api';
 
 async function main() {
+    // the node endpoint
     const provider = new WsProvider('wss://localhost:9944');
     const api = new ApiPromise(options({ provider }));
     await api.isReady;
@@ -110,7 +135,21 @@ main()
 ```ts
 // query and display account data
 const data = await api.query.system.account('5F98oWfz2r5rcRVnP9VCndg33DAAsky3iuoBSpaPUbgN9AJn');
-console.log(data.toHuman())
+console.log(data.toHuman());
+```
+
+### Usage examples
+
+We have included implementation examples for using this API to interact with an [Anchor](./examples/node/sdk-core/anchor.ts) and [Mixer](./examples/node/sdk-core/mixer.ts). 
+
+To run the above mentioned usage examples you will need to use the experimental module loader. From the root directory run:
+
+```bash
+# Runs the Anchor usage example script
+NODE_OPTIONS="--loader ./loader.js" node ./examples/node/sdk-core/anchor.ts
+
+# Runs the Mixer usage example script
+NODE_OPTIONS="--loader ./loader.js" node ./examples/node/sdk-core/mixer.ts
 ```
 
 <h2 id="test"> Testing 🧪 </h2>
