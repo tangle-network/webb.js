@@ -134,7 +134,7 @@ main()
 
 ```ts
 // query and display account data
-const data = await api.query.system.account('5F98oWfz2r5rcRVnP9VCndg33DAAsky3iuoBSpaPUbgN9AJn');
+const data = await api.query.system.account('5Dqf9U5dgQ9GLqdfaxXGjpZf9af1sCV8UrnpRgqJPbe3wCwX');
 console.log(data.toHuman());
 ```
 
