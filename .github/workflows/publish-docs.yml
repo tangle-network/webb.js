@@ -1,0 +1,30 @@
+# TODO: @dutterbutter update typedoc command with one that works, and generates docs for all packages
+
+# name: publish
+
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+
+# jobs:
+#   publish:
+#     if: github.event_name == 'push' && github.event.ref == 'refs/heads/main'
+#     name: docs
+#     runs-on: ubuntu-20.04
+#     steps:
+#       - uses: actions/checkout@v2
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v2
+
+#       - name: Install dependencies 
+#         run: yarn install
+#       - name: Generate docs
+#         run: npx typedoc --out docs src/index.ts 
+  
+#       - name: Deploy docs 🚀
+#         uses: JamesIves/github-pages-deploy-action@4.1.4
+#         with:
+#           branch: gh-pages
