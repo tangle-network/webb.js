@@ -5,7 +5,7 @@ import { WebbCurrencyId } from '@webb-tools/api-providers/enums/index.js';
 import { ChainTypeId, chainTypeIdToInternalId, Currency, InternalChainId } from '@webb-tools/api-providers/index.js';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-export type BridgeCurrencyIndex = string | number | WebbCurrencyId;
+export type BridgeCurrencyIndex = WebbCurrencyId;
 
 type BridgeStore<BridgeConfigEntry, BridgeConfig = Record<BridgeCurrencyIndex, BridgeConfigEntry>> = {
   config: BridgeConfig;
@@ -38,7 +38,7 @@ export abstract class AnchorApi<Api, BridgeConfigEntry> {
   }
 
   get bridgeIds () {
-    return Object.keys(this.store.config) as BridgeCurrencyIndex[];
+    return Object.keys(this.store.config);
   }
 
   // eslint-disable-next-line @typescript-eslint/adjacent-overload-signatures

@@ -212,7 +212,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
     if (currency) {
       return anchors.map((anchor) => ({
         amount: Number(anchor.amount),
-        asset: String(currency.id),
+        asset: currency.view.symbol,
         id: `Bridge=${anchor.amount}@${currency.view.name}`,
         title: `${anchor.amount} ${currency.view.name}`
       }));
