@@ -119,7 +119,7 @@ import { options } from '@webb-tools/api';
 
 async function main() {
     // the node endpoint
-    const provider = new WsProvider('wss://localhost:9944');
+    const provider = new WsProvider('ws://localhost:9944');
     const api = new ApiPromise(options({ provider }));
     await api.isReady;
 
