@@ -12,10 +12,11 @@ import { decodeAddress } from '@polkadot/keyring';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { MixerWithdraw } from '../abstracts/index.js';
-import { InternalChainId } from '../chains/index.js';
+import { chainTypeIdToInternalId, InternalChainId, parseChainIdType } from '../chains/index.js';
 import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
 import { PolkadotMixerDeposit } from './index.js';
 import { WebbPolkadot } from './webb-provider.js';
+import { chainIdToRelayerName } from '../utils/relayer-utils.js';
 
 const logger = LoggerService.get('PolkadotMixerWithdraw');
 
@@ -65,7 +66,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
     return this.inner.relayingManager.getRelayer({});
   }
 
-  async mapRelayerIntoActive (relayer: OptionalRelayer): Promise<OptionalActiveRelayer> {
+  async mapRelayerIntoActive (relayer: OptionalRelayer, internalChainId: InternalChainId): Promise<OptionalActiveRelayer> {
     if (!relayer) {
       return null;
     }
@@ -74,7 +75,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
       relayer,
       {
         basedOn: 'substrate',
-        chain: InternalChainId.WebbDevelopment
+        chain: internalChainId
       },
       async () => {
         return {
@@ -137,12 +138,14 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
       logger.trace(`leaf ${leaf} has index `, leafIndex);
       logger.trace(leaves.map((i) => u8aToHex(i)));
       const activeRelayer = this.activeRelayer[0];
+
+      console.log('ActiveRelayer: ', activeRelayer?.beneficiary);
       const worker = this.inner.wasmFactory('wasm-utils');
       const pm = new ProvingManager(worker);
 
       const recipientAccountHex = u8aToHex(decodeAddress(recipient));
       // ss58 format
-      const relayerAccountId = activeRelayer ? activeRelayer.beneficiary! : recipient;
+      const relayerAccountId = activeRelayer ? activeRelayer.beneficiary ?? recipient : recipient;
       const relayerAccountHex = u8aToHex(decodeAddress(relayerAccountId));
       // fetching the proving key
       const provingKey = await fetchSubstrateTornadoProvingKey();
@@ -186,17 +189,20 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
         logger.info('withdrawing through relayer', activeRelayer);
         this.emit('stateChange', WithdrawState.SendingTransaction);
         const relayerMixerTx = await activeRelayer!.initWithdraw('mixerRelayTx');
+        // Fetch the internal ID for the intended withdraw chain
+        const internalId = chainTypeIdToInternalId(parseChainIdType(Number(noteParsed.note.targetChainId)));
+
         const relayerWithdrawPayload = relayerMixerTx.generateWithdrawRequest(
           {
             baseOn: 'substrate',
             contractAddress: '',
             endpoint: '',
             // TODO change this from the config
-            name: 'localnode'
+            name: chainIdToRelayerName(internalId)
           },
           Array.from(hexToU8a(withdrawProof.proofBytes)),
           {
-            chain: 'localnode',
+            chain: chainIdToRelayerName(internalId),
             fee: withdrawProof.fee,
             id: Number(treeId),
             nullifierHash: Array.from(hexToU8a(withdrawProof.nullifierHash)),

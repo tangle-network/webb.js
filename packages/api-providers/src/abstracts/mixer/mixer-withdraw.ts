@@ -75,15 +75,15 @@ export abstract class MixerWithdraw<T extends WebbApiProvider<any>> extends Even
    * It maps a relayer to the active relayer type that can be used for relaying withdrawing
    * */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  mapRelayerIntoActive (relayer: OptionalRelayer): Promise<OptionalActiveRelayer> {
+  mapRelayerIntoActive (relayer: OptionalRelayer, internalChainId: InternalChainId): Promise<OptionalActiveRelayer> {
     return Promise.resolve(null);
   }
 
   /**
    * Set/unset the active relayer
    * */
-  public async setActiveRelayer (relayer: OptionalRelayer) {
-    this._activeRelayer = await this.mapRelayerIntoActive(relayer);
+  public async setActiveRelayer (relayer: OptionalRelayer, internalChainId: InternalChainId) {
+    this._activeRelayer = await this.mapRelayerIntoActive(relayer, internalChainId);
     this.emitter.next(this._activeRelayer);
   }
 

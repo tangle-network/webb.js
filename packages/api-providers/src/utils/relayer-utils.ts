@@ -64,7 +64,9 @@ enum RelayerChainName {
   Shiden = 'shiden',
   OptimismTestnet = 'optimismtestnet',
   ArbitrumTestnet = 'arbitrumtestnet',
-  PolygonTestnet = 'polygontestnet'
+  PolygonTestnet = 'polygontestnet',
+  WebbDevelopment = 'localnode',
+  WebbEggnet = 'webbeggnet',
 }
 
 export function chainIdToRelayerName (id: InternalChainId): string {
@@ -99,6 +101,10 @@ export function chainIdToRelayerName (id: InternalChainId): string {
       return RelayerChainName.ArbitrumTestnet;
     case InternalChainId.PolygonTestnet:
       return RelayerChainName.PolygonTestnet;
+    case InternalChainId.WebbDevelopment:
+      return RelayerChainName.WebbDevelopment;
+    case InternalChainId.WebbEggnet:
+      return RelayerChainName.WebbEggnet;
   }
 
   throw new Error(`unhandled Chain id ${id}`);

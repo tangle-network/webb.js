@@ -223,7 +223,7 @@ export class PolkaTXBuilder {
 
     tx.on('loading', (data) => {
       handler({
-        description: data.address,
+        description: `${data.address.substring(0, 10)}...${data.address.substring(36)}`,
         key: data.key,
         level: 'loading',
         message: `${data.path.section}:${data.path.method}`,
@@ -234,7 +234,7 @@ export class PolkaTXBuilder {
 
     tx.on('finalize', (data) => {
       handler({
-        description: data.address,
+        description: `${data.address.substring(0, 10)}...${data.address.substring(36)}`,
         key: data.key,
         level: 'success',
         message: `${data.path.section}:${data.path.method}`,

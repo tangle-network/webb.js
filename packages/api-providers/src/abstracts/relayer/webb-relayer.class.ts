@@ -428,6 +428,8 @@ export class WebbRelayer {
     query: { chain: InternalChainId; basedOn: 'evm' | 'substrate' },
     getFees: (note: string) => Promise<{ totalFees: string; withdrawFeePercentage: number } | undefined>
   ): ActiveWebbRelayer {
+    console.log('Static method intoActiveWebRelayer: ', instance.capabilities);
+
     return new ActiveWebbRelayer(instance.endpoint, instance.capabilities, query, getFees);
   }
 }

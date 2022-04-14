@@ -36,19 +36,16 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     return this.inner.config;
   }
 
-  async mapRelayerIntoActive (relayer: OptionalRelayer): Promise<OptionalActiveRelayer> {
+  async mapRelayerIntoActive (relayer: OptionalRelayer, internalChainId: InternalChainId): Promise<OptionalActiveRelayer> {
     if (!relayer) {
       return null;
     }
-
-    const evmId = await this.inner.getChainId();
-    const chainId = evmIdIntoInternalChainId(evmId);
 
     return WebbRelayer.intoActiveWebRelayer(
       relayer,
       {
         basedOn: 'evm',
-        chain: chainId
+        chain: internalChainId
       },
       // Define the function for retrieving fee information for the relayer
       async (note: string) => {
