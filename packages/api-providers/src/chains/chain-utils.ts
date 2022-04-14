@@ -157,8 +157,10 @@ export const substrateIdIntoInternalChainId = (chainId: SubstrateChainId): Inter
   switch (Number(chainId) as SubstrateChainId) {
     case SubstrateChainId.Edgeware:
       return InternalChainId.Edgeware;
-    case SubstrateChainId.Webb:
+    case SubstrateChainId.WebbDevelopment:
       return InternalChainId.WebbDevelopment;
+    case SubstrateChainId.WebbEggnet:
+      return InternalChainId.WebbEggnet;
     default:
       throw Error(`Unsupported substrate id: ${chainId}`);
   }
@@ -169,7 +171,9 @@ export const internalChainIdIntoSubstrateId = (chainId: InternalChainId | number
     case InternalChainId.Edgeware:
       return SubstrateChainId.Edgeware;
     case InternalChainId.WebbDevelopment:
-      return SubstrateChainId.Webb;
+      return SubstrateChainId.WebbDevelopment;
+    case InternalChainId.WebbEggnet:
+      return SubstrateChainId.WebbEggnet;
     default:
       throw Error(`Internal Id ${chainId} is not a substrate id`);
   }

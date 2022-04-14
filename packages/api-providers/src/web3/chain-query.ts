@@ -53,6 +53,8 @@ export class Web3ChainQuery extends ChainQuery<WebbWeb3Provider> {
       const tokenBalanceBig = await tokenInstance.balanceOf(accounts[0].address);
       const tokenBalance = ethers.utils.formatEther(tokenBalanceBig);
 
+      console.log('token balance returned from chain query: ', tokenBalance);
+
       return tokenBalance;
     }
   }

@@ -17,7 +17,8 @@ export interface ChainTypeId {
 }
 
 export enum SubstrateChainId {
-  Webb = 1080,
+  WebbEggnet = 1080,
+  WebbDevelopment = 1081,
   Edgeware = 7,
 }
 
@@ -50,6 +51,7 @@ export enum InternalChainId {
   WebbDevelopment,
   HermesLocalnet,
   AthenaLocalnet,
+  WebbEggnet,
 }
 
 export enum EVMChainId {

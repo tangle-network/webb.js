@@ -54,7 +54,7 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
     const destChainId = destination;
     // TODO: add mappers similar to evm chain id
     // const chainId = this.inner.api.registry.chainSS58!;
-    const chainId = SubstrateChainId.Webb;
+    const chainId = SubstrateChainId.WebbEggnet;
     const sourceChainId = computeChainIdType(ChainType.Substrate, chainId);
     const anchorPath = String(anchorId).replace('Bridge=', '').split('@');
     const amount = anchorPath[0];

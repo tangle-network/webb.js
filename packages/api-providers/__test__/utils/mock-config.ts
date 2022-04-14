@@ -58,7 +58,7 @@ const anchorsConfig: AppConfig['anchors'] = {
 };
 const chainsConfig: AppConfig['chains'] = {
   [InternalChainId.WebbDevelopment]: {
-    chainId: SubstrateChainId.Webb,
+    chainId: SubstrateChainId.WebbDevelopment,
     chainType: ChainType.Substrate,
     currencies: [WebbCurrencyId.WEBB],
     group: 'webb',
