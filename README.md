@@ -1,21 +1,116 @@
-![license](https://img.shields.io/badge/License-Apache%202.0-blue?logo=apache&style=flat-square)
+<h1 align="center">Webb Tools API 🕸️ </h1>
+<div align="center">
+<a href="https://www.webb.tools/">
+    <img alt="Webb Logo" src="./.github/assets/webb-icon.svg" width="15%" height="30%" />
+  </a>
+  </div>
+<p align="center">
+    <strong>🚀 Webb Tools API 🚀 </strong>
+    <br />
+    <sub> ⚠️ Beta Software ⚠️ </sub>
+</p>
+
+<div align="center" >
+
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/webb-tools/webb.js/PR?style=flat-square)](https://github.com/webb-tools/webb.js/actions)
 [![npm](https://img.shields.io/npm/v/@webb-tools/api?logo=npm&style=flat-square)](https://www.npmjs.com/package/@webb-tools/api)
+[![License Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
+[![Twitter](https://img.shields.io/twitter/follow/webbprotocol.svg?style=flat-square&label=Twitter&color=1DA1F2)](https://twitter.com/webbprotocol)
+[![Telegram](https://img.shields.io/badge/Telegram-gray?logo=telegram)](https://t.me/webbprotocol)
+[![Discord](https://img.shields.io/discord/833784453251596298.svg?style=flat-square&label=Discord&logo=discord)](https://discord.gg/cv8EfJu3Tn)
 
-# @webb-tools
+</div>
 
-This library provides additional typing information for user to access Webb's modules by using [polkadot.js](https://github.com/polkadot-js/api)
+<!-- TABLE OF CONTENTS -->
+<h2 id="table-of-contents"> 📖 Table of Contents</h2>
 
-# Getting Started
+<details open="open">
+  <summary>Table of Contents</summary>
+  <ul>
+    <li><a href="#start"> Getting Started</a></li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#test">Testing</a></li>
+    <li><a href="#contribute">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+  </ul>  
+</details>
 
-More documentation and examples on [wiki](https://github.com/webb-tools/webb.js/wiki)
+<h1 id="start"> Getting Started  🎉 </h1>
 
-- Install dependencies
+This library provides additional typing information for user to access Webb's modules by using [polkadot.js](https://github.com/polkadot-js/api).
+
+For additional information, please refer to the [Webb Tools API reference docs](https://webb-tools.github.io/webb.js/) or [Webb Tools Official Documentation](https://docs.webb.tools/v1/getting-started/overview/) 📝. Have feedback on how to improve `webb.js`? Or have a specific question to ask? Checkout the [Webb Dapp Feedback Discussion](https://github.com/webb-tools/feedback/discussions/categories/webb-dapp-feedback) 💬.
+
+<h2 id="layout"> Package layout </h2>
+
+```
+packages/
+  |____api/                 # Contains necessary options to create a polkadot.js API instance
+  |____api-providers/       # API providers for webb protocol, this package facilitates building apps on top of Webb.
+  |____app-util/            # Utilities to work with Webb Network.
+  |____sdk-core/            # The package provides a cleaner API to the underlying `wasm-utils`.
+  |____type-definitions/    # Polkadot/Webb API type definitions for typescript
+  |____types/               # Polkadot.js type definitions for Webb Network.
+  |____wasm-utils/          # Wasm utils for generating zero-knowledge proof and deposit notes. Consumed by `sdk-core`.
+```
+
+## Prerequisites
+
+This repository makes use of node.js, yarn, Rust, and requires version 16. To install node.js binaries, installers, and source tarballs, please visit https://nodejs.org/en/download/. Once node.js is installed you may proceed to install [`yarn`](https://classic.yarnpkg.com/en/docs/install):
+
+```
+npm install --global yarn
+```
+
+Great! Now your **Node** environment is ready! 🚀🚀
+
+To install Rust, we will make use of <https://rustup.rs> installer and the `rustup` tool to manage the Rust toolchain.
+
+First install and configure `rustup`:
+
+```bash
+# Install
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# Configure
+source ~/.cargo/env
+```
+
+Configure the Rust toolchain to default to the nightly version, add nightly and the nightly wasm target:
+
+```bash
+rustup default nightly
+rustup update
+rustup update nightly
+```
+
+Great! Now your **Rust** environment is ready! 🦀 🦀
+
+## Installation 💻
+
+Once the development environment is set up, you may proceed install the required dependencies. 
+
+```bash
+yarn install
+```
+
+**To build:**
+
+```bash
+yarn build
+```
+
+<h1 id="usage"> Usage </h1>
+
+<h2 style="border-bottom:none"> Quick Start ⚡ </h2>
+
+In order to make use of `@webb-tools/api` you will need to have a node available and running. Below we assume you have started a node locally, but you may also make use of our deployed [Standalone Testnet here](https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fstandalone1.webb.tools#/explorer).
+#### Install package dependencies
 
 ```bash
 yarn add @polkadot/api @webb-tools/api@beta
 ```
 
-- Create API instance
+#### Create API instance
 
 ```ts
 import { ApiPromise } from '@polkadot/api';
@@ -23,7 +118,8 @@ import { WsProvider } from '@polkadot/rpc-provider';
 import { options } from '@webb-tools/api';
 
 async function main() {
-    const provider = new WsProvider('wss://localhost:9944');
+    // the node endpoint
+    const provider = new WsProvider('ws://localhost:9944');
     const api = new ApiPromise(options({ provider }));
     await api.isReady;
 
@@ -34,29 +130,86 @@ async function main() {
 main()
 ```
 
-- Use api to interact with node
+#### Use api to interact with node
 
 ```ts
 // query and display account data
-const data = await api.query.system.account('5F98oWfz2r5rcRVnP9VCndg33DAAsky3iuoBSpaPUbgN9AJn');
-console.log(data.toHuman())
+const data = await api.query.system.account('5Dqf9U5dgQ9GLqdfaxXGjpZf9af1sCV8UrnpRgqJPbe3wCwX');
+console.log(data.toHuman());
 ```
 
-# Scripts
-You will also find a number of scripts inside this API. To run the scripts, you will want to use the following command:
-```
-yarn script <PATH_TO_SCRIPT>
-```
-For example, if you want to generate a quadratic distribution of all balances on Edgeware at some block hash, you can run the following command:
-```
-yarn script scripts/edgeware/getQuadraticDistribution.ts
+### Usage examples
+
+We have included implementation examples for using this API to interact with an [Anchor](./examples/node/sdk-core/anchor.ts) and [Mixer](./examples/node/sdk-core/mixer.ts). 
+
+To run the above mentioned usage examples you will need to use the experimental module loader. From the root directory run:
+
+```bash
+# Runs the Anchor usage example script
+NODE_OPTIONS="--loader ./loader.js" node ./examples/node/sdk-core/anchor.ts
+
+# Runs the Mixer usage example script
+NODE_OPTIONS="--loader ./loader.js" node ./examples/node/sdk-core/mixer.ts
 ```
 
-# Packages
+<h2 id="test"> Testing 🧪 </h2>
 
-- [api](./packages/api)
-  - Contains necessary options to create a polkadot.js API instance
-- [app-util](./packages/app-util)
-  - Utilities to work with Webb Network
-- [types](./packages/types)
-  - Polkadot.js type definations for Webb Network.
+The following instructions outlines how to run webb.js API unit test suite and integration test suite.
+
+### To run all tests - unit, integration, wasm, providers
+
+```
+yarn test
+```
+
+### To run unit tests
+
+```
+yarn test:unit
+```
+
+### To run integration tests
+
+```
+yarn test:integration
+```
+
+### To run wasm tests
+
+```
+yarn test:wasm
+```
+
+### To run providers test
+
+```
+yarn test:providers
+```
+
+<h2 id="contribute"> Contributing </h2>
+
+Interested in contributing to Webb.js? Thank you so much for your interest! We are always appreciative for contributions from the open-source community!
+
+If you have a contribution in mind, please check out our [Contribution Guide](./.github/CONTRIBUTING.md) for information on how to do so. We are excited for your first contribution!
+
+### Lint before you push! 🪥
+
+Please ensure you lint and format your changes prior to opening a PR. 
+
+**To lint:**
+
+```
+yarn lint
+```
+
+**To format:**
+
+```
+yarn format
+```
+
+<h2 id="license"> License </h2>
+
+Licensed under <a href="LICENSE">Apache 2.0 license</a>.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this crate by you, as defined in the Apache 2.0 license, shall be licensed as above, without any additional terms or conditions.
