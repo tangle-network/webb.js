@@ -1,7 +1,7 @@
 {
   "author": "Webb Developers",
   "name": "@webb-tools/wasm-utils",
-  "version": "0.1.4-49",
+  "version": "0.1.4-50",
   "scripts": {
     "build": "rimraf build pkg && NODE_OPTIONS=\"--loader ../../loader.js\" webpack --config webpack.config.cjs",
     "start": "rimraf build pkg && webpack-dev-server --open -d",
