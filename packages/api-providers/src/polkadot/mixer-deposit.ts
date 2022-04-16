@@ -26,6 +26,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     const api = webbPolkadot.api;
     const ormlCurrency = new ORMLCurrency(webbPolkadot);
     const ormlAssets = await ormlCurrency.list();
+
     const data = await api.query.mixerBn254.mixers.entries();
     // @ts-ignore
     // const tokenProperty: Array<NativeTokenProperties> = await api.rpc.system.properties();
@@ -44,12 +45,10 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
         // TODO replace `replaceAll` or target es2021
         // @ts-ignore
         const amountNumber = (Number(amount?.toString().replaceAll(',', '')) * 1.0) / Math.pow(10, 12);
-        const currency = cId
-          ? Currency.fromORMLAsset(
-            webbPolkadot.config.currencies,
-            ormlAssets.find((asset) => Number(asset.id) === cId)!
-          )
-          : Currency.fromCurrencyId(webbPolkadot.config.currencies, Number(cId));
+        const currency = Currency.fromORMLAsset(
+          webbPolkadot.config.currencies,
+          ormlAssets.find((asset) => Number(asset.id) === cId)!,
+        );
 
         return {
           amount: amountNumber,

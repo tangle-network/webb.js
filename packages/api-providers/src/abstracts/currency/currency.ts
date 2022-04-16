@@ -28,13 +28,17 @@ export class Currency extends CurrencyContent {
   }
 
   // TODO: this should be removed instead use the constructor
-  static fromORMLAsset (currenciesConfig: AppConfig['currencies'], asset: ORMLAsset): Currency {
+  static fromORMLAsset (currenciesConfig: AppConfig['currencies'], asset: ORMLAsset, chain: InternalChainId): Currency {
+    // Find the currency with the same name in the currenciesConfig
+    const currencyIndex = Object.values(currenciesConfig).findIndex((config) => config.name === asset.name);
+    const currencyConfig = currenciesConfig[currencyIndex];
+
     return new Currency({
-      ...currenciesConfig[WebbCurrencyId.WEBB],
-      addresses: new Map([[InternalChainId.WebbDevelopment, asset.id]]),
+      ...currencyConfig,
+      addresses: new Map([[chain, asset.id]]),
       id: `ORML@${asset.id}`,
       name: asset.name,
-      symbol: asset.name.slice(0, 3).toLocaleUpperCase()
+      symbol: asset.name
     });
   }
 
