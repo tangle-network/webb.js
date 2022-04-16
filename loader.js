@@ -42,7 +42,7 @@ export async function load(resolvedUrl, context, defaultLoad) {
     format: 'commonjs',
   });
   const result = await loadTs(resolvedUrl, context, defaultLoad);
-  console.log(result);
+
   return result;
 }
 

@@ -11,7 +11,7 @@ import { u8aToHex } from '@polkadot/util';
 
 import { MixerDeposit } from '../abstracts';
 import { WebbError, WebbErrorCodes } from '../webb-error';
-import { WebbPolkadot } from './webb-provider.js';
+import { WebbPolkadot } from './webb-provider';
 
 type DepositPayload = TDepositPayload<Note, [number, string]>;
 const logger = LoggerService.get('tornado-deposit');
