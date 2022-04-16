@@ -8,17 +8,6 @@ import type { FrameSupportPalletId } from '@polkadot/types/lookup';
 
 declare module '@polkadot/api-base/types/consts' {
   export interface AugmentedConsts<ApiType extends ApiTypes> {
-    anchorBls381: {
-      /**
-       * Native currency id
-       **/
-      nativeCurrencyId: u32 & AugmentedConst<ApiType>;
-      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
     anchorBn254: {
       /**
        * Native currency id
@@ -35,17 +24,6 @@ declare module '@polkadot/api-base/types/consts' {
        * Native Asset Id
        **/
       nativeAssetId: u32 & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
-    mixerBls381: {
-      /**
-       * Native currency id
-       **/
-      nativeCurrencyId: u32 & AugmentedConst<ApiType>;
-      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/

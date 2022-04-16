@@ -3,15 +3,14 @@
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { Currency, DepositPayload as TDepositPayload, MixerSize, ORMLCurrency } from '@webb-tools/api-providers/index.js';
-import { LoggerService } from '@webb-tools/app-util/index.js';
-import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
-import { PalletMixerMixerMetadata } from '@webb-tools/types/interfaces/pallets/index.js';
+import { Currency, DepositPayload as TDepositPayload, MixerSize, ORMLCurrency } from '@webb-tools/api-providers';
+import { LoggerService } from '@webb-tools/app-util';
+import { Note, NoteGenInput } from '@webb-tools/sdk-core';
 
 import { u8aToHex } from '@polkadot/util';
 
-import { MixerDeposit } from '../abstracts/index.js';
-import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
+import { MixerDeposit } from '../abstracts';
+import { WebbError, WebbErrorCodes } from '../webb-error';
 import { WebbPolkadot } from './webb-provider.js';
 
 type DepositPayload = TDepositPayload<Note, [number, string]>;
@@ -31,7 +30,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     // const tokenProperty: Array<NativeTokenProperties> = await api.rpc.system.properties();
     const groupItem = data
       .map(([storageKey, info]) => {
-        const mixerInfo = (info as unknown as PalletMixerMixerMetadata).toHuman();
+        const mixerInfo = info as any;
         const cId = Number(mixerInfo.asset);
         const amount = mixerInfo.depositSize;
         // @ts-ignore

@@ -5,25 +5,9 @@ import type { ApiTypes } from '@polkadot/api-base/types';
 import type { Bytes, Null, Option, Vec, bool, u128, u32 } from '@polkadot/types-codec';
 import type { AnyNumber } from '@polkadot/types-codec/types';
 import type { Observable } from '@polkadot/types/types';
-import type { DarkwebbStandaloneRuntimeElement, OrmlTokensAccountData, OrmlTokensBalanceLock, PalletAnchorAnchorMetadata, PalletAssetRegistryAssetDetails, PalletAssetRegistryAssetMetadata, PalletMixerMixerMetadata } from '@webb-tools/types/interfaces/pallets';
-import type { AccountId32 } from '@webb-tools/types/interfaces/runtime';
 
 declare module '@polkadot/api-base/types/storage' {
   export interface AugmentedQueries<ApiType extends ApiTypes> {
-    anchorBls381: {
-      /**
-       * The map of trees to their anchor metadata
-       **/
-      anchors: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<PalletAnchorAnchorMetadata>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
-      /**
-       * The map of trees to their spent nullifier hashes
-       **/
-      nullifierHashes: AugmentedQuery<ApiType, (arg1: u32 | AnyNumber | Uint8Array, arg2: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => Observable<bool>, [u32, DarkwebbStandaloneRuntimeElement]> & QueryableStorageEntry<ApiType, [u32, DarkwebbStandaloneRuntimeElement]>;
-      /**
-       * Generic query
-       **/
-      [key: string]: QueryableStorageEntry<ApiType>;
-    };
     anchorBn254: {
       /**
        * The map of trees to their anchor metadata
@@ -32,7 +16,7 @@ declare module '@polkadot/api-base/types/storage' {
       /**
        * The map of trees to their spent nullifier hashes
        **/
-      nullifierHashes: AugmentedQuery<ApiType, (arg1: u32 | AnyNumber | Uint8Array, arg2: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => Observable<bool>, [u32, DarkwebbStandaloneRuntimeElement]> & QueryableStorageEntry<ApiType, [u32, DarkwebbStandaloneRuntimeElement]>;
+      nullifierHashes: AugmentedQuery<ApiType, (arg1: u32 | AnyNumber | Uint8Array, arg2: EggStandaloneRuntimeProtocolSubstrateConfigElement | string | Uint8Array) => Observable<bool>, [u32, EggStandaloneRuntimeProtocolSubstrateConfigElement]> & QueryableStorageEntry<ApiType, [u32, EggStandaloneRuntimeProtocolSubstrateConfigElement]>;
       /**
        * Generic query
        **/
@@ -69,37 +53,15 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       [key: string]: QueryableStorageEntry<ApiType>;
     };
-    mixerBls381: {
-      /**
-       * The parameter maintainer who can change the parameters
-       **/
-      maintainer: AugmentedQuery<ApiType, () => Observable<AccountId32>, []> & QueryableStorageEntry<ApiType, []>;
-      /**
-       * The map of trees to their mixer metadata
-       **/
-      mixers: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<PalletMixerMixerMetadata>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
-      /**
-       * The map of trees to their spent nullifier hashes
-       **/
-      nullifierHashes: AugmentedQuery<ApiType, (arg1: u32 | AnyNumber | Uint8Array, arg2: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => Observable<bool>, [u32, DarkwebbStandaloneRuntimeElement]> & QueryableStorageEntry<ApiType, [u32, DarkwebbStandaloneRuntimeElement]>;
-      /**
-       * Generic query
-       **/
-      [key: string]: QueryableStorageEntry<ApiType>;
-    };
     mixerBn254: {
       /**
-       * The parameter maintainer who can change the parameters
-       **/
-      maintainer: AugmentedQuery<ApiType, () => Observable<AccountId32>, []> & QueryableStorageEntry<ApiType, []>;
-      /**
        * The map of trees to their mixer metadata
        **/
       mixers: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<PalletMixerMixerMetadata>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
       /**
        * The map of trees to their spent nullifier hashes
        **/
-      nullifierHashes: AugmentedQuery<ApiType, (arg1: u32 | AnyNumber | Uint8Array, arg2: DarkwebbStandaloneRuntimeElement | string | Uint8Array) => Observable<bool>, [u32, DarkwebbStandaloneRuntimeElement]> & QueryableStorageEntry<ApiType, [u32, DarkwebbStandaloneRuntimeElement]>;
+      nullifierHashes: AugmentedQuery<ApiType, (arg1: u32 | AnyNumber | Uint8Array, arg2: EggStandaloneRuntimeProtocolSubstrateConfigElement | string | Uint8Array) => Observable<bool>, [u32, EggStandaloneRuntimeProtocolSubstrateConfigElement]> & QueryableStorageEntry<ApiType, [u32, EggStandaloneRuntimeProtocolSubstrateConfigElement]>;
       /**
        * Generic query
        **/

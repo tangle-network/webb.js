@@ -19,7 +19,7 @@
     "build": "yarn build-ts:dev",
     "build-ts:dev": "node ./scripts/webb-build-dev.cjs",
     "build:release": "node ./scripts/webb-build-release.cjs",
-    "build:interfaces": "ts-node-script -r tsconfig-paths/register packages/types/scripts/generate.ts && ts-node-script -r tsconfig-paths/register packages/type-definitions/scripts/generate.ts",
+    "build:interfaces": "NODE_OPTIONS='--loader ./loader.js' node packages/types/scripts/generate.ts && NODE_OPTIONS='--loader ./loader.js' packages/type-definitions/scripts/generate.ts",
     "lint": "polkadot-dev-run-lint --skip-tsc",
     "clean": "polkadot-dev-clean-build",
     "postinstall": "polkadot-dev-yarn-only",
@@ -27,16 +27,17 @@
     "test": "yarn test:unit && yarn test:integration && yarn wasm:test",
     "test:unit": "mocha 'packages/**/*.spec.ts' --exit",
     "test:wasm": "mocha 'packages/**/*.spec.ts' --exit",
+    "test:derive": "mocha 'packages/api-derive/**/*.spec.ts' --exit",
     "test:providers": "mocha 'packages/api-providers/**/*.spec.ts' --exit",
     "test:integration": "mocha 'tests/integration_tests/**/*.ts' --exit",
     "test:perf": "cross-env NODE_OPTIONS=--experimental-wasm-modules jest --config ./jest.perf.config.js",
     "check-deps": "./node_modules/@open-web3/util/scripts/check-deps.js yarn.lock @polkadot/ @open-web3/",
-    "update-metadata": "ts-node-script -r tsconfig-paths/register packages/types/scripts/updateMetadata.ts",
+    "update-metadata": "ts-node packages/types/scripts/updateMetadata.ts",
     "example:mixer": "ts-node -r tsconfig-paths/register examples/mixer.ts",
     "script": "NODE_OPTIONS=\"loader=./loader.js\" node",
     "format": "prettier --write \"packages/**/*.{ts,js,jsx,tsx}\" && cargo fmt --manifest-path packages/wasm-utils/Cargo.toml",
     "doc": "npx typedoc --name \"Webb Tools API\" --includeVersion --options ./typedoc.json",
-    "generate:meta": "ts-node --skip-project node_modules/.bin/polkadot-types-from-chain --package sample-polkadotjs-typegen/interfaces --endpoint ./packages/types/src/metadata/edgware.json --output ./interfaces --strict"
+    "generate:meta": "ts-node --skip-project node_modules/.bin/polkadot-types-from-chain --package sample-polkadotjs-typegen/interfaces --endpoint ./packages/types/src/metadata/metadata.json --output ./interfaces --strict"
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",

@@ -3,16 +3,16 @@
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { options } from '@webb-tools/api/index.js';
-import { ApiInitHandler } from '@webb-tools/api-providers/index.js';
-import { EventBus, LoggerService } from '@webb-tools/app-util/index.js';
+import { options } from '@webb-tools/api';
+import { ApiInitHandler } from '@webb-tools/api-providers';
+import { EventBus, LoggerService } from '@webb-tools/app-util';
 import lodash from 'lodash';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { InjectedExtension } from '@polkadot/extension-inject/types';
 
-import { PolkaTXBuilder } from '../../polkadot/index.js';
-import { InteractiveFeedback, WebbError, WebbErrorCodes } from '../../webb-error/index.js';
+import { PolkaTXBuilder } from '../../polkadot';
+import { InteractiveFeedback, WebbError, WebbErrorCodes } from '../../webb-error';
 import { PolkadotAccount, PolkadotAccounts } from './polkadot-accounts.js';
 
 const { isNumber } = lodash;
@@ -189,40 +189,9 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
       }
     });
 
-    const apiPromise = await ApiPromise.create({
-      provider: wsProvider,
-      // Custom RPCs
-      rpc: {
-        mt: {
-          getLeaves: {
-            description: 'Query for the tree leaves',
-            params: [
-              {
-                isOptional: false,
-                name: 'tree_id',
-                type: 'u32'
-              },
-              {
-                isOptional: false,
-                name: 'from',
-                type: 'u32'
-              },
-              {
-                isOptional: false,
-                name: 'to',
-                type: 'u32'
-              },
-              {
-                isOptional: true,
-                name: 'at',
-                type: 'Hash'
-              }
-            ],
-            type: 'Vec<[u8; 32]>'
-          }
-        }
-      }
-    });
+    const apiPromise = await ApiPromise.create(options({
+      provider: wsProvider
+    }));
 
     return apiPromise;
   }

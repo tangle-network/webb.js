@@ -22,7 +22,7 @@ const main = (): void => {
     const metadata = fullData.result;
 
     fs.writeFileSync('packages/types/src/metadata/static-latest.ts', `export default '${metadata}'`);
-    fs.writeFileSync('packages/types/src/metadata/edgware.json', JSON.stringify(fullData, null, 2));
+    fs.writeFileSync('packages/types/src/metadata/chain.json', JSON.stringify(fullData, null, 2));
 
     console.log('Done');
     process.exit(0);

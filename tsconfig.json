@@ -12,8 +12,8 @@
   "compilerOptions": {
     "types": ["mocha", "node"],
     "declaration": true,
-    "target": "ESNext",
-    "module": "ESNext",
+    "target": "esnext",
+    "module": "esnext",
     "jsx": "preserve",
     "strict": true,
     "noImplicitAny": true,
@@ -25,8 +25,7 @@
     "baseUrl": ".",
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true, //
-    
+    "allowSyntheticDefaultImports": true,
     "paths": {
       "@webb-tools/api": [
         "packages/api/src"
@@ -69,9 +68,14 @@
       ],
       "@webb-tools/api-providers/*": [
         "packages/api-providers/src/*"
+      ],
+      "@webb-tools/api-derive": [
+        "packages/api-derive/src"
+      ],
+      "@webb-tools/api-derive/*": [
+        "packages/api-derive/src/*"
       ]
     },
-
     "typeRoots": [
       "./node_modules/@polkadot/ts",
       "./node_modules/@types"

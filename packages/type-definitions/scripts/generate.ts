@@ -1,9 +1,10 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { rpc, types, typesBundleForPolkadot } from '@webb-tools/type-definitions/index';
+import { rpc, types, typesBundleForPolkadot } from '@webb-tools/type-definitions';
 import fs from 'fs';
 
+console.log(rpc, types, typesBundleForPolkadot);
 fs.writeFileSync('packages/type-definitions/src/json/types.json', JSON.stringify(types, null, 4));
 fs.writeFileSync(
   'packages/type-definitions/src/json/typesBundle.json',
