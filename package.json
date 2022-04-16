@@ -19,7 +19,7 @@
     "build": "yarn build-ts:dev",
     "build-ts:dev": "node ./scripts/webb-build-dev.cjs",
     "build:release": "node ./scripts/webb-build-release.cjs",
-    "build:interfaces": "NODE_OPTIONS='--loader ./loader.js' node packages/types/scripts/generate.ts && NODE_OPTIONS='--loader ./loader.js' packages/type-definitions/scripts/generate.ts",
+    "build:interfaces": "NODE_OPTIONS='--loader ./loader.js' node packages/types/scripts/generate.ts && NODE_OPTIONS='--loader ./loader.js' node packages/type-definitions/scripts/generate.ts",
     "lint": "polkadot-dev-run-lint --skip-tsc",
     "clean": "polkadot-dev-clean-build",
     "postinstall": "polkadot-dev-yarn-only",

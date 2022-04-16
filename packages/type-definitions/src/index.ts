@@ -3,35 +3,13 @@
 
 import { jsonrpcFromDefs, typesAliasFromDefs, typesFromDefs } from '@open-web3/orml-type-definitions/utils';
 
-import versioned from './types-known/versioned';
-import merkle from './merkle';
+import versioned from './types-known/versioned.js';
+import merkle from './merkle.js';
 
 // FIXME: currently we cannot override this in runtime definations because the code generation script cannot handle overrides
 // This will make it behave correctly in runtime, but wrong types in TS defination.
 const additionalOverride = {
-  Address: 'AccountId',
-  Keys: 'SessionKeys3',
-  LookupSource: 'AccountId',
-  PalletsOrigin: {
-    _enum: {
-      Aura: 'Null',
-      Authorship: 'Null',
-      Balances: 'Null',
-      Grandpa: 'Null',
-      Historical: 'Null',
-      Indices: 'Null',
-      Merkle: 'Null',
-      Mixer: 'Null',
-      RandomnessCollectiveFlip: 'Null',
-      Session: 'Null',
-      Staking: 'Null',
-      Sudo: 'Null',
-      System: 'SystemOrigin',
-      Timestamp: 'Null',
-      TransactionPayment: 'Null',
-      Utility: 'Null'
-    }
-  }
+  Keys: 'SessionKeys3'
 };
 
 const webbDefs = {
