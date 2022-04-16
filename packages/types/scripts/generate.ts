@@ -56,12 +56,16 @@ const metadata = filterModules(
   [
     'AnchorBn254',
     'AnchorHandler',
+    'MerkleTreeBn254',
     'bridge',
     'Hasher',
     'MixerBn254',
     'AssetRegistry',
     'Verifier',
-    'Tokens'
+    'Tokens',
+    'DKG',
+    'DKGProposals',
+    'DKGProposalHandler'
   ],
   definitions
 );

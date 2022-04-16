@@ -2,9 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiPromise, ApiRx } from '@polkadot/api';
+import { U32 } from '@polkadot/types';
 
 import { FixedPointNumber } from './fixed-point-number.js';
 import { CHAIN } from './type.js';
+
+export type CurrencyId = U32;
 
 export interface TokenConfig {
   chain?: CHAIN; // which chain the token is in
@@ -113,4 +116,12 @@ export function sortTokens (token1: Token, token2: Token, ...other: Token[]): To
   const result = [token1, token2, ...other];
 
   return result.sort((a, b) => TOKEN_SORT[a.name] - TOKEN_SORT[b.name]);
+}
+
+export function token2CurrencyId (api: ApiPromise | ApiRx, token: Token): CurrencyId {
+  return api.createType('CurrencyId', token.toChainData());
+}
+
+export function currencyId2Token (token: CurrencyId): Token {
+  return getPresetToken(Tokens[token.toNumber()]);
 }

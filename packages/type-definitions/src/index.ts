@@ -10,7 +10,7 @@ import merkle from './merkle';
 // This will make it behave correctly in runtime, but wrong types in TS defination.
 const additionalOverride = {
   Address: 'AccountId',
-  Keys: 'SessionKeys2',
+  Keys: 'SessionKeys3',
   LookupSource: 'AccountId',
   PalletsOrigin: {
     _enum: {

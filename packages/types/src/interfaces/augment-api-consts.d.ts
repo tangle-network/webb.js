@@ -2,7 +2,7 @@
 /* eslint-disable */
 
 import type { ApiTypes } from '@polkadot/api-base/types';
-import type { u32 } from '@polkadot/types-codec';
+import type { u16, u32 } from '@polkadot/types-codec';
 import type { Codec } from '@polkadot/types-codec/types';
 import type { FrameSupportPalletId } from '@polkadot/types/lookup';
 
@@ -24,6 +24,43 @@ declare module '@polkadot/api-base/types/consts' {
        * Native Asset Id
        **/
       nativeAssetId: u32 & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    dkg: {
+      /**
+       * Percentage session should have progressed for refresh to begin
+       **/
+      refreshDelay: Permill & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    dkgProposalHandler: {
+      /**
+       * Max number of signed proposal submissions per batch;
+       **/
+      maxSubmissionsPerBatch: u16 & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    dkgProposals: {
+      /**
+       * The identifier for this chain.
+       * This must be unique and must not collide with existing IDs within a
+       * set of bridged chains.
+       **/
+      chainIdentifier: WebbProposalsHeaderTypedChainId & AugmentedConst<ApiType>;
+      /**
+       * The session period
+       **/
+      period: u32 & AugmentedConst<ApiType>;
+      proposalLifetime: u32 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
