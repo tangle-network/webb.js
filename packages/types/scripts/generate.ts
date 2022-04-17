@@ -17,8 +17,8 @@ import { Metadata } from '@polkadot/types';
 import { TypeRegistry } from '@polkadot/types/create';
 import * as defaultDefinitions from '@polkadot/types/interfaces/definitions';
 
-import * as webbDefinitions from '../src/interfaces/definitions';
-import metaHex from '../src/metadata/static-latest';
+import * as webbDefinitions from '../src/interfaces/definitions.js';
+import metaHex from '../src/metadata/static-latest.js';
 
 // Only keep our own modules to avoid confllicts with the one provided by polkadot.js
 // TODO: make an issue on polkadot.js

@@ -18,8 +18,8 @@
   "dependencies": {
     "@babel/runtime": "^7.10.2",
     "@open-web3/orml-types": "^1.0.1",
-    "@polkadot/typegen": "7.13.1",
-    "@polkadot/types": "7.13.1",
+    "@polkadot/typegen": "8.1.1",
+    "@polkadot/types": "8.1.1",
     "@webb-tools/type-definitions": "0.1.4-50"
   },
   "devDependencies": {

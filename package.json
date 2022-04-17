@@ -11,15 +11,15 @@
     "tests/*"
   ],
   "resolutions": {
-    "@polkadot/api": "7.13.1",
-    "@polkadot/types": "7.13.1"
+    "@polkadot/api": "8.1.1",
+    "@polkadot/types": "8.1.1"
   },
   "scripts": {
     "pumbp": "./scripts/update-version.js prerelease",
     "build": "yarn build-ts:dev",
     "build-ts:dev": "node ./scripts/webb-build-dev.cjs",
     "build:release": "node ./scripts/webb-build-release.cjs",
-    "build:interfaces": "ts-node-script -r tsconfig-paths/register packages/types/scripts/generate.ts && ts-node-script -r tsconfig-paths/register packages/type-definitions/scripts/generate.ts",
+    "build:interfaces": "NODE_OPTIONS=\"--loader ./loader.js\" node packages/types/scripts/generate.ts && NODE_OPTIONS=\"--loader ./loader.js\" node packages/type-definitions/scripts/generate.ts",
     "lint": "polkadot-dev-run-lint --skip-tsc",
     "clean": "polkadot-dev-clean-build",
     "postinstall": "polkadot-dev-yarn-only",
@@ -43,12 +43,13 @@
     "@babel/plugin-syntax-import-assertions": "^7.16.7",
     "@babel/register": "^7.17.0",
     "@babel/runtime": "^7.17.2",
+    "@babel/cli": "7.17.6",
     "@ethersproject/experimental": "^5.5.0",
     "@open-web3/util": "^1.0.1",
     "@openzeppelin/contracts": "^4.2.0",
-    "@polkadot/api": "7.13.1",
-    "@polkadot/dev": "0.65.97",
-    "@polkadot/types": "7.13.1",
+    "@polkadot/api": "8.1.1",
+    "@polkadot/dev": "0.66.4",
+    "@polkadot/types": "8.1.1",
     "@truffle/hdwallet-provider": "^1.4.1",
     "@types/jest": "^26.0.24",
     "@types/mocha": "^9.1.0",

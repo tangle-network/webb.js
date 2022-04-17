@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import pallets from '@webb-tools/type-definitions/pallets';
+import pallets from '@webb-tools/type-definitions/pallets.js';
 
 import { Definitions } from '@polkadot/types/types';
 

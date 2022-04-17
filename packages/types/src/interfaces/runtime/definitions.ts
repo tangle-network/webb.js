@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import runtime from '@webb-tools/type-definitions/runtime';
+import runtime from '@webb-tools/type-definitions/runtime.js';
 
 import definitions from '@polkadot/types/interfaces/runtime/definitions';
 import { Definitions } from '@polkadot/types/types';
