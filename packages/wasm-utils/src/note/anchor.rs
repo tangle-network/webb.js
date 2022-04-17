@@ -56,7 +56,7 @@ pub fn get_leaf_with_private_raw(
 		),
 		_ => {
 			let message = format!(
-				"No Anchor leaf setup available for curve {}, exponentiation {} , and width {}",
+				"No Anchor leaf setup available for curve {}, exponentiation {}, and width {}",
 				curve, exponentiation, width
 			);
 			return Err(OperationError::new_with_message(

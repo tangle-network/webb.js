@@ -132,8 +132,8 @@ function npmPublish() {
 function gitBump() {
   const currentVersion = npmGetVersion();
   const [version, tag] = currentVersion.split('-');
-  const [, , patch] = version.split('.');
-  console.log(`currentVersion ${currentVersion}  -<<>>-,version ${version} , tag ${tag} , patch ${patch}`);
+  const [,, patch] = version.split('.');
+  console.log(`currentVersion ${currentVersion}  -<<>>-,version ${version}, tag ${tag}, patch ${patch}`);
   if (tag) {
     // if we have a beta version, just continue the stream of betas
     executeSync(`${path.join(__dirname, 'update-version.js')} prerelease`);
@@ -184,4 +184,5 @@ runTest();
 runBuild();
 
 // gitPush();
+execSync("node ./generate-docs")
 loopFunc(npmPublish);

@@ -64,10 +64,6 @@ export class Token {
     }
   }
 
-  /**
-   * @name isEqual
-   * @description check if `token` equal current
-   */
   public isEqual (token: Token): boolean {
     return this.chain === token.chain && this.name === token.name;
   }

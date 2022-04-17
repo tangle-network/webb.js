@@ -14,7 +14,7 @@ documentation = "https://docs.rs/wasm-utils"
 license = "MIT/Apache-2.0"
 
 [lib]
-crate-type = ["cdylib" , "rlib"]
+crate-type = ["cdylib", "rlib"]
 
 [profile.release]
 # This makes the compiled code faster and smaller, but it makes compiling slower,

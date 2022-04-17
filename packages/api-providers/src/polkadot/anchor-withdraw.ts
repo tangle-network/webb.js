@@ -15,6 +15,17 @@ import { WebbPolkadot } from './webb-provider.js';
 
 const logger = LoggerService.get('PolkadotBridgeWithdraw');
 
+/**
+ * @param id - Anchor tree id
+ * @param proofBytes - Zero-knowledge Proof bytes
+ * @param root - Tree root
+ * @param nullifierHash - Nullifier hash
+ * @param recipient - Recipient accountId Ss558 format
+ * @param relayer - Relayer accountId Ss558 format
+ * @param fee - Fee value, should be the same as used while generating the zkp
+ * @param refund - Refund value, should be the same as used while generating the zkp
+ * @param refreshCommitment - Refresh commitment should be the same as used while generating  the zkp
+ **/
 export type AnchorWithdrawProof = {
   id: string;
   proofBytes: string;
@@ -68,6 +79,7 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
     // TODO: Integrate with Substrate relayer
     // TODO handle the cached roots
     try {
+      // Getting the  active account
       const account = await this.inner.accounts.activeOrDefault;
 
       if (!account) {
@@ -78,27 +90,37 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
       const relayerAccountId = account.address;
 
       this.emit('stateChange', WithdrawState.GeneratingZk);
-      logger.trace(`Withdraw using note ${note} , recipient ${recipient}`);
+      logger.trace(`Withdraw using note ${note}, recipient ${recipient}`);
       const parseNote = await Note.deserialize(note);
       const depositNote = parseNote.note;
       const amount = parseNote.note.amount;
+      // listing anchors
       const anchors = await this.inner.methods.anchorApi.getAnchors();
+      // Get the anchor of the note amount
       const anchor = anchors.find((a) => a.amount === amount)!;
+      // TODO : Make the key dynamic not just WebbDevelopment!
       const treeId = anchor.neighbours[InternalChainId.WebbDevelopment] as string;
-
+      // Fetching tree leaves
       const leaves = await this.fetchRPCTreeLeaves(treeId);
       const leaf = depositNote.getLeafCommitment();
       const leafHex = u8aToHex(leaf);
+      // Find the index of the note's leaf commitment
       const leafIndex = leaves.findIndex((leaf) => u8aToHex(leaf) === leafHex);
 
       logger.trace(leaves.map((i) => u8aToHex(i)));
+      // Init a worker from the factory with `wasm-utils` key
       const worker = this.inner.wasmFactory('wasm-utils');
       const pm = new ProvingManager(worker);
 
+      // Converting accounts into hex
       const recipientAccountHex = u8aToHex(decodeAddress(recipient));
       const relayerAccountHex = u8aToHex(decodeAddress(recipient));
+
+      // Fetching the proving key
       const provingKey = await fetchSubstrateAnchorProvingKey();
+      // Pass in an empty leaf for the refresh commitment
       const refreshCommitment = '0000000000000000000000000000000000000000000000000000000000000000';
+      // Get the linked tree root
       const root = await this.fetchRoot(treeId);
 
       const proofInput: ProvingManagerSetupInput = {

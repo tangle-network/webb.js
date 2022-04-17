@@ -8,7 +8,7 @@ import { MixerSize } from '../mixer/index.js';
 
 /**
  *
- * */
+ **/
 
 export type WrappingEvent = {
   ready: null;
@@ -27,13 +27,13 @@ export type WrappingBalance = {
 
 /**
  * Webb wrap unwrap functionality
- * Stores two tokens of type {WrappingTokenId}
- * currentToken , otherEdgeToken
- *  wrap => GovernWrapper<currentToken> and use otherEdgeToken as parameter
- *  unwrap GovernWrapper<otherEdgeToken> and use currentToken as parameter
- * */
+ * Stores two tokens of type WrappingTokenId
+ * currentToken, otherEdgeToken
+ *  wrap  Governwrapper<currentToken> and use otherEdgeToken as parameter
+ *  unwrap Governwrapper<otherEdgeToken> and use currentToken as parameter
+ **/
 
-export abstract class WrapUnWrap<T, WrapPayload extends Amount = Amount, UnwrapPayload extends Amount = Amount> {
+export abstract class WrapUnwrap<T, WrapPayload extends Amount = Amount, UnwrapPayload extends Amount = Amount> {
   protected _wrappableToken: BehaviorSubject<WebbCurrencyId | null> = new BehaviorSubject<null | WebbCurrencyId>(null);
   protected _governedToken: BehaviorSubject<WebbCurrencyId | null> = new BehaviorSubject<null | WebbCurrencyId>(null);
 
@@ -87,44 +87,44 @@ export abstract class WrapUnWrap<T, WrapPayload extends Amount = Amount, UnwrapP
 
   /**
    *  Get list of all the Governed tokens
-   * */
+   **/
   abstract getGovernedTokens(): Promise<WebbCurrencyId[]>;
 
   /**
    *  For validation pre the Wrapping
    *  - Validate the user balance of the token to wrap
    *  - If Wrapping native check if the native token is allowed to be wrapped
-   * */
-  abstract canWrap(wrapPayload: WrapPayload): Promise<boolean>;
+   **/
+  abstract canwrap(wrapPayload: WrapPayload): Promise<boolean>;
 
   /**
    *  Wrap call
    *  - Can wrap a token to a GovernedToken
    *  - Can wrap a token to an ERC20
-   * */
+   **/
   abstract wrap(wrapPayload: WrapPayload): Promise<string>;
 
   /**
    *  For validation
    *  -Check there is enough liquidity
-   *  -If UnWrapping to native check if this allowed
-   * */
-  abstract canUnWrap(unwrapPayload: UnwrapPayload): Promise<boolean>;
+   *  -If Unwrapping to native check if this allowed
+   **/
+  abstract canUnwrap(unwrapPayload: UnwrapPayload): Promise<boolean>;
 
   /**
    *  Unwrap call
    *  - Can Unwrap a token to a GovernedToken
-   * */
+   **/
   abstract unwrap(unwrapPayload: UnwrapPayload): Promise<string>;
 
   /**
    * Observing the balances of the two edges
-   * */
+   **/
   abstract get balances(): Observable<[WrappingBalance, WrappingBalance]>;
 
   /**
    * Observing the liquidity of the two edges
-   * */
+   **/
   abstract get liquidity(): Observable<[WrappingBalance, WrappingBalance]>;
 }
 

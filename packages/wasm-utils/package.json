@@ -1,11 +1,12 @@
 {
   "author": "Webb Developers",
   "name": "@webb-tools/wasm-utils",
-  "version": "0.1.4-48",
+  "version": "0.1.4-50",
   "scripts": {
     "build": "rimraf build pkg && NODE_OPTIONS=\"--loader ../../loader.js\" webpack --config webpack.config.cjs",
     "start": "rimraf build pkg && webpack-dev-server --open -d",
-    "test": "wasm-pack test --release --node "
+    "test": "wasm-pack test --release --node ",
+    "test:ts": "cd ../.. && yarn test:wasm && cd ./packages/wasm-utils"
   },
   "publishConfig": {
     "access": "public",

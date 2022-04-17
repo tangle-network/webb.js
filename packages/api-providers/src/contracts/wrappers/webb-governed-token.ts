@@ -114,7 +114,7 @@ export class WebbGovernedToken {
 
   // Checks if the governed token wraps a particular token.
   // Does NOT check if allowances for ERC20s are satisfied.
-  async canWrap (tokenAddress: string) {
+  async canwrap (tokenAddress: string) {
     const tokens = await this._contract.getTokens();
 
     if (tokens.includes(tokenAddress)) {

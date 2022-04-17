@@ -13,8 +13,8 @@ export const byteArrayToNum = (arr: number[]): number => {
 };
 
 /**
- * @param num the number to be converted
- * @param min the minimum bytes the array should hold (in the case of requiring empty bytes to match rust values)
+ * @param num - the number to be converted
+ * @param min - the minimum bytes the array should hold (in the case of requiring empty bytes to match rust values)
  * @returns
  */
 export const numToByteArray = (num: number, min: number): number[] => {

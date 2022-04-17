@@ -4,9 +4,9 @@
 import BigNumber from 'bignumber.js';
 
 /**
- * @constant
- * @type {(0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)}
- * @description
+
+ *  Example : (0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)
+ *
  * | Value | Property | Description |
  * | 0     | ROUND_UP | Rounds away from zero |
  * | 1     | ROUND_DOWN | Rounds towards zero |
@@ -63,8 +63,8 @@ export class FixedPointNumber {
   }
 
   /**
-   * @name fromRational
-   * @description constructor form inner
+   *  fromRational
+   *  Constructor form inner
    */
   public static fromRational (
     numerator: number | string | FixedPointNumber,
@@ -82,8 +82,8 @@ export class FixedPointNumber {
   }
 
   /**
-   * @name fromInner
-   * @description constructor form inner
+   *  fromInner
+   *  Constructor form inner
    */
   public static fromInner (origin: number | string, precision = 18): FixedPointNumber {
     const inner = new BN(origin);
@@ -95,8 +95,8 @@ export class FixedPointNumber {
   }
 
   /**
-   * @name _fromBN
-   * @description constructor from BN
+   *  _fromBN
+   *  Constructor from BN
    */
   public static _fromBN (origin: BigNumber, precision = 18): FixedPointNumber {
     const temp = new FixedPointNumber(0, precision);
@@ -125,7 +125,7 @@ export class FixedPointNumber {
   }
 
   /**
-   * @name toNumber
+   *  toNumber
    */
   public toNumber (dp = 8, rm = 3): number {
     this.setMode();
@@ -137,7 +137,7 @@ export class FixedPointNumber {
   }
 
   /**
-   * @name toStirng
+   *  toStirng
    */
   public toString (dp = 0, rm = 3): string {
     this.setMode(dp, rm);
@@ -146,14 +146,14 @@ export class FixedPointNumber {
   }
 
   /**
-   * @name toChainData
+   *  toChainData
    */
   public toChainData (): string {
     return this.inner.toFixed(0, 3);
   }
 
   /**
-   * @name trunc
+   *  trunc
    */
   public trunc (): FixedPointNumber {
     this.setMode();
@@ -169,7 +169,7 @@ export class FixedPointNumber {
   }
 
   /**
-   * @name frac
+   *  frac
    */
   public frac (): FixedPointNumber {
     const integer = this.trunc();
@@ -191,8 +191,8 @@ export class FixedPointNumber {
   }
 
   /**
-   * @name setPrecision
-   * @description change the precision and modify the inner
+   *  setPrecision
+   *  Change the precision and modify the inner
    */
   public setPrecision (precision: number): void {
     const oldPrecision = this.precision;
@@ -204,24 +204,24 @@ export class FixedPointNumber {
   }
 
   /**
-   * @name getPrecision
-   * @description get the precision
+   *  getPrecision
+   *  Get the precision
    */
   public getPrecision (): number {
     return this.precision;
   }
 
   /**
-   * @name abs
-   * @description return a FixedPointNumber whose inner value is the absolute value
+   *  abs
+   *  Return a FixedPointNumber whose inner value is the absolute value
    */
   public abs (): FixedPointNumber {
     return FixedPointNumber._fromBN(this.inner.abs(), this.precision);
   }
 
   /**
-   * @name plus
-   * @description return a FixedPointNumber whose value is origin value plus right value
+   *  plus
+   *  Return a FixedPointNumber whose value is origin value plus right value
    */
   public plus (right: FixedPointNumber): FixedPointNumber {
     this.alignPrecision(right);
@@ -231,8 +231,8 @@ export class FixedPointNumber {
   }
 
   /**
-   * @name minus
-   * @description return a FixedPointNumber whose value is origin value minus right value
+   *  minus
+   *  Return a FixedPointNumber whose value is origin value minus right value
    */
   public minus (right: FixedPointNumber): FixedPointNumber {
     this.alignPrecision(right);
@@ -242,8 +242,8 @@ export class FixedPointNumber {
   }
 
   /**
-   * @name times
-   * @description return a FixedPointNumber whose value is origin value times right value
+   *  times
+   *  Return a FixedPointNumber whose value is origin value times right value
    */
   public times (right: FixedPointNumber): FixedPointNumber {
     this.alignPrecision(right);
@@ -253,8 +253,8 @@ export class FixedPointNumber {
   }
 
   /**
-   * @name div
-   * @description return a FixedPointNumber whose value is origin value div right value
+   *  div
+   *  Return a FixedPointNumber whose value is origin value div right value
    */
   public div (right: FixedPointNumber): FixedPointNumber {
     this.alignPrecision(right);
@@ -264,64 +264,64 @@ export class FixedPointNumber {
   }
 
   /**
-   * @name reciprocal
+   *  reciprocal
    */
   public reciprocal (): FixedPointNumber {
     return FixedPointNumber.ONE.div(this);
   }
 
   /**
-   * @name isGreaterThan
+   *  isGreaterThan
    */
   public isGreaterThan = genFnFromBigNumber('isGreaterThan', false).bind(this);
 
   /**
-   * @name isGreaterThanOrEqualTo
+   *  isGreaterThanOrEqualTo
    */
   public isGreaterThanOrEqualTo = genFnFromBigNumber('isGreaterThanOrEqualTo', false).bind(this);
 
   /**
-   * @name isLessThan
+   *  isLessThan
    */
   public isLessThan = genFnFromBigNumber('isLessThan', false).bind(this);
 
   /**
-   * @name isLessOrEqualTo
+   *  isLessOrEqualTo
    */
   public isLessOrEqualTo = genFnFromBigNumber('isLessThanOrEqualTo', false).bind(this);
 
   /**
-   * @name isEqualTo
+   *  isEqualTo
    */
   public isEqualTo = genFnFromBigNumber('isEqualTo', false).bind(this);
 
   /**
-   * @name isZero
+   *  isZero
    */
   public isZero = genFnFromBigNumber('isZero', true).bind(this);
 
   /**
-   * @name isNaN
+   *  isNaN
    */
   public isNaN = genFnFromBigNumber('isNaN', true).bind(this);
 
   /**
-   * @name isFinaite
+   *  isFinaite
    */
   public isFinaite = genFnFromBigNumber('isFinite', true).bind(this);
 
   /**
-   * @name isNegative
+   *  isNegative
    */
   public isNegative = genFnFromBigNumber('isNegative', true).bind(this);
 
   /**
-   * @name isPositive
+   *  isPositive
    */
   public isPositive = genFnFromBigNumber('isPositive', true).bind(this);
 
   /**
-   * @name min
+   *  min
    */
   public min (...targets: FixedPointNumber[]): FixedPointNumber {
     targets.forEach((item) => this.alignPrecision(item));
@@ -333,7 +333,7 @@ export class FixedPointNumber {
   }
 
   /**
-   * @name max
+   *  max
    */
   public max (...targets: FixedPointNumber[]): FixedPointNumber {
     targets.forEach((item) => this.alignPrecision(item));

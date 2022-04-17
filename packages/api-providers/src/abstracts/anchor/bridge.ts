@@ -6,7 +6,9 @@ import { CurrencyRole } from '../../types/currency-config.interface.js';
 import { AppConfig } from '../common.js';
 import { Currency } from '../currency/currency.js';
 
-// This bridge class exposes methods which retrieve information from a passed config.
+/**
+ * This bridge class exposes methods which retrieve information from a passed config.
+ * */
 export class Bridge {
   /*
    *  Get all Bridge tokens
