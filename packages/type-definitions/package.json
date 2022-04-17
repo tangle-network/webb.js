@@ -16,6 +16,6 @@
   },
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
-    "@open-web3/orml-type-definitions": "^1.0.1"
+    "@open-web3/orml-type-definitions": "^1.1.3"
   }
 }

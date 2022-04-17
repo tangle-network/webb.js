@@ -1,5 +1,3 @@
 {
-    "KeyId": "u32",
-    "TreeId": "u32",
     "Keys": "SessionKeys3"
 }

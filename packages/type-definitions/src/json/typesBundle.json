@@ -2,17 +2,9 @@
     "spec": {
         "webb": {
             "alias": {},
-            "types": [
-                {
-                    "types": {
-                        "KeyId": "u32",
-                        "TreeId": "u32",
-                        "Keys": "SessionKeys3",
-                        "Address": "AccountId",
-                        "LookupSource": "AccountId"
-                    }
-                }
-            ]
+            "types": {
+                "Keys": "SessionKeys3"
+            }
         }
     }
 }

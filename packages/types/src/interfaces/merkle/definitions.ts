@@ -5,4 +5,4 @@ import merkle from '@webb-tools/type-definitions/merkle.js';
 
 import { Definitions } from '@polkadot/types/types';
 
-export default merkle as unknown as Definitions;
+export default merkle as Definitions;
