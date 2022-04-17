@@ -1,11 +1,10 @@
 // Auto-generated via `yarn polkadot-types-from-chain`, do not edit
 /* eslint-disable */
 
-import type { 'PERSISTENT' | 'LOCAL', 'newHeads' | 'logs' | 'newPendingTransactions' | 'syncing', AccountId, BlockNumber, CurrencyId, H160, H256, H64, Hash, Header, Index, Justification, KeyValue, NumberOrHex, OracleKey, Plain, RpcDataProviderId, SignedBlock, StorageData, String, TimestampedValue, Uint8Array, any, boolean, null, number, object, string, { Logs: any }, { None: any }, { from?: any; to?: any; gasPrice?: any; gas?: any; value?: any; data?: any; nonce?: any }, { fromBlock?: any; toBlock?: any; blockHash?: any; address?: any; topics?: any }, { origin?: any; code?: any; storageDepositLimit?: any }, { origin?: any; dest?: any; value?: any; gasLimit?: any; storageDepositLimit?: any; inputData?: any }, { origin?: any; value?: any; gasLimit?: any; storageDepositLimit?: any; code?: any; data?: any; salt?: any } } from '@open-web3/orml-types/interfaces/__esModule';
 import type { AugmentedRpc } from '@polkadot/rpc-core/types';
 import type { Metadata, StorageKey } from '@polkadot/types';
-import type { Bytes, HashMap, Json, Null, Option, Text, U256, U64, U8aFixed, Vec, bool, u32, u64 } from '@polkadot/types-codec';
-import type { AnyNumber, Codec, ITuple } from '@polkadot/types-codec/types';
+import type { Bytes, HashMap, Json, Null, Option, Text, U256, U64, Vec, bool, u32, u64 } from '@polkadot/types-codec';
+import type { AnyNumber, Codec } from '@polkadot/types-codec/types';
 import type { ExtrinsicOrHash, ExtrinsicStatus } from '@polkadot/types/interfaces/author';
 import type { EpochAuthorship } from '@polkadot/types/interfaces/babe';
 import type { BeefySignedCommitment } from '@polkadot/types/interfaces/beefy';
@@ -22,6 +21,7 @@ import type { MmrLeafProof } from '@polkadot/types/interfaces/mmr';
 import type { StorageKind } from '@polkadot/types/interfaces/offchain';
 import type { FeeDetails, RuntimeDispatchInfo } from '@polkadot/types/interfaces/payment';
 import type { RpcMethods } from '@polkadot/types/interfaces/rpc';
+import type { AccountId, BlockNumber, H160, H256, H64, Hash, Header, Index, Justification, KeyValue, SignedBlock, StorageData } from '@polkadot/types/interfaces/runtime';
 import type { MigrationStatusResult, ReadProof, RuntimeVersion, TraceBlockResponse } from '@polkadot/types/interfaces/state';
 import type { ApplyExtrinsicResult, ChainProperties, ChainType, Health, NetworkState, NodeRole, PeerInfo, SyncState } from '@polkadot/types/interfaces/system';
 import type { IExtrinsic, Observable } from '@polkadot/types/types';
@@ -352,12 +352,6 @@ declare module '@polkadot/rpc-core/types/jsonrpc' {
        **/
       subscribeJustifications: AugmentedRpc<() => Observable<JustificationNotification>>;
     };
-    merkle: {
-      /**
-       * Query for the tree leaves
-       **/
-      treeLeaves: AugmentedRpc<(tree_id: u32 | AnyNumber | Uint8Array, from: u32 | AnyNumber | Uint8Array, to: u32 | AnyNumber | Uint8Array, at: Hash | string | Uint8Array) => Observable<Vec<U8aFixed>>>;
-    };
     mmr: {
       /**
        * Generate MMR proof for given leaf index.
@@ -387,16 +381,6 @@ declare module '@polkadot/rpc-core/types/jsonrpc' {
        * Set offchain local storage under given key and prefix
        **/
       localStorageSet: AugmentedRpc<(kind: StorageKind | 'PERSISTENT' | 'LOCAL' | number | Uint8Array, key: Bytes | string | Uint8Array, value: Bytes | string | Uint8Array) => Observable<Null>>;
-    };
-    oracle: {
-      /**
-       * Retrieves all oracle values.
-       **/
-      getAllValues: AugmentedRpc<(providerId: RpcDataProviderId | string, at?: BlockHash | string | Uint8Array) => Observable<Vec<ITuple<[OracleKey, Option<TimestampedValue>]>>>>;
-      /**
-       * Retrieves the oracle value for a given key.
-       **/
-      getValue: AugmentedRpc<(providerId: RpcDataProviderId | string, key: OracleKey, at?: BlockHash | string | Uint8Array) => Observable<Option<TimestampedValue>>>;
     };
     payment: {
       /**
@@ -583,12 +567,6 @@ declare module '@polkadot/rpc-core/types/jsonrpc' {
        * Retrieves the version of the node
        **/
       version: AugmentedRpc<() => Observable<Text>>;
-    };
-    tokens: {
-      /**
-       * Query Existential Deposit for a given currency.
-       **/
-      queryExistentialDeposit: AugmentedRpc<(currencyId: CurrencyId, at?: BlockHash | string | Uint8Array) => Observable<NumberOrHex>>;
     };
     web3: {
       /**

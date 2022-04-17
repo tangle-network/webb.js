@@ -14,6 +14,7 @@ import path from 'path';
 import fs from 'fs';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { BigNumber } from 'ethers';
+import { MultiAddress } from '@polkadot/types/interfaces';
 
 /// <reference path="@webb-tools/types/interfaces/types.d.ts"
 export function currencyToUnitI128(currencyAmount: number) {
@@ -152,17 +153,15 @@ export async function setORMLTokenBalance(
   amount: number = 1000
 ) {
   return new Promise((resolve, reject) => {
-    const address = api.createType('MultiAddress', {
+    const address: MultiAddress = api.createType('MultiAddress', {
       Id: receiverPair.address,
     });
-    // @ts-ignore
     api.tx.sudo
       .sudo(
-        // @ts-ignore
         api.tx.currencies.updateBalance(
           address,
           ORMLCurrencyId,
-          currencyToUnitI128(amount)
+          api.createType('i128', currencyToUnitI128(amount)),
         )
       )
       .signAndSend(sudoPair, (res) => {

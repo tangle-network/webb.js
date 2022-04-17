@@ -44,7 +44,6 @@ export class PolkadotAccounts extends AccountsAdapter<InjectedExtension, Injecte
   }
 
   setActiveAccount (account: PolkadotAccount): PromiseOrT<void> {
-    console.log(account);
     this.activeAccount = account;
 
     return undefined;

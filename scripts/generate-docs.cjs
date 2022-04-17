@@ -1,7 +1,6 @@
 const {execSync} =require("child_process")
 
 const packages = [
-  "api-derive",
   "api-providers",
   "api",
   "app-util",

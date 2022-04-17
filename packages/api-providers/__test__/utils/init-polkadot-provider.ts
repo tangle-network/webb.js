@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 // eslint-disable-next-line header/header
-import { Account, AccountsAdapter, NotificationPayload, PromiseOrT, RelayerConfig, relayerNameToChainId, WebbPolkadot, WebbRelayerBuilder } from '@webb-tools/api-providers';
-import { InternalChainId } from '@webb-tools/api-providers/chains';
-import { PolkadotProvider } from '@webb-tools/api-providers/ext-providers';
-import { InteractiveFeedback } from '@webb-tools/api-providers/webb-error';
+import { InternalChainId } from '@webb-tools/api-providers/chains/index.js';
+import { PolkadotProvider } from '@webb-tools/api-providers/ext-providers/index.js';
+import { Account, AccountsAdapter, NotificationPayload, PromiseOrT, RelayerConfig, relayerNameToChainId, WebbPolkadot, WebbRelayerBuilder } from '@webb-tools/api-providers/index.js';
+import { InteractiveFeedback } from '@webb-tools/api-providers/webb-error/index.js';
 
 import { InjectedAccount, InjectedExtension } from '@polkadot/extension-inject/types';
 
