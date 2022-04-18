@@ -27,7 +27,7 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@webb-tools/types/lookup": [
+      "@polkadot/types/lookup": [
         "packages/types/src/interfaces/types-lookup.ts"
       ],
       "@webb-tools/api": [

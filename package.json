@@ -21,7 +21,7 @@
     "build:release": "node ./scripts/webb-build-release.cjs",
     "build:interfaces": "yarn build:interfaces:defs && yarn build:interfaces:chain",
     "build:interfaces:defs": "yarn polkadot-types-from-defs --input packages/types/src/interfaces --package sample-polkadotjs-typegen/interfaces --endpoint packages/types/src/metadata/metadata.json",
-    "build:interfaces:chain": "yarn polkadot-types-from-chain --endpoint ws://localhost:9944 --output ./packages/types/src",
+    "build:interfaces:chain": "yarn polkadot-types-from-chain --endpoint ws://localhost:9944 --output ./packages/types/src/interfaces",
     "lint": "polkadot-dev-run-lint --skip-tsc",
     "clean": "polkadot-dev-clean-build",
     "postinstall": "polkadot-dev-yarn-only",
