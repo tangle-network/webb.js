@@ -5,7 +5,6 @@ const packages = [
   "api",
   "app-util",
   "sdk-core",
-  "type-definitions",
   "types"
 ]
 

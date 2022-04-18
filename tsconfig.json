@@ -42,12 +42,6 @@
       "@webb-tools/types/*": [
         "packages/types/src/*"
       ],
-      "@webb-tools/type-definitions": [
-        "packages/type-definitions/src"
-      ],
-      "@webb-tools/type-definitions/*": [
-        "packages/type-definitions/src/*"
-      ],
       "@webb-tools/sdk-core": [
         "packages/sdk-core/src"
       ],
