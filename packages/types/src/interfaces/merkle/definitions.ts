@@ -3,7 +3,7 @@
 
 export default {
   rpc: {
-    treeLeaves: {
+    getLeaves: {
       description: 'Query for the tree leaves',
       params: [
         {
