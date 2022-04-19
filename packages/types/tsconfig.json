@@ -1,0 +1,11 @@
+{
+  "extends": "@polkadot/dev/config/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "composite": true,
+    "moduleResolution": "node",
+    "module": "CommonJS",
+    "target": "ES6",
+    "skipLibCheck": true
+  }
+}

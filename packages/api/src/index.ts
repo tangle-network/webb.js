@@ -17,6 +17,7 @@ export const options = ({ types = {},
   rpc: {
     ...rpc
   },
+  // @ts-ignore
   types: {
     ...webbTypes,
     ...types

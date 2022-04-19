@@ -41,6 +41,17 @@ export async function load(resolvedUrl, context, defaultLoad) {
     ...context,
     format: 'commonjs',
   });
+
+  // For the types package, we should load with commonjs.
+  if (url.pathname.includes('webb.js/packages/types')) {
+    console.log('loading something from webb.js types: ', url.pathname);
+
+    return await loadTs(resolvedUrl, {
+      ...context,
+      format: 'commonjs',
+    });
+  }
+
   const result = await loadTs(resolvedUrl, context, defaultLoad);
 
   return result;

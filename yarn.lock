@@ -2355,7 +2355,7 @@
   dependencies:
     "@octokit/openapi-types" "^11.2.0"
 
-"@open-web3/orml-type-definitions@1.1.3", "@open-web3/orml-type-definitions@^1.1.3":
+"@open-web3/orml-type-definitions@1.1.3":
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/@open-web3/orml-type-definitions/-/orml-type-definitions-1.1.3.tgz#0fe5974186711672ec7be4bb26865be9540a76f7"
   integrity sha512-kIYIGzaILjUikKsUxs3mE2akQINC+rctVuq4rYYniZPsWA2L0+4FLt8tefTxTy6OcfsmQeefrbFiFBHs9igC7w==
