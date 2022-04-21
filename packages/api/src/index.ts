@@ -3,7 +3,7 @@
 
 import '@webb-tools/api-derive/augmentDerives.js';
 
-import { derive as webbDerives } from '@webb-tools/api-derive';
+import { derive as webbDerives } from '@webb-tools/api-derive/index.js';
 
 import { ApiOptions } from '@polkadot/api/types';
 

@@ -4016,15 +4016,6 @@
     "@webb-tools/utils" "^0.1.7"
     snarkjs "0.4.16"
 
-"@webb-tools/api-derive@file:packages/api-derive/build":
-  version "0.1.4-50"
-  dependencies:
-    "@babel/runtime" "^7.10.2"
-    "@polkadot/api" "8.1.1"
-    "@polkadot/rpc-core" "8.1.1"
-    "@webb-tools/api" "0.1.4-50"
-    "@webb-tools/types" "0.1.4-50"
-
 "@webb-tools/bridges@^0.1.11":
   version "0.1.11"
   resolved "https://registry.yarnpkg.com/@webb-tools/bridges/-/bridges-0.1.11.tgz#2a8e57a3f0f97b1515c7edbbadb1eb515e33de8a"
