@@ -200,7 +200,6 @@ export class WebbRelayerBuilder {
         ]);
       })
     );
-    console.log(relayerBuilder);
 
     return relayerBuilder;
   }

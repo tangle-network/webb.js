@@ -46,7 +46,9 @@ export class Web3ChainQuery extends ChainQuery<WebbWeb3Provider> {
       const currency = Currency.fromCurrencyId(this.inner.config, currencyId);
       const currencyOnChain = currency.getAddress(webbChain);
 
-      if (!currencyOnChain) return '';
+      if (!currencyOnChain) {
+        return '';
+      }
 
       // Create a token instance for this chain
       const tokenInstance = ERC20Factory.connect(currencyOnChain, provider);

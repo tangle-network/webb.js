@@ -1,7 +1,7 @@
 import { load as loadTs, resolve as resolveTs } from 'ts-node/esm'
 import * as tsConfigPaths from 'tsconfig-paths'
-import { pathToFileURL } from 'url'
-import path from 'path'
+import { pathToFileURL, fileURLToPath } from 'url'
+import path, { dirname } from 'path'
 
 // A custom loader is used to register tsConfigPaths as well as
 // run the typescript compiler via ts-node with its ESM.
@@ -37,12 +37,22 @@ export async function load(resolvedUrl, context, defaultLoad) {
     .split(path.sep)
     .at(-1);
 
-  if (!ext && parentDir === 'bin') return loadTs(resolvedUrl, {
+  if (!ext && parentDir === 'bin') return await loadTs(resolvedUrl, {
     ...context,
     format: 'commonjs',
   });
 
-  return loadTs(resolvedUrl, context, defaultLoad);
+  // For the types package, we should load with commonjs.
+  if (url.pathname.includes('webb.js/packages/types')) {
+    return await loadTs(resolvedUrl, {
+      ...context,
+      format: 'commonjs',
+    });
+  }
+
+  const result = await loadTs(resolvedUrl, context, defaultLoad);
+
+  return result;
 }
 
 export { transformSource } from 'ts-node/esm'

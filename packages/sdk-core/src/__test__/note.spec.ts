@@ -7,7 +7,7 @@ import { expect } from 'chai';
 import { Note, NoteGenInput } from '../note.js';
 
 describe('Note class', () => {
-  it.only('should test constructor from `NoteGenInput`', async () => {
+  it('should test constructor from `NoteGenInput`', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
       backend: 'Circom',
@@ -41,7 +41,7 @@ describe('Note class', () => {
     expect(note.note.tokenSymbol).to.deep.equal('WEBB');
   });
 
-  it.only('should test serializing and deserializing', async () => {
+  it('should test serializing and deserializing', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
       backend: 'Circom',
@@ -77,7 +77,7 @@ describe('Note class', () => {
     expect(deserializedNote.note.exponentiation).to.deep.equal('5');
   });
 
-  it.only('should test anchor secrets chain', async () => {
+  it('should test anchor secrets chain', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
       backend: 'Circom',
@@ -103,7 +103,7 @@ describe('Note class', () => {
     expect(targetChain.toString()).to.deep.equal('1');
   });
 
-  it.only('should fail to deserialize invalid protocol', async () => {
+  it('should fail to deserialize invalid protocol', async () => {
     const serialized = 'webb://' +
       'v2:invalid/' +
       '1:1/' +
@@ -119,7 +119,7 @@ describe('Note class', () => {
     }
   });
 
-  it.only('should fail to deserialize invalid version', async () => {
+  it('should fail to deserialize invalid version', async () => {
     const serialized = 'webb://' +
       'v3:anchor/' +
       '1:1/' +
@@ -135,7 +135,7 @@ describe('Note class', () => {
     }
   });
 
-  it.only('should fail to deserialize invalid source chain id', async () => {
+  it('should fail to deserialize invalid source chain id', async () => {
     const serialized = 'webb://' +
       'v2:anchor/' +
       'invalid_source_chain_id:1/' +
@@ -151,7 +151,7 @@ describe('Note class', () => {
     }
   });
 
-  it.only('should fail to deserialize invalid target chain id', async () => {
+  it('should fail to deserialize invalid target chain id', async () => {
     const serialized = 'webb://' +
       'v2:anchor/' +
       '1:invalid_target_chain_id/' +
@@ -167,7 +167,7 @@ describe('Note class', () => {
     }
   });
 
-  it.only('should fail to deserialize invalid note length', async () => {
+  it('should fail to deserialize invalid note length', async () => {
     const serialized = 'webb://' +
       'v2:anchor/' +
       '1:1/' +
@@ -183,7 +183,7 @@ describe('Note class', () => {
     }
   });
 
-  it.only('should fail to deserialize anchor invalid secrets (invalid chain id item - too large)', async () => {
+  it('should fail to deserialize anchor invalid secrets (invalid chain id item - too large)', async () => {
     const serialized = 'webb://' +
       'v2:anchor/' +
       '1:1/' +
@@ -200,7 +200,7 @@ describe('Note class', () => {
     }
   });
 
-  it.only('should fail to deserialize anchor invalid secrets (invalid chain id item - too small)', async () => {
+  it('should fail to deserialize anchor invalid secrets (invalid chain id item - too small)', async () => {
     const serialized = 'webb://' +
       'v2:anchor/' +
       '1:1/' +
@@ -217,7 +217,7 @@ describe('Note class', () => {
     }
   });
 
-  it.only('should fail to deserialize anchor invalid secrets (missing chain id item)', async () => {
+  it('should fail to deserialize anchor invalid secrets (missing chain id item)', async () => {
     const serialized = 'webb://' +
       'v2:anchor/' +
       '1:1/' +
@@ -234,7 +234,7 @@ describe('Note class', () => {
     }
   });
 
-  it.only('should fail to deserialize anchor invalid secrets (nullifier item)', async () => {
+  it('should fail to deserialize anchor invalid secrets (nullifier item)', async () => {
     const serialized = 'webb://' +
       'v2:anchor/' +
       '1:1/' +
@@ -251,7 +251,7 @@ describe('Note class', () => {
     }
   });
 
-  it.only('should fail to deserialize anchor invalid secrets (multiple colons)', async () => {
+  it('should fail to deserialize anchor invalid secrets (multiple colons)', async () => {
     const serialized = 'webb://' +
       'v2:anchor/' +
       '1:1/' +
@@ -268,7 +268,7 @@ describe('Note class', () => {
     }
   });
 
-  it.only('should fail to deserialize anchor invalid secrets (1 colon)', async () => {
+  it('should fail to deserialize anchor invalid secrets (1 colon)', async () => {
     const serialized = 'webb://' +
       'v2:anchor/' +
       '1:1/' +

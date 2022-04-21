@@ -1,12 +1,13 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { CurrencyId } from '@webb-tools/types/interfaces';
-
 import { ApiPromise, ApiRx } from '@polkadot/api';
+import { U32 } from '@polkadot/types';
 
 import { FixedPointNumber } from './fixed-point-number.js';
 import { CHAIN } from './type.js';
+
+export type CurrencyId = U32;
 
 export interface TokenConfig {
   chain?: CHAIN; // which chain the token is in

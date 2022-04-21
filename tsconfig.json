@@ -2,18 +2,20 @@
   "exclude": [
     "build/**/*",
     "**/build/**/*",
-    "scripts"
+    "scripts",
+    "node_modules/**/*",
+    "**/node_modules/**/*",
   ],
   "include": [
     "packages/**/*",
-    "examples/*",
+    "examples/**/*",
     "tests/**/*"
   ],
   "compilerOptions": {
     "types": ["mocha", "node"],
     "declaration": true,
-    "target": "ESNext",
-    "module": "ESNext",
+    "target": "esnext",
+    "module": "esnext",
     "jsx": "preserve",
     "strict": true,
     "noImplicitAny": true,
@@ -25,9 +27,13 @@
     "baseUrl": ".",
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true, //
-    
+    "allowSyntheticDefaultImports": true,
     "paths": {
+      "@polkadot/types/lookup": [
+        "packages/types/src/interfaces/types-lookup.ts"
+      ],
+      "@polkadot/api/augment": ["packages/types/src/interfaces/augment-api.ts"],
+      "@polkadot/types/augment": ["packages/types/src/interfaces/augment-types.ts"],
       "@webb-tools/api": [
         "packages/api/src"
       ],
@@ -39,12 +45,6 @@
       ],
       "@webb-tools/types/*": [
         "packages/types/src/*"
-      ],
-      "@webb-tools/type-definitions": [
-        "packages/type-definitions/src"
-      ],
-      "@webb-tools/type-definitions/*": [
-        "packages/type-definitions/src/*"
       ],
       "@webb-tools/sdk-core": [
         "packages/sdk-core/src"
@@ -69,9 +69,14 @@
       ],
       "@webb-tools/api-providers/*": [
         "packages/api-providers/src/*"
-      ]
+      ],
+      "@webb-tools/api-derive": [
+        "packages/api-derive/src"
+      ],
+      "@webb-tools/api-derive/*": [
+        "packages/api-derive/src/*"
+      ],
     },
-
     "typeRoots": [
       "./node_modules/@polkadot/ts",
       "./node_modules/@types"

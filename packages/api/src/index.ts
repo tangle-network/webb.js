@@ -1,16 +1,11 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import webbTypesPkg from '@webb-tools/types/index.js';
+import '@webb-tools/api-derive/augmentDerives.js';
+
+import { derive as webbDerives } from '@webb-tools/api-derive/index.js';
 
 import { ApiOptions } from '@polkadot/api/types';
-
-const { rpc: webbRpc, types: webbTypes, typesAlias: webbTypesAlias, typesBundle: webbTypesBundle } = webbTypesPkg;
-
-export const defaultOptions: ApiOptions = {
-  rpc: webbRpc,
-  types: webbTypes
-};
 
 /**
  *
@@ -20,17 +15,19 @@ export const options = ({ types = {},
   rpc = {},
   typesAlias = {},
   typesBundle = {},
+  derives = {},
   ...otherOptions }: ApiOptions = {}): ApiOptions => ({
+  derives: {
+    ...webbDerives,
+    ...derives
+  },
   rpc: {
-    ...webbRpc,
     ...rpc
   },
   types: {
-    ...webbTypes,
     ...types
   },
   typesAlias: {
-    ...webbTypesAlias,
     ...typesAlias
   },
   typesBundle: {
@@ -38,7 +35,6 @@ export const options = ({ types = {},
     spec: {
       ...typesBundle.spec,
       webb: {
-        ...webbTypesBundle?.spec?.webb,
         ...typesBundle?.spec?.webb
       }
     }
@@ -57,18 +53,13 @@ export const optionsWithChain = (chainTypes: any) => ({ types = {},
   typesBundle = {},
   ...otherOptions }: ApiOptions = {}): ApiOptions => ({
   rpc: {
-    ...webbRpc,
     ...rpc
   },
   types: {
-    ...webbTypes,
     ...chainTypes.types,
-    ...types,
-    Address: 'MultiAddress',
-    LookupSource: 'MultiAddress'
+    ...types
   },
   typesAlias: {
-    ...webbTypesAlias,
     ...typesAlias
   },
   typesBundle: {
@@ -77,7 +68,6 @@ export const optionsWithChain = (chainTypes: any) => ({ types = {},
       ...typesBundle.spec,
       ...chainTypes.typesBundle.spec,
       webb: {
-        ...webbTypesBundle?.spec?.webb,
         ...typesBundle?.spec?.webb
       }
     }
