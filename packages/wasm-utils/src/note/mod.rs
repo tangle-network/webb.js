@@ -1,7 +1,8 @@
-use ark_bn254::Bn254;
 use core::fmt;
 use std::str::FromStr;
 
+use ark_bn254::Fr as FrBn254;
+use ark_ff::{BigInteger, PrimeField};
 use arkworks_setups::common::Leaf;
 use arkworks_setups::utxo::Utxo;
 use js_sys::{JsString, Uint8Array};
@@ -28,7 +29,7 @@ macro_rules! console_log {
 }
 
 enum JsUtxoInner {
-	Bn254(Utxo<Bn254>),
+	Bn254(Utxo<FrBn254>),
 }
 
 #[wasm_bindgen]
@@ -38,16 +39,17 @@ pub struct JsUtxo {
 	pub inner: JsUtxoInner,
 }
 impl JsUtxo {
-	pub fn new_from_bn254_UTXO(utxo: Utxo<Bn254>) -> Self {
+	pub fn new_from_bn254_UTXO(utxo: Utxo<FrBn254>) -> Self {
 		Self {
 			inner: JsUtxoInner::Bn254(utxo),
 		}
 	}
 
-	pub fn new_from_Bls381_UTXO(_utxo: Utxo<Bn254>) -> Self {
+	pub fn new_from_Bls381_UTXO(_utxo: Utxo<FrBn254>) -> Self {
 		unimplemented!()
 	}
 }
+
 #[wasm_bindgen]
 impl JsUtxo {
 	#[wasm_bindgen(getter)]
@@ -123,13 +125,31 @@ enum JsLeafInner {
 	Anchor(Leaf),
 	VAnchor(JsUtxo),
 }
+#[wasm_bindgen]
+struct JsLeaf {
+	#[wasm_bindgen(skip)]
+	pub inner: JsLeafInner,
+}
+
+impl JsLeaf {
+	#[wasm_bindgen(getter)]
+	pub fn protocol(&self) -> Protocol {
+		let protocol = match self.inner {
+			JsLeafInner::Mixer(_) => "mixer",
+			JsLeafInner::Anchor(_) => "anchor",
+			JsLeafInner::VAnchor(_) => "vanchor",
+		};
+
+		JsValue::from(protocol)
+	}
+}
 impl JsNote {
 	/// Deseralize note from a string
 	pub fn deserialize(note: &str) -> Result<Self, OperationError> {
 		note.parse().map_err(Into::into)
 	}
 
-	pub fn get_leaf_and_nullifier(&self) -> Result<Leaf, OperationError> {
+	pub fn get_leaf_and_nullifier(&self) -> Result<JsLeaf, OperationError> {
 		match self.protocol {
 			NoteProtocol::Mixer => {
 				let raw = match self.version {
@@ -145,12 +165,15 @@ impl JsNote {
 						raw
 					}
 				};
-				mixer::get_leaf_with_private_raw(
+				let mixer_leaf = mixer::get_leaf_with_private_raw(
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
 					self.exponentiation.unwrap_or(5),
 					&raw,
-				)
+				)?;
+				Ok(JsLeaf {
+					inner: JsLeafInner::Mixer(mixer_leaf),
+				})
 			}
 			NoteProtocol::Anchor => {
 				let mut secret_bytes: Vec<u8> = Vec::new();
@@ -184,15 +207,56 @@ impl JsNote {
 					));
 				}
 
-				anchor::get_leaf_with_private_raw(
+				let anchor_leaf = anchor::get_leaf_with_private_raw(
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
 					self.exponentiation.unwrap_or(4),
 					u64::from_str(&self.target_chain_id).unwrap(),
 					nullifier_bytes,
 					secret_bytes,
-				)
+				)?;
+
+				Ok(JsLeaf {
+					inner: JsLeafInner::Anchor(anchor_leaf),
+				})
 			}
+			NoteProtocol::VAnchor => match self.version {
+				NoteVersion::V1 => {
+					let message = "VAnchor protocol isn't supported in note v1";
+					return Err(OperationError::new_with_message(
+						OpStatusCode::FailedToGenerateTheLeaf,
+						message,
+					));
+				}
+				NoteVersion::V2 => {
+					if self.secrets.len() == 6 {
+						let chain_id = self.secrets[0].clone();
+						let amount = self.secrets[1].clone();
+						let blinding = self.secrets[2].clone();
+						let secret_key = self.secrets[3].clone();
+						let index = self.secrets[5].clone();
+
+						let curve = self.curve.unwrap_or(Curve::Bn254);
+						let width = self.width.unwrap_or(2);
+						let exponentiation = self.exponentiation.unwrap_or(5);
+						let utxo = vanchor::get_leaf_with_private_raw(
+							curve,
+							width,
+							exponentiation,
+							&secret_key,
+							&blinding,
+							u64::from_le_bytes(chain_id.as_slice().into()),
+							u128::from_le_bytes(amount.as_slice().into()),
+							index: Some(u64::from_le_bytes(index)),
+						)?;
+						Ok(JsLeaf {
+							inner: JsLeafInner::VAnchor(utxo),
+						})
+					} else {
+						false
+					}
+				}
+			},
 			_ => {
 				let message = format!("{} protocol isn't supported yet", self.protocol);
 				Err(OperationError::new_with_message(
