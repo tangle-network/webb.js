@@ -1,12 +1,12 @@
 import {cryptoWaitReady} from "@polkadot/util-crypto";
 import {decodeAddress, Keyring} from "@polkadot/keyring";
 import {fetchRPCTreeLeaves, polkadotTx, preparePolkadotApi, transferBalance} from "../utils";
-import {Note, NoteGenInput, ProvingManager, ProvingManagerSetupInput, u8aToHex} from "../../../packages/sdk-core/build";
+import {Note, NoteGenInput, ProvingManager, ProvingManagerSetupInput, u8aToHex} from "@webb-tools/sdk-core";
 import path from "path";
 import fs from "fs";
 import {AnchorWithdrawProof} from "../../../tests/utils";
 
-async function anchorBn254() {
+export async function anchorBn254() {
   const BOBPhrase =
     'asthma early danger glue satisfy spatial decade wing organ bean census announce';
   await cryptoWaitReady();
@@ -20,7 +20,6 @@ async function anchorBn254() {
   await transferBalance(apiPromise, charlie, [bob], 10000);
   console.info(`[ anchorBn254 ] Transferred the balance to Bob`);
   const treeId = '3';
-  const amount = '10';
   // => Depositing with bob account <=
   const noteGenInput: NoteGenInput = {
     amount: "10",

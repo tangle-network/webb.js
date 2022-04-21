@@ -3,8 +3,8 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import fs from 'fs';
-import pkg from 'websocket';
+import * as fs from 'fs';
+import * as pkg from 'websocket';
 
 const { w3cwebsocket: WebSocket } = pkg;
 

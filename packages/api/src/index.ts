@@ -1,7 +1,9 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import * as webbTypes from '@webb-tools/types/index.js';
+import '@webb-tools/api-derive/augmentDerives.js';
+
+import { derive as webbDerives } from '@webb-tools/api-derive';
 
 import { ApiOptions } from '@polkadot/api/types';
 
@@ -13,13 +15,16 @@ export const options = ({ types = {},
   rpc = {},
   typesAlias = {},
   typesBundle = {},
+  derives = {},
   ...otherOptions }: ApiOptions = {}): ApiOptions => ({
+  derives: {
+    ...webbDerives,
+    ...derives
+  },
   rpc: {
     ...rpc
   },
-  // @ts-ignore
   types: {
-    ...webbTypes,
     ...types
   },
   typesAlias: {
@@ -51,7 +56,6 @@ export const optionsWithChain = (chainTypes: any) => ({ types = {},
     ...rpc
   },
   types: {
-    ...webbTypes,
     ...chainTypes.types,
     ...types
   },

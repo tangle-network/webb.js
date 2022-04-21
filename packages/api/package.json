@@ -20,6 +20,6 @@
     "@babel/runtime": "^7.10.2",
     "@polkadot/api": "8.1.1",
     "@polkadot/rpc-core": "8.1.1",
-    "@webb-tools/types": "0.1.4-50"
+    "@webb-tools/api-derive": "file:../api-derive/build"
   }
 }

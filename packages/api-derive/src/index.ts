@@ -1,12 +1,10 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
+import type { DeriveCustom } from '@polkadot/api-base/types';
 
-import { ApiPromise } from '@polkadot/api';
+import * as merkleTreeBn254 from './merkleTreeBn254';
 
-export const getMixers = async (
-  _instanceId: string,
-  _api: ApiPromise
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-): Promise<void> => {};
+export const derive: DeriveCustom = {
+  merkleTreeBn254: merkleTreeBn254 as unknown as DeriveCustom[string]
+};

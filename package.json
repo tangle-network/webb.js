@@ -35,10 +35,9 @@
     "check-deps": "./node_modules/@open-web3/util/scripts/check-deps.js yarn.lock @polkadot/ @open-web3/",
     "update-metadata": "NODE_OPTIONS='--loader ./loader.js' node --experimental-specifier-resolution=node packages/types/scripts/updateMetadata.ts",
     "example:mixer": "ts-node -r tsconfig-paths/register examples/mixer.ts",
-    "script": "NODE_OPTIONS=\"loader=./loader.js\" node",
+    "script": "NODE_OPTIONS=\"--loader ./loader.js\" node",
     "format": "prettier --write \"packages/**/*.{ts,js,jsx,tsx}\" && cargo fmt --manifest-path packages/wasm-utils/Cargo.toml",
-    "doc": "npx typedoc --name \"Webb Tools API\" --includeVersion --options ./typedoc.json",
-    "generate:meta": "ts-node --skip-project node_modules/.bin/polkadot-types-from-chain --package sample-polkadotjs-typegen/interfaces --endpoint ./packages/types/src/metadata/metadata.json --output ./interfaces --strict"
+    "doc": "npx typedoc --name \"Webb Tools API\" --includeVersion --options ./typedoc.json"
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",
@@ -49,6 +48,7 @@
     "@open-web3/util": "^1.0.1",
     "@openzeppelin/contracts": "^4.2.0",
     "@polkadot/api": "8.1.1",
+    "@polkadot/api-derive": "8.1.1",
     "@polkadot/dev": "0.66.4",
     "@polkadot/types": "8.1.1",
     "@truffle/hdwallet-provider": "^1.4.1",
