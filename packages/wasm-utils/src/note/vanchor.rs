@@ -7,7 +7,7 @@ use rand::rngs::OsRng;
 
 use crate::note::{JsUtxo, JsUtxoInner};
 use crate::types::{Curve, OpStatusCode, OperationError};
-use crate::{VAnchorR1CSProverBls381_30_2, VAnchorR1CSProverBn254_30_2, VAnchorR1CSProverBn254_30_2_2_2};
+use crate::VAnchorR1CSProverBn254_30_2_2_2;
 
 pub fn generate_secrets(
 	amount: u128,
@@ -17,7 +17,7 @@ pub fn generate_secrets(
 	chain_id: u64,
 	index: Option<u64>,
 	rng: &mut OsRng,
-) -> Result<JsUtxo, OpStatusCode> {
+) -> Result<JsUtxo, OperationError> {
 	let utxo: JsUtxo = match (curve, exponentiation, width) {
 		(Curve::Bls381, 5, 5) => {
 			VAnchorR1CSProverBn254_30_2_2_2::create_random_leaf(ArkCurve::Bls381, chain_id, amount, index, rng)

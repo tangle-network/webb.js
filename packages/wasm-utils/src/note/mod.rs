@@ -33,7 +33,6 @@ enum JsUtxoInner {
 }
 
 #[wasm_bindgen]
-#[derive(Debug, Clone)]
 pub struct JsUtxo {
 	#[wasm_bindgen(skip)]
 	pub inner: JsUtxoInner,
@@ -54,48 +53,48 @@ impl JsUtxo {
 impl JsUtxo {
 	#[wasm_bindgen(getter)]
 	#[wasm_bindgen(js_name = chainIdRaw)]
-	fn chain_id_raw(&self) -> u64 {
+	pub fn chain_id_raw(&self) -> u64 {
 		let chain_id_raw = match &self.inner {
 			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.chain_id_raw,
 		};
-		JsString::from(chain_id_raw.to_string())
+		chain_id_raw
 	}
 
 	#[wasm_bindgen(getter)]
 	#[wasm_bindgen(js_name = chainIdBytes)]
-	fn chain_id_bytes(&self) -> JsString {
+	pub fn chain_id_bytes(&self) -> JsString {
 		let chain_id_bytes = match &self.inner {
 			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.chain_id.into_repr().to_bytes_le(),
 		};
-		JsString::from(&hex::encode(chain_id_bytes))
+		hex::encode(chain_id_bytes).into()
 	}
 
 	#[wasm_bindgen(getter)]
-	fn amount(&self) -> JsString {
+	pub fn amount(&self) -> JsString {
 		let amount = match &self.inner {
 			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.amount.into_repr().to_bytes_le(),
 		};
-		JsString::from(&hex::encode(amount))
+		hex::encode(amount).into()
 	}
 
 	#[wasm_bindgen(getter)]
-	fn blinding(&self) -> JsString {
+	pub fn blinding(&self) -> JsString {
 		let blinding = match &self.inner {
 			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.blinding.into_repr().to_bytes_le(),
 		};
-		JsString::from(&hex::encode(blinding))
+		hex::encode(blinding).into()
 	}
 
 	#[wasm_bindgen(getter)]
-	fn secret_key(&self) -> JsString {
+	pub fn secret_key(&self) -> JsString {
 		let secret_key = match &self.inner {
 			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.keypair.secret_key.into_repr().to_bytes_le(),
 		};
-		JsString::from(&hex::encode(secret_key))
+		hex::encode(secret_key).into()
 	}
 
 	#[wasm_bindgen(getter)]
-	fn index(&self) -> JsValue {
+	pub fn index(&self) -> JsValue {
 		let secret_key = match &self.inner {
 			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.index,
 		}
@@ -104,7 +103,7 @@ impl JsUtxo {
 	}
 
 	#[wasm_bindgen(getter)]
-	fn nullifier(&self) -> JsValue {
+	pub fn nullifier(&self) -> JsValue {
 		let secret_key = match &self.inner {
 			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.nullifier.clone(),
 		}
@@ -113,24 +112,26 @@ impl JsUtxo {
 	}
 
 	#[wasm_bindgen(getter)]
-	fn commitment(&self) -> JsString {
+	pub fn commitment(&self) -> Uint8Array {
 		let commitment = match &self.inner {
 			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.commitment.into_repr().to_bytes_le(),
 		};
-		JsString::from(&hex::encode(commitment))
+		Uint8Array::from(commitment)
 	}
 }
-enum JsLeafInner {
+
+pub enum JsLeafInner {
 	Mixer(Leaf),
 	Anchor(Leaf),
 	VAnchor(JsUtxo),
 }
 #[wasm_bindgen]
-struct JsLeaf {
+pub struct JsLeaf {
 	#[wasm_bindgen(skip)]
 	pub inner: JsLeafInner,
 }
 
+#[wasm_bindgen]
 impl JsLeaf {
 	#[wasm_bindgen(getter)]
 	pub fn protocol(&self) -> Protocol {
@@ -140,7 +141,16 @@ impl JsLeaf {
 			JsLeafInner::VAnchor(_) => "vanchor",
 		};
 
-		JsValue::from(protocol)
+		JsValue::from(protocol).into()
+	}
+
+	#[wasm_bindgen(getter)]
+	pub fn commitment(&self) -> Uint8Array {
+		let leaf = match &self.inner {
+			JsLeafInner::Mixer(mixer_leaf) => Uint8Array::from(mixer_leaf.secret_bytes.as_slice()),
+			JsLeafInner::Anchor(anchor_leaf) => Uint8Array::from(anchor_leaf.secret_bytes.as_slice()),
+			JsLeafInner::VAnchor(vanchor_leaf) => vanchor_leaf.commitment(),
+		};
 	}
 }
 impl JsNote {
@@ -222,7 +232,7 @@ impl JsNote {
 			}
 			NoteProtocol::VAnchor => match self.version {
 				NoteVersion::V1 => {
-					let message = "VAnchor protocol isn't supported in note v1";
+					let message = "VAnchor protocol isn't supported in note v1".to_string();
 					return Err(OperationError::new_with_message(
 						OpStatusCode::FailedToGenerateTheLeaf,
 						message,
@@ -253,7 +263,11 @@ impl JsNote {
 							inner: JsLeafInner::VAnchor(utxo),
 						})
 					} else {
-						false
+						let message = format!("Invalid secret format for protocol {}", self.protocol);
+						return Err(OperationError::new_with_message(
+							OpStatusCode::InvalidNoteSecrets,
+							message,
+						));
 					}
 				}
 			},
@@ -646,7 +660,8 @@ impl JsNote {
 	#[wasm_bindgen(js_name = getLeafCommitment)]
 	pub fn get_leaf_commitment(&self) -> Result<Uint8Array, JsValue> {
 		let leaf = self.get_leaf_and_nullifier()?;
-		Ok(Uint8Array::from(leaf.leaf_bytes.as_slice()))
+
+		Ok(leaf.commitment())
 	}
 
 	pub fn serialize(&self) -> JsString {

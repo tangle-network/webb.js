@@ -32,32 +32,6 @@ pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
 	truncated_bytes
 }
 
-enum JsUtxoInner {
-	Bn254(Utxo<Bn254>),
-	Bls381(Utxo<Bls12_381>),
-}
-
-#[wasm_bindgen]
-#[derive(Debug, Clone)]
-pub struct JsUtxo {
-  pub chain_id_bytes: Vec<u8>,
-  pub amount: u128,
-  pub public_key_bytes: Vec<u8>,
-  pub blinding_bytes: Vec<u8>,
-  pub index: u32,
-  pub private_key_bytes: Vec<u8>,
-  pub nullifier_bytes: Vec<u8>,
-  pub leaf_bytes: Vec<u8>,
-  pub nullifier_hash_bytes: Vec<u8>,
-}
-
-#[wasm_bindgen]
-impl JsUtxo {
-	#[wasm_bindgen(getter)]
-	pub fn public_key(&self) -> JsString {
-    self.inner.
-  }
-}
 #[allow(clippy::unused_unit)]
 #[wasm_bindgen]
 #[derive(Debug, Eq, PartialEq)]
