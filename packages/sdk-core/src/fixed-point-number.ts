@@ -56,7 +56,9 @@ export class FixedPointNumber {
   private inner: BigNumber;
 
   constructor (origin: number | string, precision = 18) {
-    if (typeof origin !== 'number' && typeof origin !== 'string') { throw new Error('FixedPointNumber constructor should use number or string'); }
+    if (typeof origin !== 'number' && typeof origin !== 'string') {
+      throw new Error('FixedPointNumber constructor should use number or string');
+    }
 
     this.precision = precision;
     this.inner = new BN(origin).shiftedBy(this.precision);

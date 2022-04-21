@@ -107,7 +107,9 @@ export class AnchorContract {
 
   async isWrappableTokenApprovalRequired (tokenAddress: string) {
     // Native token never requires approval
-    if (tokenAddress === zeroAddress) return false;
+    if (tokenAddress === zeroAddress) {
+      return false;
+    }
 
     const userAddress = await this.signer.getAddress();
     const webbToken = await this.getWebbToken();
@@ -152,7 +154,9 @@ export class AnchorContract {
 
   async approve (tokenInstance: Contract) {
     // check the approved spending before attempting deposit
-    if (tokenInstance == null) return;
+    if (tokenInstance == null) {
+      return;
+    }
 
     if (tokenInstance != null) {
       const depositAmount = await this.denomination;
