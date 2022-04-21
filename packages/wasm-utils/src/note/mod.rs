@@ -1,7 +1,9 @@
+use ark_bn254::Bn254;
 use core::fmt;
 use std::str::FromStr;
 
 use arkworks_setups::common::Leaf;
+use arkworks_setups::utxo::Utxo;
 use js_sys::{JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
@@ -15,6 +17,7 @@ use crate::types::{
 mod anchor;
 pub mod mixer;
 
+mod vanchor;
 mod versioning;
 
 #[allow(unused_macros)]
@@ -24,6 +27,102 @@ macro_rules! console_log {
 	($($t:tt)*) => (crate::types::log(&format_args!($($t)*).to_string()))
 }
 
+enum JsUtxoInner {
+	Bn254(Utxo<Bn254>),
+}
+
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct JsUtxo {
+	#[wasm_bindgen(skip)]
+	pub inner: JsUtxoInner,
+}
+impl JsUtxo {
+	pub fn new_from_bn254_UTXO(utxo: Utxo<Bn254>) -> Self {
+		Self {
+			inner: JsUtxoInner::Bn254(utxo),
+		}
+	}
+
+	pub fn new_from_Bls381_UTXO(_utxo: Utxo<Bn254>) -> Self {
+		unimplemented!()
+	}
+}
+#[wasm_bindgen]
+impl JsUtxo {
+	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name = chainIdRaw)]
+	fn chain_id_raw(&self) -> u64 {
+		let chain_id_raw = match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.chain_id_raw,
+		};
+		JsString::from(chain_id_raw.to_string())
+	}
+
+	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name = chainIdBytes)]
+	fn chain_id_bytes(&self) -> JsString {
+		let chain_id_bytes = match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.chain_id.into_repr().to_bytes_le(),
+		};
+		JsString::from(&hex::encode(chain_id_bytes))
+	}
+
+	#[wasm_bindgen(getter)]
+	fn amount(&self) -> JsString {
+		let amount = match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.amount.into_repr().to_bytes_le(),
+		};
+		JsString::from(&hex::encode(amount))
+	}
+
+	#[wasm_bindgen(getter)]
+	fn blinding(&self) -> JsString {
+		let blinding = match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.blinding.into_repr().to_bytes_le(),
+		};
+		JsString::from(&hex::encode(blinding))
+	}
+
+	#[wasm_bindgen(getter)]
+	fn secret_key(&self) -> JsString {
+		let secret_key = match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.keypair.secret_key.into_repr().to_bytes_le(),
+		};
+		JsString::from(&hex::encode(secret_key))
+	}
+
+	#[wasm_bindgen(getter)]
+	fn index(&self) -> JsValue {
+		let secret_key = match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.index,
+		}
+		.map(|value| JsString::from(value.to_string()));
+		JsValue::from(secret_key)
+	}
+
+	#[wasm_bindgen(getter)]
+	fn nullifier(&self) -> JsValue {
+		let secret_key = match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.nullifier.clone(),
+		}
+		.map(|value| value.into_repr().to_bytes_le());
+		JsValue::from(secret_key)
+	}
+
+	#[wasm_bindgen(getter)]
+	fn commitment(&self) -> JsString {
+		let commitment = match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.commitment.into_repr().to_bytes_le(),
+		};
+		JsString::from(&hex::encode(commitment))
+	}
+}
+enum JsLeafInner {
+	Mixer(Leaf),
+	Anchor(Leaf),
+	VAnchor(JsUtxo),
+}
 impl JsNote {
 	/// Deseralize note from a string
 	pub fn deserialize(note: &str) -> Result<Self, OperationError> {

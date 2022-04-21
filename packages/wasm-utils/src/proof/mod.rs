@@ -13,6 +13,7 @@ use ark_bn254::{Bn254, Fr as Bn254Fr};
 use arkworks_native_gadgets::merkle_tree::SparseMerkleTree;
 use arkworks_native_gadgets::poseidon::Poseidon;
 use arkworks_setups::common::{setup_params, setup_tree_and_create_path, verify_unchecked_raw};
+use arkworks_setups::utxo::Utxo;
 use arkworks_setups::Curve as ArkCurve;
 use wasm_bindgen::__rt::std::collections::btree_map::BTreeMap;
 
@@ -31,6 +32,32 @@ pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
 	truncated_bytes
 }
 
+enum JsUtxoInner {
+	Bn254(Utxo<Bn254>),
+	Bls381(Utxo<Bls12_381>),
+}
+
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct JsUtxo {
+  pub chain_id_bytes: Vec<u8>,
+  pub amount: u128,
+  pub public_key_bytes: Vec<u8>,
+  pub blinding_bytes: Vec<u8>,
+  pub index: u32,
+  pub private_key_bytes: Vec<u8>,
+  pub nullifier_bytes: Vec<u8>,
+  pub leaf_bytes: Vec<u8>,
+  pub nullifier_hash_bytes: Vec<u8>,
+}
+
+#[wasm_bindgen]
+impl JsUtxo {
+	#[wasm_bindgen(getter)]
+	pub fn public_key(&self) -> JsString {
+    self.inner.
+  }
+}
 #[allow(clippy::unused_unit)]
 #[wasm_bindgen]
 #[derive(Debug, Eq, PartialEq)]
