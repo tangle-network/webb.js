@@ -1,4 +1,4 @@
-import {Note, NoteGenInput, ProvingManager, u8aToHex} from '@webb-tools/sdk-core/build/index.js';
+import {Note, NoteGenInput, ProvingManager, u8aToHex} from '@webb-tools/sdk-core';
 import {fetchRPCTreeLeaves, polkadotTx, preparePolkadotApi, transferBalance} from "../utils.js";
 import {decodeAddress, Keyring} from "@polkadot/keyring";
 import {cryptoWaitReady} from '@polkadot/util-crypto'

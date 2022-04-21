@@ -20,6 +20,7 @@ export enum WebbCurrencyId {
   webbWETH,
   DEV,
   webbDEV,
+  EGG,
 }
 
 export function webbCurrencyIdToString (c: WebbCurrencyId): string {
@@ -46,6 +47,8 @@ export function webbCurrencyIdToString (c: WebbCurrencyId): string {
       return 'DEV';
     case WebbCurrencyId.webbDEV:
       return 'webbDEV';
+    case WebbCurrencyId.EGG:
+      return 'EGG';
   }
 }
 
@@ -73,6 +76,8 @@ export function webbCurrencyIdFromString (c: string): WebbCurrencyId {
       return WebbCurrencyId.DEV;
     case 'webbDEV':
       return WebbCurrencyId.webbDEV;
+    case 'EGG':
+      return WebbCurrencyId.EGG;
     default:
       throw new Error(`${c} isn't a valid WebbCurrencyId`);
   }

@@ -6,7 +6,6 @@
 import { Currency, DepositPayload as TDepositPayload, MixerSize, ORMLCurrency } from '@webb-tools/api-providers/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
-import { PalletMixerMixerMetadata } from '@webb-tools/types/interfaces/pallets/index.js';
 
 import { u8aToHex } from '@polkadot/util';
 
@@ -32,7 +31,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     // const tokenProperty: Array<NativeTokenProperties> = await api.rpc.system.properties();
     const groupItem = data
       .map(([storageKey, info]) => {
-        const mixerInfo = (info as unknown as PalletMixerMixerMetadata).toHuman();
+        const mixerInfo = info as any;
         const cId = Number(mixerInfo.asset);
         const amount = mixerInfo.depositSize;
         // @ts-ignore

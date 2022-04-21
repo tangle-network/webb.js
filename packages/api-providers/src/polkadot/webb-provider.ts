@@ -114,8 +114,6 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
   }
 
   private async insureApiInterface () {
-    // check for RPC
-    console.log(this.api, 'api');
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const merkleRPC = Boolean(this.api.rpc.mt.getLeaves);

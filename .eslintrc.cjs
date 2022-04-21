@@ -10,6 +10,7 @@ module.exports = {
     '.eslintrc.cjs',
     '.eslintrc.js',
     'babel-config-esm.cjs',
+    'babel-config-cjs.cjs',
     'loader.js',
     '.github/**',
     '.vscode/**',

@@ -90,7 +90,6 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
       targetChain: destChainId.toString(),
       targetIdentifyingData: treeId.toString(),
       tokenSymbol: tokenSymbol,
-      version: 'v1',
       width: '4'
     };
 
