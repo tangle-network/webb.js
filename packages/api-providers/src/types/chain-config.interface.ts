@@ -15,6 +15,8 @@ export interface ChainConfig {
   url: string;
   evmRpcUrls?: string[];
   blockExplorerStub?: string;
+  // The name of the chain according to polkadotjs's api.runtimeChain
+  substrateName?: string;
   logo: ReactElement;
   nativeCurrencyId: WebbCurrencyId;
   currencies: Array<WebbCurrencyId>;

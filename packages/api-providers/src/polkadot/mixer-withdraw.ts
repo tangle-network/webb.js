@@ -13,10 +13,10 @@ import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { MixerWithdraw } from '../abstracts/index.js';
 import { chainTypeIdToInternalId, InternalChainId, parseChainIdType } from '../chains/index.js';
+import { chainIdToRelayerName } from '../utils/relayer-utils.js';
 import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
 import { PolkadotMixerDeposit } from './index.js';
 import { WebbPolkadot } from './webb-provider.js';
-import { chainIdToRelayerName } from '../utils/relayer-utils.js';
 
 const logger = LoggerService.get('PolkadotMixerWithdraw');
 

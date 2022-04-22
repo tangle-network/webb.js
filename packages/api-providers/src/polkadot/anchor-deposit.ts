@@ -16,6 +16,16 @@ import { WebbPolkadot } from './webb-provider.js';
 const logger = LoggerService.get('PolkadotBridgeDeposit');
 
 type DepositPayload = IDepositPayload<Note, [number, string]>;
+
+export interface NoteGenerationInput {
+  amount: number,
+  sourceChainId: number,
+  sourceIdentifyingData: number | string,
+  targetChainId: number
+  targetIdentifyingData: number | string,
+  tokenSymbol: string,
+}
+
 /**
  * Webb Anchor API implementation for Polkadot
  **/
@@ -37,6 +47,41 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
     const hash = await tx.call(account.address);
 
     console.log(hash);
+  }
+
+  async generateBridgeNote2 (input: NoteGenerationInput): Promise<DepositPayload> {
+    // Create the note gen input
+    const noteInput: NoteGenInput = {
+      amount: input.amount.toString(),
+      backend: 'Arkworks',
+      curve: 'Bn254',
+      denomination: '18',
+      exponentiation: '5',
+      hashFunction: 'Poseidon',
+      protocol: 'anchor',
+      sourceChain: input.sourceChainId.toString(),
+      sourceIdentifyingData: input.sourceIdentifyingData.toString(),
+      targetChain: input.targetChainId.toString(),
+      targetIdentifyingData: input.targetIdentifyingData.toString(),
+      tokenSymbol: input.tokenSymbol,
+      width: '4'
+    };
+
+    logger.log('note input', noteInput);
+    const note = await Note.generateNote(noteInput);
+
+    const leaf = note.getLeaf();
+    const leafHex = u8aToHex(leaf);
+    // The tree id for depositing should be the source identifying data
+    const treeId = input.sourceIdentifyingData;
+
+    return {
+      note,
+      params: [
+        Number(treeId),
+        leafHex
+      ]
+    };
   }
 
   async generateBridgeNote (

@@ -27,6 +27,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     const ormlAssets = await ormlCurrency.list();
 
     const data = await api.query.mixerBn254.mixers.entries();
+
     // @ts-ignore
     // const tokenProperty: Array<NativeTokenProperties> = await api.rpc.system.properties();
     const groupItem = data
@@ -47,6 +48,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
         const currency = Currency.fromORMLAsset(
           webbPolkadot.config.currencies,
           ormlAssets.find((asset) => Number(asset.id) === cId)!,
+          1
         );
 
         return {

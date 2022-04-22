@@ -6,6 +6,9 @@ async function main() {
   const api = new ApiPromise(options());
   await api.isReady;
 
+  const runtimeChainInfo = await api.runtimeChain.toHuman();
+  console.log('runtimeChainInfo: ', runtimeChainInfo);
+
   const leafCount = await api.derive.merkleTreeBn254.getLeafCountForTree(0);
   console.log('leafCount for the tree of id 0: ', leafCount);
 
