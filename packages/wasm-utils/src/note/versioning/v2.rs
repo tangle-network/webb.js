@@ -68,7 +68,6 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OperationError> {
 	let mut token_symbol = None;
 	let mut denomination = None;
 	let mut amount = None;
-	let mut index = None;
 
 	for part in misc_parts {
 		let part_parts: Vec<&str> = part.split('=').collect();

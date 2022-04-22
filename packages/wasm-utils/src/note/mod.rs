@@ -2,7 +2,7 @@ use core::fmt;
 use std::str::FromStr;
 
 use ark_bn254::Fr as FrBn254;
-use ark_ff::{BigInteger, PrimeField};
+use ark_ff::{BigInteger, PrimeField, Zero};
 use arkworks_setups::common::Leaf;
 use arkworks_setups::utxo::Utxo;
 use hex::encode;
@@ -28,15 +28,13 @@ macro_rules! console_log {
 	// `bare_bones`
 	($($t:tt)*) => (crate::types::log(&format_args!($($t)*).to_string()))
 }
-
 enum JsUtxoInner {
 	Bn254(Utxo<FrBn254>),
 }
 
 #[wasm_bindgen]
 pub struct JsUtxo {
-	#[wasm_bindgen(skip)]
-	pub inner: JsUtxoInner,
+	inner: JsUtxoInner,
 }
 
 impl JsUtxo {
@@ -50,51 +48,65 @@ impl JsUtxo {
 		unimplemented!()
 	}
 
-  //Getters for inner enum
-  pub fn get_chain_id_raw(&self) -> u64 {
-    let chain_id_raw = match &self.inner {
-      JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.chain_id_raw,
-    };
-    chain_id_raw
-  }
-  pub fn get_chain_id_bytes(&self) -> Vec<u8> {
-    match &self.inner {
-      JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.chain_id.into_repr().to_bytes_le(),
-    }
-  }
-  pub fn get_amount(&self) -> Vec<u8> {
-     match &self.inner {
-      JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.amount.into_repr().to_bytes_le(),
-    }
-  }
+	//Getters for inner enum
+	pub fn get_chain_id_raw(&self) -> u64 {
+		let chain_id_raw = match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.chain_id_raw,
+		};
+		chain_id_raw
+	}
 
-  pub fn get_blinding(&self) -> Vec<u8> {
-    match &self.inner {
-      JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.blinding.into_repr().to_bytes_le(),
-    }
-  }
-  pub fn get_secret_key(&self) -> Vec<u8> {
-     match &self.inner {
-      JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.keypair.secret_key.into_repr().to_bytes_le(),
-    }
-  }
-  pub fn get_index(&self) -> Option<u64> {
-     match &self.inner {
-      JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.index,
-    }
-  }
-  pub fn get_nullifier(&self) -> Option<Vec<u8>> {
-     match &self.inner {
-      JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.nullifier.clone(),
-    }.map(|value| value.into_repr().to_bytes_le())
-  }
+	pub fn get_chain_id_bytes(&self) -> Vec<u8> {
+		match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.chain_id.into_repr().to_bytes_le(),
+		}
+	}
 
-  pub fn get_commitment(&self) -> Vec<u8> {
-    match &self.inner {
-      JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.commitment.into_repr().to_bytes_le(),
-    }
-  }
+	pub fn get_amount(&self) -> Vec<u8> {
+		match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.amount.into_repr().to_bytes_le(),
+		}
+	}
 
+	pub fn get_blinding(&self) -> Vec<u8> {
+		match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.blinding.into_repr().to_bytes_le(),
+		}
+	}
+
+	pub fn get_secret_key(&self) -> Vec<u8> {
+		match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.keypair.secret_key.into_repr().to_bytes_le(),
+		}
+	}
+
+	pub fn get_index(&self) -> Option<u64> {
+		match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.index,
+		}
+	}
+
+	pub fn get_index_bytes(&self) -> Vec<u8> {
+		match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => match bn254_utxo.index {
+				None => FrBn254::zero().into_repr().to_bytes_le(),
+				Some(index) => FrBn254::from(index).into_repr().to_bytes_le(),
+			},
+		}
+	}
+
+	pub fn get_nullifier(&self) -> Option<Vec<u8>> {
+		match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.nullifier.clone(),
+		}
+		.map(|value| value.into_repr().to_bytes_le())
+	}
+
+	pub fn get_commitment(&self) -> Vec<u8> {
+		match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.commitment.into_repr().to_bytes_le(),
+		}
+	}
 }
 
 #[wasm_bindgen]
@@ -102,7 +114,7 @@ impl JsUtxo {
 	#[wasm_bindgen(getter)]
 	#[wasm_bindgen(js_name = chainIdRaw)]
 	pub fn chain_id_raw(&self) -> u64 {
-  self.get_chain_id_raw()
+		self.get_chain_id_raw()
 	}
 
 	#[wasm_bindgen(getter)]
@@ -126,23 +138,23 @@ impl JsUtxo {
 
 	#[wasm_bindgen(getter)]
 	pub fn secret_key(&self) -> JsString {
-		let secret_key =self.get_secret_key();
+		let secret_key = self.get_secret_key();
 		hex::encode(secret_key).into()
 	}
 
 	#[wasm_bindgen(getter)]
 	pub fn index(&self) -> JsValue {
-		let index = self.get_index()
-		.unwrap_or(0);
+		let index = self.get_index().unwrap_or(0);
 
 		JsValue::from(index)
 	}
 
 	#[wasm_bindgen(getter)]
 	pub fn nullifier(&self) -> JsString {
-		let nullifier = self.get_nullifier()
-		.map(|value| hex::encode(value.as_slice()))
-		.unwrap_or("".to_string());
+		let nullifier = self
+			.get_nullifier()
+			.map(|value| hex::encode(value.as_slice()))
+			.unwrap_or("".to_string());
 
 		JsString::from(nullifier)
 	}
@@ -291,8 +303,8 @@ impl JsNote {
 							exponentiation,
 							secret_key.as_slice(),
 							blinding.as_slice(),
-							u64::from_le_bytes(chain_id.as_slice().into()),
-							u128::from_le_bytes(amount.as_slice().into()),
+							1000,
+							10,
 							Some(0u64),
 						)?;
 
@@ -631,7 +643,7 @@ impl JsNoteBuilder {
 		let exponentiation = self.exponentiation;
 		let width = self.width;
 		let curve = self.curve;
-		let amount = self.amount;
+		let amount = self.amount.clone();
 		let index = self.index;
 		let secrets = match self.secrets {
 			None => match protocol {
@@ -666,7 +678,13 @@ impl JsNoteBuilder {
 						index,
 						&mut OsRng,
 					)?;
-          let secret = utxo.inner.
+					let chain_id = utxo.get_chain_id_bytes();
+					let amount = utxo.get_amount();
+					let blinding = utxo.get_blinding();
+					let secret_key = utxo.get_secret_key();
+					let index = utxo.get_index_bytes();
+					// secrets
+					vec![chain_id, amount, blinding, secret_key, index]
 				}
 				_ => return Err(JsValue::from(OpStatusCode::SecretGenFailed)),
 			},

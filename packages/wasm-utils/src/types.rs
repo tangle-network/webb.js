@@ -453,6 +453,7 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::InvalidTargetIdentifyingData => "Invalid target identifying data",
 			OpStatusCode::UnsupportedParameterCombination => "Unsupported Paramater combination to generate proof",
 			OpStatusCode::InvalidProof => "Proof verification failed",
+			OpStatusCode::InvalidUTXOIndex => "Invalid UTXO Index value",
 		}
 		.to_string()
 	}
