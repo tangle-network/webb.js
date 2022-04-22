@@ -340,6 +340,8 @@ pub enum OpStatusCode {
 	UnsupportedParameterCombination = 39,
 	/// Invalid proof on verification
 	InvalidProof = 40,
+	/// Invalid index
+	InvalidUTXOIndex = 41,
 }
 
 #[wasm_bindgen]
