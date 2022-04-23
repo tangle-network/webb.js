@@ -167,7 +167,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
       if (isValidRelayer) {
         logger.info('withdrawing through relayer', activeRelayer);
         this.emit('stateChange', WithdrawState.SendingTransaction);
-        const relayerMixerTx = await activeRelayer!.initWithdraw('mixerRelayTx');
+        const relayerMixerTx = await activeRelayer!.initWithdraw('mixer');
         const relayerWithdrawPayload = relayerMixerTx.generateWithdrawRequest(
           {
             baseOn: 'substrate',

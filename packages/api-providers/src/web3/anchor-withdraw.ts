@@ -482,7 +482,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       const relayerRootsBytes = hexStringToBytes(relayerRootString);
       const relayerRoots = Array.from(relayerRootsBytes);
 
-      const relayedWithdraw = await activeRelayer.initWithdraw('anchorRelayTx');
+      const relayedWithdraw = await activeRelayer.initWithdraw('anchor');
 
       logger.trace('initialized the withdraw WebSocket');
 
@@ -493,7 +493,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
         name: chainIdToRelayerName(destInternalId)
       };
 
-      const tx = relayedWithdraw.generateWithdrawRequest<typeof chainInfo, 'anchorRelayTx'>(
+      const tx = relayedWithdraw.generateWithdrawRequest<typeof chainInfo, 'anchor'>(
         chainInfo,
         `0x${proofBytes}`,
         {

@@ -183,13 +183,13 @@ type AnchorRelayTransaction = {
  * Relayed transaction for substrate
  **/
 export type RelayerSubstrateCommands = {
-  mixerRelayTx: MixerRelayTx;
+  mixer: MixerRelayTx;
 };
 /**
  * Relayed transaction for EVM
  **/
 export type RelayerEVMCommands = {
-  anchorRelayTx: AnchorRelayTransaction;
+  anchor: AnchorRelayTransaction;
 };
 export type EVMCMDKeys = keyof RelayerEVMCommands;
 export type SubstrateCMDKeys = keyof RelayerSubstrateCommands;

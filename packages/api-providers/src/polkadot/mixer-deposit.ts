@@ -27,12 +27,12 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     const ormlCurrency = new ORMLCurrency(webbPolkadot);
     const ormlAssets = await ormlCurrency.list();
     const data = await api.query.mixerBn254.mixers.entries();
-    // @ts-ignore
-    // const tokenProperty: Array<NativeTokenProperties> = await api.rpc.system.properties();
     const groupItem = data
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .filter(([_, info]) => info.isSome)
       // storageKey is treeId.  Info is {depositSize, asset}
       .map(([storageKey, info]) => {
-        const mixerInfo = (info as unknown as PalletMixerMixerMetadata).toHuman();
+        const mixerInfo: PalletMixerMixerMetadata = info.unwrap();
         const cId = Number(mixerInfo.asset);
         const amount = mixerInfo.depositSize;
         // @ts-ignore
