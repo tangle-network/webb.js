@@ -40,7 +40,7 @@ export class Currency extends CurrencyContent {
       addresses: new Map([[InternalChainId.WebbDevelopment, asset.id]]),
       id: `ORML@${asset.id}`,
       name: asset.name,
-      symbol: asset.name.slice(0, 3).toLocaleUpperCase()
+      symbol: asset.name.slice(0, 4).toLocaleUpperCase()
     });
   }
 

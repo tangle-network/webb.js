@@ -14,7 +14,6 @@ import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { MixerWithdraw } from '../abstracts/index.js';
 import { InternalChainId } from '../chains/index.js';
 import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
-import { PolkadotMixerDeposit } from './index.js';
 import { WebbPolkadot } from './webb-provider.js';
 
 const logger = LoggerService.get('PolkadotMixerWithdraw');
@@ -124,17 +123,18 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
 
       // parse the note
       const noteParsed = await Note.deserialize(note);
-      const depositAmount = noteParsed.note.amount;
-      const amount = depositAmount;
-      const sizes = await PolkadotMixerDeposit.getSizes(this.inner);
-      const treeId = sizes.find((s) => s.amount === Number(amount))?.treeId!;
+      const treeId = noteParsed.note.targetIdentifyingData;
 
-      logger.trace('Tree Id ', treeId);
+      console.log('Tree Id ', treeId);
       const leaves = await this.fetchTreeLeaves(treeId);
       const leaf = u8aToHex(noteParsed.getLeaf());
-      const leafIndex = leaves.findIndex((l) => u8aToHex(l) === leaf);
+      const leafIndex = leaves.findIndex((l) => {
+        console.log(`leaf in leaves: ${l}`);
 
-      logger.trace(`leaf ${leaf} has index `, leafIndex);
+        return u8aToHex(l) === leaf;
+      });
+
+      console.log(`leaf ${leaf} has index `, leafIndex);
       logger.trace(leaves.map((i) => u8aToHex(i)));
       const activeRelayer = this.activeRelayer[0];
       const worker = this.inner.wasmFactory('wasm-utils');

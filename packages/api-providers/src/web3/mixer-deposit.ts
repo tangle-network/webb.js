@@ -201,12 +201,17 @@ export class Web3MixerDeposit extends Web3AnchorDeposit {
     const currency = this.bridgeApi.currency;
 
     if (currency) {
-      return anchors.map((anchor) => ({
-        amount: Number(anchor.amount),
-        asset: String(currency.id),
-        id: `Bridge=${anchor.amount}@${currency.view.name}`,
-        title: `${anchor.amount} ${currency.view.name}`
-      }));
+      // SelectedBridgeCurrency
+      console.log('currency: ', currency.view);
+
+      return anchors.map((anchor) => {
+        return {
+          amount: Number(anchor.amount),
+          asset: String(currency.view.symbol),
+          id: `Bridge=${anchor.amount}@${currency.view.name}`,
+          title: `${anchor.amount} ${currency.view.name}`
+        };
+      });
     }
 
     return [];

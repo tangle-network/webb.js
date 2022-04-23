@@ -7,6 +7,7 @@ import { Currency, DepositPayload as TDepositPayload, MixerSize, ORMLCurrency } 
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
 
+import { PalletMixerMixerMetadata } from '@polkadot/types/lookup';
 import { u8aToHex } from '@polkadot/util';
 
 import { MixerDeposit } from '../abstracts/index.js';
@@ -29,31 +30,35 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     // @ts-ignore
     // const tokenProperty: Array<NativeTokenProperties> = await api.rpc.system.properties();
     const groupItem = data
+      // storageKey is treeId.  Info is {depositSize, asset}
       .map(([storageKey, info]) => {
-        const mixerInfo = info as any;
+        const mixerInfo = (info as unknown as PalletMixerMixerMetadata).toHuman();
+
+        console.log(mixerInfo);
         const cId = Number(mixerInfo.asset);
         const amount = mixerInfo.depositSize;
         // @ts-ignore
         const treeId = storageKey.toHuman()[0];
-        const id = storageKey.toString() + treeId;
 
-        console.log('id in getSizes: ', id);
+        console.log('treeId in getSizes: ', treeId);
+        console.log('cId value: ', cId);
         // parse number from amount string
         // TODO: Get and parse native / non-native token denomination
         // TODO replace `replaceAll` or target es2021
         // @ts-ignore
         const amountNumber = (Number(amount?.toString().replaceAll(',', '')) * 1.0) / Math.pow(10, 12);
-        const currency = cId
-          ? Currency.fromORMLAsset(
-            webbPolkadot.config.currencies,
-            ormlAssets.find((asset) => Number(asset.id) === cId)!
-          )
-          : Currency.fromCurrencyId(webbPolkadot.config.currencies, Number(cId));
+
+        console.log('orml assets detected: ', ormlAssets);
+
+        const currency = Currency.fromORMLAsset(
+          webbPolkadot.config.currencies,
+          ormlAssets.find((asset) => Number(asset.id) === cId)!
+        );
 
         return {
           amount: amountNumber,
           currency: currency,
-          id,
+          id: treeId,
           treeId
         };
       })
