@@ -1033,4 +1033,35 @@ mod test {
 		let note_from_str = JsNote::from_str(note_str).unwrap();
 		assert_eq!(note.serialize(), note_from_str.serialize());
 	}
+	// VAnchor tests
+
+	#[wasm_bindgen_test]
+	fn generate_vanchor_note() {
+		let mut note_builder = JsNoteBuilder::new();
+		let protocol: Protocol = JsValue::from(NoteProtocol::VAnchor.to_string()).into();
+		let version: Version = JsValue::from(NoteVersion::V1.to_string()).into();
+		let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
+		let hash_function: HF = JsValue::from(HashFunction::Poseidon.to_string()).into();
+		let curve: WasmCurve = JsValue::from(Curve::Bn254.to_string()).into();
+
+		note_builder.protocol(protocol).unwrap();
+		note_builder.version(version).unwrap();
+		note_builder.source_chain_id(JsString::from("2"));
+		note_builder.target_chain_id(JsString::from("3"));
+		note_builder.source_identifying_data(JsString::from("2"));
+		note_builder.target_identifying_data(JsString::from("3"));
+
+		note_builder.width(JsString::from("5")).unwrap();
+		note_builder.exponentiation(JsString::from("5")).unwrap();
+		note_builder.denomination(JsString::from("18")).unwrap();
+		note_builder.amount(JsString::from("0"));
+		note_builder.token_symbol(JsString::from("EDG"));
+		note_builder.curve(curve).unwrap();
+		note_builder.hash_function(hash_function).unwrap();
+		note_builder.backend(backend);
+		note_builder.index(JsString::from("10"));
+
+		let vanchor_note = note_builder.build().unwrap();
+		dbg!(vanchor_note.to_string());
+	}
 }
