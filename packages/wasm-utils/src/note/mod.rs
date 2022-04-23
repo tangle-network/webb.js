@@ -1077,11 +1077,11 @@ mod test {
 		note_builder.index(JsString::from("10"));
 
 		let vanchor_note = note_builder.build().unwrap();
-		let note_1_string = vanchor_note.to_string();
-
-		let js_note_2 = JsNote::deserialize(&note_1_string).unwrap();
+		let note_string = vanchor_note.to_string();
+		let js_note_2 = JsNote::deserialize(&note_string).unwrap();
 		let js_note_2_string = js_note_2.to_string();
 
-		assert_eq!(note_1_string, js_note_2_string);
+		// Asserting that with serialization and deserialization lead to the same note
+		assert_eq!(note_string, js_note_2_string);
 	}
 }
