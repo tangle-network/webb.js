@@ -33,22 +33,16 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
       // storageKey is treeId.  Info is {depositSize, asset}
       .map(([storageKey, info]) => {
         const mixerInfo = (info as unknown as PalletMixerMixerMetadata).toHuman();
-
-        console.log(mixerInfo);
         const cId = Number(mixerInfo.asset);
         const amount = mixerInfo.depositSize;
         // @ts-ignore
         const treeId = storageKey.toHuman()[0];
 
-        console.log('treeId in getSizes: ', treeId);
-        console.log('cId value: ', cId);
         // parse number from amount string
         // TODO: Get and parse native / non-native token denomination
         // TODO replace `replaceAll` or target es2021
         // @ts-ignore
         const amountNumber = (Number(amount?.toString().replaceAll(',', '')) * 1.0) / Math.pow(10, 12);
-
-        console.log('orml assets detected: ', ormlAssets);
 
         const currency = Currency.fromORMLAsset(
           webbPolkadot.config.currencies,

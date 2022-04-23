@@ -84,26 +84,12 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
     );
   }
 
-  async fetchTreeLeaves (treeId: string | number): Promise<Uint8Array[]> {
-    let done = false;
-    let from = 0;
-    let to = 511;
-    const leaves: Uint8Array[] = [];
+  async fetchTreeLeaves (treeId: number): Promise<Uint8Array[]> {
+    const leafCount = await this.inner.api.derive.merkleTreeBn254.getLeafCountForTree(treeId);
+    const treeLeaves = await this.inner.api.derive.merkleTreeBn254.getLeavesForTree(treeId, 0, leafCount);
 
-    while (done === false) {
-      const treeLeaves: any[] = await (this.inner.api.rpc as any).mt.getLeaves(treeId, from, to);
-
-      if (treeLeaves.length === 0) {
-        done = true;
-        break;
-      }
-
-      leaves.push(...treeLeaves.map((i) => i.toU8a()));
-      from = to;
-      to = to + 511;
-    }
-
-    return leaves;
+    // TODO: proper pagination of leaves
+    return treeLeaves;
   }
 
   async submitViaRelayer () {
@@ -125,16 +111,12 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
       const noteParsed = await Note.deserialize(note);
       const treeId = noteParsed.note.targetIdentifyingData;
 
-      console.log('Tree Id ', treeId);
-      const leaves = await this.fetchTreeLeaves(treeId);
+      const leaves = await this.fetchTreeLeaves(Number(treeId));
       const leaf = u8aToHex(noteParsed.getLeaf());
       const leafIndex = leaves.findIndex((l) => {
-        console.log(`leaf in leaves: ${l}`);
-
         return u8aToHex(l) === leaf;
       });
 
-      console.log(`leaf ${leaf} has index `, leafIndex);
       logger.trace(leaves.map((i) => u8aToHex(i)));
       const activeRelayer = this.activeRelayer[0];
       const worker = this.inner.wasmFactory('wasm-utils');

@@ -4,8 +4,6 @@
 // augmentDerives.ts
 import type { Observable } from 'rxjs';
 
-import { EggStandaloneRuntimeProtocolSubstrateConfigElement } from '@polkadot/types/lookup';
-
 declare module '@polkadot/api-derive/derive' {
   // extend, add our custom section
   // https://github.com/polkadot-js/api/pull/4578
@@ -13,7 +11,7 @@ declare module '@polkadot/api-derive/derive' {
     merkleTreeBn254: {
       getLeafCountForTree: ReturnType<() => (treeId: number) => Observable<number>>,
       // api for pagination support
-      getLeavesForTree: ReturnType<() => (treeId: number, start: number, end: number) => Observable<EggStandaloneRuntimeProtocolSubstrateConfigElement[]>>,
+      getLeavesForTree: ReturnType<() => (treeId: number, start: number, end: number) => Observable<Uint8Array[]>>,
     }
   }
 }

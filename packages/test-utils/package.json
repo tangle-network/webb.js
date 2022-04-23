@@ -1,0 +1,25 @@
+{
+  "name": "@webb-tools/test-utils",
+  "version": "0.1.4-51",
+  "description": "Utilities to work with Webb in test environments",
+  "author": "Webb Developers <drew@webb.tools>",
+  "module": "index.js",
+  "type": "module",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "repository": "https://github.com/webb-tools/webb.js.git",
+  "dependencies": {
+    "@babel/runtime": "^7.10.2",
+    "@polkadot/api": "8.1.1",
+    "@polkadot/keyring": "9.0.1",
+    "bignumber.js": "^9.0.0",
+    "ethers": "5.5.1"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.0",
+    "chai": "^4.3.6"
+  }
+}
