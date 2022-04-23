@@ -1,7 +1,7 @@
 use core::fmt;
 use std::str::FromStr;
 
-use ark_bn254::Fr as FrBn254;
+use ark_bn254::Fr as Bn254Fr;
 use ark_ff::{BigInteger, PrimeField, Zero};
 use arkworks_setups::common::Leaf;
 use arkworks_setups::utxo::Utxo;
@@ -29,7 +29,7 @@ macro_rules! console_log {
 	($($t:tt)*) => (crate::types::log(&format_args!($($t)*).to_string()))
 }
 enum JsUtxoInner {
-	Bn254(Utxo<FrBn254>),
+	Bn254(Utxo<Bn254Fr>),
 }
 
 #[wasm_bindgen]
@@ -38,13 +38,13 @@ pub struct JsUtxo {
 }
 
 impl JsUtxo {
-	pub fn new_from_bn254_UTXO(utxo: Utxo<FrBn254>) -> Self {
+	pub fn new_from_bn254_UTXO(utxo: Utxo<Bn254Fr>) -> Self {
 		Self {
 			inner: JsUtxoInner::Bn254(utxo),
 		}
 	}
 
-	pub fn new_from_Bls381_UTXO(_utxo: Utxo<FrBn254>) -> Self {
+	pub fn new_from_Bls381_UTXO(_utxo: Utxo<Bn254Fr>) -> Self {
 		unimplemented!()
 	}
 
