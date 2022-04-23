@@ -145,7 +145,6 @@ impl JsUtxo {
 	#[wasm_bindgen(getter)]
 	pub fn index(&self) -> JsValue {
 		let index = self.get_index().unwrap_or(0);
-
 		JsValue::from(index)
 	}
 

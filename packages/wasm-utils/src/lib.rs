@@ -26,7 +26,7 @@ pub const ANCHOR_COUNT_2: usize = 2;
 pub const ANCHOR_COUNT_16: usize = 16;
 pub const ANCHOR_COUNT_32: usize = 32;
 
-const INS_16: usize = 2;
+const INS_16: usize = 16;
 const INS_2: usize = 2;
 const OUTS_2: usize = 2;
 
