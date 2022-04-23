@@ -20,7 +20,7 @@ pub fn generate_secrets(
 ) -> Result<JsUtxo, OperationError> {
 	let utxo: JsUtxo = match (curve, exponentiation, width) {
 		(Curve::Bn254, 5, 5) => {
-			VAnchorR1CSProverBn254_30_2_2_2::create_random_leaf(ArkCurve::Bls381, chain_id, amount, index, rng)
+			VAnchorR1CSProverBn254_30_2_2_2::create_random_leaf(ArkCurve::Bn254, chain_id, amount, index, rng)
 				.map(|utxo| JsUtxo::new_from_bn254_UTXO(utxo))
 		}
 		_ => {
@@ -51,7 +51,7 @@ pub fn get_leaf_with_private_raw(
 ) -> Result<JsUtxo, OperationError> {
 	let utxo: JsUtxo = match (curve, exponentiation, width) {
 		(Curve::Bn254, 5, 3) => VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
-			ArkCurve::Bls381,
+			ArkCurve::Bn254,
 			chain_id,
 			amount,
 			index,

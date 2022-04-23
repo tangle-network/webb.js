@@ -89,8 +89,8 @@ impl JsUtxo {
 	pub fn get_index_bytes(&self) -> Vec<u8> {
 		match &self.inner {
 			JsUtxoInner::Bn254(bn254_utxo) => match bn254_utxo.index {
-				None => FrBn254::zero().into_repr().to_bytes_le(),
-				Some(index) => FrBn254::from(index).into_repr().to_bytes_le(),
+				None => 0u64.to_le_bytes().to_vec(),
+				Some(index) => index.to_le_bytes().to_vec(),
 			},
 		}
 	}
@@ -221,12 +221,14 @@ impl JsNote {
 						raw
 					}
 				};
+
 				let mixer_leaf = mixer::get_leaf_with_private_raw(
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
 					self.exponentiation.unwrap_or(5),
 					&raw,
 				)?;
+
 				Ok(JsLeaf {
 					inner: JsLeafInner::Mixer(mixer_leaf),
 				})
@@ -293,6 +295,18 @@ impl JsNote {
 						let secret_key = self.secrets[3].clone();
 						let index = self.secrets[4].clone();
 
+						let mut index_slice = [0u8; 8];
+						index_slice.copy_from_slice(index.as_slice());
+						let index = u64::from_le_bytes(index_slice);
+
+						let mut amount_slice = [0u8; 16];
+						amount_slice.copy_from_slice(amount.as_slice());
+						let amount = u128::from_le_bytes(amount_slice);
+
+						let mut chain_id_slice = [0u8; 8];
+						chain_id_slice.copy_from_slice(chain_id.as_slice());
+						let chain_id = u64::from_le_bytes(chain_id_slice);
+
 						let curve = self.curve.unwrap_or(Curve::Bn254);
 						let width = self.width.unwrap_or(2);
 						let exponentiation = self.exponentiation.unwrap_or(5);
@@ -303,9 +317,9 @@ impl JsNote {
 							exponentiation,
 							secret_key.as_slice(),
 							blinding.as_slice(),
-							1000,
-							10,
-							Some(0u64),
+							chain_id,
+							amount,
+							Some(index),
 						)?;
 
 						Ok(JsLeaf {
@@ -678,11 +692,13 @@ impl JsNoteBuilder {
 						index,
 						&mut OsRng,
 					)?;
+
 					let chain_id = utxo.get_chain_id_bytes();
 					let amount = utxo.get_amount();
 					let blinding = utxo.get_blinding();
 					let secret_key = utxo.get_secret_key();
 					let index = utxo.get_index_bytes();
+
 					// secrets
 					vec![chain_id, amount, blinding, secret_key, index]
 				}
@@ -1054,7 +1070,7 @@ mod test {
 		note_builder.width(JsString::from("5")).unwrap();
 		note_builder.exponentiation(JsString::from("5")).unwrap();
 		note_builder.denomination(JsString::from("18")).unwrap();
-		note_builder.amount(JsString::from("0"));
+		note_builder.amount(JsString::from("10"));
 		note_builder.token_symbol(JsString::from("EDG"));
 		note_builder.curve(curve).unwrap();
 		note_builder.hash_function(hash_function).unwrap();
@@ -1062,6 +1078,11 @@ mod test {
 		note_builder.index(JsString::from("10"));
 
 		let vanchor_note = note_builder.build().unwrap();
-		dbg!(vanchor_note.to_string());
+		let note_1_string = vanchor_note.to_string();
+
+		let js_note_2 = JsNote::deserialize(&note_1_string).unwrap();
+		let js_note_2_string = js_note_2.to_string();
+
+		assert_eq!(note_1_string, js_note_2_string);
 	}
 }
