@@ -38,13 +38,13 @@ pub struct JsUtxo {
 }
 
 impl JsUtxo {
-	pub fn new_from_bn254_UTXO(utxo: Utxo<Bn254Fr>) -> Self {
+	pub fn new_from_bn254_utxo(utxo: Utxo<Bn254Fr>) -> Self {
 		Self {
 			inner: JsUtxoInner::Bn254(utxo),
 		}
 	}
 
-	pub fn new_from_Bls381_UTXO(_utxo: Utxo<Bn254Fr>) -> Self {
+	pub fn new_from_Bls381_utxo(_utxo: Utxo<Bn254Fr>) -> Self {
 		unimplemented!()
 	}
 
