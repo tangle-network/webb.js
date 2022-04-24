@@ -31,7 +31,7 @@ const relayerConfig: RelayerConfig[] = [
 export function relayerSubstrateNameToChainId (name: string): InternalChainId {
   switch (name) {
     case 'localnode':
-      return InternalChainId.WebbDevelopment;
+      return InternalChainId.ProtocolSubstrateStandalone;
   }
 
   throw new Error('unhandled relayed chain name  ' + name);

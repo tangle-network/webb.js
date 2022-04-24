@@ -6,7 +6,7 @@ import { InternalChainId } from '../chains/index.js';
 export function relayerSubstrateNameToChainId (name: string): InternalChainId {
   switch (name) {
     case 'localnode':
-      return InternalChainId.WebbDevelopment;
+      return InternalChainId.ProtocolSubstrateStandalone;
   }
 
   throw new Error('unhandled relayed chain name  ' + name);
@@ -64,7 +64,9 @@ enum RelayerChainName {
   Shiden = 'shiden',
   OptimismTestnet = 'optimismtestnet',
   ArbitrumTestnet = 'arbitrumtestnet',
-  PolygonTestnet = 'polygontestnet'
+  PolygonTestnet = 'polygontestnet',
+  ProtocolSubstrateStandalone = 'localnode',
+  WebbEggnet = 'webbeggnet',
 }
 
 export function chainIdToRelayerName (id: InternalChainId): string {
@@ -99,6 +101,10 @@ export function chainIdToRelayerName (id: InternalChainId): string {
       return RelayerChainName.ArbitrumTestnet;
     case InternalChainId.PolygonTestnet:
       return RelayerChainName.PolygonTestnet;
+    case InternalChainId.ProtocolSubstrateStandalone:
+      return RelayerChainName.ProtocolSubstrateStandalone;
+    case InternalChainId.EggDevelopStandalone:
+      return RelayerChainName.WebbEggnet;
   }
 
   throw new Error(`unhandled Chain id ${id}`);

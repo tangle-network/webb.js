@@ -37,7 +37,7 @@ export class Currency extends CurrencyContent {
   static fromORMLAsset (currenciesConfig: AppConfig['currencies'], asset: ORMLAsset): Currency {
     return new Currency({
       ...currenciesConfig[WebbCurrencyId.WEBB],
-      addresses: new Map([[InternalChainId.WebbDevelopment, asset.id]]),
+      addresses: new Map([[InternalChainId.ProtocolSubstrateStandalone, asset.id]]),
       id: `ORML@${asset.id}`,
       name: asset.name,
       symbol: asset.name.slice(0, 4).toLocaleUpperCase()

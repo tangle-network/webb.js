@@ -14,6 +14,7 @@ import { MixerDeposit } from '../abstracts/index.js';
 import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
 import { WebbPolkadot } from './webb-provider.js';
 
+// The DepositPayload is the Note and [treeId, leafhex]
 type DepositPayload = TDepositPayload<Note, [number, string]>;
 const logger = LoggerService.get('tornado-deposit');
 
@@ -76,22 +77,23 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     return PolkadotMixerDeposit.getSizes(this.inner);
   }
 
+  // MixerId is the treeId for deposit, chainIdType is the destination (and source because this is mixer)
   async generateNote (mixerId: number, chainIdType: number): Promise<DepositPayload> {
     logger.info(`Depositing to mixer id ${mixerId}`);
     const sizes = await this.getSizes();
-    const amount = sizes.find((size) => Number(size.id) === mixerId);
+    const mixer = sizes.find((size) => Number(size.id) === mixerId);
     const properties = await this.inner.api.rpc.system.properties();
     const denomination = properties.tokenDecimals.toHuman() || 12;
 
-    if (!amount) {
+    if (!mixer) {
       throw Error('amount not found! for mixer id ' + mixerId);
     }
 
-    const treeId = amount.id;
+    const treeId = mixer.id;
 
     logger.info(`Depositing to tree id ${treeId}`);
     const noteInput: NoteGenInput = {
-      amount: String(amount.amount),
+      amount: String(mixer.amount),
       backend: 'Arkworks',
       curve: 'Bn254',
       denomination: `${denomination}`,
@@ -102,7 +104,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
       sourceIdentifyingData: treeId.toString(),
       targetChain: chainIdType.toString(),
       targetIdentifyingData: treeId.toString(),
-      tokenSymbol: amount.asset,
+      tokenSymbol: mixer.asset,
       version: 'v2',
       width: '3'
     };

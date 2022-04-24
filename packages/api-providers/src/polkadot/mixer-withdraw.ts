@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
-import { OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, WebbRelayer, WithdrawState } from '@webb-tools/api-providers/index.js';
+import { chainIdToRelayerName, OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, WebbRelayer, WithdrawState } from '@webb-tools/api-providers/index.js';
 import { fetchSubstrateTornadoProvingKey } from '@webb-tools/api-providers/ipfs/substrate/tornado.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note, ProvingManager } from '@webb-tools/sdk-core/index.js';
@@ -12,7 +12,7 @@ import { decodeAddress } from '@polkadot/keyring';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { MixerWithdraw } from '../abstracts/index.js';
-import { InternalChainId } from '../chains/index.js';
+import { chainTypeIdToInternalId, InternalChainId, parseChainIdType } from '../chains/index.js';
 import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
 import { WebbPolkadot } from './webb-provider.js';
 
@@ -73,7 +73,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
       relayer,
       {
         basedOn: 'substrate',
-        chain: InternalChainId.WebbDevelopment
+        chain: InternalChainId.ProtocolSubstrateStandalone
       },
       async () => {
         return {
@@ -168,17 +168,20 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
         logger.info('withdrawing through relayer', activeRelayer);
         this.emit('stateChange', WithdrawState.SendingTransaction);
         const relayerMixerTx = await activeRelayer!.initWithdraw('mixer');
+        // Fetch the internal ID for the intended withdraw chain
+        const internalId = chainTypeIdToInternalId(parseChainIdType(Number(noteParsed.note.targetChainId)));
+
         const relayerWithdrawPayload = relayerMixerTx.generateWithdrawRequest(
           {
             baseOn: 'substrate',
             contractAddress: '',
             endpoint: '',
             // TODO change this from the config
-            name: 'localnode'
+            name: chainIdToRelayerName(internalId)
           },
           Array.from(hexToU8a(withdrawProof.proofBytes)),
           {
-            chain: 'localnode',
+            chain: chainIdToRelayerName(internalId),
             fee: withdrawProof.fee,
             id: Number(treeId),
             nullifierHash: Array.from(hexToU8a(withdrawProof.nullifierHash)),
