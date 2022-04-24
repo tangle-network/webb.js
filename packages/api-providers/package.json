@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/api-providers",
-  "version": "0.1.4-51",
+  "version": "0.1.4-52",
   "description": "dApp provider to work with Webb",
   "author": "Webb Developers <drew@webb.tools>",
   "main": "index.cjs",
