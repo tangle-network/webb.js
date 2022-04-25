@@ -11,6 +11,7 @@ pub mod note;
 pub mod proof;
 pub mod types;
 mod utils;
+mod utxo;
 
 use ark_bls12_381::Bls12_381;
 use ark_bn254::Bn254;

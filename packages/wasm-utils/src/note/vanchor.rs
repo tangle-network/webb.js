@@ -5,8 +5,8 @@ use arkworks_setups::utxo::Utxo;
 use arkworks_setups::{Curve as ArkCurve, VAnchorProver};
 use rand::rngs::OsRng;
 
-use crate::note::{JsUtxo, JsUtxoInner};
 use crate::types::{Curve, OpStatusCode, OperationError};
+use crate::utxo::{JsUtxo, JsUtxoInner};
 use crate::VAnchorR1CSProverBn254_30_2_2_2;
 
 pub fn generate_secrets(

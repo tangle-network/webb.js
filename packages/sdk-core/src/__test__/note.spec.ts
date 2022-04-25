@@ -128,7 +128,7 @@ describe('Note class', () => {
       expect(e.message).to.equal('Unsupported backend');
     }
   });
-  it.only('should generate a note with circom backend when secrets is passed', async () => {
+  it('should generate a note with circom backend when secrets is passed', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
       backend: 'Circom',
