@@ -1,10 +1,7 @@
 use core::fmt;
 use std::str::FromStr;
 
-use ark_ff::{BigInteger, PrimeField, Zero};
 use arkworks_setups::common::Leaf;
-use arkworks_setups::utxo::Utxo;
-use hex::encode;
 use js_sys::{JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
@@ -197,13 +194,6 @@ impl JsNote {
 					}
 				}
 			},
-			_ => {
-				let message = format!("{} protocol isn't supported yet", self.protocol);
-				Err(OperationError::new_with_message(
-					OpStatusCode::FailedToGenerateTheLeaf,
-					message,
-				))
-			}
 		}
 	}
 }

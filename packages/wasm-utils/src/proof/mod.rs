@@ -13,7 +13,6 @@ use ark_bn254::{Bn254, Fr as Bn254Fr};
 use arkworks_native_gadgets::merkle_tree::SparseMerkleTree;
 use arkworks_native_gadgets::poseidon::Poseidon;
 use arkworks_setups::common::{setup_params, setup_tree_and_create_path, verify_unchecked_raw};
-use arkworks_setups::utxo::Utxo;
 use arkworks_setups::Curve as ArkCurve;
 use wasm_bindgen::__rt::std::collections::btree_map::BTreeMap;
 

@@ -3,7 +3,6 @@ use ark_ff::{BigInteger, PrimeField};
 use arkworks_setups::utxo::Utxo;
 use js_sys::{JsString, Uint8Array};
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsValue;
 
 pub enum JsUtxoInner {
 	Bn254(Utxo<Bn254Fr>),
@@ -140,6 +139,7 @@ impl JsUtxo {
 	#[wasm_bindgen(getter)]
 	pub fn commitment(&self) -> Uint8Array {
 		let commitment = self.get_commitment();
+
 		Uint8Array::from(commitment.as_slice())
 	}
 }
