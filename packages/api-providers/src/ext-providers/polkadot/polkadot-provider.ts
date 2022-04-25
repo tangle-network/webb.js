@@ -303,7 +303,10 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
    * Get MetaData of the ext provider
    **/
   getMetaData () {
-    if (!this.apiPromise.isConnected) return;
+    if (!this.apiPromise.isConnected) {
+      return;
+    }
+
     const metadataDef = {
       chain: this.apiPromise.runtimeChain.toString(),
       genesisHash: this.apiPromise.genesisHash.toHex(),
@@ -328,13 +331,17 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
     const metadataDef = this.getMetaData();
     const known = await this.injectedExtension?.metadata?.get();
 
-    if (!known || !metadataDef) return null;
+    if (!known || !metadataDef) {
+      return null;
+    }
 
     const result = !known.find(({ genesisHash, specVersion }) => {
       return metadataDef.genesisHash === genesisHash && metadataDef.specVersion === specVersion;
     });
 
-    if (result) this.emit('updateMetaData', metadataDef);
+    if (result) {
+      this.emit('updateMetaData', metadataDef);
+    }
 
     return metadataDef;
   }

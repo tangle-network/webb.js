@@ -30,7 +30,7 @@ import type { Backend, Curve, HashFunction, JsNote, NoteProtocol, Version } from
  */
 export type NoteGenInput = {
   protocol: NoteProtocol;
-  version: string;
+  version?: string;
   sourceChain: string;
   sourceIdentifyingData?: string;
   targetChain: string;

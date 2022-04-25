@@ -62,9 +62,12 @@ function buildWebpack() {
   executeSync('yarn polkadot-exec-webpack --config webpack.config.cjs --mode production');
 }
 
-async function buildBabel(dir) {
+// @param module - the module system to use cjs or esm.
+async function buildBabel(dir, module = 'esm') {
+  console.log('build babel for: ', module);
+
   // babel configuratiom
-  const configFileName = 'babel-config-esm.cjs';
+  const configFileName = `babel-config-${module}.cjs`;
 
   // Get Config Options:
   const rootConfig = path.join(process.cwd(), `../../${configFileName}`);
@@ -102,7 +105,11 @@ async function buildJs(dir) {
     if (fs.existsSync(path.join(process.cwd(), 'public'))) {
       buildWebpack(dir);
     } else {
-      await buildBabel(dir);
+      if (dir === 'types') {
+        await buildBabel(dir, 'cjs');
+      } else {
+        await buildBabel(dir, 'esm');
+      }
     }
 
     console.log();

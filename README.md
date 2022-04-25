@@ -49,7 +49,6 @@ packages/
   |____api-providers/       # API providers for webb protocol, this package facilitates building apps on top of Webb.
   |____app-util/            # Utilities to work with Webb Network.
   |____sdk-core/            # The package provides a cleaner API to the underlying `wasm-utils`.
-  |____type-definitions/    # Polkadot/Webb API type definitions for typescript
   |____types/               # Polkadot.js type definitions for Webb Network.
   |____wasm-utils/          # Wasm utils for generating zero-knowledge proof and deposit notes. Consumed by `sdk-core`.
 ```
@@ -206,6 +205,14 @@ yarn lint
 
 ```
 yarn format
+```
+
+## Updating chain types
+In order to update the types for the runtimes we're interested in, you'll need to run a chain with the latest runtime. Currently, this is the egg standalone network.
+```
+yarn update-metadata
+yarn polkadot-types-from-defs --input packages/types/src/interfaces --package sample-polkadotjs-typegen/interfaces --endpoint packages/types/src/metadata/metadata.json
+yarn polkadot-types-from-chain --endpoint ws://localhost:9944 --output ./packages/types/src/interfaces
 ```
 
 <h2 id="license"> License </h2>

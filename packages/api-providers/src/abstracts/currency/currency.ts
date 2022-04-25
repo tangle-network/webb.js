@@ -45,7 +45,9 @@ export class Currency extends CurrencyContent {
   }
 
   static isWrappableCurrency (currenciesConfig: AppConfig['currencies'], currencyId: WebbCurrencyId) {
-    if (currenciesConfig[currencyId].role === CurrencyRole.Wrappable) return true;
+    if (currenciesConfig[currencyId].role === CurrencyRole.Wrappable) {
+      return true;
+    }
 
     return false;
   }

@@ -32,7 +32,6 @@ export class ORMLCurrency {
     const activeAccount = await this.api.accounts.activeOrDefault;
 
     logger.info('active account', activeAccount);
-    console.log(this.api.accounts);
 
     if (activeAccount) {
       const ormlBalances = await this.api.api.query.tokens.accounts.entries(activeAccount.address);

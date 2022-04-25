@@ -143,7 +143,9 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
     const activeBridge = this.bridgeApi.activeBridge;
 
-    if (!activeBridge) throw new Error('No activeBridge set on the web3 anchor api');
+    if (!activeBridge) {
+      throw new Error('No activeBridge set on the web3 anchor api');
+    }
 
     // Parse the intended target address for the note
     const activeChain = await this.inner.getChainId();
@@ -280,7 +282,9 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     this.cancelToken.cancelled = false;
     const activeBridge = this.bridgeApi.activeBridge;
 
-    if (!activeBridge) throw new Error('No activeBridge set on the web3 anchor api');
+    if (!activeBridge) {
+      throw new Error('No activeBridge set on the web3 anchor api');
+    }
 
     // TODO: handle provider storage
     // const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();

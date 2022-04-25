@@ -224,5 +224,6 @@ runBuild();
 runTest();
 
 gitPush();
-execSync("node ./generate-docs")
+// TODO: Investigate generate-docs not working on CI
+//execSync("node ./generate-docs")
 loopFunc(npmPublish);

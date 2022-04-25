@@ -1,5 +1,5 @@
 {
-  "version": "0.1.4-50",
+  "version": "0.1.4-52",
   "private": true,
   "type": "module",
   "engines": {
@@ -11,15 +11,17 @@
     "tests/*"
   ],
   "resolutions": {
-    "@polkadot/api": "7.13.1",
-    "@polkadot/types": "7.13.1"
+    "@polkadot/api": "8.1.1",
+    "@polkadot/types": "8.1.1"
   },
   "scripts": {
     "pumbp": "./scripts/update-version.js prerelease",
     "build": "yarn build-ts:dev",
     "build-ts:dev": "node ./scripts/webb-build-dev.cjs",
     "build:release": "node ./scripts/webb-build-release.cjs",
-    "build:interfaces": "ts-node-script -r tsconfig-paths/register packages/types/scripts/generate.ts && ts-node-script -r tsconfig-paths/register packages/type-definitions/scripts/generate.ts",
+    "build:interfaces": "yarn build:interfaces:defs && yarn build:interfaces:chain",
+    "build:interfaces:defs": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" -r tsconfig-paths/register node_modules/.bin/polkadot-types-from-defs --input packages/types/src/interfaces --package sample-polkadotjs-typegen/interfaces --endpoint packages/types/src/metadata/metadata.json",
+    "build:interfaces:chain": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" -r tsconfig-paths/register node_modules/.bin/polkadot-types-from-chain --endpoint ws://localhost:9944 --output ./packages/types/src/interfaces",
     "lint": "polkadot-dev-run-lint --skip-tsc",
     "clean": "polkadot-dev-clean-build",
     "postinstall": "polkadot-dev-yarn-only",
@@ -31,12 +33,11 @@
     "test:integration": "mocha 'tests/integration_tests/**/*.ts' --exit",
     "test:perf": "cross-env NODE_OPTIONS=--experimental-wasm-modules jest --config ./jest.perf.config.js",
     "check-deps": "./node_modules/@open-web3/util/scripts/check-deps.js yarn.lock @polkadot/ @open-web3/",
-    "update-metadata": "ts-node-script -r tsconfig-paths/register packages/types/scripts/updateMetadata.ts",
+    "update-metadata": "NODE_OPTIONS='--loader ./loader.js' node --experimental-specifier-resolution=node packages/types/scripts/updateMetadata.ts",
     "example:mixer": "ts-node -r tsconfig-paths/register examples/mixer.ts",
-    "script": "NODE_OPTIONS=\"loader=./loader.js\" node",
+    "script": "NODE_OPTIONS=\"--loader ./loader.js\" node",
     "format": "prettier --write \"packages/**/*.{ts,js,jsx,tsx}\" && cargo fmt --manifest-path packages/wasm-utils/Cargo.toml",
-    "doc": "npx typedoc --name \"Webb Tools API\" --includeVersion --options ./typedoc.json",
-    "generate:meta": "ts-node --skip-project node_modules/.bin/polkadot-types-from-chain --package sample-polkadotjs-typegen/interfaces --endpoint ./packages/types/src/metadata/edgware.json --output ./interfaces --strict"
+    "doc": "npx typedoc --name \"Webb Tools API\" --includeVersion --options ./typedoc.json"
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",
@@ -46,9 +47,10 @@
     "@ethersproject/experimental": "^5.5.0",
     "@open-web3/util": "^1.0.1",
     "@openzeppelin/contracts": "^4.2.0",
-    "@polkadot/api": "7.13.1",
-    "@polkadot/dev": "0.65.97",
-    "@polkadot/types": "7.13.1",
+    "@polkadot/api": "8.1.1",
+    "@polkadot/api-derive": "8.1.1",
+    "@polkadot/dev": "0.66.4",
+    "@polkadot/types": "8.1.1",
     "@truffle/hdwallet-provider": "^1.4.1",
     "@types/jest": "^26.0.24",
     "@types/mocha": "^9.1.0",
@@ -74,7 +76,7 @@
     "source-map-support": "^0.5.19",
     "ts-jest": "^26.5.2",
     "ts-node": "10.7.0",
-    "tsconfig-paths": "^3.12.0",
+    "tsconfig-paths": "^3.14.1",
     "typedoc": "^0.22.13",
     "typescript": "^4.6.2",
     "worker-loader": "^3.0.7",
