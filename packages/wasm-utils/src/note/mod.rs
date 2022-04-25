@@ -658,6 +658,14 @@ impl JsNoteBuilder {
 		let curve = self.curve;
 		let amount = self.amount.clone();
 		let index = self.index;
+		let backend = self.backend.unwrap_or(Backend::Arkworks);
+
+		if backend == Backend::Circom && self.secrets.is_none() {
+			let message = "Circom backend is supported when the secret value is supplied".to_string();
+			let operation_error = OperationError::new_with_message(OpStatusCode::UnsupportedBackend, message);
+			return Err(operation_error.into());
+		}
+
 		let secrets = match self.secrets {
 			None => match protocol {
 				NoteProtocol::Mixer => {

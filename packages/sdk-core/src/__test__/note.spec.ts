@@ -10,7 +10,7 @@ describe('Note class', () => {
   it.only('should test constructor from `NoteGenInput`', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
-      backend: 'Circom',
+      backend: 'Arkworks',
       curve: 'Bn254',
       denomination: '18',
       exponentiation: '5',
@@ -35,7 +35,7 @@ describe('Note class', () => {
     expect(note.note.targetIdentifyingData).to.deep.equal('1');
     expect(note.note.sourceChainId).to.deep.equal('1');
     expect(note.note.sourceIdentifyingData).to.deep.equal('1');
-    expect(note.note.backend).to.deep.equal('Circom');
+    expect(note.note.backend).to.deep.equal('Arkworks');
     expect(note.note.hashFunction).to.deep.equal('Poseidon');
     expect(note.note.curve).to.deep.equal('Bn254');
     expect(note.note.tokenSymbol).to.deep.equal('WEBB');
@@ -44,7 +44,7 @@ describe('Note class', () => {
   it.only('should test serializing and deserializing', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
-      backend: 'Circom',
+      backend: 'Arkworks',
       curve: 'Bn254',
       denomination: '18',
       exponentiation: '5',
@@ -67,7 +67,7 @@ describe('Note class', () => {
     expect(deserializedNote.note.sourceIdentifyingData).to.deep.equal('1');
     expect(deserializedNote.note.targetChainId).to.deep.equal('1');
     expect(deserializedNote.note.targetIdentifyingData).to.deep.equal('1');
-    expect(deserializedNote.note.backend).to.deep.equal('Circom');
+    expect(deserializedNote.note.backend).to.deep.equal('Arkworks');
     expect(deserializedNote.note.hashFunction).to.deep.equal('Poseidon');
     expect(deserializedNote.note.curve).to.deep.equal('Bn254');
     expect(deserializedNote.note.tokenSymbol).to.deep.equal('WEBB');
@@ -80,7 +80,7 @@ describe('Note class', () => {
   it.only('should test anchor secrets chain', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
-      backend: 'Circom',
+      backend: 'Arkworks',
       curve: 'Bn254',
       denomination: '18',
       exponentiation: '5',
@@ -101,6 +101,55 @@ describe('Note class', () => {
     const targetChain = targetChainBuffer.readBigUInt64BE();
 
     expect(targetChain.toString()).to.deep.equal('1');
+  });
+
+  it.only('should fail with circom backend', async () => {
+    const noteInput: NoteGenInput = {
+      amount: '1',
+      backend: 'Circom',
+      curve: 'Bn254',
+      denomination: '18',
+      exponentiation: '5',
+      hashFunction: 'Poseidon',
+      protocol: 'anchor',
+      sourceChain: '1',
+      sourceIdentifyingData: '1',
+      targetChain: '1',
+      targetIdentifyingData: '1',
+      tokenSymbol: 'WEBB',
+      version: 'v2',
+      width: '4'
+    };
+
+    try {
+      await Note.generateNote(noteInput);
+    } catch (e: any) {
+      expect(e.code).to.equal(42);
+      expect(e.message).to.equal('Unsupported backend');
+    }
+  });
+  it.only('should generate a note with circom backend when secrets is passed', async () => {
+    const noteInput: NoteGenInput = {
+      amount: '1',
+      backend: 'Circom',
+      curve: 'Bn254',
+      denomination: '18',
+      exponentiation: '5',
+      hashFunction: 'Poseidon',
+      protocol: 'anchor',
+      secrets: '339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b',
+      sourceChain: '1',
+      sourceIdentifyingData: '1',
+      targetChain: '1',
+      targetIdentifyingData: '1',
+      tokenSymbol: 'WEBB',
+      version: 'v2',
+      width: '4'
+    };
+
+    const { note } = await Note.generateNote(noteInput);
+
+    expect(note.backend).to.equal('Circom');
   });
 
   it.only('vanchor note generation should Fail for Bls381', async () => {

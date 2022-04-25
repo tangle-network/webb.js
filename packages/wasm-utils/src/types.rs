@@ -342,6 +342,8 @@ pub enum OpStatusCode {
 	InvalidProof = 40,
 	/// Invalid index
 	InvalidUTXOIndex = 41,
+	/// Unsupported Backend
+	UnsupportedBackend = 42,
 }
 
 #[wasm_bindgen]
@@ -454,6 +456,7 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::UnsupportedParameterCombination => "Unsupported Paramater combination to generate proof",
 			OpStatusCode::InvalidProof => "Proof verification failed",
 			OpStatusCode::InvalidUTXOIndex => "Invalid UTXO Index value",
+			OpStatusCode::UnsupportedBackend => "Unsupported backend",
 		}
 		.to_string()
 	}
