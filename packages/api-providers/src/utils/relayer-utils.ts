@@ -7,6 +7,8 @@ export function relayerSubstrateNameToChainId (name: string): InternalChainId {
   switch (name) {
     case 'localnode':
       return InternalChainId.ProtocolSubstrateStandalone;
+    case 'webbeggnet':
+      return InternalChainId.EggStandalone;
   }
 
   throw new Error('unhandled relayed chain name  ' + name);
@@ -103,7 +105,7 @@ export function chainIdToRelayerName (id: InternalChainId): string {
       return RelayerChainName.PolygonTestnet;
     case InternalChainId.ProtocolSubstrateStandalone:
       return RelayerChainName.ProtocolSubstrateStandalone;
-    case InternalChainId.EggDevelopStandalone:
+    case InternalChainId.EggStandalone:
       return RelayerChainName.WebbEggnet;
   }
 

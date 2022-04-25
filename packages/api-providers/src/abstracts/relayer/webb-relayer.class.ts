@@ -125,10 +125,7 @@ export class WebbRelayerBuilder {
         evm: info.evm
           ? Object.keys(info.evm)
             .filter(
-              /**
-               * account is deprecated but it's kept here for backward compatibility
-               **/
-              (key) => (info.evm[key]?.account || info.evm[key]?.beneficiary) && nameAdapter(key, 'evm') != null
+              (key) => (info.evm[key]?.beneficiary) && nameAdapter(key, 'evm') != null
             )
             .reduce((m, key) => {
               m.set(nameAdapter(key, 'evm'), info.evm[key]);
@@ -214,6 +211,8 @@ export class WebbRelayerBuilder {
     const relayers = Object.keys(this.capabilities)
       .filter((key) => {
         const capabilities = this.capabilities[key];
+
+        console.log('capabilities: ', capabilities);
 
         if (ipService) {
           if (!capabilities.hasIpService) {

@@ -7,6 +7,7 @@ export enum ChainType {
   None = 0x0000,
   EVM = 0x0100,
   Substrate = 0x0200,
+  SubstrateDevelopment = 0x0250,
   PolkadotRelayChain = 0x0301,
   KusamaRelayChain = 0x0302,
   PolkadotParachain = 0x0310,
@@ -15,17 +16,12 @@ export enum ChainType {
 
 export interface ChainTypeId {
   chainType: ChainType;
-  chainId: EVMChainId | SubstrateChainId | SubstrateDevelopChainId;
-}
-
-export enum SubstrateDevelopChainId {
-  ProtocolSubstrateStandalone = 1080,
-  EggDevelopStandalone = 1081,
-  DkgSubstrateStandalone = 1082,
+  chainId: EVMChainId | SubstrateChainId;
 }
 
 export enum SubstrateChainId {
   Edgeware = 7,
+  ProtocolSubstrateStandalone = 1080,
   EggStandalone = 1081, // Used for EggNet Standalone test deployment
 }
 

@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainType, EVMChainId, InternalChainId, SubstrateDevelopChainId } from '@webb-tools/api-providers/chains/index.js';
+import { ChainType, EVMChainId, InternalChainId, SubstrateChainId } from '@webb-tools/api-providers/chains/index.js';
 import { ZERO, zeroAddress } from '@webb-tools/api-providers/contracts/index.js';
 import { WebbCurrencyId } from '@webb-tools/api-providers/enums/index.js';
 import { AppConfig } from '@webb-tools/api-providers/index.js';
@@ -58,7 +58,7 @@ const anchorsConfig: AppConfig['anchors'] = {
 };
 const chainsConfig: AppConfig['chains'] = {
   [InternalChainId.ProtocolSubstrateStandalone]: {
-    chainId: SubstrateDevelopChainId.ProtocolSubstrateStandalone,
+    chainId: SubstrateChainId.ProtocolSubstrateStandalone,
     chainType: ChainType.Substrate,
     currencies: [WebbCurrencyId.WEBB],
     group: 'webb',

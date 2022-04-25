@@ -64,7 +64,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
     return this.inner.relayingManager.getRelayer({});
   }
 
-  async mapRelayerIntoActive (relayer: OptionalRelayer): Promise<OptionalActiveRelayer> {
+  async mapRelayerIntoActive (relayer: OptionalRelayer, internalChainId: InternalChainId): Promise<OptionalActiveRelayer> {
     if (!relayer) {
       return null;
     }
@@ -73,7 +73,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
       relayer,
       {
         basedOn: 'substrate',
-        chain: InternalChainId.ProtocolSubstrateStandalone
+        chain: internalChainId
       },
       async () => {
         return {
@@ -124,7 +124,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
 
       const recipientAccountHex = u8aToHex(decodeAddress(recipient));
       // ss58 format
-      const relayerAccountId = activeRelayer ? activeRelayer.beneficiary! : recipient;
+      const relayerAccountId = activeRelayer ? activeRelayer.beneficiary ?? recipient : recipient;
       const relayerAccountHex = u8aToHex(decodeAddress(relayerAccountId));
       // fetching the proving key
       const provingKey = await fetchSubstrateTornadoProvingKey();
