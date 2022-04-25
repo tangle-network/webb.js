@@ -106,7 +106,7 @@ describe('Note class', () => {
   it.only('vanchor note generation should Fail for Bls381', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
-      backend: 'Circom',
+      backend: 'Arkworks',
       curve: 'Bls381',
       denomination: '18',
       exponentiation: '5',
@@ -133,7 +133,7 @@ describe('Note class', () => {
   it.only('should generate vanchor', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
-      backend: 'Circom',
+      backend: 'Arkworks',
       curve: 'Bn254',
       denomination: '18',
       exponentiation: '5',
@@ -157,7 +157,7 @@ describe('Note class', () => {
     expect(deserializedNote.note.sourceIdentifyingData).to.deep.equal('1');
     expect(deserializedNote.note.targetChainId).to.deep.equal('1');
     expect(deserializedNote.note.targetIdentifyingData).to.deep.equal('1');
-    expect(deserializedNote.note.backend).to.deep.equal('Circom');
+    expect(deserializedNote.note.backend).to.deep.equal('Arkworks');
     expect(deserializedNote.note.hashFunction).to.deep.equal('Poseidon');
     expect(deserializedNote.note.curve).to.deep.equal('Bn254');
     expect(deserializedNote.note.tokenSymbol).to.deep.equal('WEBB');
