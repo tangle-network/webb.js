@@ -1083,5 +1083,7 @@ mod test {
 
 		// Asserting that with serialization and deserialization lead to the same note
 		assert_eq!(note_string, js_note_2_string);
+
+		assert_eq!(vanchor_note.secrets.len(), 5)
 	}
 }
