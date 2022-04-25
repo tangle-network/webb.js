@@ -28,13 +28,10 @@ pub fn generate_secrets(
 				"No VAnchor leaf setup for curve {}, exponentiation {}, and width {}",
 				curve, exponentiation, width
 			);
-			return Err(OperationError::new_with_message(
-				OpStatusCode::FailedToGenerateTheLeaf,
-				message,
-			));
+			return Err(OperationError::new_with_message(OpStatusCode::SecretGenFailed, message));
 		}
 	}
-	.map_err(|e| OperationError::new_with_message(OpStatusCode::FailedToGenerateTheLeaf, e.to_string()))?;
+	.map_err(|e| OperationError::new_with_message(OpStatusCode::SecretGenFailed, e.to_string()))?;
 
 	Ok(utxo)
 }

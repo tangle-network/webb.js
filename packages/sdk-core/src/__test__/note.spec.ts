@@ -103,6 +103,72 @@ describe('Note class', () => {
     expect(targetChain.toString()).to.deep.equal('1');
   });
 
+  it.only('vanchor note generation should Fail for Bls381', async () => {
+    const noteInput: NoteGenInput = {
+      amount: '1',
+      backend: 'Circom',
+      curve: 'Bls381',
+      denomination: '18',
+      exponentiation: '5',
+      hashFunction: 'Poseidon',
+      index: 5,
+      protocol: 'vanchor',
+      sourceChain: '1',
+      sourceIdentifyingData: '1',
+      targetChain: '1',
+      targetIdentifyingData: '1',
+      tokenSymbol: 'WEBB',
+      version: 'v2',
+      width: '5'
+    };
+
+    try {
+      await Note.generateNote(noteInput);
+    } catch (e: any) {
+      expect(e.code).to.equal(17);
+      expect(e.message).to.equal('Failed to generate secrets');
+    }
+  });
+
+  it.only('should generate vanchor', async () => {
+    const noteInput: NoteGenInput = {
+      amount: '1',
+      backend: 'Circom',
+      curve: 'Bn254',
+      denomination: '18',
+      exponentiation: '5',
+      hashFunction: 'Poseidon',
+      index: 5,
+      protocol: 'vanchor',
+      sourceChain: '1',
+      sourceIdentifyingData: '1',
+      targetChain: '1',
+      targetIdentifyingData: '1',
+      tokenSymbol: 'WEBB',
+      version: 'v2',
+      width: '5'
+    };
+    const note = await Note.generateNote(noteInput);
+
+    const serializedNote = note.serialize();
+    const deserializedNote = await Note.deserialize(serializedNote);
+
+    expect(deserializedNote.note.sourceChainId).to.deep.equal('1');
+    expect(deserializedNote.note.sourceIdentifyingData).to.deep.equal('1');
+    expect(deserializedNote.note.targetChainId).to.deep.equal('1');
+    expect(deserializedNote.note.targetIdentifyingData).to.deep.equal('1');
+    expect(deserializedNote.note.backend).to.deep.equal('Circom');
+    expect(deserializedNote.note.hashFunction).to.deep.equal('Poseidon');
+    expect(deserializedNote.note.curve).to.deep.equal('Bn254');
+    expect(deserializedNote.note.tokenSymbol).to.deep.equal('WEBB');
+    expect(deserializedNote.note.amount).to.deep.equal('1');
+    expect(deserializedNote.note.denomination).to.deep.equal('18');
+    expect(deserializedNote.note.width).to.deep.equal('5');
+    expect(deserializedNote.note.exponentiation).to.deep.equal('5');
+    expect(deserializedNote.note.version).to.deep.equal('v2');
+    expect(deserializedNote.note.protocol).to.deep.equal('vanchor');
+  });
+
   it.only('should fail to deserialize invalid protocol', async () => {
     const serialized = 'webb://' +
       'v2:invalid/' +

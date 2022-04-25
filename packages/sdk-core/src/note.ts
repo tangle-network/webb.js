@@ -26,6 +26,7 @@ import type { Backend, Curve, HashFunction, JsNote, NoteProtocol, Version } from
  * @param width - The width to use.
  * @param secrets - Optional secrets to use.
  * @param exponentiation - The exponentiation to use.
+ * @param index - UTXO index
  */
 export type NoteGenInput = {
   protocol: NoteProtocol;
@@ -43,6 +44,7 @@ export type NoteGenInput = {
   secrets?: string;
   width: string;
   exponentiation: string;
+  index?: number
 };
 
 /**
@@ -177,6 +179,10 @@ export class Note {
 
       if (noteGenInput.sourceIdentifyingData) {
         noteBuilderInput.sourceIdentifyingData(noteGenInput.sourceIdentifyingData);
+      }
+
+      if (noteGenInput.index) {
+        noteBuilderInput.index(String(noteGenInput.index));
       }
 
       const depositNote = noteBuilderInput.build();
