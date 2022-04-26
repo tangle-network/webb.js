@@ -1,9 +1,9 @@
-use core::fmt;
-use std::str::FromStr;
-
 use arkworks_setups::common::Leaf;
+use core::fmt;
 use js_sys::{JsString, Uint8Array};
 use rand::rngs::OsRng;
+use std::str::FromStr;
+
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 

@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+#![allow(clippy::unused_unit)]
 
 extern crate ark_ff;
 extern crate wasm_bindgen;
