@@ -564,7 +564,36 @@ impl JsNoteBuilder {
 					vec![chain_id, amount, blinding, secret_key, index]
 				}
 			},
-			Some(secrets) => secrets,
+			Some(secrets) => {
+				match protocol {
+					NoteProtocol::Mixer => {
+						if secrets.len() != 1 {
+							let message = "Mixer secrets length should be 1 in length".to_string();
+							let operation_error =
+								OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
+							return Err(operation_error.into());
+						}
+					}
+					NoteProtocol::Anchor => {
+						if secrets.len() != 3 {
+							let message = "Anchor secrets length should be 3 in length".to_string();
+							let operation_error =
+								OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
+							return Err(operation_error.into());
+						}
+					}
+					NoteProtocol::VAnchor => {
+						if secrets.len() != 5 {
+							let message = "VAnchor secrets length should be 5 in length".to_string();
+							let operation_error =
+								OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
+							return Err(operation_error.into());
+						}
+					}
+				};
+
+				secrets
+			}
 		};
 
 		let backend = self.backend;
