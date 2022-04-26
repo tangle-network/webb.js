@@ -141,10 +141,10 @@ impl JsNote {
 			NoteProtocol::VAnchor => match self.version {
 				NoteVersion::V1 => {
 					let message = "VAnchor protocol isn't supported in note v1".to_string();
-					return Err(OperationError::new_with_message(
+					Err(OperationError::new_with_message(
 						OpStatusCode::FailedToGenerateTheLeaf,
 						message,
-					));
+					))
 				}
 				NoteVersion::V2 => {
 					if self.secrets.len() == 5 {
@@ -187,10 +187,10 @@ impl JsNote {
 						})
 					} else {
 						let message = format!("Invalid secret format for protocol {}", self.protocol);
-						return Err(OperationError::new_with_message(
+						Err(OperationError::new_with_message(
 							OpStatusCode::InvalidNoteSecrets,
 							message,
-						));
+						))
 					}
 				}
 			},
@@ -545,7 +545,7 @@ impl JsNoteBuilder {
 				}
 				NoteProtocol::VAnchor => {
 					let utxo = vanchor::generate_secrets(
-						amount.unwrap_or("0".to_string()).parse().unwrap(),
+						amount.unwrap_or_else(|| "0".to_string()).parse().unwrap(),
 						exponentiation.unwrap_or(5),
 						width.unwrap_or(5),
 						curve.unwrap_or(Curve::Bn254),
@@ -563,7 +563,6 @@ impl JsNoteBuilder {
 					// secrets
 					vec![chain_id, amount, blinding, secret_key, index]
 				}
-				_ => return Err(JsValue::from(OpStatusCode::SecretGenFailed)),
 			},
 			Some(secrets) => secrets,
 		};

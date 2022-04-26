@@ -22,16 +22,15 @@ impl JsUtxo {
 	}
 
 	/// Create `JsUtxo` from a Utxo with bls381 Fr
-	pub fn new_from_Bls381_utxo(_utxo: Utxo<Bn254Fr>) -> Self {
+	pub fn new_from_bls381_utxo(_utxo: Utxo<Bn254Fr>) -> Self {
 		unimplemented!()
 	}
 
 	/// Getters for inner enum
 	pub fn get_chain_id_raw(&self) -> u64 {
-		let chain_id_raw = match &self.inner {
+		match &self.inner {
 			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.chain_id_raw,
-		};
-		chain_id_raw
+		}
 	}
 
 	pub fn get_chain_id_bytes(&self) -> Vec<u8> {
@@ -75,7 +74,7 @@ impl JsUtxo {
 
 	pub fn get_nullifier(&self) -> Option<Vec<u8>> {
 		match &self.inner {
-			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.nullifier.clone(),
+			JsUtxoInner::Bn254(bn254_utxo) => &bn254_utxo.nullifier,
 		}
 		.map(|value| value.into_repr().to_bytes_le())
 	}
@@ -131,7 +130,7 @@ impl JsUtxo {
 		let nullifier = self
 			.get_nullifier()
 			.map(|value| hex::encode(value.as_slice()))
-			.unwrap_or("".to_string());
+			.unwrap_or_else(|| "".to_string());
 
 		JsString::from(nullifier)
 	}

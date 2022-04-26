@@ -1,4 +1,3 @@
-use arkworks_setups::r1cs::vanchor::VAnchorR1CSProver;
 use arkworks_setups::{Curve as ArkCurve, VAnchorProver};
 use rand::rngs::OsRng;
 
@@ -18,7 +17,7 @@ pub fn generate_secrets(
 	let utxo: JsUtxo = match (curve, exponentiation, width) {
 		(Curve::Bn254, 5, 5) => {
 			VAnchorR1CSProverBn254_30_2_2_2::create_random_leaf(ArkCurve::Bn254, chain_id, amount, index, rng)
-				.map(|utxo| JsUtxo::new_from_bn254_utxo(utxo))
+				.map(JsUtxo::new_from_bn254_utxo)
 		}
 		_ => {
 			let message = format!(
@@ -32,7 +31,7 @@ pub fn generate_secrets(
 
 	Ok(utxo)
 }
-
+#[allow(clippy::too_many_arguments)]
 pub fn get_leaf_with_private_raw(
 	curve: Curve,
 	width: usize,
@@ -52,7 +51,7 @@ pub fn get_leaf_with_private_raw(
 			private_key.to_vec(),
 			blinding.to_vec(),
 		)
-		.map(|utxo| JsUtxo::new_from_bn254_utxo(utxo)),
+		.map(JsUtxo::new_from_bn254_utxo),
 		_ => {
 			let message = format!(
 				"No VAnchor leaf setup for curve {}, exponentiation {}, and width {}",
