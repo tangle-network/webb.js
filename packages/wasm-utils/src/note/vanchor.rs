@@ -43,7 +43,7 @@ pub fn get_leaf_with_private_raw(
 	index: Option<u64>,
 ) -> Result<JsUtxo, OperationError> {
 	let utxo: JsUtxo = match (curve, exponentiation, width) {
-		(Curve::Bn254, 5, 3) => VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
+		(Curve::Bn254, 5, 5) => VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
 			ArkCurve::Bn254,
 			chain_id,
 			amount,
