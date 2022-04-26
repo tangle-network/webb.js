@@ -65,6 +65,21 @@ impl JsNote {
 		note.parse().map_err(Into::into)
 	}
 
+	pub fn mutate_index(&mut self, index: u64) -> Result<(), OperationError> {
+		let index_bytes = index.to_le_bytes().to_vec();
+		match self.protocol {
+			NoteProtocol::VAnchor => {}
+			_ => {
+				let message = "Index secret can be set only for VAnchor".to_string();
+				let oe = OperationError::new_with_message(OpStatusCode::InvalidNoteProtocol, message);
+				return Err(oe);
+			}
+		}
+
+		self.secrets[4] = index_bytes;
+		Ok(())
+	}
+
 	pub fn get_leaf_and_nullifier(&self) -> Result<JsLeaf, OperationError> {
 		match self.protocol {
 			NoteProtocol::Mixer => {
@@ -734,6 +749,14 @@ impl JsNote {
 	pub fn exponentiation(&self) -> JsString {
 		let exp = self.exponentiation.unwrap_or_default().to_string();
 		exp.into()
+	}
+
+	#[wasm_bindgen(js_name = mutateIndex)]
+	pub fn js_mutate_index(&mut self, index: JsString) -> Result<(), JsValue> {
+		let index: String = index.into();
+		let index: u64 = index.parse().map_err(|_| OpStatusCode::InvalidNoteVersion)?;
+		self.mutate_index(index);
+		Ok(())
 	}
 }
 
