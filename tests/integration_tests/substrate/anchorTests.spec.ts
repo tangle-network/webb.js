@@ -71,7 +71,7 @@ describe('Anchor tests', function () {
       await catchWasmError(() =>
         withdrawAnchorBnx5_4(apiPromise!, bob, note!, bob.address)
       );
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof OperationError) {
         const errorMessage = {
           code: e.code,
