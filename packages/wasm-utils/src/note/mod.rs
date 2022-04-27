@@ -1,9 +1,9 @@
-use arkworks_setups::common::Leaf;
 use core::fmt;
-use js_sys::{JsString, Uint8Array};
-use rand::rngs::OsRng;
 use std::str::FromStr;
 
+use arkworks_setups::common::Leaf;
+use js_sys::{JsString, Uint8Array};
+use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 
@@ -580,32 +580,35 @@ impl JsNoteBuilder {
 				}
 			},
 			Some(secrets) => {
-				match protocol {
-					NoteProtocol::Mixer => {
-						if secrets.len() != 1 {
-							let message = "Mixer secrets length should be 1 in length".to_string();
-							let operation_error =
-								OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
-							return Err(operation_error.into());
+				// Skip validation for note V1
+				if version != NoteVersion::V1 {
+					match protocol {
+						NoteProtocol::Mixer => {
+							if secrets.len() != 1 {
+								let message = "Mixer secrets length should be 1 in length".to_string();
+								let operation_error =
+									OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
+								return Err(operation_error.into());
+							}
 						}
-					}
-					NoteProtocol::Anchor => {
-						if secrets.len() != 3 {
-							let message = "Anchor secrets length should be 3 in length".to_string();
-							let operation_error =
-								OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
-							return Err(operation_error.into());
+						NoteProtocol::Anchor => {
+							if secrets.len() != 3 {
+								let message = "Anchor secrets length should be 3 in length".to_string();
+								let operation_error =
+									OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
+								return Err(operation_error.into());
+							}
 						}
-					}
-					NoteProtocol::VAnchor => {
-						if secrets.len() != 5 {
-							let message = "VAnchor secrets length should be 5 in length".to_string();
-							let operation_error =
-								OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
-							return Err(operation_error.into());
+						NoteProtocol::VAnchor => {
+							if secrets.len() != 5 {
+								let message = "VAnchor secrets length should be 5 in length".to_string();
+								let operation_error =
+									OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
+								return Err(operation_error.into());
+							}
 						}
-					}
-				};
+					};
+				}
 
 				secrets
 			}
@@ -997,6 +1000,6 @@ mod test {
 		// Asserting that with serialization and deserialization lead to the same note
 		assert_eq!(note_string, js_note_2_string);
 
-		assert_eq!(vanchor_note.secrets.len(), 5)
+		assert_eq!(vanchor_note.secrets.len(), 5);
 	}
 }
