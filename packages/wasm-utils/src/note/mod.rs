@@ -1,5 +1,5 @@
 use core::fmt;
-use std::str::FromStr;
+use core::str::FromStr;
 
 use arkworks_setups::common::Leaf;
 use js_sys::{JsString, Uint8Array};

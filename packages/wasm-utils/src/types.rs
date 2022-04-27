@@ -1,8 +1,8 @@
 #![allow(clippy::unused_unit)]
+use core::convert::{TryFrom, TryInto};
 use core::fmt;
-use std::convert::{TryFrom, TryInto};
-use std::ops::Deref;
-use std::str::FromStr;
+use core::ops::Deref;
+use core::str::FromStr;
 
 use arkworks_setups::Curve as ArkCurve;
 use js_sys::{JsString, Uint8Array};
