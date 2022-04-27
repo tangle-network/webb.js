@@ -389,7 +389,7 @@ describe('Note class', () => {
     }
   });
 
-  it('should generate vanchor', async () => {
+  it('should generate vanchor note', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
       backend: 'Arkworks',

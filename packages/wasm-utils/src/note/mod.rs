@@ -755,8 +755,8 @@ impl JsNote {
 	pub fn js_mutate_index(&mut self, index: JsString) -> Result<(), JsValue> {
 		let index: String = index.into();
 		let index: u64 = index.parse().map_err(|_| OpStatusCode::InvalidNoteVersion)?;
-		self.mutate_index(index);
-		Ok(())
+
+		self.mutate_index(index).map_err(|e| e.into())
 	}
 }
 
