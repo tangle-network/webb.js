@@ -53,8 +53,8 @@ impl JsLeaf {
 	#[wasm_bindgen(getter)]
 	pub fn commitment(&self) -> Uint8Array {
 		match &self.inner {
-			JsLeafInner::Mixer(mixer_leaf) => Uint8Array::from(mixer_leaf.secret_bytes.as_slice()),
-			JsLeafInner::Anchor(anchor_leaf) => Uint8Array::from(anchor_leaf.secret_bytes.as_slice()),
+			JsLeafInner::Mixer(mixer_leaf) => Uint8Array::from(mixer_leaf.leaf_bytes.as_slice()),
+			JsLeafInner::Anchor(anchor_leaf) => Uint8Array::from(anchor_leaf.leaf_bytes.as_slice()),
 			JsLeafInner::VAnchor(vanchor_leaf) => vanchor_leaf.commitment(),
 		}
 	}
