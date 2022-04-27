@@ -343,6 +343,7 @@ describe('Note class', () => {
 
     const { note } = await Note.deserialize(serialized);
 
+    // Trigger the leaf generation to ensure all secrets and there types are correct
     note.getLeafCommitment();
 
     expect(note.protocol).to.equal('vanchor');
@@ -358,6 +359,8 @@ describe('Note class', () => {
     const { note } = await Note.deserialize(serialized);
 
     try {
+      // Trigger the leaf generation to ensure all secrets and there types are correct
+
       note.getLeafCommitment();
     } catch (e: any) {
       expect(e.code).to.equal(8);
@@ -489,7 +492,6 @@ describe('Note class', () => {
 
     const indexSecret = note.secrets.split(':')[4];
 
-    
     expect(deserializedNote.note.sourceChainId).to.deep.equal('1');
     expect(deserializedNote.note.sourceIdentifyingData).to.deep.equal('1');
     expect(deserializedNote.note.targetChainId).to.deep.equal('1');

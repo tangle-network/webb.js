@@ -580,7 +580,8 @@ impl JsNoteBuilder {
 				}
 			},
 			Some(secrets) => {
-				// Skip validation for note V1
+				// Skip validation for note V1 , V1 secrets are just of length 1
+				// V2 notes have secrets list the length of the list is validated
 				if version != NoteVersion::V1 {
 					match protocol {
 						NoteProtocol::Mixer => {
