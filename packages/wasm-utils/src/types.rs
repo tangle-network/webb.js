@@ -32,9 +32,16 @@ impl OperationError {
 		JsValue::from(self.code.clone() as u32)
 	}
 
+	// For backward compatibility
 	#[wasm_bindgen(js_name = error_message)]
 	#[wasm_bindgen(getter)]
 	pub fn error_message(&self) -> JsString {
+		JsString::from(self.error_message.clone())
+	}
+
+	#[wasm_bindgen(js_name = message)]
+	#[wasm_bindgen(getter)]
+	pub fn message(&self) -> JsString {
 		JsString::from(self.error_message.clone())
 	}
 

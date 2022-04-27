@@ -2,6 +2,7 @@
 #![allow(clippy::unused_unit)]
 
 extern crate ark_ff;
+extern crate core;
 extern crate wasm_bindgen;
 
 #[cfg(feature = "wee_alloc")]

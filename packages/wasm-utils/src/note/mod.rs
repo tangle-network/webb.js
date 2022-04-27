@@ -171,15 +171,15 @@ impl JsNote {
 						let index = self.secrets[4].clone();
 
 						let mut index_slice = [0u8; 8];
-						index_slice.copy_from_slice(index.as_slice());
+						index_slice.copy_from_slice(index[..8].to_vec().as_slice());
 						let index = u64::from_le_bytes(index_slice);
 
 						let mut amount_slice = [0u8; 16];
-						amount_slice.copy_from_slice(amount.as_slice());
+						amount_slice.copy_from_slice(amount[..16].to_vec().as_slice());
 						let amount = u128::from_le_bytes(amount_slice);
 
 						let mut chain_id_slice = [0u8; 8];
-						chain_id_slice.copy_from_slice(chain_id.as_slice());
+						chain_id_slice.copy_from_slice(chain_id[..8].to_vec().as_slice());
 						let chain_id = u64::from_le_bytes(chain_id_slice);
 
 						let curve = self.curve.unwrap_or(Curve::Bn254);
@@ -970,7 +970,7 @@ mod test {
 	fn generate_vanchor_note() {
 		let mut note_builder = JsNoteBuilder::new();
 		let protocol: Protocol = JsValue::from(NoteProtocol::VAnchor.to_string()).into();
-		let version: Version = JsValue::from(NoteVersion::V1.to_string()).into();
+		let version: Version = JsValue::from(NoteVersion::V2.to_string()).into();
 		let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
 		let hash_function: HF = JsValue::from(HashFunction::Poseidon.to_string()).into();
 		let curve: WasmCurve = JsValue::from(Curve::Bn254.to_string()).into();
@@ -994,12 +994,20 @@ mod test {
 
 		let vanchor_note = note_builder.build().unwrap();
 		let note_string = vanchor_note.to_string();
+		let leaf = vanchor_note.get_leaf_commitment().unwrap();
+		let leaf_vec = leaf.to_vec();
+
 		let js_note_2 = JsNote::deserialize(&note_string).unwrap();
 		let js_note_2_string = js_note_2.to_string();
+
+		let leaf_2 = js_note_2.get_leaf_commitment().unwrap();
+		let leaf_2_vec = leaf.to_vec();
 
 		// Asserting that with serialization and deserialization lead to the same note
 		assert_eq!(note_string, js_note_2_string);
 
 		assert_eq!(vanchor_note.secrets.len(), 5);
+
+		assert_eq!(hex::encode(leaf_vec), hex::encode(leaf_2_vec))
 	}
 }

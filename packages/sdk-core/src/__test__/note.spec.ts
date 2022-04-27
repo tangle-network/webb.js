@@ -334,6 +334,39 @@ describe('Note class', () => {
     }
   });
 
+  it('should deserialized vanchor note', async () => {
+    const serialized = 'webb://v2:vanchor/' +
+      '1:1/' +
+      '1:1/' +
+      '0100000000000000000000000000000000000000000000000000000000000000:0100000000000000000000000000000000000000000000000000000000000000:c841cfb05415b4fb9872576dc0f7f366cb5cc909e196c53522879a01fa807e0e:4f5cf320dd74031fc6d190e2d17c807828efc03accd6a6c466e09eb4f5aceb13:0002000000000000/' +
+      '?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=WEBB&denom=18&amount=1';
+
+    const { note } = await Note.deserialize(serialized);
+
+    note.getLeafCommitment();
+
+    expect(note.protocol).to.equal('vanchor');
+  });
+
+  it('should fail to deserialize vanchor note with secrets less than 5 (Leaf gen failure)', async () => {
+    const serialized = 'webb://v2:vanchor/' +
+      '1:1/' +
+      '1:1/' +
+      '0100000000000000000000000000000000000000000000000000000000000000:c841cfb05415b4fb9872576dc0f7f366cb5cc909e196c53522879a01fa807e0e:4f5cf320dd74031fc6d190e2d17c807828efc03accd6a6c466e09eb4f5aceb13:0002000000000000/' +
+      '?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=WEBB&denom=18&amount=1';
+
+    const { note } = await Note.deserialize(serialized);
+
+    try {
+      note.getLeafCommitment();
+    } catch (e: any) {
+      expect(e.code).to.equal(8);
+      expect(e.message).to.equal('Invalid secret format for protocol vanchor');
+    }
+
+    expect(note.protocol).to.equal('vanchor');
+  });
+
   it('vanchor note generation should Fail for Bls381', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
@@ -456,6 +489,7 @@ describe('Note class', () => {
 
     const indexSecret = note.secrets.split(':')[4];
 
+    
     expect(deserializedNote.note.sourceChainId).to.deep.equal('1');
     expect(deserializedNote.note.sourceIdentifyingData).to.deep.equal('1');
     expect(deserializedNote.note.targetChainId).to.deep.equal('1');
