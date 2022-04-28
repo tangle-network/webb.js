@@ -1,7 +1,9 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { MerkleTree, PoseidonHasher } from '@webb-tools/api-providers/contracts/utils/merkle';
+import '@webb-tools/types/build/index.js';
+
+import { MerkleTree, PoseidonHasher } from '@webb-tools/api-providers/contracts/utils/merkle/index.js';
 import { createLocalPolkadotApi, polkadotTx } from '@webb-tools/test-utils/src/index.js';
 import { expect } from 'chai';
 
@@ -10,6 +12,8 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 describe('getLeafCountForTree should work', function () {
+  this.timeout(120_000);
+
   let signer: KeyringPair;
   let api: ApiPromise;
 
@@ -23,14 +27,13 @@ describe('getLeafCountForTree should work', function () {
     const k = new Keyring({ type: 'sr25519' });
 
     signer = k.addFromMnemonic(alicePhrase);
-    api = await createLocalPolkadotApi();
   });
-
-  this.timeout(120_000);
 
   // This test assumes a node is running at localhost - but this interferes with
   // integration tests run through docker.
-  it('get the leaf count after a deposit', async () => {
+  it.skip('get the leaf count after a deposit', async () => {
+    api = await createLocalPolkadotApi();
+
     // Assume there exists a tree with id 0 on the local substrate node
     const leafCountBefore = await api.derive.merkleTreeBn254.getLeafCountForTree(0);
 
@@ -50,14 +53,23 @@ describe('getLeafCountForTree should work', function () {
     expect(leafCountAfter).to.eq(leafCountBefore + 1);
   });
 
-  it('should match on-chain merkle tree and tree created from leaves for getLeaves', async () => {
+  it.skip('should match on-chain merkle tree and tree created from leaves for getLeaves', async () => {
+    api = await createLocalPolkadotApi();
+
     const leafCount = await api.derive.merkleTreeBn254.getLeafCountForTree(0);
     const chainTree = await api.query.merkleTreeBn254.trees(0);
     const chainRoot = chainTree.unwrap().root.toString();
 
-    const leaves = await api.derive.merkleTreeBn254.getLeavesForTree(0, 0, leafCount);
-    const calculatedTree = MerkleTree.new('', 30, leaves, new PoseidonHasher());
+    const leaves = await api.derive.merkleTreeBn254.getLeavesForTree(0, 0, leafCount - 1);
+    const stringLeaves = leaves.map((leaf) => {
+      return `0x${Buffer.from(leaf).toString('hex')}`;
+    });
 
-    expect(calculatedTree.getRoot()).to.eq(chainRoot);
+    console.log('chainRoot: ', chainRoot);
+    console.log(stringLeaves);
+    const calculatedTree = MerkleTree.new('', 30, stringLeaves, new PoseidonHasher());
+
+    console.log('calculatedRoot: ', BigInt(calculatedTree.getRoot()));
+    expect(BigInt(calculatedTree.getRoot())).to.eq(BigInt(chainRoot));
   });
 });
