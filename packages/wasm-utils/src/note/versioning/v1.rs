@@ -54,5 +54,6 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OperationError> {
 		exponentiation: Some(exponentiation),
 		width: Some(width),
 		secrets: vec![secrets],
+		index: None,
 	})
 }

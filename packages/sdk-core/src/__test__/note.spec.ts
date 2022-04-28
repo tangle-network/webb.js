@@ -336,9 +336,8 @@ describe('Note class', () => {
 
   it('should deserialized vanchor note', async () => {
     const serialized = 'webb://v2:vanchor/' +
-      '1:1/' +
-      '1:1/' +
-      '0100000000000000000000000000000000000000000000000000000000000000:0100000000000000000000000000000000000000000000000000000000000000:c841cfb05415b4fb9872576dc0f7f366cb5cc909e196c53522879a01fa807e0e:4f5cf320dd74031fc6d190e2d17c807828efc03accd6a6c466e09eb4f5aceb13:0002000000000000/' +
+      '1:1/1:1/' +
+      '0100000000000000000000000000000000000000000000000000000000000000:0100000000000000000000000000000000000000000000000000000000000000:a5ae2e56bf539da01d46e9f762faf1fa6cf4547822bd1ec720a10aec2fe6651f:fdda3612a8761648547834e50313935409a1faea9eb27bf2574fc7828c332f26/' +
       '?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=WEBB&denom=18&amount=1';
 
     const { note } = await Note.deserialize(serialized);
@@ -397,7 +396,7 @@ describe('Note class', () => {
     }
   });
 
-  it('vanchor should fail with secrets 5 secrets', async () => {
+  it('vanchor should fail with secrets 4 secrets', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
       backend: 'Arkworks',
@@ -405,7 +404,6 @@ describe('Note class', () => {
       denomination: '18',
       exponentiation: '5',
       hashFunction: 'Poseidon',
-      index: 5,
       protocol: 'vanchor',
       secrets: '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b',
       sourceChain: '1',
@@ -421,7 +419,7 @@ describe('Note class', () => {
       await Note.generateNote(noteInput);
     } catch (e: any) {
       expect(e.code).to.equal(8);
-      expect(e.message).to.equal('VAnchor secrets length should be 5 in length');
+      expect(e.message).to.equal('VAnchor secrets length should be 4 in length');
     }
   });
 
@@ -433,7 +431,6 @@ describe('Note class', () => {
       denomination: '18',
       exponentiation: '5',
       hashFunction: 'Poseidon',
-      index: 5,
       protocol: 'vanchor',
       sourceChain: '1',
       sourceIdentifyingData: '1',
@@ -447,6 +444,7 @@ describe('Note class', () => {
 
     const serializedNote = note.serialize();
     const deserializedNote = await Note.deserialize(serializedNote);
+
 
     expect(deserializedNote.note.sourceChainId).to.deep.equal('1');
     expect(deserializedNote.note.sourceIdentifyingData).to.deep.equal('1');
@@ -472,7 +470,6 @@ describe('Note class', () => {
       denomination: '18',
       exponentiation: '5',
       hashFunction: 'Poseidon',
-      index: 5,
       protocol: 'vanchor',
       sourceChain: '1',
       sourceIdentifyingData: '1',
@@ -490,7 +487,6 @@ describe('Note class', () => {
     const serializedNote = note.serialize();
     const deserializedNote = await Note.deserialize(serializedNote);
 
-    const indexSecret = note.secrets.split(':')[4];
 
     expect(deserializedNote.note.sourceChainId).to.deep.equal('1');
     expect(deserializedNote.note.sourceIdentifyingData).to.deep.equal('1');
@@ -506,6 +502,6 @@ describe('Note class', () => {
     expect(deserializedNote.note.exponentiation).to.deep.equal('5');
     expect(deserializedNote.note.version).to.deep.equal('v2');
     expect(deserializedNote.note.protocol).to.deep.equal('vanchor');
-    expect(indexSecret).to.deep.equal('0002000000000000');
+    expect(deserializedNote.note.index).to.deep.equal('512');
   });
 });

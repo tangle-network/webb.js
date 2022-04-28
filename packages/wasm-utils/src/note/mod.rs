@@ -66,7 +66,6 @@ impl JsNote {
 	}
 
 	pub fn mutate_index(&mut self, index: u64) -> Result<(), OperationError> {
-		let index_bytes = index.to_le_bytes().to_vec();
 		match self.protocol {
 			NoteProtocol::VAnchor => {}
 			_ => {
@@ -76,7 +75,7 @@ impl JsNote {
 			}
 		}
 
-		self.secrets[4] = index_bytes;
+		self.index = Some(index);
 		Ok(())
 	}
 
@@ -162,17 +161,13 @@ impl JsNote {
 					))
 				}
 				NoteVersion::V2 => {
-					if self.secrets.len() == 5 {
+					if self.secrets.len() == 4 {
 						let chain_id = self.secrets[0].clone();
 
 						let amount = self.secrets[1].clone();
 						let blinding = self.secrets[2].clone();
 						let secret_key = self.secrets[3].clone();
-						let index = self.secrets[4].clone();
-
-						let mut index_slice = [0u8; 8];
-						index_slice.copy_from_slice(index[..8].to_vec().as_slice());
-						let index = u64::from_le_bytes(index_slice);
+						let index = self.index;
 
 						let mut amount_slice = [0u8; 16];
 						amount_slice.copy_from_slice(amount[..16].to_vec().as_slice());
@@ -194,7 +189,7 @@ impl JsNote {
 							blinding.as_slice(),
 							chain_id,
 							amount,
-							Some(index),
+							index,
 						)?;
 
 						Ok(JsLeaf {
@@ -273,6 +268,11 @@ impl fmt::Display for JsNote {
 			} else {
 				"".to_string()
 			},
+			if self.index.is_some() {
+				format!("index={}", self.index.clone().unwrap())
+			} else {
+				"".to_string()
+			},
 		]
 		.iter()
 		.filter(|v| !v.is_empty())
@@ -342,6 +342,9 @@ pub struct JsNote {
 	pub backend: Option<Backend>,
 	#[wasm_bindgen(skip)]
 	pub hash_function: Option<HashFunction>,
+
+	#[wasm_bindgen(skip)]
+	pub index: Option<u64>,
 }
 
 #[wasm_bindgen]
@@ -573,10 +576,9 @@ impl JsNoteBuilder {
 					let amount = utxo.get_amount();
 					let blinding = utxo.get_blinding();
 					let secret_key = utxo.get_secret_key();
-					let index = utxo.get_index_bytes();
 
 					// secrets
-					vec![chain_id, amount, blinding, secret_key, index]
+					vec![chain_id, amount, blinding, secret_key]
 				}
 			},
 			Some(secrets) => {
@@ -601,8 +603,8 @@ impl JsNoteBuilder {
 							}
 						}
 						NoteProtocol::VAnchor => {
-							if secrets.len() != 5 {
-								let message = "VAnchor secrets length should be 5 in length".to_string();
+							if secrets.len() != 4 {
+								let message = "VAnchor secrets length should be 4 in length".to_string();
 								let operation_error =
 									OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
 								return Err(operation_error.into());
@@ -639,6 +641,7 @@ impl JsNoteBuilder {
 			exponentiation,
 			width,
 			secrets,
+			index,
 		};
 		Ok(note)
 	}
@@ -762,6 +765,14 @@ impl JsNote {
 
 		self.mutate_index(index).map_err(|e| e.into())
 	}
+
+	#[wasm_bindgen(getter)]
+	pub fn index(&self) -> JsString {
+		match self.index {
+			None => JsString::from(""),
+			Some(index) => JsString::from(index.to_string().as_str()),
+		}
+	}
 }
 
 #[cfg(test)]
@@ -813,6 +824,7 @@ mod test {
 			curve: Some(Curve::Bn254),
 			amount: Some("0".to_string()),
 			secrets: vec![note_value],
+			index: None,
 		};
 		assert_eq!(note.to_string(), JsNote::from_str(note_str).unwrap().to_string());
 	}
@@ -856,6 +868,7 @@ mod test {
 			curve: Some(Curve::Bn254),
 			amount: Some("0".to_string()),
 			secrets: vec![note_value_decoded],
+			index: None,
 		};
 		assert_eq!(note.to_string(), note_str)
 	}
@@ -1007,7 +1020,7 @@ mod test {
 		// Asserting that with serialization and deserialization lead to the same note
 		assert_eq!(note_string, js_note_2_string);
 
-		assert_eq!(vanchor_note.secrets.len(), 5);
+		assert_eq!(vanchor_note.secrets.len(), 4);
 
 		assert_eq!(hex::encode(leaf_vec), hex::encode(leaf_2_vec))
 	}
