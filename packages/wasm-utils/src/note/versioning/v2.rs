@@ -68,6 +68,7 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OperationError> {
 	let mut token_symbol = None;
 	let mut denomination = None;
 	let mut amount = None;
+	let mut index = None;
 
 	for part in misc_parts {
 		let part_parts: Vec<&str> = part.split('=').collect();
@@ -89,6 +90,7 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OperationError> {
 			"token" => token_symbol = Some(value),
 			"denom" => denomination = Some(value),
 			"amount" => amount = Some(value),
+			"index" => index = Some(value),
 			_ => {
 				return Err(OperationError::new_with_message(
 					OpStatusCode::InvalidNoteMiscData,
@@ -120,5 +122,6 @@ pub fn note_from_str(s: &str) -> Result<JsNote, OperationError> {
 		exponentiation: exponentiation.map(|v| v.parse::<i8>().unwrap()),
 		width: width.map(|v| v.parse::<usize>().unwrap()),
 		secrets: secret_parts,
+		index: index.map(|v| v.parse().unwrap()),
 	})
 }

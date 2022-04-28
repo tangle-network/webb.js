@@ -1,8 +1,8 @@
 #![allow(clippy::unused_unit)]
+use core::convert::{TryFrom, TryInto};
 use core::fmt;
-use std::convert::{TryFrom, TryInto};
-use std::ops::Deref;
-use std::str::FromStr;
+use core::ops::Deref;
+use core::str::FromStr;
 
 use arkworks_setups::Curve as ArkCurve;
 use js_sys::{JsString, Uint8Array};
@@ -32,9 +32,16 @@ impl OperationError {
 		JsValue::from(self.code.clone() as u32)
 	}
 
+	// For backward compatibility
 	#[wasm_bindgen(js_name = error_message)]
 	#[wasm_bindgen(getter)]
 	pub fn error_message(&self) -> JsString {
+		JsString::from(self.error_message.clone())
+	}
+
+	#[wasm_bindgen(js_name = message)]
+	#[wasm_bindgen(getter)]
+	pub fn message(&self) -> JsString {
 		JsString::from(self.error_message.clone())
 	}
 
@@ -95,7 +102,7 @@ impl fmt::Display for OperationError {
 impl OperationError {
 	pub fn new_with_message(code: OpStatusCode, message: String) -> Self {
 		let mut oe: Self = code.into();
-		oe.data = Some(message);
+		oe.error_message = message;
 		oe
 	}
 }
@@ -340,6 +347,10 @@ pub enum OpStatusCode {
 	UnsupportedParameterCombination = 39,
 	/// Invalid proof on verification
 	InvalidProof = 40,
+	/// Invalid index
+	InvalidUTXOIndex = 41,
+	/// Unsupported Backend
+	UnsupportedBackend = 42,
 }
 
 #[wasm_bindgen]
@@ -451,6 +462,8 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::InvalidTargetIdentifyingData => "Invalid target identifying data",
 			OpStatusCode::UnsupportedParameterCombination => "Unsupported Paramater combination to generate proof",
 			OpStatusCode::InvalidProof => "Proof verification failed",
+			OpStatusCode::InvalidUTXOIndex => "Invalid UTXO Index value",
+			OpStatusCode::UnsupportedBackend => "Unsupported backend",
 		}
 		.to_string()
 	}

@@ -1,5 +1,5 @@
 use core::fmt;
-use std::str::FromStr;
+use core::str::FromStr;
 
 use arkworks_setups::common::Leaf;
 use js_sys::{JsString, Uint8Array};
@@ -11,10 +11,12 @@ use crate::types::{
 	Backend, Curve, HashFunction, NoteProtocol, NoteVersion, OpStatusCode, OperationError, Protocol, Version,
 	WasmCurve, BE, HF,
 };
+use crate::utxo::JsUtxo;
 
 mod anchor;
 pub mod mixer;
 
+mod vanchor;
 mod versioning;
 
 #[allow(unused_macros)]
@@ -24,13 +26,60 @@ macro_rules! console_log {
 	($($t:tt)*) => (crate::types::log(&format_args!($($t)*).to_string()))
 }
 
+pub enum JsLeafInner {
+	Mixer(Leaf),
+	Anchor(Leaf),
+	VAnchor(JsUtxo),
+}
+#[wasm_bindgen]
+pub struct JsLeaf {
+	#[wasm_bindgen(skip)]
+	pub inner: JsLeafInner,
+}
+
+#[wasm_bindgen]
+impl JsLeaf {
+	#[wasm_bindgen(getter)]
+	pub fn protocol(&self) -> Protocol {
+		let protocol = match self.inner {
+			JsLeafInner::Mixer(_) => "mixer",
+			JsLeafInner::Anchor(_) => "anchor",
+			JsLeafInner::VAnchor(_) => "vanchor",
+		};
+
+		JsValue::from(protocol).into()
+	}
+
+	#[wasm_bindgen(getter)]
+	pub fn commitment(&self) -> Uint8Array {
+		match &self.inner {
+			JsLeafInner::Mixer(mixer_leaf) => Uint8Array::from(mixer_leaf.leaf_bytes.as_slice()),
+			JsLeafInner::Anchor(anchor_leaf) => Uint8Array::from(anchor_leaf.leaf_bytes.as_slice()),
+			JsLeafInner::VAnchor(vanchor_leaf) => vanchor_leaf.commitment(),
+		}
+	}
+}
 impl JsNote {
 	/// Deseralize note from a string
 	pub fn deserialize(note: &str) -> Result<Self, OperationError> {
 		note.parse().map_err(Into::into)
 	}
 
-	pub fn get_leaf_and_nullifier(&self) -> Result<Leaf, OperationError> {
+	pub fn mutate_index(&mut self, index: u64) -> Result<(), OperationError> {
+		match self.protocol {
+			NoteProtocol::VAnchor => {}
+			_ => {
+				let message = "Index secret can be set only for VAnchor".to_string();
+				let oe = OperationError::new_with_message(OpStatusCode::InvalidNoteProtocol, message);
+				return Err(oe);
+			}
+		}
+
+		self.index = Some(index);
+		Ok(())
+	}
+
+	pub fn get_leaf_and_nullifier(&self) -> Result<JsLeaf, OperationError> {
 		match self.protocol {
 			NoteProtocol::Mixer => {
 				let raw = match self.version {
@@ -46,12 +95,17 @@ impl JsNote {
 						raw
 					}
 				};
-				mixer::get_leaf_with_private_raw(
+
+				let mixer_leaf = mixer::get_leaf_with_private_raw(
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
 					self.exponentiation.unwrap_or(5),
 					&raw,
-				)
+				)?;
+
+				Ok(JsLeaf {
+					inner: JsLeafInner::Mixer(mixer_leaf),
+				})
 			}
 			NoteProtocol::Anchor => {
 				let mut secret_bytes: Vec<u8> = Vec::new();
@@ -85,22 +139,71 @@ impl JsNote {
 					));
 				}
 
-				anchor::get_leaf_with_private_raw(
+				let anchor_leaf = anchor::get_leaf_with_private_raw(
 					self.curve.unwrap_or(Curve::Bn254),
 					self.width.unwrap_or(5),
 					self.exponentiation.unwrap_or(4),
 					u64::from_str(&self.target_chain_id).unwrap(),
 					nullifier_bytes,
 					secret_bytes,
-				)
+				)?;
+
+				Ok(JsLeaf {
+					inner: JsLeafInner::Anchor(anchor_leaf),
+				})
 			}
-			_ => {
-				let message = format!("{} protocol isn't supported yet", self.protocol);
-				Err(OperationError::new_with_message(
-					OpStatusCode::FailedToGenerateTheLeaf,
-					message,
-				))
-			}
+			NoteProtocol::VAnchor => match self.version {
+				NoteVersion::V1 => {
+					let message = "VAnchor protocol isn't supported in note v1".to_string();
+					Err(OperationError::new_with_message(
+						OpStatusCode::FailedToGenerateTheLeaf,
+						message,
+					))
+				}
+				NoteVersion::V2 => {
+					if self.secrets.len() == 4 {
+						let chain_id = self.secrets[0].clone();
+
+						let amount = self.secrets[1].clone();
+						let blinding = self.secrets[2].clone();
+						let secret_key = self.secrets[3].clone();
+						let index = self.index;
+
+						let mut amount_slice = [0u8; 16];
+						amount_slice.copy_from_slice(amount[..16].to_vec().as_slice());
+						let amount = u128::from_le_bytes(amount_slice);
+
+						let mut chain_id_slice = [0u8; 8];
+						chain_id_slice.copy_from_slice(chain_id[..8].to_vec().as_slice());
+						let chain_id = u64::from_le_bytes(chain_id_slice);
+
+						let curve = self.curve.unwrap_or(Curve::Bn254);
+						let width = self.width.unwrap_or(2);
+						let exponentiation = self.exponentiation.unwrap_or(5);
+
+						let utxo = vanchor::get_leaf_with_private_raw(
+							curve,
+							width,
+							exponentiation,
+							secret_key.as_slice(),
+							blinding.as_slice(),
+							chain_id,
+							amount,
+							index,
+						)?;
+
+						Ok(JsLeaf {
+							inner: JsLeafInner::VAnchor(utxo),
+						})
+					} else {
+						let message = format!("Invalid secret format for protocol {}", self.protocol);
+						Err(OperationError::new_with_message(
+							OpStatusCode::InvalidNoteSecrets,
+							message,
+						))
+					}
+				}
+			},
 		}
 	}
 }
@@ -162,6 +265,11 @@ impl fmt::Display for JsNote {
 			},
 			if self.amount.is_some() {
 				format!("amount={}", self.amount.clone().unwrap())
+			} else {
+				"".to_string()
+			},
+			if self.index.is_some() {
+				format!("index={}", self.index.unwrap())
 			} else {
 				"".to_string()
 			},
@@ -234,6 +342,9 @@ pub struct JsNote {
 	pub backend: Option<Backend>,
 	#[wasm_bindgen(skip)]
 	pub hash_function: Option<HashFunction>,
+
+	#[wasm_bindgen(skip)]
+	pub index: Option<u64>,
 }
 
 #[wasm_bindgen]
@@ -272,6 +383,9 @@ pub struct JsNoteBuilder {
 	pub exponentiation: Option<i8>,
 	#[wasm_bindgen(skip)]
 	pub width: Option<usize>,
+	// Utxo index
+	#[wasm_bindgen(skip)]
+	pub index: Option<u64>,
 }
 
 #[allow(clippy::unused_unit)]
@@ -362,6 +476,13 @@ impl JsNoteBuilder {
 		Ok(())
 	}
 
+	pub fn index(&mut self, index: JsString) -> Result<(), JsValue> {
+		let index: String = index.into();
+		let index: u64 = index.parse().map_err(|_| OpStatusCode::InvalidUTXOIndex)?;
+		self.index = Some(index);
+		Ok(())
+	}
+
 	pub fn exponentiation(&mut self, exponentiation: JsString) -> Result<(), JsValue> {
 		let exp: String = exponentiation.into();
 		let exponentiation = exp.parse().map_err(|_| OpStatusCode::InvalidExponentiation)?;
@@ -407,6 +528,15 @@ impl JsNoteBuilder {
 		let exponentiation = self.exponentiation;
 		let width = self.width;
 		let curve = self.curve;
+		let amount = self.amount.clone();
+		let index = self.index;
+		let backend = self.backend.unwrap_or(Backend::Arkworks);
+
+		if backend == Backend::Circom && self.secrets.is_none() {
+			let message = "Circom backend is supported when the secret value is supplied".to_string();
+			let operation_error = OperationError::new_with_message(OpStatusCode::UnsupportedBackend, message);
+			return Err(operation_error.into());
+		}
 
 		let secrets = match self.secrets {
 			None => match protocol {
@@ -431,15 +561,66 @@ impl JsNoteBuilder {
 
 					secrets.to_vec()
 				}
-				_ => return Err(JsValue::from(OpStatusCode::SecretGenFailed)),
+				NoteProtocol::VAnchor => {
+					let utxo = vanchor::generate_secrets(
+						amount.unwrap_or_else(|| "0".to_string()).parse().unwrap(),
+						exponentiation.unwrap_or(5),
+						width.unwrap_or(5),
+						curve.unwrap_or(Curve::Bn254),
+						chain_id,
+						index,
+						&mut OsRng,
+					)?;
+
+					let chain_id = utxo.get_chain_id_bytes();
+					let amount = utxo.get_amount();
+					let blinding = utxo.get_blinding();
+					let secret_key = utxo.get_secret_key();
+
+					// secrets
+					vec![chain_id, amount, blinding, secret_key]
+				}
 			},
-			Some(secrets) => secrets,
+			Some(secrets) => {
+				// Skip validation for note V1 , V1 secrets are just of length 1
+				// V2 notes have secrets list the length of the list is validated
+				if version != NoteVersion::V1 {
+					match protocol {
+						NoteProtocol::Mixer => {
+							if secrets.len() != 1 {
+								let message = "Mixer secrets length should be 1 in length".to_string();
+								let operation_error =
+									OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
+								return Err(operation_error.into());
+							}
+						}
+						NoteProtocol::Anchor => {
+							if secrets.len() != 3 {
+								let message = "Anchor secrets length should be 3 in length".to_string();
+								let operation_error =
+									OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
+								return Err(operation_error.into());
+							}
+						}
+						NoteProtocol::VAnchor => {
+							if secrets.len() != 4 {
+								let message = "VAnchor secrets length should be 4 in length".to_string();
+								let operation_error =
+									OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
+								return Err(operation_error.into());
+							}
+						}
+					};
+				}
+
+				secrets
+			}
 		};
 
 		let backend = self.backend;
 		let hash_function = self.hash_function;
 		let token_symbol = self.token_symbol;
-		let amount = self.amount;
+		let amount = self.amount.clone();
 		let denomination = self.denomination;
 
 		let scheme = "webb://".to_string();
@@ -460,6 +641,7 @@ impl JsNoteBuilder {
 			exponentiation,
 			width,
 			secrets,
+			index,
 		};
 		Ok(note)
 	}
@@ -483,7 +665,8 @@ impl JsNote {
 	#[wasm_bindgen(js_name = getLeafCommitment)]
 	pub fn get_leaf_commitment(&self) -> Result<Uint8Array, JsValue> {
 		let leaf = self.get_leaf_and_nullifier()?;
-		Ok(Uint8Array::from(leaf.leaf_bytes.as_slice()))
+
+		Ok(leaf.commitment())
 	}
 
 	pub fn serialize(&self) -> JsString {
@@ -574,6 +757,22 @@ impl JsNote {
 		let exp = self.exponentiation.unwrap_or_default().to_string();
 		exp.into()
 	}
+
+	#[wasm_bindgen(js_name = mutateIndex)]
+	pub fn js_mutate_index(&mut self, index: JsString) -> Result<(), JsValue> {
+		let index: String = index.into();
+		let index: u64 = index.parse().map_err(|_| OpStatusCode::InvalidNoteVersion)?;
+
+		self.mutate_index(index).map_err(|e| e.into())
+	}
+
+	#[wasm_bindgen(getter)]
+	pub fn index(&self) -> JsString {
+		match self.index {
+			None => JsString::from(""),
+			Some(index) => JsString::from(index.to_string().as_str()),
+		}
+	}
 }
 
 #[cfg(test)]
@@ -625,6 +824,7 @@ mod test {
 			curve: Some(Curve::Bn254),
 			amount: Some("0".to_string()),
 			secrets: vec![note_value],
+			index: None,
 		};
 		assert_eq!(note.to_string(), JsNote::from_str(note_str).unwrap().to_string());
 	}
@@ -668,6 +868,7 @@ mod test {
 			curve: Some(Curve::Bn254),
 			amount: Some("0".to_string()),
 			secrets: vec![note_value_decoded],
+			index: None,
 		};
 		assert_eq!(note.to_string(), note_str)
 	}
@@ -776,5 +977,51 @@ mod test {
 		let note = note_builder.build().unwrap();
 		let note_from_str = JsNote::from_str(note_str).unwrap();
 		assert_eq!(note.serialize(), note_from_str.serialize());
+	}
+	// VAnchor tests
+
+	#[wasm_bindgen_test]
+	fn generate_vanchor_note() {
+		let mut note_builder = JsNoteBuilder::new();
+		let protocol: Protocol = JsValue::from(NoteProtocol::VAnchor.to_string()).into();
+		let version: Version = JsValue::from(NoteVersion::V2.to_string()).into();
+		let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
+		let hash_function: HF = JsValue::from(HashFunction::Poseidon.to_string()).into();
+		let curve: WasmCurve = JsValue::from(Curve::Bn254.to_string()).into();
+
+		note_builder.protocol(protocol).unwrap();
+		note_builder.version(version).unwrap();
+		note_builder.source_chain_id(JsString::from("2"));
+		note_builder.target_chain_id(JsString::from("3"));
+		note_builder.source_identifying_data(JsString::from("2"));
+		note_builder.target_identifying_data(JsString::from("3"));
+
+		note_builder.width(JsString::from("5")).unwrap();
+		note_builder.exponentiation(JsString::from("5")).unwrap();
+		note_builder.denomination(JsString::from("18")).unwrap();
+		note_builder.amount(JsString::from("10"));
+		note_builder.token_symbol(JsString::from("EDG"));
+		note_builder.curve(curve).unwrap();
+		note_builder.hash_function(hash_function).unwrap();
+		note_builder.backend(backend);
+		note_builder.index(JsString::from("10"));
+
+		let vanchor_note = note_builder.build().unwrap();
+		let note_string = vanchor_note.to_string();
+		let leaf = vanchor_note.get_leaf_commitment().unwrap();
+		let leaf_vec = leaf.to_vec();
+
+		let js_note_2 = JsNote::deserialize(&note_string).unwrap();
+		let js_note_2_string = js_note_2.to_string();
+
+		let leaf_2 = js_note_2.get_leaf_commitment().unwrap();
+		let leaf_2_vec = leaf.to_vec();
+
+		// Asserting that with serialization and deserialization lead to the same note
+		assert_eq!(note_string, js_note_2_string);
+
+		assert_eq!(vanchor_note.secrets.len(), 4);
+
+		assert_eq!(hex::encode(leaf_vec), hex::encode(leaf_2_vec))
 	}
 }

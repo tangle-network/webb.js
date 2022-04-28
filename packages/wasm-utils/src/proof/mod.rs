@@ -1,6 +1,6 @@
 #![allow(clippy::unused_unit)]
 
-use std::convert::{TryFrom, TryInto};
+use core::convert::{TryFrom, TryInto};
 
 use ark_ff::{BigInteger, PrimeField};
 

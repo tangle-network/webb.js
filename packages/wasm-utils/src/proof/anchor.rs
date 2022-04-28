@@ -1,4 +1,4 @@
-use std::convert::TryInto;
+use core::convert::TryInto;
 
 use arkworks_setups::Curve as ArkCurve;
 use rand::rngs::OsRng;
