@@ -10,7 +10,7 @@ describe('Note class', () => {
   it('should test constructor from `NoteGenInput`', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
-      backend: 'Circom',
+      backend: 'Arkworks',
       curve: 'Bn254',
       denomination: '18',
       exponentiation: '5',
@@ -35,7 +35,7 @@ describe('Note class', () => {
     expect(note.note.targetIdentifyingData).to.deep.equal('1');
     expect(note.note.sourceChainId).to.deep.equal('1');
     expect(note.note.sourceIdentifyingData).to.deep.equal('1');
-    expect(note.note.backend).to.deep.equal('Circom');
+    expect(note.note.backend).to.deep.equal('Arkworks');
     expect(note.note.hashFunction).to.deep.equal('Poseidon');
     expect(note.note.curve).to.deep.equal('Bn254');
     expect(note.note.tokenSymbol).to.deep.equal('WEBB');
@@ -44,7 +44,7 @@ describe('Note class', () => {
   it('should test serializing and deserializing', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
-      backend: 'Circom',
+      backend: 'Arkworks',
       curve: 'Bn254',
       denomination: '18',
       exponentiation: '5',
@@ -67,7 +67,7 @@ describe('Note class', () => {
     expect(deserializedNote.note.sourceIdentifyingData).to.deep.equal('1');
     expect(deserializedNote.note.targetChainId).to.deep.equal('1');
     expect(deserializedNote.note.targetIdentifyingData).to.deep.equal('1');
-    expect(deserializedNote.note.backend).to.deep.equal('Circom');
+    expect(deserializedNote.note.backend).to.deep.equal('Arkworks');
     expect(deserializedNote.note.hashFunction).to.deep.equal('Poseidon');
     expect(deserializedNote.note.curve).to.deep.equal('Bn254');
     expect(deserializedNote.note.tokenSymbol).to.deep.equal('WEBB');
@@ -80,7 +80,7 @@ describe('Note class', () => {
   it('should test anchor secrets chain', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
-      backend: 'Circom',
+      backend: 'Arkworks',
       curve: 'Bn254',
       denomination: '18',
       exponentiation: '5',
@@ -101,6 +101,55 @@ describe('Note class', () => {
     const targetChain = targetChainBuffer.readBigUInt64BE();
 
     expect(targetChain.toString()).to.deep.equal('1');
+  });
+
+  it('should fail with circom backend', async () => {
+    const noteInput: NoteGenInput = {
+      amount: '1',
+      backend: 'Circom',
+      curve: 'Bn254',
+      denomination: '18',
+      exponentiation: '5',
+      hashFunction: 'Poseidon',
+      protocol: 'anchor',
+      sourceChain: '1',
+      sourceIdentifyingData: '1',
+      targetChain: '1',
+      targetIdentifyingData: '1',
+      tokenSymbol: 'WEBB',
+      version: 'v2',
+      width: '4'
+    };
+
+    try {
+      await Note.generateNote(noteInput);
+    } catch (e: any) {
+      expect(e.code).to.equal(42);
+      expect(e.message).to.equal('Circom backend is supported when the secret value is supplied');
+    }
+  });
+  it('should generate a note with circom backend when secrets is passed', async () => {
+    const noteInput: NoteGenInput = {
+      amount: '1',
+      backend: 'Circom',
+      curve: 'Bn254',
+      denomination: '18',
+      exponentiation: '5',
+      hashFunction: 'Poseidon',
+      protocol: 'mixer',
+      secrets: '339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b',
+      sourceChain: '1',
+      sourceIdentifyingData: '1',
+      targetChain: '1',
+      targetIdentifyingData: '1',
+      tokenSymbol: 'WEBB',
+      version: 'v2',
+      width: '4'
+    };
+
+    const { note } = await Note.generateNote(noteInput);
+
+    expect(note.backend).to.equal('Circom');
   });
 
   it('should fail to deserialize invalid protocol', async () => {
@@ -179,7 +228,7 @@ describe('Note class', () => {
       await Note.deserialize(serialized);
     } catch (e: any) {
       expect(e.code).to.equal(3);
-      expect(e.message).to.equal('Invalid note length');
+      expect(e.message).to.equal('Note length has incorrect parts length: 4');
     }
   });
 
@@ -283,5 +332,193 @@ describe('Note class', () => {
       expect(e.code).to.equal(3);
       expect(e.message).to.equal('Invalid note length');
     }
+  });
+
+  it('should deserialized vanchor note', async () => {
+    const serialized = 'webb://v2:vanchor/' +
+      '1:1/1:1/' +
+      '0100000000000000000000000000000000000000000000000000000000000000:0100000000000000000000000000000000000000000000000000000000000000:a5ae2e56bf539da01d46e9f762faf1fa6cf4547822bd1ec720a10aec2fe6651f:fdda3612a8761648547834e50313935409a1faea9eb27bf2574fc7828c332f26/' +
+      '?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=WEBB&denom=18&amount=1';
+
+    const { note } = await Note.deserialize(serialized);
+
+    // Trigger the leaf generation to ensure all secrets and there types are correct
+    note.getLeafCommitment();
+
+    expect(note.protocol).to.equal('vanchor');
+  });
+
+  it('should fail to deserialize vanchor note with secrets less than 5 (Leaf gen failure)', async () => {
+    const serialized = 'webb://v2:vanchor/' +
+      '1:1/' +
+      '1:1/' +
+      '0100000000000000000000000000000000000000000000000000000000000000:c841cfb05415b4fb9872576dc0f7f366cb5cc909e196c53522879a01fa807e0e:4f5cf320dd74031fc6d190e2d17c807828efc03accd6a6c466e09eb4f5aceb13:0002000000000000/' +
+      '?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=WEBB&denom=18&amount=1';
+
+    const { note } = await Note.deserialize(serialized);
+
+    try {
+      // Trigger the leaf generation to ensure all secrets and there types are correct
+
+      note.getLeafCommitment();
+    } catch (e: any) {
+      expect(e.code).to.equal(8);
+      expect(e.message).to.equal('Invalid secret format for protocol vanchor');
+    }
+
+    expect(note.protocol).to.equal('vanchor');
+  });
+
+  it('vanchor note generation should Fail for Bls381', async () => {
+    const noteInput: NoteGenInput = {
+      amount: '1',
+      backend: 'Arkworks',
+      curve: 'Bls381',
+      denomination: '18',
+      exponentiation: '5',
+      hashFunction: 'Poseidon',
+      index: 5,
+      protocol: 'vanchor',
+      sourceChain: '1',
+      sourceIdentifyingData: '1',
+      targetChain: '1',
+      targetIdentifyingData: '1',
+      tokenSymbol: 'WEBB',
+      version: 'v2',
+      width: '5'
+    };
+
+    try {
+      await Note.generateNote(noteInput);
+    } catch (e: any) {
+      expect(e.code).to.equal(17);
+      expect(e.message).to.equal('No VAnchor leaf setup for curve Bls381, exponentiation 5, and width 5');
+    }
+  });
+
+  it('vanchor should fail with secrets 4 secrets', async () => {
+    const noteInput: NoteGenInput = {
+      amount: '1',
+      backend: 'Arkworks',
+      curve: 'Bn254',
+      denomination: '18',
+      exponentiation: '5',
+      hashFunction: 'Poseidon',
+      protocol: 'vanchor',
+      secrets: '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b',
+      sourceChain: '1',
+      sourceIdentifyingData: '1',
+      targetChain: '1',
+      targetIdentifyingData: '1',
+      tokenSymbol: 'WEBB',
+      version: 'v2',
+      width: '5'
+    };
+
+    try {
+      await Note.generateNote(noteInput);
+    } catch (e: any) {
+      expect(e.code).to.equal(8);
+      expect(e.message).to.equal('VAnchor secrets length should be 4 in length');
+    }
+  });
+
+  it('should generate vanchor note', async () => {
+    const noteInput: NoteGenInput = {
+      amount: '1',
+      backend: 'Arkworks',
+      curve: 'Bn254',
+      denomination: '18',
+      exponentiation: '5',
+      hashFunction: 'Poseidon',
+      protocol: 'vanchor',
+      sourceChain: '1',
+      sourceIdentifyingData: '1',
+      targetChain: '1',
+      targetIdentifyingData: '1',
+      tokenSymbol: 'WEBB',
+      version: 'v2',
+      width: '5'
+    };
+    const note = await Note.generateNote(noteInput);
+
+    const serializedNote = note.serialize();
+    const deserializedNote = await Note.deserialize(serializedNote);
+
+    expect(deserializedNote.note.sourceChainId).to.deep.equal('1');
+    expect(deserializedNote.note.sourceIdentifyingData).to.deep.equal('1');
+    expect(deserializedNote.note.targetChainId).to.deep.equal('1');
+    expect(deserializedNote.note.targetIdentifyingData).to.deep.equal('1');
+    expect(deserializedNote.note.backend).to.deep.equal('Arkworks');
+    expect(deserializedNote.note.hashFunction).to.deep.equal('Poseidon');
+    expect(deserializedNote.note.curve).to.deep.equal('Bn254');
+    expect(deserializedNote.note.tokenSymbol).to.deep.equal('WEBB');
+    expect(deserializedNote.note.amount).to.deep.equal('1');
+    expect(deserializedNote.note.denomination).to.deep.equal('18');
+    expect(deserializedNote.note.width).to.deep.equal('5');
+    expect(deserializedNote.note.exponentiation).to.deep.equal('5');
+    expect(deserializedNote.note.version).to.deep.equal('v2');
+    expect(deserializedNote.note.protocol).to.deep.equal('vanchor');
+  });
+
+  it('should update vanchor utxo index successfully', async () => {
+    const noteInput: NoteGenInput = {
+      amount: '1',
+      backend: 'Arkworks',
+      curve: 'Bn254',
+      denomination: '18',
+      exponentiation: '5',
+      hashFunction: 'Poseidon',
+      protocol: 'vanchor',
+      sourceChain: '1',
+      sourceIdentifyingData: '1',
+      targetChain: '1',
+      targetIdentifyingData: '1',
+      tokenSymbol: 'WEBB',
+      version: 'v2',
+      width: '5'
+    };
+    // Note generated
+    const { note } = await Note.generateNote(noteInput);
+    const noteWithoutIndex = note.serialize();
+
+    const miscPartsObj = (note: string): Record<string, string> => {
+      return note.split('?')[1].split('&').reduce((acc, entry) => {
+        const [key, value] = entry.split('=');
+
+        return {
+          ...acc,
+          [key]: value
+        };
+      }, {});
+    };
+
+    const miscPartsWithoutIndex: any = miscPartsObj(noteWithoutIndex);
+
+    // No index before mutating
+    expect(miscPartsWithoutIndex.index).to.deep.equal(undefined);
+    note.mutateIndex('512');
+
+    const serializedNote = note.serialize();
+    const deserializedNote = await Note.deserialize(serializedNote);
+    const miscPartsWitIndex: any = miscPartsObj(serializedNote);
+
+    expect(miscPartsWitIndex.index).to.deep.equal('512');
+
+    expect(deserializedNote.note.sourceChainId).to.deep.equal('1');
+    expect(deserializedNote.note.sourceIdentifyingData).to.deep.equal('1');
+    expect(deserializedNote.note.targetChainId).to.deep.equal('1');
+    expect(deserializedNote.note.targetIdentifyingData).to.deep.equal('1');
+    expect(deserializedNote.note.backend).to.deep.equal('Arkworks');
+    expect(deserializedNote.note.hashFunction).to.deep.equal('Poseidon');
+    expect(deserializedNote.note.curve).to.deep.equal('Bn254');
+    expect(deserializedNote.note.tokenSymbol).to.deep.equal('WEBB');
+    expect(deserializedNote.note.amount).to.deep.equal('1');
+    expect(deserializedNote.note.denomination).to.deep.equal('18');
+    expect(deserializedNote.note.width).to.deep.equal('5');
+    expect(deserializedNote.note.exponentiation).to.deep.equal('5');
+    expect(deserializedNote.note.version).to.deep.equal('v2');
+    expect(deserializedNote.note.protocol).to.deep.equal('vanchor');
+    expect(deserializedNote.note.index).to.deep.equal('512');
   });
 });
