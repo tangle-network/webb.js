@@ -445,7 +445,6 @@ describe('Note class', () => {
     const serializedNote = note.serialize();
     const deserializedNote = await Note.deserialize(serializedNote);
 
-
     expect(deserializedNote.note.sourceChainId).to.deep.equal('1');
     expect(deserializedNote.note.sourceIdentifyingData).to.deep.equal('1');
     expect(deserializedNote.note.targetChainId).to.deep.equal('1');
@@ -481,12 +480,30 @@ describe('Note class', () => {
     };
     // Note generated
     const { note } = await Note.generateNote(noteInput);
+    const noteWithoutIndex = note.serialize();
 
+    const miscPartsObj = (note: string): Record<string, string> => {
+      return note.split('?')[1].split('&').reduce((acc, entry) => {
+        const [key, value] = entry.split('=');
+
+        return {
+          ...acc,
+          [key]: value
+        };
+      }, {});
+    };
+
+    const miscPartsWithoutIndex: any = miscPartsObj(noteWithoutIndex);
+
+    // No index before mutating
+    expect(miscPartsWithoutIndex.index).to.deep.equal(undefined);
     note.mutateIndex('512');
 
     const serializedNote = note.serialize();
     const deserializedNote = await Note.deserialize(serializedNote);
+    const miscPartsWitIndex: any = miscPartsObj(serializedNote);
 
+    expect(miscPartsWitIndex.index).to.deep.equal('512');
 
     expect(deserializedNote.note.sourceChainId).to.deep.equal('1');
     expect(deserializedNote.note.sourceIdentifyingData).to.deep.equal('1');
