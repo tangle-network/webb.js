@@ -7,12 +7,14 @@ import { Currency, DepositPayload as TDepositPayload, MixerSize, ORMLCurrency } 
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
 
+import { PalletMixerMixerMetadata } from '@polkadot/types/lookup';
 import { u8aToHex } from '@polkadot/util';
 
 import { MixerDeposit } from '../abstracts/index.js';
 import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
 import { WebbPolkadot } from './webb-provider.js';
 
+// The DepositPayload is the Note and [treeId, leafhex]
 type DepositPayload = TDepositPayload<Note, [number, string]>;
 const logger = LoggerService.get('tornado-deposit');
 
@@ -26,34 +28,34 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     const ormlCurrency = new ORMLCurrency(webbPolkadot);
     const ormlAssets = await ormlCurrency.list();
     const data = await api.query.mixerBn254.mixers.entries();
-    // @ts-ignore
-    // const tokenProperty: Array<NativeTokenProperties> = await api.rpc.system.properties();
     const groupItem = data
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .filter(([_, info]) => !info.isEmpty)
+      // storageKey is treeId.  Info is {depositSize, asset}
       .map(([storageKey, info]) => {
-        const mixerInfo = info as any;
+        // TODO: Figure out why typescript complains about an `unwrap()`
+        //       while running protocol-substrate locally.
+        const mixerInfo: PalletMixerMixerMetadata = info.unwrap();
         const cId = Number(mixerInfo.asset);
         const amount = mixerInfo.depositSize;
         // @ts-ignore
         const treeId = storageKey.toHuman()[0];
-        const id = storageKey.toString() + treeId;
 
-        console.log('id in getSizes: ', id);
         // parse number from amount string
         // TODO: Get and parse native / non-native token denomination
         // TODO replace `replaceAll` or target es2021
         // @ts-ignore
         const amountNumber = (Number(amount?.toString().replaceAll(',', '')) * 1.0) / Math.pow(10, 12);
-        const currency = cId
-          ? Currency.fromORMLAsset(
-            webbPolkadot.config.currencies,
-            ormlAssets.find((asset) => Number(asset.id) === cId)!
-          )
-          : Currency.fromCurrencyId(webbPolkadot.config.currencies, Number(cId));
+
+        const currency = Currency.fromORMLAsset(
+          webbPolkadot.config.currencies,
+          ormlAssets.find((asset) => Number(asset.id) === cId)!
+        );
 
         return {
           amount: amountNumber,
           currency: currency,
-          id,
+          id: treeId,
           treeId
         };
       })
@@ -77,22 +79,23 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     return PolkadotMixerDeposit.getSizes(this.inner);
   }
 
+  // MixerId is the treeId for deposit, chainIdType is the destination (and source because this is mixer)
   async generateNote (mixerId: number, chainIdType: number): Promise<DepositPayload> {
     logger.info(`Depositing to mixer id ${mixerId}`);
     const sizes = await this.getSizes();
-    const amount = sizes.find((size) => Number(size.id) === mixerId);
+    const mixer = sizes.find((size) => Number(size.id) === mixerId);
     const properties = await this.inner.api.rpc.system.properties();
     const denomination = properties.tokenDecimals.toHuman() || 12;
 
-    if (!amount) {
+    if (!mixer) {
       throw Error('amount not found! for mixer id ' + mixerId);
     }
 
-    const treeId = amount.id;
+    const treeId = mixer.id;
 
     logger.info(`Depositing to tree id ${treeId}`);
     const noteInput: NoteGenInput = {
-      amount: String(amount.amount),
+      amount: String(mixer.amount),
       backend: 'Arkworks',
       curve: 'Bn254',
       denomination: `${denomination}`,
@@ -103,7 +106,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
       sourceIdentifyingData: treeId.toString(),
       targetChain: chainIdType.toString(),
       targetIdentifyingData: treeId.toString(),
-      tokenSymbol: amount.asset,
+      tokenSymbol: mixer.asset,
       version: 'v2',
       width: '3'
     };

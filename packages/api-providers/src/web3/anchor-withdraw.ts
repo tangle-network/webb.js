@@ -36,19 +36,16 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     return this.inner.config;
   }
 
-  async mapRelayerIntoActive (relayer: OptionalRelayer): Promise<OptionalActiveRelayer> {
+  async mapRelayerIntoActive (relayer: OptionalRelayer, internalChainId: InternalChainId): Promise<OptionalActiveRelayer> {
     if (!relayer) {
       return null;
     }
-
-    const evmId = await this.inner.getChainId();
-    const chainId = evmIdIntoInternalChainId(evmId);
 
     return WebbRelayer.intoActiveWebRelayer(
       relayer,
       {
         basedOn: 'evm',
-        chain: chainId
+        chain: internalChainId
       },
       // Define the function for retrieving fee information for the relayer
       async (note: string) => {
@@ -482,7 +479,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       const relayerRootsBytes = hexStringToBytes(relayerRootString);
       const relayerRoots = Array.from(relayerRootsBytes);
 
-      const relayedWithdraw = await activeRelayer.initWithdraw('anchorRelayTx');
+      const relayedWithdraw = await activeRelayer.initWithdraw('anchor');
 
       logger.trace('initialized the withdraw WebSocket');
 
@@ -493,7 +490,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
         name: chainIdToRelayerName(destInternalId)
       };
 
-      const tx = relayedWithdraw.generateWithdrawRequest<typeof chainInfo, 'anchorRelayTx'>(
+      const tx = relayedWithdraw.generateWithdrawRequest<typeof chainInfo, 'anchor'>(
         chainInfo,
         `0x${proofBytes}`,
         {

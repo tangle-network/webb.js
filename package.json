@@ -20,7 +20,7 @@
     "build-ts:dev": "node ./scripts/webb-build-dev.cjs",
     "build:release": "node ./scripts/webb-build-release.cjs",
     "build:interfaces": "yarn build:interfaces:defs && yarn build:interfaces:chain",
-    "build:interfaces:defs": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" -r tsconfig-paths/register node_modules/.bin/polkadot-types-from-defs --input packages/types/src/interfaces --package sample-polkadotjs-typegen/interfaces --endpoint packages/types/src/metadata/metadata.json",
+    "build:interfaces:defs": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" -r tsconfig-paths/register node_modules/.bin/polkadot-types-from-defs --input packages/types/src/interfaces --package @webb-tools/types --endpoint packages/types/src/metadata/metadata.json",
     "build:interfaces:chain": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" -r tsconfig-paths/register node_modules/.bin/polkadot-types-from-chain --endpoint ws://localhost:9944 --output ./packages/types/src/interfaces",
     "lint": "polkadot-dev-run-lint --skip-tsc",
     "clean": "polkadot-dev-clean-build",

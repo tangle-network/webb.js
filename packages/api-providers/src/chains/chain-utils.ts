@@ -70,6 +70,8 @@ export const chainTypeIdToInternalId = (chainTypeId: ChainTypeId): InternalChain
       return evmIdIntoInternalChainId(chainTypeId.chainId);
     case ChainType.Substrate:
       return substrateIdIntoInternalChainId(chainTypeId.chainId as SubstrateChainId);
+    // case ChainType.SubstrateDevelopment:
+    //   return substrateDevelopIdIntoInternalChainId(chainTypeId.chainId as SubstrateDevelopChainId);
     default:
       throw new Error('chainTypeId not handled in chainTypeIdToInternalId');
   }
@@ -159,10 +161,12 @@ export const substrateIdIntoInternalChainId = (chainId: SubstrateChainId): Inter
   switch (Number(chainId) as SubstrateChainId) {
     case SubstrateChainId.Edgeware:
       return InternalChainId.Edgeware;
-    case SubstrateChainId.Webb:
-      return InternalChainId.WebbDevelopment;
+    case SubstrateChainId.EggStandalone:
+      return InternalChainId.EggStandalone;
+    case SubstrateChainId.ProtocolSubstrateStandalone:
+      return InternalChainId.ProtocolSubstrateStandalone;
     default:
-      throw Error(`Unsupported substrate id: ${chainId}`);
+      throw Error(`Unsupported substrate live id: ${chainId}`);
   }
 };
 
@@ -170,9 +174,35 @@ export const internalChainIdIntoSubstrateId = (chainId: InternalChainId | number
   switch (Number(chainId) as InternalChainId) {
     case InternalChainId.Edgeware:
       return SubstrateChainId.Edgeware;
-    case InternalChainId.WebbDevelopment:
-      return SubstrateChainId.Webb;
+    case InternalChainId.EggStandalone:
+      return SubstrateChainId.EggStandalone;
     default:
-      throw Error(`Internal Id ${chainId} is not a substrate id`);
+      throw Error(`Internal Id ${chainId} is not a substrate live id`);
   }
 };
+
+// export const substrateDevelopIdIntoInternalChainId = (chainId: SubstrateDevelopChainId): InternalChainId => {
+//   switch (Number(chainId) as SubstrateDevelopChainId) {
+//     case SubstrateDevelopChainId.EggDevelopStandalone:
+//       return InternalChainId.EggDevelopStandalone;
+//     case SubstrateDevelopChainId.DkgSubstrateStandalone:
+//       return InternalChainId.DkgSubstrateStandalone;
+//     case SubstrateDevelopChainId.ProtocolSubstrateStandalone:
+//       return InternalChainId.ProtocolSubstrateStandalone;
+//     default:
+//       throw Error(`Unsupported substrate development id: ${chainId}`);
+//   }
+// };
+
+// export const internalChainIdIntoSubstrateDevelopId = (chainId: InternalChainId | number | string): SubstrateDevelopChainId => {
+//   switch (Number(chainId) as InternalChainId) {
+//     case InternalChainId.EggStandalone:
+//       return SubstrateDevelopChainId.EggDevelopStandalone;
+//     case InternalChainId.DkgSubstrateStandalone:
+//       return SubstrateDevelopChainId.DkgSubstrateStandalone;
+//     case InternalChainId.ProtocolSubstrateStandalone:
+//       return SubstrateDevelopChainId.ProtocolSubstrateStandalone;
+//     default:
+//       throw Error(`Internal Id ${chainId} is not a substrate develop id`);
+//   }
+// };
