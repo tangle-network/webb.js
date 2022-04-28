@@ -21,11 +21,6 @@ impl JsUtxo {
 		}
 	}
 
-	/// Create `JsUtxo` from a Utxo with bls381 Fr
-	pub fn new_from_bls381_utxo(_utxo: Utxo<Bn254Fr>) -> Self {
-		unimplemented!()
-	}
-
 	/// Getters for inner enum
 	pub fn get_chain_id_raw(&self) -> u64 {
 		match &self.inner {
