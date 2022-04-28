@@ -269,7 +269,7 @@ impl fmt::Display for JsNote {
 				"".to_string()
 			},
 			if self.index.is_some() {
-				format!("index={}", self.index.clone().unwrap())
+				format!("index={}", self.index.unwrap())
 			} else {
 				"".to_string()
 			},
