@@ -17,16 +17,12 @@ export class PolkadotChainQuery extends ChainQuery<WebbPolkadot> {
 
     const activeAccount = await this.inner.accounts.activeOrDefault;
 
-    console.log('activeAccount: ', activeAccount?.address);
-
     if (activeAccount) {
       // If the assetId is not 0, query the orml tokens
       if (assetId !== '0') {
         const tokenAccountData = await this.inner.api.query.tokens.accounts(activeAccount.address, assetId);
 
         const json = tokenAccountData.toHuman();
-
-        console.log('json: ', json);
 
         // @ts-ignore
         let tokenBalance: string = json.free;
@@ -39,8 +35,6 @@ export class PolkadotChainQuery extends ChainQuery<WebbPolkadot> {
         const systemAccountData = await this.inner.api.query.system.account(activeAccount.address);
 
         const json = systemAccountData.toHuman();
-
-        console.log('json: ', json);
 
         // @ts-ignore
         let tokenBalance: string = json.data.free;
