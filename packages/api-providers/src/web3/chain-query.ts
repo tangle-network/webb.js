@@ -6,7 +6,7 @@ import { ERC20__factory as ERC20Factory } from '@webb-tools/contracts';
 import { ethers } from 'ethers';
 
 import { ChainQuery } from '../abstracts/index.js';
-import { evmIdIntoInternalChainId } from '../chains/index.js';
+import { evmIdIntoInternalChainId, InternalChainId } from '../chains/index.js';
 import { zeroAddress } from '../contracts/wrappers/index.js';
 import { WebbCurrencyId } from '../enums/index.js';
 import { WebbWeb3Provider } from './webb-provider.js';
@@ -20,7 +20,7 @@ export class Web3ChainQuery extends ChainQuery<WebbWeb3Provider> {
     return this.inner.config;
   }
 
-  async tokenBalanceByCurrencyId (currencyId: WebbCurrencyId): Promise<string> {
+  async tokenBalanceByCurrencyId (chainId: InternalChainId, currencyId: WebbCurrencyId): Promise<string> {
     const provider = this.inner.getEthersProvider();
 
     // check if the token is the native token of this chain
