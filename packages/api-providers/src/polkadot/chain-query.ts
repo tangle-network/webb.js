@@ -3,6 +3,7 @@
 
 import { ChainQuery } from '../abstracts/index.js';
 import { WebbCurrencyId } from '../enums/index.js';
+import { InternalChainId } from '../index.js';
 import { WebbPolkadot } from './webb-provider.js';
 
 export class PolkadotChainQuery extends ChainQuery<WebbPolkadot> {
@@ -11,7 +12,46 @@ export class PolkadotChainQuery extends ChainQuery<WebbPolkadot> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async tokenBalanceByCurrencyId (currency: WebbCurrencyId): Promise<string> {
+  async tokenBalanceByCurrencyId (chainId: InternalChainId, currency: WebbCurrencyId): Promise<string> {
+    const assetId = this.inner.config.currencies[currency].addresses.get(chainId);
+
+    const activeAccount = await this.inner.accounts.activeOrDefault;
+
+    console.log('activeAccount: ', activeAccount?.address);
+
+    if (activeAccount) {
+      // If the assetId is not 0, query the orml tokens
+      if (assetId !== '0') {
+        const tokenAccountData = await this.inner.api.query.tokens.accounts(activeAccount.address, assetId);
+
+        const json = tokenAccountData.toHuman();
+
+        console.log('json: ', json);
+
+        // @ts-ignore
+        let tokenBalance: string = json.free;
+
+        tokenBalance = tokenBalance.replaceAll(',', '');
+        const denominatedTokenBalance = Number(tokenBalance) / (10 ** 12);
+
+        return denominatedTokenBalance.toString();
+      } else {
+        const systemAccountData = await this.inner.api.query.system.account(activeAccount.address);
+
+        const json = systemAccountData.toHuman();
+
+        console.log('json: ', json);
+
+        // @ts-ignore
+        let tokenBalance: string = json.data.free;
+
+        tokenBalance = tokenBalance.replaceAll(',', '');
+        const denominatedTokenBalance = Number(tokenBalance) / (10 ** 12);
+
+        return denominatedTokenBalance.toString();
+      }
+    }
+
     return '';
   }
 
