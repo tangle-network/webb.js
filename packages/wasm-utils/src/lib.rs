@@ -21,7 +21,11 @@ use arkworks_setups::r1cs::anchor::AnchorR1CSProver;
 use arkworks_setups::r1cs::mixer::MixerR1CSProver;
 use arkworks_setups::r1cs::vanchor::VAnchorR1CSProver;
 
-pub const DEFAULT_LEAF: [u8; 32] = [0u8; 32];
+pub const ZERO_LEAF: [u8; 32] = [0u8; 32];
+pub const DEFAULT_LEAF: [u8; 32] = [
+	108, 175, 153, 72, 237, 133, 150, 36, 226, 65, 231, 118, 15, 52, 27, 130, 180, 93, 161, 235, 182, 53, 58, 52, 243,
+	171, 172, 211, 96, 76, 229, 47,
+];
 pub const TREE_HEIGHT: usize = 30;
 pub const ANCHOR_COUNT: usize = 2;
 
