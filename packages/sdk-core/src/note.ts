@@ -17,16 +17,16 @@ import type { Backend, Curve, HashFunction, JsNote, NoteProtocol, Version } from
  * @param sourceIdentifyingData - Optional source identifying data.
  * @param targetChain - The target chain id.
  * @param targetIdentifyingData - Optional target identifying data.
- * @param backend - The backend to use.
- * @param hashFunction - The hash function to use.
- * @param curve - The curve to use.
+ * @param backend - The backend to use. Different values include 'Arkworks' and 'Circom'
+ * @param hashFunction - The hash function to use. Different values include 'Poseidon' and 'Pederson'
+ * @param curve - The curve to use. Different values include 'Bn254' and 'Bls381'
  * @param tokenSymbol - The token symbol to use.
  * @param amount - The amount to use.
- * @param denomination - The denomination to use.
- * @param width - The width to use.
- * @param secrets - Optional secrets to use.
- * @param exponentiation - The exponentiation to use.
- * @param index - UTXO index
+ * @param denomination - The denomination to use. Commonly used denominations include '18' for ETH and '12' for DOT
+ * @param width - The width to use. Setup parameter 
+ * @param secrets - Optional secrets to use. When passed, secret generation is skipped for the resulting note instance.
+ * @param exponentiation - The exponentiation to use. Setup parameter 
+ * @param index - UTXO index. Useful identifying information for deposits in merkle trees.
  */
 export type NoteGenInput = {
   protocol: NoteProtocol;
