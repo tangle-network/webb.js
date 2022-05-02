@@ -18,7 +18,7 @@ use wasm_bindgen::__rt::std::collections::btree_map::BTreeMap;
 
 use crate::note::JsNote;
 use crate::types::{Backend, Curve, Leaves, NoteProtocol, OpStatusCode, OperationError, Uint8Arrayx32, WasmCurve};
-use crate::TREE_HEIGHT;
+use crate::{DEFAULT_LEAF, TREE_HEIGHT};
 
 mod anchor;
 mod mixer;
@@ -324,7 +324,10 @@ impl AnchorMTBn254X5 {
 		let poseidon3 = Poseidon::new(params3);
 
 		let (tree, _) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
-			&poseidon3, &leaves, leaf_index, &[0u8; 32],
+			&poseidon3,
+			&leaves,
+			leaf_index,
+			&DEFAULT_LEAF,
 		)
 		.unwrap();
 		Ok(Self { inner: tree })

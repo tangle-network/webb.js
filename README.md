@@ -139,16 +139,16 @@ console.log(data.toHuman());
 
 ### Usage examples
 
-We have included implementation examples for using this API to interact with an [Anchor](./examples/node/sdk-core/anchor.ts) and [Mixer](./examples/node/sdk-core/mixer.ts). 
+We have included implementation examples for using this API to interact with an [Anchor](./examples/node/substrate/anchor.ts) and [Mixer](./examples/node/substrate/mixer.ts). 
 
 To run the above mentioned usage examples you will need to use the experimental module loader. From the root directory run:
 
 ```bash
 # Runs the Anchor usage example script
-NODE_OPTIONS="--loader ./loader.js" node ./examples/node/sdk-core/anchor.ts
+NODE_OPTIONS="--loader ./loader.js" node ./examples/node/substrate/anchor.ts
 
 # Runs the Mixer usage example script
-NODE_OPTIONS="--loader ./loader.js" node ./examples/node/sdk-core/mixer.ts
+NODE_OPTIONS="--loader ./loader.js" node ./examples/node/substrate/mixer.ts
 ```
 
 <h2 id="test"> Testing 🧪 </h2>

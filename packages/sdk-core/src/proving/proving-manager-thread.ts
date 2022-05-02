@@ -19,7 +19,6 @@ import { Note } from '../note.js';
  * @param refund - The refund for the transaction
  * @param provingKey - Proving key bytes to pass in to the Zero-knowledge proof generation
  * @param roots - Roots for anchor API
- * @param roots - Roots for anchor a
  * @param refreshCommitment - Refresh commitment in hex representation ( without prefix `0x` ) Required for anchor, ignored for the mixer
  **/
 export type ProvingManagerSetupInput = {
@@ -32,7 +31,7 @@ export type ProvingManagerSetupInput = {
   refund: number;
   provingKey: Uint8Array;
 
-  roots?: Leaves;
+  roots?: Array<Uint8Array>;
   refreshCommitment?: string;
 };
 
