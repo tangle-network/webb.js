@@ -55,7 +55,8 @@ async function mixerBn254() {
   //    - curve:
   //        - Our substrate mixer pallets use 'Bn254' for their curve.
   //    - width:
-  //        - 
+  //        - Related to the amount of secret parameters hashed together. Substrate mixer pallets assume the leaf
+  //          was created with hash(chainID, nullifier, secret).
   const noteGenInput: NoteGenInput = {
     protocol: 'mixer',
     version: 'v2',
