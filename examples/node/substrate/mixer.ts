@@ -20,6 +20,11 @@ async function mixerBn254() {
   const bob = k.addFromMnemonic(BOBPhrase);
   const apiPromise = await preparePolkadotApi();
   console.info(`[ mixerBn254 ] Prepared the api promise`);
+  
+  // Get some tokens from a populated account
+  const charlie = k.addFromUri('//Charlie');
+  await transferBalance(apiPromise, charlie, [bob], 10000);
+  console.info(`[ mixerBn254 ] Transferred the balance to Bob`);
 
   // After waiting for the appropriate crypto and polkadot.js api initialization, start creating
   // some transactions to the mixer pallets.
@@ -175,7 +180,7 @@ async function mixerBn254() {
     bob
   );
 
-  console.log(txHash);
+  console.log('[ mixerBn254 ] withdraw complete, txHash: ', txHash);
   await apiPromise.disconnect();
 // Kill the process
   process.exit(0);

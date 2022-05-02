@@ -23,9 +23,9 @@ import type { Backend, Curve, HashFunction, JsNote, NoteProtocol, Version } from
  * @param tokenSymbol - The token symbol to use.
  * @param amount - The amount to use.
  * @param denomination - The denomination to use. Commonly used denominations include '18' for ETH and '12' for DOT
- * @param width - The width to use. Setup parameter
+ * @param width - The width to use. Related to the amount of secret parameters hashed together.
  * @param secrets - Optional secrets to use. When passed, secret generation is skipped for the resulting note instance.
- * @param exponentiation - The exponentiation to use. Setup parameter
+ * @param exponentiation - The exponentiation to use. This is the exponentiation of the SBOX hash function component (for Poseidon)
  * @param index - UTXO index. Useful identifying information for deposits in merkle trees.
  */
 export type NoteGenInput = {
