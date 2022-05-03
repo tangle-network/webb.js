@@ -11,7 +11,7 @@ The note contains data about a deposit
 // Note Generation input
 const noteInput: NoteGenInput = {
   amount: '1',
-  backend: 'Circom',
+  backend: 'Arkworks',
   curve: 'Bn254',
   denomination: '18',
   exponentiation: '5',
