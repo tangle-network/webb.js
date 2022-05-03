@@ -141,7 +141,7 @@ console.log(data.toHuman());
 
 We have included implementation examples for using this API to interact with an [Anchor](./examples/node/substrate/anchor.ts) and [Mixer](./examples/node/substrate/mixer.ts). 
 
-To run the above mentioned usage examples you will need to use the experimental module loader. From the root directory run:
+To run the above mentioned usage examples you will need to use the experimental module loader and start a (local substrate chain)[https://github.com/webb-tools/protocol-substrate#standalone-local-testnet]. Once started you may run the following command from root:
 
 ```bash
 # Runs the Anchor usage example script
