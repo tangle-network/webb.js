@@ -86,7 +86,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
 
   async fetchTreeLeaves (treeId: number): Promise<Uint8Array[]> {
     const leafCount = await this.inner.api.derive.merkleTreeBn254.getLeafCountForTree(treeId);
-    const treeLeaves = await this.inner.api.derive.merkleTreeBn254.getLeavesForTree(treeId, 0, leafCount);
+    const treeLeaves = await this.inner.api.derive.merkleTreeBn254.getLeavesForTree(treeId, 0, leafCount - 1);
 
     // TODO: proper pagination of leaves
     return treeLeaves;
@@ -150,6 +150,8 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
         });
       }
 
+      console.log('proofInput: ', proofInput);
+
       const zkProofMetadata = await pm.prove(proofInput);
 
       const withdrawProof: WithdrawProof = {
@@ -162,6 +164,8 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
         relayer: relayerAccountId,
         root: `0x${zkProofMetadata.root}`
       };
+
+      console.log('withdrawProof: ', withdrawProof);
 
       // withdraw through relayer
       if (isValidRelayer) {
