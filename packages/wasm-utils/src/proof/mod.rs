@@ -24,6 +24,7 @@ mod anchor;
 mod mixer;
 #[cfg(test)]
 mod test_utils;
+mod vanchor;
 
 pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
 	let mut truncated_bytes = t[..20].to_vec();
@@ -118,17 +119,38 @@ pub struct AnchorProofInput {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]
+pub struct VAnchorProofInput {
+	pub exponentiation: i8,
+	pub width: usize,
+	pub curve: Curve,
+	pub backend: Backend,
+	pub pk: Vec<u8>,
+	pub leaves: BTreeMap<u64, Vec<Vec<u8>>>,
+	/// get roots for linkable tree
+	/// Available set can be of length 2 , 16 , 32
+	pub roots: Vec<Vec<u8>>,
+	// Notes for UTXOs
+	pub notes: Vec<JsNote>,
+	// leaf indices
+	pub indices: Vec<u64>,
+	pub chain_id: u64,
+	// public amount
+	pub public_amount: i128,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub enum ProofInput {
 	Mixer(MixerProofInput),
 	Anchor(AnchorProofInput),
+	VAnchor(VAnchorProofInput),
 }
 
 impl ProofInput {
 	pub fn mixer_input(&self) -> Result<MixerProofInput, OperationError> {
 		match self {
 			ProofInput::Mixer(mixer_input) => Ok(mixer_input.clone()),
-			ProofInput::Anchor(_) => {
-				let message = "Can't construct proof input for AnchorProofInput from mixer input".to_string();
+			_ => {
+				let message = "Can't construct proof input for AnchorProofInput".to_string();
 				Err(OperationError::new_with_message(
 					OpStatusCode::InvalidNoteProtocol,
 					message,
@@ -140,8 +162,21 @@ impl ProofInput {
 	pub fn anchor_input(&self) -> Result<AnchorProofInput, OperationError> {
 		match self {
 			ProofInput::Anchor(anchor) => Ok(anchor.clone()),
-			ProofInput::Mixer(_) => {
-				let message = "Can't cant construct proof input for MixerProofInput from anchor input ".to_string();
+			_ => {
+				let message = "Can't cant construct proof input for MixerProofInput ".to_string();
+				Err(OperationError::new_with_message(
+					OpStatusCode::InvalidNoteProtocol,
+					message,
+				))
+			}
+		}
+	}
+
+	pub fn vanchor_input(&self) -> Result<VAnchorProofInput, OperationError> {
+		match self {
+			ProofInput::VAnchor(vanchor) => Ok(vanchor.clone()),
+			_ => {
+				let message = "Can't cant construct proof input for VAnchorProofInput".to_string();
 				Err(OperationError::new_with_message(
 					OpStatusCode::InvalidNoteProtocol,
 					message,
@@ -187,8 +222,19 @@ pub struct ProofInputBuilder {
 	/// required only for [anchor,]
 	pub refresh_commitment: Option<[u8; 32]>,
 	#[wasm_bindgen(skip)]
-	/// required only for [anchor,]
+	/// required only for [anchor,vanchor]
 	pub roots: Option<Vec<Vec<u8>>>,
+	// VAnchor related
+	#[wasm_bindgen(skip)]
+	pub notes: Option<Vec<JsNote>>,
+	#[wasm_bindgen(skip)]
+	pub indices: Option<Vec<u64>>,
+	#[wasm_bindgen(skip)]
+	pub chain_id: Option<u64>,
+	#[wasm_bindgen(skip)]
+	pub public_amount: Option<i128>,
+	#[wasm_bindgen(skip)]
+	pub leaves_map: BTreeMap<u64, Vec<Vec<u8>>>,
 }
 
 impl ProofInputBuilder {
@@ -485,6 +531,7 @@ pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
 	match proof_input_value {
 		ProofInput::Mixer(mixer_proof_input) => mixer::create_proof(mixer_proof_input, &mut rng),
 		ProofInput::Anchor(anchor_proof_input) => anchor::create_proof(anchor_proof_input, &mut rng),
+		ProofInput::VAnchor(vanchor_proof_input) => vanchor::create_proof(vanchor_proof_input, &mut rng),
 	}
 	.map_err(|e| e.into())
 }
