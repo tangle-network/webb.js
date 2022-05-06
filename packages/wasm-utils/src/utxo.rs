@@ -1,8 +1,11 @@
 use crate::types::OpStatusCode;
+use crate::VAnchorR1CSProverBn254_30_2_2_2;
 use ark_bn254::Fr as Bn254Fr;
 use ark_ff::{BigInteger, PrimeField};
 use arkworks_setups::utxo::Utxo;
+use arkworks_setups::{Curve as ArkCurve, VAnchorProver};
 use js_sys::{JsString, Uint8Array};
+use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
 #[derive(Clone)]
@@ -18,6 +21,14 @@ pub struct JsUtxo {
 }
 
 impl JsUtxo {
+	pub fn default_bn254_utxo() -> Self {
+		let utxo =
+			VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, 0, 0, None, &mut OsRng).unwrap();
+		Self {
+			inner: JsUtxoInner::Bn254(utxo),
+		}
+	}
+
 	/// Create `JsUtxo` from a Utxo with bn254 Fr
 	pub fn new_from_bn254_utxo(utxo: Utxo<Bn254Fr>) -> Self {
 		Self {

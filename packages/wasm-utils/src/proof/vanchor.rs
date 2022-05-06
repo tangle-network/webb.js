@@ -8,7 +8,10 @@ use rand::rngs::OsRng;
 use crate::proof::{AnchorProofInput, Proof, VAnchorProofInput};
 use crate::types::{Backend, Curve, OpStatusCode, OperationError};
 use crate::utxo::JsUtxo;
-use crate::{AnchorR1CSProverBls381_30_2, AnchorR1CSProverBn254_30_2, VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF};
+use crate::{
+	AnchorR1CSProverBls381_30_2, AnchorR1CSProverBn254_30_2, VAnchorR1CSProverBn254_30_2_16_2,
+	VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF,
+};
 
 pub fn create_proof(anchor_proof_input: VAnchorProofInput, rng: &mut OsRng) -> Result<Proof, OperationError> {
 	let VAnchorProofInput {
@@ -88,6 +91,33 @@ pub fn create_proof(anchor_proof_input: VAnchorProofInput, rng: &mut OsRng) -> R
 				leaves,
 				utxos_out,
 				utxos_in,
+				pk,
+				DEFAULT_LEAF,
+				rng,
+			)
+		}
+		(Backend::Arkworks, Curve::Bn254, 5, 4, 16) => {
+			let mut utxos_slice: [Utxo<Bn254Fr>; 16] = [JsUtxo::default_bn254_utxo().get_bn254_utxo()?; 16];
+			let in_utxo = in_utxos
+				.into_iter()
+				.map(|utxo| utxo.get_bn254_utxo())
+				.collect::<Result<Vec<_>, _>>()
+				.into_iter()
+				.collect();
+
+			utxos_slice.clone_from_slice(in_utxo);
+			let indices = indices.try_into().map_err(|_| OpStatusCode::InvalidProofParameters)?;
+			let roots = roots.try_into().map_err(|_| OpStatusCode::InvalidProofParameters)?;
+			VAnchorR1CSProverBn254_30_2_16_2::create_proof(
+				ArkCurve::Bn254,
+				chain_id,
+				public_amount,
+				Default::default(),
+				roots,
+				indices,
+				leaves,
+				utxos_slice,
+				utxos_out,
 				pk,
 				DEFAULT_LEAF,
 				rng,
