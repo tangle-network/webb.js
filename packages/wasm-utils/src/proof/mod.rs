@@ -78,6 +78,7 @@ impl Proof {
 		roots
 	}
 }
+
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct MixerProofInput {
 	pub exponentiation: i8,
@@ -95,6 +96,7 @@ pub struct MixerProofInput {
 	pub leaves: Vec<Vec<u8>>,
 	pub leaf_index: u64,
 }
+
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct AnchorProofInput {
 	pub exponentiation: i8,
@@ -131,10 +133,11 @@ pub struct VAnchorProofInput {
 	pub roots: Vec<Vec<u8>>,
 	// Notes for UTXOs
 	pub notes: Vec<JsNote>,
-	// leaf indices
+	// Leaf indices
 	pub indices: Vec<u64>,
+	// Chain Id
 	pub chain_id: u64,
-	// public amount
+	// Public amount
 	pub public_amount: i128,
 }
 
@@ -234,12 +237,17 @@ pub struct ProofInputBuilder {
 	#[wasm_bindgen(skip)]
 	pub public_amount: Option<i128>,
 	#[wasm_bindgen(skip)]
-	pub leaves_map: BTreeMap<u64, Vec<Vec<u8>>>,
+	pub leaves_map: Option<BTreeMap<u64, Vec<Vec<u8>>>>,
 }
 
 impl ProofInputBuilder {
 	pub fn build(self) -> Result<ProofInput, OpStatusCode> {
-		let note = self.note.ok_or(OpStatusCode::ProofBuilderNoteNotSet)?;
+		// Note used for getting data for proof generation
+		let note = match (self.notes, self.note) {
+			(_, Some(note)) => note,
+			(Some(notes), None) => notes[0].clone(),
+			_ => return Err(OpStatusCode::ProofBuilderNoteNotSet),
+		};
 		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
 		let recipient = self.recipient.ok_or(OpStatusCode::InvalidRecipient)?;
 		let relayer = self.relayer.ok_or(OpStatusCode::InvalidRelayer)?;
@@ -334,7 +342,32 @@ impl ProofInputBuilder {
 					roots,
 					refresh_commitment,
 				};
+
 				Ok(ProofInput::Anchor(anchor_input))
+			}
+			NoteProtocol::VAnchor => {
+				let public_amount = self.public_amount.ok_or(OpStatusCode::PublicAmountNotSet)?;
+				let chain_id = self.chain_id.ok_or(OpStatusCode::VAnchorProofChainId)?;
+				let notes = self.notes.ok_or(OpStatusCode::VAnchorNotesNotSet)?;
+				let roots = self.roots.ok_or(OpStatusCode::RootsNotSet)?;
+				let indices = self.indices.ok_or(OpStatusCode::VAnchorProofIndices)?;
+				let leaves_map = self.leaves_map.ok_or(OpStatusCode::VAnchorProofLeavesMap)?;
+
+				let vanchor_input = VAnchorProofInput {
+					exponentiation: exponentiation.unwrap_or(5),
+					width: width.unwrap_or(4),
+					curve: curve.unwrap_or(Curve::Bn254),
+					backend: backend.unwrap_or(Backend::Circom),
+					pk,
+					leaves: leaves_map,
+					roots,
+					notes,
+					indices,
+					chain_id,
+					public_amount,
+				};
+
+				Ok(ProofInput::VAnchor(vanchor_input))
 			}
 			_ => Err(OpStatusCode::InvalidNoteProtocol),
 		}

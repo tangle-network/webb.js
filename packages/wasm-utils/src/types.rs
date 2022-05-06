@@ -351,6 +351,16 @@ pub enum OpStatusCode {
 	InvalidUTXOIndex = 41,
 	/// Unsupported Backend
 	UnsupportedBackend = 42,
+	/// Public amount not set
+	PublicAmountNotSet = 43,
+	/// VAnchor Proof Chain Id not set
+	VAnchorProofChainId = 44,
+	/// VAnchor proof not set
+	VAnchorNotesNotSet = 45,
+	/// VAnchor proof indices
+	VAnchorProofIndices = 46,
+	/// VAnchor proof leaves map not defined
+	VAnchorProofLeavesMap = 47,
 }
 
 #[wasm_bindgen]
@@ -464,6 +474,11 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::InvalidProof => "Proof verification failed",
 			OpStatusCode::InvalidUTXOIndex => "Invalid UTXO Index value",
 			OpStatusCode::UnsupportedBackend => "Unsupported backend",
+			OpStatusCode::PublicAmountNotSet => "VAnchor proof input requires public amount field",
+			OpStatusCode::VAnchorProofChainId => "VAnchor proof input requires chain id",
+			OpStatusCode::VAnchorNotesNotSet => "VAnchor proof input requires list of notes",
+			OpStatusCode::VAnchorProofIndices => "VAnchor proof input require list of indices",
+			OpStatusCode::VAnchorProofLeavesMap => "VAnchor proof input require leaves  map",
 		}
 		.to_string()
 	}
