@@ -1,3 +1,4 @@
+use crate::types::OpStatusCode;
 use ark_bn254::Fr as Bn254Fr;
 use ark_ff::{BigInteger, PrimeField};
 use arkworks_setups::utxo::Utxo;
@@ -10,6 +11,8 @@ pub enum JsUtxoInner {
 }
 
 #[wasm_bindgen]
+#[derive(Clone)]
+
 pub struct JsUtxo {
 	inner: JsUtxoInner,
 }
@@ -81,7 +84,7 @@ impl JsUtxo {
 		}
 	}
 
-	pub fn get_bn254_utxo(&self) -> Result<Utxo<Bn254Fr>, JsValue> {
+	pub fn get_bn254_utxo(&self) -> Result<Utxo<Bn254Fr>, OpStatusCode> {
 		match self.inner.clone() {
 			JsUtxoInner::Bn254(utxo) => Ok(utxo),
 		}

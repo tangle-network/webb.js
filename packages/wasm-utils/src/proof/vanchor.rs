@@ -1,6 +1,6 @@
-use ark_bn254::Bn254;
 use core::convert::TryInto;
 
+use ark_bn254::Fr as Bn254Fr;
 use arkworks_setups::utxo::Utxo;
 use arkworks_setups::{AnchorProver, Curve as ArkCurve, VAnchorProver};
 use rand::rngs::OsRng;
@@ -25,18 +25,38 @@ pub fn create_proof(anchor_proof_input: VAnchorProofInput, rng: &mut OsRng) -> R
 		pk,
 		chain_id,
 	} = anchor_proof_input;
+	// Prepare in UTXOs
 	let in_utxos: Vec<JsUtxo> = match notes.len() {
-		2 | 16 => {
-			//notes.iter().map(|note| note.get_utxo())
-			unreachable!();
-		}
-		length if length > 16 && length < 2 => {
-			// Create empty utxos to fill the list with  16 utxos
-			unreachable!();
+		2 | 16 => notes
+			.iter()
+			.map(|note| note.get_js_utxo())
+			.collect::<Result<Vec<_>, _>>()?
+			.into_iter()
+			.collect(),
+		length if length < 16 && length > 2 => {
+			let mut utxos: Vec<JsUtxo> = notes
+				.iter()
+				.map(|note| note.get_js_utxo())
+				.collect::<Result<Vec<_>, _>>()?
+				.into_iter()
+				.collect();
+			let utxo =
+				VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, 0, 0, None, &mut OsRng).unwrap();
+			// Create empty UTXOs to fill the list with  16 UTXOs
+			let js_utxo = JsUtxo::new_from_bn254_utxo(utxo);
+			loop {
+				if utxos.len() == 16 {
+					break;
+				}
+				utxos.push(js_utxo.clone())
+			}
+			utxos
 		}
 		1 => {
-			// create one empty utxo to fill the list with 2 utxo
-			unreachable!();
+			let utxo =
+				VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, 0, 0, None, &mut OsRng).unwrap();
+			let utxo = JsUtxo::new_from_bn254_utxo(utxo);
+			vec![notes[0].get_js_utxo()?, utxo]
 		}
 		length => {
 			return Err(OperationError::new_with_message(
@@ -50,23 +70,29 @@ pub fn create_proof(anchor_proof_input: VAnchorProofInput, rng: &mut OsRng) -> R
 	// the corresponding
 	// VAnchorR1CSProver${curve=bn254}_${tree_height=32}_${anchor_count}_${ins_count}_${outs_count=2}
 	let utxo = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, 0, 0, None, &mut OsRng).unwrap();
-	let utxos_in = [utxo.clone(), utxo.clone()];
+
 	let utxos_out = [utxo.clone(), utxo.clone()];
-	let anchor_proof = match (backend, curve, exponentiation, width) {
-		(Backend::Arkworks, Curve::Bn254, 5, 4) => VAnchorR1CSProverBn254_30_2_2_2::create_proof(
-			ArkCurve::Bn254,
-			chain_id,
-			public_amount,
-			Default::default(),
-			[vec![], vec![]],
-			Default::default(),
-			leaves,
-			utxos_out,
-			utxos_in,
-			pk,
-			DEFAULT_LEAF,
-			rng,
-		),
+
+	let anchor_proof = match (backend, curve, exponentiation, width, in_utxos.len()) {
+		(Backend::Arkworks, Curve::Bn254, 5, 4, 2) => {
+			let mut utxos_in: [Utxo<Bn254Fr>; 2] = [in_utxos[0].get_bn254_utxo()?, in_utxos[0].get_bn254_utxo()?];
+			let indices = indices.try_into().map_err(|_| OpStatusCode::InvalidProofParameters)?;
+			let roots = roots.try_into().map_err(|_| OpStatusCode::InvalidProofParameters)?;
+			VAnchorR1CSProverBn254_30_2_2_2::create_proof(
+				ArkCurve::Bn254,
+				chain_id,
+				public_amount,
+				Default::default(),
+				roots,
+				indices,
+				leaves,
+				utxos_out,
+				utxos_in,
+				pk,
+				DEFAULT_LEAF,
+				rng,
+			)
+		}
 		_ => return Err(OpStatusCode::InvalidProofParameters.into()),
 	}
 	.map_err(|e| {
