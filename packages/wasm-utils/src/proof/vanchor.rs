@@ -1,6 +1,7 @@
+use ark_bn254::Bn254;
 use core::convert::TryInto;
-use std::intrinsics::unreachable;
 
+use arkworks_setups::utxo::Utxo;
 use arkworks_setups::{AnchorProver, Curve as ArkCurve, VAnchorProver};
 use rand::rngs::OsRng;
 
@@ -48,21 +49,20 @@ pub fn create_proof(anchor_proof_input: VAnchorProofInput, rng: &mut OsRng) -> R
 	// TODO: use the anchor count,the Ins count,Curve=bn254 Outs count =2, to get
 	// the corresponding
 	// VAnchorR1CSProver${curve=bn254}_${tree_height=32}_${anchor_count}_${ins_count}_${outs_count=2}
+	let utxo = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, 0, 0, None, &mut OsRng).unwrap();
+	let utxos_in = [utxo.clone(), utxo.clone()];
+	let utxos_out = [utxo.clone(), utxo.clone()];
 	let anchor_proof = match (backend, curve, exponentiation, width) {
 		(Backend::Arkworks, Curve::Bn254, 5, 4) => VAnchorR1CSProverBn254_30_2_2_2::create_proof(
 			ArkCurve::Bn254,
 			chain_id,
-			secret,
-			vec![],
-			roots.into(),
-			indices.into(),
+			public_amount,
+			Default::default(),
+			[vec![], vec![]],
+			Default::default(),
 			leaves,
-			in_utxos,
-			recipient_raw,
-			relayer_raw,
-			fee,
-			refund,
-			refresh_commitment.to_vec(),
+			utxos_out,
+			utxos_in,
 			pk,
 			DEFAULT_LEAF,
 			rng,
@@ -75,11 +75,11 @@ pub fn create_proof(anchor_proof_input: VAnchorProofInput, rng: &mut OsRng) -> R
 		error
 	})?;
 	Ok(Proof {
-		proof: anchor_proof.proof,
-		nullifier_hash: anchor_proof.nullifier_hash_raw,
-		root: anchor_proof.roots_raw[0].clone(),
-		roots: anchor_proof.roots_raw,
+		proof: anchor_proof.proof.clone(),
+		nullifier_hash: vec![],
+		root: vec![],
+		roots: vec![],
 		public_inputs: anchor_proof.public_inputs_raw,
-		leaf: anchor_proof.leaf_raw,
+		leaf: vec![],
 	})
 }

@@ -243,7 +243,7 @@ pub struct ProofInputBuilder {
 impl ProofInputBuilder {
 	pub fn build(self) -> Result<ProofInput, OpStatusCode> {
 		// Note used for getting data for proof generation
-		let note = match (self.notes, self.note) {
+		let note = match (self.notes.clone(), self.note) {
 			(_, Some(note)) => note,
 			(Some(notes), None) => notes[0].clone(),
 			_ => return Err(OpStatusCode::ProofBuilderNoteNotSet),
@@ -554,6 +554,12 @@ impl ProofInputBuilder {
 	pub fn build_js(self) -> Result<JsProofInput, JsValue> {
 		let proof_input = self.build()?;
 		Ok(JsProofInput { inner: proof_input })
+	}
+
+	/// Set notes for VAnchor
+	#[wasm_bindgen(js_name=setNotes)]
+	pub fn set_notes(&mut self, notes: Array) -> Result<(), JsValue> {
+		Ok(())
 	}
 }
 

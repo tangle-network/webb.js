@@ -2,6 +2,7 @@ use core::fmt;
 use core::str::FromStr;
 
 use arkworks_setups::common::Leaf;
+use arkworks_setups::utxo::Utxo;
 use js_sys::{JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
@@ -204,6 +205,14 @@ impl JsNote {
 					}
 				}
 			},
+		}
+	}
+
+	pub fn get_js_utxo(&self) -> Result<JsUtxo, OperationError> {
+		let leaf = self.get_leaf_and_nullifier()?;
+		match leaf.inner {
+			JsLeafInner::VAnchor(utxo) => Ok(utxo),
+			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),
 		}
 	}
 }

@@ -4,6 +4,7 @@ use arkworks_setups::utxo::Utxo;
 use js_sys::{JsString, Uint8Array};
 use wasm_bindgen::prelude::*;
 
+#[derive(Clone)]
 pub enum JsUtxoInner {
 	Bn254(Utxo<Bn254Fr>),
 }
@@ -77,6 +78,12 @@ impl JsUtxo {
 	pub fn get_commitment(&self) -> Vec<u8> {
 		match &self.inner {
 			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.commitment.into_repr().to_bytes_le(),
+		}
+	}
+
+	pub fn get_bn254_utxo(&self) -> Result<Utxo<Bn254Fr>, JsValue> {
+		match self.inner.clone() {
+			JsUtxoInner::Bn254(utxo) => Ok(utxo),
 		}
 	}
 }
