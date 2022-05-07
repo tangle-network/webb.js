@@ -1,7 +1,7 @@
 use core::fmt;
 use core::str::FromStr;
 
-use arkworks_setups::common::Leaf;
+use arkworks_setups::common::{Leaf, VAnchorLeaf};
 use arkworks_setups::utxo::Utxo;
 use js_sys::{JsString, Uint8Array};
 use rand::rngs::OsRng;
@@ -37,7 +37,28 @@ pub struct JsLeaf {
 	#[wasm_bindgen(skip)]
 	pub inner: JsLeafInner,
 }
+impl JsLeaf {
+	pub fn mixer_leaf(&self) -> Result<Leaf, OperationError> {
+		match self.inner.clone() {
+			JsLeafInner::Mixer(leaf) => Ok(leaf),
+			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),
+		}
+	}
 
+	pub fn anchor_leaf(&self) -> Result<Leaf, OperationError> {
+		match self.inner.clone() {
+			JsLeafInner::Anchor(leaf) => Ok(leaf),
+			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),
+		}
+	}
+
+	pub fn vanchor_leaf(&self) -> Result<VAnchorLeaf, OperationError> {
+		match self.inner.clone() {
+			JsLeafInner::VAnchor(leaf) => Ok(leaf),
+			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),
+		}
+	}
+}
 #[wasm_bindgen]
 impl JsLeaf {
 	#[wasm_bindgen(getter)]
@@ -54,8 +75,7 @@ impl JsLeaf {
 	#[wasm_bindgen(getter)]
 	pub fn commitment(&self) -> Uint8Array {
 		match &self.inner {
-			JsLeafInner::Mixer(mixer_leaf) => Uint8Array::from(mixer_leaf.leaf_bytes.as_slice()),
-			JsLeafInner::Anchor(anchor_leaf) => Uint8Array::from(anchor_leaf.leaf_bytes.as_slice()),
+			JsLeafInner::Mixer(leaf) | JsLeafInner::Anchor(leaf) => Uint8Array::from(leaf.leaf_bytes.as_slice()),
 			JsLeafInner::VAnchor(vanchor_leaf) => vanchor_leaf.commitment(),
 		}
 	}

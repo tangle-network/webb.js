@@ -2,22 +2,23 @@
 
 use core::convert::{TryFrom, TryInto};
 
-use ark_ff::{BigInteger, PrimeField};
-
-use js_sys::{Array, JsString, Uint8Array};
-use rand::rngs::OsRng;
-use wasm_bindgen::prelude::*;
-
 use ark_bls12_381::Bls12_381;
 use ark_bn254::{Bn254, Fr as Bn254Fr};
+use ark_ff::{BigInteger, PrimeField};
 use arkworks_native_gadgets::merkle_tree::SparseMerkleTree;
 use arkworks_native_gadgets::poseidon::Poseidon;
-use arkworks_setups::common::{setup_params, setup_tree_and_create_path, verify_unchecked_raw};
+use arkworks_setups::common::{setup_params, setup_tree_and_create_path, verify_unchecked_raw, Leaf};
 use arkworks_setups::Curve as ArkCurve;
+use js_sys::{Array, JsString, Uint8Array};
+use rand::rngs::OsRng;
 use wasm_bindgen::__rt::std::collections::btree_map::BTreeMap;
+use wasm_bindgen::prelude::*;
 
-use crate::note::JsNote;
-use crate::types::{Backend, Curve, Leaves, NoteProtocol, OpStatusCode, OperationError, Uint8Arrayx32, WasmCurve};
+use crate::note::{JsLeafInner, JsNote};
+use crate::types::{
+	Backend, Curve, Leaves, NoteProtocol, OpStatusCode, OperationError, Protocol, Uint8Arrayx32, WasmCurve,
+};
+use crate::utxo::JsUtxo;
 use crate::TREE_HEIGHT;
 
 mod anchor;
@@ -97,7 +98,7 @@ pub struct MixerProofPayload {
 	pub leaf_index: u64,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq, Clone, Default)]
 pub struct MixerProofInput {
 	pub exponentiation: Option<i8>,
 	pub width: Option<usize>,
@@ -138,7 +139,7 @@ pub struct AnchorProofPayload {
 	pub refresh_commitment: [u8; 32],
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq, Clone, Default)]
 pub struct AnchorProofInput {
 	pub exponentiation: Option<i8>,
 	pub width: Option<usize>,
@@ -173,7 +174,7 @@ pub struct VAnchorProofPayload {
 	/// Available set can be of length 2 , 16 , 32
 	pub roots: Vec<Vec<u8>>,
 	// Notes for UTXOs
-	pub notes: Vec<JsNote>,
+	pub notes: Vec<JsUtxo>,
 	// Leaf indices
 	pub indices: Vec<u64>,
 	// Chain Id
@@ -182,7 +183,7 @@ pub struct VAnchorProofPayload {
 	pub public_amount: i128,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq, Clone, Default)]
 pub struct VAnchorProofInput {
 	pub exponentiation: Option<i8>,
 	pub width: Option<usize>,
@@ -194,7 +195,7 @@ pub struct VAnchorProofInput {
 	/// Available set can be of length 2 , 16 , 32
 	pub roots: Option<Vec<Vec<u8>>>,
 	// Notes for UTXOs
-	pub notes: Option<Vec<JsNote>>,
+	pub secret: Option<Vec<JsUtxo>>,
 	// Leaf indices
 	pub indices: Option<Vec<u64>>,
 	// Chain Id
@@ -271,6 +272,16 @@ pub enum ProofInputBuilder {
 	VAnchor(VAnchorProofInput),
 }
 impl ProofInputBuilder {
+	pub fn set_utxos(&mut self, utxo_list: Vec<JsUtxo>) -> Result<(), OperationError> {
+		match self {
+			Self::VAnchor(input) => {
+				input.secret = Some(utxo_list);
+				Ok(())
+			}
+			_ => Err(OperationError::ProofInputFieldInstantiationProtocolInvalid.into()),
+		}
+	}
+
 	pub fn roots(&mut self, roots: Vec<Vec<u8>>) -> Result<(), OperationError> {
 		match self {
 			ProofInputBuilder::Mixer(value) => {
@@ -298,6 +309,16 @@ impl ProofInputBuilder {
 		match self {
 			ProofInputBuilder::VAnchor(input) => {
 				input.public_amount = Some(public_amount);
+				Ok(())
+			}
+			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
+		}
+	}
+
+	pub fn secrets(&mut self, leaf: Leaf) -> Result<(), OperationError> {
+		match self {
+			ProofInputBuilder::Mixer(input) | ProofInputBuilder::Anchor(input) => {
+				input.secret = Some(leaf.secret_bytes);
 				Ok(())
 			}
 			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
@@ -447,40 +468,163 @@ impl ProofInputBuilder {
 #[derive(Debug, Eq, PartialEq, Default)]
 pub struct JsProofInputBuilder {
 	#[wasm_bindgen(skip)]
-	pub recipient: Option<Vec<u8>>,
-	#[wasm_bindgen(skip)]
-	pub relayer: Option<Vec<u8>>,
-	#[wasm_bindgen(skip)]
-	pub leaves: Option<Vec<[u8; 32]>>,
-	#[wasm_bindgen(skip)]
-	pub leaf_index: Option<u64>,
-	#[wasm_bindgen(skip)]
-	pub fee: Option<u128>,
-	#[wasm_bindgen(skip)]
-	pub refund: Option<u128>,
-	#[wasm_bindgen(skip)]
-	pub pk: Option<Vec<u8>>,
-	#[wasm_bindgen(skip)]
-	pub note: Option<JsNote>,
-	#[wasm_bindgen(skip)]
-	/// required only for [anchor,]
-	pub refresh_commitment: Option<[u8; 32]>,
-	#[wasm_bindgen(skip)]
-	/// required only for [anchor,vanchor]
-	pub roots: Option<Vec<Vec<u8>>>,
-	// VAnchor related
-	#[wasm_bindgen(skip)]
-	pub notes: Option<Vec<JsNote>>,
-	#[wasm_bindgen(skip)]
-	pub indices: Option<Vec<u64>>,
-	#[wasm_bindgen(skip)]
-	pub chain_id: Option<u64>,
-	#[wasm_bindgen(skip)]
-	pub public_amount: Option<i128>,
-	#[wasm_bindgen(skip)]
-	pub leaves_map: Option<BTreeMap<u64, Vec<Vec<u8>>>>,
+	pub inner: ProofInputBuilder,
 }
+#[wasm_bindgen]
+impl JsProofInputBuilder {
+	#[wasm_bindgen(constructor)]
+	pub fn new(protocol: Protocol) -> Result<Self, OperationError> {
+		let protocol: String = JsValue::from(&protocol)
+			.as_string()
+			.ok_or(OpStatusCode::InvalidNoteProtocol)?;
+		let note_protocol: NoteProtocol = protocol
+			.as_str()
+			.parse()
+			.map_err(|_| OpStatusCode::InvalidNoteProtocol)?;
+		let proof_input_builder = match note_protocol {
+			NoteProtocol::Mixer => Self {
+				inner: ProofInputBuilder::Mixer(Default::default()),
+			},
+			NoteProtocol::Anchor => ProofInputBuilder::Anchor(Default::default()),
+			NoteProtocol::VAnchor => ProofInputBuilder::VAnchor(Default::default()),
+		};
 
+		Ok(proof_input_builder)
+	}
+
+	#[wasm_bindgen(js_name = setRoots)]
+	pub fn set_roots(&mut self, roots: Leaves) -> Result<(), JsValue> {
+		let rs: Vec<Vec<u8>> = Array::from(&roots)
+			.to_vec()
+			.into_iter()
+			.map(|v| Uint8Array::new_with_byte_offset_and_length(&v, 0, 32))
+			.map(Uint8Arrayx32::try_from)
+			.collect::<Result<Vec<_>, _>>()
+			.map_err(|_| OpStatusCode::InvalidLeaves)?
+			.into_iter()
+			.map(|v| v.0.to_vec())
+			.collect();
+		self.inner.roots(rs)
+	}
+
+	#[wasm_bindgen(js_name = setRefreshCommitment)]
+	pub fn set_refresh_commitment(&mut self, refresh_commitment: JsString) -> Result<(), JsValue> {
+		let c: String = refresh_commitment.into();
+		let refresh_commitment = hex::decode(c).map_err(|_| OpStatusCode::CommitmentNotSet)?;
+		let refresh_commitment: [u8; 32] = refresh_commitment
+			.try_into()
+			.map_err(|_| OpStatusCode::CommitmentNotSet)?;
+		self.inner.refresh_commitment(refresh_commitment)
+	}
+
+	#[wasm_bindgen(js_name = setRecipient)]
+	pub fn set_recipient(&mut self, recipient: JsString) -> Result<(), JsValue> {
+		let r: String = recipient.into();
+		let recipient = hex::decode(r).map_err(|_| OpStatusCode::InvalidRecipient)?;
+		self.inner.recipient(recipient)
+	}
+
+	#[wasm_bindgen(js_name = setRelayer)]
+	pub fn set_relayer(&mut self, relayer: JsString) -> Result<(), JsValue> {
+		let r: String = relayer.into();
+		let relayer = hex::decode(r).map_err(|_| OpStatusCode::DeserializationFailed)?;
+		self.inner.relayer(relayer)
+	}
+
+	#[wasm_bindgen(js_name = setLeaves)]
+	pub fn set_leaves(&mut self, leaves: Leaves) -> Result<(), JsValue> {
+		let ls: Vec<_> = Array::from(&leaves)
+			.to_vec()
+			.into_iter()
+			.map(|v| Uint8Array::new_with_byte_offset_and_length(&v, 0, 32))
+			.map(Uint8Arrayx32::try_from)
+			.collect::<Result<Vec<_>, _>>()
+			.map_err(|_| OpStatusCode::InvalidLeaves)?
+			.into_iter()
+			.map(|v| v.0)
+			.collect();
+		self.inner.leaves_list(ls)
+	}
+
+	#[wasm_bindgen(js_name = setLeafIndex)]
+	pub fn set_leaf_index(&mut self, leaf_index: JsString) -> Result<(), JsValue> {
+		let leaf_index: String = leaf_index.into();
+		let leaf_index = leaf_index
+			.as_str()
+			.parse()
+			.map_err(|_| OpStatusCode::InvalidLeafIndex)?;
+		self.inner.leaf_index(leaf_index)
+	}
+
+	#[wasm_bindgen(js_name = setFee)]
+	pub fn set_fee(&mut self, fee: JsString) -> Result<(), JsValue> {
+		let fee: String = fee.into();
+		let fee = fee.as_str().parse().map_err(|_| OpStatusCode::InvalidFee)?;
+		self.inner.fee(fee)
+	}
+
+	#[wasm_bindgen(js_name = setRefund)]
+	pub fn set_refund(&mut self, refund: JsString) -> Result<(), JsValue> {
+		let refund: String = refund.into();
+		let refund = refund.as_str().parse().map_err(|_| OpStatusCode::InvalidRefund)?;
+		self.inner.refund(refund)
+	}
+
+	#[wasm_bindgen(js_name = setPk)]
+	pub fn set_pk(&mut self, pk: JsString) -> Result<(), JsValue> {
+		let p: String = pk.into();
+		let proving_key = hex::decode(p).map_err(|_| OpStatusCode::InvalidProvingKey)?;
+		self.inner.pk(proving_key)
+	}
+
+	#[wasm_bindgen(js_name = setNote)]
+	pub fn set_metadata_from_note(&mut self, note: &JsNote) -> Result<(), JsValue> {
+		let exponentiation = note.exponentiation.unwrap_or(5);
+		let backend = note.backend.unwrap_or(Backend::Circom);
+		let curve = note.curve.unwrap_or(Curve::Bn254);
+		let width = note.width.unwrap_or(3);
+
+		let chain_id = note
+			.target_chain_id
+			.parse()
+			.map_err(|_| OpStatusCode::InvalidTargetChain)?;
+
+		self.inner.exponentiation(exponentiation)?;
+		self.inner.backend(backend)?;
+		self.inner.width(width)?;
+		self.inner.curve(curve)?;
+		self.inner.chain_id(chain_id)?;
+		// For the Mixer/Anchor secrets live in the the note
+		// For the VAnchor there is a call `set_notes` that will set UTXOs in the
+		// `ProofInput::VAnchor(VAnchorProofInput)`
+		match self.inner {
+			ProofInputBuilder::Mixer(_) => {
+				let leaf = note.get_leaf_and_nullifier()?;
+				let mixer_leaf = leaf.mixer_leaf()?;
+				self.inner.secrets(mixer_leaf)?
+			}
+			ProofInputBuilder::Anchor(_) => {
+				let leaf = note.get_leaf_and_nullifier()?;
+				let anchor_leaf = leaf.anchor_leaf()?;
+				self.inner.secrets(anchor_leaf)?
+			}
+			_ => {}
+		}
+		Ok(())
+	}
+
+	#[wasm_bindgen]
+	pub fn build_js(self) -> Result<JsProofInput, JsValue> {
+		let proof_input = self.build()?;
+		Ok(JsProofInput { inner: proof_input })
+	}
+
+	/// Set notes for VAnchor
+	#[wasm_bindgen(js_name=setNotes)]
+	pub fn set_notes(&mut self, notes: Array) -> Result<(), JsValue> {
+		Ok(())
+	}
+}
 impl JsProofInputBuilder {
 	pub fn build(self) -> Result<ProofInput, OpStatusCode> {
 		// Note used for getting data for proof generation
@@ -684,125 +828,6 @@ impl AnchorMTBn254X5 {
 		Ok(())
 	}
 }
-#[wasm_bindgen]
-impl JsProofInputBuilder {
-	#[wasm_bindgen(constructor)]
-	pub fn new() -> Self {
-		Self::default()
-	}
-
-	#[wasm_bindgen(js_name = setRoots)]
-	pub fn set_roots(&mut self, roots: Leaves) -> Result<(), JsValue> {
-		let rs: Vec<Vec<u8>> = Array::from(&roots)
-			.to_vec()
-			.into_iter()
-			.map(|v| Uint8Array::new_with_byte_offset_and_length(&v, 0, 32))
-			.map(Uint8Arrayx32::try_from)
-			.collect::<Result<Vec<_>, _>>()
-			.map_err(|_| OpStatusCode::InvalidLeaves)?
-			.into_iter()
-			.map(|v| v.0.to_vec())
-			.collect();
-		self.roots = Some(rs);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setRefreshCommitment)]
-	pub fn set_refresh_commitment(&mut self, refresh_commitment: JsString) -> Result<(), JsValue> {
-		let c: String = refresh_commitment.into();
-		let refresh_commitment = hex::decode(c).map_err(|_| OpStatusCode::CommitmentNotSet)?;
-		let refresh_commitment: [u8; 32] = refresh_commitment
-			.try_into()
-			.map_err(|_| OpStatusCode::CommitmentNotSet)?;
-		self.refresh_commitment = Some(refresh_commitment);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setRecipient)]
-	pub fn set_recipient(&mut self, recipient: JsString) -> Result<(), JsValue> {
-		let r: String = recipient.into();
-		let recipient = hex::decode(r).map_err(|_| OpStatusCode::InvalidRecipient)?;
-		self.recipient = Some(recipient);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setRelayer)]
-	pub fn set_relayer(&mut self, relayer: JsString) -> Result<(), JsValue> {
-		let r: String = relayer.into();
-		let hex_data = hex::decode(r).map_err(|_| OpStatusCode::DeserializationFailed)?;
-		self.relayer = Some(hex_data);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setLeaves)]
-	pub fn set_leaves(&mut self, leaves: Leaves) -> Result<(), JsValue> {
-		let ls: Vec<_> = Array::from(&leaves)
-			.to_vec()
-			.into_iter()
-			.map(|v| Uint8Array::new_with_byte_offset_and_length(&v, 0, 32))
-			.map(Uint8Arrayx32::try_from)
-			.collect::<Result<Vec<_>, _>>()
-			.map_err(|_| OpStatusCode::InvalidLeaves)?
-			.into_iter()
-			.map(|v| v.0)
-			.collect();
-		self.leaves = Some(ls);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setLeafIndex)]
-	pub fn set_leaf_index(&mut self, leaf_index: JsString) -> Result<(), JsValue> {
-		let leaf_index: String = leaf_index.into();
-		let leaf_index = leaf_index
-			.as_str()
-			.parse()
-			.map_err(|_| OpStatusCode::InvalidLeafIndex)?;
-		self.leaf_index = Some(leaf_index);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setFee)]
-	pub fn set_fee(&mut self, fee: JsString) -> Result<(), JsValue> {
-		let fee: String = fee.into();
-		let fee = fee.as_str().parse().map_err(|_| OpStatusCode::InvalidFee)?;
-		self.fee = Some(fee);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setRefund)]
-	pub fn set_refund(&mut self, refund: JsString) -> Result<(), JsValue> {
-		let refund: String = refund.into();
-		let refund = refund.as_str().parse().map_err(|_| OpStatusCode::InvalidRefund)?;
-		self.refund = Some(refund);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setPk)]
-	pub fn set_pk(&mut self, pk: JsString) -> Result<(), JsValue> {
-		let p: String = pk.into();
-		let proving_key = hex::decode(p).map_err(|_| OpStatusCode::InvalidProvingKey)?;
-		self.pk = Some(proving_key);
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setNote)]
-	pub fn set_note(&mut self, note: &JsNote) -> Result<(), JsValue> {
-		self.note = Some(note.clone());
-		Ok(())
-	}
-
-	#[wasm_bindgen]
-	pub fn build_js(self) -> Result<JsProofInput, JsValue> {
-		let proof_input = self.build()?;
-		Ok(JsProofInput { inner: proof_input })
-	}
-
-	/// Set notes for VAnchor
-	#[wasm_bindgen(js_name=setNotes)]
-	pub fn set_notes(&mut self, notes: Array) -> Result<(), JsValue> {
-		Ok(())
-	}
-}
 
 #[wasm_bindgen]
 pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
@@ -833,14 +858,14 @@ pub fn validate_proof(proof: &Proof, vk: JsString, curve: WasmCurve) -> Result<b
 }
 #[cfg(test)]
 mod test {
-	use super::*;
-
 	use wasm_bindgen_test::*;
 
 	use crate::proof::test_utils::{
 		generate_anchor_test_setup, generate_mixer_test_setup, AnchorTestSetup, MixerTestSetup, ANCHOR_NOTE_V1_X5_4,
 		ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5,
 	};
+
+	use super::*;
 
 	const TREE_DEPTH: usize = 30;
 
@@ -1010,7 +1035,7 @@ mod test {
 	#[wasm_bindgen_test]
 	fn generate_anchor_proof_input() {
 		let vanchor_note_str = "webb://v2:vanchor/2:3/2:3/0300000000000000000000000000000000000000000000000000000000000000:0a00000000000000000000000000000000000000000000000000000000000000:7798d054444ec463be7d41ad834147b5b2c468182c7cd6a601aec29a273fca05:bf5d780608f5b8a8db1dc87356a225a0324a1db61903540daaedd54ab10a4124/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
-		let mut proof_builder = JsProofInputBuilder::new();
+		let mut proof_builder = JsProofInputBuilder::new("vanchor".into()).unwrap();
 		let note = JsNote::deserialize(vanchor_note_str).unwrap();
 		proof_builder.notes = Some(vec![note.clone()]);
 		proof_builder.chain_id = Some(2);
