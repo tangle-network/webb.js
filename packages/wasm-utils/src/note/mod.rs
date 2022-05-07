@@ -1031,6 +1031,14 @@ mod test {
 
 		assert_eq!(vanchor_note.secrets.len(), 4);
 
-		assert_eq!(hex::encode(leaf_vec), hex::encode(leaf_2_vec))
+		assert_eq!(hex::encode(leaf_vec), hex::encode(leaf_2_vec));
+	}
+
+	#[wasm_bindgen_test]
+	fn should_deserialize_vanchor_note() {
+		let vanchor_note_str = "webb://v2:vanchor/2:3/2:3/0300000000000000000000000000000000000000000000000000000000000000:0a00000000000000000000000000000000000000000000000000000000000000:7798d054444ec463be7d41ad834147b5b2c468182c7cd6a601aec29a273fca05:bf5d780608f5b8a8db1dc87356a225a0324a1db61903540daaedd54ab10a4124/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
+		let note = JsNote::deserialize(vanchor_note_str).unwrap();
+		// Generate leaf to trigger any errors
+		let leaf = note.get_leaf_commitment().unwrap();
 	}
 }

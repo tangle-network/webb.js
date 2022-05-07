@@ -765,4 +765,20 @@ mod test {
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 		assert!(is_valid_proof);
 	}
+
+	#[wasm_bindgen_test]
+	fn generate_anchor_proof_input() {
+		let vanchor_note_str = "webb://v2:vanchor/2:3/2:3/0300000000000000000000000000000000000000000000000000000000000000:0a00000000000000000000000000000000000000000000000000000000000000:7798d054444ec463be7d41ad834147b5b2c468182c7cd6a601aec29a273fca05:bf5d780608f5b8a8db1dc87356a225a0324a1db61903540daaedd54ab10a4124/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
+		let mut proof_builder = ProofInputBuilder::new();
+		let note = JsNote::deserialize(vanchor_note_str).unwrap();
+		proof_builder.notes = Some(vec![note.clone()]);
+		proof_builder.chain_id = Some(2);
+		proof_builder.roots = Some(vec![[0u8; 32].to_vec(), [0u8; 32].to_vec()]);
+		proof_builder.public_amount = Some(10);
+		let mut leaf_map = BTreeMap::new();
+		let leaf: Vec<u8> = note.get_leaf_commitment().unwrap().to_vec();
+		leaf_map.insert(3, vec![leaf]);
+		proof_builder.leaves_map = Some(leaf_map);
+		let vanchor_proof = proof_builder.build().unwrap().vanchor_input().unwrap();
+	}
 }

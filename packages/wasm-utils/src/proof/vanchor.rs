@@ -97,17 +97,18 @@ pub fn create_proof(anchor_proof_input: VAnchorProofInput, rng: &mut OsRng) -> R
 			)
 		}
 		(Backend::Arkworks, Curve::Bn254, 5, 4, 16) => {
-			let mut utxos_slice: [Utxo<Bn254Fr>; 16] = [JsUtxo::default_bn254_utxo().get_bn254_utxo()?; 16];
-			let in_utxo = in_utxos
+			let in_utxos = in_utxos
 				.into_iter()
 				.map(|utxo| utxo.get_bn254_utxo())
-				.collect::<Result<Vec<_>, _>>()
-				.into_iter()
-				.collect();
-
-			utxos_slice.clone_from_slice(in_utxo);
+				.collect::<Result<Vec<_>, _>>()?;
+			let boxed_slice = in_utxos.into_boxed_slice();
+			let boxed_array: Box<[Utxo<Bn254Fr>; 16]> = boxed_slice
+				.try_into()
+				.map_err(|_| OpStatusCode::InvalidProofParameters)?;
+			let utxos_slice = *boxed_array;
 			let indices = indices.try_into().map_err(|_| OpStatusCode::InvalidProofParameters)?;
 			let roots = roots.try_into().map_err(|_| OpStatusCode::InvalidProofParameters)?;
+
 			VAnchorR1CSProverBn254_30_2_16_2::create_proof(
 				ArkCurve::Bn254,
 				chain_id,
