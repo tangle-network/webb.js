@@ -202,6 +202,7 @@ pub struct JsProofInput {
 	#[wasm_bindgen(skip)]
 	pub inner: ProofInput,
 }
+
 #[wasm_bindgen]
 #[derive(Debug, Eq, PartialEq, Default)]
 pub struct ProofInputBuilder {
@@ -779,6 +780,7 @@ mod test {
 		let leaf: Vec<u8> = note.get_leaf_commitment().unwrap().to_vec();
 		leaf_map.insert(3, vec![leaf]);
 		proof_builder.leaves_map = Some(leaf_map);
+		proof_builder.pk = Some([0u8; 102400].to_vec());
 		let vanchor_proof = proof_builder.build().unwrap().vanchor_input().unwrap();
 	}
 }
