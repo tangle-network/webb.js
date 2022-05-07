@@ -8,7 +8,7 @@ use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
 use crate::note::JsNote;
-use crate::proof::ProofInputBuilder;
+use crate::proof::JsProofInputBuilder;
 use crate::types::Leaves;
 use crate::{AnchorR1CSProverBn254_30_2, MixerR1CSProverBn254_30, ANCHOR_COUNT, DEFAULT_LEAF, TREE_HEIGHT};
 
@@ -21,7 +21,7 @@ pub const DECODED_SUBSTRATE_ADDRESS: &str = "644277e80e74baf70c59aeaa038b9e95b40
 pub struct MixerTestSetup {
 	pub(crate) relayer: Vec<u8>,
 	pub(crate) recipient: Vec<u8>,
-	pub(crate) proof_input_builder: ProofInputBuilder,
+	pub(crate) proof_input_builder: JsProofInputBuilder,
 	pub(crate) root: Vec<u8>,
 	pub(crate) leaf_bytes: Vec<u8>,
 	pub(crate) leaf_index: u64,
@@ -31,7 +31,7 @@ pub struct MixerTestSetup {
 pub struct AnchorTestSetup {
 	pub(crate) relayer: Vec<u8>,
 	pub(crate) recipient: Vec<u8>,
-	pub(crate) proof_input_builder: ProofInputBuilder,
+	pub(crate) proof_input_builder: JsProofInputBuilder,
 	pub(crate) roots_raw: [Vec<u8>; 2],
 	pub(crate) leaf_bytes: Vec<u8>,
 	pub(crate) leaf_index: u64,
@@ -52,7 +52,7 @@ pub fn generate_mixer_test_setup(
 
 	let leaves_ua: Array = vec![leaf].into_iter().collect();
 
-	let mut js_builder = ProofInputBuilder::new();
+	let mut js_builder = JsProofInputBuilder::new();
 
 	js_builder.set_leaf_index(JsString::from("0")).unwrap();
 	js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua))).unwrap();
@@ -113,7 +113,7 @@ pub fn generate_anchor_test_setup(
 	let roots_raw = roots_f.map(|x| x.into_repr().to_bytes_le());
 	let roots_array: Array = roots_raw.iter().map(|i| Uint8Array::from(i.as_slice())).collect();
 
-	let mut js_builder = ProofInputBuilder::new();
+	let mut js_builder = JsProofInputBuilder::new();
 	js_builder.set_leaf_index(JsString::from(index.to_string())).unwrap();
 	js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua))).unwrap();
 

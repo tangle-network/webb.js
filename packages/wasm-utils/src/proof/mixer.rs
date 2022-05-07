@@ -2,12 +2,12 @@ use arkworks_setups::{Curve as ArkCurve, MixerProver};
 
 use rand::rngs::OsRng;
 
-use crate::proof::{MixerProofInput, Proof};
+use crate::proof::{MixerProofPayload, Proof};
 use crate::types::{Backend, Curve, OpStatusCode, OperationError};
 use crate::{MixerR1CSProverBls381_30, MixerR1CSProverBn254_30, DEFAULT_LEAF};
 
-pub fn create_proof(mixer_proof_input: MixerProofInput, rng: &mut OsRng) -> Result<Proof, OperationError> {
-	let MixerProofInput {
+pub fn create_proof(mixer_proof_input: MixerProofPayload, rng: &mut OsRng) -> Result<Proof, OperationError> {
+	let MixerProofPayload {
 		recipient,
 		relayer,
 		leaves,

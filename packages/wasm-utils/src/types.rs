@@ -361,6 +361,10 @@ pub enum OpStatusCode {
 	VAnchorProofIndices = 46,
 	/// VAnchor proof leaves map not defined
 	VAnchorProofLeavesMap = 47,
+	/// Generic error while trying to instantiate proof input field
+	ProofInputFieldInstantiationError = 48,
+	/// Invalid filed for the proof input protocol
+	ProofInputFieldInstantiationProtocolInvalid = 49,
 }
 
 #[wasm_bindgen]
@@ -479,6 +483,10 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::VAnchorNotesNotSet => "VAnchor proof input requires list of notes",
 			OpStatusCode::VAnchorProofIndices => "VAnchor proof input require list of indices",
 			OpStatusCode::VAnchorProofLeavesMap => "VAnchor proof input require leaves  map",
+			OpStatusCode::ProofInputFieldInstantiationError => "The proof input field installation failed",
+			OpStatusCode::ProofInputFieldInstantiationProtocolInvalid => {
+				"The proof input field installation failed wrong protocol or field"
+			}
 		}
 		.to_string()
 	}

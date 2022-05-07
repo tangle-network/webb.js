@@ -5,7 +5,7 @@ use arkworks_setups::utxo::Utxo;
 use arkworks_setups::{AnchorProver, Curve as ArkCurve, VAnchorProver};
 use rand::rngs::OsRng;
 
-use crate::proof::{AnchorProofInput, Proof, VAnchorProofInput};
+use crate::proof::{AnchorProofPayload, Proof, VAnchorProofPayload};
 use crate::types::{Backend, Curve, OpStatusCode, OperationError};
 use crate::utxo::JsUtxo;
 use crate::{
@@ -13,8 +13,8 @@ use crate::{
 	VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF,
 };
 
-pub fn create_proof(anchor_proof_input: VAnchorProofInput, rng: &mut OsRng) -> Result<Proof, OperationError> {
-	let VAnchorProofInput {
+pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -> Result<Proof, OperationError> {
+	let VAnchorProofPayload {
 		public_amount,
 		notes,
 		backend,
