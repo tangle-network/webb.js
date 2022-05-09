@@ -15,7 +15,7 @@ use wasm_bindgen::prelude::*;
 
 use crate::note::{JsLeafInner, JsNote};
 use crate::types::{
-	Backend, Curve, Leaves, NoteProtocol, OpStatusCode, OperationError, Protocol, Uint8Arrayx32, WasmCurve,
+	Backend, Curve, Indices, Leaves, NoteProtocol, OpStatusCode, OperationError, Protocol, Uint8Arrayx32, WasmCurve,
 };
 use crate::utxo::JsUtxo;
 use crate::TREE_HEIGHT;
@@ -765,6 +765,13 @@ impl JsProofInputBuilder {
 	#[wasm_bindgen(js_name = setLeavesMap)]
 	pub fn set_leaves_map(&mut self, leaves_input: LeavesMapInput) -> Result<(), JsValue> {
 		self.inner.leaves_map(leaves_input.leaves)?;
+		Ok(())
+	}
+
+	#[wasm_bindgen(js_name = setIndices)]
+	pub fn set_indices(&mut self, indices: Indices) -> Result<(), JsValue> {
+		let indices: Vec<_> = Array::from(&indices).to_vec().into_iter().collect();
+		self.inner.leaf_indices(indices)?;
 		Ok(())
 	}
 

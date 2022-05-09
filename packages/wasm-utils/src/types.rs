@@ -396,6 +396,10 @@ extern "C" {
 
 	#[wasm_bindgen(typescript_type = "Leaves")]
 	pub type Leaves;
+
+	#[wasm_bindgen(typescript_type = "Indices")]
+	pub type Indices;
+
 }
 
 #[wasm_bindgen(typescript_custom_section)]
@@ -403,6 +407,9 @@ const NOTE_PROTOCOL: &str = "type NoteProtocol = 'mixer'|'anchor'|'vanchor' ";
 
 #[wasm_bindgen(typescript_custom_section)]
 const LEAVES: &str = "type Leaves = Array<Uint8Array>;";
+
+#[wasm_bindgen(typescript_custom_section)]
+const INDICES: &str = "type Indices = Array<number>;";
 
 #[wasm_bindgen(typescript_custom_section)]
 const HF: &str = "type HashFunction = 'Poseidon'|'MiMCTornado'";
