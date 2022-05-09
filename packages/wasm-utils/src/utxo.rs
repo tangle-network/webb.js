@@ -105,7 +105,6 @@ impl JsUtxo {
 		}
 	}
 }
-
 #[wasm_bindgen]
 impl JsUtxo {
 	#[wasm_bindgen(getter)]

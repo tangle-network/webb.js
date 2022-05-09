@@ -283,6 +283,39 @@ pub struct VAnchorProofInput {
 	pub public_amount: Option<i128>,
 }
 
+#[wasm_bindgen]
+pub struct LeavesMapInput {
+	#[wasm_bindgen(skip)]
+	pub leaves: BTreeMap<u64, Vec<Vec<u8>>>,
+}
+#[wasm_bindgen]
+impl LeavesMapInput {
+	#[wasm_bindgen(constructor)]
+	pub fn new() -> Self {
+		Self {
+			leaves: Default::default(),
+		}
+	}
+
+	#[wasm_bindgen(js_name=setChainLeaves)]
+	pub fn set_chain_leaves(&mut self, chain_id: u64, leaves: Leaves) -> Result<(), JsValue> {
+		let leaves: Vec<_> = Array::from(&leaves)
+			.to_vec()
+			.into_iter()
+			.map(|v| Uint8Array::new_with_byte_offset_and_length(&v, 0, 32))
+			.map(Uint8Arrayx32::try_from)
+			.collect::<Result<Vec<_>, _>>()
+			.map_err(|_| OpStatusCode::InvalidLeaves)?
+			.into_iter()
+			.map(|v| v.0.to_vec())
+			.collect();
+
+		self.leaves.insert(chain_id, leaves);
+
+		Ok(())
+	}
+}
+
 impl VAnchorProofInput {
 	pub fn build(self) -> Result<VAnchorProofPayload, OperationError> {
 		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
@@ -726,6 +759,12 @@ impl JsProofInputBuilder {
 			.map(|v| v.0.to_vec())
 			.collect();
 		self.inner.leaves_list(ls)?;
+		Ok(())
+	}
+
+	#[wasm_bindgen(js_name = setLeavesMap)]
+	pub fn set_leaves_map(&mut self, leaves_input: LeavesMapInput) -> Result<(), JsValue> {
+		self.inner.leaves_map(leaves_input.leaves)?;
 		Ok(())
 	}
 
