@@ -26,7 +26,7 @@ macro_rules! console_log {
 	// `bare_bones`
 	($($t:tt)*) => (crate::types::log(&format_args!($($t)*).to_string()))
 }
-
+#[derive()]
 pub enum JsLeafInner {
 	Mixer(Leaf),
 	Anchor(Leaf),
@@ -52,7 +52,7 @@ impl JsLeaf {
 		}
 	}
 
-	pub fn vanchor_leaf(&self) -> Result<VAnchorLeaf, OperationError> {
+	pub fn vanchor_leaf(&self) -> Result<JsUtxo, OperationError> {
 		match self.inner.clone() {
 			JsLeafInner::VAnchor(leaf) => Ok(leaf),
 			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),

@@ -4,6 +4,7 @@ use ark_bn254::Fr as Bn254Fr;
 use ark_ff::{BigInteger, PrimeField};
 use arkworks_setups::utxo::Utxo;
 use arkworks_setups::{Curve as ArkCurve, VAnchorProver};
+use core::fmt;
 use js_sys::{JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
@@ -12,10 +13,13 @@ use wasm_bindgen::prelude::*;
 pub enum JsUtxoInner {
 	Bn254(Utxo<Bn254Fr>),
 }
-
+impl fmt::Debug for JsUtxoInner {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "JsUtxoInner")
+	}
+}
 #[wasm_bindgen]
-#[derive(Clone)]
-
+#[derive(Clone, Debug)]
 pub struct JsUtxo {
 	inner: JsUtxoInner,
 }

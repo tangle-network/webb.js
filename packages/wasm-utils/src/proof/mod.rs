@@ -35,7 +35,7 @@ pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
 
 #[allow(clippy::unused_unit)]
 #[wasm_bindgen]
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug)]
 pub struct Proof {
 	#[wasm_bindgen(skip)]
 	pub proof: Vec<u8>,
@@ -80,7 +80,7 @@ impl Proof {
 	}
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Clone)]
 pub struct MixerProofPayload {
 	pub exponentiation: i8,
 	pub width: usize,
@@ -98,7 +98,7 @@ pub struct MixerProofPayload {
 	pub leaf_index: u64,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct MixerProofInput {
 	pub exponentiation: Option<i8>,
 	pub width: Option<usize>,
@@ -116,7 +116,7 @@ pub struct MixerProofInput {
 	pub leaf_index: Option<u64>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Clone)]
 pub struct AnchorProofPayload {
 	pub exponentiation: i8,
 	pub width: usize,
@@ -139,7 +139,7 @@ pub struct AnchorProofPayload {
 	pub refresh_commitment: [u8; 32],
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct AnchorProofInput {
 	pub exponentiation: Option<i8>,
 	pub width: Option<usize>,
@@ -153,7 +153,7 @@ pub struct AnchorProofInput {
 	pub refund: Option<u128>,
 	pub fee: Option<u128>,
 	pub chain_id: Option<u64>,
-	pub leaves: Option<Vec<Vec<u8>>>,
+	pub leaves: Option<Vec<[u8; 32]>>,
 	pub leaf_index: Option<u64>,
 	/// get roots for linkable tree
 	pub roots: Option<Vec<Vec<u8>>>,
@@ -162,7 +162,7 @@ pub struct AnchorProofInput {
 	pub refresh_commitment: Option<[u8; 32]>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Clone)]
 pub struct VAnchorProofPayload {
 	pub exponentiation: i8,
 	pub width: usize,
@@ -183,7 +183,7 @@ pub struct VAnchorProofPayload {
 	pub public_amount: i128,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct VAnchorProofInput {
 	pub exponentiation: Option<i8>,
 	pub width: Option<usize>,
@@ -204,7 +204,7 @@ pub struct VAnchorProofInput {
 	pub public_amount: Option<i128>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Clone)]
 pub enum ProofInput {
 	Mixer(MixerProofPayload),
 	Anchor(AnchorProofPayload),
@@ -265,7 +265,7 @@ pub struct JsProofInput {
 	#[wasm_bindgen(skip)]
 	pub inner: ProofInput,
 }
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone)]
 pub enum ProofInputBuilder {
 	Mixer(MixerProofInput),
 	Anchor(AnchorProofInput),
@@ -366,7 +366,7 @@ impl ProofInputBuilder {
 		}
 	}
 
-	pub fn leaves_list(&mut self, leaves: Vec<Vec<u8>>) -> Result<(), OperationError> {
+	pub fn leaves_list(&mut self, leaves: Vec<[u8; 32]>) -> Result<(), OperationError> {
 		match self {
 			Self::Anchor(input) | Self::Mixer(input) => {
 				input.leaves = Some(leaves);
@@ -465,7 +465,7 @@ impl ProofInputBuilder {
 	/* Shared fields  [VAnchor,Anchor,Mixer] */
 }
 #[wasm_bindgen]
-#[derive(Debug, Eq, PartialEq, Default)]
+#[derive(Debug)]
 pub struct JsProofInputBuilder {
 	#[wasm_bindgen(skip)]
 	pub inner: ProofInputBuilder,
@@ -482,14 +482,14 @@ impl JsProofInputBuilder {
 			.parse()
 			.map_err(|_| OpStatusCode::InvalidNoteProtocol)?;
 		let proof_input_builder = match note_protocol {
-			NoteProtocol::Mixer => Self {
-				inner: ProofInputBuilder::Mixer(Default::default()),
-			},
+			NoteProtocol::Mixer => ProofInputBuilder::Mixer(Default::default()),
 			NoteProtocol::Anchor => ProofInputBuilder::Anchor(Default::default()),
 			NoteProtocol::VAnchor => ProofInputBuilder::VAnchor(Default::default()),
 		};
 
-		Ok(proof_input_builder)
+		Ok(Self {
+			inner: proof_input_builder,
+		})
 	}
 
 	#[wasm_bindgen(js_name = setRoots)]
@@ -504,7 +504,8 @@ impl JsProofInputBuilder {
 			.into_iter()
 			.map(|v| v.0.to_vec())
 			.collect();
-		self.inner.roots(rs)
+		self.inner.roots(rs)?;
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setRefreshCommitment)]
@@ -514,21 +515,24 @@ impl JsProofInputBuilder {
 		let refresh_commitment: [u8; 32] = refresh_commitment
 			.try_into()
 			.map_err(|_| OpStatusCode::CommitmentNotSet)?;
-		self.inner.refresh_commitment(refresh_commitment)
+		self.inner.refresh_commitment(refresh_commitment)?;
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setRecipient)]
 	pub fn set_recipient(&mut self, recipient: JsString) -> Result<(), JsValue> {
 		let r: String = recipient.into();
 		let recipient = hex::decode(r).map_err(|_| OpStatusCode::InvalidRecipient)?;
-		self.inner.recipient(recipient)
+		self.inner.recipient(recipient)?;
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setRelayer)]
 	pub fn set_relayer(&mut self, relayer: JsString) -> Result<(), JsValue> {
 		let r: String = relayer.into();
 		let relayer = hex::decode(r).map_err(|_| OpStatusCode::DeserializationFailed)?;
-		self.inner.relayer(relayer)
+		self.inner.relayer(relayer)?;
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setLeaves)]
@@ -543,7 +547,8 @@ impl JsProofInputBuilder {
 			.into_iter()
 			.map(|v| v.0)
 			.collect();
-		self.inner.leaves_list(ls)
+		self.inner.leaves_list(ls)?;
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setLeafIndex)]
@@ -553,28 +558,32 @@ impl JsProofInputBuilder {
 			.as_str()
 			.parse()
 			.map_err(|_| OpStatusCode::InvalidLeafIndex)?;
-		self.inner.leaf_index(leaf_index)
+		self.inner.leaf_index(leaf_index)?;
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setFee)]
 	pub fn set_fee(&mut self, fee: JsString) -> Result<(), JsValue> {
 		let fee: String = fee.into();
 		let fee = fee.as_str().parse().map_err(|_| OpStatusCode::InvalidFee)?;
-		self.inner.fee(fee)
+		self.inner.fee(fee)?;
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setRefund)]
 	pub fn set_refund(&mut self, refund: JsString) -> Result<(), JsValue> {
 		let refund: String = refund.into();
 		let refund = refund.as_str().parse().map_err(|_| OpStatusCode::InvalidRefund)?;
-		self.inner.refund(refund)
+		self.inner.refund(refund)?;
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setPk)]
 	pub fn set_pk(&mut self, pk: JsString) -> Result<(), JsValue> {
 		let p: String = pk.into();
 		let proving_key = hex::decode(p).map_err(|_| OpStatusCode::InvalidProvingKey)?;
-		self.inner.pk(proving_key)
+		self.inner.pk(proving_key)?;
+		Ok(())
 	}
 
 	#[wasm_bindgen(js_name = setNote)]
@@ -1035,17 +1044,18 @@ mod test {
 	#[wasm_bindgen_test]
 	fn generate_anchor_proof_input() {
 		let vanchor_note_str = "webb://v2:vanchor/2:3/2:3/0300000000000000000000000000000000000000000000000000000000000000:0a00000000000000000000000000000000000000000000000000000000000000:7798d054444ec463be7d41ad834147b5b2c468182c7cd6a601aec29a273fca05:bf5d780608f5b8a8db1dc87356a225a0324a1db61903540daaedd54ab10a4124/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
-		let mut proof_builder = JsProofInputBuilder::new("vanchor".into()).unwrap();
+		let mut proof_builder = ProofInputBuilder::Anchor(Default::default());
 		let note = JsNote::deserialize(vanchor_note_str).unwrap();
-		proof_builder.notes = Some(vec![note.clone()]);
-		proof_builder.chain_id = Some(2);
-		proof_builder.roots = Some(vec![[0u8; 32].to_vec(), [0u8; 32].to_vec()]);
-		proof_builder.public_amount = Some(10);
+		proof_builder.set_utxos(vec![]);
+		proof_builder.chain_id(2);
+		proof_builder.roots(vec![[0u8; 32].to_vec(), [0u8; 32].to_vec()]);
+		proof_builder.public_amount(209);
 		let mut leaf_map = BTreeMap::new();
 		let leaf: Vec<u8> = note.get_leaf_commitment().unwrap().to_vec();
 		leaf_map.insert(3, vec![leaf]);
-		proof_builder.leaves_map = Some(leaf_map);
-		proof_builder.pk = Some([0u8; 102400].to_vec());
-		let vanchor_proof = proof_builder.build().unwrap().vanchor_input().unwrap();
+		proof_builder.leaves_map(leaf_map);
+		proof_builder.pk([0u8; 102400].to_vec());
+		let vanchor_proof = JsProofInputBuilder { inner: proof_builder };
+		vanchor_proof.build().unwrap().vanchor_input().unwrap();
 	}
 }
