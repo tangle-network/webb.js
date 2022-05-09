@@ -291,7 +291,7 @@ pub struct LeavesMapInput {
 #[wasm_bindgen]
 impl LeavesMapInput {
 	#[wasm_bindgen(constructor)]
-	pub fn new() -> Self {
+	pub fn new() -> LeavesMapInput {
 		Self {
 			leaves: Default::default(),
 		}
@@ -770,7 +770,17 @@ impl JsProofInputBuilder {
 
 	#[wasm_bindgen(js_name = setIndices)]
 	pub fn set_indices(&mut self, indices: Indices) -> Result<(), JsValue> {
-		let indices: Vec<_> = Array::from(&indices).to_vec().into_iter().collect();
+		let indices: Vec<_> = Array::from(&indices)
+			.to_vec()
+			.into_iter()
+			.map(|v| {
+				let s: String = JsString::from(v).into();
+				s.parse::<u64>()
+			})
+			.collect::<Result<Vec<u64>, _>>()
+			.map_err(|_| OpStatusCode::InvalidIndices)?
+			.into_iter()
+			.collect();
 		self.inner.leaf_indices(indices)?;
 		Ok(())
 	}
@@ -807,6 +817,22 @@ impl JsProofInputBuilder {
 		let p: String = pk.into();
 		let proving_key = hex::decode(p).map_err(|_| OpStatusCode::InvalidProvingKey)?;
 		self.inner.pk(proving_key)?;
+		Ok(())
+	}
+
+	#[wasm_bindgen]
+	pub fn public_amount(&mut self, public_amount: JsString) -> Result<(), JsValue> {
+		let pa: String = public_amount.into();
+		let pa: i128 = pa.parse().map_err(|_| OpStatusCode::InvalidPublicAmount)?;
+		self.inner.public_amount(pa);
+		Ok(())
+	}
+
+	#[wasm_bindgen]
+	pub fn chain_id(&mut self, chain_id: JsString) -> Result<(), JsValue> {
+		let chain_id: String = chain_id.into();
+		let chain_id = chain_id.parse().map_err(|_| OpStatusCode::InvalidChainId)?;
+		self.inner.chain_id(chain_id);
 		Ok(())
 	}
 
@@ -981,7 +1007,7 @@ mod test {
 
 	use crate::proof::test_utils::{
 		generate_anchor_test_setup, generate_mixer_test_setup, AnchorTestSetup, MixerTestSetup, ANCHOR_NOTE_V1_X5_4,
-		ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5,
+		ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V2_X5_4,
 	};
 
 	use super::*;
@@ -1153,21 +1179,46 @@ mod test {
 
 	#[wasm_bindgen_test]
 	fn generate_vanchor_proof_input() {
-		let vanchor_note_str = "webb://v2:vanchor/2:3/2:3/0300000000000000000000000000000000000000000000000000000000000000:0a00000000000000000000000000000000000000000000000000000000000000:7798d054444ec463be7d41ad834147b5b2c468182c7cd6a601aec29a273fca05:bf5d780608f5b8a8db1dc87356a225a0324a1db61903540daaedd54ab10a4124/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
-		let mut proof_builder = ProofInputBuilder::VAnchor(Default::default());
+		let vanchor_note_str = VANCHOR_NOTE_V2_X5_4;
+		let protocol = JsValue::from("vanchor").into();
+		let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
+
 		let note = JsNote::deserialize(vanchor_note_str).unwrap();
-		proof_builder.set_utxos(vec![]).unwrap();
-		proof_builder.chain_id(2).unwrap();
-		proof_builder.roots(vec![[0u8; 32].to_vec(), [0u8; 32].to_vec()]);
-		proof_builder.public_amount(209).unwrap();
-		let mut leaf_map = BTreeMap::new();
-		let leaf: Vec<u8> = note.get_leaf_commitment().unwrap().to_vec();
-		leaf_map.insert(3, vec![leaf]);
-		proof_builder.leaves_map(leaf_map).unwrap();
-		proof_builder.leaf_indices(vec![0]);
-		proof_builder.public_amount(20);
-		proof_builder.pk([0u8; 102400].to_vec()).unwrap();
-		let vanchor_proof = JsProofInputBuilder { inner: proof_builder };
-		vanchor_proof.build().unwrap().vanchor_input().unwrap();
+		let leaf = note.get_leaf_commitment().unwrap();
+		let leaves: Array = vec![leaf].into_iter().collect();
+
+		let mut tree_leaves = LeavesMapInput::new();
+		tree_leaves
+			.set_chain_leaves(2, Leaves::from(JsValue::from(leaves.clone())))
+			.unwrap();
+		tree_leaves
+			.set_chain_leaves(3, Leaves::from(JsValue::from(leaves.clone())))
+			.unwrap();
+
+		let indices: Array = vec![JsValue::from("0"), JsValue::from("0")].into_iter().collect();
+		let roots: Array = vec![
+			Uint8Array::from([0u8; 32].to_vec().as_slice()),
+			Uint8Array::from([0u8; 32].to_vec().as_slice()),
+		]
+		.into_iter()
+		.collect();
+		proof_input_builder.set_leaves_map(tree_leaves).unwrap();
+		proof_input_builder.set_metadata_from_note(&note).unwrap();
+
+		proof_input_builder
+			.set_indices(Indices::from(JsValue::from(indices)))
+			.unwrap();
+		proof_input_builder
+			.set_roots(Leaves::from(JsValue::from(roots)))
+			.unwrap();
+
+		proof_input_builder.set_pk(JsString::from("0000")).unwrap();
+		proof_input_builder.public_amount(JsString::from("3")).unwrap();
+		proof_input_builder.chain_id(JsString::from("3")).unwrap();
+		let notes: Array = vec![note.clone()].into_iter().collect();
+		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
+		// `note::JsNote`
+		proof_input_builder.set_notes(JsValue::from(notes)).unwrap();
+		let proof_builder = proof_input_builder.build_js().unwrap();
 	}
 }

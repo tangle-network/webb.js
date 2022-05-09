@@ -162,8 +162,7 @@ pub fn generate_vanchor_test_setup(
 	let curve = ArkCurve::Bn254;
 	let index = 0;
 
-	let (c, ..) =
-		VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
+	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
 	let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
 
 	let note = JsNote::js_deserialize(JsString::from(note)).unwrap();
