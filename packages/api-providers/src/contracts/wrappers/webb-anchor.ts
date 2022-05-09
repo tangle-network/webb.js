@@ -73,7 +73,7 @@ export class AnchorContract {
       console.log('createTreeWithRoot - leaf: ', leaves[i]);
       const nextRoot = tree.getRoot();
 
-      logger.log(`target root: ${targetRoot} \n this root: ${bufferToFixed(nextRoot)}`);
+      console.log(`target root: ${targetRoot} \n this root: ${bufferToFixed(nextRoot)}`);
 
       if (bufferToFixed(nextRoot) === targetRoot) {
         return tree;
@@ -326,7 +326,7 @@ export class AnchorContract {
     const edgeIndex = await this._contract.edgeIndex(sourceChainId);
     const edge = await this._contract.edgeList(edgeIndex);
 
-    logger.log('retrieved edge while generating merkle proof: ', edge);
+    console.log('retrieved edge while generating merkle proof: ', edge);
     const latestSourceRoot = edge[1];
 
     const tree = AnchorContract.createTreeWithRoot(sourceLeaves, latestSourceRoot);
@@ -337,7 +337,7 @@ export class AnchorContract {
       console.log('index of element: ', index);
       const path = tree.path(index);
 
-      logger.log('path for proof: ', path);
+      console.log('path for proof: ', path);
 
       return {
         index: index,
