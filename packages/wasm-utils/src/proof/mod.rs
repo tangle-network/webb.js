@@ -1,7 +1,5 @@
 #![allow(clippy::unused_unit)]
 
-use core::convert::{TryFrom, TryInto};
-
 use ark_bls12_381::Bls12_381;
 use ark_bn254::{Bn254, Fr as Bn254Fr};
 use ark_ff::{BigInteger, PrimeField};
@@ -9,6 +7,7 @@ use arkworks_native_gadgets::merkle_tree::SparseMerkleTree;
 use arkworks_native_gadgets::poseidon::Poseidon;
 use arkworks_setups::common::{setup_params, setup_tree_and_create_path, verify_unchecked_raw, Leaf};
 use arkworks_setups::Curve as ArkCurve;
+use core::convert::{TryFrom, TryInto};
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::__rt::std::collections::btree_map::BTreeMap;
@@ -310,7 +309,7 @@ impl VAnchorProofInput {
 			roots,
 			secret,
 			indices,
-			chain_id: 0,
+			chain_id: chain_id.try_into().unwrap(),
 			public_amount,
 		})
 	}
@@ -1105,19 +1104,21 @@ mod test {
 	}
 
 	#[wasm_bindgen_test]
-	fn generate_anchor_proof_input() {
+	fn generate_vanchor_proof_input() {
 		let vanchor_note_str = "webb://v2:vanchor/2:3/2:3/0300000000000000000000000000000000000000000000000000000000000000:0a00000000000000000000000000000000000000000000000000000000000000:7798d054444ec463be7d41ad834147b5b2c468182c7cd6a601aec29a273fca05:bf5d780608f5b8a8db1dc87356a225a0324a1db61903540daaedd54ab10a4124/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
-		let mut proof_builder = ProofInputBuilder::Anchor(Default::default());
+		let mut proof_builder = ProofInputBuilder::VAnchor(Default::default());
 		let note = JsNote::deserialize(vanchor_note_str).unwrap();
-		proof_builder.set_utxos(vec![]);
-		proof_builder.chain_id(2);
+		proof_builder.set_utxos(vec![]).unwrap();
+		proof_builder.chain_id(2).unwrap();
 		proof_builder.roots(vec![[0u8; 32].to_vec(), [0u8; 32].to_vec()]);
-		proof_builder.public_amount(209);
+		proof_builder.public_amount(209).unwrap();
 		let mut leaf_map = BTreeMap::new();
 		let leaf: Vec<u8> = note.get_leaf_commitment().unwrap().to_vec();
 		leaf_map.insert(3, vec![leaf]);
-		proof_builder.leaves_map(leaf_map);
-		proof_builder.pk([0u8; 102400].to_vec());
+		proof_builder.leaves_map(leaf_map).unwrap();
+		proof_builder.leaf_indices(vec![0]);
+		proof_builder.public_amount(20);
+		proof_builder.pk([0u8; 102400].to_vec()).unwrap();
 		let vanchor_proof = JsProofInputBuilder { inner: proof_builder };
 		vanchor_proof.build().unwrap().vanchor_input().unwrap();
 	}
