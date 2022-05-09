@@ -4,7 +4,8 @@
 /* eslint-disable camelcase */
 
 import { Log } from '@ethersproject/abstract-provider';
-import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, MixerStorage } from '@webb-tools/api-providers/utils/index.js';
+import { ChainType, computeChainIdType } from '@webb-tools/api-providers/index.js';
+import { BridgeStorage, bridgeStorageFactory, getAnchorDeploymentBlockNumber } from '@webb-tools/api-providers/utils/index.js';
 import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { ERC20, ERC20__factory as ERC20Factory, FixedDepositAnchor, FixedDepositAnchor__factory } from '@webb-tools/contracts';
@@ -270,11 +271,14 @@ export class AnchorContract {
    **/
 
   async generateMerkleProof (deposit: IAnchorDepositInfo) {
-    const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
-    const storedContractInfo: MixerStorage[0] = (await bridgeStorageStorage.get(
+    const evmId = await this.signer.getChainId();
+    const sourceChainIdType = computeChainIdType(ChainType.EVM, evmId);
+
+    const bridgeStorageStorage = await bridgeStorageFactory(sourceChainIdType);
+    const storedContractInfo: BridgeStorage[0] = (await bridgeStorageStorage.get(
       this._contract.address.toLowerCase()
     )) || {
-      lastQueriedBlock: anchorDeploymentBlock[this._contract.address.toString().toLowerCase()] || 0,
+      lastQueriedBlock: getAnchorDeploymentBlockNumber(sourceChainIdType, this._contract.address) || 0,
       leaves: [] as string[]
     };
     const treeHeight = await this._contract.levels();

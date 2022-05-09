@@ -7,14 +7,14 @@ import { parseUnits } from '@ethersproject/units';
 import { Anchor } from '@webb-tools/anchors';
 import * as witnessCalculatorFile from '@webb-tools/api-providers/contracts/utils/witness-calculator.js';
 import { BridgeConfig, OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer, WithdrawState } from '@webb-tools/api-providers/index.js';
-import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, chainIdToRelayerName, getAnchorAddressForBridge, getEVMChainName, getEVMChainNameFromInternal, MixerStorage } from '@webb-tools/api-providers/utils/index.js';
+import { BridgeStorage, bridgeStorageFactory, chainIdToRelayerName, getAnchorAddressForBridge, getAnchorDeploymentBlockNumber, getEVMChainName, getEVMChainNameFromInternal } from '@webb-tools/api-providers/utils/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note } from '@webb-tools/sdk-core/index.js';
 import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
 import { BigNumber } from 'ethers';
 
 import { AnchorApi, AnchorWithdraw } from '../abstracts/index.js';
-import { chainTypeIdToInternalId, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains/index.js';
+import { ChainType, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains/index.js';
 import { generateWithdrawProofCallData, hexStringToBytes } from '../contracts/utils/bridge-utils.js';
 import { bufferToFixed } from '../contracts/utils/buffer-to-fixed.js';
 import { depositFromAnchorNote } from '../contracts/utils/make-deposit.js';
@@ -155,11 +155,11 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     const contract = this.inner.getWebbAnchorByAddress(contractAddress);
 
     // Fetch the leaves that we already have in storage
-    const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
-    const storedContractInfo: MixerStorage[0] = (await bridgeStorageStorage.get(
+    const bridgeStorageStorage = await bridgeStorageFactory(Number(note.sourceChainId));
+    const storedContractInfo: BridgeStorage[0] = (await bridgeStorageStorage.get(
       contractAddress.toLowerCase()
     )) || {
-      lastQueriedBlock: anchorDeploymentBlock[contractAddress.toLowerCase()] || 0,
+      lastQueriedBlock: getAnchorDeploymentBlockNumber(computeChainIdType(ChainType.EVM, activeChain), contractAddress) || 0,
       leaves: [] as string[]
     };
 
@@ -285,7 +285,6 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
     // TODO: handle provider storage
     // const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
-    const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
 
     // Set up a provider for the source chain
     const sourceChainIdType = parseChainIdType(Number(note.sourceChainId));
@@ -295,6 +294,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     const rpc = sourceChainConfig.url;
     const sourceHttpProvider = Web3Provider.fromUri(rpc);
     const sourceEthers = sourceHttpProvider.intoEthersProvider();
+    const sourceBridgeStorage = await bridgeStorageFactory(Number(note.sourceChainId));
 
     // get info from the destination chain (should be selected)
     const destChainIdType = parseChainIdType(Number(note.targetChainId));
@@ -356,7 +356,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
           console.log('tree valid, using relayer leaves');
           leaves = relayerLeaves.leaves;
 
-          await bridgeStorageStorage.set(sourceContract.inner.address.toLowerCase(), {
+          await sourceBridgeStorage.set(sourceContract.inner.address.toLowerCase(), {
             lastQueriedBlock: relayerLeaves.lastQueriedBlock,
             leaves: relayerLeaves.leaves
           });
@@ -367,11 +367,12 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
     // if we weren't able to get leaves from the relayer, get them directly from chain
     if (!leaves.length) {
-      // check if we already cached some values
-      const storedContractInfo: MixerStorage[0] = (await bridgeStorageStorage.get(
-        sourceContractAddress.toLowerCase()
-      )) || {
-        lastQueriedBlock: anchorDeploymentBlock[sourceContractAddress.toLowerCase()] || 0,
+      // check if we already cached some values.
+      // TODO: Figure out storage where some chains can have the same contract address
+      const storedContractInfo: BridgeStorage[0] =
+      // (await bridgeStorageStorage.get(sourceContractAddress.toLowerCase())) ||
+      {
+        lastQueriedBlock: getAnchorDeploymentBlockNumber(Number(note.sourceChainId), sourceContractAddress) || 0,
         leaves: [] as string[]
       };
 
@@ -558,7 +559,9 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       txHash = txResult?.[1] || '';
     } else {
       try {
-        logger.log('withdrawing without relayer');
+        console.log(withdrawSetup);
+        console.log(withdrawSetup.publicInputs);
+        console.log(withdrawSetup.extData);
 
         const tx = await destAnchor.inner.withdraw(withdrawSetup.publicInputs, withdrawSetup.extData);
         const receipt = await tx.wait();

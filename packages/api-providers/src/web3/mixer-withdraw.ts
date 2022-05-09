@@ -3,13 +3,14 @@
 
 import { Anchor } from '@webb-tools/anchors';
 import * as witnessCalculatorFile from '@webb-tools/api-providers/contracts/utils/witness-calculator.js';
-import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, depositFromAnchorNote, MixerStorage } from '@webb-tools/api-providers/index.js';
+import { BridgeStorage, bridgeStorageFactory, depositFromAnchorNote } from '@webb-tools/api-providers/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note } from '@webb-tools/sdk-core/index.js';
 
 import { WithdrawState } from '../abstracts/index.js';
 import { evmIdIntoInternalChainId } from '../chains/index.js';
 import { fetchKeyForEdges, fetchWasmForEdges } from '../ipfs/evm/index.js';
+import { getAnchorDeploymentBlockNumber } from '../utils/storage-mock.js';
 import { Web3AnchorWithdraw } from './anchor-withdraw.js';
 
 const logger = LoggerService.get('Web3MixerWithdraw');
@@ -51,11 +52,11 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
     });
 
     // Fetch the leaves that we already have in storage
-    const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
-    const storedContractInfo: MixerStorage[0] = (await bridgeStorageStorage.get(
+    const bridgeStorageStorage = await bridgeStorageFactory(Number(depositNote.sourceChainId));
+    const storedContractInfo: BridgeStorage[0] = (await bridgeStorageStorage.get(
       contractAddress.toLowerCase()
     )) || {
-      lastQueriedBlock: anchorDeploymentBlock[contractAddress.toLowerCase()] || 0,
+      lastQueriedBlock: getAnchorDeploymentBlockNumber(Number(depositNote.sourceChainId), contractAddress.toLowerCase()) || 0,
       leaves: [] as string[]
     };
 
