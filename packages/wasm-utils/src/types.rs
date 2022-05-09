@@ -365,6 +365,11 @@ pub enum OpStatusCode {
 	ProofInputFieldInstantiationError = 48,
 	/// Invalid filed for the proof input protocol
 	ProofInputFieldInstantiationProtocolInvalid = 49,
+	InvalidNullifer = 50,
+	InvalidRoots = 51,
+	InvalidChainId = 52,
+	InvalidIndices = 53,
+	InvalidPublicAmount = 54,
 }
 
 #[wasm_bindgen]
@@ -487,6 +492,11 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::ProofInputFieldInstantiationProtocolInvalid => {
 				"The proof input field installation failed wrong protocol or field"
 			}
+			OpStatusCode::InvalidNullifer => "Invalid nullifer value",
+			OpStatusCode::InvalidRoots => "Invalid roots value",
+			OpStatusCode::InvalidChainId => "Invalid chain id",
+			OpStatusCode::InvalidIndices => "Invalid indices value",
+			OpStatusCode::InvalidPublicAmount => "Invalid public amount",
 		}
 		.to_string()
 	}

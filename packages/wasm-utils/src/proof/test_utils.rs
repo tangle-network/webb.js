@@ -51,7 +51,7 @@ pub fn generate_mixer_test_setup(
 	let leaf_bytes: Vec<u8> = leaf.to_vec();
 
 	let leaves_ua: Array = vec![leaf].into_iter().collect();
-	let protocol: Protocol = JsValue::from("anchor").into();
+	let protocol: Protocol = JsValue::from("mixer").into();
 	let mut js_builder = JsProofInputBuilder::new(protocol).unwrap();
 
 	js_builder.set_leaf_index(JsString::from("0")).unwrap();

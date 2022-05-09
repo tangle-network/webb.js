@@ -204,7 +204,7 @@ impl AnchorProofInput {
 		let relayer = self.relayer.ok_or(OpStatusCode::InvalidRelayer)?;
 		let leaf_index = self.leaf_index.ok_or(OpStatusCode::InvalidLeafIndex)?;
 		let secret = self.secret.ok_or(OpStatusCode::InvalidNoteSecrets)?;
-		let nullifier = self.nullifier.ok_or(OpStatusCode::InvalidNoteSecrets)?;
+		let nullifier = self.nullifier.ok_or(OpStatusCode::InvalidNullifer)?;
 		let leaves = self.leaves.ok_or(OpStatusCode::InvalidLeaves)?;
 		let fee = self.fee.ok_or(OpStatusCode::InvalidFee)?;
 		let refund = self.refund.ok_or(OpStatusCode::InvalidRefund)?;
@@ -289,10 +289,10 @@ impl VAnchorProofInput {
 		let secret = self.secret.ok_or(OpStatusCode::InvalidNoteSecrets)?;
 		let leaves = self.leaves.ok_or(OpStatusCode::InvalidLeaves)?;
 		// TODO add error
-		let roots = self.roots.ok_or(OpStatusCode::InvalidLeaves)?;
-		let chain_id = self.chain_id.ok_or(OpStatusCode::InvalidTargetChain)?;
-		let indices = self.indices.ok_or(OpStatusCode::InvalidTargetChain)?;
-		let public_amount = self.public_amount.ok_or(OpStatusCode::InvalidTargetChain)?;
+		let roots = self.roots.ok_or(OpStatusCode::InvalidRoots)?;
+		let chain_id = self.chain_id.ok_or(OpStatusCode::InvalidChainId)?;
+		let indices = self.indices.ok_or(OpStatusCode::InvalidIndices)?;
+		let public_amount = self.public_amount.ok_or(OpStatusCode::InvalidPublicAmount)?;
 
 		let exponentiation = self.exponentiation.unwrap_or(5);
 		let width = self.width.unwrap_or(3);
@@ -431,10 +431,12 @@ impl ProofInputBuilder {
 		match self {
 			ProofInputBuilder::Mixer(input) => {
 				input.secret = Some(leaf.secret_bytes);
+				input.nullifier = Some(leaf.nullifier_bytes);
 				Ok(())
 			}
 			ProofInputBuilder::Anchor(input) => {
 				input.secret = Some(leaf.secret_bytes);
+				input.nullifier = Some(leaf.nullifier_bytes);
 				Ok(())
 			}
 			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
