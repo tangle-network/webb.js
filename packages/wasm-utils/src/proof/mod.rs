@@ -94,7 +94,7 @@ pub struct MixerProofPayload {
 	pub refund: u128,
 	pub fee: u128,
 	pub chain_id: u128,
-	pub leaves: Vec<[u8; 32]>,
+	pub leaves: Vec<Vec<u8>>,
 	pub leaf_index: u64,
 }
 
@@ -112,7 +112,7 @@ pub struct MixerProofInput {
 	pub refund: Option<u128>,
 	pub fee: Option<u128>,
 	pub chain_id: Option<u128>,
-	pub leaves: Option<Vec<[u8; 32]>>,
+	pub leaves: Option<Vec<Vec<u8>>>,
 	pub leaf_index: Option<u64>,
 }
 impl MixerProofInput {
@@ -167,7 +167,7 @@ pub struct AnchorProofPayload {
 	pub refund: u128,
 	pub fee: u128,
 	pub chain_id: u64,
-	pub leaves: Vec<[u8; 32]>,
+	pub leaves: Vec<Vec<u8>>,
 	pub leaf_index: u64,
 	/// get roots for linkable tree
 	pub roots: Vec<Vec<u8>>,
@@ -190,7 +190,7 @@ pub struct AnchorProofInput {
 	pub refund: Option<u128>,
 	pub fee: Option<u128>,
 	pub chain_id: Option<u64>,
-	pub leaves: Option<Vec<[u8; 32]>>,
+	pub leaves: Option<Vec<Vec<u8>>>,
 	pub leaf_index: Option<u64>,
 	/// get roots for linkable tree
 	pub roots: Option<Vec<Vec<u8>>>,
@@ -299,9 +299,6 @@ impl VAnchorProofInput {
 		let width = self.width.unwrap_or(3);
 		let curve = self.curve.unwrap_or(Curve::Bn254);
 		let backend = self.backend.unwrap_or(Backend::Arkworks);
-
-		let processed_relayer = truncate_and_pad(&relayer);
-		let processed_recipient = truncate_and_pad(&recipient);
 
 		Ok(VAnchorProofPayload {
 			exponentiation,
@@ -494,7 +491,7 @@ impl ProofInputBuilder {
 		}
 	}
 
-	pub fn leaves_list(&mut self, leaves: Vec<[u8; 32]>) -> Result<(), OperationError> {
+	pub fn leaves_list(&mut self, leaves: Vec<Vec<u8>>) -> Result<(), OperationError> {
 		match self {
 			Self::Anchor(input) => {
 				input.leaves = Some(leaves);
@@ -653,7 +650,7 @@ pub struct JsProofInputBuilder {
 #[wasm_bindgen]
 impl JsProofInputBuilder {
 	#[wasm_bindgen(constructor)]
-	pub fn new(protocol: Protocol) -> Result<Self, OperationError> {
+	pub fn new(protocol: Protocol) -> Result<JsProofInputBuilder, OperationError> {
 		let protocol: String = JsValue::from(&protocol)
 			.as_string()
 			.ok_or(OpStatusCode::InvalidNoteProtocol)?;
@@ -667,7 +664,7 @@ impl JsProofInputBuilder {
 			NoteProtocol::VAnchor => ProofInputBuilder::VAnchor(Default::default()),
 		};
 
-		Ok(Self {
+		Ok(JsProofInputBuilder {
 			inner: proof_input_builder,
 		})
 	}
@@ -725,7 +722,7 @@ impl JsProofInputBuilder {
 			.collect::<Result<Vec<_>, _>>()
 			.map_err(|_| OpStatusCode::InvalidLeaves)?
 			.into_iter()
-			.map(|v| v.0)
+			.map(|v| v.0.to_vec())
 			.collect();
 		self.inner.leaves_list(ls)?;
 		Ok(())

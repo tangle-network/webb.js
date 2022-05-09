@@ -28,7 +28,7 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 		chain_id,
 	} = anchor_proof_input;
 	// Prepare in UTXOs
-	let in_utxos: Vec<JsUtxo> = match notes.len() {
+	let in_utxos: Vec<JsUtxo> = match secret.len() {
 		2 | 16 => secret,
 		length if length < 16 && length > 2 => {
 			let mut utxos: Vec<JsUtxo> = secret;
@@ -48,7 +48,7 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 			let utxo =
 				VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, 0, 0, None, &mut OsRng).unwrap();
 			let utxo = JsUtxo::new_from_bn254_utxo(utxo);
-			vec![secret[0], utxo]
+			vec![secret[0].clone(), utxo]
 		}
 		length => {
 			return Err(OperationError::new_with_message(

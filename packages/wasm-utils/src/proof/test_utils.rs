@@ -9,7 +9,7 @@ use wasm_bindgen::prelude::*;
 
 use crate::note::JsNote;
 use crate::proof::JsProofInputBuilder;
-use crate::types::Leaves;
+use crate::types::{Leaves, Protocol};
 use crate::{AnchorR1CSProverBn254_30_2, MixerR1CSProverBn254_30, ANCHOR_COUNT, DEFAULT_LEAF, TREE_HEIGHT};
 
 pub const MIXER_NOTE_V1_X5_5:&str  = "webb.mixer:v1:16:16:Arkworks:Bn254:Poseidon:WEBB:12:10:5:3:7dc8420a25a15d2e7b712b4df15c6f6f9f5a8bacfa466671eb1f078406b09a2a00b7063c9fc19d488c25a18cb9c40bc4c29c00f822fdecd58d579cafa46ac31f";
@@ -51,8 +51,8 @@ pub fn generate_mixer_test_setup(
 	let leaf_bytes: Vec<u8> = leaf.to_vec();
 
 	let leaves_ua: Array = vec![leaf].into_iter().collect();
-
-	let mut js_builder = JsProofInputBuilder::new();
+	let protocol: Protocol = JsValue::from("anchor").into();
+	let mut js_builder = JsProofInputBuilder::new(protocol).unwrap();
 
 	js_builder.set_leaf_index(JsString::from("0")).unwrap();
 	js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua))).unwrap();
@@ -67,7 +67,7 @@ pub fn generate_mixer_test_setup(
 
 	js_builder.set_pk(JsString::from(hex::encode(&pk))).unwrap();
 
-	js_builder.set_note(&note).unwrap();
+	js_builder.set_metadata_from_note(&note).unwrap();
 
 	MixerTestSetup {
 		relayer: hex::decode(relayer_decoded_ss58).unwrap(),
@@ -113,7 +113,7 @@ pub fn generate_anchor_test_setup(
 	let roots_raw = roots_f.map(|x| x.into_repr().to_bytes_le());
 	let roots_array: Array = roots_raw.iter().map(|i| Uint8Array::from(i.as_slice())).collect();
 
-	let mut js_builder = JsProofInputBuilder::new();
+	let mut js_builder = JsProofInputBuilder::new(JsValue::from("anchor").into()).unwrap();
 	js_builder.set_leaf_index(JsString::from(index.to_string())).unwrap();
 	js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua))).unwrap();
 
@@ -126,7 +126,7 @@ pub fn generate_anchor_test_setup(
 
 	js_builder.set_relayer(JsString::from(relayer_decoded_ss58)).unwrap();
 
-	js_builder.set_note(&note).unwrap();
+	js_builder.set_metadata_from_note(&note).unwrap();
 
 	js_builder.set_pk(JsString::from(hex::encode(pk))).unwrap();
 	js_builder
