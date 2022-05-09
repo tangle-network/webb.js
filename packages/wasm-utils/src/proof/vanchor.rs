@@ -16,11 +16,10 @@ use crate::{
 pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -> Result<Proof, OperationError> {
 	let VAnchorProofPayload {
 		public_amount,
-		notes,
 		backend,
 		curve,
 		width,
-
+		secret,
 		indices,
 		leaves,
 		exponentiation,
@@ -30,19 +29,9 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 	} = anchor_proof_input;
 	// Prepare in UTXOs
 	let in_utxos: Vec<JsUtxo> = match notes.len() {
-		2 | 16 => notes
-			.iter()
-			.map(|note| note.get_js_utxo())
-			.collect::<Result<Vec<_>, _>>()?
-			.into_iter()
-			.collect(),
+		2 | 16 => secret,
 		length if length < 16 && length > 2 => {
-			let mut utxos: Vec<JsUtxo> = notes
-				.iter()
-				.map(|note| note.get_js_utxo())
-				.collect::<Result<Vec<_>, _>>()?
-				.into_iter()
-				.collect();
+			let mut utxos: Vec<JsUtxo> = secret;
 			let utxo =
 				VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, 0, 0, None, &mut OsRng).unwrap();
 			// Create empty UTXOs to fill the list with  16 UTXOs
@@ -59,7 +48,7 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 			let utxo =
 				VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, 0, 0, None, &mut OsRng).unwrap();
 			let utxo = JsUtxo::new_from_bn254_utxo(utxo);
-			vec![notes[0].get_js_utxo()?, utxo]
+			vec![secret[0], utxo]
 		}
 		length => {
 			return Err(OperationError::new_with_message(

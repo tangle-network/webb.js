@@ -26,11 +26,32 @@ macro_rules! console_log {
 	// `bare_bones`
 	($($t:tt)*) => (crate::types::log(&format_args!($($t)*).to_string()))
 }
-#[derive()]
 pub enum JsLeafInner {
 	Mixer(Leaf),
 	Anchor(Leaf),
 	VAnchor(JsUtxo),
+}
+
+impl Clone for JsLeafInner {
+	fn clone(&self) -> Self {
+		match self {
+			JsLeafInner::Mixer(leaf) => JsLeafInner::Mixer(Leaf {
+				chain_id_bytes: leaf.chain_id_bytes.clone(),
+				secret_bytes: leaf.secret_bytes.clone(),
+				nullifier_bytes: leaf.nullifier_bytes.clone(),
+				leaf_bytes: leaf.leaf_bytes.clone(),
+				nullifier_hash_bytes: leaf.nullifier_hash_bytes.clone(),
+			}),
+			JsLeafInner::Anchor(leaf) => JsLeafInner::Anchor(Leaf {
+				chain_id_bytes: leaf.chain_id_bytes.clone(),
+				secret_bytes: leaf.secret_bytes.clone(),
+				nullifier_bytes: leaf.nullifier_bytes.clone(),
+				leaf_bytes: leaf.leaf_bytes.clone(),
+				nullifier_hash_bytes: leaf.nullifier_hash_bytes.clone(),
+			}),
+			JsLeafInner::VAnchor(utxo) => JsLeafInner::VAnchor(utxo.clone()),
+		}
+	}
 }
 #[wasm_bindgen]
 pub struct JsLeaf {

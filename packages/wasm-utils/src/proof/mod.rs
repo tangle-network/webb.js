@@ -393,20 +393,21 @@ impl ProofInputBuilder {
 				input.secret = Some(utxo_list);
 				Ok(())
 			}
-			_ => Err(OperationError::ProofInputFieldInstantiationProtocolInvalid.into()),
+			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
 		}
 	}
 
 	pub fn roots(&mut self, roots: Vec<Vec<u8>>) -> Result<(), OperationError> {
 		match self {
-			ProofInputBuilder::Mixer(value) => {
-				return Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into())
-			}
-			ProofInputBuilder::Anchor(value) | ProofInputBuilder::VAnchor(value) => {
+			ProofInputBuilder::Anchor(value) => {
 				value.roots = Some(roots);
 				Ok(())
 			}
-			_ => {}
+			ProofInputBuilder::VAnchor(value) => {
+				value.roots = Some(roots);
+				Ok(())
+			}
+			_ => return Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
 		}
 	}
 
@@ -432,7 +433,11 @@ impl ProofInputBuilder {
 
 	pub fn secrets(&mut self, leaf: Leaf) -> Result<(), OperationError> {
 		match self {
-			ProofInputBuilder::Mixer(input) | ProofInputBuilder::Anchor(input) => {
+			ProofInputBuilder::Mixer(input) => {
+				input.secret = Some(leaf.secret_bytes);
+				Ok(())
+			}
+			ProofInputBuilder::Anchor(input) => {
 				input.secret = Some(leaf.secret_bytes);
 				Ok(())
 			}
@@ -463,7 +468,11 @@ impl ProofInputBuilder {
 	/* Shared fields  [Anchor,Mixer] */
 	pub fn recipient(&mut self, recipient: Vec<u8>) -> Result<(), OperationError> {
 		match self {
-			Self::Anchor(input) | Self::Mixer(input) => {
+			Self::Anchor(input) => {
+				input.recipient = Some(recipient);
+				Ok(())
+			}
+			Self::Mixer(input) => {
 				input.recipient = Some(recipient);
 				Ok(())
 			}
@@ -473,7 +482,11 @@ impl ProofInputBuilder {
 
 	pub fn relayer(&mut self, relayer: Vec<u8>) -> Result<(), OperationError> {
 		match self {
-			Self::Anchor(input) | Self::Mixer(input) => {
+			Self::Anchor(input) => {
+				input.relayer = Some(relayer);
+				Ok(())
+			}
+			Self::Mixer(input) => {
 				input.relayer = Some(relayer);
 				Ok(())
 			}
@@ -483,7 +496,11 @@ impl ProofInputBuilder {
 
 	pub fn leaves_list(&mut self, leaves: Vec<[u8; 32]>) -> Result<(), OperationError> {
 		match self {
-			Self::Anchor(input) | Self::Mixer(input) => {
+			Self::Anchor(input) => {
+				input.leaves = Some(leaves);
+				Ok(())
+			}
+			Self::Mixer(input) => {
 				input.leaves = Some(leaves);
 				Ok(())
 			}
@@ -493,7 +510,11 @@ impl ProofInputBuilder {
 
 	pub fn leaf_index(&mut self, leaf_index: u64) -> Result<(), OperationError> {
 		match self {
-			Self::Anchor(input) | Self::Mixer(input) => {
+			Self::Anchor(input) => {
+				input.leaf_index = Some(leaf_index);
+				Ok(())
+			}
+			Self::Mixer(input) => {
 				input.leaf_index = Some(leaf_index);
 				Ok(())
 			}
@@ -503,7 +524,11 @@ impl ProofInputBuilder {
 
 	pub fn fee(&mut self, fee: u128) -> Result<(), OperationError> {
 		match self {
-			Self::Anchor(input) | Self::Mixer(input) => {
+			Self::Anchor(input) => {
+				input.fee = Some(fee);
+				Ok(())
+			}
+			Self::Mixer(input) => {
 				input.fee = Some(fee);
 				Ok(())
 			}
@@ -513,7 +538,11 @@ impl ProofInputBuilder {
 
 	pub fn refund(&mut self, refund: u128) -> Result<(), OperationError> {
 		match self {
-			Self::Anchor(input) | Self::Mixer(input) => {
+			Self::Anchor(input) => {
+				input.refund = Some(refund);
+				Ok(())
+			}
+			Self::Mixer(input) => {
 				input.refund = Some(refund);
 				Ok(())
 			}
@@ -526,56 +555,92 @@ impl ProofInputBuilder {
 	/* Shared fields  [VAnchor,Anchor,Mixer] */
 	pub fn pk(&mut self, pk: Vec<u8>) -> Result<(), OperationError> {
 		match self {
-			Self::VAnchor(input) | Self::Anchor(input) | Self::Mixer(input) => {
+			ProofInputBuilder::Mixer(input) => {
 				input.pk = Some(pk);
-				Ok(())
+			}
+			ProofInputBuilder::Anchor(input) => {
+				input.pk = Some(pk.into());
+			}
+			ProofInputBuilder::VAnchor(input) => {
+				input.pk = Some(pk);
 			}
 		}
+		Ok(())
 	}
 
 	pub fn exponentiation(&mut self, exponentiation: i8) -> Result<(), OperationError> {
 		match self {
-			Self::VAnchor(input) | Self::Anchor(input) | Self::Mixer(input) => {
+			ProofInputBuilder::Mixer(input) => {
 				input.exponentiation = Some(exponentiation);
-				Ok(())
+			}
+			ProofInputBuilder::Anchor(input) => {
+				input.exponentiation = Some(exponentiation.into());
+			}
+			ProofInputBuilder::VAnchor(input) => {
+				input.exponentiation = Some(exponentiation);
 			}
 		}
+		Ok(())
 	}
 
 	pub fn width(&mut self, width: usize) -> Result<(), OperationError> {
 		match self {
-			Self::VAnchor(input) | Self::Anchor(input) | Self::Mixer(input) => {
+			ProofInputBuilder::Mixer(input) => {
 				input.width = Some(width);
-				Ok(())
+			}
+			ProofInputBuilder::Anchor(input) => {
+				input.width = Some(width.into());
+			}
+			ProofInputBuilder::VAnchor(input) => {
+				input.width = Some(width);
 			}
 		}
+		Ok(())
 	}
 
 	pub fn curve(&mut self, curve: Curve) -> Result<(), OperationError> {
 		match self {
-			Self::VAnchor(input) | Self::Anchor(input) | Self::Mixer(input) => {
+			ProofInputBuilder::Mixer(input) => {
 				input.curve = Some(curve);
-				Ok(())
+			}
+			ProofInputBuilder::Anchor(input) => {
+				input.curve = Some(curve.into());
+			}
+			ProofInputBuilder::VAnchor(input) => {
+				input.curve = Some(curve);
 			}
 		}
+		Ok(())
 	}
 
 	pub fn backend(&mut self, backend: Backend) -> Result<(), OperationError> {
 		match self {
-			Self::VAnchor(input) | Self::Anchor(input) | Self::Mixer(input) => {
+			ProofInputBuilder::Mixer(input) => {
 				input.backend = Some(backend);
-				Ok(())
+			}
+			ProofInputBuilder::Anchor(input) => {
+				input.backend = Some(backend.into());
+			}
+			ProofInputBuilder::VAnchor(input) => {
+				input.backend = Some(backend);
 			}
 		}
+		Ok(())
 	}
 
 	pub fn chain_id(&mut self, chain_id: u128) -> Result<(), OperationError> {
 		match self {
-			Self::VAnchor(input) | Self::Anchor(input) | Self::Mixer(input) => {
+			ProofInputBuilder::Mixer(input) => {
 				input.chain_id = Some(chain_id);
-				Ok(())
+			}
+			ProofInputBuilder::Anchor(input) => {
+				input.chain_id = Some(chain_id.try_into().map_err(|_| OpStatusCode::InvalidTargetChain)?);
+			}
+			ProofInputBuilder::VAnchor(input) => {
+				input.chain_id = Some(chain_id);
 			}
 		}
+		Ok(())
 	}
 	/* Shared fields  [VAnchor,Anchor,Mixer] */
 }
@@ -750,136 +815,22 @@ impl JsProofInputBuilder {
 	}
 }
 impl JsProofInputBuilder {
-	pub fn build(self) -> Result<ProofInput, OpStatusCode> {
-		// Note used for getting data for proof generation
-		let note = match (self.notes.clone(), self.note) {
-			(_, Some(note)) => note,
-			(Some(notes), None) => notes[0].clone(),
-			_ => return Err(OpStatusCode::ProofBuilderNoteNotSet),
+	pub fn build(self) -> Result<ProofInput, OperationError> {
+		let proof_input = match self.inner {
+			ProofInputBuilder::Mixer(mixer_proof_input) => {
+				let mixer_payload = mixer_proof_input.build()?;
+				ProofInput::Mixer(mixer_payload)
+			}
+			ProofInputBuilder::Anchor(anchor_proof_input) => {
+				let anchor_payload = anchor_proof_input.build()?;
+				ProofInput::Anchor(anchor_payload)
+			}
+			ProofInputBuilder::VAnchor(vanchor_proof_input) => {
+				let vanchor_payload = vanchor_proof_input.build()?;
+				ProofInput::VAnchor(vanchor_payload)
+			}
 		};
-		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
-		let recipient = self.recipient.ok_or(OpStatusCode::InvalidRecipient)?;
-		let relayer = self.relayer.ok_or(OpStatusCode::InvalidRelayer)?;
-
-		let leaf_index = self.leaf_index.ok_or(OpStatusCode::InvalidLeafIndex)?;
-		let leaves: Vec<_> = self
-			.leaves
-			.ok_or(OpStatusCode::InvalidLeaves)?
-			.into_iter()
-			.map(|leaf| leaf.to_vec())
-			.collect();
-
-		let fee = self.fee.ok_or(OpStatusCode::InvalidFee)?;
-		let refund = self.refund.ok_or(OpStatusCode::InvalidRefund)?;
-		let proof_target = note.protocol;
-		let width = note.width;
-		let exponentiation = note.exponentiation;
-		let backend = note.backend;
-		let curve = note.curve;
-		let note_secrets = note.secrets;
-		let processed_relayer = truncate_and_pad(&relayer);
-		let processed_recipient = truncate_and_pad(&recipient);
-		match proof_target {
-			NoteProtocol::Mixer => {
-				// Mixer secrets are structures as a vector of [secret, nullifier] or
-				// concatenated bytes
-				let mut secret = Vec::new();
-				let mut nullifier = Vec::new();
-				if note_secrets.len() == 1 && note_secrets[0].len() >= 64 {
-					secret.extend_from_slice(&note_secrets[0][0..32]);
-					nullifier.extend_from_slice(&note_secrets[0][32..64]);
-				} else {
-					secret = note_secrets[0].clone();
-					nullifier = note_secrets[1].clone();
-				}
-
-				let mixer_proof_input = MixerProofPayload {
-					exponentiation: exponentiation.unwrap_or(5),
-					width: width.unwrap_or(3),
-					curve: curve.unwrap_or(Curve::Bn254),
-					backend: backend.unwrap_or(Backend::Circom),
-					pk,
-					recipient: processed_recipient,
-					relayer: processed_relayer,
-					refund,
-					fee,
-					leaf_index,
-					leaves,
-					secret,
-					nullifier,
-					chain_id: 0,
-				};
-				Ok(ProofInput::Mixer(mixer_proof_input))
-			}
-			NoteProtocol::Anchor => {
-				// Mixer secrets are structures as a vector of [secret, nullifier] or
-				// concatenated bytes
-				let chain_id = note
-					.target_chain_id
-					.parse()
-					.map_err(|_| OpStatusCode::InvalidTargetChain)?;
-				let mut secret = Vec::new();
-				let mut nullifier = Vec::new();
-				if note_secrets.len() == 1 && note_secrets[0].len() >= 64 {
-					secret.extend_from_slice(&note_secrets[0][0..32]);
-					nullifier.extend_from_slice(&note_secrets[0][32..64]);
-				} else {
-					// Anchor note secrets are structure as a vector of [chain_id, secret,
-					// nullifier]
-					nullifier = note_secrets[1].clone();
-					secret = note_secrets[2].clone();
-				}
-
-				let refresh_commitment = self.refresh_commitment.ok_or(OpStatusCode::CommitmentNotSet)?;
-				let roots = self.roots.ok_or(OpStatusCode::RootsNotSet)?;
-
-				let anchor_input = AnchorProofPayload {
-					exponentiation: exponentiation.unwrap_or(5),
-					width: width.unwrap_or(4),
-					curve: curve.unwrap_or(Curve::Bn254),
-					backend: backend.unwrap_or(Backend::Circom),
-					secret,
-					nullifier,
-					recipient: processed_recipient,
-					relayer: processed_relayer,
-					pk,
-					refund,
-					fee,
-					chain_id,
-					leaves,
-					leaf_index,
-					roots,
-					refresh_commitment,
-				};
-
-				Ok(ProofInput::Anchor(anchor_input))
-			}
-			NoteProtocol::VAnchor => {
-				let public_amount = self.public_amount.ok_or(OpStatusCode::PublicAmountNotSet)?;
-				let chain_id = self.chain_id.ok_or(OpStatusCode::VAnchorProofChainId)?;
-				let notes = self.notes.ok_or(OpStatusCode::VAnchorNotesNotSet)?;
-				let roots = self.roots.ok_or(OpStatusCode::RootsNotSet)?;
-				let indices = self.indices.ok_or(OpStatusCode::VAnchorProofIndices)?;
-				let leaves_map = self.leaves_map.ok_or(OpStatusCode::VAnchorProofLeavesMap)?;
-
-				let vanchor_input = VAnchorProofPayload {
-					exponentiation: exponentiation.unwrap_or(5),
-					width: width.unwrap_or(4),
-					curve: curve.unwrap_or(Curve::Bn254),
-					backend: backend.unwrap_or(Backend::Circom),
-					pk,
-					leaves: leaves_map,
-					roots,
-					notes,
-					indices,
-					chain_id,
-					public_amount,
-				};
-
-				Ok(ProofInput::VAnchor(vanchor_input))
-			}
-			_ => Err(OpStatusCode::InvalidNoteProtocol),
-		}
+		Ok(proof_input)
 	}
 }
 
