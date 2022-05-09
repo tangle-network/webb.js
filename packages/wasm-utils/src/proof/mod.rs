@@ -94,7 +94,7 @@ pub struct MixerProofPayload {
 	pub refund: u128,
 	pub fee: u128,
 	pub chain_id: u128,
-	pub leaves: Vec<Vec<u8>>,
+	pub leaves: Vec<[u8; 32]>,
 	pub leaf_index: u64,
 }
 
@@ -112,10 +112,47 @@ pub struct MixerProofInput {
 	pub refund: Option<u128>,
 	pub fee: Option<u128>,
 	pub chain_id: Option<u128>,
-	pub leaves: Option<Vec<u8>>,
+	pub leaves: Option<Vec<[u8; 32]>>,
 	pub leaf_index: Option<u64>,
 }
+impl MixerProofInput {
+	pub fn build(self) -> Result<MixerProofPayload, OperationError> {
+		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
+		let recipient = self.recipient.ok_or(OpStatusCode::InvalidRecipient)?;
+		let relayer = self.relayer.ok_or(OpStatusCode::InvalidRelayer)?;
+		let leaf_index = self.leaf_index.ok_or(OpStatusCode::InvalidLeafIndex)?;
+		let secret = self.secret.ok_or(OpStatusCode::InvalidNoteSecrets)?;
+		let nullifier = self.nullifier.ok_or(OpStatusCode::InvalidNoteSecrets)?;
+		let leaves = self.leaves.ok_or(OpStatusCode::InvalidLeaves)?;
+		let fee = self.fee.ok_or(OpStatusCode::InvalidFee)?;
+		let refund = self.refund.ok_or(OpStatusCode::InvalidRefund)?;
 
+		let exponentiation = self.exponentiation.unwrap_or(5);
+		let width = self.width.unwrap_or(3);
+		let curve = self.curve.unwrap_or(Curve::Bn254);
+		let backend = self.backend.unwrap_or(Backend::Arkworks);
+
+		let processed_relayer = truncate_and_pad(&relayer);
+		let processed_recipient = truncate_and_pad(&recipient);
+
+		Ok(MixerProofPayload {
+			exponentiation,
+			width,
+			curve,
+			backend,
+			secret,
+			nullifier,
+			recipient: processed_recipient,
+			relayer: processed_relayer,
+			pk,
+			refund,
+			fee,
+			chain_id: 0,
+			leaves,
+			leaf_index,
+		})
+	}
+}
 #[derive(Debug, Clone)]
 pub struct AnchorProofPayload {
 	pub exponentiation: i8,
@@ -130,7 +167,7 @@ pub struct AnchorProofPayload {
 	pub refund: u128,
 	pub fee: u128,
 	pub chain_id: u64,
-	pub leaves: Vec<Vec<u8>>,
+	pub leaves: Vec<[u8; 32]>,
 	pub leaf_index: u64,
 	/// get roots for linkable tree
 	pub roots: Vec<Vec<u8>>,
@@ -161,6 +198,49 @@ pub struct AnchorProofInput {
 	/// not EMPTY if refreshing
 	pub refresh_commitment: Option<[u8; 32]>,
 }
+impl AnchorProofInput {
+	pub fn build(self) -> Result<AnchorProofPayload, OperationError> {
+		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
+		let recipient = self.recipient.ok_or(OpStatusCode::InvalidRecipient)?;
+		let relayer = self.relayer.ok_or(OpStatusCode::InvalidRelayer)?;
+		let leaf_index = self.leaf_index.ok_or(OpStatusCode::InvalidLeafIndex)?;
+		let secret = self.secret.ok_or(OpStatusCode::InvalidNoteSecrets)?;
+		let nullifier = self.nullifier.ok_or(OpStatusCode::InvalidNoteSecrets)?;
+		let leaves = self.leaves.ok_or(OpStatusCode::InvalidLeaves)?;
+		let fee = self.fee.ok_or(OpStatusCode::InvalidFee)?;
+		let refund = self.refund.ok_or(OpStatusCode::InvalidRefund)?;
+		let refresh_commitment = self.refresh_commitment.ok_or(OpStatusCode::InvalidLeaves)?;
+		let roots = self.roots.ok_or(OpStatusCode::InvalidLeaves)?;
+		let chain_id = self.chain_id.ok_or(OpStatusCode::InvalidTargetChain)?;
+
+		let exponentiation = self.exponentiation.unwrap_or(5);
+		let width = self.width.unwrap_or(3);
+		let curve = self.curve.unwrap_or(Curve::Bn254);
+		let backend = self.backend.unwrap_or(Backend::Arkworks);
+
+		let processed_relayer = truncate_and_pad(&relayer);
+		let processed_recipient = truncate_and_pad(&recipient);
+
+		Ok(AnchorProofPayload {
+			exponentiation,
+			width,
+			curve,
+			backend,
+			secret,
+			nullifier,
+			recipient: processed_recipient,
+			relayer: processed_relayer,
+			pk,
+			refund,
+			fee,
+			chain_id,
+			leaves,
+			leaf_index,
+			roots,
+			refresh_commitment,
+		})
+	}
+}
 
 #[derive(Debug, Clone)]
 pub struct VAnchorProofPayload {
@@ -174,7 +254,7 @@ pub struct VAnchorProofPayload {
 	/// Available set can be of length 2 , 16 , 32
 	pub roots: Vec<Vec<u8>>,
 	// Notes for UTXOs
-	pub notes: Vec<JsUtxo>,
+	pub secret: Vec<JsUtxo>,
 	// Leaf indices
 	pub indices: Vec<u64>,
 	// Chain Id
@@ -202,6 +282,41 @@ pub struct VAnchorProofInput {
 	pub chain_id: Option<u128>,
 	// Public amount
 	pub public_amount: Option<i128>,
+}
+
+impl VAnchorProofInput {
+	pub fn build(self) -> Result<VAnchorProofPayload, OperationError> {
+		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
+		let secret = self.secret.ok_or(OpStatusCode::InvalidNoteSecrets)?;
+		let leaves = self.leaves.ok_or(OpStatusCode::InvalidLeaves)?;
+		// TODO add error
+		let roots = self.roots.ok_or(OpStatusCode::InvalidLeaves)?;
+		let chain_id = self.chain_id.ok_or(OpStatusCode::InvalidTargetChain)?;
+		let indices = self.indices.ok_or(OpStatusCode::InvalidTargetChain)?;
+		let public_amount = self.public_amount.ok_or(OpStatusCode::InvalidTargetChain)?;
+
+		let exponentiation = self.exponentiation.unwrap_or(5);
+		let width = self.width.unwrap_or(3);
+		let curve = self.curve.unwrap_or(Curve::Bn254);
+		let backend = self.backend.unwrap_or(Backend::Arkworks);
+
+		let processed_relayer = truncate_and_pad(&relayer);
+		let processed_recipient = truncate_and_pad(&recipient);
+
+		Ok(VAnchorProofPayload {
+			exponentiation,
+			width,
+			curve,
+			backend,
+			pk,
+			leaves,
+			roots,
+			secret,
+			indices,
+			chain_id: 0,
+			public_amount,
+		})
+	}
 }
 
 #[derive(Debug, Clone)]
