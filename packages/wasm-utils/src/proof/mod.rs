@@ -1245,12 +1245,31 @@ mod test {
 
 		proof_input_builder.set_pk(JsString::from("0000")).unwrap();
 		proof_input_builder.public_amount(JsString::from("3")).unwrap();
-		proof_input_builder.chain_id(JsString::from("3")).unwrap();
+		proof_input_builder.chain_id(JsString::from("4")).unwrap();
 		let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
 		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
 		// `note::JsNote`
 		proof_input_builder.set_notes(notes).unwrap();
 		let proof_builder = proof_input_builder.build_js().unwrap();
 		let vanchor_proof_input_payload = proof_builder.inner.vanchor_input().unwrap();
+		assert_eq!(vanchor_proof_input_payload.public_amount, 3);
+		assert_eq!(vanchor_proof_input_payload.chain_id, 4);
+		assert_eq!(vanchor_proof_input_payload.indices, [0u64, 0u64].to_vec());
+		assert_eq!(
+			hex::encode(&vanchor_proof_input_payload.roots[0]),
+			hex::encode([0u8; 32].to_vec())
+		);
+		assert_eq!(vanchor_proof_input_payload.roots.len(), 2);
+		assert_eq!(
+			vanchor_proof_input_payload.backend.to_string(),
+			note.backend.unwrap().to_string()
+		);
+		assert_eq!(vanchor_proof_input_payload.exponentiation, note.exponentiation.unwrap());
+		assert_eq!(vanchor_proof_input_payload.width, note.width.unwrap());
+		assert_eq!(
+			vanchor_proof_input_payload.curve.to_string(),
+			note.curve.unwrap().to_string()
+		);
+		assert_eq!(hex::encode(vanchor_proof_input_payload.pk), "0000");
 	}
 }
