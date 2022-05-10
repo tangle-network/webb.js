@@ -86,6 +86,8 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
 
   async fetchTreeLeaves (treeId: number): Promise<Uint8Array[]> {
     const leafCount = await this.inner.api.derive.merkleTreeBn254.getLeafCountForTree(treeId);
+
+    // retrieve all leaves between 0 and leafCount - 1 (inclusive)
     const treeLeaves = await this.inner.api.derive.merkleTreeBn254.getLeavesForTree(treeId, 0, leafCount - 1);
 
     // TODO: proper pagination of leaves
