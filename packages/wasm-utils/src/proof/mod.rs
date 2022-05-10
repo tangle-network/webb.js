@@ -1,5 +1,7 @@
 #![allow(clippy::unused_unit)]
 
+use core::convert::{TryFrom, TryInto};
+
 use ark_bls12_381::Bls12_381;
 use ark_bn254::{Bn254, Fr as Bn254Fr};
 use ark_ff::{BigInteger, PrimeField};
@@ -7,7 +9,6 @@ use arkworks_native_gadgets::merkle_tree::SparseMerkleTree;
 use arkworks_native_gadgets::poseidon::Poseidon;
 use arkworks_setups::common::{setup_params, setup_tree_and_create_path, verify_unchecked_raw, Leaf};
 use arkworks_setups::Curve as ArkCurve;
-use core::convert::{TryFrom, TryInto};
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::__rt::std::collections::btree_map::BTreeMap;
@@ -281,6 +282,25 @@ pub struct VAnchorProofInput {
 	pub chain_id: Option<u128>,
 	// Public amount
 	pub public_amount: Option<i128>,
+}
+// https://github.com/rustwasm/wasm-bindgen/issues/2231#issuecomment-656293288
+use wasm_bindgen::convert::FromWasmAbi;
+pub fn generic_of_jsval<T: FromWasmAbi<Abi = u32>>(js: JsValue, classname: &str) -> Result<T, JsValue> {
+	use js_sys::{Object, Reflect};
+	let ctor_name = Object::get_prototype_of(&js).constructor().name();
+	if ctor_name == classname {
+		let ptr = Reflect::get(&js, &JsValue::from_str("ptr"))?;
+		let ptr_u32: u32 = ptr.as_f64().ok_or(JsValue::NULL)? as u32;
+		let foo = unsafe { T::from_abi(ptr_u32) };
+		Ok(foo)
+	} else {
+		Err(JsValue::NULL)
+	}
+}
+
+#[wasm_bindgen]
+pub fn jsNote_of_jsval(js: JsValue) -> Option<JsNote> {
+	generic_of_jsval(js, "JsNote").unwrap_or(None)
 }
 
 #[wasm_bindgen]
@@ -881,6 +901,17 @@ impl JsProofInputBuilder {
 	/// Set notes for VAnchor
 	#[wasm_bindgen(js_name=setNotes)]
 	pub fn set_notes(&mut self, notes: Array) -> Result<(), JsValue> {
+		let utxos: Vec<_> = notes
+			.to_vec()
+			.into_iter()
+			.map(|v| {
+				jsNote_of_jsval(v)
+					.ok_or(OpStatusCode::InvalidNoteSecrets)
+					.map(|n| n.get_js_utxo())?
+			})
+			.collect::<Result<Vec<_>, _>>()?;
+
+		self.inner.set_utxos(utxos)?;
 		Ok(())
 	}
 }
@@ -1215,10 +1246,11 @@ mod test {
 		proof_input_builder.set_pk(JsString::from("0000")).unwrap();
 		proof_input_builder.public_amount(JsString::from("3")).unwrap();
 		proof_input_builder.chain_id(JsString::from("3")).unwrap();
-		let notes: Array = vec![note.clone()].into_iter().collect();
+		let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
 		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
 		// `note::JsNote`
-		proof_input_builder.set_notes(JsValue::from(notes)).unwrap();
+		proof_input_builder.set_notes(notes).unwrap();
 		let proof_builder = proof_input_builder.build_js().unwrap();
+		let vanchor_proof_input_payload = proof_builder.inner.vanchor_input().unwrap();
 	}
 }
