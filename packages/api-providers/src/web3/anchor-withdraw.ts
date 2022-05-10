@@ -15,10 +15,9 @@ import { BigNumber } from 'ethers';
 
 import { AnchorApi, AnchorWithdraw } from '../abstracts/index.js';
 import { ChainType, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains/index.js';
-import { generateWithdrawProofCallData, hexStringToBytes } from '../contracts/utils/bridge-utils.js';
 import { bufferToFixed } from '../contracts/utils/buffer-to-fixed.js';
 import { depositFromAnchorNote } from '../contracts/utils/make-deposit.js';
-import { AnchorContract, ZKPWebbAnchorInputWithoutMerkle } from '../contracts/wrappers/index.js';
+import { AnchorContract } from '../contracts/wrappers/index.js';
 import { webbCurrencyIdFromString } from '../enums/index.js';
 import { Web3Provider } from '../ext-providers/index.js';
 import { fetchKeyForEdges, fetchWasmForEdges } from '../ipfs/evm/anchors.js';
@@ -368,9 +367,9 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     // if we weren't able to get leaves from the relayer, get them directly from chain
     if (!leaves.length) {
       // check if we already cached some values.
-      // TODO: Figure out storage where some chains can have the same contract address
-      const storedContractInfo: BridgeStorage[0] =
-      // (await bridgeStorageStorage.get(sourceContractAddress.toLowerCase())) ||
+      const storedContractInfo: BridgeStorage[0] = (await sourceBridgeStorage.get(
+        sourceContractAddress.toLowerCase()
+      )) ||
       {
         lastQueriedBlock: getAnchorDeploymentBlockNumber(Number(note.sourceChainId), sourceContractAddress) || 0,
         leaves: [] as string[]
@@ -427,59 +426,18 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
     const merkleProof = linkedMerkleProof.path;
 
-    // setup the cross chain withdraw with the generated merkle proof
-    console.log('before setupBridgedWithdraw');
-    this.emit('stateChange', WithdrawState.GeneratingZk);
-    const withdrawSetup = await anchorWrapper.setupBridgedWithdraw(sourceDeposit, merkleProof, account.address, account.address, BigInt(0), 0);
-
-    this.emit('stateChange', WithdrawState.SendingTransaction);
     let txHash: string;
     const activeRelayer = this.activeRelayer[0];
 
-    if (activeRelayer && activeRelayer !== null && (activeRelayer?.account || activeRelayer?.beneficiary)) {
-      logger.log('withdrawing through relayer');
-      const input: ZKPWebbAnchorInputWithoutMerkle = {
-        destinationChainId: Number(note.targetChainId),
-        fee: 0,
-        nullifier: sourceDeposit.nullifier.toString(),
-        nullifierHash: sourceDeposit.nullifierHash,
+    if (activeRelayer && activeRelayer !== null && activeRelayer.beneficiary) {
+      console.log('withdrawing through relayer');
 
-        recipient: recipient,
-        refund: 0,
-        relayer: String(activeRelayer?.beneficiary ? activeRelayer?.beneficiary : activeRelayer?.account!),
-        secret: sourceDeposit.secret.toString()
-      };
+      // setup the cross chain withdraw with the generated merkle proof
+      console.log('before setupBridgedWithdraw');
+      this.emit('stateChange', WithdrawState.GeneratingZk);
+      const withdrawSetup = await anchorWrapper.setupBridgedWithdraw(sourceDeposit, merkleProof, recipient, activeRelayer.beneficiary, BigInt(0), 0);
 
-      let zkp;
-
-      try {
-        zkp = await destAnchor.merkleProofToZKP(merkleProof, sourceEvmId, sourceDeposit, input);
-      } catch (e) {
-        console.log(e);
-        this.emit('stateChange', WithdrawState.Ideal);
-
-        this.inner.notificationHandler({
-          description: 'Deposit not yet available',
-          key: 'mixer-withdraw-evm',
-          level: 'error',
-          message: 'bridge:withdraw',
-          name: 'Transaction'
-        });
-
-        return '';
-      }
-
-      // convert the proof to solidity calldata
-      const proofBytes = await generateWithdrawProofCallData(zkp.proof, zkp.input);
-
-      // convert the roots into the format the relayer expects
-      const roots = zkp.input.roots.map((root: string) => {
-        return root.substr(2);
-      });
-      const relayerRootString = roots.join('');
-      const relayerRootsBytes = hexStringToBytes(relayerRootString);
-      const relayerRoots = Array.from(relayerRootsBytes);
-
+      this.emit('stateChange', WithdrawState.SendingTransaction);
       const relayedWithdraw = await activeRelayer.initWithdraw('anchor');
 
       logger.trace('initialized the withdraw WebSocket');
@@ -493,17 +451,18 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
       const tx = relayedWithdraw.generateWithdrawRequest<typeof chainInfo, 'anchor'>(
         chainInfo,
-        `0x${proofBytes}`,
+        withdrawSetup.publicInputs.proof,
         {
           chain: chainInfo.name,
-          contract: chainInfo.contractAddress,
-          fee: bufferToFixed(zkp.input.fee),
-          nullifierHash: bufferToFixed(zkp.input.nullifierHash),
-          recipient: zkp.input.recipient,
-          refreshCommitment: '0x0000000000000000000000000000000000000000000000000000000000000000',
-          refund: bufferToFixed(zkp.input.refund),
-          relayer: zkp.input.relayer,
-          roots: relayerRoots
+          extDataHash: withdrawSetup.publicInputs._extDataHash,
+          fee: bufferToFixed(withdrawSetup.extData._fee),
+          id: chainInfo.contractAddress,
+          nullifierHash: bufferToFixed(withdrawSetup.publicInputs._nullifierHash),
+          recipient: withdrawSetup.extData._recipient,
+          refreshCommitment: withdrawSetup.extData._refreshCommitment,
+          refund: bufferToFixed(withdrawSetup.extData._refund),
+          relayer: withdrawSetup.extData._relayer,
+          roots: withdrawSetup.publicInputs._roots
         }
       );
 
@@ -559,9 +518,13 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       txHash = txResult?.[1] || '';
     } else {
       try {
+        // setup the cross chain withdraw with the generated merkle proof
+        console.log('before setupBridgedWithdraw');
+        this.emit('stateChange', WithdrawState.GeneratingZk);
+        const withdrawSetup = await anchorWrapper.setupBridgedWithdraw(sourceDeposit, merkleProof, recipient, account.address, BigInt(0), 0);
+
+        this.emit('stateChange', WithdrawState.SendingTransaction);
         console.log(withdrawSetup);
-        console.log(withdrawSetup.publicInputs);
-        console.log(withdrawSetup.extData);
 
         const tx = await destAnchor.inner.withdraw(withdrawSetup.publicInputs, withdrawSetup.extData);
         const receipt = await tx.wait();

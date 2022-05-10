@@ -382,13 +382,13 @@ export class AnchorContract {
     };
     const edges = await this._contract.maxEdges();
 
-    logger.trace(`Generate witness with edges ${edges}`, input);
+    console.log(`Generate witness with edges ${edges}`, input);
     const witness = await generateWitness(input, edges as any);
 
-    logger.trace('Generated witness', witness);
+    console.log('Generated witness', witness);
     const proof = await proofAndVerify(witness, edges as any);
 
-    logger.trace('Zero knowlage proof', proof);
+    console.log('Zero knowledge proof', proof);
 
     return { input, proof: proof.proof, root };
   }

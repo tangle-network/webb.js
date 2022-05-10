@@ -8,22 +8,22 @@ export type BridgeStorage = Record<string, { lastQueriedBlock: number; leaves: s
 
 export const anchorDeploymentBlock: Record<number, Record<string, number>> = {
   [computeChainIdType(ChainType.EVM, EVMChainId.Ropsten)]: {
-    '0xc95ffc094b31789f5f1a6cbae071d7cc6e677d19': 12242400
+    '0x09d2D6520BE3922549c81885477258F41c96c43f': 12253337
   },
   [computeChainIdType(ChainType.EVM, EVMChainId.Rinkeby)]: {
-    '0xf2f7bc0bed36d94c19c337b6e114cad2bc218819': 10628940
+    '0x95E2eB4c9Fe2FB580E27dCe997e0E3D69FFdDf5a': 10651758
   },
   [computeChainIdType(ChainType.EVM, EVMChainId.Goerli)]: {
-    '0x3e8b7e3b498ea9375172f4d4bd181c21f18a4381': 6840576
+    '0x6188F18359250f241e2171BAFD57447F8931176e': 6859976
   },
   [computeChainIdType(ChainType.EVM, EVMChainId.PolygonTestnet)]: {
-    '0x3e8b7e3b498ea9375172f4d4bd181c21f18a4381': 26227363
+    '0x95E2eB4c9Fe2FB580E27dCe997e0E3D69FFdDf5a': 26274943
   },
   [computeChainIdType(ChainType.EVM, EVMChainId.OptimismTestnet)]: {
-    '0xf2f7bc0bed36d94c19c337b6e114cad2bc218819': 2535400
+    '0x27a693cdF40acFc18195C2ecc9f0352452624e84': 2664708
   },
   [computeChainIdType(ChainType.EVM, EVMChainId.ArbitrumTestnet)]: {
-    '0x151bb411b44088a4615a1314b5a948272d8a0342': 11731661
+    '0x30aEF9a80BAe60Cd789904C8875fbd6a19b80488': 11799624
   },
   [computeChainIdType(ChainType.EVM, EVMChainId.HermesLocalnet)]: {
     '0xbfce6b877ebff977bb6e80b24fbbb7bc4ebca4df': 1

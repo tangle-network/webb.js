@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 // eslint-disable-next-line header/header
-import { InternalChainId } from '@webb-tools/api-providers/chains/index.js';
 import { PolkadotProvider } from '@webb-tools/api-providers/ext-providers/index.js';
-import { Account, AccountsAdapter, NotificationPayload, PromiseOrT, RelayerConfig, relayerNameToChainId, WebbPolkadot, WebbRelayerBuilder } from '@webb-tools/api-providers/index.js';
+import { Account, AccountsAdapter, NotificationPayload, PromiseOrT, RelayerConfig, relayerNameToChainId, relayerSubstrateNameToChainId, WebbPolkadot, WebbRelayerBuilder } from '@webb-tools/api-providers/index.js';
 import { InteractiveFeedback } from '@webb-tools/api-providers/webb-error/index.js';
 
 import { InjectedAccount, InjectedExtension } from '@polkadot/extension-inject/types';
@@ -27,15 +26,6 @@ const relayerConfig: RelayerConfig[] = [
     endpoint: 'https://relayer.bldnodes.org'
   }
 ];
-
-export function relayerSubstrateNameToChainId (name: string): InternalChainId {
-  switch (name) {
-    case 'localnode':
-      return InternalChainId.ProtocolSubstrateStandalone;
-  }
-
-  throw new Error('unhandled relayed chain name  ' + name);
-}
 
 const notificationHandler = (m: NotificationPayload) => {
   console.log(m);
