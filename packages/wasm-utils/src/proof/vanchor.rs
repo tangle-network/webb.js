@@ -1,6 +1,7 @@
 use core::convert::TryInto;
 
 use ark_bn254::Fr as Bn254Fr;
+use ark_crypto_primitives::Error;
 use arkworks_setups::utxo::Utxo;
 use arkworks_setups::{AnchorProver, Curve as ArkCurve, VAnchorProver};
 use rand::rngs::OsRng;
@@ -66,10 +67,10 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 	let utxos_out = [utxo.clone(), utxo.clone()];
 
 	let anchor_proof = match (backend, curve, exponentiation, width, in_utxos.len()) {
-		(Backend::Arkworks, Curve::Bn254, 5, 4, 2) => {
+		(Backend::Arkworks, Curve::Bn254, 5, 5, 2) => {
 			let mut utxos_in: [Utxo<Bn254Fr>; 2] = [in_utxos[0].get_bn254_utxo()?, in_utxos[0].get_bn254_utxo()?];
-			let indices = indices.try_into().map_err(|_| OpStatusCode::InvalidProofParameters)?;
-			let roots = roots.try_into().map_err(|_| OpStatusCode::InvalidProofParameters)?;
+			let indices = indices.try_into().map_err(|_| OpStatusCode::InvalidIndices)?;
+			let roots = roots.try_into().map_err(|_| OpStatusCode::InvalidRoots)?;
 			VAnchorR1CSProverBn254_30_2_2_2::create_proof(
 				ArkCurve::Bn254,
 				chain_id,
@@ -85,18 +86,17 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 				rng,
 			)
 		}
-		(Backend::Arkworks, Curve::Bn254, 5, 4, 16) => {
+		(Backend::Arkworks, Curve::Bn254, 5, 5, 16) => {
 			let in_utxos = in_utxos
 				.into_iter()
 				.map(|utxo| utxo.get_bn254_utxo())
 				.collect::<Result<Vec<_>, _>>()?;
 			let boxed_slice = in_utxos.into_boxed_slice();
-			let boxed_array: Box<[Utxo<Bn254Fr>; 16]> = boxed_slice
-				.try_into()
-				.map_err(|_| OpStatusCode::InvalidProofParameters)?;
+			let boxed_array: Box<[Utxo<Bn254Fr>; 16]> =
+				boxed_slice.try_into().map_err(|_| OpStatusCode::InvalidNoteSecrets)?;
 			let utxos_slice = *boxed_array;
-			let indices = indices.try_into().map_err(|_| OpStatusCode::InvalidProofParameters)?;
-			let roots = roots.try_into().map_err(|_| OpStatusCode::InvalidProofParameters)?;
+			let indices = indices.try_into().map_err(|_| OpStatusCode::InvalidIndices)?;
+			let roots = roots.try_into().map_err(|_| OpStatusCode::InvalidRoots)?;
 
 			VAnchorR1CSProverBn254_30_2_16_2::create_proof(
 				ArkCurve::Bn254,
@@ -113,7 +113,17 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 				rng,
 			)
 		}
-		_ => return Err(OpStatusCode::InvalidProofParameters.into()),
+		_ => {
+			let message = format!(
+				"The proofing setup for backend {} curve {} width {} exp {} input size {} isn't implemented!",
+				backend,
+				curve,
+				width,
+				exponentiation,
+				in_utxos.len(),
+			);
+			Err(Error::from(message))
+		}
 	}
 	.map_err(|e| {
 		let mut error: OperationError = OpStatusCode::InvalidProofParameters.into();

@@ -256,6 +256,7 @@ pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded
 		.unwrap();
 	js_builder.set_leaves_map(leaves_map).unwrap();
 	js_builder.public_amount(JsString::from("100")).unwrap();
+	js_builder.chain_id(JsString::from(chain_id.to_string())).unwrap();
 	let indices: Array = vec![JsValue::from("0"), JsValue::from("1")].iter().collect();
 	js_builder.set_indices(Indices::from(JsValue::from(indices))).unwrap();
 	let notes: Array = vec![JsValue::from(note1.clone()), JsValue::from(note2.clone())]
