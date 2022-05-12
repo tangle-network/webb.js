@@ -1038,8 +1038,9 @@ mod test {
 	use wasm_bindgen_test::*;
 
 	use crate::proof::test_utils::{
-		generate_anchor_test_setup, generate_mixer_test_setup, AnchorTestSetup, MixerTestSetup, ANCHOR_NOTE_V1_X5_4,
-		ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V2_X5_4,
+		generate_anchor_test_setup, generate_mixer_test_setup, generate_vanchor_test_setup, AnchorTestSetup,
+		MixerTestSetup, VAnchorTestSetup, ANCHOR_NOTE_V1_X5_4, ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS,
+		MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V2_X5_4,
 	};
 
 	use super::*;
@@ -1272,5 +1273,19 @@ mod test {
 			note.curve.unwrap().to_string()
 		);
 		assert_eq!(hex::encode(vanchor_proof_input_payload.pk), "0000");
+	}
+	#[wasm_bindgen_test]
+	fn generate_vanchor_proof() {
+		let VAnchorTestSetup {
+			proof_input_builder,
+			roots_raw,
+			leaf_bytes,
+			leaf_index,
+			vk,
+		} = generate_vanchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS);
+		let proof_input = proof_input_builder.build_js().unwrap();
+		let proof = generate_proof_js(proof_input).unwrap();
+		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
+		assert!(is_valid_proof);
 	}
 }

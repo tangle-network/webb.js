@@ -8,9 +8,9 @@ use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
 use crate::note::{JsNote, JsNoteBuilder};
-use crate::proof::JsProofInputBuilder;
+use crate::proof::{JsProofInputBuilder, LeavesMapInput};
 use crate::types::{
-	Backend, Curve, HashFunction, Leaves, NoteProtocol, NoteVersion, Protocol, Version, WasmCurve, BE, HF,
+	Backend, Curve, HashFunction, Indices, Leaves, NoteProtocol, NoteVersion, Protocol, Version, WasmCurve, BE, HF,
 };
 use crate::{
 	AnchorR1CSProverBn254_30_2, MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_2_2, ANCHOR_COUNT, DEFAULT_LEAF,
@@ -191,10 +191,7 @@ pub fn generate_vanchor_note(amount: i128, in_chain_id: u64, output_chain_id: u6
 	note_builder.build().unwrap()
 }
 
-pub fn compute_chain_id_type<ChainId>(chain_id: ChainId, chain_type: [u8; 2]) -> u64
-where
-	ChainId: AtLeast32Bit,
-{
+pub fn compute_chain_id_type(chain_id: u64, chain_type: [u8; 2]) -> u64 {
 	let chain_id_value: u32 = chain_id.try_into().unwrap_or_default();
 	let mut buf = [0u8; 8];
 	buf[2..4].copy_from_slice(&chain_type);
@@ -203,29 +200,32 @@ where
 }
 
 pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded_ss58: &str) -> VAnchorTestSetup {
-	let chain_type = [2, 0];
-	let chain_id = compute_chain_id_type(0u32, chain_type);
+	let curve = ArkCurve::Bn254;
 
+	let chain_type = [2, 0];
+	let chain_id = compute_chain_id_type(0, chain_type);
+
+	// two output notes (Assuming are already deposited)
 	let note1 = generate_vanchor_note(100, chain_id, chain_id, Some(0));
 	let note2 = generate_vanchor_note(100, chain_id, chain_id, Some(1));
 
-	let curve = ArkCurve::Bn254;
 	let index = 0;
 
 	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
 	let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
-	// Do the insertion
-	let note = JsNote::js_deserialize(JsString::from(note)).unwrap();
-
-	let leaf: Uint8Array = note.get_leaf_commitment().unwrap();
-	let leaf_bytes: Vec<u8> = leaf.to_vec();
-	let leaves_ua: Array = vec![leaf].into_iter().collect();
 
 	let params3 = setup_params::<Bn254Fr>(curve, 5, 3);
 
 	let poseidon3 = Poseidon::new(params3);
 
-	let leaves_f = vec![Bn254Fr::from_le_bytes_mod_order(&leaf_bytes)];
+	// Output leaf commitment
+	let note1_com: Vec<u8> = note1.get_leaf_commitment().unwrap().to_vec();
+	let note2_com: Vec<u8> = note2.get_leaf_commitment().unwrap().to_vec();
+	// Insert commitments
+	let leaves_f: Vec<_> = vec![note1_com, note2_com]
+		.iter()
+		.map(|c| Bn254Fr::from_le_bytes_mod_order(&c))
+		.collect();
 	let (tree, _) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
 		&poseidon3,
 		&leaves_f,
@@ -237,12 +237,7 @@ pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded
 	let roots_raw = roots_f.map(|x| x.into_repr().to_bytes_le());
 	let roots_array: Array = roots_raw.iter().map(|i| Uint8Array::from(i.as_slice())).collect();
 
-	let mut js_builder = JsProofInputBuilder::new(JsValue::from("anchor").into()).unwrap();
-	js_builder.set_leaf_index(JsString::from(index.to_string())).unwrap();
-	js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua))).unwrap();
-
-	js_builder.set_fee(JsString::from("5")).unwrap();
-	js_builder.set_refund(JsString::from("1")).unwrap();
+	let mut js_builder = JsProofInputBuilder::new(JsValue::from("vanchor").into()).unwrap();
 
 	js_builder
 		.set_recipient(JsString::from(recipient_decoded_ss58))
@@ -250,14 +245,25 @@ pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded
 
 	js_builder.set_relayer(JsString::from(relayer_decoded_ss58)).unwrap();
 
-	js_builder.set_metadata_from_note(&note).unwrap();
+	js_builder.set_metadata_from_note(&note1).unwrap();
 
 	js_builder.set_pk(JsString::from(hex::encode(pk))).unwrap();
-	js_builder
-		.set_refresh_commitment(JsString::from(hex::encode([0u8; 32])))
-		.unwrap();
 	js_builder.set_roots(Leaves::from(JsValue::from(roots_array))).unwrap();
-
+	let mut leaves_map = LeavesMapInput::new();
+	let leaves_ua: Array = vec![
+		note1.get_leaf_commitment().unwrap(),
+		note2.get_leaf_commitment().unwrap(),
+	]
+	.iter()
+	.collect();
+	leaves_map
+		.set_chain_leaves(chain_id, Leaves::from(JsValue::from(leaves_ua)))
+		.unwrap();
+	js_builder.public_amount(JsString::from("100"));
+	let indices: Array = vec![JsValue::from("0"), JsValue::from("1")].iter().collect();
+	js_builder.set_indices(Indices::from(JsValue::from(indices)));
+	let notes: Array = vec![JsValue::from(note1), JsValue::from(note2)].iter().collect();
+	js_builder.set_notes(notes);
 	VAnchorTestSetup {
 		vk,
 		leaf_index: index,
