@@ -58,17 +58,17 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 			));
 		}
 	};
-	//TODO: match on the root set length for getting the anchor count
-	// TODO: use the anchor count,the Ins count,Curve=bn254 Outs count =2, to get
-	// the corresponding
-	// VAnchorR1CSProver${curve=bn254}_${tree_height=32}_${anchor_count}_${ins_count}_${outs_count=2}
-	let utxo = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, 0, 0, None, &mut OsRng).unwrap();
+	// TODO: construct the UTXO based on the public amount, chain_id
+	// TODO: get the out map [(chain_id , amount),2] from wasm
+
+	let utxo =
+		VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, chain_id, 100, None, &mut OsRng).unwrap();
 
 	let utxos_out = [utxo.clone(), utxo.clone()];
 
 	let anchor_proof = match (backend, curve, exponentiation, width, in_utxos.len()) {
 		(Backend::Arkworks, Curve::Bn254, 5, 5, 2) => {
-			let mut utxos_in: [Utxo<Bn254Fr>; 2] = [in_utxos[0].get_bn254_utxo()?, in_utxos[0].get_bn254_utxo()?];
+			let mut utxos_in: [Utxo<Bn254Fr>; 2] = [in_utxos[0].get_bn254_utxo()?, in_utxos[1].get_bn254_utxo()?];
 			let indices = indices.try_into().map_err(|_| OpStatusCode::InvalidIndices)?;
 			let roots = roots.try_into().map_err(|_| OpStatusCode::InvalidRoots)?;
 			VAnchorR1CSProverBn254_30_2_2_2::create_proof(

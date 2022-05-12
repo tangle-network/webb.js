@@ -263,6 +263,13 @@ pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded
 		.iter()
 		.collect();
 	js_builder.set_notes(notes).unwrap();
+
+	// Assert the utxo chain id
+	let note_1_chain_id = note1.get_js_utxo().unwrap().chain_id_raw();
+	let note_2_chain_id = note2.get_js_utxo().unwrap().chain_id_raw();
+	assert_eq!(note_1_chain_id, chain_id);
+	assert_eq!(note_2_chain_id, chain_id);
+
 	VAnchorTestSetup {
 		vk,
 		leaf_index: index,
