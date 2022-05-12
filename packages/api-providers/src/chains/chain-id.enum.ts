@@ -58,6 +58,7 @@ export enum InternalChainId {
   EggStandalone,
   EggDevelopStandalone,
   DkgSubstrateStandalone,
+  DemeterLocalnet,
 }
 
 export enum EVMChainId {
@@ -81,4 +82,5 @@ export enum EVMChainId {
   PolygonTestnet = 80001,
   HermesLocalnet = 5001,
   AthenaLocalnet = 5002,
+  DemeterLocalnet = 5003,
 }

@@ -6,7 +6,7 @@ import { ERC20__factory as ERC20Factory } from '@webb-tools/contracts';
 import { ethers } from 'ethers';
 
 import { ChainQuery } from '../abstracts/index.js';
-import { evmIdIntoInternalChainId, InternalChainId } from '../chains/index.js';
+import { InternalChainId } from '../chains/index.js';
 import { zeroAddress } from '../contracts/wrappers/index.js';
 import { WebbCurrencyId } from '../enums/index.js';
 import { WebbWeb3Provider } from './webb-provider.js';
@@ -24,8 +24,6 @@ export class Web3ChainQuery extends ChainQuery<WebbWeb3Provider> {
     const provider = this.inner.getEthersProvider();
 
     // check if the token is the native token of this chain
-    const { chainId: evmId } = await provider.getNetwork();
-    const webbChain = evmIdIntoInternalChainId(evmId);
 
     const accounts = await this.inner.accounts.accounts();
 
@@ -36,15 +34,15 @@ export class Web3ChainQuery extends ChainQuery<WebbWeb3Provider> {
     }
 
     // Return the balance of the account if native currency
-    if (this.config.chains[webbChain].nativeCurrencyId === currencyId) {
+    if (this.config.chains[chainId].nativeCurrencyId === currencyId) {
       const tokenBalanceBig = await provider.getBalance(accounts[0].address);
       const tokenBalance = ethers.utils.formatEther(tokenBalanceBig);
 
       return tokenBalance;
     } else {
       // Find the currency address on this chain
-      const currency = Currency.fromCurrencyId(this.inner.config, currencyId);
-      const currencyOnChain = currency.getAddress(webbChain);
+      const currency = Currency.fromCurrencyId(this.inner.config.currencies, currencyId);
+      const currencyOnChain = currency.getAddress(chainId);
 
       if (!currencyOnChain) {
         return '';

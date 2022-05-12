@@ -13,7 +13,7 @@ export const fetchWasmForEdges = async (maxEdges: number) => {
       cachedURI = getCachedFixtureURI('anchor_wasm_2.wasm');
       break;
     case 2:
-      ipfsHash = 'QmZcyRgorkHDWf5Tx8jnb1D9mKkwWc5DdYbWYspJLSGNbG';
+      ipfsHash = 'QmQB2yBjuw99tfSZAyaB5E4q2WUKgiTrwJjEmDzfbmLrNs';
       cachedURI = getCachedFixtureURI('anchor_wasm_3.wasm');
       break;
     case 3:
@@ -25,7 +25,7 @@ export const fetchWasmForEdges = async (maxEdges: number) => {
       cachedURI = getCachedFixtureURI('anchor_wasm_5.wasm');
       break;
     case 5:
-      ipfsHash = 'Qme47CdNasWDUz2u1m1HtbqMJG3vLPFyDj2Gr5HT3JAzLn';
+      ipfsHash = 'QmchjCgUruxrZ7gQJHGQRGicdEoAJSyAo1eFiaqt6HACPJ';
       cachedURI = getCachedFixtureURI('anchor_wasm_6.wasm');
       break;
     default:
@@ -62,7 +62,7 @@ export const fetchKeyForEdges = async (maxEdges: number) => {
       cachedURI = getCachedFixtureURI('anchor_key_2.zkey');
       break;
     case 2:
-      ipfsHash = 'QmeaX6KfJTC9oixvjig4RMS3bMNizAqQXNRTh6sadAnzps';
+      ipfsHash = 'QmUVPDV1yiT1pMNAm3LNcqvhEs2QvbEKBq13XE5nbmMK2s';
       cachedURI = getCachedFixtureURI('anchor_key_3.zkey');
       break;
     case 3:
@@ -74,7 +74,7 @@ export const fetchKeyForEdges = async (maxEdges: number) => {
       cachedURI = getCachedFixtureURI('anchor_key_5.zkey');
       break;
     case 5:
-      ipfsHash = 'Qmc58Pq8iP3y12crAvjyVdnT2z9hA7TyduhANjSNrJz8Sp';
+      ipfsHash = 'QmYV8kb2o8LgdWJPPKpKYnvAcx6yy4dQxmxA9WdHzresoN';
       cachedURI = getCachedFixtureURI('anchor_key_6.zkey');
       break;
     default:

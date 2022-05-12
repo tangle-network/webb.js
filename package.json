@@ -55,7 +55,7 @@
     "@types/jest": "^26.0.24",
     "@types/mocha": "^9.1.0",
     "@types/source-map-support": "^0.5.3",
-    "@webb-tools/protocol-solidity": "0.1.12",
+    "@webb-tools/protocol-solidity": "0.1.14",
     "cross-env": "^7.0.3",
     "dotenv": "^10.0.0",
     "eslint-plugin-tsdoc": "^0.2.14",
