@@ -1,3 +1,5 @@
+import '../../packages/types/build/index.js';
+import { options } from '@webb-tools/api/index.js';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import {
@@ -76,7 +78,7 @@ export function polkadotTx(
 
 export async function preparePolkadotApi() {
   const wsProvider = new WsProvider('ws://127.0.0.1:9944');
-  const api = await ApiPromise.create({
+  const api = await ApiPromise.create(options({
     provider: wsProvider,
     rpc: {
       mt: {
@@ -107,8 +109,26 @@ export async function preparePolkadotApi() {
           type: 'Vec<[u8; 32]>',
         },
       },
+      lt: {
+        getNeighborRoots: {
+          description: 'Query for the neighbor roots',
+          params: [
+            {
+              name: 'tree_id',
+              type: 'u32',
+              isOptional: false,
+            },
+            {
+              name: 'at',
+              type: 'Hash',
+              isOptional: true,
+            },
+          ],
+          type: 'Vec<[u8; 32]>',
+        },
+      },
     },
-  });
+  }));
   return api.isReady;
 }
 
@@ -366,7 +386,8 @@ export async function withdrawAnchorBnx5_4(
   const treeId = await firstAnchorTreeId(api);
 
   // fetch leaves
-  const leaves = await fetchRPCTreeLeaves(api, Number(treeId));
+  const leafCount = await api.derive.merkleTreeBn254.getLeafCountForTree(Number(treeId));
+  const leaves = await api.derive.merkleTreeBn254.getLeavesForTree(Number(treeId), 0, leafCount - 1);
   const proofInputBuilder = new ProofInputBuilder();
   const leafHex = u8aToHex(note.getLeafCommitment());
   proofInputBuilder.setNote(note);
@@ -381,9 +402,17 @@ export async function withdrawAnchorBnx5_4(
   const root = `0x${merkeTree.root}`;
 
   proofInputBuilder.setRefreshCommitment('0000000000000000000000000000000000000000000000000000000000000000');
-  // 1 from eth
-  // 1 from substrate
-  proofInputBuilder.setRoots([hexToU8a(root), hexToU8a(root)]);
+  
+  // get the neighbor roots
+  // @ts-ignore
+  const neighborRoots = await api.rpc.lt.getNeighborRoots(treeId);
+
+  let neighborRootsU8: Uint8Array[] = new Array(neighborRoots.length);
+  for (let i = 0; i < neighborRootsU8.length; i++) {
+    neighborRootsU8[i] = hexToU8a(neighborRoots[i].toString());
+  }
+
+  proofInputBuilder.setRoots([hexToU8a(root), ...neighborRootsU8]);
 
   proofInputBuilder.setRecipient(addressHex.replace('0x', ''));
   proofInputBuilder.setRelayer(relayerAddressHex.replace('0x', ''));

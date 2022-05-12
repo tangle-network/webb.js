@@ -11,7 +11,7 @@ import { AccountsAdapter } from '../account/Accounts.adapter.js';
 import { PolkadotProvider } from '../ext-providers/index.js';
 import { ActionsBuilder, InteractiveFeedback, WebbError, WebbErrorCodes } from '../webb-error/index.js';
 import { PolkadotAnchorApi } from './anchor-api.js';
-import { PolkadotBridgeDeposit } from './anchor-deposit.js';
+import { PolkadotAnchorDeposit } from './anchor-deposit.js';
 import { PolkadotAnchorWithdraw } from './anchor-withdraw.js';
 import { PolkadotChainQuery } from './chain-query.js';
 import { PolkadotMixerDeposit } from './mixer-deposit.js';
@@ -48,7 +48,7 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
         core: null,
         deposit: {
           enabled: true,
-          inner: new PolkadotBridgeDeposit(this)
+          inner: new PolkadotAnchorDeposit(this)
         },
         withdraw: {
           enabled: true,

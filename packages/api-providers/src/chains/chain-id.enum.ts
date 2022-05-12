@@ -1,10 +1,13 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-// must match u16 in rust
+// must match u16 in rust.
+// Each ChainType has its own namespace of ChainIDs.
 export enum ChainType {
+  None = 0x0000,
   EVM = 0x0100,
   Substrate = 0x0200,
+  SubstrateDevelopment = 0x0250,
   PolkadotRelayChain = 0x0301,
   KusamaRelayChain = 0x0302,
   PolkadotParachain = 0x0310,
@@ -17,9 +20,9 @@ export interface ChainTypeId {
 }
 
 export enum SubstrateChainId {
-  Webb = 1079,
   Edgeware = 7,
-  Egg = 1080,
+  ProtocolSubstrateStandalone = 1080,
+  EggStandalone = 1081, // Used for EggNet Standalone test deployment
 }
 
 export enum PolkadotRelayChain {
@@ -31,6 +34,7 @@ export enum KusamaRelayChain {
 }
 
 // INTERNAL CHAIN IDS
+// ONLY APPEND OR NOTES WILL BREAK
 export enum InternalChainId {
   Edgeware,
   EdgewareTestNet,
@@ -48,10 +52,13 @@ export enum InternalChainId {
   OptimismTestnet,
   ArbitrumTestnet,
   PolygonTestnet,
-  WebbDevelopment,
+  ProtocolSubstrateStandalone,
   HermesLocalnet,
   AthenaLocalnet,
   EggStandalone,
+  EggDevelopStandalone,
+  DkgSubstrateStandalone,
+  DemeterLocalnet,
 }
 
 export enum EVMChainId {
@@ -75,4 +82,5 @@ export enum EVMChainId {
   PolygonTestnet = 80001,
   HermesLocalnet = 5001,
   AthenaLocalnet = 5002,
+  DemeterLocalnet = 5003,
 }

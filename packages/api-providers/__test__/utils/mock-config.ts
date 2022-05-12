@@ -27,21 +27,21 @@ const anchorsConfig: AppConfig['anchors'] = {
       amount: '10',
       anchorAddresses: {},
       anchorTreeIds: {
-        [InternalChainId.WebbDevelopment]: '3'
+        [InternalChainId.ProtocolSubstrateStandalone]: '3'
       }
     },
     {
       amount: '100',
       anchorAddresses: {},
       anchorTreeIds: {
-        [InternalChainId.WebbDevelopment]: '4'
+        [InternalChainId.ProtocolSubstrateStandalone]: '4'
       }
     },
     {
       amount: '1000',
       anchorAddresses: {},
       anchorTreeIds: {
-        [InternalChainId.WebbDevelopment]: '5'
+        [InternalChainId.ProtocolSubstrateStandalone]: '5'
       }
     }
   ],
@@ -57,12 +57,12 @@ const anchorsConfig: AppConfig['anchors'] = {
   ]
 };
 const chainsConfig: AppConfig['chains'] = {
-  [InternalChainId.WebbDevelopment]: {
-    chainId: SubstrateChainId.Webb,
+  [InternalChainId.ProtocolSubstrateStandalone]: {
+    chainId: SubstrateChainId.ProtocolSubstrateStandalone,
     chainType: ChainType.Substrate,
     currencies: [WebbCurrencyId.WEBB],
     group: 'webb',
-    id: InternalChainId.WebbDevelopment,
+    id: InternalChainId.ProtocolSubstrateStandalone,
     logo: undefined,
     name: 'Webb Development',
     nativeCurrencyId: WebbCurrencyId.WEBB,
@@ -373,7 +373,7 @@ const currenciesConfig: AppConfig['currencies'] = {
   },
   [WebbCurrencyId.WEBB]: {
     // IS THIS AN EVM CHAIN?
-    addresses: new Map([[InternalChainId.WebbDevelopment, ZERO]]),
+    addresses: new Map([[InternalChainId.ProtocolSubstrateStandalone, ZERO]]),
     color: '',
     icon: undefined,
     id: WebbCurrencyId.WEBB,

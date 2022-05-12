@@ -76,6 +76,12 @@
       "@webb-tools/api-derive/*": [
         "packages/api-derive/src/*"
       ],
+      "@webb-tools/test-utils": [
+        "packages/test-utils/src"
+      ],
+      "@webb-tools/test-utils/*": [
+        "packages/test-utils/src/*"
+      ]
     },
     "typeRoots": [
       "./node_modules/@polkadot/ts",

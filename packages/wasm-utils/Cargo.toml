@@ -3,7 +3,7 @@ cargo-features = ["edition2021"]
 [package]
 name = "wasm-utils"
 description = "WASM Utilities from Webb"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Webb Developers"]
 categories = ["wasm", "cryptography", "arkworks"]
 readme = "README.md"
@@ -32,7 +32,6 @@ ark-crypto-primitives = { version = "^0.3.0", default-features = true, features 
 ark-ed-on-bn254 = { version = "^0.3.0", default-features = true, features = ["r1cs"] }
 ark-bn254 = { version = "^0.3.0", default-features = true, features = ["curve"] }
 ark-bls12-381 = { version = "^0.3.0", default-features = false, features = ["curve"] }
-webb-pedersen-hash = { version = "0.1.0", git = "https://github.com/webb-tools/webb-rs.git" }
 ark-std = { version = "^0.3.0", default-features = false }
 arkworks-setups = { version = "1.0.0", default-features = false, features = ["r1cs"] }
 arkworks-native-gadgets = { version = "1.0.0", default-features = false }

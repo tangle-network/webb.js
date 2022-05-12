@@ -19,7 +19,7 @@ use crate::types::{
 	Backend, Curve, Indices, Leaves, NoteProtocol, OpStatusCode, OperationError, Protocol, Uint8Arrayx32, WasmCurve,
 };
 use crate::utxo::JsUtxo;
-use crate::TREE_HEIGHT;
+use crate::{DEFAULT_LEAF, TREE_HEIGHT};
 
 mod anchor;
 mod mixer;
@@ -1014,7 +1014,10 @@ impl AnchorMTBn254X5 {
 		let poseidon3 = Poseidon::new(params3);
 
 		let (tree, _) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
-			&poseidon3, &leaves, leaf_index, &[0u8; 32],
+			&poseidon3,
+			&leaves,
+			leaf_index,
+			&DEFAULT_LEAF,
 		)
 		.unwrap();
 		Ok(Self { inner: tree })
