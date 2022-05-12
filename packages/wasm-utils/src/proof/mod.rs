@@ -262,8 +262,33 @@ pub struct VAnchorProofPayload {
 	pub chain_id: u64,
 	// Public amount
 	pub public_amount: i128,
+	// utxo config
+	pub output_config: [OutputUtxoConfig; 2],
+}
+#[wasm_bindgen]
+#[derive(Clone, Debug)]
+pub struct OutputUtxoConfig {
+	#[wasm_bindgen(skip)]
+	pub amount: u128,
+	#[wasm_bindgen(skip)]
+	pub index: u64,
+	#[wasm_bindgen(skip)]
+	pub chain_id: u64,
 }
 
+#[wasm_bindgen]
+impl OutputUtxoConfig {
+	#[wasm_bindgen(constructor)]
+	pub fn new(amount: JsString, index: u64, chain_id: u64) -> Result<OutputUtxoConfig, JsValue> {
+		let amount: String = amount.into();
+		let amount = amount.parse().map_err(|_| OpStatusCode::InvalidAmount)?;
+		Ok(OutputUtxoConfig {
+			amount,
+			index,
+			chain_id,
+		})
+	}
+}
 #[derive(Debug, Clone, Default)]
 pub struct VAnchorProofInput {
 	pub exponentiation: Option<i8>,
@@ -283,6 +308,8 @@ pub struct VAnchorProofInput {
 	pub chain_id: Option<u128>,
 	// Public amount
 	pub public_amount: Option<i128>,
+	// ouput utxos
+	pub output_config: Option<[OutputUtxoConfig; 2]>,
 }
 // https://github.com/rustwasm/wasm-bindgen/issues/2231#issuecomment-656293288
 use wasm_bindgen::convert::FromWasmAbi;
@@ -347,6 +374,7 @@ impl VAnchorProofInput {
 		let chain_id = self.chain_id.ok_or(OpStatusCode::InvalidChainId)?;
 		let indices = self.indices.ok_or(OpStatusCode::InvalidIndices)?;
 		let public_amount = self.public_amount.ok_or(OpStatusCode::InvalidPublicAmount)?;
+		let output_config = self.output_config.ok_or(OpStatusCode::InvalidPublicAmount)?;
 
 		let exponentiation = self.exponentiation.unwrap_or(5);
 		let width = self.width.unwrap_or(3);
@@ -365,6 +393,7 @@ impl VAnchorProofInput {
 			indices,
 			chain_id: chain_id.try_into().unwrap(),
 			public_amount,
+			output_config,
 		})
 	}
 }
@@ -437,10 +466,20 @@ pub enum ProofInputBuilder {
 	VAnchor(VAnchorProofInput),
 }
 impl ProofInputBuilder {
-	pub fn set_utxos(&mut self, utxo_list: Vec<JsUtxo>) -> Result<(), OperationError> {
+	pub fn set_input_utxos(&mut self, utxo_list: Vec<JsUtxo>) -> Result<(), OperationError> {
 		match self {
 			Self::VAnchor(input) => {
 				input.secret = Some(utxo_list);
+				Ok(())
+			}
+			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
+		}
+	}
+
+	pub fn set_output_config(&mut self, output_config: [OutputUtxoConfig; 2]) -> Result<(), OperationError> {
+		match self {
+			Self::VAnchor(input) => {
+				input.output_config = Some(output_config);
 				Ok(())
 			}
 			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
@@ -783,6 +822,16 @@ impl JsProofInputBuilder {
 		Ok(())
 	}
 
+	#[wasm_bindgen(js_name = setVanchorOutputConfig)]
+	pub fn set_vanchor_output_config(
+		&mut self,
+		utxo1: OutputUtxoConfig,
+		utxo2: OutputUtxoConfig,
+	) -> Result<(), JsValue> {
+		self.inner.set_output_config([utxo1, utxo2])?;
+		Ok(())
+	}
+
 	#[wasm_bindgen(js_name = setLeavesMap)]
 	pub fn set_leaves_map(&mut self, leaves_input: LeavesMapInput) -> Result<(), JsValue> {
 		self.inner.leaves_map(leaves_input.leaves)?;
@@ -912,7 +961,7 @@ impl JsProofInputBuilder {
 			})
 			.collect::<Result<Vec<_>, _>>()?;
 
-		self.inner.set_utxos(utxos)?;
+		self.inner.set_input_utxos(utxos)?;
 		Ok(())
 	}
 }
@@ -1248,6 +1297,20 @@ mod test {
 		proof_input_builder.set_pk(JsString::from("0000")).unwrap();
 		proof_input_builder.public_amount(JsString::from("3")).unwrap();
 		proof_input_builder.chain_id(JsString::from("4")).unwrap();
+		proof_input_builder
+			.set_vanchor_output_config(
+				OutputUtxoConfig {
+					index: 1,
+					amount: 0,
+					chain_id: 3,
+				},
+				OutputUtxoConfig {
+					index: 1,
+					amount: 0,
+					chain_id: 3,
+				},
+			)
+			.unwrap();
 		let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
 		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
 		// `note::JsNote`

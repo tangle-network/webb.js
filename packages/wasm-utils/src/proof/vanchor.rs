@@ -27,6 +27,7 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 		roots,
 		pk,
 		chain_id,
+		output_config,
 	} = anchor_proof_input;
 	// Prepare in UTXOs
 	let in_utxos: Vec<JsUtxo> = match secret.len() {
@@ -59,12 +60,25 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 		}
 	};
 	// TODO: construct the UTXO based on the public amount, chain_id
-	// TODO: get the out map [(chain_id , amount),2] from wasm
+	// TODO: get the out map [(chain_id , amount , index),2] from wasm
 
-	let utxo =
-		VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, chain_id, 100, None, &mut OsRng).unwrap();
-
-	let utxos_out = [utxo.clone(), utxo.clone()];
+	let utxo_o_1 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
+		ArkCurve::Bn254,
+		output_config[0].chain_id,
+		output_config[0].amount,
+		Some(output_config[0].index),
+		&mut OsRng,
+	)
+	.unwrap();
+	let utxo_o_2 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
+		ArkCurve::Bn254,
+		output_config[1].chain_id,
+		output_config[1].amount,
+		Some(output_config[1].index),
+		&mut OsRng,
+	)
+	.unwrap();
+	let utxos_out = [utxo_o_1, utxo_o_2];
 
 	let anchor_proof = match (backend, curve, exponentiation, width, in_utxos.len()) {
 		(Backend::Arkworks, Curve::Bn254, 5, 5, 2) => {

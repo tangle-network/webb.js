@@ -5,10 +5,11 @@ use arkworks_setups::common::{setup_keys_unchecked, setup_params, setup_tree_and
 use arkworks_setups::Curve as ArkCurve;
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
+use std::process::Output;
 use wasm_bindgen::prelude::*;
 
 use crate::note::{JsNote, JsNoteBuilder};
-use crate::proof::{JsProofInputBuilder, LeavesMapInput};
+use crate::proof::{JsProofInputBuilder, LeavesMapInput, OutputUtxoConfig};
 use crate::types::{
 	Backend, Curve, HashFunction, Indices, Leaves, NoteProtocol, NoteVersion, Protocol, Version, WasmCurve, BE, HF,
 };
@@ -208,7 +209,9 @@ pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded
 	// two output notes (Assuming are already deposited)
 	let note1 = generate_vanchor_note(100, chain_id, chain_id, Some(0));
 	let note2 = generate_vanchor_note(100, chain_id, chain_id, Some(1));
-
+	// output configs
+	let output_1 = OutputUtxoConfig::new(JsString::from("100"), 2, chain_id).unwrap();
+	let output_2 = OutputUtxoConfig::new(JsString::from("100"), 3, chain_id).unwrap();
 	let index = 0;
 
 	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
@@ -263,7 +266,7 @@ pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded
 		.iter()
 		.collect();
 	js_builder.set_notes(notes).unwrap();
-
+	js_builder.set_vanchor_output_config(output_1, output_2);
 	// Assert the utxo chain id
 	let note_1_chain_id = note1.get_js_utxo().unwrap().chain_id_raw();
 	let note_2_chain_id = note2.get_js_utxo().unwrap().chain_id_raw();
