@@ -207,10 +207,10 @@ pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded
 	let chain_id = compute_chain_id_type(0, chain_type);
 
 	// two output notes (Assuming are already deposited)
-	let note1 = generate_vanchor_note(0, chain_id, chain_id, Some(0));
-	let note2 = generate_vanchor_note(0, chain_id, chain_id, Some(0));
+	let note1 = generate_vanchor_note(5, chain_id, chain_id, Some(0));
+	let note2 = generate_vanchor_note(5, chain_id, chain_id, Some(0));
 	// output configs
-	let output_1 = OutputUtxoConfig::new(JsString::from("100"), None, chain_id).unwrap();
+	let output_1 = OutputUtxoConfig::new(JsString::from("10"), None, chain_id).unwrap();
 	let output_2 = OutputUtxoConfig::new(JsString::from("0"), None, chain_id).unwrap();
 	let index = 0;
 
@@ -260,16 +260,17 @@ pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded
 	js_builder.set_roots(Leaves::from(JsValue::from(roots_array))).unwrap();
 	// leaves
 	let mut leaves_map = LeavesMapInput::new();
-	let leaves_ua_0: Array = vec![note1.get_leaf_commitment().unwrap()].iter().collect();
-	let leaves_ua_1: Array = vec![note2.get_leaf_commitment().unwrap()].iter().collect();
+	let leaves_ua: Array = vec![
+		note1.get_leaf_commitment().unwrap(),
+		note2.get_leaf_commitment().unwrap(),
+	]
+	.iter()
+	.collect();
 	leaves_map
-		.set_chain_leaves(0, Leaves::from(JsValue::from(leaves_ua_0)))
-		.unwrap();
-	leaves_map
-		.set_chain_leaves(1, Leaves::from(JsValue::from(leaves_ua_1)))
+		.set_chain_leaves(chain_id, Leaves::from(JsValue::from(leaves_ua)))
 		.unwrap();
 	js_builder.set_leaves_map(leaves_map).unwrap();
-	js_builder.public_amount(JsString::from("100")).unwrap();
+	js_builder.public_amount(JsString::from("10")).unwrap();
 	js_builder.chain_id(JsString::from(chain_id.to_string())).unwrap();
 	let indices: Array = vec![JsValue::from("0"), JsValue::from("1")].iter().collect();
 	js_builder.set_indices(Indices::from(JsValue::from(indices))).unwrap();

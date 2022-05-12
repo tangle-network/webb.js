@@ -816,6 +816,17 @@ impl JsNote {
 		self.mutate_index(index).map_err(|e| e.into())
 	}
 
+	// for test
+	#[wasm_bindgen(js_name = update_utxo)]
+	pub fn update_vanchor_utxo(&mut self, utxo: JsUtxo) -> Result<(), OperationError> {
+		let chain_id = utxo.get_chain_id_bytes();
+		let amount = utxo.get_amount();
+		let blinding = utxo.get_blinding();
+		let secret_key = utxo.get_secret_key();
+		self.secrets = vec![chain_id, amount, blinding, secret_key];
+		Ok(())
+	}
+
 	#[wasm_bindgen(getter)]
 	pub fn index(&self) -> JsString {
 		match self.index {

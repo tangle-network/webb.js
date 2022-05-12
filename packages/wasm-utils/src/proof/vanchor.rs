@@ -4,7 +4,7 @@ use ark_bn254::{Bn254, Fr as Bn254Fr};
 use ark_crypto_primitives::Error;
 use ark_ff::{BigInteger, PrimeField};
 use ark_std::UniformRand;
-use arkworks_setups::common::{prove, VAnchorProof};
+use arkworks_setups::common::{prove, prove_unchecked, VAnchorProof};
 use arkworks_setups::utxo::Utxo;
 use arkworks_setups::{AnchorProver, Curve as ArkCurve, VAnchorProver};
 use rand::rngs::OsRng;
@@ -91,48 +91,22 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 		(Backend::Arkworks, Curve::Bn254, 5, 5, 2) => {
 			let mut utxos_in: [Utxo<Bn254Fr>; 2] = [in_utxos[0].get_bn254_utxo()?, in_utxos[1].get_bn254_utxo()?];
 			let indices = indices.try_into().map_err(|_| OpStatusCode::InvalidIndices)?;
-			let roots = roots
-				.into_iter()
-				.map(|x| Bn254Fr::from_le_bytes_mod_order(&x))
-				.collect::<Vec<_>>()
-				.try_into()
-				.map_err(|_| OpStatusCode::InvalidRoots)?;
-			let chain_id_fr = Bn254Fr::from(chain_id);
-			let public_amount_fr = Bn254Fr::from(public_amount);
-			let ex_data_fr = Bn254Fr::from_le_bytes_mod_order(&ext_data_hash);
-			let leaves_0: Vec<_> = leaves
-				.get(&0)
-				.unwrap()
-				.to_vec()
-				.into_iter()
-				.map(|x| Bn254Fr::from_le_bytes_mod_order(&x))
-				.collect();
-			let leaves_1: Vec<_> = leaves
-				.get(&1)
-				.unwrap()
-				.to_vec()
-				.into_iter()
-				.map(|x| Bn254Fr::from_le_bytes_mod_order(&x))
-				.collect();
-			let leaves_slice = [leaves_0, leaves_1];
-			let (circuit, .., pub_inc) = VAnchorR1CSProverBn254_30_2_2_2::setup_circuit_with_utxos(
+			let roots = roots.try_into().map_err(|_| OpStatusCode::InvalidRoots)?;
+
+			VAnchorR1CSProverBn254_30_2_2_2::create_proof(
 				ArkCurve::Bn254,
-				chain_id_fr,
-				public_amount_fr,
-				ex_data_fr,
+				chain_id,
+				public_amount,
+				ext_data_hash,
 				roots,
 				indices,
-				leaves_slice,
+				leaves,
 				utxos_in,
 				utxos_out,
+				pk,
 				DEFAULT_LEAF,
+				rng,
 			)
-			.unwrap();
-			let proof = prove::<Bn254, _, _>(circuit, &pk, rng).unwrap();
-			Ok(VAnchorProof {
-				proof,
-				public_inputs_raw: pub_inc.iter().map(|x| x.into_repr().to_bytes_le()).collect(),
-			})
 		}
 		(Backend::Arkworks, Curve::Bn254, 5, 5, 16) => {
 			let in_utxos = in_utxos

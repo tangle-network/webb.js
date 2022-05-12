@@ -1351,6 +1351,7 @@ mod test {
 		let proof_input = proof_input_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_input).unwrap();
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
+
 		assert!(is_valid_proof);
 	}
 }
