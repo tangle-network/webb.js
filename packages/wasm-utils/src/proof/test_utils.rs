@@ -7,9 +7,11 @@ use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
-use crate::note::JsNote;
+use crate::note::{JsNote, JsNoteBuilder};
 use crate::proof::JsProofInputBuilder;
-use crate::types::{Leaves, Protocol};
+use crate::types::{
+	Backend, Curve, HashFunction, Leaves, NoteProtocol, NoteVersion, Protocol, Version, WasmCurve, BE, HF,
+};
 use crate::{
 	AnchorR1CSProverBn254_30_2, MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_2_2, ANCHOR_COUNT, DEFAULT_LEAF,
 	TREE_HEIGHT,
@@ -154,17 +156,65 @@ pub fn generate_anchor_test_setup(
 		roots_raw,
 	}
 }
-pub fn generate_vanchor_test_setup(
-	relayer_decoded_ss58: &str,
-	recipient_decoded_ss58: &str,
-	note: &str,
-) -> AnchorTestSetup {
+// (output chain id , amount1,amount2)
+type VAnchorOutput = (u64, i128, i128);
+pub fn generate_vanchor_note(amount: i128, in_chain_id: u64, output_chain_id: u64, index: Option<u64>) -> JsNote {
+	let mut note_builder = JsNoteBuilder::new();
+	let protocol: Protocol = JsValue::from(NoteProtocol::VAnchor.to_string()).into();
+	let version: Version = JsValue::from(NoteVersion::V2.to_string()).into();
+	let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
+	let hash_function: HF = JsValue::from(HashFunction::Poseidon.to_string()).into();
+	let curve: WasmCurve = JsValue::from(Curve::Bn254.to_string()).into();
+
+	note_builder.protocol(protocol).unwrap();
+	note_builder.version(version).unwrap();
+
+	note_builder.source_chain_id(JsString::from(in_chain_id.to_string().as_str()));
+	note_builder.target_chain_id(JsString::from(output_chain_id.to_string().as_str()));
+	note_builder.source_identifying_data(JsString::from(in_chain_id.to_string().as_str()));
+	note_builder.target_identifying_data(JsString::from(output_chain_id.to_string().as_str()));
+
+	note_builder.width(JsString::from("5")).unwrap();
+	note_builder.exponentiation(JsString::from("4")).unwrap();
+	note_builder.denomination(JsString::from("18")).unwrap();
+	note_builder.amount(JsString::from(amount.to_string().as_str()));
+	note_builder.token_symbol(JsString::from("EDG"));
+	note_builder.curve(curve).unwrap();
+	note_builder.hash_function(hash_function).unwrap();
+	note_builder.backend(backend);
+	match index {
+		None => {}
+		Some(index) => {
+			note_builder.index(JsString::from(index.to_string().as_str()));
+		}
+	}
+	note_builder.build().unwrap()
+}
+
+pub fn compute_chain_id_type<ChainId>(chain_id: ChainId, chain_type: [u8; 2]) -> u64
+where
+	ChainId: AtLeast32Bit,
+{
+	let chain_id_value: u32 = chain_id.try_into().unwrap_or_default();
+	let mut buf = [0u8; 8];
+	buf[2..4].copy_from_slice(&chain_type);
+	buf[4..8].copy_from_slice(&chain_id_value.to_be_bytes());
+	u64::from_be_bytes(buf)
+}
+
+pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded_ss58: &str) -> VAnchorTestSetup {
+	let chain_type = [2, 0];
+	let chain_id = compute_chain_id_type(0u32, chain_type);
+
+	let note1 = generate_vanchor_note(100, chain_id, chain_id, Some(0));
+	let note2 = generate_vanchor_note(100, chain_id, chain_id, Some(1));
+
 	let curve = ArkCurve::Bn254;
 	let index = 0;
 
 	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
 	let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
-
+	// Do the insertion
 	let note = JsNote::js_deserialize(JsString::from(note)).unwrap();
 
 	let leaf: Uint8Array = note.get_leaf_commitment().unwrap();
@@ -208,13 +258,11 @@ pub fn generate_vanchor_test_setup(
 		.unwrap();
 	js_builder.set_roots(Leaves::from(JsValue::from(roots_array))).unwrap();
 
-	AnchorTestSetup {
-		relayer: hex::decode(relayer_decoded_ss58).unwrap(),
-		recipient: hex::decode(recipient_decoded_ss58).unwrap(),
+	VAnchorTestSetup {
 		vk,
 		leaf_index: index,
 		leaf_bytes,
 		proof_input_builder: js_builder,
-		roots_raw,
+		roots_raw: vec![],
 	}
 }

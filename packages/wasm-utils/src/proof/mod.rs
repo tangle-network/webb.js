@@ -115,6 +115,7 @@ pub struct MixerProofInput {
 	pub leaves: Option<Vec<Vec<u8>>>,
 	pub leaf_index: Option<u64>,
 }
+
 impl MixerProofInput {
 	pub fn build(self) -> Result<MixerProofPayload, OperationError> {
 		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
