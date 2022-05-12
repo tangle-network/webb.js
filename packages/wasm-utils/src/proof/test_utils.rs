@@ -260,14 +260,13 @@ pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded
 	js_builder.set_roots(Leaves::from(JsValue::from(roots_array))).unwrap();
 	// leaves
 	let mut leaves_map = LeavesMapInput::new();
-	let leaves_ua: Array = vec![
-		note1.get_leaf_commitment().unwrap(),
-		note2.get_leaf_commitment().unwrap(),
-	]
-	.iter()
-	.collect();
+	let leaves_ua_0: Array = vec![note1.get_leaf_commitment().unwrap()].iter().collect();
+	let leaves_ua_1: Array = vec![note2.get_leaf_commitment().unwrap()].iter().collect();
 	leaves_map
-		.set_chain_leaves(chain_id, Leaves::from(JsValue::from(leaves_ua)))
+		.set_chain_leaves(0, Leaves::from(JsValue::from(leaves_ua_0)))
+		.unwrap();
+	leaves_map
+		.set_chain_leaves(1, Leaves::from(JsValue::from(leaves_ua_1)))
 		.unwrap();
 	js_builder.set_leaves_map(leaves_map).unwrap();
 	js_builder.public_amount(JsString::from("100")).unwrap();
