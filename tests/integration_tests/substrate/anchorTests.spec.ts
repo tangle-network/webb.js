@@ -50,7 +50,7 @@ describe('Anchor tests', function () {
     apiPromise = await preparePolkadotApi();
   });
 
-  it.only('Anchor should work', async function () {
+  it('Anchor should work', async function () {
     try {
       const { bob, charlie, alice } = getKeyring();
       // transfer some funds to sudo & test account
