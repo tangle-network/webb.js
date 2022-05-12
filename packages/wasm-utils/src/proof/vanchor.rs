@@ -2,6 +2,8 @@ use core::convert::TryInto;
 
 use ark_bn254::Fr as Bn254Fr;
 use ark_crypto_primitives::Error;
+use ark_ff::{BigInteger, PrimeField};
+use ark_std::UniformRand;
 use arkworks_setups::utxo::Utxo;
 use arkworks_setups::{AnchorProver, Curve as ArkCurve, VAnchorProver};
 use rand::rngs::OsRng;
@@ -59,8 +61,8 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 			));
 		}
 	};
-	// TODO: construct the UTXO based on the public amount, chain_id
-	// TODO: get the out map [(chain_id , amount , index),2] from wasm
+	// TODO : handle ext data
+	let ext_data_hash = Bn254Fr::rand(rng).into_repr().to_bytes_le();
 
 	let utxo_o_1 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
 		ArkCurve::Bn254,
@@ -89,7 +91,7 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 				ArkCurve::Bn254,
 				chain_id,
 				public_amount,
-				Default::default(),
+				ext_data_hash,
 				roots,
 				indices,
 				leaves,
@@ -116,7 +118,7 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 				ArkCurve::Bn254,
 				chain_id,
 				public_amount,
-				Default::default(),
+				ext_data_hash,
 				roots,
 				indices,
 				leaves,
