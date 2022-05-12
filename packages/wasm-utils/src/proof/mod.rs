@@ -1089,9 +1089,9 @@ mod test {
 	use wasm_bindgen_test::*;
 
 	use crate::proof::test_utils::{
-		generate_anchor_test_setup, generate_mixer_test_setup, generate_vanchor_test_setup, AnchorTestSetup,
-		MixerTestSetup, VAnchorTestSetup, ANCHOR_NOTE_V1_X5_4, ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS,
-		MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V2_X5_4,
+		generate_anchor_test_setup, generate_mixer_test_setup, generate_vanchor_test_rust_setup,
+		generate_vanchor_test_setup, AnchorTestSetup, MixerTestSetup, VAnchorTestSetup, ANCHOR_NOTE_V1_X5_4,
+		ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V2_X5_4,
 	};
 
 	use super::*;
@@ -1347,7 +1347,7 @@ mod test {
 			notes,
 			leaf_index,
 			vk,
-		} = generate_vanchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS);
+		} = generate_vanchor_test_rust_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS);
 		let proof_input = proof_input_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_input).unwrap();
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
