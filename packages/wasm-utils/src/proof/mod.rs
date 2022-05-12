@@ -271,7 +271,7 @@ pub struct OutputUtxoConfig {
 	#[wasm_bindgen(skip)]
 	pub amount: u128,
 	#[wasm_bindgen(skip)]
-	pub index: u64,
+	pub index: Option<u64>,
 	#[wasm_bindgen(skip)]
 	pub chain_id: u64,
 }
@@ -279,9 +279,11 @@ pub struct OutputUtxoConfig {
 #[wasm_bindgen]
 impl OutputUtxoConfig {
 	#[wasm_bindgen(constructor)]
-	pub fn new(amount: JsString, index: u64, chain_id: u64) -> Result<OutputUtxoConfig, JsValue> {
+	pub fn new(amount: JsString, index: Option<u64>, chain_id: u64) -> Result<OutputUtxoConfig, JsValue> {
 		let amount: String = amount.into();
+
 		let amount = amount.parse().map_err(|_| OpStatusCode::InvalidAmount)?;
+
 		Ok(OutputUtxoConfig {
 			amount,
 			index,
@@ -1300,12 +1302,12 @@ mod test {
 		proof_input_builder
 			.set_vanchor_output_config(
 				OutputUtxoConfig {
-					index: 1,
+					index: Some(1),
 					amount: 0,
 					chain_id: 3,
 				},
 				OutputUtxoConfig {
-					index: 1,
+					index: Some(1),
 					amount: 0,
 					chain_id: 3,
 				},

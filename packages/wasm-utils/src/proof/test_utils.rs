@@ -207,11 +207,11 @@ pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded
 	let chain_id = compute_chain_id_type(0, chain_type);
 
 	// two output notes (Assuming are already deposited)
-	let note1 = generate_vanchor_note(100, chain_id, chain_id, Some(0));
-	let note2 = generate_vanchor_note(100, chain_id, chain_id, Some(1));
+	let note1 = generate_vanchor_note(0, chain_id, chain_id, Some(0));
+	let note2 = generate_vanchor_note(0, chain_id, chain_id, Some(0));
 	// output configs
-	let output_1 = OutputUtxoConfig::new(JsString::from("100"), 2, chain_id).unwrap();
-	let output_2 = OutputUtxoConfig::new(JsString::from("100"), 3, chain_id).unwrap();
+	let output_1 = OutputUtxoConfig::new(JsString::from("100"), None, chain_id).unwrap();
+	let output_2 = OutputUtxoConfig::new(JsString::from("0"), None, chain_id).unwrap();
 	let index = 0;
 
 	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
@@ -229,14 +229,26 @@ pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded
 		.iter()
 		.map(|c| Bn254Fr::from_le_bytes_mod_order(&c))
 		.collect();
-	let (tree, _) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
+	// tree 0
+	let (_tree0, in_path0) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
 		&poseidon3,
-		&leaves_f,
+		&vec![leaves_f[0].clone()],
 		index,
 		&DEFAULT_LEAF,
 	)
 	.unwrap();
-	let roots_f = [tree.root(); ANCHOR_COUNT];
+	let root0 = in_path0.calculate_root(&leaves_f[0].clone(), &poseidon3).unwrap();
+	// tree 1
+	let (_tree1, in_path1) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
+		&poseidon3,
+		&vec![leaves_f[1].clone()],
+		index,
+		&DEFAULT_LEAF,
+	)
+	.unwrap();
+	let root1 = in_path1.calculate_root(&leaves_f[1].clone(), &poseidon3).unwrap();
+
+	let roots_f = [root0, root1];
 	let roots_raw = roots_f.map(|x| x.into_repr().to_bytes_le());
 	let roots_array: Array = roots_raw.iter().map(|i| Uint8Array::from(i.as_slice())).collect();
 

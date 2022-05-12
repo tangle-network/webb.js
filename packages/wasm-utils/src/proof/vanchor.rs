@@ -68,7 +68,7 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 		ArkCurve::Bn254,
 		output_config[0].chain_id,
 		output_config[0].amount,
-		Some(output_config[0].index),
+		output_config[0].index,
 		&mut OsRng,
 	)
 	.unwrap();
@@ -76,7 +76,7 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 		ArkCurve::Bn254,
 		output_config[1].chain_id,
 		output_config[1].amount,
-		Some(output_config[1].index),
+		output_config[1].index,
 		&mut OsRng,
 	)
 	.unwrap();
