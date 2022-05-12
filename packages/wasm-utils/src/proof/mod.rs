@@ -1279,7 +1279,7 @@ mod test {
 		let VAnchorTestSetup {
 			proof_input_builder,
 			roots_raw,
-			leaf_bytes,
+			notes,
 			leaf_index,
 			vk,
 		} = generate_vanchor_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS);

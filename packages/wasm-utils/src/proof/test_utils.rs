@@ -46,7 +46,7 @@ pub struct AnchorTestSetup {
 pub struct VAnchorTestSetup {
 	pub(crate) proof_input_builder: JsProofInputBuilder,
 	pub(crate) roots_raw: Vec<Vec<u8>>,
-	pub(crate) leaf_bytes: Vec<u8>,
+	pub(crate) notes: Vec<JsNote>,
 	pub(crate) leaf_index: u64,
 	pub(crate) vk: Vec<u8>,
 }
@@ -175,7 +175,7 @@ pub fn generate_vanchor_note(amount: i128, in_chain_id: u64, output_chain_id: u6
 	note_builder.target_identifying_data(JsString::from(output_chain_id.to_string().as_str()));
 
 	note_builder.width(JsString::from("5")).unwrap();
-	note_builder.exponentiation(JsString::from("4")).unwrap();
+	note_builder.exponentiation(JsString::from("5")).unwrap();
 	note_builder.denomination(JsString::from("18")).unwrap();
 	note_builder.amount(JsString::from(amount.to_string().as_str()));
 	note_builder.token_symbol(JsString::from("EDG"));
@@ -239,16 +239,11 @@ pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded
 
 	let mut js_builder = JsProofInputBuilder::new(JsValue::from("vanchor").into()).unwrap();
 
-	js_builder
-		.set_recipient(JsString::from(recipient_decoded_ss58))
-		.unwrap();
-
-	js_builder.set_relayer(JsString::from(relayer_decoded_ss58)).unwrap();
-
 	js_builder.set_metadata_from_note(&note1).unwrap();
 
 	js_builder.set_pk(JsString::from(hex::encode(pk))).unwrap();
 	js_builder.set_roots(Leaves::from(JsValue::from(roots_array))).unwrap();
+	// leaves
 	let mut leaves_map = LeavesMapInput::new();
 	let leaves_ua: Array = vec![
 		note1.get_leaf_commitment().unwrap(),
@@ -259,15 +254,18 @@ pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded
 	leaves_map
 		.set_chain_leaves(chain_id, Leaves::from(JsValue::from(leaves_ua)))
 		.unwrap();
-	js_builder.public_amount(JsString::from("100"));
+	js_builder.set_leaves_map(leaves_map).unwrap();
+	js_builder.public_amount(JsString::from("100")).unwrap();
 	let indices: Array = vec![JsValue::from("0"), JsValue::from("1")].iter().collect();
-	js_builder.set_indices(Indices::from(JsValue::from(indices)));
-	let notes: Array = vec![JsValue::from(note1), JsValue::from(note2)].iter().collect();
-	js_builder.set_notes(notes);
+	js_builder.set_indices(Indices::from(JsValue::from(indices))).unwrap();
+	let notes: Array = vec![JsValue::from(note1.clone()), JsValue::from(note2.clone())]
+		.iter()
+		.collect();
+	js_builder.set_notes(notes).unwrap();
 	VAnchorTestSetup {
 		vk,
 		leaf_index: index,
-		leaf_bytes,
+		notes: vec![note1, note2],
 		proof_input_builder: js_builder,
 		roots_raw: vec![],
 	}
