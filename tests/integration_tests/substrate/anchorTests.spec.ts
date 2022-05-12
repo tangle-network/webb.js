@@ -50,7 +50,7 @@ describe('Anchor tests', function () {
     apiPromise = await preparePolkadotApi();
   });
 
-  it('Anchor should work', async function () {
+  it.only('Anchor should work', async function () {
     try {
       const { bob, charlie, alice } = getKeyring();
       // transfer some funds to sudo & test account
@@ -65,7 +65,7 @@ describe('Anchor tests', function () {
       console.log(`Depositing to the Anchor`)
       note = await catchWasmError(() => depositAnchorBnX5_4(apiPromise!, bob));
       ///Give the chain sometime to insure the leaf is there
-      await sleep(10_000);
+      await sleep(15_000);
       // withdraw fro the mixer
       console.log(`Withdrawing from the Anchor`)
       await catchWasmError(() =>
