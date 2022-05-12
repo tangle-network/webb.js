@@ -65,7 +65,7 @@ describe('Anchor tests', function () {
       console.log(`Depositing to the Anchor`)
       note = await catchWasmError(() => depositAnchorBnX5_4(apiPromise!, bob));
       ///Give the chain sometime to insure the leaf is there
-      await sleep(15_000);
+      await sleep(10_000);
       // withdraw fro the mixer
       console.log(`Withdrawing from the Anchor`)
       await catchWasmError(() =>
