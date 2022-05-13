@@ -58,7 +58,7 @@ export class ProvingManagerWrapper {
         switch (key) {
           case 'proof': {
             const input = message.proof!;
-            const proof = await this.proof(input);
+            const proof = await this.prove(input);
 
             (self as unknown as Worker).postMessage({
               data: proof,
@@ -100,7 +100,7 @@ export class ProvingManagerWrapper {
   /**
    * Generate the Zero-knowledge proof from the proof input
    **/
-  async proof (pmSetupInput: ProvingManagerSetupInput): Promise<ProofI> {
+  async prove (pmSetupInput: ProvingManagerSetupInput): Promise<ProofI> {
     const Manager = await this.proofBuilder;
     const pm = new Manager();
     const { note } = await Note.deserialize(pmSetupInput.note);

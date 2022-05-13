@@ -33,7 +33,7 @@ export class ProvingManager {
     // If the worker CTX is direct-call
     const pm = new ProvingManagerWrapper('direct-call');
 
-    return pm.proof(input);
+    return pm.prove(input);
   }
 
   private static proveWithWorker (input: ProvingManagerSetupInput, worker: Worker): Promise<ProofI> {
