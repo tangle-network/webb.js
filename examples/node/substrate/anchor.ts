@@ -1,10 +1,12 @@
 import {cryptoWaitReady} from "@polkadot/util-crypto";
 import {decodeAddress, Keyring} from "@polkadot/keyring";
 import {fetchRPCTreeLeaves, polkadotTx, preparePolkadotApi, transferBalance} from "../utils.js";
-import {Note, NoteGenInput, ProvingManager, ProvingManagerSetupInput, u8aToHex} from "@webb-tools/sdk-core/index.js";
+import {Note, NoteGenInput, ProvingManager, ProvingManagerSetupInput} from "@webb-tools/sdk-core/index.js";
 import path from "path";
 import fs from "fs";
 import {AnchorWithdrawProof} from "../../../tests/utils/index.js";
+
+import { u8aToHex } from '@polkadot/util';
 
 export async function anchorBn254() {
   const BOBPhrase =
