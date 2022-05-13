@@ -4,8 +4,6 @@
 /* eslint-disable camelcase */
 
 import { Log } from '@ethersproject/abstract-provider';
-import { ChainType, computeChainIdType } from '@webb-tools/api-providers/index.js';
-import { BridgeStorage, bridgeStorageFactory, getAnchorDeploymentBlockNumber } from '@webb-tools/api-providers/utils/index.js';
 import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { ERC20, ERC20__factory as ERC20Factory, FixedDepositAnchor, FixedDepositAnchor__factory } from '@webb-tools/contracts';
@@ -258,67 +256,6 @@ export class AnchorContract {
       lastQueriedBlock: finalBlock,
       newLeaves: newCommitments
     };
-  }
-
-  /*
-   * Generate Merkle Proof
-   *  This will
-   *  1- Get the leaves for a particular anchor
-   *  2- Fetch the missing leaves
-   *  3- Insert the missing leaves
-   *  4- Compare against historical roots before adding to local storage
-   *  5- return the path to the leaf.
-   **/
-
-  async generateMerkleProof (deposit: IAnchorDepositInfo) {
-    const evmId = await this.signer.getChainId();
-    const sourceChainIdType = computeChainIdType(ChainType.EVM, evmId);
-
-    const bridgeStorageStorage = await bridgeStorageFactory(sourceChainIdType);
-    const storedContractInfo: BridgeStorage[0] = (await bridgeStorageStorage.get(
-      this._contract.address.toLowerCase()
-    )) || {
-      lastQueriedBlock: getAnchorDeploymentBlockNumber(sourceChainIdType, this._contract.address) || 0,
-      leaves: [] as string[]
-    };
-    const treeHeight = await this._contract.levels();
-
-    logger.trace(`Generating merkle proof treeHeight ${treeHeight} of deposit`, deposit);
-    const tree = MerkleTree.new('eth', treeHeight, storedContractInfo.leaves, new PoseidonHasher());
-
-    // Query for missing blocks starting from the stored endingBlock
-    const lastQueriedBlock = storedContractInfo.lastQueriedBlock;
-
-    logger.trace('Getting leaves from lastQueriedBlock ', lastQueriedBlock);
-    const fetchedLeaves = await this.getDepositLeaves(lastQueriedBlock + 1, 0);
-
-    logger.trace(`New Leaves ${fetchedLeaves.newLeaves.length}`, fetchedLeaves.newLeaves);
-
-    tree.batchInsert(fetchedLeaves.newLeaves);
-
-    const newRoot = tree.getRoot();
-    const formattedRoot = bufferToFixed(newRoot);
-    const lastRoot = await this._contract.getLastRoot();
-    const knownRoot = await this._contract.isKnownRoot(formattedRoot);
-
-    logger.info(`fromBlock ${formattedRoot} -x- last root ${lastRoot} ---> knownRoot: ${knownRoot}`);
-    // compare root against contract, and store if there is a match
-    const leaves = [...storedContractInfo.leaves, ...fetchedLeaves.newLeaves];
-
-    if (knownRoot) {
-      logger.info(`Root is known committing to storage ${this._contract.address}`);
-      await bridgeStorageStorage.set(this._contract.address.toLowerCase(), {
-        lastQueriedBlock: fetchedLeaves.lastQueriedBlock,
-        leaves
-      });
-    }
-
-    logger.trace(`Getting leaf index  of ${deposit.commitment}`, leaves);
-    const leafIndex = leaves.findIndex((commitment) => commitment === deposit.commitment);
-
-    logger.info(`Leaf index ${leafIndex}`);
-
-    return tree.path(leafIndex);
   }
 
   async generateLinkedMerkleProof (sourceDeposit: IAnchorDepositInfo, sourceLeaves: string[], sourceChainId: number) {
