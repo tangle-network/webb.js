@@ -15,8 +15,8 @@ import { BigNumber, Contract, providers, Signer } from 'ethers';
 
 import { bufferToFixed, createRootsBytes, generateWithdrawProofCallData } from '../utils/index.js';
 import { MerkleTree, PoseidonHasher } from '../utils/merkle/index.js';
-import { AnchorWitnessInput, ZKPWebbAnchorInputWithMerkle, ZKPWebbAnchorInputWithoutMerkle } from './types.js';
-import { generateWitness, proofAndVerify, zeroAddress } from './webb-utils.js';
+import { ZKPWebbAnchorInputWithMerkle } from './types.js';
+import { zeroAddress } from './webb-utils.js';
 
 const logger = LoggerService.get('AnchorContract');
 
@@ -346,51 +346,6 @@ export class AnchorContract {
     }
 
     return undefined;
-  }
-
-  async merkleProofToZKP (
-    merkleProof: any,
-    sourceEvmId: number,
-    deposit: IAnchorDepositInfo,
-    zkpInputWithoutMerkleProof: ZKPWebbAnchorInputWithoutMerkle
-  ) {
-    const { pathElements, pathIndices, root: merkleRoot } = merkleProof;
-    const localRoot = await this._contract.getLastRoot();
-    const nr = await this._contract.getLatestNeighborRoots();
-    const sourceChainRootIndex = (await this._contract.edgeIndex(sourceEvmId)).toNumber();
-    const root = bufferToFixed(merkleRoot);
-    // create a mutable copy of the returned neighbor roots and overwrite the root used
-    // in the merkle proof
-    const neighborRoots = [...nr];
-
-    neighborRoots[sourceChainRootIndex] = root;
-    const input: AnchorWitnessInput = {
-      // public
-      chainID: BigInt(zkpInputWithoutMerkleProof.destinationChainId),
-      fee: String(zkpInputWithoutMerkleProof.fee),
-      nullifier: deposit.nullifier.toString(),
-      nullifierHash: deposit.nullifierHash,
-      pathElements,
-      pathIndices,
-      recipient: zkpInputWithoutMerkleProof.recipient,
-      refreshCommitment: bufferToFixed('0'),
-      // private
-      refund: String(zkpInputWithoutMerkleProof.refund),
-      relayer: zkpInputWithoutMerkleProof.relayer,
-      roots: [localRoot, ...neighborRoots],
-      secret: deposit.secret.toString()
-    };
-    const edges = await this._contract.maxEdges();
-
-    console.log(`Generate witness with edges ${edges}`, input);
-    const witness = await generateWitness(input, edges as any);
-
-    console.log('Generated witness', witness);
-    const proof = await proofAndVerify(witness, edges as any);
-
-    console.log('Zero knowledge proof', proof);
-
-    return { input, proof: proof.proof, root };
   }
 
   async withdraw (proof: any, zkp: ZKPWebbAnchorInputWithMerkle, pub: any): Promise<string> {
