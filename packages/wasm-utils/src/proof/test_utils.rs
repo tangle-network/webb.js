@@ -299,28 +299,26 @@ pub fn generate_vanchor_test_rust_setup(relayer_decoded_ss58: &str, recipient_de
 	let curve = ArkCurve::Bn254;
 	let index = 0;
 	let mut rng = OsRng;
-	let chain_id = 1;
+	let chain_id = 0;
 
 	let params3 = setup_params::<Bn254Fr>(curve, 5, 3);
+	let params4 = setup_params::<Bn254Fr>(curve, 5, 4);
 	let tree_hasher = Poseidon::new(params3);
+	let nullifier_hasher = Poseidon::new(params4);
 	let public_amount = 10;
 	let in_amount = 5;
-	let in_chain_id = 1;
+	let in_chain_id = 0;
 	let in_amount_fr = Bn254Fr::from(5u32);
 
-	let in_utxo1 = VAnchorR1CSProverBn254_30_2_2_2::new_utxo(
-		curve,
-		in_chain_id,
-		in_amount_fr.clone(),
-		Some(index),
-		None,
-		None,
-		&mut rng,
-	)
-	.unwrap();
-	let in_utxo2 =
-		VAnchorR1CSProverBn254_30_2_2_2::new_utxo(curve, in_chain_id, in_amount_fr, Some(index), None, None, &mut rng)
+	let mut in_utxo1 =
+		VAnchorR1CSProverBn254_30_2_2_2::new_utxo(curve, in_chain_id, in_amount_fr.clone(), None, None, None, &mut rng)
 			.unwrap();
+	in_utxo1.set_index(index, &nullifier_hasher).unwrap();
+
+	let mut in_utxo2 =
+		VAnchorR1CSProverBn254_30_2_2_2::new_utxo(curve, in_chain_id, in_amount_fr, None, None, None, &mut rng)
+			.unwrap();
+	in_utxo2.set_index(index, &nullifier_hasher).unwrap();
 
 	let output_1 = OutputUtxoConfig {
 		amount: 10,
@@ -359,10 +357,14 @@ pub fn generate_vanchor_test_rust_setup(relayer_decoded_ss58: &str, recipient_de
 	let leaves: Vec<_> = vec![leaf0, leaf1].iter().map(|x| x.into_repr().to_bytes_le()).collect();
 	leave_map.insert(1, leaves);
 	proof_builder.public_amount(10).unwrap();
-	proof_builder.chain_id(1).unwrap();
 
 	proof_builder.leaf_indices(vec![0, 0]).unwrap();
 	proof_builder.leaves_map(leave_map).unwrap();
+	proof_builder
+		.leaves_vec(vec![vec![leaf0.into_repr().to_bytes_le()], vec![leaf1
+			.into_repr()
+			.to_bytes_le()]])
+		.unwrap();
 	proof_builder
 		.set_input_utxos(vec![
 			JsUtxo::new_from_bn254_utxo(in_utxo1),
@@ -374,7 +376,8 @@ pub fn generate_vanchor_test_rust_setup(relayer_decoded_ss58: &str, recipient_de
 	let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
 	proof_builder.exponentiation(5).unwrap();
 	proof_builder.width(5).unwrap();
-	proof_builder.chain_id(1).unwrap();
+	proof_builder.chain_id(0).unwrap();
+
 	proof_builder.backend(Backend::Arkworks).unwrap();
 	proof_builder.curve(Curve::Bn254).unwrap();
 	proof_builder.set_output_config([output_1, output_2]).unwrap();

@@ -12,6 +12,8 @@ use arkworks_setups::Curve as ArkCurve;
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::__rt::std::collections::btree_map::BTreeMap;
+// https://github.com/rustwasm/wasm-bindgen/issues/2231#issuecomment-656293288
+use wasm_bindgen::convert::FromWasmAbi;
 use wasm_bindgen::prelude::*;
 
 use crate::note::{JsLeafInner, JsNote};
@@ -251,6 +253,7 @@ pub struct VAnchorProofPayload {
 	pub backend: Backend,
 	pub pk: Vec<u8>,
 	pub leaves: BTreeMap<u64, Vec<Vec<u8>>>,
+	pub leaves_vec: Vec<Vec<Vec<u8>>>,
 	/// get roots for linkable tree
 	/// Available set can be of length 2 , 16 , 32
 	pub roots: Vec<Vec<u8>>,
@@ -299,6 +302,7 @@ pub struct VAnchorProofInput {
 	pub backend: Option<Backend>,
 	pub pk: Option<Vec<u8>>,
 	pub leaves: Option<BTreeMap<u64, Vec<Vec<u8>>>>,
+	pub leaves_vec: Option<Vec<Vec<Vec<u8>>>>,
 	/// get roots for linkable tree
 	/// Available set can be of length 2 , 16 , 32
 	pub roots: Option<Vec<Vec<u8>>>,
@@ -313,8 +317,7 @@ pub struct VAnchorProofInput {
 	// ouput utxos
 	pub output_config: Option<[OutputUtxoConfig; 2]>,
 }
-// https://github.com/rustwasm/wasm-bindgen/issues/2231#issuecomment-656293288
-use wasm_bindgen::convert::FromWasmAbi;
+
 pub fn generic_of_jsval<T: FromWasmAbi<Abi = u32>>(js: JsValue, classname: &str) -> Result<T, JsValue> {
 	use js_sys::{Object, Reflect};
 	let ctor_name = Object::get_prototype_of(&js).constructor().name();
@@ -390,6 +393,7 @@ impl VAnchorProofInput {
 			backend,
 			pk,
 			leaves,
+			leaves_vec: self.leaves_vec.unwrap(),
 			roots,
 			secret,
 			indices,
@@ -542,6 +546,16 @@ impl ProofInputBuilder {
 		match self {
 			Self::VAnchor(input) => {
 				input.leaves = Some(leaves);
+				Ok(())
+			}
+			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
+		}
+	}
+
+	pub fn leaves_vec(&mut self, leaves: Vec<Vec<Vec<u8>>>) -> Result<(), OperationError> {
+		match self {
+			Self::VAnchor(input) => {
+				input.leaves_vec = Some(leaves);
 				Ok(())
 			}
 			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
@@ -1086,6 +1100,9 @@ pub fn validate_proof(proof: &Proof, vk: JsString, curve: WasmCurve) -> Result<b
 }
 #[cfg(test)]
 mod test {
+	use crate::{VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF};
+	use ark_std::UniformRand;
+	use arkworks_setups::common::{prove, prove_unchecked, setup_keys, setup_keys_unchecked, verify};
 	use wasm_bindgen_test::*;
 
 	use crate::proof::test_utils::{
@@ -1349,9 +1366,226 @@ mod test {
 			vk,
 		} = generate_vanchor_test_rust_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS);
 		let proof_input = proof_input_builder.build_js().unwrap();
+		let v = proof_input.inner.clone().vanchor_input().unwrap();
+		wasm_bindgen_test::console_log!(
+			"Leaves {:?}",
+			v.leaves_vec
+				.into_iter()
+				.map(|leaves| leaves.iter().map(|leaf| hex::encode(leaf)).collect::<Vec<String>>())
+				.collect::<Vec<Vec<String>>>()
+		);
+		wasm_bindgen_test::console_log!("ChainId {:?}", v.chain_id);
+		wasm_bindgen_test::console_log!(
+			"Roots {:?}",
+			v.roots
+				.into_iter()
+				.map(|leaf| hex::encode(leaf))
+				.collect::<Vec<String>>()
+		);
+		wasm_bindgen_test::console_log!("Indices{:?}", v.indices);
+
 		let proof = generate_proof_js(proof_input).unwrap();
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 
+		assert!(is_valid_proof);
+	}
+
+	#[wasm_bindgen_test]
+	fn test_arkworks_gadgets() {
+		let mut rng = OsRng;
+		let curve = ArkCurve::Bn254;
+		let params3 = setup_params::<Bn254Fr>(curve, 5, 3);
+		let tree_hasher = Poseidon::<Bn254Fr> { params: params3 };
+
+		// Set up a random circuit and make pk/vk pair
+		let random_circuit =
+			VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(curve, DEFAULT_LEAF, &mut rng).unwrap();
+		let (proving_key, verifying_key) = setup_keys::<Bn254, _, _>(random_circuit.clone(), &mut rng).unwrap();
+
+		// Make a proof now
+		let public_amount = Bn254Fr::from(10u32);
+		let ext_data_hash = Bn254Fr::rand(&mut rng);
+
+		// Input Utxos
+		let in_chain_id = 0u64;
+		let in_amount = Bn254Fr::from(5u32);
+		let index = 0u64;
+		let in_utxo1 =
+			VAnchorR1CSProverBn254_30_2_2_2::new_utxo(curve, in_chain_id, in_amount, Some(index), None, None, &mut rng)
+				.unwrap();
+		let in_utxo2 = VAnchorR1CSProverBn254_30_2_2_2::new_utxo(
+			curve,
+			in_chain_id,
+			Bn254Fr::from(0u32),
+			Some(index),
+			None,
+			None,
+			&mut rng,
+		)
+		.unwrap();
+		let in_utxos = [in_utxo1.clone(), in_utxo2.clone()];
+
+		// Output Utxos
+		let out_chain_id = 0u64;
+		let out_amount = Bn254Fr::from(10u32);
+		let out_utxo1 =
+			VAnchorR1CSProverBn254_30_2_2_2::new_utxo(curve, out_chain_id, out_amount, None, None, None, &mut rng)
+				.unwrap();
+		let out_utxo2 =
+			VAnchorR1CSProverBn254_30_2_2_2::new_utxo(curve, out_chain_id, out_amount, None, None, None, &mut rng)
+				.unwrap();
+		let out_utxos = [out_utxo1.clone(), out_utxo2.clone()];
+
+		let leaf0 = in_utxo1.commitment;
+		let (_, in_path0) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
+			&tree_hasher,
+			&vec![leaf0],
+			0,
+			&DEFAULT_LEAF,
+		)
+		.unwrap();
+		let root0 = in_path0.calculate_root(&leaf0, &tree_hasher).unwrap();
+		let leaf1 = in_utxo2.commitment;
+		let (_, in_path1) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
+			&tree_hasher,
+			&vec![leaf1],
+			0,
+			&DEFAULT_LEAF,
+		)
+		.unwrap();
+		let root1 = in_path1.calculate_root(&leaf1, &tree_hasher).unwrap();
+
+		let in_leaves = [vec![leaf0.clone()], vec![leaf1.clone()]];
+		let in_indices = [0; 2];
+		let in_root_set = [root0.clone(), root1.clone()];
+
+		let (circuit, .., pub_ins) = VAnchorR1CSProverBn254_30_2_2_2::setup_circuit_with_utxos(
+			curve,
+			Bn254Fr::from(in_chain_id),
+			public_amount,
+			ext_data_hash,
+			in_root_set,
+			in_indices,
+			in_leaves,
+			in_utxos.clone(),
+			out_utxos.clone(),
+			DEFAULT_LEAF,
+		)
+		.unwrap();
+
+		let proof = prove::<Bn254, _, _>(circuit, &proving_key, &mut rng).unwrap();
+		let res = verify::<Bn254>(&pub_ins, &verifying_key, &proof).unwrap();
+
+		assert!(res);
+		let (proving_key, verifying_key) = setup_keys_unchecked::<Bn254, _, _>(random_circuit, &mut rng).unwrap();
+		let leaves_vec = vec![vec![leaf0.into_repr().to_bytes_le()], vec![leaf1
+			.into_repr()
+			.to_bytes_le()]];
+		let in_root_set = vec![root0.into_repr().to_bytes_le(), root1.into_repr().to_bytes_le()];
+
+		// test with the wasm setup
+		let vanchor_proof_input = VAnchorProofPayload {
+			exponentiation: 5,
+			width: 5,
+			curve: Curve::Bn254,
+			backend: Backend::Arkworks,
+			pk: proving_key,
+			leaves: Default::default(),
+			leaves_vec,
+			roots: in_root_set,
+			secret: in_utxos
+				.to_vec()
+				.into_iter()
+				.map(|utxo| JsUtxo::new_from_bn254_utxo(utxo))
+				.collect::<Vec<JsUtxo>>(),
+			indices: vec![0, 0],
+			chain_id: 0,
+			public_amount: 10,
+			output_config: [
+				OutputUtxoConfig {
+					amount: 10,
+					index: None,
+					chain_id: 0,
+				},
+				OutputUtxoConfig {
+					amount: 10,
+					index: None,
+					chain_id: 0,
+				},
+			],
+		};
+		let VAnchorProofPayload {
+			public_amount,
+			backend,
+			curve,
+			width,
+			secret,
+			indices,
+			leaves,
+			exponentiation,
+			roots,
+			pk,
+			chain_id,
+			output_config,
+			leaves_vec,
+		} = vanchor_proof_input;
+		let in_utxo = [secret[0].get_bn254_utxo().unwrap(), secret[1].get_bn254_utxo().unwrap()];
+		let in_indices = [indices[0], indices[1]];
+		let leaves1: Vec<_> = leaves_vec[0]
+			.clone()
+			.into_iter()
+			.map(|x| Bn254Fr::from_le_bytes_mod_order(&x))
+			.collect();
+		let leaves2: Vec<_> = leaves_vec[1]
+			.clone()
+			.into_iter()
+			.map(|x| Bn254Fr::from_le_bytes_mod_order(&x))
+			.collect();
+		let in_leaves = [leaves1, leaves2];
+		let in_root_set = roots
+			.into_iter()
+			.map(|x| Bn254Fr::from_le_bytes_mod_order(&x))
+			.collect::<Vec<_>>()
+			.try_into()
+			.unwrap();
+		let ext_data_hash = Bn254Fr::rand(&mut rng);
+		let utxo_o_1 = VAnchorR1CSProverBn254_30_2_2_2::new_utxo(
+			ArkCurve::Bn254,
+			output_config[0].chain_id,
+			Bn254Fr::from(output_config[0].amount),
+			None,
+			None,
+			None,
+			&mut OsRng,
+		)
+		.unwrap();
+		let utxo_o_2 = VAnchorR1CSProverBn254_30_2_2_2::new_utxo(
+			ArkCurve::Bn254,
+			output_config[1].chain_id,
+			Bn254Fr::from(output_config[1].amount),
+			None,
+			None,
+			None,
+			&mut OsRng,
+		)
+		.unwrap();
+		let utxos_out = [utxo_o_1, utxo_o_2];
+		let (circuit, .., pub_ins) = VAnchorR1CSProverBn254_30_2_2_2::setup_circuit_with_utxos(
+			ArkCurve::Bn254,
+			Bn254Fr::from(in_chain_id),
+			Bn254Fr::from(public_amount),
+			ext_data_hash,
+			in_root_set,
+			in_indices,
+			in_leaves,
+			in_utxo,
+			utxos_out,
+			DEFAULT_LEAF,
+		)
+		.unwrap();
+		let proof = prove_unchecked::<Bn254, _, _>(circuit, &pk, &mut rng).unwrap();
+		let pub_ins: Vec<_> = pub_ins.into_iter().map(|x| x.into_repr().to_bytes_le()).collect();
+		let is_valid_proof = verify_unchecked_raw::<Bn254>(&pub_ins, &verifying_key, &proof).unwrap();
 		assert!(is_valid_proof);
 	}
 }
