@@ -318,7 +318,7 @@ pub fn generate_vanchor_test_rust_setup(relayer_decoded_ss58: &str, recipient_de
 	let mut in_utxo2 =
 		VAnchorR1CSProverBn254_30_2_2_2::new_utxo(curve, in_chain_id, in_amount_fr, None, None, None, &mut rng)
 			.unwrap();
-	in_utxo2.set_index(index, &nullifier_hasher).unwrap();
+	in_utxo2.set_index(1, &nullifier_hasher).unwrap();
 
 	let output_1 = OutputUtxoConfig {
 		amount: 10,
@@ -334,33 +334,25 @@ pub fn generate_vanchor_test_rust_setup(relayer_decoded_ss58: &str, recipient_de
 	let mut proof_builder = ProofInputBuilder::VAnchor(VAnchorProofInput::default());
 
 	let leaf0 = in_utxo1.commitment.clone();
-	let (_, in_path0) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
-		&tree_hasher,
-		&vec![leaf0],
-		0,
-		&DEFAULT_LEAF,
-	)
-	.unwrap();
-	let root0 = in_path0.calculate_root(&leaf0, &tree_hasher).unwrap();
 	let leaf1 = in_utxo2.commitment.clone();
-	let (_, in_path1) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
+	let (tree, in_path0) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
 		&tree_hasher,
-		&vec![leaf1],
+		&vec![leaf0, leaf1],
 		0,
 		&DEFAULT_LEAF,
 	)
 	.unwrap();
-	let root1 = in_path1.calculate_root(&leaf1, &tree_hasher).unwrap();
-	let in_root_set = [root0, root1].iter().map(|x| x.into_repr().to_bytes_le()).collect();
+	let root = tree.root();
+	let in_root_set = [root; 2].iter().map(|x| x.into_repr().to_bytes_le()).collect();
 
 	let mut leave_map: BTreeMap<u64, Vec<Vec<u8>>> = BTreeMap::new();
 	let leaves: Vec<_> = vec![leaf0, leaf1].iter().map(|x| x.into_repr().to_bytes_le()).collect();
-	leave_map.insert(1, leaves.clone());
+	leave_map.insert(0, leaves.clone());
 	proof_builder.public_amount(10).unwrap();
 	proof_builder
 		.leaves_vec(vec![vec![leaves[0].clone()], vec![leaves[1].clone()]])
 		.unwrap();
-	proof_builder.leaf_indices(vec![0, 0]).unwrap();
+	proof_builder.leaf_indices(vec![0, 1]).unwrap();
 	proof_builder.leaves_map(leave_map).unwrap();
 	proof_builder
 		.leaves_vec(vec![vec![leaf0.into_repr().to_bytes_le()], vec![leaf1
@@ -385,6 +377,7 @@ pub fn generate_vanchor_test_rust_setup(relayer_decoded_ss58: &str, recipient_de
 	proof_builder.set_output_config([output_1, output_2]).unwrap();
 	proof_builder.roots(in_root_set).unwrap();
 	proof_builder.pk(pk).unwrap();
+
 	VAnchorTestSetup {
 		proof_input_builder: JsProofInputBuilder { inner: proof_builder },
 		notes: vec![],
