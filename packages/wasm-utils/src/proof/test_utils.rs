@@ -326,7 +326,7 @@ pub fn generate_vanchor_test_rust_setup(relayer_decoded_ss58: &str, recipient_de
 		chain_id,
 	};
 	let output_2 = OutputUtxoConfig {
-		amount: 0,
+		amount: 10,
 		index: None,
 		chain_id,
 	};
@@ -355,9 +355,11 @@ pub fn generate_vanchor_test_rust_setup(relayer_decoded_ss58: &str, recipient_de
 
 	let mut leave_map: BTreeMap<u64, Vec<Vec<u8>>> = BTreeMap::new();
 	let leaves: Vec<_> = vec![leaf0, leaf1].iter().map(|x| x.into_repr().to_bytes_le()).collect();
-	leave_map.insert(1, leaves);
+	leave_map.insert(1, leaves.clone());
 	proof_builder.public_amount(10).unwrap();
-
+	proof_builder
+		.leaves_vec(vec![vec![leaves[0].clone()], vec![leaves[1].clone()]])
+		.unwrap();
 	proof_builder.leaf_indices(vec![0, 0]).unwrap();
 	proof_builder.leaves_map(leave_map).unwrap();
 	proof_builder

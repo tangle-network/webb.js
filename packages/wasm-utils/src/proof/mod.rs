@@ -393,7 +393,7 @@ impl VAnchorProofInput {
 			backend,
 			pk,
 			leaves,
-			leaves_vec: self.leaves_vec.unwrap(),
+			leaves_vec: self.leaves_vec.unwrap_or_default(),
 			roots,
 			secret,
 			indices,
@@ -1366,24 +1366,6 @@ mod test {
 			vk,
 		} = generate_vanchor_test_rust_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS);
 		let proof_input = proof_input_builder.build_js().unwrap();
-		let v = proof_input.inner.clone().vanchor_input().unwrap();
-		wasm_bindgen_test::console_log!(
-			"Leaves {:?}",
-			v.leaves_vec
-				.into_iter()
-				.map(|leaves| leaves.iter().map(|leaf| hex::encode(leaf)).collect::<Vec<String>>())
-				.collect::<Vec<Vec<String>>>()
-		);
-		wasm_bindgen_test::console_log!("ChainId {:?}", v.chain_id);
-		wasm_bindgen_test::console_log!(
-			"Roots {:?}",
-			v.roots
-				.into_iter()
-				.map(|leaf| hex::encode(leaf))
-				.collect::<Vec<String>>()
-		);
-		wasm_bindgen_test::console_log!("Indices{:?}", v.indices);
-
 		let proof = generate_proof_js(proof_input).unwrap();
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 
