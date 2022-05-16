@@ -42,11 +42,7 @@ export class AnchorContract {
   ) {
     this.signer = this.web3Provider.getSigner();
     logger.info(`Init with address ${address} `);
-    this._contract = new Contract(
-      address,
-      FixedDepositAnchor__factory.abi,
-      useProvider ? this.web3Provider : this.signer
-    ) as any;
+    this._contract = FixedDepositAnchor__factory.connect(address, useProvider ? this.web3Provider : this.signer);
   }
 
   get getLastRoot () {
