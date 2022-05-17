@@ -1,10 +1,23 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
-import { Proof } from '@webb-tools/wasm-utils';
+import type { NoteProtocol } from '@webb-tools/wasm-utils';
 
-export type ProofI = Omit<Proof, 'free'>;
+import { ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
+
+type VAnchorProof = {
+  readonly inputUtxos: Array<any>;
+  readonly outputNotes: Array<any>;
+  readonly proof: string;
+  readonly publicInputs: Array<any>;
+}
+type Proof = {
+  readonly nullifierHash: string;
+  readonly proof: string;
+  readonly root: string;
+  readonly roots: Array<any>;
+}
+export type ProofI<T extends NoteProtocol> = T extends 'vanchor' ? VAnchorProof : Proof;
 
 export class ProvingManager {
   constructor (
@@ -19,28 +32,30 @@ export class ProvingManager {
    *
    * @param  input - input for the manager
    **/
-  public prove (input: ProvingManagerSetupInput) {
+  public prove<T extends NoteProtocol> (protocol: T, input: ProvingManagerSetupInput<T>) {
     const worker = this.worker;
 
     if (worker) {
-      return ProvingManager.proveWithWorker(input, worker);
+      return ProvingManager.proveWithWorker([protocol, input], worker);
     }
 
-    return ProvingManager.proveWithoutWorker(input);
+    return ProvingManager.proveWithoutWorker(protocol, input);
   }
 
-  private static proveWithoutWorker (input: ProvingManagerSetupInput) {
+  private static proveWithoutWorker<T extends NoteProtocol> (
+    protocol: T,
+    input: ProvingManagerSetupInput<T>) {
     // If the worker CTX is direct-call
     const pm = new ProvingManagerWrapper('direct-call');
 
-    return pm.proof(input);
+    return pm.proof(protocol, input);
   }
 
-  private static proveWithWorker (input: ProvingManagerSetupInput, worker: Worker): Promise<ProofI> {
-    return new Promise<ProofI>((resolve, reject) => {
+  private static proveWithWorker<T extends NoteProtocol> (input: [T, ProvingManagerSetupInput<T>], worker: Worker): Promise<ProofI<T>> {
+    return new Promise<ProofI<T>>((resolve, reject) => {
       try {
         worker.addEventListener('message', (e) => {
-          const payload = e.data.data as ProofI;
+          const payload = e.data.data as ProofI<T>;
 
           resolve(payload);
         });

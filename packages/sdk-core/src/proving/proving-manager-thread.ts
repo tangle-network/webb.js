@@ -1,9 +1,10 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import type { JsProofInputBuilder, Leaves, Proof } from '@webb-tools/wasm-utils';
+import type { Leaves, NoteProtocol, OutputUtxoConfig } from '@webb-tools/wasm-utils';
 
 import { ProofI } from '@webb-tools/sdk-core/proving/proving-manager.js';
+import { JsProofInput, JsProofOutput } from '@webb-tools/wasm-utils';
 
 import { Note } from '../note.js';
 
@@ -18,11 +19,8 @@ import { Note } from '../note.js';
  * @param fee - The fee for the transaction
  * @param refund - The refund for the transaction
  * @param provingKey - Proving key bytes to pass in to the Zero-knowledge proof generation
- * @param roots - Roots for anchor API
- * @param roots - Roots for anchor a
- * @param refreshCommitment - Refresh commitment in hex representation ( without prefix `0x` ) Required for anchor, ignored for the mixer
  **/
-export type ProvingManagerSetupInput = {
+export type MixerPMSetupInput = {
   note: string;
   relayer: string;
   recipient: string;
@@ -31,15 +29,42 @@ export type ProvingManagerSetupInput = {
   fee: number;
   refund: number;
   provingKey: Uint8Array;
+}
 
-  roots?: Leaves;
-  refreshCommitment?: string;
-};
+export type ProvingManagerSetupInput<T extends NoteProtocol> = ProvingManagerPayload[T];
 
-type PMEvents = {
-  proof: ProvingManagerSetupInput;
+type PMEvents<T extends NoteProtocol = 'mixer'> = {
+  proof: [T, ProvingManagerSetupInput<T>];
   destroy: undefined;
 };
+
+/**
+ * @param roots - Roots for anchor API
+ * @param refreshCommitment - Refresh commitment in hex representation ( without prefix `0x` ) Required for anchor, ignored for the mixer
+ * */
+export type AnchorPMSetupInput = MixerPMSetupInput & {
+  roots: Leaves;
+  refreshCommitment: string;
+}
+
+export type VAnchorPMSetupInput = {
+  inputNotes: string[];
+  provingKey: Uint8Array;
+  leavesMap: Record<string, Leaves>,
+  roots: Leaves;
+  chainId: string;
+  outputConfigs: [OutputUtxoConfig, OutputUtxoConfig];
+  indices: number[];
+  publicAmount: string;
+  metaDataNote?: string;
+  externalDataHash: string;
+}
+
+interface ProvingManagerPayload extends Record<NoteProtocol, any> {
+  mixer: MixerPMSetupInput;
+  anchor: AnchorPMSetupInput;
+  vanchor: VAnchorPMSetupInput;
+}
 
 export class ProvingManagerWrapper {
   /**
@@ -56,8 +81,8 @@ export class ProvingManagerWrapper {
 
         switch (key) {
           case 'proof': {
-            const input = message.proof!;
-            const proof = await this.proof(input);
+            const [proto, input] = message.proof!;
+            const proof = await this.proof(proto, input);
 
             (self as unknown as Worker).postMessage({
               data: proof,
@@ -86,11 +111,11 @@ export class ProvingManagerWrapper {
 
   private get proofBuilder () {
     return this.wasmBlob.then((wasm) => {
-      return wasm.JsProofInputBuilder
+      return wasm.JsProofInputBuilder;
     });
   }
 
-  private async generateProof (proofInput: JsProofInputBuilder): Promise<Proof> {
+  private async generateProof (proofInput: JsProofInput): Promise<JsProofOutput> {
     const wasm = await this.wasmBlob;
 
     return wasm.generate_proof_js(proofInput);
@@ -99,38 +124,94 @@ export class ProvingManagerWrapper {
   /**
    * Generate the Zero-knowledge proof from the proof input
    **/
-  async proof (pmSetupInput: ProvingManagerSetupInput): Promise<ProofI> {
+  async proof<T extends NoteProtocol> (
+    protocol: T,
+    pmSetupInput: ProvingManagerSetupInput<T>): Promise<ProofI<T>> {
     const Manager = await this.proofBuilder;
-    const { note } = await Note.deserialize(pmSetupInput.note);
-    const pm = new Manager(note.protocol);
+    const pm = new Manager(protocol);
 
-    // TODO: handle the prefix and validation
-    pm.setLeaves(pmSetupInput.leaves);
-    pm.setRelayer(pmSetupInput.relayer);
-    pm.setRecipient(pmSetupInput.recipient);
-    pm.setLeafIndex(String(pmSetupInput.leafIndex));
-    pm.setRefund(String(pmSetupInput.refund));
-    pm.setFee(String(pmSetupInput.fee));
-    pm.setPk(u8aToHex(pmSetupInput.provingKey).replace('0x', ''));
-    pm.setNote(note);
+    if (protocol === 'mixer') {
+      const input = pmSetupInput as MixerPMSetupInput;
+      const { note } = await Note.deserialize(input.note);
 
-    if (pmSetupInput.roots) {
-      pm.setRoots(pmSetupInput.roots);
-    }
+      pm.setLeaves(input.leaves);
+      pm.setRelayer(input.relayer);
+      pm.setRecipient(input.recipient);
+      pm.setLeafIndex(String(input.leafIndex));
+      pm.setRefund(String(input.refund));
+      pm.setFee(String(input.fee));
+      pm.setPk(u8aToHex(input.provingKey).replace('0x', ''));
+      pm.setNote(note);
+    } else if (protocol === 'anchor') {
+      const input = pmSetupInput as AnchorPMSetupInput;
+      const { note } = await Note.deserialize(input.note);
 
-    if (pmSetupInput.refreshCommitment) {
-      pm.setRefreshCommitment(pmSetupInput.refreshCommitment);
+      pm.setLeaves(input.leaves);
+      pm.setRelayer(input.relayer);
+      pm.setRecipient(input.recipient);
+      pm.setLeafIndex(String(input.leafIndex));
+      pm.setRefund(String(input.refund));
+      pm.setFee(String(input.fee));
+      pm.setPk(u8aToHex(input.provingKey).replace('0x', ''));
+      pm.setNote(note);
+      pm.setRoots(input.roots);
+      pm.setRefreshCommitment(input.refreshCommitment);
+    } else if (protocol === 'vanchor') {
+      const input = pmSetupInput as VAnchorPMSetupInput;
+      const metaDataNote = input.metaDataNote || input.inputNotes[0];
+      const { note } = await Note.deserialize(metaDataNote);
+      const notes = await Promise.all(input.inputNotes.map((note) => Note.deserialize(note)));
+      const jsNotes = notes.map((note) => note.note);
+
+      pm.setNote(note);
+      pm.setNotes(jsNotes);
+      pm.setIndices(input.indices);
+      pm.setPk(u8aToHex(input.provingKey).replace('0x', ''));
+      pm.setRoots(input.roots);
+      pm.chain_id(input.chainId);
+      pm.public_amount(input.publicAmount);
+      pm.setVanchorOutputConfig(...input.outputConfigs);
+      pm.setExtDatahash(input.externalDataHash);
+      // leaves insertion
+      const wasm = await this.wasmBlob;
+      const leavesMap = new wasm.LeavesMapInput();
+
+      for (const key of Object.keys(input.leavesMap)) {
+        leavesMap.setChainLeaves(key as any, input.leavesMap[key]);
+      }
+
+      pm.setLeavesMap(leavesMap);
+    } else {
+      throw new Error('invalid protocol');
     }
 
     const proofInput = pm.build_js();
-    const proof = await this.generateProof(proofInput);
 
-    return {
-      nullifierHash: proof.nullifierHash,
-      proof: proof.proof,
-      root: proof.root,
-      roots: proof.roots
-    };
+    const proofOutput = await this.generateProof(proofInput);
+
+    if (protocol === 'mixer' || protocol === 'vanchor') {
+      const proof = proofOutput.proof;
+
+      const proofPayload: ProofI<'anchor'> = {
+        nullifierHash: proof.nullifierHash,
+        proof: proof.proof,
+        root: proof.root,
+        roots: proof.roots
+      };
+
+      return proofPayload as any;
+    } else {
+      const proof = proofOutput.vanchorProof;
+
+      const proofPayload: ProofI<'vanchor'> = {
+        inputUtxos: proof.inputUtxos,
+        outputNotes: proof.outputNotes,
+        proof: proof.proof,
+        publicInputs: proof.publicInputs
+      };
+
+      return proofPayload as any;
+    }
   }
 }
 

@@ -93,7 +93,7 @@ pub enum ProofOutput {
 }
 
 #[derive(Debug, Clone)]
-#[wasm_bindgen(js_name = "ProvingOutput")]
+#[wasm_bindgen]
 pub struct JsProofOutput {
 	#[wasm_bindgen(skip)]
 	pub inner: ProofOutput,
@@ -1433,6 +1433,7 @@ mod test {
 		proof_input_builder.set_pk(JsString::from("0000")).unwrap();
 		proof_input_builder.public_amount(JsString::from("3")).unwrap();
 		proof_input_builder.chain_id(JsString::from("4")).unwrap();
+		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
 		proof_input_builder
 			.set_vanchor_output_config(
 				OutputUtxoConfig {
