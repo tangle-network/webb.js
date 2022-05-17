@@ -7,7 +7,9 @@ use ark_bn254::{Bn254, Fr as Bn254Fr};
 use ark_ff::{BigInteger, PrimeField};
 use arkworks_native_gadgets::merkle_tree::SparseMerkleTree;
 use arkworks_native_gadgets::poseidon::Poseidon;
-use arkworks_setups::common::{setup_params, setup_tree_and_create_path, verify_unchecked_raw, Leaf};
+use arkworks_setups::common::{
+	setup_keys_unchecked, setup_params, setup_tree_and_create_path, verify_unchecked_raw, Leaf,
+};
 use arkworks_setups::Curve as ArkCurve;
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
@@ -21,7 +23,10 @@ use crate::types::{
 	Backend, Curve, Indices, Leaves, NoteProtocol, OpStatusCode, OperationError, Protocol, Uint8Arrayx32, WasmCurve,
 };
 use crate::utxo::JsUtxo;
-use crate::TREE_HEIGHT;
+use crate::{
+	AnchorR1CSProverBls381_30_2, AnchorR1CSProverBn254_30_2, MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_2_2,
+	DEFAULT_LEAF, TREE_HEIGHT,
+};
 
 mod anchor;
 mod mixer;
@@ -1175,7 +1180,64 @@ impl AnchorMTBn254X5 {
 		Ok(())
 	}
 }
+// For testing on js side
+#[wasm_bindgen]
+pub fn verifyJsProof(proof_output: JsProofOutput, vk: JsString) -> bool {
+	let vk_bytes = hex::decode(JsValue::from(vk).as_string().unwrap()).unwrap();
+	match proof_output.inner {
+		ProofOutput::Mixer(proof) | ProofOutput::Anchor(proof) => {
+			verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk_bytes, &proof.proof).unwrap()
+		}
+		ProofOutput::VAnchor(proof) => {
+			verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk_bytes, &proof.proof).unwrap()
+		}
+	}
+}
 
+#[wasm_bindgen]
+pub struct JsProvingKeys {
+	#[wasm_bindgen(skip)]
+	pub pk: Vec<u8>,
+	#[wasm_bindgen(skip)]
+	pub vk: Vec<u8>,
+}
+#[wasm_bindgen]
+impl JsProvingKeys {
+	#[wasm_bindgen(getter)]
+	pub fn pk(&self) -> Uint8Array {
+		Uint8Array::from(self.pk.as_slice())
+	}
+
+	#[wasm_bindgen(getter)]
+	pub fn vk(&self) -> Uint8Array {
+		Uint8Array::from(self.pk.as_slice())
+	}
+}
+#[wasm_bindgen]
+pub fn setupKeys(protocol: Protocol) -> JsProvingKeys {
+	let note_protocol: NoteProtocol = JsValue::from(protocol).as_string().unwrap().parse().unwrap();
+	let (pk, vk) = match note_protocol {
+		NoteProtocol::Mixer => {
+			let (c, ..) =
+				MixerR1CSProverBn254_30::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
+			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
+			(pk, vk)
+		}
+		NoteProtocol::Anchor => {
+			let (c, ..) =
+				AnchorR1CSProverBn254_30_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
+			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
+			(pk, vk)
+		}
+		NoteProtocol::VAnchor => {
+			let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng)
+				.unwrap();
+			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
+			(pk, vk)
+		}
+	};
+	JsProvingKeys { pk, vk }
+}
 #[wasm_bindgen]
 pub fn generate_proof_js(proof_input: JsProofInput) -> Result<JsProofOutput, JsValue> {
 	let mut rng = OsRng;
@@ -1217,7 +1279,6 @@ pub fn validate_proof(proof: &Proof, vk: JsString, curve: WasmCurve) -> Result<b
 }
 #[cfg(test)]
 mod test {
-	use crate::{VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF};
 	use ark_std::UniformRand;
 	use arkworks_setups::common::{prove, prove_unchecked, setup_keys, setup_keys_unchecked, verify};
 	use wasm_bindgen_test::*;
@@ -1227,6 +1288,7 @@ mod test {
 		generate_vanchor_test_setup, AnchorTestSetup, MixerTestSetup, VAnchorTestSetup, ANCHOR_NOTE_V1_X5_4,
 		ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V2_X5_4,
 	};
+	use crate::{VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF};
 
 	use super::*;
 
