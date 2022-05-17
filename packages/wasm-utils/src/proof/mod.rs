@@ -35,9 +35,105 @@ pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
 	truncated_bytes
 }
 
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct VAnchorProof {
+	#[wasm_bindgen(skip)]
+	pub proof: Vec<u8>,
+	#[wasm_bindgen(skip)]
+	pub public_inputs: Vec<Vec<u8>>,
+	#[wasm_bindgen(skip)]
+	pub output_notes: Vec<JsNote>,
+	#[wasm_bindgen(skip)]
+	pub input_utxos: Vec<JsUtxo>,
+}
+#[wasm_bindgen]
+impl VAnchorProof {
+	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name = publicInputs)]
+	pub fn public_inputs_raw(&self) -> Array {
+		let inputs: Array = self
+			.public_inputs
+			.iter()
+			.map(|x| JsString::from(hex::encode(x)))
+			.collect();
+		inputs
+	}
+
+	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name = outputNotes)]
+	pub fn output_notes(&self) -> Array {
+		let inputs: Array = self
+			.output_notes
+			.clone()
+			.into_iter()
+			.map(|x| JsValue::from(x))
+			.collect();
+		inputs
+	}
+
+	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name = inputUtxos)]
+	pub fn inputs_utxos(&self) -> Array {
+		let inputs: Array = self.input_utxos.clone().into_iter().map(|x| JsValue::from(x)).collect();
+		inputs
+	}
+
+	#[wasm_bindgen(getter)]
+	pub fn proof(&self) -> JsString {
+		JsString::from(hex::encode(&self.proof))
+	}
+}
+
+#[derive(Debug, Clone)]
+pub enum ProofOutput {
+	Mixer(Proof),
+	Anchor(Proof),
+	VAnchor(VAnchorProof),
+}
+
+#[derive(Debug, Clone)]
+#[wasm_bindgen(js_name = "ProvingOutput")]
+pub struct JsProofOutput {
+	#[wasm_bindgen(skip)]
+	pub inner: ProofOutput,
+}
+
+#[wasm_bindgen]
+impl JsProofOutput {
+	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name  = OutputProtocol)]
+	pub fn output_protocol(&self) -> Protocol {
+		let protocol = match self.inner {
+			ProofOutput::Mixer(_) => "mixer",
+			ProofOutput::Anchor(_) => "anchor",
+			ProofOutput::VAnchor(_) => "vanchor",
+		};
+
+		JsValue::from(protocol).into()
+	}
+
+	#[wasm_bindgen(getter)]
+	pub fn proof(&self) -> Result<Proof, OperationError> {
+		match self.inner.clone() {
+			ProofOutput::Mixer(proof) | ProofOutput::Anchor(proof) => Ok(proof),
+			ProofOutput::VAnchor(_) => Err(OpStatusCode::InvalidNoteProtocol.into()),
+		}
+	}
+
+	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name = vanchorProof)]
+	pub fn vanchor_proof(&self) -> Result<VAnchorProof, OperationError> {
+		match self.inner.clone() {
+			ProofOutput::VAnchor(proof) => Ok(proof),
+			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),
+		}
+	}
+}
+
 #[allow(clippy::unused_unit)]
 #[wasm_bindgen]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Proof {
 	#[wasm_bindgen(skip)]
 	pub proof: Vec<u8>,
@@ -253,7 +349,7 @@ pub struct VAnchorProofPayload {
 	pub backend: Backend,
 	pub pk: Vec<u8>,
 	pub leaves: BTreeMap<u64, Vec<Vec<u8>>>,
-	pub leaves_vec: Vec<Vec<Vec<u8>>>,
+	pub ext_data_hash: Vec<u8>,
 	/// get roots for linkable tree
 	/// Available set can be of length 2 , 16 , 32
 	pub roots: Vec<Vec<u8>>,
@@ -302,7 +398,7 @@ pub struct VAnchorProofInput {
 	pub backend: Option<Backend>,
 	pub pk: Option<Vec<u8>>,
 	pub leaves: Option<BTreeMap<u64, Vec<Vec<u8>>>>,
-	pub leaves_vec: Option<Vec<Vec<Vec<u8>>>>,
+	pub ext_data_hash: Option<Vec<u8>>,
 	/// get roots for linkable tree
 	/// Available set can be of length 2 , 16 , 32
 	pub roots: Option<Vec<Vec<u8>>>,
@@ -374,7 +470,7 @@ impl VAnchorProofInput {
 		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
 		let secret = self.secret.ok_or(OpStatusCode::InvalidNoteSecrets)?;
 		let leaves = self.leaves.ok_or(OpStatusCode::InvalidLeaves)?;
-		// TODO add error
+		let ext_data_hash = self.ext_data_hash.ok_or(OpStatusCode::InvalidExtDataHash)?;
 		let roots = self.roots.ok_or(OpStatusCode::InvalidRoots)?;
 		let chain_id = self.chain_id.ok_or(OpStatusCode::InvalidChainId)?;
 		let indices = self.indices.ok_or(OpStatusCode::InvalidIndices)?;
@@ -393,7 +489,7 @@ impl VAnchorProofInput {
 			backend,
 			pk,
 			leaves,
-			leaves_vec: self.leaves_vec.unwrap_or_default(),
+			ext_data_hash,
 			roots,
 			secret,
 			indices,
@@ -552,10 +648,10 @@ impl ProofInputBuilder {
 		}
 	}
 
-	pub fn leaves_vec(&mut self, leaves: Vec<Vec<Vec<u8>>>) -> Result<(), OperationError> {
+	pub fn ext_data_hash(&mut self, ext_data_hash_bytes: Vec<u8>) -> Result<(), OperationError> {
 		match self {
 			Self::VAnchor(input) => {
-				input.leaves_vec = Some(leaves);
+				input.ext_data_hash = Some(ext_data_hash_bytes);
 				Ok(())
 			}
 			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
@@ -980,6 +1076,15 @@ impl JsProofInputBuilder {
 		self.inner.set_input_utxos(utxos)?;
 		Ok(())
 	}
+
+	#[wasm_bindgen(js_name=setExtDatahash)]
+	pub fn set_ext_data_hash(&mut self, ex_data_hash: JsString) -> Result<(), JsValue> {
+		let ex_data_hash: String = ex_data_hash.into();
+		let bytes = hex::decode(&ex_data_hash).map_err(|_| OpStatusCode::InvalidExtDataHash)?;
+
+		self.inner.ext_data_hash(bytes)?;
+		Ok(())
+	}
 }
 impl JsProofInputBuilder {
 	pub fn build(self) -> Result<ProofInput, OperationError> {
@@ -1072,13 +1177,25 @@ impl AnchorMTBn254X5 {
 }
 
 #[wasm_bindgen]
-pub fn generate_proof_js(proof_input: JsProofInput) -> Result<Proof, JsValue> {
+pub fn generate_proof_js(proof_input: JsProofInput) -> Result<JsProofOutput, JsValue> {
 	let mut rng = OsRng;
 	let proof_input_value = proof_input.inner;
 	match proof_input_value {
-		ProofInput::Mixer(mixer_proof_input) => mixer::create_proof(mixer_proof_input, &mut rng),
-		ProofInput::Anchor(anchor_proof_input) => anchor::create_proof(anchor_proof_input, &mut rng),
-		ProofInput::VAnchor(vanchor_proof_input) => vanchor::create_proof(vanchor_proof_input, &mut rng),
+		ProofInput::Mixer(mixer_proof_input) => {
+			mixer::create_proof(mixer_proof_input, &mut rng).map(|v| JsProofOutput {
+				inner: ProofOutput::Mixer(v),
+			})
+		}
+		ProofInput::Anchor(anchor_proof_input) => {
+			anchor::create_proof(anchor_proof_input, &mut rng).map(|v| JsProofOutput {
+				inner: ProofOutput::Anchor(v),
+			})
+		}
+		ProofInput::VAnchor(vanchor_proof_input) => {
+			vanchor::create_proof(vanchor_proof_input, &mut rng).map(|v| JsProofOutput {
+				inner: ProofOutput::VAnchor(v),
+			})
+		}
 	}
 	.map_err(|e| e.into())
 }
@@ -1193,7 +1310,7 @@ mod test {
 		} = generate_mixer_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5);
 
 		let proof_input = proof_input_builder.build_js().unwrap();
-		let proof = generate_proof_js(proof_input).unwrap();
+		let proof = generate_proof_js(proof_input).unwrap().proof().unwrap();
 
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 		assert!(is_valid_proof);
@@ -1212,7 +1329,7 @@ mod test {
 		);
 
 		let proof_input = proof_input_builder.build_js().unwrap();
-		let proof = generate_proof_js(proof_input).unwrap();
+		let proof = generate_proof_js(proof_input).unwrap().proof().unwrap();
 
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 		assert!(is_valid_proof);
@@ -1232,7 +1349,7 @@ mod test {
 
 		let proof_input = proof_input_builder.build_js().unwrap();
 
-		let proof = generate_proof_js(proof_input.clone()).unwrap();
+		let proof = generate_proof_js(proof_input.clone()).unwrap().proof().unwrap();
 
 		// UNCOMENT FOR DEBUGGING
 		// match proof_input.inner {
@@ -1367,7 +1484,7 @@ mod test {
 			vk,
 		} = generate_vanchor_test_rust_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS);
 		let proof_input = proof_input_builder.build_js().unwrap();
-		let proof = generate_proof_js(proof_input).unwrap();
+		let proof = generate_proof_js(proof_input).unwrap().vanchor_proof().unwrap();
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 
 		assert!(is_valid_proof);

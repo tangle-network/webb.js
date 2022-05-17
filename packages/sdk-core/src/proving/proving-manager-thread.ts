@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import type { JsProofInput, Leaves, Proof } from '@webb-tools/wasm-utils';
+import type { JsProofInputBuilder, Leaves, Proof } from '@webb-tools/wasm-utils';
 
 import { ProofI } from '@webb-tools/sdk-core/proving/proving-manager.js';
 
@@ -86,11 +86,11 @@ export class ProvingManagerWrapper {
 
   private get proofBuilder () {
     return this.wasmBlob.then((wasm) => {
-      return wasm.ProofInputBuilder;
+      return wasm.JsProofInputBuilder
     });
   }
 
-  private async generateProof (proofInput: JsProofInput): Promise<Proof> {
+  private async generateProof (proofInput: JsProofInputBuilder): Promise<Proof> {
     const wasm = await this.wasmBlob;
 
     return wasm.generate_proof_js(proofInput);
@@ -101,8 +101,8 @@ export class ProvingManagerWrapper {
    **/
   async proof (pmSetupInput: ProvingManagerSetupInput): Promise<ProofI> {
     const Manager = await this.proofBuilder;
-    const pm = new Manager();
     const { note } = await Note.deserialize(pmSetupInput.note);
+    const pm = new Manager(note.protocol);
 
     // TODO: handle the prefix and validation
     pm.setLeaves(pmSetupInput.leaves);

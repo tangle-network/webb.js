@@ -4,20 +4,56 @@ use ark_bn254::{Bn254, Fr as Bn254Fr};
 use ark_crypto_primitives::Error;
 use ark_ff::{BigInteger, PrimeField};
 use ark_std::UniformRand;
-use arkworks_setups::common::{prove, prove_unchecked, VAnchorProof};
+use arkworks_setups::common::{prove, prove_unchecked};
 use arkworks_setups::utxo::Utxo;
 use arkworks_setups::{AnchorProver, Curve as ArkCurve, VAnchorProver};
 use rand::rngs::OsRng;
 
-use crate::proof::{AnchorProofPayload, Proof, VAnchorProofPayload};
-use crate::types::{Backend, Curve, OpStatusCode, OperationError};
+use crate::note::JsNote;
+use crate::proof::{AnchorProofPayload, OutputUtxoConfig, Proof, VAnchorProof, VAnchorProofPayload};
+use crate::types::{Backend, Curve, HashFunction, NoteProtocol, NoteVersion, OpStatusCode, OperationError};
 use crate::utxo::JsUtxo;
 use crate::{
 	AnchorR1CSProverBls381_30_2, AnchorR1CSProverBn254_30_2, VAnchorR1CSProverBn254_30_2_16_2,
 	VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF,
 };
 
-pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -> Result<Proof, OperationError> {
+fn get_output_notes(
+	anchor_proof_input: &VAnchorProofPayload,
+	output_config: [JsUtxo; 2],
+) -> Result<[JsNote; 2], OperationError> {
+	output_config
+		.into_iter()
+		.map(|c| {
+			let mut note = JsNote {
+				scheme: NoteProtocol::Mixer.to_string(),
+				protocol: NoteProtocol::VAnchor,
+				version: NoteVersion::V2,
+				source_chain_id: c.chain_id_raw().to_string(),
+				target_chain_id: c.chain_id_raw().to_string(),
+				source_identifying_data: "".to_string(),
+				target_identifying_data: "".to_string(),
+				// Are set with the utxo mutation
+				secrets: vec![],
+				curve: Some(anchor_proof_input.curve),
+				exponentiation: Some(anchor_proof_input.exponentiation),
+				width: Some(anchor_proof_input.width),
+				// TODO : fix the token_symbol
+				token_symbol: Some("ANY".to_string()),
+				amount: Some(c.amount_raw().to_string()),
+				denomination: None,
+				backend: Some(anchor_proof_input.backend),
+				hash_function: Some(HashFunction::Poseidon),
+				index: None,
+			};
+			note.update_vanchor_utxo(c)?;
+			Ok(note)
+		})
+		.collect::<Result<Vec<JsNote>, OperationError>>()?
+		.try_into()
+		.map_err(|_| OpStatusCode::InvalidProofParameters.into())
+}
+pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -> Result<VAnchorProof, OperationError> {
 	let VAnchorProofPayload {
 		public_amount,
 		backend,
@@ -31,8 +67,8 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 		pk,
 		chain_id,
 		output_config,
-		leaves_vec,
-	} = anchor_proof_input;
+		ext_data_hash,
+	} = vanchor_proof_input.clone();
 
 	// Prepare in UTXOs
 	let in_utxos: Vec<JsUtxo> = match secret.len() {
@@ -87,9 +123,14 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 		&mut OsRng,
 	)
 	.unwrap();
-	let utxos_out = [utxo_o_1, utxo_o_2];
-
-	let anchor_proof = match (backend, curve, exponentiation, width, in_utxos.len()) {
+	let utxos_out = [utxo_o_1.clone(), utxo_o_2.clone()];
+	// output payload utxos
+	let input_utxos = in_utxos.clone();
+	let output_notes = get_output_notes(&vanchor_proof_input, [
+		JsUtxo::new_from_bn254_utxo(utxo_o_1),
+		JsUtxo::new_from_bn254_utxo(utxo_o_2),
+	])?;
+	let vanchor_proof = match (backend, curve, exponentiation, width, in_utxos.len()) {
 		(Backend::Arkworks, Curve::Bn254, 5, 5, 2) => {
 			let mut utxos_in: [Utxo<Bn254Fr>; 2] = [in_utxos[0].get_bn254_utxo()?, in_utxos[1].get_bn254_utxo()?];
 			let indices = indices.try_into().map_err(|_| OpStatusCode::InvalidIndices)?;
@@ -153,12 +194,10 @@ pub fn create_proof(anchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) ->
 		error.data = Some(format!("Anchor {}", e));
 		error
 	})?;
-	Ok(Proof {
-		proof: anchor_proof.proof.clone(),
-		nullifier_hash: vec![],
-		root: vec![],
-		roots: vec![],
-		public_inputs: anchor_proof.public_inputs_raw,
-		leaf: vec![],
+	Ok(VAnchorProof {
+		proof: vanchor_proof.proof,
+		public_inputs: vanchor_proof.public_inputs_raw,
+		output_notes: output_notes.to_vec(),
+		input_utxos,
 	})
 }

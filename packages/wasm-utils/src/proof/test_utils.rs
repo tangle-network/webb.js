@@ -349,16 +349,9 @@ pub fn generate_vanchor_test_rust_setup(relayer_decoded_ss58: &str, recipient_de
 	let leaves: Vec<_> = vec![leaf0, leaf1].iter().map(|x| x.into_repr().to_bytes_le()).collect();
 	leave_map.insert(0, leaves.clone());
 	proof_builder.public_amount(10).unwrap();
-	proof_builder
-		.leaves_vec(vec![vec![leaves[0].clone()], vec![leaves[1].clone()]])
-		.unwrap();
+	proof_builder.ext_data_hash([1u8; 32].to_vec()).unwrap();
 	proof_builder.leaf_indices(vec![0, 1]).unwrap();
 	proof_builder.leaves_map(leave_map).unwrap();
-	proof_builder
-		.leaves_vec(vec![vec![leaf0.into_repr().to_bytes_le()], vec![leaf1
-			.into_repr()
-			.to_bytes_le()]])
-		.unwrap();
 	proof_builder
 		.set_input_utxos(vec![
 			JsUtxo::new_from_bn254_utxo(in_utxo1),

@@ -21,10 +21,19 @@ impl fmt::Debug for JsUtxoInner {
 #[wasm_bindgen]
 #[derive(Clone, Debug)]
 pub struct JsUtxo {
-	inner: JsUtxoInner,
+	#[wasm_bindgen(skip)]
+	pub inner: JsUtxoInner,
 }
 
 impl JsUtxo {
+	pub fn amount_raw(&self) -> u128 {
+		let amount_bytes = self.get_amount();
+		let mut amount_slice = [0u8; 16];
+		amount_slice.copy_from_slice(amount_bytes[..16].to_vec().as_slice());
+		let amount = u128::from_le_bytes(amount_slice);
+		amount
+	}
+
 	pub fn default_bn254_utxo() -> Self {
 		let utxo =
 			VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, 0, 0, None, &mut OsRng).unwrap();
