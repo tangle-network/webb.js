@@ -147,7 +147,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
       // fetching the proving key
       const provingKey = await fetchSubstrateTornadoProvingKey();
       const isValidRelayer = Boolean(activeRelayer && activeRelayer.beneficiary);
-      const proofInput: ProvingManagerSetupInput = {
+      const proofInput: ProvingManagerSetupInput<'mixer'> = {
         fee: 0,
         leafIndex,
         leaves,
@@ -168,7 +168,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
         });
       }
 
-      const zkProofMetadata = await pm.prove(proofInput);
+      const zkProofMetadata = await pm.prove('mixer', proofInput);
 
       const withdrawProof: WithdrawProof = {
         fee: 0,

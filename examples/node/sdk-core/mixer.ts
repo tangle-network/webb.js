@@ -74,7 +74,7 @@ async function mixerBn254() {
   const pk = fs.readFileSync(pkPath);
 
   // Proving Input
-  const provingInput: ProvingManagerSetupInput = {
+  const provingInput: ProvingManagerSetupInput<'mixer'> = {
     leafIndex: 0,
     provingKey: hexToU8a(pk.toString('hex')),
     note: note.serialize(),
@@ -86,7 +86,7 @@ async function mixerBn254() {
   };
 
   // Proof
-  const proof = await pm.prove(provingInput)
+  const proof = await pm.prove('mixer',provingInput)
 
   const withdrawProof: WithdrawProof = {
     id: String(0),

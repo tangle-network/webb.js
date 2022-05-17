@@ -6,7 +6,7 @@ import {
   JsNote,
   JsNoteBuilder,
   OperationError,
-  ProofInputBuilder,
+  JsProofInputBuilder,
 } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/keyring';
@@ -367,7 +367,7 @@ export async function withdrawAnchorBnx5_4(
 
   // fetch leaves
   const leaves = await fetchRPCTreeLeaves(api, Number(treeId));
-  const proofInputBuilder = new ProofInputBuilder();
+  const proofInputBuilder = new JsProofInputBuilder('anchor');
   const leafHex = u8aToHex(note.getLeafCommitment());
   proofInputBuilder.setNote(note);
   proofInputBuilder.setLeaves(leaves);
@@ -405,7 +405,7 @@ export async function withdrawAnchorBnx5_4(
 
   const proofInput = proofInputBuilder.build_js();
 
-  const zkProofMetadata = generate_proof_js(proofInput);
+  const zkProofMetadata = generate_proof_js(proofInput).proof;
 
   const withdrawProof: AnchorWithdrawProof = {
     id: treeId,
@@ -449,7 +449,7 @@ export async function withdrawMixerBnX5_3(
   const relayerAddressHex = u8aToHex(decodeAddress(relayerAccountId));
   // Fetch leaves
   const leaves = await fetchRPCTreeLeaves(api, 0);
-  const proofInputBuilder = new ProofInputBuilder();
+  const proofInputBuilder = new JsProofInputBuilder("mixer");
   const leafHex = u8aToHex(note.getLeafCommitment());
   proofInputBuilder.setNote(note);
   proofInputBuilder.setLeaves(leaves);
@@ -479,7 +479,7 @@ export async function withdrawMixerBnX5_3(
 
   const proofInput = proofInputBuilder.build_js();
 
-  const zkProofMetadata = generate_proof_js(proofInput);
+  const zkProofMetadata = generate_proof_js(proofInput).proof;
 
   /*
   const vkPath = path.join(

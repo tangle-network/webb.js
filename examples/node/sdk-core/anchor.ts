@@ -68,7 +68,7 @@ export async function anchorBn254() {
   const leafHex = u8aToHex(note.getLeaf());
   const leafIndex = leaves.findIndex((l) => u8aToHex(l) === leafHex);
 
-  const proveInput: ProvingManagerSetupInput = {
+  const proveInput: ProvingManagerSetupInput<'anchor'> = {
     fee: 0,
     leafIndex,
     leaves,
@@ -77,9 +77,11 @@ export async function anchorBn254() {
     recipient: addressHex.replace('0x', ''),
     refund: 0,
     relayer: relayerAddressHex.replace('0x', ''),
-    refreshCommitment: '0000000000000000000000000000000000000000000000000000000000000000'
+    refreshCommitment: '0000000000000000000000000000000000000000000000000000000000000000',
+    roots:[]
+
   };
-  const proof = await pm.prove(proveInput);
+  const proof = await pm.prove('anchor',proveInput);
   const withdrawProof: AnchorWithdrawProof = {
     id: treeId,
     proofBytes: `0x${proof.proof}` as any,

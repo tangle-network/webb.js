@@ -123,7 +123,7 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
       // Get the linked tree root
       const root = await this.fetchRoot(treeId);
 
-      const proofInput: ProvingManagerSetupInput = {
+      const proofInput: ProvingManagerSetupInput<'anchor'> = {
         fee: 0,
         leafIndex,
         leaves,
@@ -137,7 +137,7 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
       };
 
       logger.log('proofInput to webb.js: ', proofInput);
-      const zkProofMetadata = await pm.prove(proofInput);
+      const zkProofMetadata = await pm.prove('anchor', proofInput);
       const withdrawProof: AnchorWithdrawProof = {
         fee: 0,
         id: treeId,
