@@ -189,6 +189,7 @@ export class ProvingManagerWrapper {
 
     const proofOutput = await this.generateProof(proofInput);
 
+    // Mixer and anchor share the same proof type
     if (protocol === 'mixer' || protocol === 'anchor') {
       const proof = proofOutput.proof;
 
