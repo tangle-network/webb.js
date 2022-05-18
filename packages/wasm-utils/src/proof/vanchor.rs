@@ -71,8 +71,8 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		2 | 16 => secret,
 		length if length < 16 && length > 2 => {
 			let mut utxos: Vec<JsUtxo> = secret;
-			let utxo =
-				VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, 0, 0, None, &mut OsRng).unwrap();
+			let utxo = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, 0, 0, Some(0), &mut OsRng)
+				.unwrap();
 			// Create empty UTXOs to fill the list with  16 UTXOs
 			let js_utxo = JsUtxo::new_from_bn254_utxo(utxo);
 			loop {
@@ -84,8 +84,8 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 			utxos
 		}
 		1 => {
-			let utxo =
-				VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, 0, 0, None, &mut OsRng).unwrap();
+			let utxo = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(ArkCurve::Bn254, 0, 0, Some(0), &mut OsRng)
+				.unwrap();
 			let utxo = JsUtxo::new_from_bn254_utxo(utxo);
 			vec![secret[0].clone(), utxo]
 		}
