@@ -4,7 +4,8 @@
 /* eslint-disable camelcase */
 
 import { Log } from '@ethersproject/abstract-provider';
-import { anchorDeploymentBlock, bridgeCurrencyBridgeStorageFactory, MixerStorage } from '@webb-tools/api-providers/utils/index.js';
+import { ChainType, computeChainIdType } from '@webb-tools/api-providers/index.js';
+import { BridgeStorage, bridgeStorageFactory, getAnchorDeploymentBlockNumber } from '@webb-tools/api-providers/utils/index.js';
 import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { ERC20, ERC20__factory as ERC20Factory, FixedDepositAnchor, FixedDepositAnchor__factory } from '@webb-tools/contracts';
@@ -72,7 +73,7 @@ export class AnchorContract {
       console.log('createTreeWithRoot - leaf: ', leaves[i]);
       const nextRoot = tree.getRoot();
 
-      logger.log(`target root: ${targetRoot} \n this root: ${bufferToFixed(nextRoot)}`);
+      console.log(`target root: ${targetRoot} \n this root: ${bufferToFixed(nextRoot)}`);
 
       if (bufferToFixed(nextRoot) === targetRoot) {
         return tree;
@@ -270,11 +271,14 @@ export class AnchorContract {
    **/
 
   async generateMerkleProof (deposit: IAnchorDepositInfo) {
-    const bridgeStorageStorage = await bridgeCurrencyBridgeStorageFactory();
-    const storedContractInfo: MixerStorage[0] = (await bridgeStorageStorage.get(
+    const evmId = await this.signer.getChainId();
+    const sourceChainIdType = computeChainIdType(ChainType.EVM, evmId);
+
+    const bridgeStorageStorage = await bridgeStorageFactory(sourceChainIdType);
+    const storedContractInfo: BridgeStorage[0] = (await bridgeStorageStorage.get(
       this._contract.address.toLowerCase()
     )) || {
-      lastQueriedBlock: anchorDeploymentBlock[this._contract.address.toString().toLowerCase()] || 0,
+      lastQueriedBlock: getAnchorDeploymentBlockNumber(sourceChainIdType, this._contract.address) || 0,
       leaves: [] as string[]
     };
     const treeHeight = await this._contract.levels();
@@ -322,7 +326,7 @@ export class AnchorContract {
     const edgeIndex = await this._contract.edgeIndex(sourceChainId);
     const edge = await this._contract.edgeList(edgeIndex);
 
-    logger.log('retrieved edge while generating merkle proof: ', edge);
+    console.log('retrieved edge while generating merkle proof: ', edge);
     const latestSourceRoot = edge[1];
 
     const tree = AnchorContract.createTreeWithRoot(sourceLeaves, latestSourceRoot);
@@ -333,7 +337,7 @@ export class AnchorContract {
       console.log('index of element: ', index);
       const path = tree.path(index);
 
-      logger.log('path for proof: ', path);
+      console.log('path for proof: ', path);
 
       return {
         index: index,
@@ -378,13 +382,13 @@ export class AnchorContract {
     };
     const edges = await this._contract.maxEdges();
 
-    logger.trace(`Generate witness with edges ${edges}`, input);
+    console.log(`Generate witness with edges ${edges}`, input);
     const witness = await generateWitness(input, edges as any);
 
-    logger.trace('Generated witness', witness);
+    console.log('Generated witness', witness);
     const proof = await proofAndVerify(witness, edges as any);
 
-    logger.trace('Zero knowlage proof', proof);
+    console.log('Zero knowledge proof', proof);
 
     return { input, proof: proof.proof, root };
   }

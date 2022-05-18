@@ -11,7 +11,7 @@ async function main() {
 
   const leaves = await api.derive.merkleTreeBn254.getLeavesForTree(0, 0, 1);
   leaves.map((leaf) => {
-    console.log('leaf: ', leaf.valueOf());
+    console.log('leaf: ', leaf);
   })
 }
 

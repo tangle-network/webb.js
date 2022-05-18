@@ -1,9 +1,8 @@
 {
-  "name": "@webb-tools/app-util",
+  "name": "@webb-tools/test-utils",
   "version": "0.1.4-60",
-  "description": "Utilities to work with Webb",
+  "description": "Utilities to work with Webb in test environments",
   "author": "Webb Developers <drew@webb.tools>",
-  "main": "index.cjs",
   "module": "index.js",
   "type": "module",
   "license": "Apache-2.0",
@@ -14,7 +13,11 @@
   "repository": "https://github.com/webb-tools/webb.js.git",
   "dependencies": {
     "@babel/runtime": "^7.10.2",
-    "bignumber.js": "^9.0.0"
+    "@polkadot/api": "8.1.1",
+    "@polkadot/keyring": "9.0.1",
+    "@webb-tools/api": "0.1.4-60",
+    "bignumber.js": "^9.0.0",
+    "ethers": "5.5.1"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",

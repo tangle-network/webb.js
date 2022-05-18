@@ -6,7 +6,9 @@ import { InternalChainId } from '../chains/index.js';
 export function relayerSubstrateNameToChainId (name: string): InternalChainId {
   switch (name) {
     case 'localnode':
-      return InternalChainId.WebbDevelopment;
+      return InternalChainId.ProtocolSubstrateStandalone;
+    case 'webbeggnet':
+      return InternalChainId.EggStandalone;
   }
 
   throw new Error('unhandled relayed chain name  ' + name);
@@ -44,6 +46,12 @@ export function relayerNameToChainId (name: string): InternalChainId {
       return InternalChainId.ArbitrumTestnet;
     case 'polygontestnet':
       return InternalChainId.PolygonTestnet;
+    case 'athena':
+      return InternalChainId.AthenaLocalnet;
+    case 'demeter':
+      return InternalChainId.DemeterLocalnet;
+    case 'hermes':
+      return InternalChainId.HermesLocalnet;
   }
 
   throw new Error('unhandled relayed chain name  ' + name);
@@ -64,7 +72,12 @@ enum RelayerChainName {
   Shiden = 'shiden',
   OptimismTestnet = 'optimismtestnet',
   ArbitrumTestnet = 'arbitrumtestnet',
-  PolygonTestnet = 'polygontestnet'
+  PolygonTestnet = 'polygontestnet',
+  ProtocolSubstrateStandalone = 'localnode',
+  WebbEggnet = 'webbeggnet',
+  Hermes = 'hermes',
+  Athena = 'athena',
+  Demeter = 'demeter',
 }
 
 export function chainIdToRelayerName (id: InternalChainId): string {
@@ -99,6 +112,16 @@ export function chainIdToRelayerName (id: InternalChainId): string {
       return RelayerChainName.ArbitrumTestnet;
     case InternalChainId.PolygonTestnet:
       return RelayerChainName.PolygonTestnet;
+    case InternalChainId.ProtocolSubstrateStandalone:
+      return RelayerChainName.ProtocolSubstrateStandalone;
+    case InternalChainId.EggStandalone:
+      return RelayerChainName.WebbEggnet;
+    case InternalChainId.HermesLocalnet:
+      return RelayerChainName.Hermes;
+    case InternalChainId.AthenaLocalnet:
+      return RelayerChainName.Athena;
+    case InternalChainId.DemeterLocalnet:
+      return RelayerChainName.Demeter;
   }
 
   throw new Error(`unhandled Chain id ${id}`);

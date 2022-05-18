@@ -8,18 +8,19 @@ import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
 import { u8aToHex } from '@polkadot/util';
 
 import { AnchorDeposit, AnchorSize, DepositPayload as IDepositPayload } from '../abstracts/index.js';
-import { ChainType, computeChainIdType, InternalChainId, SubstrateChainId } from '../chains/index.js';
+import { computeChainIdType, InternalChainId } from '../chains/index.js';
 import { BridgeConfig } from '../types/bridge-config.interface.js';
 import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
 import { WebbPolkadot } from './webb-provider.js';
 
 const logger = LoggerService.get('PolkadotBridgeDeposit');
 
+// The Deposit Payload is the note and [treeId, leafHex]
 type DepositPayload = IDepositPayload<Note, [number, string]>;
 /**
  * Webb Anchor API implementation for Polkadot
  **/
-export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPayload> {
+export class PolkadotAnchorDeposit extends AnchorDeposit<WebbPolkadot, DepositPayload> {
   async deposit (depositPayload: DepositPayload): Promise<void> {
     const tx = this.inner.txBuilder.build(
       {
@@ -39,6 +40,7 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
     console.log(hash);
   }
 
+  // anchorId is formatted as 'Bridge=<amount>@<assetName>@<linkableTreeId>.
   async generateBridgeNote (
     anchorId: number | string,
     destination: number,
@@ -58,24 +60,17 @@ export class PolkadotBridgeDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
     const destChainId = destination;
     // TODO: add mappers similar to evm chain id
     // const chainId = this.inner.api.registry.chainSS58!;
-    const chainId = SubstrateChainId.Webb;
-    const sourceChainId = computeChainIdType(ChainType.Substrate, chainId);
+    const chainId = await this.inner.api.consts.linkableTreeBn254.chainIdentifier;
+    const chainType = await this.inner.api.consts.linkableTreeBn254.chainType;
+    const sourceChainId = computeChainIdType(Number(chainType.toHex()), Number(chainId));
     const anchorPath = String(anchorId).replace('Bridge=', '').split('@');
     const amount = anchorPath[0];
     const anchorIndex = anchorPath[2];
     const anchors = await this.bridgeApi.getAnchors();
     const anchor = anchors[Number(anchorIndex)];
 
-    logger.trace({
-      amount,
-      anchor,
-      anchorId,
-      anchorIndex,
-      anchors,
-      destination,
-      sourceChainId
-    });
-    const treeId = anchor.neighbours[InternalChainId.WebbDevelopment] as number; // TODO: Anchor in one chain the 0 id contains the treeId
+    // TODO: Anchor in one chain the 0 id contains the treeId
+    const treeId = anchor.neighbours[InternalChainId.ProtocolSubstrateStandalone] as number;
     // Create the note gen input
     const noteInput: NoteGenInput = {
       amount: amount,

@@ -157,7 +157,7 @@ export type MixerRelayTx = {
 /**
  * Anchor relayer transaction payload it's similar to mixer/tornado, but don't have the value `root`
  * @param chain - Chain name
- * @param contract - The target contract.
+ * @param id - The target contract.
  * @param proof - Proof bytes
  * @param fee - Fee value
  * @param refund - Refund value
@@ -168,7 +168,8 @@ export type MixerRelayTx = {
  **/
 type AnchorRelayTransaction = {
   chain: string;
-  contract: string;
+  id: string;
+  extDataHash: string;
   proof: string;
   fee: string;
   nullifierHash: string;
@@ -176,20 +177,20 @@ type AnchorRelayTransaction = {
   refund: string;
   relayer: string;
   refreshCommitment: string;
-  roots: Array<number>;
+  roots: string;
 };
 
 /**
  * Relayed transaction for substrate
  **/
 export type RelayerSubstrateCommands = {
-  mixerRelayTx: MixerRelayTx;
+  mixer: MixerRelayTx;
 };
 /**
  * Relayed transaction for EVM
  **/
 export type RelayerEVMCommands = {
-  anchorRelayTx: AnchorRelayTransaction;
+  anchor: AnchorRelayTransaction;
 };
 export type EVMCMDKeys = keyof RelayerEVMCommands;
 export type SubstrateCMDKeys = keyof RelayerSubstrateCommands;

@@ -99,7 +99,7 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
       // Get the anchor of the note amount
       const anchor = anchors.find((a) => a.amount === amount)!;
       // TODO : Make the key dynamic not just WebbDevelopment!
-      const treeId = anchor.neighbours[InternalChainId.WebbDevelopment] as string;
+      const treeId = anchor.neighbours[InternalChainId.ProtocolSubstrateStandalone] as string;
       // Fetching tree leaves
       const leaves = await this.fetchRPCTreeLeaves(treeId);
       const leaf = depositNote.getLeafCommitment();

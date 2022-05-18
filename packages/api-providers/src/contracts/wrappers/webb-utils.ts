@@ -19,7 +19,11 @@ export const isZero = (value: string | number) => {
     return true;
   }
 
-  return value === ZERO;
+  if (value === 'ZERO') {
+    return true;
+  }
+
+  return value === 0;
 };
 
 export const generateWitness = async (input: AnchorWitnessInput, maxEdges: MaxEdges) => {
