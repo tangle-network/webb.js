@@ -26,7 +26,7 @@ fn get_output_notes(
 		.into_iter()
 		.map(|c| {
 			let mut note = JsNote {
-				scheme: NoteProtocol::Mixer.to_string(),
+				scheme: NoteProtocol::VAnchor.to_string(),
 				protocol: NoteProtocol::VAnchor,
 				version: NoteVersion::V2,
 				source_chain_id: c.chain_id_raw().to_string(),
@@ -51,7 +51,9 @@ fn get_output_notes(
 		})
 		.collect::<Result<Vec<JsNote>, OperationError>>()?
 		.try_into()
-		.map_err(|_| OpStatusCode::InvalidProofParameters.into())
+		.map_err(|_| {
+			OperationError::new_with_message(OpStatusCode::Unknown, "Failed to generate the notes".to_string())
+		})
 }
 pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -> Result<VAnchorProof, OperationError> {
 	let VAnchorProofPayload {
@@ -190,9 +192,8 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		}
 	}
 	.map_err(|e| {
-		let mut error: OperationError = OpStatusCode::InvalidProofParameters.into();
-		error.data = Some(format!("Anchor {}", e));
-		error
+		let message = format!("Anchor {}", e).to_string();
+		OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message)
 	})?;
 	Ok(VAnchorProof {
 		proof: vanchor_proof.proof,

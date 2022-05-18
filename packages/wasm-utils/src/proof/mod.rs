@@ -1182,15 +1182,19 @@ impl AnchorMTBn254X5 {
 }
 // For testing on js side
 #[wasm_bindgen]
-pub fn verifyJsProof(proof_output: JsProofOutput, vk: JsString) -> bool {
-	let vk_bytes = hex::decode(JsValue::from(vk).as_string().unwrap()).unwrap();
-	match proof_output.inner {
-		ProofOutput::Mixer(proof) | ProofOutput::Anchor(proof) => {
-			verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk_bytes, &proof.proof).unwrap()
-		}
-		ProofOutput::VAnchor(proof) => {
-			verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk_bytes, &proof.proof).unwrap()
-		}
+pub fn verify_js_proof(proof: JsString, publicInputs: Array, vk: JsString, curve: WasmCurve) -> bool {
+	let proof = hex::decode(JsValue::from(proof).as_string().unwrap()).unwrap();
+	let pub_ins: Vec<String> = publicInputs
+		.to_vec()
+		.into_iter()
+		.map(|v| JsValue::from(JsString::from(v)).as_string().unwrap())
+		.collect();
+	let pub_ins: Vec<Vec<u8>> = pub_ins.into_iter().map(|x| hex::decode(&x).unwrap()).collect();
+	let curve: Curve = JsValue::from(curve).as_string().unwrap().parse().unwrap();
+	let vk = hex::decode(JsValue::from(vk).as_string().unwrap()).unwrap();
+	match curve {
+		Curve::Bls381 => verify_unchecked_raw::<Bls12_381>(&pub_ins, &vk, &proof).unwrap(),
+		Curve::Bn254 => verify_unchecked_raw::<Bn254>(&pub_ins, &vk, &proof).unwrap(),
 	}
 }
 
@@ -1218,21 +1222,21 @@ pub fn setupKeys(protocol: Protocol) -> JsProvingKeys {
 	let note_protocol: NoteProtocol = JsValue::from(protocol).as_string().unwrap().parse().unwrap();
 	let (pk, vk) = match note_protocol {
 		NoteProtocol::Mixer => {
-			let (c, ..) =
-				MixerR1CSProverBn254_30::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
-			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
+			let (c, ..) = MixerR1CSProverBn254_30::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng)
+				.expect("Failed to create a circuit");
+			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).expect("failed to generate keys");
 			(pk, vk)
 		}
 		NoteProtocol::Anchor => {
-			let (c, ..) =
-				AnchorR1CSProverBn254_30_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
-			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
+			let (c, ..) = AnchorR1CSProverBn254_30_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng)
+				.expect("Failed to create a circuit");
+			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).expect("failed to generate keys");
 			(pk, vk)
 		}
 		NoteProtocol::VAnchor => {
 			let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng)
-				.unwrap();
-			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
+				.expect("Failed to create a circuit");
+			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).expect("failed to generate keys");
 			(pk, vk)
 		}
 	};

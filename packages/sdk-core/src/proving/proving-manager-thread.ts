@@ -165,7 +165,7 @@ export class ProvingManagerWrapper {
 
       pm.setNote(note);
       pm.setNotes(jsNotes);
-      pm.setIndices(input.indices);
+      pm.setIndices(input.indices.map((i) => i.toString()) as any);
       pm.setPk(u8aToHex(input.provingKey).replace('0x', ''));
       pm.setRoots(input.roots);
       pm.chain_id(input.chainId);
@@ -189,7 +189,7 @@ export class ProvingManagerWrapper {
 
     const proofOutput = await this.generateProof(proofInput);
 
-    if (protocol === 'mixer' || protocol === 'vanchor') {
+    if (protocol === 'mixer' || protocol === 'anchor') {
       const proof = proofOutput.proof;
 
       const proofPayload: ProofI<'anchor'> = {
