@@ -4048,7 +4048,7 @@
     "@webb-tools/contracts" "^0.1.10"
     "@webb-tools/utils" "^0.1.7"
 
-"@webb-tools/merkle-tree@0.1.14", "@webb-tools/merkle-tree@^0.1.14":
+"@webb-tools/merkle-tree@^0.1.14":
   version "0.1.14"
   resolved "https://registry.yarnpkg.com/@webb-tools/merkle-tree/-/merkle-tree-0.1.14.tgz#9ae8b2d52b6c1117eaa2d2ef9505395af21c2488"
   integrity sha512-67dI+tHtRyhmLaTkgkDEH2gtNAFpb57BccpN3nUZhrjZ8f+RMfidU3KoUpzAos+eSzkV2w8J1WnRK41daQUtig==
@@ -8069,10 +8069,10 @@ functions-have-names@^1.2.2:
   resolved "https://registry.yarnpkg.com/functions-have-names/-/functions-have-names-1.2.2.tgz#98d93991c39da9361f8e50b337c4f6e41f120e21"
   integrity sha512-bLgc3asbWdwPbx2mNk2S49kmJCuQeu0nfmaOgbs8WIyzzkw3r4htszdIi9Q9EMezDPTYuJx2wvjZ/EwgAthpnA==
 
-ganache@^7.0.3:
-  version "7.0.4"
-  resolved "https://registry.yarnpkg.com/ganache/-/ganache-7.0.4.tgz#a1ec33f8e264a7691397dc9efdc4b9f85c8119e4"
-  integrity sha512-/ur2WNQoCwmobZb/TcpMgJlJy4TLtCUMtnCIldChAn5LleeAETaHB80knGqOgGc3ZS+ksokSqmQHuHqMAmlRkg==
+ganache@7.1.0:
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/ganache/-/ganache-7.1.0.tgz#f38287ae86c415d0a62b762faaef4732811e89e7"
+  integrity sha512-f794GTIxHcb9o889GOh0Ad6/Q09nsNhJtN11oi8m+nxsuPHkkMNaGRHav3hApZLY3GPrSBT3XIKlDIUFxcBq8g==
   dependencies:
     "@trufflesuite/bigint-buffer" "1.1.9"
     emittery "0.10.0"

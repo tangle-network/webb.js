@@ -4,17 +4,17 @@
 /* eslint-disable camelcase */
 
 import { Log } from '@ethersproject/abstract-provider';
+import { Anchor } from '@webb-tools/anchors';
 import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { ERC20, ERC20__factory as ERC20Factory, FixedDepositAnchor, FixedDepositAnchor__factory } from '@webb-tools/contracts';
 import { IAnchorDepositInfo } from '@webb-tools/interfaces';
-import { getFixedAnchorExtDataHash } from '@webb-tools/utils';
+import { MerkleTree } from '@webb-tools/merkle-tree';
+import { getFixedAnchorExtDataHash, toFixedHex } from '@webb-tools/utils';
 import { BigNumber, Contract, providers, Signer } from 'ethers';
 
-import { bufferToFixed, createRootsBytes, generateWithdrawProofCallData } from '../utils/index.js';
-import { MerkleTree, PoseidonHasher } from '../utils/merkle/index.js';
+import { zeroAddress } from '../index.js';
 import { ZKPWebbAnchorInputWithMerkle } from './types.js';
-import { zeroAddress } from './webb-utils.js';
 
 const logger = LoggerService.get('AnchorContract');
 
@@ -60,16 +60,16 @@ export class AnchorContract {
   }
 
   static createTreeWithRoot (leaves: string[], targetRoot: string): MerkleTree | undefined {
-    const tree = MerkleTree.new('eth', 30, [], new PoseidonHasher());
+    const tree = new MerkleTree(30, []);
 
     for (let i = 0; i < leaves.length; i++) {
       tree.insert(leaves[i]);
       console.log('createTreeWithRoot - leaf: ', leaves[i]);
-      const nextRoot = tree.getRoot();
+      const nextRoot = tree.root();
 
-      console.log(`target root: ${targetRoot} \n this root: ${bufferToFixed(nextRoot)}`);
+      console.log(`target root: ${targetRoot} \n this root: ${toFixedHex(nextRoot)}`);
 
-      if (bufferToFixed(nextRoot) === targetRoot) {
+      if (toFixedHex(nextRoot) === targetRoot) {
         return tree;
       }
     }
@@ -265,7 +265,7 @@ export class AnchorContract {
     const tree = AnchorContract.createTreeWithRoot(sourceLeaves, latestSourceRoot);
 
     if (tree) {
-      const index = tree.getIndexOfElement(sourceDeposit.commitment);
+      const index = tree.getIndexByElement(sourceDeposit.commitment);
 
       console.log('index of element: ', index);
       const path = tree.path(index);
@@ -285,14 +285,14 @@ export class AnchorContract {
     const overrides = {
       gasLimit: 6000000
     };
-    const proofBytes = await generateWithdrawProofCallData(proof, pub);
-    const nullifierHash = bufferToFixed(zkp.nullifierHash);
-    const roots = createRootsBytes(pub.roots);
+    const proofBytes = await Anchor.generateWithdrawProofCallData(proof, pub);
+    const nullifierHash = toFixedHex(zkp.nullifierHash);
+    const roots = Anchor.createRootsBytes(pub.roots);
     const extDataHash = getFixedAnchorExtDataHash({
-      _fee: bufferToFixed(zkp.fee),
+      _fee: toFixedHex(zkp.fee),
       _recipient: zkp.recipient,
-      _refreshCommitment: bufferToFixed('0'),
-      _refund: bufferToFixed(zkp.refund),
+      _refreshCommitment: toFixedHex('0'),
+      _refund: toFixedHex(zkp.refund),
       _relayer: zkp.relayer
     });
     const tx = await this._contract.withdraw(
@@ -303,10 +303,10 @@ export class AnchorContract {
         proof: `0x${proofBytes}`
       },
       {
-        _fee: bufferToFixed(zkp.fee),
+        _fee: toFixedHex(zkp.fee),
         _recipient: zkp.recipient,
-        _refreshCommitment: bufferToFixed('0'),
-        _refund: bufferToFixed(zkp.refund),
+        _refreshCommitment: toFixedHex('0'),
+        _refund: toFixedHex(zkp.refund),
         _relayer: zkp.relayer
       },
       overrides

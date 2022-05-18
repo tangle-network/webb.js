@@ -10,12 +10,12 @@ import { BridgeConfig, OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawRe
 import { BridgeStorage, bridgeStorageFactory, chainIdToRelayerName, getAnchorAddressForBridge, getAnchorDeploymentBlockNumber, getEVMChainName, getEVMChainNameFromInternal } from '@webb-tools/api-providers/utils/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note } from '@webb-tools/sdk-core/index.js';
+import { toFixedHex } from '@webb-tools/utils';
 import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
 import { BigNumber } from 'ethers';
 
 import { AnchorApi, AnchorWithdraw } from '../abstracts/index.js';
 import { ChainType, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains/index.js';
-import { bufferToFixed } from '../contracts/utils/buffer-to-fixed.js';
 import { depositFromAnchorNote } from '../contracts/utils/make-deposit.js';
 import { AnchorContract } from '../contracts/wrappers/index.js';
 import { webbCurrencyIdFromString } from '../enums/index.js';
@@ -455,12 +455,12 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
         {
           chain: chainInfo.name,
           extDataHash: withdrawSetup.publicInputs._extDataHash,
-          fee: bufferToFixed(withdrawSetup.extData._fee),
+          fee: toFixedHex(withdrawSetup.extData._fee),
           id: chainInfo.contractAddress,
-          nullifierHash: bufferToFixed(withdrawSetup.publicInputs._nullifierHash),
+          nullifierHash: toFixedHex(withdrawSetup.publicInputs._nullifierHash),
           recipient: withdrawSetup.extData._recipient,
           refreshCommitment: withdrawSetup.extData._refreshCommitment,
-          refund: bufferToFixed(withdrawSetup.extData._refund),
+          refund: toFixedHex(withdrawSetup.extData._refund),
           relayer: withdrawSetup.extData._relayer,
           roots: withdrawSetup.publicInputs._roots
         }

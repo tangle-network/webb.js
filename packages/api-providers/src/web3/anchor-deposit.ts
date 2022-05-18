@@ -1,18 +1,18 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
+import { Anchor } from '@webb-tools/anchors';
 import { getEVMChainNameFromInternal } from '@webb-tools/api-providers/utils/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 // eslint-disable-next-line camelcase
 import { ERC20__factory as ERC20Factory } from '@webb-tools/contracts';
 import { IAnchorDepositInfo } from '@webb-tools/interfaces';
 import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
+import { GovernedTokenWrapper } from '@webb-tools/tokens';
+import { toFixedHex } from '@webb-tools/utils';
 
 import { AnchorApi, AnchorDeposit, Currency, DepositPayload as IDepositPayload, MixerSize } from '../abstracts/index.js';
 import { ChainType, ChainTypeId, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, InternalChainId, internalChainIdIntoEVMId, parseChainIdType } from '../chains/index.js';
-import { bufferToFixed } from '../contracts/utils/buffer-to-fixed.js';
-import { createAnchor2Deposit } from '../contracts/utils/make-deposit.js';
-import { WebbGovernedToken } from '../contracts/wrappers/index.js';
 import { BridgeConfig } from '../index.js';
 import { WebbWeb3Provider } from './webb-provider.js';
 
@@ -238,8 +238,8 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       }
 
       // Get the available token addresses which can wrap into the wrappedToken
-      const wrappedToken = new WebbGovernedToken(this.inner.getEthersProvider(), wrappedTokenAddress);
-      const tokenAddresses = await wrappedToken.tokens;
+      const wrappedToken = GovernedTokenWrapper.connect(wrappedTokenAddress, this.inner.getEthersProvider().getSigner());
+      const tokenAddresses = await wrappedToken.contract.getTokens();
 
       // TODO: dynamic wrappable assets - consider some Currency constructor via address & default token config.
 
@@ -250,7 +250,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
         return wrappableTokenAddress && tokenAddresses.includes(wrappableTokenAddress);
       });
 
-      if (await wrappedToken.isNativeAllowed()) {
+      if (await wrappedToken.contract.isNativeAllowed()) {
         wrappableCurrencyIds.push(this.config.chains[chainId].nativeCurrencyId);
       }
 
@@ -297,7 +297,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
     const tokenSymbol = currency.view.symbol;
     const sourceEvmId = await this.inner.getChainId();
     const sourceChainId = computeChainIdType(ChainType.EVM, sourceEvmId);
-    const deposit = createAnchor2Deposit(destChainId);
+    const deposit = Anchor.generateDeposit(destChainId);
     const srcChainInternal = evmIdIntoInternalChainId(sourceEvmId);
     const destChainInternal = chainTypeIdToInternalId(parseChainIdType(destChainId));
     const target = currency.getAddress(destChainInternal);
@@ -312,7 +312,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       exponentiation: '5',
       hashFunction: 'Poseidon',
       protocol: 'anchor',
-      secrets: `${bufferToFixed(destChainId, 6).substring(2)}:${deposit.nullifier.toString(16)}:${deposit.secret.toString(16)}`,
+      secrets: `${toFixedHex(destChainId, 6).substring(2)}:${deposit.nullifier.toString(16)}:${deposit.secret.toString(16)}`,
       sourceChain: sourceChainId.toString(),
       sourceIdentifyingData: srcAddress,
       targetChain: destChainId.toString(),
