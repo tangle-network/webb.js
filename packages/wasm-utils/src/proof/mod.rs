@@ -18,14 +18,13 @@ use wasm_bindgen::__rt::std::collections::btree_map::BTreeMap;
 use wasm_bindgen::convert::FromWasmAbi;
 use wasm_bindgen::prelude::*;
 
-use crate::note::{JsLeafInner, JsNote};
+use crate::note::JsNote;
 use crate::types::{
 	Backend, Curve, Indices, Leaves, NoteProtocol, OpStatusCode, OperationError, Protocol, Uint8Arrayx32, WasmCurve,
 };
 use crate::utxo::JsUtxo;
 use crate::{
-	AnchorR1CSProverBls381_30_2, AnchorR1CSProverBn254_30_2, MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_2_2,
-	DEFAULT_LEAF, TREE_HEIGHT,
+	AnchorR1CSProverBn254_30_2, MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF, TREE_HEIGHT,
 };
 
 mod anchor;
@@ -68,19 +67,14 @@ impl VAnchorProof {
 	#[wasm_bindgen(getter)]
 	#[wasm_bindgen(js_name = outputNotes)]
 	pub fn output_notes(&self) -> Array {
-		let inputs: Array = self
-			.output_notes
-			.clone()
-			.into_iter()
-			.map(|x| JsValue::from(x))
-			.collect();
+		let inputs: Array = self.output_notes.clone().into_iter().map(JsValue::from).collect();
 		inputs
 	}
 
 	#[wasm_bindgen(getter)]
 	#[wasm_bindgen(js_name = inputUtxos)]
 	pub fn inputs_utxos(&self) -> Array {
-		let inputs: Array = self.input_utxos.clone().into_iter().map(|x| JsValue::from(x)).collect();
+		let inputs: Array = self.input_utxos.clone().into_iter().map(JsValue::from).collect();
 		inputs
 	}
 
@@ -425,15 +419,15 @@ pub fn generic_of_jsval<T: FromWasmAbi<Abi = u32>>(js: JsValue, classname: &str)
 	if ctor_name == classname {
 		let ptr = Reflect::get(&js, &JsValue::from_str("ptr"))?;
 		let ptr_u32: u32 = ptr.as_f64().ok_or(JsValue::NULL)? as u32;
-		let foo = unsafe { T::from_abi(ptr_u32) };
-		Ok(foo)
+		let t = unsafe { T::from_abi(ptr_u32) };
+		Ok(t)
 	} else {
 		Err(JsValue::NULL)
 	}
 }
 
 #[wasm_bindgen]
-pub fn jsNote_of_jsval(js: JsValue) -> Option<JsNote> {
+pub fn js_note_of_jsval(js: JsValue) -> Option<JsNote> {
 	generic_of_jsval(js, "JsNote").unwrap_or(None)
 }
 
@@ -441,6 +435,12 @@ pub fn jsNote_of_jsval(js: JsValue) -> Option<JsNote> {
 pub struct LeavesMapInput {
 	#[wasm_bindgen(skip)]
 	pub leaves: BTreeMap<u64, Vec<Vec<u8>>>,
+}
+
+impl Default for LeavesMapInput {
+	fn default() -> Self {
+		Self::new()
+	}
 }
 #[wasm_bindgen]
 impl LeavesMapInput {
@@ -603,7 +603,7 @@ impl ProofInputBuilder {
 				value.roots = Some(roots);
 				Ok(())
 			}
-			_ => return Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
+			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
 		}
 	}
 
@@ -767,7 +767,7 @@ impl ProofInputBuilder {
 				input.pk = Some(pk);
 			}
 			ProofInputBuilder::Anchor(input) => {
-				input.pk = Some(pk.into());
+				input.pk = Some(pk);
 			}
 			ProofInputBuilder::VAnchor(input) => {
 				input.pk = Some(pk);
@@ -782,7 +782,7 @@ impl ProofInputBuilder {
 				input.exponentiation = Some(exponentiation);
 			}
 			ProofInputBuilder::Anchor(input) => {
-				input.exponentiation = Some(exponentiation.into());
+				input.exponentiation = Some(exponentiation);
 			}
 			ProofInputBuilder::VAnchor(input) => {
 				input.exponentiation = Some(exponentiation);
@@ -797,7 +797,7 @@ impl ProofInputBuilder {
 				input.width = Some(width);
 			}
 			ProofInputBuilder::Anchor(input) => {
-				input.width = Some(width.into());
+				input.width = Some(width);
 			}
 			ProofInputBuilder::VAnchor(input) => {
 				input.width = Some(width);
@@ -812,7 +812,7 @@ impl ProofInputBuilder {
 				input.curve = Some(curve);
 			}
 			ProofInputBuilder::Anchor(input) => {
-				input.curve = Some(curve.into());
+				input.curve = Some(curve);
 			}
 			ProofInputBuilder::VAnchor(input) => {
 				input.curve = Some(curve);
@@ -827,7 +827,7 @@ impl ProofInputBuilder {
 				input.backend = Some(backend);
 			}
 			ProofInputBuilder::Anchor(input) => {
-				input.backend = Some(backend.into());
+				input.backend = Some(backend);
 			}
 			ProofInputBuilder::VAnchor(input) => {
 				input.backend = Some(backend);
@@ -1011,7 +1011,7 @@ impl JsProofInputBuilder {
 	pub fn public_amount(&mut self, public_amount: JsString) -> Result<(), JsValue> {
 		let pa: String = public_amount.into();
 		let pa: i128 = pa.parse().map_err(|_| OpStatusCode::InvalidPublicAmount)?;
-		self.inner.public_amount(pa);
+		self.inner.public_amount(pa)?;
 		Ok(())
 	}
 
@@ -1019,7 +1019,7 @@ impl JsProofInputBuilder {
 	pub fn chain_id(&mut self, chain_id: JsString) -> Result<(), JsValue> {
 		let chain_id: String = chain_id.into();
 		let chain_id = chain_id.parse().map_err(|_| OpStatusCode::InvalidChainId)?;
-		self.inner.chain_id(chain_id);
+		self.inner.chain_id(chain_id)?;
 		Ok(())
 	}
 
@@ -1072,7 +1072,7 @@ impl JsProofInputBuilder {
 			.to_vec()
 			.into_iter()
 			.map(|v| {
-				jsNote_of_jsval(v)
+				js_note_of_jsval(v)
 					.ok_or(OpStatusCode::InvalidNoteSecrets)
 					.map(|n| n.get_js_utxo())?
 			})
@@ -1185,14 +1185,15 @@ impl MTBn254X5 {
 }
 // For testing on js side
 #[wasm_bindgen]
-pub fn verify_js_proof(proof: JsString, publicInputs: Array, vk: JsString, curve: WasmCurve) -> bool {
+pub fn verify_js_proof(proof: JsString, public_inputs: Array, vk: JsString, curve: WasmCurve) -> bool {
 	let proof = hex::decode(JsValue::from(proof).as_string().unwrap()).unwrap();
-	let pub_ins: Vec<String> = publicInputs
+	let pub_ins: Vec<Vec<u8>> = public_inputs
 		.to_vec()
 		.into_iter()
 		.map(|v| JsValue::from(JsString::from(v)).as_string().unwrap())
+		.map(|x| hex::decode(&x).unwrap())
 		.collect();
-	let pub_ins: Vec<Vec<u8>> = pub_ins.into_iter().map(|x| hex::decode(&x).unwrap()).collect();
+
 	let curve: Curve = JsValue::from(curve).as_string().unwrap().parse().unwrap();
 	let vk = hex::decode(JsValue::from(vk).as_string().unwrap()).unwrap();
 	match curve {
@@ -1220,8 +1221,8 @@ impl JsProvingKeys {
 		Uint8Array::from(self.pk.as_slice())
 	}
 }
-#[wasm_bindgen]
-pub fn setupKeys(protocol: Protocol) -> JsProvingKeys {
+#[wasm_bindgen(js_name = setupKeys)]
+pub fn setup_keys(protocol: Protocol) -> JsProvingKeys {
 	let note_protocol: NoteProtocol = JsValue::from(protocol).as_string().unwrap().parse().unwrap();
 	let (pk, vk) = match note_protocol {
 		NoteProtocol::Mixer => {

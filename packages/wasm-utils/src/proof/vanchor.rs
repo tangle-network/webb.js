@@ -1,22 +1,16 @@
 use core::convert::TryInto;
 
-use ark_bn254::{Bn254, Fr as Bn254Fr};
+use ark_bn254::Fr as Bn254Fr;
 use ark_crypto_primitives::Error;
-use ark_ff::{BigInteger, PrimeField};
-use ark_std::UniformRand;
-use arkworks_setups::common::{prove, prove_unchecked};
 use arkworks_setups::utxo::Utxo;
-use arkworks_setups::{AnchorProver, Curve as ArkCurve, VAnchorProver};
+use arkworks_setups::{Curve as ArkCurve, VAnchorProver};
 use rand::rngs::OsRng;
 
 use crate::note::JsNote;
-use crate::proof::{AnchorProofPayload, OutputUtxoConfig, Proof, VAnchorProof, VAnchorProofPayload};
+use crate::proof::{VAnchorProof, VAnchorProofPayload};
 use crate::types::{Backend, Curve, HashFunction, NoteProtocol, NoteVersion, OpStatusCode, OperationError};
 use crate::utxo::JsUtxo;
-use crate::{
-	AnchorR1CSProverBls381_30_2, AnchorR1CSProverBn254_30_2, VAnchorR1CSProverBn254_30_2_16_2,
-	VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF,
-};
+use crate::{VAnchorR1CSProverBn254_30_2_16_2, VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF};
 
 fn get_output_notes(
 	anchor_proof_input: &VAnchorProofPayload,
@@ -102,9 +96,6 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 			));
 		}
 	};
-	// TODO : handle ext data
-	let ext_data_hash = Bn254Fr::rand(rng).into_repr().to_bytes_le();
-
 	let utxo_o_1 = VAnchorR1CSProverBn254_30_2_2_2::new_utxo(
 		ArkCurve::Bn254,
 		output_config[0].chain_id,
@@ -134,7 +125,7 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 	])?;
 	let vanchor_proof = match (backend, curve, exponentiation, width, in_utxos.len()) {
 		(Backend::Arkworks, Curve::Bn254, 5, 5, 2) => {
-			let mut utxos_in: [Utxo<Bn254Fr>; 2] = [in_utxos[0].get_bn254_utxo()?, in_utxos[1].get_bn254_utxo()?];
+			let utxos_in: [Utxo<Bn254Fr>; 2] = [in_utxos[0].get_bn254_utxo()?, in_utxos[1].get_bn254_utxo()?];
 			let indices = indices.try_into().map_err(|_| OpStatusCode::InvalidIndices)?;
 			let roots = roots.try_into().map_err(|_| OpStatusCode::InvalidRoots)?;
 			VAnchorR1CSProverBn254_30_2_2_2::create_proof(
@@ -192,7 +183,7 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		}
 	}
 	.map_err(|e| {
-		let message = format!("Anchor {}", e).to_string();
+		let message = format!("Anchor {}", e);
 		OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message)
 	})?;
 	Ok(VAnchorProof {

@@ -1,8 +1,7 @@
 use core::fmt;
 use core::str::FromStr;
 
-use arkworks_setups::common::{Leaf, VAnchorLeaf};
-use arkworks_setups::utxo::Utxo;
+use arkworks_setups::common::Leaf;
 use js_sys::{JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;

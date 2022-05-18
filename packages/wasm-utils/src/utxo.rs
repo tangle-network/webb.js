@@ -30,8 +30,7 @@ impl JsUtxo {
 		let amount_bytes = self.get_amount();
 		let mut amount_slice = [0u8; 16];
 		amount_slice.copy_from_slice(amount_bytes[..16].to_vec().as_slice());
-		let amount = u128::from_le_bytes(amount_slice);
-		amount
+		u128::from_le_bytes(amount_slice)
 	}
 
 	pub fn default_bn254_utxo() -> Self {
