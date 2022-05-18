@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line camelcase
-import { AnchorMTBn254X5, JsNoteBuilder, OutputUtxoConfig, setupKeys, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
+import { JsNoteBuilder, MTBn254X5, OutputUtxoConfig, setupKeys, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { expect } from 'chai';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
@@ -63,7 +63,7 @@ describe.only('Proving manager', function () {
 
     console.log('===> Tree setup with leaves');
 
-    const tree = new AnchorMTBn254X5([leaf1, leaf2], '0');
+    const tree = new MTBn254X5([leaf1, leaf2], '0');
     const root = `0x${tree.root}`;
     const rootsSet = [hexToU8a(root), hexToU8a(root)];
     const leavesMap: any = {};

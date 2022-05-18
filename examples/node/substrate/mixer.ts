@@ -20,7 +20,7 @@ async function mixerBn254() {
   const bob = k.addFromMnemonic(BOBPhrase);
   const apiPromise = await preparePolkadotApi();
   console.info(`[ mixerBn254 ] Prepared the api promise`);
-  
+
   // Get some tokens from a populated account
   const charlie = k.addFromUri('//Charlie');
   await transferBalance(apiPromise, charlie, [bob], 10000);
@@ -33,13 +33,13 @@ async function mixerBn254() {
 
   // The Webb.js note generation process allows for a variety of configurable parameters.
   // This example will relate these parameters to the substrate mixer context.
-  // 
+  //
   // The application environment will define the values for note input parameters.
   // These note inputs allow for metadata to be attached to the note, which helps to:
   //   (1) Identify which deposit is controlled by the note.
   //   (2) Identify how a note should be generated.
   //   (3) Auxiliary information that could be useful to know about a deposit.
-  // 
+  //
   // Some important parameters and example usage:
   //
   //  (1)
@@ -122,7 +122,7 @@ async function mixerBn254() {
 
 
   // Define the different parameters involved for generating a proof and successfully withdrawing:
-  // 
+  //
   // leafIndex:
   //      - This NodeJS example has hard-coded it to 0. But our DApp references the auxiliary information
   //        that was populated on note generation.
@@ -130,11 +130,11 @@ async function mixerBn254() {
   //      - In this NodeJS example, we've referenced the proving key from our git submodule file on disk.
   //      - DApp developers will likely fetch this information from IPFS or some other server.
   // leaves:
-  //      - In order to create a proof about state of the merkle tree, 
+  //      - In order to create a proof about state of the merkle tree,
   //        we need to be able to build the merkle tree ourselves.
   // fee: Fees can be specified to pay out the relayer of a withdraw transaction. This example does not use a relayer.
   // relayer: Who should be paid the fees of the withdraw transaction? Bob puts his own address as the relayer.
-  const provingInput: ProvingManagerSetupInput = {
+  const provingInput: ProvingManagerSetupInput<"mixer"> = {
     leafIndex: 0,
     provingKey: hexToU8a(pk.toString('hex')),
     note: note.serialize(),
@@ -146,7 +146,7 @@ async function mixerBn254() {
   };
 
   // Generate the proof
-  const proof = await pm.prove(provingInput)
+  const proof = await pm.prove('mixer',provingInput);
 
   // Format the proof information in the forms that substrate expects
   const withdrawProof: WithdrawProof = {

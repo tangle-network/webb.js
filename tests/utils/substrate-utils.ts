@@ -3,12 +3,12 @@ import { options } from '@webb-tools/api/index.js';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import {
-  AnchorMTBn254X5,
+  MTBn254X5,
   generate_proof_js,
   JsNote,
   JsNoteBuilder,
   OperationError,
-  ProofInputBuilder,
+  JsProofInputBuilder,
 } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/keyring';
@@ -398,7 +398,7 @@ export async function withdrawAnchorBnx5_4(
 
   proofInputBuilder.setFee('5');
   proofInputBuilder.setRefund('1');
-  const merkeTree = new AnchorMTBn254X5(leaves, String(leafIndex));
+  const merkeTree = new MTBn254X5(leaves, String(leafIndex));
   const root = `0x${merkeTree.root}`;
 
   proofInputBuilder.setRefreshCommitment('0000000000000000000000000000000000000000000000000000000000000000');

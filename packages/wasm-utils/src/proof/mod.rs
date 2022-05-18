@@ -1112,16 +1112,16 @@ impl JsProofInputBuilder {
 }
 
 #[wasm_bindgen]
-pub struct AnchorMTBn254X5 {
+pub struct MTBn254X5 {
 	#[wasm_bindgen(skip)]
 	pub inner: SparseMerkleTree<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>,
 }
 
 #[allow(clippy::unused_unit)]
 #[wasm_bindgen]
-impl AnchorMTBn254X5 {
+impl MTBn254X5 {
 	#[wasm_bindgen(constructor)]
-	pub fn new(initial_leaves: Leaves, leaf_index: JsString) -> Result<AnchorMTBn254X5, JsValue> {
+	pub fn new(initial_leaves: Leaves, leaf_index: JsString) -> Result<MTBn254X5, JsValue> {
 		let leaf_index: String = leaf_index.into();
 		let leaf_index: u64 = leaf_index.parse().expect("Failed to parse the leaf index");
 		let leaves: Vec<_> = Array::from(&initial_leaves)
@@ -1140,7 +1140,10 @@ impl AnchorMTBn254X5 {
 		let poseidon3 = Poseidon::new(params3);
 
 		let (tree, _) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
-			&poseidon3, &leaves, leaf_index, &[0u8; 32],
+			&poseidon3,
+			&leaves,
+			leaf_index,
+			&DEFAULT_LEAF,
 		)
 		.unwrap();
 		Ok(Self { inner: tree })

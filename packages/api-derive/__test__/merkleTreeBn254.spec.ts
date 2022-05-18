@@ -4,7 +4,7 @@
 import '@webb-tools/types/build/index.js';
 
 import { MerkleTree, PoseidonHasher } from '@webb-tools/api-providers/contracts/utils/merkle/index.js';
-import { createLocalPolkadotApi, polkadotTx } from '@webb-tools/test-utils/src/index.js';
+import { createLocalPolkadotApi, polkadotTx } from '@webb-tools/test-utils/index.js';
 import { expect } from 'chai';
 
 import { ApiPromise, Keyring } from '@polkadot/api';
