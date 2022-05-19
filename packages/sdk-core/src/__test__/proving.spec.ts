@@ -1,6 +1,8 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
+/* eslint-disable camelcase */
+
 // eslint-disable-next-line camelcase
 import { JsNoteBuilder, MTBn254X5, OutputUtxoConfig, setupKeys, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { expect } from 'chai';
@@ -41,11 +43,14 @@ function generateVAnchorNote (
   return note;
 }
 
+const vanchorBn2542_2_2 = setupKeys('vanchor', 'Bn254', 2, 2, 2);
+const vanchorBn2542_16_2 = setupKeys('vanchor', 'Bn254', 2, 16, 2);
+
 describe('Proving manager VAnchor', function () {
   this.timeout(120_1000);
 
-  it('should fail proof js for VAnchor with one inputs', async () => {
-    const keys = setupKeys('vanchor', 'Bn254', 2, 2, 2);
+  it('should  proof js for VAnchor with one input note and one index', async () => {
+    const keys = vanchorBn2542_2_2;
     const vanchorNote1 = generateVAnchorNote(20, 0, 0, 0);
 
     console.log('===> Generated vanchor notes');
@@ -73,7 +78,7 @@ describe('Proving manager VAnchor', function () {
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: '0',
       externalDataHash,
-      indices: [0, 0],
+      indices: [0],
       inputNotes: [vanchorNote1.serialize()],
       leavesMap: leavesMap,
       outputConfigs: [outputConfig1, outputConfig2],
@@ -82,19 +87,16 @@ describe('Proving manager VAnchor', function () {
       roots: rootsSet
 
     };
-    let errorMessage = '';
 
-    try {
-      await provingManager.proof('vanchor', setup);
-    } catch (e: any) {
-      errorMessage = e.message;
-    }
+    const data = await provingManager.proof('vanchor', setup);
 
-    expect(errorMessage).to.equal('Input set has 1 UTXOs while the supported set length should be one of [2, 16]');
+    const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
+
+    expect(isValidProof).to.deep.equal(true);
   });
 
-  it('should proof js for VAnchor with two inputs', async () => {
-    const keys = setupKeys('vanchor', 'Bn254', 2, 2, 2);
+  it('should proof js for VAnchor with two inputs and two indices', async () => {
+    const keys = vanchorBn2542_2_2;
 
     const vanchorNote1 = generateVAnchorNote(10, 0, 0, 0);
     const vanchorNote2 = generateVAnchorNote(10, 0, 0, 1);
@@ -141,9 +143,9 @@ describe('Proving manager VAnchor', function () {
     expect(isValidProof).to.deep.equal(true);
   });
 
-  it('should proof js for VAnchor with three inputs', async () => {
+  it('should proof js for VAnchor with three inputs amd three indices', async () => {
     console.log('===> Generating keys for vanchor');
-    const keys = setupKeys('vanchor', 'Bn254', 2, 16, 2);
+    const keys = vanchorBn2542_16_2;
 
     console.log('===> Keys are generated');
     const vanchorNote1 = generateVAnchorNote(10, 0, 0, 0);
@@ -186,26 +188,22 @@ describe('Proving manager VAnchor', function () {
       roots: rootsSet
 
     };
-    let errorMessage = '';
+    const data = await provingManager.proof('vanchor', setup);
 
-    try {
-      await provingManager.proof('vanchor', setup);
-    } catch (e: any) {
-      errorMessage = e.message;
-    }
+    const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
 
-    expect(errorMessage).to.equal('Input set has 3 UTXOs while the supported set length should be one of [2, 16]');
+    expect(isValidProof).to.deep.equal(true);
   });
 
-  it('should proof js for VAnchor with 16 inputs', async () => {
-    const keys = setupKeys('vanchor', 'Bn254', 2, 16, 2);
+  it('should proof js for VAnchor with 16 inputs and 16 indices', async () => {
+    const keys = vanchorBn2542_16_2;
 
     const notes = Array(16).fill(0).map((_, index) => generateVAnchorNote(10, 0, 0, index));
 
     console.log('===> Generated vanchor notes');
 
-    const publicAmount = 0;
-    const outputAmount = String(10 * 80);
+    const publicAmount = 10;
+    const outputAmount = String(10 * 80 + 5);
     const outputChainId = BigInt(0);
     const leaves = notes.map((note) => note.getLeafCommitment());
 

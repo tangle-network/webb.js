@@ -178,9 +178,8 @@ export class ProvingManagerWrapper {
 
       if (rawNotes.length > 2 && rawNotes.length < 16) {
         const inputGap = 16 - rawNotes.length;
-        const defaultNote = note.defaultUtxoNote();
 
-        jsNotes.push(...Array(inputGap).fill(defaultNote));
+        jsNotes.push(...Array(inputGap).fill(0).map(() => note.defaultUtxoNote()));
         indices.push(...Array(inputGap).fill(0));
       }
 
