@@ -154,8 +154,8 @@ describe('Proving manager VAnchor', function () {
 
     console.log('===> Generated vanchor notes');
 
-    const publicAmount = 0;
-    const outputAmount = String(15);
+    const publicAmount = 10;
+    const outputAmount = String(20);
     const outputChainId = BigInt(0);
 
     const leaf1 = vanchorNote1.getLeafCommitment();
@@ -203,7 +203,7 @@ describe('Proving manager VAnchor', function () {
     console.log('===> Generated vanchor notes');
 
     const publicAmount = 10;
-    const outputAmount = String(10 * 80 + 5);
+    const outputAmount = String(10 * 8 + 5);
     const outputChainId = BigInt(0);
     const leaves = notes.map((note) => note.getLeafCommitment());
 

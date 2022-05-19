@@ -546,7 +546,8 @@ impl VAnchorProofInput {
 				in_amount, out_amount
 			);
 			let mut oe = OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message);
-			oe.data = Some(format!("{{ inputAmount:{} ,outputAmount:{}}}", in_amount, out_amount))
+			oe.data = Some(format!("{{ inputAmount:{} ,outputAmount:{}}}", in_amount, out_amount));
+			return Err(oe);
 		}
 
 		Ok(VAnchorProofPayload {
@@ -1601,12 +1602,12 @@ mod test {
 		proof_input_builder
 			.set_vanchor_output_config(
 				OutputUtxoConfig {
-					index: Some(1),
+					index: None,
 					amount: 0,
 					chain_id: 3,
 				},
 				OutputUtxoConfig {
-					index: Some(1),
+					index: None,
 					amount: 0,
 					chain_id: 3,
 				},
