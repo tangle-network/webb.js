@@ -5,4 +5,3 @@ export * from './types.js';
 export * from './anchor-interface.js';
 export * from './webb-anchor.js';
 export * from './webb-governed-token.js';
-export * from './webb-utils.js';

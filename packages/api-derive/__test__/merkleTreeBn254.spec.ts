@@ -3,9 +3,10 @@
 
 import '@webb-tools/types/build/index.js';
 
-import { MerkleTree, PoseidonHasher } from '@webb-tools/api-providers/contracts/utils/merkle/index.js';
-import { createLocalPolkadotApi, polkadotTx } from '@webb-tools/test-utils/index.js';
+import { MerkleTree } from '@webb-tools/merkle-tree';
+import { createLocalPolkadotApi, polkadotTx } from '@webb-tools/test-utils/src/index.js';
 import { expect } from 'chai';
+import { BigNumber } from 'ethers';
 
 import { ApiPromise, Keyring } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -21,7 +22,7 @@ describe('getLeafCountForTree should work', function () {
     // Setup the signer for the transactions
 
     const alicePhrase =
-      'bottom drive obey lake curtain smoke basket hold race lonely fit walk//Alice';
+    'bottom drive obey lake curtain smoke basket hold race lonely fit walk//Alice';
 
     await cryptoWaitReady();
     const k = new Keyring({ type: 'sr25519' });
@@ -67,9 +68,8 @@ describe('getLeafCountForTree should work', function () {
 
     console.log('chainRoot: ', chainRoot);
     console.log(stringLeaves);
-    const calculatedTree = MerkleTree.new('', 30, stringLeaves, new PoseidonHasher());
+    const calculatedTree = new MerkleTree(30, stringLeaves);
 
-    console.log('calculatedRoot: ', BigInt(calculatedTree.getRoot()));
-    expect(BigInt(calculatedTree.getRoot())).to.eq(BigInt(chainRoot));
+    expect(BigNumber.from(calculatedTree.root())).to.eq(BigNumber.from(chainRoot));
   });
 });

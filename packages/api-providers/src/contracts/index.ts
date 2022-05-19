@@ -3,3 +3,17 @@
 
 export * from './wrappers/index.js';
 export * from './utils/index.js';
+export const zeroAddress = '0x0000000000000000000000000000000000000000';
+export const ZERO = 'ZERO';
+
+export const isZero = (value: string | number) => {
+  if (value === zeroAddress) {
+    return true;
+  }
+
+  if (value === 'ZERO') {
+    return true;
+  }
+
+  return value === 0;
+};
