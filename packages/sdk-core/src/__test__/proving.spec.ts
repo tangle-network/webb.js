@@ -282,6 +282,6 @@ describe('Proving manager VAnchor', function () {
       message = e.message;
     }
 
-    expect(message).to.be('Output amount and input amount  don\'t match input(170) != output(1610)');
+    expect(message).to.deep.equal('Output amount and input amount  don\'t match input(170) != output(1610)');
   });
 });
