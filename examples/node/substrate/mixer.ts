@@ -1,10 +1,10 @@
 import {fetchRPCTreeLeaves, polkadotTx, preparePolkadotApi, transferBalance} from "../utils.js";
 import {decodeAddress, Keyring} from "@polkadot/keyring";
 import {cryptoWaitReady} from '@polkadot/util-crypto'
-import {Note, NoteGenInput, ProvingManager, u8aToHex, ProvingManagerSetupInput} from "@webb-tools/sdk-core/src/index.js";
+import {Note, NoteGenInput, ProvingManager, ProvingManagerSetupInput} from "@webb-tools/sdk-core/src/index.js";
 import path from "path";
 import fs from "fs";
-import {hexToU8a} from "@polkadot/util";
+import {hexToU8a, u8aToHex} from "@polkadot/util";
 import {WithdrawProof} from "../../../tests/utils/index.js";
 
 // This script details usage of our mixer pallets (and proving / verifying) from nodejs.

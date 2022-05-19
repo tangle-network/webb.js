@@ -17,7 +17,8 @@
     "@polkadot/keyring": "9.0.1",
     "@webb-tools/api": "0.1.4-60",
     "bignumber.js": "^9.0.0",
-    "ethers": "5.5.1"
+    "ethers": "5.5.1",
+    "ganache":"7.1.0"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",

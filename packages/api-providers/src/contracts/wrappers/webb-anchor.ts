@@ -4,19 +4,17 @@
 /* eslint-disable camelcase */
 
 import { Log } from '@ethersproject/abstract-provider';
-import { ChainType, computeChainIdType } from '@webb-tools/api-providers/index.js';
-import { BridgeStorage, bridgeStorageFactory, getAnchorDeploymentBlockNumber } from '@webb-tools/api-providers/utils/index.js';
+import { Anchor } from '@webb-tools/anchors';
 import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { ERC20, ERC20__factory as ERC20Factory, FixedDepositAnchor, FixedDepositAnchor__factory } from '@webb-tools/contracts';
 import { IAnchorDepositInfo } from '@webb-tools/interfaces';
-import { getFixedAnchorExtDataHash } from '@webb-tools/utils';
+import { MerkleTree } from '@webb-tools/merkle-tree';
+import { getFixedAnchorExtDataHash, toFixedHex } from '@webb-tools/utils';
 import { BigNumber, Contract, providers, Signer } from 'ethers';
 
-import { bufferToFixed, createRootsBytes, generateWithdrawProofCallData } from '../utils/index.js';
-import { MerkleTree, PoseidonHasher } from '../utils/merkle/index.js';
-import { AnchorWitnessInput, ZKPWebbAnchorInputWithMerkle, ZKPWebbAnchorInputWithoutMerkle } from './types.js';
-import { generateWitness, proofAndVerify, zeroAddress } from './webb-utils.js';
+import { zeroAddress } from '../index.js';
+import { ZKPWebbAnchorInputWithMerkle } from './types.js';
 
 const logger = LoggerService.get('AnchorContract');
 
@@ -42,11 +40,7 @@ export class AnchorContract {
   ) {
     this.signer = this.web3Provider.getSigner();
     logger.info(`Init with address ${address} `);
-    this._contract = new Contract(
-      address,
-      FixedDepositAnchor__factory.abi,
-      useProvider ? this.web3Provider : this.signer
-    ) as any;
+    this._contract = FixedDepositAnchor__factory.connect(address, useProvider ? this.web3Provider : this.signer);
   }
 
   get getLastRoot () {
@@ -66,16 +60,16 @@ export class AnchorContract {
   }
 
   static createTreeWithRoot (leaves: string[], targetRoot: string): MerkleTree | undefined {
-    const tree = MerkleTree.new('eth', 30, [], new PoseidonHasher());
+    const tree = new MerkleTree(30, []);
 
     for (let i = 0; i < leaves.length; i++) {
       tree.insert(leaves[i]);
       console.log('createTreeWithRoot - leaf: ', leaves[i]);
-      const nextRoot = tree.getRoot();
+      const nextRoot = tree.root();
 
-      console.log(`target root: ${targetRoot} \n this root: ${bufferToFixed(nextRoot)}`);
+      console.log(`target root: ${targetRoot} \n this root: ${toFixedHex(nextRoot)}`);
 
-      if (bufferToFixed(nextRoot) === targetRoot) {
+      if (toFixedHex(nextRoot) === targetRoot) {
         return tree;
       }
     }
@@ -260,67 +254,6 @@ export class AnchorContract {
     };
   }
 
-  /*
-   * Generate Merkle Proof
-   *  This will
-   *  1- Get the leaves for a particular anchor
-   *  2- Fetch the missing leaves
-   *  3- Insert the missing leaves
-   *  4- Compare against historical roots before adding to local storage
-   *  5- return the path to the leaf.
-   **/
-
-  async generateMerkleProof (deposit: IAnchorDepositInfo) {
-    const evmId = await this.signer.getChainId();
-    const sourceChainIdType = computeChainIdType(ChainType.EVM, evmId);
-
-    const bridgeStorageStorage = await bridgeStorageFactory(sourceChainIdType);
-    const storedContractInfo: BridgeStorage[0] = (await bridgeStorageStorage.get(
-      this._contract.address.toLowerCase()
-    )) || {
-      lastQueriedBlock: getAnchorDeploymentBlockNumber(sourceChainIdType, this._contract.address) || 0,
-      leaves: [] as string[]
-    };
-    const treeHeight = await this._contract.levels();
-
-    logger.trace(`Generating merkle proof treeHeight ${treeHeight} of deposit`, deposit);
-    const tree = MerkleTree.new('eth', treeHeight, storedContractInfo.leaves, new PoseidonHasher());
-
-    // Query for missing blocks starting from the stored endingBlock
-    const lastQueriedBlock = storedContractInfo.lastQueriedBlock;
-
-    logger.trace('Getting leaves from lastQueriedBlock ', lastQueriedBlock);
-    const fetchedLeaves = await this.getDepositLeaves(lastQueriedBlock + 1, 0);
-
-    logger.trace(`New Leaves ${fetchedLeaves.newLeaves.length}`, fetchedLeaves.newLeaves);
-
-    tree.batchInsert(fetchedLeaves.newLeaves);
-
-    const newRoot = tree.getRoot();
-    const formattedRoot = bufferToFixed(newRoot);
-    const lastRoot = await this._contract.getLastRoot();
-    const knownRoot = await this._contract.isKnownRoot(formattedRoot);
-
-    logger.info(`fromBlock ${formattedRoot} -x- last root ${lastRoot} ---> knownRoot: ${knownRoot}`);
-    // compare root against contract, and store if there is a match
-    const leaves = [...storedContractInfo.leaves, ...fetchedLeaves.newLeaves];
-
-    if (knownRoot) {
-      logger.info(`Root is known committing to storage ${this._contract.address}`);
-      await bridgeStorageStorage.set(this._contract.address.toLowerCase(), {
-        lastQueriedBlock: fetchedLeaves.lastQueriedBlock,
-        leaves
-      });
-    }
-
-    logger.trace(`Getting leaf index  of ${deposit.commitment}`, leaves);
-    const leafIndex = leaves.findIndex((commitment) => commitment === deposit.commitment);
-
-    logger.info(`Leaf index ${leafIndex}`);
-
-    return tree.path(leafIndex);
-  }
-
   async generateLinkedMerkleProof (sourceDeposit: IAnchorDepositInfo, sourceLeaves: string[], sourceChainId: number) {
     // Grab the root of the source chain to prove against
     const edgeIndex = await this._contract.edgeIndex(sourceChainId);
@@ -332,7 +265,7 @@ export class AnchorContract {
     const tree = AnchorContract.createTreeWithRoot(sourceLeaves, latestSourceRoot);
 
     if (tree) {
-      const index = tree.getIndexOfElement(sourceDeposit.commitment);
+      const index = tree.getIndexByElement(sourceDeposit.commitment);
 
       console.log('index of element: ', index);
       const path = tree.path(index);
@@ -348,63 +281,18 @@ export class AnchorContract {
     return undefined;
   }
 
-  async merkleProofToZKP (
-    merkleProof: any,
-    sourceEvmId: number,
-    deposit: IAnchorDepositInfo,
-    zkpInputWithoutMerkleProof: ZKPWebbAnchorInputWithoutMerkle
-  ) {
-    const { pathElements, pathIndices, root: merkleRoot } = merkleProof;
-    const localRoot = await this._contract.getLastRoot();
-    const nr = await this._contract.getLatestNeighborRoots();
-    const sourceChainRootIndex = (await this._contract.edgeIndex(sourceEvmId)).toNumber();
-    const root = bufferToFixed(merkleRoot);
-    // create a mutable copy of the returned neighbor roots and overwrite the root used
-    // in the merkle proof
-    const neighborRoots = [...nr];
-
-    neighborRoots[sourceChainRootIndex] = root;
-    const input: AnchorWitnessInput = {
-      // public
-      chainID: BigInt(zkpInputWithoutMerkleProof.destinationChainId),
-      fee: String(zkpInputWithoutMerkleProof.fee),
-      nullifier: deposit.nullifier.toString(),
-      nullifierHash: deposit.nullifierHash,
-      pathElements,
-      pathIndices,
-      recipient: zkpInputWithoutMerkleProof.recipient,
-      refreshCommitment: bufferToFixed('0'),
-      // private
-      refund: String(zkpInputWithoutMerkleProof.refund),
-      relayer: zkpInputWithoutMerkleProof.relayer,
-      roots: [localRoot, ...neighborRoots],
-      secret: deposit.secret.toString()
-    };
-    const edges = await this._contract.maxEdges();
-
-    console.log(`Generate witness with edges ${edges}`, input);
-    const witness = await generateWitness(input, edges as any);
-
-    console.log('Generated witness', witness);
-    const proof = await proofAndVerify(witness, edges as any);
-
-    console.log('Zero knowledge proof', proof);
-
-    return { input, proof: proof.proof, root };
-  }
-
   async withdraw (proof: any, zkp: ZKPWebbAnchorInputWithMerkle, pub: any): Promise<string> {
     const overrides = {
       gasLimit: 6000000
     };
-    const proofBytes = await generateWithdrawProofCallData(proof, pub);
-    const nullifierHash = bufferToFixed(zkp.nullifierHash);
-    const roots = createRootsBytes(pub.roots);
+    const proofBytes = await Anchor.generateWithdrawProofCallData(proof, pub);
+    const nullifierHash = toFixedHex(zkp.nullifierHash);
+    const roots = Anchor.createRootsBytes(pub.roots);
     const extDataHash = getFixedAnchorExtDataHash({
-      _fee: bufferToFixed(zkp.fee),
+      _fee: toFixedHex(zkp.fee),
       _recipient: zkp.recipient,
-      _refreshCommitment: bufferToFixed('0'),
-      _refund: bufferToFixed(zkp.refund),
+      _refreshCommitment: toFixedHex('0'),
+      _refund: toFixedHex(zkp.refund),
       _relayer: zkp.relayer
     });
     const tx = await this._contract.withdraw(
@@ -415,10 +303,10 @@ export class AnchorContract {
         proof: `0x${proofBytes}`
       },
       {
-        _fee: bufferToFixed(zkp.fee),
+        _fee: toFixedHex(zkp.fee),
         _recipient: zkp.recipient,
-        _refreshCommitment: bufferToFixed('0'),
-        _refund: bufferToFixed(zkp.refund),
+        _refreshCommitment: toFixedHex('0'),
+        _refund: toFixedHex(zkp.refund),
         _relayer: zkp.relayer
       },
       overrides

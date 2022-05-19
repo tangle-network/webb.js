@@ -7,7 +7,7 @@ import { LoggerService } from '@webb-tools/app-util/index.js';
 import { GovernedTokenWrapper, GovernedTokenWrapper__factory } from '@webb-tools/contracts';
 import { BigNumberish, Contract, PayableOverrides, providers, Signer } from 'ethers';
 
-import { zeroAddress } from './webb-utils.js';
+import { zeroAddress } from '../index.js';
 
 const logger = LoggerService.get('WebbGovernedToken');
 

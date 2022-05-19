@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AnchorBase, BridgeConfig, Currency, CurrencyRole, CurrencyType } from '@webb-tools/api-providers/index.js';
+import { GovernedTokenWrapper } from '@webb-tools/tokens';
 
 import { AnchorApi } from '../abstracts/index.js';
 import { ChainTypeId, chainTypeIdToInternalId, evmIdIntoInternalChainId } from '../chains/index.js';
-import { WebbGovernedToken } from '../contracts/wrappers/index.js';
 import { WebbWeb3Provider } from './webb-provider.js';
 
 export class Web3AnchorApi extends AnchorApi<WebbWeb3Provider, BridgeConfig> {
@@ -67,8 +67,8 @@ export class Web3AnchorApi extends AnchorApi<WebbWeb3Provider, BridgeConfig> {
     }
 
     // Get the available token addresses which can wrap into the wrappedToken
-    const wrappedToken = new WebbGovernedToken(this.inner.getEthersProvider(), wrappedTokenAddress);
-    const tokenAddresses = await wrappedToken.tokens;
+    const wrappedToken = GovernedTokenWrapper.connect(wrappedTokenAddress, this.inner.getEthersProvider().getSigner());
+    const tokenAddresses = await wrappedToken.contract.getTokens();
     // TODO: dynamic wrappable assets - consider some Currency constructor via address & default token config.
 
     // If the tokenAddress matches one of the wrappableCurrencies, return it
@@ -78,7 +78,7 @@ export class Web3AnchorApi extends AnchorApi<WebbWeb3Provider, BridgeConfig> {
       return wrappableTokenAddress && tokenAddresses.includes(wrappableTokenAddress);
     });
 
-    if (await wrappedToken.isNativeAllowed()) {
+    if (await wrappedToken.contract.isNativeAllowed()) {
       wrappableCurrencyIds.push(this.config.chains[internalChainId].nativeCurrencyId);
     }
 
