@@ -33,7 +33,7 @@ ark-ed-on-bn254 = { version = "^0.3.0", default-features = true, features = ["r1
 ark-bn254 = { version = "^0.3.0", default-features = true, features = ["curve"] }
 ark-bls12-381 = { version = "^0.3.0", default-features = false, features = ["curve"] }
 ark-std = { version = "^0.3.0", default-features = false }
-arkworks-setups = { version = "1.0.0", default-features = false, features = ["r1cs"] }
+arkworks-setups = { version = "1.0.2", default-features = false, features = ["r1cs"] }
 arkworks-native-gadgets = { version = "1.0.0", default-features = false }
 
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
