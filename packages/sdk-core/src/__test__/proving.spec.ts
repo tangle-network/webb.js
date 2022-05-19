@@ -42,10 +42,10 @@ function generateVAnchorNote (
 }
 
 describe('Proving manager VAnchor', function () {
-  this.timeout(720_000);
+  this.timeout(120_1000);
 
-  it('Should proof js for VAnchor with one inputs', async () => {
-    const keys = setupKeys('vanchor');
+  it('should fail proof js for VAnchor with one inputs', async () => {
+    const keys = setupKeys('vanchor', 'Bn254', 2, 2, 2);
     const vanchorNote1 = generateVAnchorNote(20, 0, 0, 0);
 
     console.log('===> Generated vanchor notes');
@@ -82,16 +82,20 @@ describe('Proving manager VAnchor', function () {
       roots: rootsSet
 
     };
+    let errorMessage = '';
 
-    const data = await provingManager.proof('vanchor', setup);
+    try {
+      await provingManager.proof('vanchor', setup);
+    } catch (e: any) {
+      errorMessage = e.message;
+    }
 
-    const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
-
-    expect(isValidProof).to.deep.equal(true);
+    expect(errorMessage).to.equal('Input set has 1 UTXOs while the supported set length should be one of [2, 16]');
   });
 
-  it('Should proof js for VAnchor with two inputs', async () => {
-    const keys = setupKeys('vanchor');
+  it('should proof js for VAnchor with two inputs', async () => {
+    const keys = setupKeys('vanchor', 'Bn254', 2, 2, 2);
+
     const vanchorNote1 = generateVAnchorNote(10, 0, 0, 0);
     const vanchorNote2 = generateVAnchorNote(10, 0, 0, 1);
 
@@ -130,7 +134,6 @@ describe('Proving manager VAnchor', function () {
       roots: rootsSet
 
     };
-
     const data = await provingManager.proof('vanchor', setup);
 
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
@@ -138,9 +141,9 @@ describe('Proving manager VAnchor', function () {
     expect(isValidProof).to.deep.equal(true);
   });
 
-  it('Should proof js for VAnchor with three inputs', async () => {
+  it('should proof js for VAnchor with three inputs', async () => {
     console.log('===> Generating keys for vanchor');
-    const keys = setupKeys('vanchor');
+    const keys = setupKeys('vanchor', 'Bn254', 2, 16, 2);
 
     console.log('===> Keys are generated');
     const vanchorNote1 = generateVAnchorNote(10, 0, 0, 0);
@@ -183,16 +186,19 @@ describe('Proving manager VAnchor', function () {
       roots: rootsSet
 
     };
+    let errorMessage = '';
 
-    const data = await provingManager.proof('vanchor', setup);
+    try {
+      await provingManager.proof('vanchor', setup);
+    } catch (e: any) {
+      errorMessage = e.message;
+    }
 
-    const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
-
-    expect(isValidProof).to.deep.equal(true);
+    expect(errorMessage).to.equal('Input set has 3 UTXOs while the supported set length should be one of [2, 16]');
   });
 
-  it('Should proof js for VAnchor with 16 inputs', async () => {
-    const keys = setupKeys('vanchor');
+  it('should proof js for VAnchor with 16 inputs', async () => {
+    const keys = setupKeys('vanchor', 'Bn254', 2, 16, 2);
 
     const notes = Array(16).fill(0).map((_, index) => generateVAnchorNote(10, 0, 0, index));
 

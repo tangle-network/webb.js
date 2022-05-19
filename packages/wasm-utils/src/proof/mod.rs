@@ -1,6 +1,7 @@
 #![allow(clippy::unused_unit)]
 
 use core::convert::{TryFrom, TryInto};
+use std::ops::Add;
 
 use ark_bls12_381::Bls12_381;
 use ark_bn254::{Bn254, Fr as Bn254Fr};
@@ -24,7 +25,9 @@ use crate::types::{
 };
 use crate::utxo::JsUtxo;
 use crate::{
-	AnchorR1CSProverBn254_30_2, MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF, TREE_HEIGHT,
+	AnchorR1CSProverBn254_30_2, MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_16_16_2,
+	VAnchorR1CSProverBn254_30_16_2_2, VAnchorR1CSProverBn254_30_2_16_2, VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF,
+	TREE_HEIGHT,
 };
 
 mod anchor;
@@ -487,9 +490,9 @@ impl VAnchorProofInput {
 		let curve = self.curve.unwrap_or(Curve::Bn254);
 		let backend = self.backend.unwrap_or(Backend::Arkworks);
 
-		/// Input UTXO should have the same chain_id
-		/// For default UTXOS the amount and the index should be `0`
-		/// Duplicate indices is ONLY allowed for the default UTXOs
+		// Input UTXO should have the same chain_id
+		// For default UTXOS the amount and the index should be `0`
+		// Duplicate indices is ONLY allowed for the default UTXOs
 		// chain_id of the first item in the list
 		let mut invalid_utxo_chain_id_indices = vec![];
 		let mut invalid_utxo_dublicate_nullifiers = vec![];
@@ -511,7 +514,7 @@ impl VAnchorProofInput {
 		non_default_utxo.iter().for_each(|(index, utxo)| {
 			let has_dublicate = non_default_utxo
 				.iter()
-				.find(|(root_index, root_utxo)| root_index != index && root_utxo.amount_raw() == utxo.amount_raw());
+				.find(|(root_index, root_utxo)| root_index != index && root_utxo.get_index() == utxo.get_index());
 			if has_dublicate.is_some() {
 				invalid_utxo_dublicate_nullifiers.push(index)
 			}
@@ -525,6 +528,25 @@ impl VAnchorProofInput {
 				invalid_utxo_chain_id_indices, invalid_utxo_dublicate_nullifiers
 			));
 			return Err(op);
+		}
+
+		/// validate amounts
+		let mut in_amount: u128 = public_amount
+			.try_into()
+			.expect("Failed to convert the public amount to u128");
+		secret.iter().for_each(|utxo| in_amount += utxo.amount_raw());
+		let mut out_amount = 0u128;
+		output_config
+			.iter()
+			.for_each(|output_config| out_amount += output_config.amount);
+
+		if out_amount != in_amount {
+			let message = format!(
+				"Output amount and input amount  don't match input({}) != output({})",
+				in_amount, out_amount
+			);
+			let mut oe = OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message);
+			oe.data = Some(format!("{{ inputAmount:{} ,outputAmount:{}}}", in_amount, out_amount))
 		}
 
 		Ok(VAnchorProofPayload {
@@ -1262,29 +1284,61 @@ impl JsProvingKeys {
 	}
 }
 #[wasm_bindgen(js_name = setupKeys)]
-pub fn setup_keys(protocol: Protocol) -> JsProvingKeys {
+pub fn setup_keys(
+	protocol: Protocol,
+	curve: Option<WasmCurve>,
+	anchor_count: Option<u32>,
+	in_count: Option<u32>,
+	out_count: Option<u32>,
+) -> Result<JsProvingKeys, JsValue> {
+	let curve: Curve = match curve {
+		Some(curve) => JsValue::from(curve).as_string().unwrap().parse().unwrap(),
+		None => Curve::Bn254,
+	};
+	let anchor_count = anchor_count.unwrap_or(2);
+	let in_count = in_count.unwrap_or(2);
+	let out_count = out_count.unwrap_or(2);
 	let note_protocol: NoteProtocol = JsValue::from(protocol).as_string().unwrap().parse().unwrap();
-	let (pk, vk) = match note_protocol {
-		NoteProtocol::Mixer => {
+	let (pk, vk) = match (note_protocol, curve, anchor_count, in_count, out_count) {
+		(NoteProtocol::Mixer, ..) => {
 			let (c, ..) = MixerR1CSProverBn254_30::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng)
 				.expect("Failed to create a circuit");
 			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).expect("failed to generate keys");
 			(pk, vk)
 		}
-		NoteProtocol::Anchor => {
+		(NoteProtocol::Anchor, ..) => {
 			let (c, ..) = AnchorR1CSProverBn254_30_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng)
 				.expect("Failed to create a circuit");
 			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).expect("failed to generate keys");
 			(pk, vk)
 		}
-		NoteProtocol::VAnchor => {
+		(NoteProtocol::VAnchor, Curve::Bn254, 2, 2, 2) => {
 			let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng)
 				.expect("Failed to create a circuit");
 			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).expect("failed to generate keys");
 			(pk, vk)
 		}
+		(NoteProtocol::VAnchor, Curve::Bn254, 2, 16, 2) => {
+			let c = VAnchorR1CSProverBn254_30_2_16_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng)
+				.expect("Failed to create a circuit");
+			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).expect("failed to generate keys");
+			(pk, vk)
+		}
+		(NoteProtocol::VAnchor, Curve::Bn254, 16, 2, 2) => {
+			let c = VAnchorR1CSProverBn254_30_16_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng)
+				.expect("Failed to create a circuit");
+			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).expect("failed to generate keys");
+			(pk, vk)
+		}
+		(NoteProtocol::VAnchor, Curve::Bn254, 16, 16, 2) => {
+			let c = VAnchorR1CSProverBn254_30_16_16_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng)
+				.expect("Failed to create a circuit");
+			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).expect("failed to generate keys");
+			(pk, vk)
+		}
+		_ => return Err(JsValue::from(JsString::from("Unsupported input"))),
 	};
-	JsProvingKeys { pk, vk }
+	Ok(JsProvingKeys { pk, vk })
 }
 #[wasm_bindgen]
 pub fn generate_proof_js(proof_input: JsProofInput) -> Result<JsProofOutput, JsValue> {

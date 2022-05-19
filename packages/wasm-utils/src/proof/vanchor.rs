@@ -98,7 +98,7 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 	// Insure the Anchor count is supported
 	if !SUPPORTED_ANCHOR_COUNT.contains(&roots.len()) {
 		let message = format!(
-			"Input  set has {} roots while the supported set length should be one of {:?}",
+			"Input set has {} roots while the supported set length should be one of {:?}",
 			&roots.len(),
 			&SUPPORTED_ANCHOR_COUNT,
 		);
