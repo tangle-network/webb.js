@@ -195,7 +195,7 @@ describe('Proving manager VAnchor', function () {
     expect(isValidProof).to.deep.equal(true);
   });
 
-  it('should proof js for VAnchor with 16 inputs and 16 indices', async () => {
+  it.only('should proof js for VAnchor with 16 inputs and 16 indices', async () => {
     const keys = vanchorBn2542_16_2;
 
     const notes = Array(16).fill(0).map((_, index) => generateVAnchorNote(10, 0, 0, index));
@@ -239,5 +239,55 @@ describe('Proving manager VAnchor', function () {
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
 
     expect(isValidProof).to.deep.equal(true);
+  });
+
+  it('should fail to proof  for VAnchor with 16 inputs and 16 indices with invalid amounts', async () => {
+    let message = '';
+
+    try {
+      const keys = vanchorBn2542_16_2;
+
+      const notes = Array(16).fill(0).map((_, index) => generateVAnchorNote(10, 0, 0, index));
+
+      console.log('===> Generated vanchor notes');
+
+      const publicAmount = 10;
+      const outputAmount = String(10 * 80 + 5);
+      const outputChainId = BigInt(0);
+      const leaves = notes.map((note) => note.getLeafCommitment());
+
+      console.log('===> Tree setup with leaves');
+
+      const tree = new MTBn254X5(leaves, '0');
+      const root = `0x${tree.root}`;
+      const rootsSet = [hexToU8a(root), hexToU8a(root)];
+      const leavesMap: any = {};
+
+      leavesMap[0] = leaves;
+      const externalDataHash = '10101010101010101010';
+
+      const outputConfig1 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
+      const outputConfig2 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
+
+      const provingManager = new ProvingManagerWrapper('direct-call');
+      const setup: ProvingManagerSetupInput<'vanchor'> = {
+        chainId: '0',
+        externalDataHash,
+        indices: notes.map((_, index) => index),
+        inputNotes: notes.map((note) => note.serialize()),
+        leavesMap: leavesMap,
+        outputConfigs: [outputConfig1, outputConfig2],
+        provingKey: keys.pk,
+        publicAmount: String(publicAmount),
+        roots: rootsSet
+
+      };
+
+      await provingManager.proof('vanchor', setup);
+    } catch (e: any) {
+      message = e.message;
+    }
+
+    expect(message).to.be('Output amount and input amount  don\'t match input(170) != output(1610)');
   });
 });
