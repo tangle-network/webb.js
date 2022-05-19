@@ -78,6 +78,18 @@ export class Note {
    * @param value - A serialized note.
    * @returns A note class instance.
    */
+  public getDefaultUtxoNote (): Note {
+    const note = this.note.defaultUtxoNote();
+
+    return new Note(note);
+  }
+
+  /**
+   * Deserializes a note from a string.
+   *
+   * @param value - A serialized note.
+   * @returns A note class instance.
+   */
   public static async deserialize (value: string): Promise<Note> {
     try {
       const wasm = await Note.wasm;

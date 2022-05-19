@@ -815,8 +815,28 @@ impl JsNote {
 		self.mutate_index(index).map_err(|e| e.into())
 	}
 
-	// for test
-	#[wasm_bindgen(js_name = update_utxo)]
+	#[wasm_bindgen(js_name = defaultUtxoNote)]
+	pub fn default_utxo_note(&self) -> Result<JsNote, OperationError> {
+		let mut new_note = self.clone();
+		let chain_id: u64 = self
+			.target_chain_id
+			.parse()
+			.map_err(|_| OpStatusCode::InvalidTargetChain)?;
+
+		let utxo = vanchor::generate_secrets(
+			0,
+			self.exponentiation.unwrap_or(5),
+			self.width.unwrap_or(4),
+			self.curve.unwrap_or(Curve::Bn254),
+			chain_id,
+			Some(0),
+			&mut OsRng,
+		)?;
+		new_note.update_vanchor_utxo(utxo)?;
+		Ok(new_note)
+	}
+
+	// for test and internal usage
 	pub fn update_vanchor_utxo(&mut self, utxo: JsUtxo) -> Result<(), OperationError> {
 		let chain_id = utxo.get_chain_id_bytes();
 		let amount = utxo.get_amount();

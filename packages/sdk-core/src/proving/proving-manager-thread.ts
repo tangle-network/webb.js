@@ -5,6 +5,7 @@ import type { Leaves, NoteProtocol, OutputUtxoConfig } from '@webb-tools/wasm-ut
 
 import { ProofI } from '@webb-tools/sdk-core/proving/proving-manager.js';
 import { JsProofInput, JsProofOutput } from '@webb-tools/wasm-utils';
+import { JsNote } from '@webb-tools/wasm-utils/njs';
 
 import { Note } from '../note.js';
 
@@ -160,12 +161,36 @@ export class ProvingManagerWrapper {
       const input = pmSetupInput as VAnchorPMSetupInput;
       const metaDataNote = input.metaDataNote || input.inputNotes[0];
       const { note } = await Note.deserialize(metaDataNote);
-      const notes = await Promise.all(input.inputNotes.map((note) => Note.deserialize(note)));
-      const jsNotes = notes.map((note) => note.note);
+      const rawNotes = await Promise.all(input.inputNotes.map((note) => Note.deserialize(note)));
+      const jsNotes: JsNote[] = rawNotes.map((n) => n.note);
+      const rawIndices = [...input.indices];
+      const indices = rawIndices;
+
+      if (rawNotes.length !== indices.length) {
+        throw new Error(`Input notes and indices size don't match notes count (${rawNotes.length}) indices count (${indices.length})`);
+      }
+
+      // Pad the 1 note to make 2 inputs
+      if (rawNotes.length === 1) {
+        jsNotes.push(note.defaultUtxoNote());
+        indices.push(0);
+      }
+
+      if (rawNotes.length > 2 && rawNotes.length < 16) {
+        const inputGap = 16 - rawNotes.length;
+        const defaultNote = note.defaultUtxoNote();
+
+        jsNotes.push(...Array(inputGap).fill(defaultNote));
+        indices.push(...Array(inputGap).fill(0));
+      }
+
+      if (rawNotes.length > 16) {
+        throw new Error('The maximum support input count is 16');
+      }
 
       pm.setNote(note);
       pm.setNotes(jsNotes);
-      pm.setIndices(input.indices.map((i) => i.toString()) as any);
+      pm.setIndices(indices.map((i) => i.toString()) as any);
       pm.setPk(u8aToHex(input.provingKey).replace('0x', ''));
       pm.setRoots(input.roots);
       pm.chain_id(input.chainId);
