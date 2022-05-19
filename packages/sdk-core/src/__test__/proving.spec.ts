@@ -53,15 +53,11 @@ describe('Proving manager VAnchor', function () {
     const keys = vanchorBn2542_2_2;
     const vanchorNote1 = generateVAnchorNote(20, 0, 0, 0);
 
-    console.log('===> Generated vanchor notes');
-
     const publicAmount = 10;
     const outputAmount = String(15);
     const outputChainId = BigInt(0);
 
     const leaf1 = vanchorNote1.getLeafCommitment();
-
-    console.log('===> Tree setup with leaves');
 
     const tree = new MTBn254X5([leaf1], '0');
     const root = `0x${tree.root}`;
@@ -101,16 +97,12 @@ describe('Proving manager VAnchor', function () {
     const vanchorNote1 = generateVAnchorNote(10, 0, 0, 0);
     const vanchorNote2 = generateVAnchorNote(10, 0, 0, 1);
 
-    console.log('===> Generated vanchor notes');
-
     const publicAmount = 10;
     const outputAmount = String(15);
     const outputChainId = BigInt(0);
 
     const leaf1 = vanchorNote1.getLeafCommitment();
     const leaf2 = vanchorNote2.getLeafCommitment();
-
-    console.log('===> Tree setup with leaves');
 
     const tree = new MTBn254X5([leaf1, leaf2], '0');
     const root = `0x${tree.root}`;
@@ -148,14 +140,10 @@ describe('Proving manager VAnchor', function () {
 
     const notes = Array(3).fill(0).map((_, index) => generateVAnchorNote(10, 0, 0, index));
 
-    console.log('===> Generated vanchor notes');
-
     const publicAmount = 10;
     const outputAmount = String(10 * 1.5 + 5);
     const outputChainId = BigInt(0);
     const leaves = notes.map((note) => note.getLeafCommitment());
-
-    console.log('===> Tree setup with leaves');
 
     const tree = new MTBn254X5(leaves, '0');
     const root = `0x${tree.root}`;
@@ -194,14 +182,10 @@ describe('Proving manager VAnchor', function () {
 
     const notes = Array(16).fill(0).map((_, index) => generateVAnchorNote(10, 0, 0, index));
 
-    console.log('===> Generated vanchor notes');
-
     const publicAmount = 10;
     const outputAmount = String(10 * 8 + 5);
     const outputChainId = BigInt(0);
     const leaves = notes.map((note) => note.getLeafCommitment());
-
-    console.log('===> Tree setup with leaves');
 
     const tree = new MTBn254X5(leaves, '0');
     const root = `0x${tree.root}`;
@@ -243,14 +227,10 @@ describe('Proving manager VAnchor', function () {
 
       const notes = Array(16).fill(0).map((_, index) => generateVAnchorNote(10, 0, 0, index));
 
-      console.log('===> Generated vanchor notes');
-
       const publicAmount = 10;
       const outputAmount = String(10 * 80 + 5);
       const outputChainId = BigInt(0);
       const leaves = notes.map((note) => note.getLeafCommitment());
-
-      console.log('===> Tree setup with leaves');
 
       const tree = new MTBn254X5(leaves, '0');
       const root = `0x${tree.root}`;
