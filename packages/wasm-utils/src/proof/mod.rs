@@ -487,6 +487,46 @@ impl VAnchorProofInput {
 		let curve = self.curve.unwrap_or(Curve::Bn254);
 		let backend = self.backend.unwrap_or(Backend::Arkworks);
 
+		/// Input UTXO should have the same chain_id
+		/// For default UTXOS the amount and the index should be `0`
+		/// Duplicate indices is ONLY allowed for the default UTXOs
+		// chain_id of the first item in the list
+		let mut invalid_utxo_chain_id_indices = vec![];
+		let mut invalid_utxo_dublicate_nullifiers = vec![];
+		let utxos_chain_id = secret[0].clone().chain_id_raw();
+		// validate the all inputs share the same chain_id
+		secret.iter().enumerate().for_each(|(index, utxo)| {
+			if utxo.get_chain_id_raw() != utxos_chain_id {
+				invalid_utxo_chain_id_indices.push(index)
+			}
+		});
+		let non_default_utxo = secret
+			.iter()
+			.enumerate()
+			.filter(|(_, utxo)| {
+				// filter for non-default utxos
+				utxo.amount_raw() != 0 && utxo.get_index().unwrap_or(0) != 0
+			})
+			.collect::<Vec<_>>();
+		non_default_utxo.iter().for_each(|(index, utxo)| {
+			let has_dublicate = non_default_utxo
+				.iter()
+				.find(|(root_index, root_utxo)| root_index != index && root_utxo.amount_raw() == utxo.amount_raw());
+			if has_dublicate.is_some() {
+				invalid_utxo_dublicate_nullifiers.push(index)
+			}
+		});
+		if &invalid_utxo_chain_id_indices.len() > &0 || &invalid_utxo_dublicate_nullifiers.len() > &0 {
+			let message  = format!("Invalid UTXOs: utxo indices has invalid chain_id {:?} , non-default utxos with an  duplicate index {:?}" , &invalid_utxo_chain_id_indices , &invalid_utxo_dublicate_nullifiers);
+			let mut op: OperationError =
+				OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message);
+			op.data = Some(format!(
+				"{{ duplicateIndices:{:?} , invalidChainId:{:?} }}",
+				invalid_utxo_chain_id_indices, invalid_utxo_dublicate_nullifiers
+			));
+			return Err(op);
+		}
+
 		Ok(VAnchorProofPayload {
 			exponentiation,
 			width,

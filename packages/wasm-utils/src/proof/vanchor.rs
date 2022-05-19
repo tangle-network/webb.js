@@ -84,11 +84,11 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		));
 	};
 	// Insure the length of the indices
-	if &indices.len() != &secret.len() {
+	if &indices.len() != &in_utxos.len() {
 		let message = format!(
       "Indices Array don't match with the Input size , supplied {} indices while there are {} utxos in the input ",
       &indices.len(),
-      &secret.len(),
+      &in_utxos.len(),
     );
 		return Err(OperationError::new_with_message(
 			OpStatusCode::InvalidProofParameters,
@@ -116,6 +116,7 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 				output_config[0].chain_id,
 				output_config[0].amount,
 				None,
+				rng,
 			)
 			.unwrap();
 			let utxo_o_2 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
@@ -123,6 +124,7 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 				output_config[1].chain_id,
 				output_config[1].amount,
 				None,
+				rng,
 			)
 			.unwrap();
 			let utxos_out = [utxo_o_1.clone(), utxo_o_2.clone()];
@@ -153,7 +155,7 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 				}
 				(5, 5, 16) => {
 					let in_utxos = in_utxos
-						.into_iter()
+						.iter()
 						.map(|utxo| utxo.get_bn254_utxo())
 						.collect::<Result<Vec<_>, _>>()?;
 					let utxos_slice = in_utxos.try_into().map_err(|_| OpStatusCode::InvalidNoteSecrets)?;
@@ -208,6 +210,6 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		proof: proof.proof,
 		public_inputs: proof.public_inputs_raw,
 		output_notes: output_notes.to_vec(),
-		input_utxos,
+		input_utxos: in_utxos,
 	})
 }
