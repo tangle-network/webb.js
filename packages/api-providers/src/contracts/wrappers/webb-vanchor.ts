@@ -12,7 +12,7 @@ import { LoggerService } from '@webb-tools/app-util/index.js';
 import { ERC20, ERC20__factory as ERC20Factory, VAnchor, VAnchor__factory } from '@webb-tools/contracts';
 import { IAnchorDepositInfo } from '@webb-tools/interfaces';
 import { MerkleTree } from '@webb-tools/merkle-tree';
-import { toFixedHex, Utxo } from '@webb-tools/utils';
+import { Utxo } from '@webb-tools/utils';
 import { BigNumber, BigNumberish, Contract, providers, Signer } from 'ethers';
 
 import { zeroAddress } from '../index.js';
