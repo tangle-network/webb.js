@@ -17,6 +17,7 @@ import { PolkadotChainQuery } from './chain-query.js';
 import { PolkadotMixerDeposit } from './mixer-deposit.js';
 import { PolkadotMixerWithdraw } from './mixer-withdraw.js';
 import { PolkaTXBuilder } from './transaction.js';
+import { PolkadotVAnchorDeposit } from './vanchor-deposit.js';
 import { PolkadotWrapUnwrap } from './wrap-unwrap.js';
 
 export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbApiProvider<WebbPolkadot> {
@@ -44,8 +45,9 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
     this.api = this.provider.api;
     this.txBuilder = this.provider.txBuilder;
     this.methods = {
-      anchor: {
-        core: null,
+      anchorApi: new PolkadotAnchorApi(this, this.config.bridgeByAsset),
+      chainQuery: new PolkadotChainQuery(this),
+      fixedAnchor: {
         deposit: {
           enabled: true,
           inner: new PolkadotAnchorDeposit(this)
@@ -55,8 +57,6 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
           inner: new PolkadotAnchorWithdraw(this)
         }
       },
-      anchorApi: new PolkadotAnchorApi(this, this.config.bridgeByAsset),
-      chainQuery: new PolkadotChainQuery(this),
       mixer: {
         deposit: {
           enabled: true,
@@ -65,6 +65,12 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
         withdraw: {
           enabled: true,
           inner: new PolkadotMixerWithdraw(this)
+        }
+      },
+      variableAnchor: {
+        deposit: {
+          enabled: true,
+          inner: new PolkadotVAnchorDeposit(this)
         }
       },
       wrapUnwrap: {

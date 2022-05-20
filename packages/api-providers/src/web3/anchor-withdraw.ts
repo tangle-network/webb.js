@@ -5,9 +5,9 @@
 
 import { parseUnits } from '@ethersproject/units';
 import { Anchor } from '@webb-tools/anchors';
-import * as witnessCalculatorFile from '@webb-tools/api-providers/contracts/utils/witness-calculator.js';
+import * as witnessCalculatorFile from '@webb-tools/api-providers/contracts/utils/fixed-witness-calculator.js';
 import { BridgeConfig, OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer, WithdrawState } from '@webb-tools/api-providers/index.js';
-import { BridgeStorage, bridgeStorageFactory, chainIdToRelayerName, getAnchorAddressForBridge, getAnchorDeploymentBlockNumber, getEVMChainName, getEVMChainNameFromInternal } from '@webb-tools/api-providers/utils/index.js';
+import { BridgeStorage, bridgeStorageFactory, chainIdToRelayerName, getAnchorDeploymentBlockNumber, getEVMChainName, getEVMChainNameFromInternal, getFixedAnchorAddressForBridge } from '@webb-tools/api-providers/utils/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note } from '@webb-tools/sdk-core/index.js';
 import { toFixedHex } from '@webb-tools/utils';
@@ -20,7 +20,7 @@ import { depositFromAnchorNote } from '../contracts/utils/make-deposit.js';
 import { AnchorContract } from '../contracts/wrappers/index.js';
 import { webbCurrencyIdFromString } from '../enums/index.js';
 import { Web3Provider } from '../ext-providers/index.js';
-import { fetchKeyForEdges, fetchWasmForEdges } from '../ipfs/evm/anchors.js';
+import { fetchFixedAnchorKeyForEdges, fetchFixedAnchorWasmForEdges } from '../ipfs/evm/anchors.js';
 import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
 import { WebbWeb3Provider } from './webb-provider.js';
 
@@ -51,7 +51,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
         const depositNote = await Note.deserialize(note);
         const evmNote = depositNote.note;
         const internalId = chainTypeIdToInternalId(parseChainIdType(Number(depositNote.note.targetChainId)));
-        const contractAddress = await getAnchorAddressForBridge(
+        const contractAddress = await getFixedAnchorAddressForBridge(
           webbCurrencyIdFromString(evmNote.tokenSymbol),
           internalId,
           Number(evmNote.amount),
@@ -147,11 +147,11 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     const activeChain = await this.inner.getChainId();
     const internalId = evmIdIntoInternalChainId(activeChain);
 
-    const anchorConfigsForBridge = activeBridge.anchors.find((anchor) => anchor.amount === note.amount)!;
+    const anchorConfigsForBridge = activeBridge.anchors.find((anchor) => anchor.type === 'fixed' && anchor.amount === note.amount)!;
     const contractAddress = anchorConfigsForBridge.anchorAddresses[internalId]!;
 
     // create the Anchor instance
-    const contract = this.inner.getWebbAnchorByAddress(contractAddress);
+    const contract = this.inner.getFixedAnchorByAddress(contractAddress);
 
     // Fetch the leaves that we already have in storage
     const bridgeStorageStorage = await bridgeStorageFactory(Number(note.sourceChainId));
@@ -186,11 +186,11 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
     // Fetch the zero knowledge files required for creating witnesses and verifying.
     const maxEdges = await contract.inner.maxEdges();
-    const wasmBuf = await fetchWasmForEdges(maxEdges);
+    const wasmBuf = await fetchFixedAnchorWasmForEdges(maxEdges);
 
     console.log('Fetched the wasm buffer');
     const witnessCalculator = await witnessCalculatorFile.builder(wasmBuf, {});
-    const circuitKey = await fetchKeyForEdges(maxEdges);
+    const circuitKey = await fetchFixedAnchorKeyForEdges(maxEdges);
 
     console.log('fetched the circuit key');
 
@@ -315,10 +315,10 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     const sourceContractAddress = selectedAnchor?.neighbours[sourceInternalId]! as string;
 
     // get root and neighbour root from the dest provider
-    const destAnchor = this.inner.getWebbAnchorByAddress(destContractAddress);
+    const destAnchor = this.inner.getFixedAnchorByAddress(destContractAddress);
 
     // Building the merkle proof
-    const sourceContract = this.inner.getWebbAnchorByAddressAndProvider(sourceContractAddress, sourceEthers);
+    const sourceContract = this.inner.getFixedAnchorByAddressAndProvider(sourceContractAddress, sourceEthers);
     const sourceLatestRoot = await sourceContract.inner.getLastRoot();
 
     logger.trace(`Source latest root ${sourceLatestRoot}`);
@@ -395,13 +395,13 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
     // Fetch the zero knowledge files required for creating witnesses and verifying.
     const maxEdges = await destAnchor.inner.maxEdges();
-    const wasmBuf = await fetchWasmForEdges(maxEdges);
+    const wasmBuf = await fetchFixedAnchorWasmForEdges(maxEdges);
 
     console.log('wasmBuf: ', wasmBuf);
 
     console.log('wasm for edges fetched');
     const witnessCalculator = await witnessCalculatorFile.builder(wasmBuf, {});
-    const circuitKey = await fetchKeyForEdges(maxEdges);
+    const circuitKey = await fetchFixedAnchorKeyForEdges(maxEdges);
 
     // This anchor wrapper from protocol-solidity is used for public inputs generation
     const anchorWrapper = await Anchor.connect(destAnchor.inner.address, {

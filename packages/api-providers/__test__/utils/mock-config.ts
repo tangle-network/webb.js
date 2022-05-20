@@ -14,21 +14,24 @@ const anchorsConfig: AppConfig['anchors'] = {
       anchorAddresses: {},
       anchorTreeIds: {
         [InternalChainId.ProtocolSubstrateStandalone]: '3'
-      }
+      },
+      type: 'fixed'
     },
     {
       amount: '100',
       anchorAddresses: {},
       anchorTreeIds: {
         [InternalChainId.ProtocolSubstrateStandalone]: '4'
-      }
+      },
+      type: 'fixed'
     },
     {
       amount: '1000',
       anchorAddresses: {},
       anchorTreeIds: {
         [InternalChainId.ProtocolSubstrateStandalone]: '5'
-      }
+      },
+      type: 'fixed'
     }
   ],
   [WebbCurrencyId.webbDEV]: [
@@ -39,7 +42,17 @@ const anchorsConfig: AppConfig['anchors'] = {
         [InternalChainId.AthenaLocalnet]: '0xcd75Ad7AC9C9325105f798c476E84176648F391A',
         [InternalChainId.DemeterLocalnet]: '0x4e3df2073bf4b43B9944b8e5A463b1E185D6448C'
       },
-      anchorTreeIds: {}
+      anchorTreeIds: {},
+      type: 'fixed'
+    },
+    {
+      anchorAddresses: {
+        [InternalChainId.HermesLocalnet]: '0xb824C5F99339C7E486a1b452B635886BE82bc8b7',
+        [InternalChainId.AthenaLocalnet]: '0xFEe587E68c470DAE8147B46bB39fF230A29D4769',
+        [InternalChainId.DemeterLocalnet]: '0xdB587ef6aaA16b5719CDd3AaB316F0E70473e9Be'
+      },
+      anchorTreeIds: {},
+      type: 'variable'
     }
   ]
 };

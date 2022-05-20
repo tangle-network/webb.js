@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { getAnchorAddressForBridge } from '@webb-tools/api-providers/index.js';
+import { getFixedAnchorAddressForBridge } from '@webb-tools/api-providers/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Observable, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -234,7 +234,7 @@ export class WebbRelayerBuilder {
 
         if (bridgeSupport && baseOn && chainId) {
           if (baseOn === 'evm') {
-            const anchorAddress = getAnchorAddressForBridge(
+            const anchorAddress = getFixedAnchorAddressForBridge(
               webbCurrencyIdFromString(bridgeSupport.tokenSymbol),
               chainId,
               bridgeSupport.amount,

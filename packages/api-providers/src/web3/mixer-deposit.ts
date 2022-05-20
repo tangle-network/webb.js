@@ -56,7 +56,7 @@ export class Web3MixerDeposit extends Web3AnchorDeposit {
         throw new Error(`No Anchor for the chain ${note.targetChainId}`);
       }
 
-      const contract = this.inner.getWebbAnchorByAddress(contractAddress as string);
+      const contract = this.inner.getFixedAnchorByAddress(contractAddress as string);
 
       // If a wrappableAsset was selected, perform a wrapAndDeposit
       if (depositPayload.params[2]) {
