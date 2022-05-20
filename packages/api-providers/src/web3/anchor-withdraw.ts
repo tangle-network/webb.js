@@ -9,6 +9,7 @@ import * as witnessCalculatorFile from '@webb-tools/api-providers/contracts/util
 import { BridgeConfig, OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer, WithdrawState } from '@webb-tools/api-providers/index.js';
 import { BridgeStorage, bridgeStorageFactory, chainIdToRelayerName, getAnchorDeploymentBlockNumber, getEVMChainName, getEVMChainNameFromInternal, getFixedAnchorAddressForBridge } from '@webb-tools/api-providers/utils/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
+import { MerkleTree } from '@webb-tools/merkle-tree';
 import { Note } from '@webb-tools/sdk-core/index.js';
 import { toFixedHex } from '@webb-tools/utils';
 import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
@@ -17,7 +18,6 @@ import { BigNumber } from 'ethers';
 import { AnchorApi, AnchorWithdraw } from '../abstracts/index.js';
 import { ChainType, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains/index.js';
 import { depositFromAnchorNote } from '../contracts/utils/make-deposit.js';
-import { AnchorContract } from '../contracts/wrappers/index.js';
 import { webbCurrencyIdFromString } from '../enums/index.js';
 import { Web3Provider } from '../ext-providers/index.js';
 import { fetchFixedAnchorKeyForEdges, fetchFixedAnchorWasmForEdges } from '../ipfs/evm/anchors.js';
@@ -348,7 +348,9 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
       // leaves from relayer somewhat validated, attempt to build the tree
       if (validLatestLeaf) {
-        const tree = AnchorContract.createTreeWithRoot(relayerLeaves.leaves, sourceLatestRoot);
+        // Assume the destination anchor has the same levels as source anchor
+        const levels = await destAnchor.inner.levels();
+        const tree = MerkleTree.createTreeWithRoot(levels, relayerLeaves.leaves, sourceLatestRoot);
 
         // If we were able to build the tree, set local storage and break out of the loop
         if (tree) {

@@ -59,24 +59,6 @@ export class AnchorContract {
     return this._contract;
   }
 
-  static createTreeWithRoot (leaves: string[], targetRoot: string): MerkleTree | undefined {
-    const tree = new MerkleTree(30, []);
-
-    for (let i = 0; i < leaves.length; i++) {
-      tree.insert(leaves[i]);
-      console.log('createTreeWithRoot - leaf: ', leaves[i]);
-      const nextRoot = tree.root();
-
-      console.log(`target root: ${targetRoot} \n this root: ${toFixedHex(nextRoot)}`);
-
-      if (toFixedHex(nextRoot) === targetRoot) {
-        return tree;
-      }
-    }
-
-    return undefined;
-  }
-
   async getWebbToken (): Promise<ERC20> {
     const tokenAddress = await this._contract.token();
     const tokenInstance = ERC20Factory.connect(tokenAddress, this.signer);
@@ -262,7 +244,8 @@ export class AnchorContract {
     console.log('retrieved edge while generating merkle proof: ', edge);
     const latestSourceRoot = edge[1];
 
-    const tree = AnchorContract.createTreeWithRoot(sourceLeaves, latestSourceRoot);
+    const levels = await this._contract.levels();
+    const tree = MerkleTree.createTreeWithRoot(levels, sourceLeaves, latestSourceRoot);
 
     if (tree) {
       const index = tree.getIndexByElement(sourceDeposit.commitment);

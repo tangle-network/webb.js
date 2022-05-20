@@ -58,24 +58,6 @@ export class VAnchorContract {
     return this._contract;
   }
 
-  static createTreeWithRoot (leaves: string[], targetRoot: string): MerkleTree | undefined {
-    const tree = new MerkleTree(5, []);
-
-    for (let i = 0; i < leaves.length; i++) {
-      tree.insert(leaves[i]);
-      console.log('createTreeWithRoot - leaf: ', leaves[i]);
-      const nextRoot = tree.root();
-
-      console.log(`target root: ${targetRoot} \n this root: ${toFixedHex(nextRoot)}`);
-
-      if (toFixedHex(nextRoot) === targetRoot) {
-        return tree;
-      }
-    }
-
-    return undefined;
-  }
-
   async initializeWrapper () {
     if (!this.wrapper) {
       const maxEdges = await this._contract.maxEdges();
@@ -307,7 +289,8 @@ export class VAnchorContract {
     console.log('retrieved edge while generating merkle proof: ', edge);
     const latestSourceRoot = edge[1];
 
-    const tree = VAnchorContract.createTreeWithRoot(sourceLeaves, latestSourceRoot);
+    const levels = await this._contract.levels();
+    const tree = MerkleTree.createTreeWithRoot(levels, sourceLeaves, latestSourceRoot);
 
     if (tree) {
       const index = tree.getIndexByElement(sourceDeposit.commitment);
