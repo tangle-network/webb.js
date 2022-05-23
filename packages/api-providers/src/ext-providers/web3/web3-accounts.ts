@@ -6,11 +6,11 @@ import { Eth } from 'web3-eth';
 import { Account, AccountsAdapter, PromiseOrT } from '../../account/Accounts.adapter.js';
 
 export class Web3Account extends Account<Eth> {
-  get avatar() {
+  get avatar () {
     return '';
   }
 
-  get name(): string {
+  get name (): string {
     return '';
   }
 }
@@ -18,20 +18,20 @@ export class Web3Account extends Account<Eth> {
 export class Web3Accounts extends AccountsAdapter<Eth> {
   providerName = 'Eth';
 
-  async accounts() {
+  async accounts () {
     const accounts = await this._inner.getAccounts();
 
     return accounts.map((address) => new Web3Account(this.inner, address));
   }
 
-  get activeOrDefault() {
+  get activeOrDefault () {
     const defaultAccount = this.inner.defaultAccount;
 
     return defaultAccount ? new Web3Account(this.inner, defaultAccount) : null;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  setActiveAccount(account: Account): PromiseOrT<void> {
+  setActiveAccount (account: Account): PromiseOrT<void> {
     return undefined;
   }
 }

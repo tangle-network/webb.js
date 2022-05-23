@@ -17,7 +17,7 @@ export abstract class EventBus<T extends Event> {
    * Register an event and pass a callback
    * @returns Void|Function , Void if the handler is already registered or Function if the handler is registered
    **/
-  on<E extends keyof T>(event: E, cb: (val: T[E]) => void): () => void {
+  on<E extends keyof T> (event: E, cb: (val: T[E]) => void): () => void {
     const listeners = this.subscriptions[event];
 
     if (!listeners || listeners.indexOf(cb) === -1) {
@@ -30,7 +30,7 @@ export abstract class EventBus<T extends Event> {
   /**
    * emit an event
    **/
-  protected emit<E extends keyof T>(event: E, data: T[E]): void {
+  protected emit<E extends keyof T> (event: E, data: T[E]): void {
     this.subscriptions[event]?.forEach((cb) => cb(data));
   }
 
@@ -38,13 +38,13 @@ export abstract class EventBus<T extends Event> {
    *  Unregister the listener for an event
    *  the reference of the callback function
    **/
-  protected off<E extends keyof T>(event: E, cb: (val: T[E]) => void): void {
+  protected off<E extends keyof T> (event: E, cb: (val: T[E]) => void): void {
     const listeners = this.subscriptions[event];
 
     this.subscriptions[event] = listeners?.filter((c) => c !== cb) ?? [];
   }
 
-  once<E extends keyof T>(event: E, cb: (val: T[E]) => void): () => void {
+  once<E extends keyof T> (event: E, cb: (val: T[E]) => void): () => void {
     const hookedCb = (val: T[E]) => {
       cb(val);
       this.off(event, hookedCb);
@@ -55,11 +55,11 @@ export abstract class EventBus<T extends Event> {
     return () => this.off(event, hookedCb);
   }
 
-  unsubscribeAll() {
+  unsubscribeAll () {
     this.subscriptions = {} as Subscription<T>;
   }
 
-  unsubscribeAllForEvent<E extends keyof T>(event: E) {
+  unsubscribeAllForEvent<E extends keyof T> (event: E) {
     this.subscriptions[event] = [];
   }
 }

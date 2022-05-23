@@ -32,7 +32,7 @@ export abstract class MixerDeposit<
   T extends WebbApiProvider<any> = WebbApiProvider<any>,
   K extends DepositPayload = DepositPayload<any>
 > extends EventBus<MixerDepositEvents> {
-  constructor(protected inner: T) {
+  constructor (protected inner: T) {
     super();
   }
 

@@ -9,18 +9,7 @@ import { filter } from 'rxjs/operators';
 import { InternalChainId } from '../../chains/index.js';
 import { webbCurrencyIdFromString } from '../../enums/index.js';
 import { AppConfig } from '../common.js';
-import {
-  Capabilities,
-  EVMCMDKeys,
-  RelayedChainConfig,
-  RelayerCMDBase,
-  RelayerCMDKey,
-  RelayerConfig,
-  RelayerEVMCommands,
-  RelayerMessage,
-  RelayerSubstrateCommands,
-  SubstrateCMDKeys,
-} from './types.js';
+import { Capabilities, EVMCMDKeys, RelayedChainConfig, RelayerCMDBase, RelayerCMDKey, RelayerConfig, RelayerEVMCommands, RelayerMessage, RelayerSubstrateCommands, SubstrateCMDKeys } from './types.js';
 
 const logger = LoggerService.get('webb-relayer class');
 
@@ -85,12 +74,12 @@ export type RelayerCMDs<A extends RelayerCMDBase, C extends CMDSwitcher<A>> = A 
     ? RelayerEVMCommands[C]
     : never
   : C extends keyof RelayerSubstrateCommands
-  ? RelayerSubstrateCommands[C]
-  : never;
+    ? RelayerSubstrateCommands[C]
+    : never;
 
 export type WithdrawRelayerArgs<A extends RelayerCMDBase, C extends CMDSwitcher<A>> = Omit<
-  RelayerCMDs<A, C>,
-  keyof RelayedChainInput | 'proof'
+RelayerCMDs<A, C>,
+keyof RelayedChainInput | 'proof'
 >;
 
 export interface RelayerInfo {
@@ -114,7 +103,7 @@ export class WebbRelayerBuilder {
   private _listUpdated = new Subject<void>();
   public readonly listUpdated: Observable<void>;
 
-  private constructor(
+  private constructor (
     protected relayerConfigs: RelayerConfig[],
     private readonly chainNameAdapter: ChainNameIntoChainId,
     private appConfig: AppConfig
@@ -125,7 +114,7 @@ export class WebbRelayerBuilder {
   /**
    * Mapping the fetched relayers info to the Capabilities store
    **/
-  private static infoIntoCapabilities(
+  private static infoIntoCapabilities (
     _nfig: RelayerConfig,
     info: RelayerInfo,
     nameAdapter: ChainNameIntoChainId
@@ -137,47 +126,47 @@ export class WebbRelayerBuilder {
       supportedChains: {
         evm: info.evm
           ? Object.keys(info.evm)
-              .filter((key) => info.evm[key]?.beneficiary && nameAdapter(key, 'evm') != null)
-              .reduce((m, key) => {
-                m.set(nameAdapter(key, 'evm'), info.evm[key]);
+            .filter((key) => info.evm[key]?.beneficiary && nameAdapter(key, 'evm') != null)
+            .reduce((m, key) => {
+              m.set(nameAdapter(key, 'evm'), info.evm[key]);
 
-                return m;
-              }, new Map())
+              return m;
+            }, new Map())
           : new Map(),
         substrate: info.substrate
           ? Object.keys(info.substrate)
-              .filter((key) => info.substrate[key]?.beneficiary && nameAdapter(key, 'substrate') != null)
-              .reduce((m, key) => {
-                m.set(nameAdapter(key, 'substrate'), info.substrate[key]);
+            .filter((key) => info.substrate[key]?.beneficiary && nameAdapter(key, 'substrate') != null)
+            .reduce((m, key) => {
+              m.set(nameAdapter(key, 'substrate'), info.substrate[key]);
 
-                return m;
-              }, new Map())
-          : new Map(),
-      },
+              return m;
+            }, new Map())
+          : new Map()
+      }
     };
   }
 
   /// fetch relayers
-  private async fetchCapabilitiesAndInsert(config: RelayerConfig) {
+  private async fetchCapabilitiesAndInsert (config: RelayerConfig) {
     this.capabilities[config.endpoint] = await this.fetchCapabilities(config.endpoint);
 
     return this.capabilities;
   }
 
-  public async fetchCapabilities(endpoint: string): Promise<Capabilities> {
+  public async fetchCapabilities (endpoint: string): Promise<Capabilities> {
     const res = await fetch(`${endpoint}/api/v1/info`);
     const info: RelayerInfo = await res.json();
 
     return WebbRelayerBuilder.infoIntoCapabilities(
       {
-        endpoint,
+        endpoint
       },
       info,
       this.chainNameAdapter
     );
   }
 
-  public async addRelayer(endpoint: string) {
+  public async addRelayer (endpoint: string) {
     const c = await this.fetchCapabilitiesAndInsert({ endpoint });
 
     this._listUpdated.next();
@@ -189,7 +178,7 @@ export class WebbRelayerBuilder {
    * init the builder
    *  create new instance and fetch the relayers
    **/
-  static async initBuilder(
+  static async initBuilder (
     config: RelayerConfig[],
     chainNameAdapter: ChainNameIntoChainId,
     appConfig: AppConfig
@@ -204,7 +193,7 @@ export class WebbRelayerBuilder {
           relayerBuilder.fetchCapabilitiesAndInsert(p),
           new Promise((resolve) => {
             setTimeout(resolve.bind(null, null), 5000);
-          }),
+          })
         ]);
       })
     );
@@ -217,7 +206,7 @@ export class WebbRelayerBuilder {
    *  the list is randomized
    *  Accepts a 'RelayerQuery' object with optional, indexible fields.
    **/
-  getRelayer(query: RelayerQuery): WebbRelayer[] {
+  getRelayer (query: RelayerQuery): WebbRelayer[] {
     const { baseOn, bridgeSupport, chainId, contractAddress, ipService } = query;
     const relayers = Object.keys(this.capabilities)
       .filter((key) => {
@@ -340,7 +329,7 @@ class RelayedWithdraw {
   readonly watcher: Observable<[RelayedWithdrawResult, string | undefined]>;
   private emitter: Subject<[RelayedWithdrawResult, string | undefined]> = new Subject();
 
-  constructor(private ws: WebSocket, private prefix: RelayerCMDKey) {
+  constructor (private ws: WebSocket, private prefix: RelayerCMDKey) {
     this.watcher = this.emitter.asObservable();
 
     ws.onmessage = ({ data }) => {
@@ -372,7 +361,7 @@ class RelayedWithdraw {
     }
   };
 
-  generateWithdrawRequest<T extends RelayedChainInput, C extends CMDSwitcher<T['baseOn']>>(
+  generateWithdrawRequest<T extends RelayedChainInput, C extends CMDSwitcher<T['baseOn']>> (
     chain: T,
     proof: RelayerCMDs<T['baseOn'], C>['proof'],
     args: WithdrawRelayerArgs<T['baseOn'], C>
@@ -382,13 +371,13 @@ class RelayedWithdraw {
         [this.prefix]: {
           contract: chain.contractAddress,
           proof,
-          ...args,
-        },
-      },
+          ...args
+        }
+      }
     };
   }
 
-  send(withdrawRequest: any) {
+  send (withdrawRequest: any) {
     if (this.status !== RelayedWithdrawResult.PreFlight) {
       throw Error('there is a withdraw process running');
     }
@@ -397,7 +386,7 @@ class RelayedWithdraw {
     this.ws.send(JSON.stringify(withdrawRequest));
   }
 
-  await() {
+  await () {
     return this.watcher
       .pipe(
         filter(([next]) => {
@@ -407,15 +396,15 @@ class RelayedWithdraw {
       .toPromise();
   }
 
-  get currentStatus() {
+  get currentStatus () {
     return this.status;
   }
 }
 
 export class WebbRelayer {
-  constructor(readonly endpoint: string, readonly capabilities: Capabilities) {}
+  constructor (readonly endpoint: string, readonly capabilities: Capabilities) {}
 
-  async initWithdraw<Target extends RelayerCMDKey>(target: Target) {
+  async initWithdraw<Target extends RelayerCMDKey> (target: Target) {
     const ws = new WebSocket(this.endpoint.replace('http', 'ws') + '/ws');
 
     await new Promise((resolve, reject) => {
@@ -438,7 +427,7 @@ export class WebbRelayer {
     return new RelayedWithdraw(ws, target);
   }
 
-  async getIp(): Promise<string> {
+  async getIp (): Promise<string> {
     const req = await fetch(`${this.endpoint}/api/v1/ip`);
 
     if (req.ok) {
@@ -449,7 +438,7 @@ export class WebbRelayer {
   }
 
   // chainId should be formatted as a hex string
-  async getLeaves(chainId: string, contractAddress: string): Promise<RelayerLeaves> {
+  async getLeaves (chainId: string, contractAddress: string): Promise<RelayerLeaves> {
     const url = `${this.endpoint}/api/v1/leaves/${chainId}/${contractAddress}`;
 
     logger.info(`fetching info from: ${url}`);
@@ -465,14 +454,14 @@ export class WebbRelayer {
 
       return {
         lastQueriedBlock: lastQueriedBlockNumber,
-        leaves: fetchedLeaves,
+        leaves: fetchedLeaves
       };
     } else {
       throw new Error('network error');
     }
   }
 
-  static intoActiveWebRelayer(
+  static intoActiveWebRelayer (
     instance: WebbRelayer,
     query: { chain: InternalChainId; basedOn: 'evm' | 'substrate' },
     getFees: (note: string) => Promise<{ totalFees: string; withdrawFeePercentage: number } | undefined>
@@ -482,7 +471,7 @@ export class WebbRelayer {
 }
 
 export class ActiveWebbRelayer extends WebbRelayer {
-  constructor(
+  constructor (
     endpoint: string,
     capabilities: Capabilities,
     private query: { chain: InternalChainId; basedOn: 'evm' | 'substrate' },
@@ -491,21 +480,21 @@ export class ActiveWebbRelayer extends WebbRelayer {
     super(endpoint, capabilities);
   }
 
-  private get config() {
+  private get config () {
     const list = this.capabilities.supportedChains[this.query.basedOn];
 
     return list.get(this.query.chain);
   }
 
-  get gasLimit(): number | undefined {
+  get gasLimit (): number | undefined {
     return undefined;
   }
 
-  get account(): string | undefined {
+  get account (): string | undefined {
     return this.config?.account;
   }
 
-  get beneficiary(): string | undefined {
+  get beneficiary (): string | undefined {
     return this.config?.beneficiary;
   }
 

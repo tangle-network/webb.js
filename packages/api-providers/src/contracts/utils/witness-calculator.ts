@@ -5,7 +5,7 @@
 // @ts-nocheck
 /* eslint-disable camelcase */
 
-export async function builder(code, options) {
+export async function builder (code, options) {
   options = options || {};
 
   const wasmModule = await WebAssembly.compile(code);
@@ -35,8 +35,8 @@ export async function builder(code, options) {
       },
       showSharedRWMemory: function () {
         printSharedRWMemory();
-      },
-    },
+      }
+    }
   });
 
   const sanityCheck = options;
@@ -53,7 +53,7 @@ export async function builder(code, options) {
 
   return wc;
 
-  function getMessage() {
+  function getMessage () {
     let message = '';
     let c = instance.exports.getMessageChar();
 
@@ -65,7 +65,7 @@ export async function builder(code, options) {
     return message;
   }
 
-  function printSharedRWMemory() {
+  function printSharedRWMemory () {
     const shared_rw_memory_size = instance.exports.getFieldNumLen32();
     const arr = new Uint32Array(shared_rw_memory_size);
 
@@ -78,7 +78,7 @@ export async function builder(code, options) {
 }
 
 class WitnessCalculator {
-  constructor(instance, sanityCheck) {
+  constructor (instance, sanityCheck) {
     this.instance = instance;
 
     this.version = this.instance.exports.getVersion();
@@ -98,11 +98,11 @@ class WitnessCalculator {
     this.sanityCheck = sanityCheck;
   }
 
-  circom_version() {
+  circom_version () {
     return this.instance.exports.getVersion();
   }
 
-  async _doCalculateWitness(input, sanityCheck) {
+  async _doCalculateWitness (input, sanityCheck) {
     // input is assumed to be a map from signals to arrays of bigints
     this.instance.exports.init(this.sanityCheck || sanityCheck ? 1 : 0);
     const keys = Object.keys(input);
@@ -130,7 +130,7 @@ class WitnessCalculator {
     });
   }
 
-  async calculateWitness(input, sanityCheck) {
+  async calculateWitness (input, sanityCheck) {
     const w = [];
 
     await this._doCalculateWitness(input, sanityCheck);
@@ -149,7 +149,7 @@ class WitnessCalculator {
     return w;
   }
 
-  async calculateBinWitness(input, sanityCheck) {
+  async calculateBinWitness (input, sanityCheck) {
     const buff32 = new Uint32Array(this.witnessSize * this.n32);
     const buff = new Uint8Array(buff32.buffer);
 
@@ -167,7 +167,7 @@ class WitnessCalculator {
     return buff;
   }
 
-  async calculateWTNSBin(input, sanityCheck) {
+  async calculateWTNSBin (input, sanityCheck) {
     const buff32 = new Uint32Array(this.witnessSize * this.n32 + this.n32 + 11);
     const buff = new Uint8Array(buff32.buffer);
 
@@ -241,7 +241,7 @@ class WitnessCalculator {
   }
 }
 
-function toArray32(s, size) {
+function toArray32 (s, size) {
   const res = []; // new Uint32Array(size); //has no unshift
   let rem = BigInt(s);
   const radix = BigInt(0x100000000);
@@ -263,7 +263,7 @@ function toArray32(s, size) {
   return res;
 }
 
-function fromArray32(arr) {
+function fromArray32 (arr) {
   // returns a BigInt
   let res = BigInt(0);
   const radix = BigInt(0x100000000);
@@ -275,14 +275,14 @@ function fromArray32(arr) {
   return res;
 }
 
-function flatArray(a) {
+function flatArray (a) {
   const res = [];
 
   fillArray(res, a);
 
   return res;
 
-  function fillArray(res, a) {
+  function fillArray (res, a) {
     if (Array.isArray(a)) {
       for (let i = 0; i < a.length; i++) {
         fillArray(res, a[i]);
@@ -293,7 +293,7 @@ function flatArray(a) {
   }
 }
 
-function fnvHash(str) {
+function fnvHash (str) {
   const uint64_max = BigInt(2) ** BigInt(64);
   let hash = BigInt('0xCBF29CE484222325');
 

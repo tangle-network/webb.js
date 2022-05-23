@@ -5,11 +5,11 @@ import { Storage } from '../storage/index.js';
 
 export type NetworkStore = {
   networksConfig: Record<
-    number,
-    | {
-        defaultAccount: string;
-      }
-    | undefined
+  number,
+  | {
+    defaultAccount: string;
+  }
+  | undefined
   >;
   defaultNetwork?: number;
   defaultWallet?: number;

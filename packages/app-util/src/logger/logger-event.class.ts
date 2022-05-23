@@ -13,7 +13,7 @@ export type LogEvent = {
 };
 
 export class LoggerEvent extends EventBus<LogEvent> {
-  constructor() {
+  constructor () {
     super();
     this.sendEvent = this.emit;
   }

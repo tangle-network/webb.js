@@ -3,12 +3,7 @@
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import {
-  Currency,
-  DepositPayload as TDepositPayload,
-  MixerSize,
-  ORMLCurrency,
-} from '@webb-tools/api-providers/index.js';
+import { Currency, DepositPayload as TDepositPayload, MixerSize, ORMLCurrency } from '@webb-tools/api-providers/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
 
@@ -24,11 +19,11 @@ type DepositPayload = TDepositPayload<Note, [number, string]>;
 const logger = LoggerService.get('tornado-deposit');
 
 export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayload> {
-  constructor(protected inner: WebbPolkadot) {
+  constructor (protected inner: WebbPolkadot) {
     super(inner);
   }
 
-  static async getSizes(webbPolkadot: WebbPolkadot): Promise<MixerSize[]> {
+  static async getSizes (webbPolkadot: WebbPolkadot): Promise<MixerSize[]> {
     const api = webbPolkadot.api;
     const ormlCurrency = new ORMLCurrency(webbPolkadot);
     const ormlAssets = await ormlCurrency.list();
@@ -61,7 +56,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
           amount: amountNumber,
           currency: currency,
           id: treeId,
-          treeId,
+          treeId
         };
       })
       .map(
@@ -72,7 +67,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
             id: treeId,
             title: amount + ` ${currency.view.symbol}`,
             treeId,
-            value: amount,
+            value: amount
           } as MixerSize)
       )
       .sort((a, b) => (a.amount > b.amount ? 1 : a.amount < b.amount ? -1 : 0));
@@ -80,12 +75,12 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
     return groupItem;
   }
 
-  async getSizes() {
+  async getSizes () {
     return PolkadotMixerDeposit.getSizes(this.inner);
   }
 
   // MixerId is the treeId for deposit, chainIdType is the destination (and source because this is mixer)
-  async generateNote(mixerId: number, chainIdType: number): Promise<DepositPayload> {
+  async generateNote (mixerId: number, chainIdType: number): Promise<DepositPayload> {
     logger.info(`Depositing to mixer id ${mixerId}`);
     const sizes = await this.getSizes();
     const mixer = sizes.find((size) => Number(size.id) === mixerId);
@@ -113,7 +108,7 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
       targetIdentifyingData: treeId.toString(),
       tokenSymbol: mixer.asset,
       version: 'v2',
-      width: '3',
+      width: '3'
     };
 
     logger.info('noteInput in generateNote: ', noteInput);
@@ -124,15 +119,15 @@ export class PolkadotMixerDeposit extends MixerDeposit<WebbPolkadot, DepositPayl
 
     return {
       note: depositNote,
-      params: [Number(treeId), u8aToHex(leaf)],
+      params: [Number(treeId), u8aToHex(leaf)]
     };
   }
 
-  async deposit(depositPayload: DepositPayload): Promise<void> {
+  async deposit (depositPayload: DepositPayload): Promise<void> {
     const tx = this.inner.txBuilder.build(
       {
         method: 'deposit',
-        section: 'mixerBn254',
+        section: 'mixerBn254'
       },
       depositPayload.params
     );

@@ -42,7 +42,7 @@ describe('getLeafCountForTree should work', function () {
       {
         section: 'merkleTreeBn254',
         // eslint-disable-next-line sort-keys
-        method: 'insert',
+        method: 'insert'
       },
       [0, '0x1111111111111111111111111111111111111111111111111111111111111111'],
       signer

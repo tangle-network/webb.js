@@ -6,7 +6,7 @@ import { LoggerService } from '@webb-tools/app-util/index.js';
 
 const logger = LoggerService.get('IPFS');
 
-export async function fetchSubstrateTornadoProvingKey() {
+export async function fetchSubstrateTornadoProvingKey () {
   const IPFSUrl = 'https://ipfs.io/ipfs/QmfQUgqRXCdUiogiRU8ZdLFZD2vqVb9fHpLkL6DsGHwoLH';
   const cachedURI = getCachedFixtureURI('proving_key_substrate_mixer.bin');
   const ipfsKeyRequest = await fetch(withLocalFixtures() ? cachedURI : IPFSUrl);

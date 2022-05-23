@@ -4,20 +4,14 @@
 /* eslint-disable camelcase */
 
 // eslint-disable-next-line camelcase
-import {
-  JsNoteBuilder,
-  MTBn254X5,
-  OutputUtxoConfig,
-  setupKeys,
-  verify_js_proof,
-} from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
+import { JsNoteBuilder, MTBn254X5, OutputUtxoConfig, setupKeys, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { expect } from 'chai';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { ProvingManagerSetupInput, ProvingManagerWrapper } from '../proving/index.js';
 
-function generateVAnchorNote(amount: number, chainId: number, outputChainId: number, index?: number) {
+function generateVAnchorNote (amount: number, chainId: number, outputChainId: number, index?: number) {
   const noteBuilder = new JsNoteBuilder();
 
   noteBuilder.protocol('vanchor');
@@ -81,7 +75,7 @@ describe('Proving manager VAnchor', function () {
       outputConfigs: [outputConfig1, outputConfig2],
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
-      roots: rootsSet,
+      roots: rootsSet
     };
     const data = await provingManager.proof('vanchor', setup);
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
@@ -123,7 +117,7 @@ describe('Proving manager VAnchor', function () {
       outputConfigs: [outputConfig1, outputConfig2],
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
-      roots: rootsSet,
+      roots: rootsSet
     };
     const data = await provingManager.proof('vanchor', setup);
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
@@ -164,7 +158,7 @@ describe('Proving manager VAnchor', function () {
       outputConfigs: [outputConfig1, outputConfig2],
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
-      roots: rootsSet,
+      roots: rootsSet
     };
 
     const data = await provingManager.proof('vanchor', setup);
@@ -206,7 +200,7 @@ describe('Proving manager VAnchor', function () {
       outputConfigs: [outputConfig1, outputConfig2],
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
-      roots: rootsSet,
+      roots: rootsSet
     };
 
     const data = await provingManager.proof('vanchor', setup);
@@ -250,7 +244,7 @@ describe('Proving manager VAnchor', function () {
         outputConfigs: [outputConfig1, outputConfig2],
         provingKey: keys.pk,
         publicAmount: String(publicAmount),
-        roots: rootsSet,
+        roots: rootsSet
       };
 
       await provingManager.proof('vanchor', setup);

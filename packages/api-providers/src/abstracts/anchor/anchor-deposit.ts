@@ -16,7 +16,7 @@ export abstract class AnchorDeposit<
   T extends WebbApiProvider<any>,
   K extends DepositPayload = DepositPayload<any>
 > extends MixerDeposit<T, K> {
-  generateNote(anchorId: number | string): Promise<K> {
+  generateNote (anchorId: number | string): Promise<K> {
     throw new Error('api not ready:Not mixer api for ' + anchorId);
   }
 

@@ -85,7 +85,6 @@ export type VAnchorPMSetupInput = {
   chainId: string;
   outputConfigs: [OutputUtxoConfig, OutputUtxoConfig];
   publicAmount: string;
-  metaDataNote?: string;
   externalDataHash: string;
   provingKey: Uint8Array;
 };
@@ -102,7 +101,7 @@ export class ProvingManagerWrapper {
    * Defaults to worker mode assuming that the Proving manager is running in the browser
    * if it's set to direct-call which is done in nodejs then this is running without worker
    **/
-  constructor(private ctx: 'worker' | 'direct-call' = 'worker') {
+  constructor (private ctx: 'worker' | 'direct-call' = 'worker') {
     // if the Manager is running in side worker it registers an event listener
     if (ctx === 'worker') {
       self.addEventListener('message', async (event) => {
@@ -117,7 +116,7 @@ export class ProvingManagerWrapper {
 
               (self as unknown as Worker).postMessage({
                 data: proof,
-                name: key,
+                name: key
               });
             }
 
@@ -134,19 +133,19 @@ export class ProvingManagerWrapper {
    * Getter for wasm blob
    * for worker wasm it will resolve the browser build of wasm-utils,and Nodejs build for direct-call
    **/
-  private get wasmBlob() {
+  private get wasmBlob () {
     return this.ctx === 'worker'
       ? import('@webb-tools/wasm-utils/wasm-utils.js')
       : import('@webb-tools/wasm-utils/njs/wasm-utils-njs.js');
   }
 
-  private get proofBuilder() {
+  private get proofBuilder () {
     return this.wasmBlob.then((wasm) => {
       return wasm.JsProofInputBuilder;
     });
   }
 
-  private async generateProof(proofInput: JsProofInput): Promise<JsProofOutput> {
+  private async generateProof (proofInput: JsProofInput): Promise<JsProofOutput> {
     const wasm = await this.wasmBlob;
 
     return wasm.generate_proof_js(proofInput);
@@ -155,7 +154,7 @@ export class ProvingManagerWrapper {
   /**
    * Generate the Zero-knowledge proof from the proof input
    **/
-  async proof<T extends NoteProtocol>(protocol: T, pmSetupInput: ProvingManagerSetupInput<T>): Promise<ProofI<T>> {
+  async proof<T extends NoteProtocol> (protocol: T, pmSetupInput: ProvingManagerSetupInput<T>): Promise<ProofI<T>> {
     const Manager = await this.proofBuilder;
     const pm = new Manager(protocol);
 
@@ -179,7 +178,7 @@ export class ProvingManagerWrapper {
       const mixerProof: ProofI<'mixer'> = {
         nullifierHash: proof.nullifierHash,
         proof: proof.proof,
-        root: proof.root,
+        root: proof.root
       };
 
       return mixerProof as any;
@@ -205,13 +204,13 @@ export class ProvingManagerWrapper {
         nullifierHash: proof.nullifierHash,
         proof: proof.proof,
         root: proof.root,
-        roots: proof.roots,
+        roots: proof.roots
       };
 
       return anchorProof as any;
     } else if (protocol === 'vanchor') {
       const input = pmSetupInput as VAnchorPMSetupInput;
-      const metaDataNote = input.metaDataNote || input.inputNotes[0];
+      const metaDataNote = input.inputNotes[0];
       const { note } = await Note.deserialize(metaDataNote);
       const rawNotes = await Promise.all(input.inputNotes.map((note) => Note.deserialize(note)));
       const jsNotes: JsNote[] = rawNotes.map((n) => n.note);
@@ -245,7 +244,6 @@ export class ProvingManagerWrapper {
         throw new Error('The maximum support input count is 16');
       }
 
-      pm.setNote(note);
       pm.setNotes(jsNotes);
       pm.setIndices(indices.map((i) => i.toString()) as any);
       pm.setPk(u8aToHex(input.provingKey).replace('0x', ''));
@@ -271,7 +269,7 @@ export class ProvingManagerWrapper {
         inputUtxos: proof.inputUtxos,
         outputNotes: proof.outputNotes,
         proof: proof.proof,
-        publicInputs: proof.publicInputs,
+        publicInputs: proof.publicInputs
       };
 
       return anchorProof as any;
@@ -310,7 +308,7 @@ for (let i = 0; i < 256; i++) {
 }
 
 // @ts-ignore
-function hex(value) {
+function hex (value) {
   const mod = value.length % 2;
   const length = value.length - mod;
   const dv = new DataView(value.buffer, value.byteOffset);
@@ -328,14 +326,14 @@ function hex(value) {
 }
 
 // @ts-ignore
-export function u8aToHex(value, bitLength = -1, isPrefixed = true) {
+export function u8aToHex (value, bitLength = -1, isPrefixed = true) {
   const length = Math.ceil(bitLength / 8);
 
   return `${isPrefixed ? '0x' : ''}${
     !value || !value.length
       ? ''
       : length > 0 && value.length > length
-      ? `${hex(value.subarray(0, length / 2))}…${hex(value.subarray(value.length - length / 2))}`
-      : hex(value)
+        ? `${hex(value.subarray(0, length / 2))}…${hex(value.subarray(value.length - length / 2))}`
+        : hex(value)
   }`;
 }

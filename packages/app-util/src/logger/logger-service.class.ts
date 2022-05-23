@@ -13,7 +13,7 @@ export class LoggerService {
   private static _loggers: LoggersMaps = {};
   public static _enabled = true;
 
-  static new(ctx: string, logLevel: LogLevel = LogLevel.trace): LoggerService {
+  static new (ctx: string, logLevel: LogLevel = LogLevel.trace): LoggerService {
     const logger = new LoggerService(ctx, logLevel);
 
     LoggerService._loggers[ctx] = logger;
@@ -21,7 +21,7 @@ export class LoggerService {
     return logger;
   }
 
-  static get(ctx: string): LoggerService {
+  static get (ctx: string): LoggerService {
     const cachedLogger = LoggerService._loggers[ctx];
 
     if (cachedLogger) {
@@ -31,7 +31,7 @@ export class LoggerService {
     return LoggerService.new(ctx);
   }
 
-  constructor(private readonly ctx: string, private readonly logLevel: LogLevel) {
+  constructor (private readonly ctx: string, private readonly logLevel: LogLevel) {
     return this;
   }
 
@@ -47,7 +47,7 @@ export class LoggerService {
     LoggerService.eventBus.sendEvent?.('log', {
       ctx: this.ctx,
       level,
-      log: m,
+      log: m
     });
 
     if (!LoggerService._enabled) {

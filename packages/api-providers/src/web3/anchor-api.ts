@@ -9,18 +9,18 @@ import { ChainTypeId, chainTypeIdToInternalId, evmIdIntoInternalChainId } from '
 import { WebbWeb3Provider } from './webb-provider.js';
 
 export class Web3AnchorApi extends AnchorApi<WebbWeb3Provider, BridgeConfig> {
-  getTokenAddress(chainTypeId: ChainTypeId): string | null {
+  getTokenAddress (chainTypeId: ChainTypeId): string | null {
     const activeBridgeAsset = this.store.activeBridge?.asset;
     const internalChainId = chainTypeIdToInternalId(chainTypeId);
 
     return activeBridgeAsset ? this.config.currencies[activeBridgeAsset].addresses.get(internalChainId) ?? null : null;
   }
 
-  private get config() {
+  private get config () {
     return this.inner.config;
   }
 
-  async getCurrencies(): Promise<Currency[]> {
+  async getCurrencies (): Promise<Currency[]> {
     const currentChainId = await this.inner.getChainId();
     const internalChainId = evmIdIntoInternalChainId(currentChainId);
     const bridgeCurrenciesConfig = Object.values(this.config.currencies).filter((i) => {
@@ -35,24 +35,24 @@ export class Web3AnchorApi extends AnchorApi<WebbWeb3Provider, BridgeConfig> {
     });
   }
 
-  private get activeBridgeAsset() {
+  private get activeBridgeAsset () {
     return this.store.activeBridge?.asset ?? null;
   }
 
-  get currency(): Currency | null {
+  get currency (): Currency | null {
     return this.activeBridgeAsset ? Currency.fromCurrencyId(this.config.currencies, this.activeBridgeAsset) : null;
   }
 
-  async getAnchors(): Promise<AnchorBase[]> {
+  async getAnchors (): Promise<AnchorBase[]> {
     return (
       this.store.activeBridge?.anchors.map((anchor) => ({
         amount: anchor.amount,
-        neighbours: anchor.anchorAddresses,
+        neighbours: anchor.anchorAddresses
       })) ?? []
     );
   }
 
-  async getWrappableAssets(chainTypeId: ChainTypeId): Promise<Currency[]> {
+  async getWrappableAssets (chainTypeId: ChainTypeId): Promise<Currency[]> {
     const bridge = this.activeBridge;
     const internalChainId = chainTypeIdToInternalId(chainTypeId);
 

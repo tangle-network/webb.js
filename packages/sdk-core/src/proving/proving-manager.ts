@@ -3,10 +3,7 @@
 
 import type { JsNote, JsUtxo, NoteProtocol } from '@webb-tools/wasm-utils';
 
-import {
-  ProvingManagerSetupInput,
-  ProvingManagerWrapper,
-} from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
+import { ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
 
 type VAnchorProof = {
   readonly inputUtxos: Array<JsUtxo>;
@@ -30,11 +27,11 @@ type MixerProof = {
 export type ProofI<T extends NoteProtocol> = T extends 'vanchor'
   ? VAnchorProof
   : T extends 'mixer'
-  ? MixerProof
-  : AnchorProof;
+    ? MixerProof
+    : AnchorProof;
 
 export class ProvingManager {
-  constructor(
+  constructor (
     private readonly worker: Worker | null | undefined // Optional WebWorker
   ) {}
 
@@ -45,7 +42,7 @@ export class ProvingManager {
    *
    * @param  input - input for the manager
    **/
-  public prove<T extends NoteProtocol>(protocol: T, input: ProvingManagerSetupInput<T>) {
+  public prove<T extends NoteProtocol> (protocol: T, input: ProvingManagerSetupInput<T>) {
     const worker = this.worker;
 
     if (worker) {
@@ -55,14 +52,14 @@ export class ProvingManager {
     return ProvingManager.proveWithoutWorker(protocol, input);
   }
 
-  private static proveWithoutWorker<T extends NoteProtocol>(protocol: T, input: ProvingManagerSetupInput<T>) {
+  private static proveWithoutWorker<T extends NoteProtocol> (protocol: T, input: ProvingManagerSetupInput<T>) {
     // If the worker CTX is direct-call
     const pm = new ProvingManagerWrapper('direct-call');
 
     return pm.proof(protocol, input);
   }
 
-  private static proveWithWorker<T extends NoteProtocol>(
+  private static proveWithWorker<T extends NoteProtocol> (
     input: [T, ProvingManagerSetupInput<T>],
     worker: Worker
   ): Promise<ProofI<T>> {
@@ -74,7 +71,7 @@ export class ProvingManager {
           resolve(payload);
         });
         worker.postMessage({
-          proof: input,
+          proof: input
         });
       } catch (e) {
         reject(e);

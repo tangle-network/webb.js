@@ -257,8 +257,6 @@ pub fn generate_vanchor_test_js_setup() -> VAnchorTestSetup {
 
 	let mut js_builder = JsProofInputBuilder::new(JsValue::from("vanchor").into()).unwrap();
 
-	js_builder.set_metadata_from_note(&note1).unwrap();
-
 	js_builder.set_pk(JsString::from(hex::encode(pk))).unwrap();
 	js_builder.set_roots(Leaves::from(JsValue::from(roots_array))).unwrap();
 	// leaves

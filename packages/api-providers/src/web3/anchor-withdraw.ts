@@ -6,24 +6,8 @@
 import { parseUnits } from '@ethersproject/units';
 import { Anchor } from '@webb-tools/anchors';
 import * as witnessCalculatorFile from '@webb-tools/api-providers/contracts/utils/witness-calculator.js';
-import {
-  BridgeConfig,
-  OptionalActiveRelayer,
-  OptionalRelayer,
-  RelayedWithdrawResult,
-  RelayerCMDBase,
-  WebbRelayer,
-  WithdrawState,
-} from '@webb-tools/api-providers/index.js';
-import {
-  BridgeStorage,
-  bridgeStorageFactory,
-  chainIdToRelayerName,
-  getAnchorAddressForBridge,
-  getAnchorDeploymentBlockNumber,
-  getEVMChainName,
-  getEVMChainNameFromInternal,
-} from '@webb-tools/api-providers/utils/index.js';
+import { BridgeConfig, OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer, WithdrawState } from '@webb-tools/api-providers/index.js';
+import { BridgeStorage, bridgeStorageFactory, chainIdToRelayerName, getAnchorAddressForBridge, getAnchorDeploymentBlockNumber, getEVMChainName, getEVMChainNameFromInternal } from '@webb-tools/api-providers/utils/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note } from '@webb-tools/sdk-core/index.js';
 import { toFixedHex } from '@webb-tools/utils';
@@ -31,14 +15,7 @@ import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
 import { BigNumber } from 'ethers';
 
 import { AnchorApi, AnchorWithdraw } from '../abstracts/index.js';
-import {
-  ChainType,
-  chainTypeIdToInternalId,
-  computeChainIdType,
-  evmIdIntoInternalChainId,
-  InternalChainId,
-  parseChainIdType,
-} from '../chains/index.js';
+import { ChainType, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains/index.js';
 import { depositFromAnchorNote } from '../contracts/utils/make-deposit.js';
 import { AnchorContract } from '../contracts/wrappers/index.js';
 import { webbCurrencyIdFromString } from '../enums/index.js';
@@ -50,15 +27,15 @@ import { WebbWeb3Provider } from './webb-provider.js';
 const logger = LoggerService.get('Web3BridgeWithdraw');
 
 export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
-  protected get bridgeApi() {
+  protected get bridgeApi () {
     return this.inner.methods.anchorApi as AnchorApi<WebbWeb3Provider, BridgeConfig>;
   }
 
-  protected get config() {
+  protected get config () {
     return this.inner.config;
   }
 
-  async mapRelayerIntoActive(
+  async mapRelayerIntoActive (
     relayer: OptionalRelayer,
     internalChainId: InternalChainId
   ): Promise<OptionalActiveRelayer> {
@@ -70,7 +47,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       relayer,
       {
         basedOn: 'evm',
-        chain: internalChainId,
+        chain: internalChainId
       },
       // Define the function for retrieving fee information for the relayer
       async (note: string) => {
@@ -113,32 +90,32 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
         return {
           totalFees: feeBig.toString(),
-          withdrawFeePercentage: supportedContract.withdrawFeePercentage,
+          withdrawFeePercentage: supportedContract.withdrawFeePercentage
         };
       }
     );
   }
 
-  async getRelayersByChainAndAddress(chainId: InternalChainId, address: string) {
+  async getRelayersByChainAndAddress (chainId: InternalChainId, address: string) {
     return this.inner.relayingManager.getRelayer({
       baseOn: 'evm',
       chainId: chainId,
-      contractAddress: address,
+      contractAddress: address
     });
   }
 
-  get relayers() {
+  get relayers () {
     return this.inner.getChainId().then((evmId) => {
       const chainId = evmIdIntoInternalChainId(evmId);
 
       return this.inner.relayingManager.getRelayer({
         baseOn: 'evm',
-        chainId,
+        chainId
       });
     });
   }
 
-  async getRelayersByNote(evmNote: Note) {
+  async getRelayersByNote (evmNote: Note) {
     const chainTypeId = Number(evmNote.note.targetChainId);
     const internalId = chainTypeIdToInternalId(parseChainIdType(chainTypeId));
 
@@ -146,9 +123,9 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       baseOn: 'evm',
       bridgeSupport: {
         amount: Number(evmNote.note.amount),
-        tokenSymbol: evmNote.note.tokenSymbol,
+        tokenSymbol: evmNote.note.tokenSymbol
       },
-      chainId: internalId,
+      chainId: internalId
     });
   }
 
@@ -160,7 +137,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
   //    Use Anchor instance methods to generate proof and initiate relayed withdraw flow.
   // If no relayer is selected:
   //    Use Anchor instance 'withdraw' method.
-  async sameChainWithdraw(note: DepositNote, recipient: string): Promise<string> {
+  async sameChainWithdraw (note: DepositNote, recipient: string): Promise<string> {
     this.cancelToken.cancelled = false;
 
     const activeBridge = this.bridgeApi.activeBridge;
@@ -184,7 +161,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     const storedContractInfo: BridgeStorage[0] = (await bridgeStorageStorage.get(contractAddress.toLowerCase())) || {
       lastQueriedBlock:
         getAnchorDeploymentBlockNumber(computeChainIdType(ChainType.EVM, activeChain), contractAddress) || 0,
-      leaves: [] as string[],
+      leaves: [] as string[]
     };
 
     let allLeaves: string[] = [];
@@ -228,7 +205,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       {
         wasm: Buffer.from(wasmBuf),
         witnessCalculator,
-        zkey: circuitKey,
+        zkey: circuitKey
       },
       this.inner.getEthersProvider().getSigner()
     );
@@ -250,7 +227,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
         key,
         level: 'error',
         message: `${section}:withdraw`,
-        name: 'Transaction',
+        name: 'Transaction'
       });
       this.emit('stateChange', WithdrawState.Ideal);
 
@@ -275,12 +252,12 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       key,
       level: 'loading',
       message: `${section}:withdraw`,
-      name: 'Transaction',
+      name: 'Transaction'
     });
 
     try {
       const tx = await anchorWrapper.contract.withdraw(withdrawSetup.publicInputs, withdrawSetup.extData, {
-        gasLimit: '0x5B8D80',
+        gasLimit: '0x5B8D80'
       });
       const receipt = await tx.wait();
 
@@ -293,7 +270,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
         key,
         level: 'error',
         message: `${section}:withdraw`,
-        name: 'Transaction',
+        name: 'Transaction'
       });
 
       return txHash;
@@ -305,13 +282,13 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       key,
       level: 'success',
       message: `${section}:withdraw`,
-      name: 'Transaction',
+      name: 'Transaction'
     });
 
     return txHash;
   }
 
-  async crossChainWithdraw(note: DepositNote, recipient: string) {
+  async crossChainWithdraw (note: DepositNote, recipient: string) {
     this.cancelToken.cancelled = false;
     const activeBridge = this.bridgeApi.activeBridge;
 
@@ -365,9 +342,9 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       baseOn: 'evm',
       bridgeSupport: {
         amount: Number(note.amount),
-        tokenSymbol: note.tokenSymbol,
+        tokenSymbol: note.tokenSymbol
       },
-      chainId: chainTypeIdToInternalId(parseChainIdType(Number(note.sourceChainId))),
+      chainId: chainTypeIdToInternalId(parseChainIdType(Number(note.sourceChainId)))
     });
 
     let leaves: string[] = [];
@@ -394,7 +371,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
           await sourceBridgeStorage.set(sourceContract.inner.address.toLowerCase(), {
             lastQueriedBlock: relayerLeaves.lastQueriedBlock,
-            leaves: relayerLeaves.leaves,
+            leaves: relayerLeaves.leaves
           });
           break;
         }
@@ -408,7 +385,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
         sourceContractAddress.toLowerCase()
       )) || {
         lastQueriedBlock: getAnchorDeploymentBlockNumber(Number(note.sourceChainId), sourceContractAddress) || 0,
-        leaves: [] as string[],
+        leaves: [] as string[]
       };
 
       const leavesFromChain = await sourceContract.getDepositLeaves(storedContractInfo.lastQueriedBlock + 1, 0);
@@ -445,7 +422,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       {
         wasm: Buffer.from(wasmBuf),
         witnessCalculator,
-        zkey: circuitKey,
+        zkey: circuitKey
       },
       this.inner.getEthersProvider().getSigner()
     );
@@ -457,7 +434,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
         key: 'mixer-withdraw-evm',
         level: 'error',
         message: 'bridge:withdraw',
-        name: 'Transaction',
+        name: 'Transaction'
       });
       this.emit('stateChange', WithdrawState.Ideal);
 
@@ -493,7 +470,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
         baseOn: 'evm' as RelayerCMDBase,
         contractAddress: destContractAddress,
         endpoint: '',
-        name: chainIdToRelayerName(destInternalId),
+        name: chainIdToRelayerName(destInternalId)
       };
 
       const tx = relayedWithdraw.generateWithdrawRequest<typeof chainInfo, 'anchor'>(
@@ -509,7 +486,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
           refreshCommitment: withdrawSetup.extData._refreshCommitment,
           refund: toFixedHex(withdrawSetup.extData._refund),
           relayer: withdrawSetup.extData._relayer,
-          roots: withdrawSetup.publicInputs._roots,
+          roots: withdrawSetup.publicInputs._roots
         }
       );
 
@@ -530,7 +507,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
               key: 'mixer-withdraw-evm',
               level: 'success',
               message: 'bridge:withdraw',
-              name: 'Transaction',
+              name: 'Transaction'
             });
 
             break;
@@ -543,7 +520,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
               key: 'mixer-withdraw-evm',
               level: 'error',
               message: 'bridge:withdraw',
-              name: 'Transaction',
+              name: 'Transaction'
             });
 
             break;
@@ -594,7 +571,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
             ?.getChainIds()
             .map((id) => getEVMChainNameFromInternal(this.config, id))
             .join('-')}:withdraw`,
-          name: 'Transaction',
+          name: 'Transaction'
         });
 
         return '';
@@ -609,7 +586,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
         ?.getChainIds()
         .map((id) => getEVMChainNameFromInternal(this.config, id))
         .join('-')}:withdraw`,
-      name: 'Transaction',
+      name: 'Transaction'
     });
 
     this.emit('stateChange', WithdrawState.Done);
@@ -622,7 +599,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
   // The merkle proof is always generated from the source anchor, therefore, a new provider
   // needs to be constructed in the cross-chain scenario.
   // Zero knowledge files are fetched in both withdraw flows.
-  async withdraw(note: string, recipient: string): Promise<string> {
+  async withdraw (note: string, recipient: string): Promise<string> {
     logger.trace(`Withdraw using note ${note}, recipient ${recipient}`);
 
     const parseNote = await Note.deserialize(note);

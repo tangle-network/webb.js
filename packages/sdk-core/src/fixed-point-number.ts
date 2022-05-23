@@ -21,14 +21,14 @@ import BigNumber from 'bignumber.js';
 export type ROUND_MODE = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 // generate function from BN class
-function genFnFromBigNumber<T extends keyof BigNumber, U extends boolean>(
+function genFnFromBigNumber<T extends keyof BigNumber, U extends boolean> (
   fn: T,
   noRight: U
 ): BigNumber[typeof fn] extends (...params: any) => any
-  ? typeof noRight extends true
-    ? () => ReturnType<BigNumber[typeof fn]>
-    : (right: FixedPointNumber) => ReturnType<BigNumber[typeof fn]>
-  : () => any {
+    ? typeof noRight extends true
+      ? () => ReturnType<BigNumber[typeof fn]>
+      : (right: FixedPointNumber) => ReturnType<BigNumber[typeof fn]>
+    : () => any {
   if (noRight) {
     return function (): number {
       /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/ban-ts-comment */
@@ -55,7 +55,7 @@ export class FixedPointNumber {
   private precision!: number;
   private inner: BigNumber;
 
-  constructor(origin: number | string, precision = 18) {
+  constructor (origin: number | string, precision = 18) {
     if (typeof origin !== 'number' && typeof origin !== 'string') {
       throw new Error('FixedPointNumber constructor should use number or string');
     }
@@ -68,7 +68,7 @@ export class FixedPointNumber {
    *  fromRational
    *  Constructor form inner
    */
-  public static fromRational(
+  public static fromRational (
     numerator: number | string | FixedPointNumber,
     denominator: number | string | FixedPointNumber,
     precision = 18
@@ -87,7 +87,7 @@ export class FixedPointNumber {
    *  fromInner
    *  Constructor form inner
    */
-  public static fromInner(origin: number | string, precision = 18): FixedPointNumber {
+  public static fromInner (origin: number | string, precision = 18): FixedPointNumber {
     const inner = new BN(origin);
     const temp = new FixedPointNumber(0, precision);
 
@@ -100,7 +100,7 @@ export class FixedPointNumber {
    *  _fromBN
    *  Constructor from BN
    */
-  public static _fromBN(origin: BigNumber, precision = 18): FixedPointNumber {
+  public static _fromBN (origin: BigNumber, precision = 18): FixedPointNumber {
     const temp = new FixedPointNumber(0, precision);
 
     temp._setInner(origin);
@@ -109,27 +109,27 @@ export class FixedPointNumber {
   }
 
   // set inner directly
-  public _setInner(origin: BigNumber): void {
+  public _setInner (origin: BigNumber): void {
     this.inner = origin;
   }
 
   // get inner
-  public _getInner(): BigNumber {
+  public _getInner (): BigNumber {
     return this.inner;
   }
 
-  private setMode(dp = 0, rm = 3): void {
+  private setMode (dp = 0, rm = 3): void {
     BN.config({
       DECIMAL_PLACES: dp,
       EXPONENTIAL_AT: [-100, 100],
-      ROUNDING_MODE: rm as ROUND_MODE,
+      ROUNDING_MODE: rm as ROUND_MODE
     });
   }
 
   /**
    *  toNumber
    */
-  public toNumber(dp = 8, rm = 3): number {
+  public toNumber (dp = 8, rm = 3): number {
     this.setMode();
 
     return this.inner
@@ -141,7 +141,7 @@ export class FixedPointNumber {
   /**
    *  toStirng
    */
-  public toString(dp = 0, rm = 3): string {
+  public toString (dp = 0, rm = 3): string {
     this.setMode(dp, rm);
 
     return this.inner.shiftedBy(-this.precision).toString();
@@ -150,14 +150,14 @@ export class FixedPointNumber {
   /**
    *  toChainData
    */
-  public toChainData(): string {
+  public toChainData (): string {
     return this.inner.toFixed(0, 3);
   }
 
   /**
    *  trunc
    */
-  public trunc(): FixedPointNumber {
+  public trunc (): FixedPointNumber {
     this.setMode();
 
     const DIV = 10 ** this.precision;
@@ -173,7 +173,7 @@ export class FixedPointNumber {
   /**
    *  frac
    */
-  public frac(): FixedPointNumber {
+  public frac (): FixedPointNumber {
     const integer = this.trunc();
 
     const fractional = this.minus(integer);
@@ -186,7 +186,7 @@ export class FixedPointNumber {
   }
 
   // set b's precision to this.precision
-  private alignPrecision(b: FixedPointNumber): void {
+  private alignPrecision (b: FixedPointNumber): void {
     if (this.precision !== b.precision) {
       b.setPrecision(this.precision);
     }
@@ -196,7 +196,7 @@ export class FixedPointNumber {
    *  setPrecision
    *  Change the precision and modify the inner
    */
-  public setPrecision(precision: number): void {
+  public setPrecision (precision: number): void {
     const oldPrecision = this.precision;
 
     this.precision = precision;
@@ -209,7 +209,7 @@ export class FixedPointNumber {
    *  getPrecision
    *  Get the precision
    */
-  public getPrecision(): number {
+  public getPrecision (): number {
     return this.precision;
   }
 
@@ -217,7 +217,7 @@ export class FixedPointNumber {
    *  abs
    *  Return a FixedPointNumber whose inner value is the absolute value
    */
-  public abs(): FixedPointNumber {
+  public abs (): FixedPointNumber {
     return FixedPointNumber._fromBN(this.inner.abs(), this.precision);
   }
 
@@ -225,7 +225,7 @@ export class FixedPointNumber {
    *  plus
    *  Return a FixedPointNumber whose value is origin value plus right value
    */
-  public plus(right: FixedPointNumber): FixedPointNumber {
+  public plus (right: FixedPointNumber): FixedPointNumber {
     this.alignPrecision(right);
     this.setMode();
 
@@ -236,7 +236,7 @@ export class FixedPointNumber {
    *  minus
    *  Return a FixedPointNumber whose value is origin value minus right value
    */
-  public minus(right: FixedPointNumber): FixedPointNumber {
+  public minus (right: FixedPointNumber): FixedPointNumber {
     this.alignPrecision(right);
     this.setMode();
 
@@ -247,7 +247,7 @@ export class FixedPointNumber {
    *  times
    *  Return a FixedPointNumber whose value is origin value times right value
    */
-  public times(right: FixedPointNumber): FixedPointNumber {
+  public times (right: FixedPointNumber): FixedPointNumber {
     this.alignPrecision(right);
     this.setMode();
 
@@ -258,7 +258,7 @@ export class FixedPointNumber {
    *  div
    *  Return a FixedPointNumber whose value is origin value div right value
    */
-  public div(right: FixedPointNumber): FixedPointNumber {
+  public div (right: FixedPointNumber): FixedPointNumber {
     this.alignPrecision(right);
     this.setMode();
 
@@ -268,7 +268,7 @@ export class FixedPointNumber {
   /**
    *  reciprocal
    */
-  public reciprocal(): FixedPointNumber {
+  public reciprocal (): FixedPointNumber {
     return FixedPointNumber.ONE.div(this);
   }
 
@@ -325,7 +325,7 @@ export class FixedPointNumber {
   /**
    *  min
    */
-  public min(...targets: FixedPointNumber[]): FixedPointNumber {
+  public min (...targets: FixedPointNumber[]): FixedPointNumber {
     targets.forEach((item) => this.alignPrecision(item));
 
     return FixedPointNumber._fromBN(
@@ -337,7 +337,7 @@ export class FixedPointNumber {
   /**
    *  max
    */
-  public max(...targets: FixedPointNumber[]): FixedPointNumber {
+  public max (...targets: FixedPointNumber[]): FixedPointNumber {
     targets.forEach((item) => this.alignPrecision(item));
 
     return FixedPointNumber._fromBN(

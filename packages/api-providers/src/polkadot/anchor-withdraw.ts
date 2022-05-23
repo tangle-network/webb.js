@@ -39,7 +39,7 @@ export type AnchorWithdrawProof = {
 };
 
 export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
-  async fetchRPCTreeLeaves(treeId: string | number): Promise<Uint8Array[]> {
+  async fetchRPCTreeLeaves (treeId: string | number): Promise<Uint8Array[]> {
     logger.trace(`Fetching leaves for tree with id ${treeId}`);
     let done = false;
     let from = 0;
@@ -62,7 +62,7 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
     return leaves;
   }
 
-  async fetchRoot(treeId: string) {
+  async fetchRoot (treeId: string) {
     logger.trace(`fetching metadata for tree id ${treeId}`);
     const storage =
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -74,7 +74,7 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
     return storage.toHuman().root;
   }
 
-  async withdraw(note: string, recipient: string): Promise<string> {
+  async withdraw (note: string, recipient: string): Promise<string> {
     // TODO: implement cross chain
     // TODO: Integrate with Substrate relayer
     // TODO handle the cached roots
@@ -133,7 +133,7 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
         refreshCommitment,
         refund: 0,
         relayer: relayerAccountHex.replace('0x', ''),
-        roots: [hexToU8a(root), hexToU8a(root)],
+        roots: [hexToU8a(root), hexToU8a(root)]
       };
 
       logger.log('proofInput to webb.js: ', proofInput);
@@ -147,7 +147,7 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
         refreshCommitment: `0x${refreshCommitment}`,
         refund: 0,
         relayer: relayerAccountId,
-        root: `0x${zkProofMetadata.root}`,
+        root: `0x${zkProofMetadata.root}`
       };
       const parms = [
         withdrawProof.id,
@@ -158,14 +158,14 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
         withdrawProof.relayer,
         withdrawProof.fee,
         withdrawProof.refund,
-        withdrawProof.refreshCommitment,
+        withdrawProof.refreshCommitment
       ];
 
       this.emit('stateChange', WithdrawState.SendingTransaction);
       const tx = this.inner.txBuilder.build(
         {
           method: 'withdraw',
-          section: 'anchorBn254',
+          section: 'anchorBn254'
         },
         parms
       );

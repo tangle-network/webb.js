@@ -22,7 +22,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '4',
+      width: '4'
     };
 
     const note = await Note.generateNote(noteInput);
@@ -56,7 +56,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '4',
+      width: '4'
     };
 
     const note = await Note.generateNote(noteInput);
@@ -92,7 +92,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '4',
+      width: '4'
     };
 
     const note = await Note.generateNote(noteInput);
@@ -118,7 +118,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '4',
+      width: '4'
     };
 
     try {
@@ -144,7 +144,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '4',
+      width: '4'
     };
 
     const { note } = await Note.generateNote(noteInput);
@@ -398,7 +398,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '5',
+      width: '5'
     };
 
     try {
@@ -426,7 +426,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '5',
+      width: '5'
     };
 
     try {
@@ -452,7 +452,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '5',
+      width: '5'
     };
     const note = await Note.generateNote(noteInput);
 
@@ -490,7 +490,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '5',
+      width: '5'
     };
     // Note generated
     const { note } = await Note.generateNote(noteInput);
@@ -505,7 +505,7 @@ describe('Note class', () => {
 
           return {
             ...acc,
-            [key]: value,
+            [key]: value
           };
         }, {});
     };

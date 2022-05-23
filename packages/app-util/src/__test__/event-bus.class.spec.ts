@@ -8,7 +8,7 @@ import { EventBus } from '../shared/event-bus.class.js';
 class TestEvent extends EventBus<{ log: number }> {
   override readonly sendEvent: EventBus<{ log: number }>['emit'];
 
-  constructor() {
+  constructor () {
     super();
     this.sendEvent = this.emit;
   }

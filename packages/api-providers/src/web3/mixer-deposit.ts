@@ -15,7 +15,7 @@ type DepositPayload = IDepositPayload<Note, [IAnchorDepositInfo, number | string
 // The Web3 version of a mixer deposit is simply an anchor deposit where src and target chainID are the same.
 export class Web3MixerDeposit extends Web3AnchorDeposit {
   // Override the deposit in AnchorDeposit to emit different notifications
-  async deposit(depositPayload: DepositPayload): Promise<void> {
+  async deposit (depositPayload: DepositPayload): Promise<void> {
     const bridge = this.bridgeApi.activeBridge;
     const currency = this.bridgeApi.currency;
 
@@ -33,13 +33,13 @@ export class Web3MixerDeposit extends Web3AnchorDeposit {
         data: {
           amount: String(Number(note.amount)),
           chain: getEVMChainName(this.inner.config, sourceEvmId),
-          currency: note.tokenSymbol,
+          currency: note.tokenSymbol
         },
         description: 'Depositing',
         key: 'mixer-deposit',
         level: 'loading',
         message: 'mixer deposit',
-        name: 'Transaction',
+        name: 'Transaction'
       });
       const anchors = await this.bridgeApi.getAnchors();
       // Find the Anchor for this bridge amount
@@ -69,7 +69,7 @@ export class Web3MixerDeposit extends Web3AnchorDeposit {
             level: 'info',
             message: 'Waiting for token approval',
             name: 'Approval',
-            persist: true,
+            persist: true
           });
           const tokenInstance = await ERC20Factory.connect(
             depositPayload.params[2],
@@ -91,26 +91,26 @@ export class Web3MixerDeposit extends Web3AnchorDeposit {
             data: {
               amount: note.amount,
               chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
-              currency: currency.view.name,
+              currency: currency.view.name
             },
             description: 'Depositing',
             key: 'mixer-deposit',
             level: 'success',
             message: `${currency.view.name} wrap and deposit`,
-            name: 'Transaction',
+            name: 'Transaction'
           });
         } else {
           this.inner.notificationHandler({
             data: {
               amount: note.amount,
               chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
-              currency: currency.view.name,
+              currency: currency.view.name
             },
             description: 'Not enough token balance',
             key: 'mixer-deposit',
             level: 'error',
             message: `${currency.view.name} wrap and deposit`,
-            name: 'Transaction',
+            name: 'Transaction'
           });
         }
 
@@ -125,7 +125,7 @@ export class Web3MixerDeposit extends Web3AnchorDeposit {
             level: 'info',
             message: 'Waiting for token approval',
             name: 'Approval',
-            persist: true,
+            persist: true
           });
           const tokenInstance = await contract.getWebbToken();
           const tx = await tokenInstance.approve(contract.inner.address, await contract.denomination);
@@ -143,20 +143,20 @@ export class Web3MixerDeposit extends Web3AnchorDeposit {
             key: 'mixer-deposit',
             level: 'success',
             message: `${currency.view.name} deposit`,
-            name: 'Transaction',
+            name: 'Transaction'
           });
         } else {
           this.inner.notificationHandler({
             data: {
               amount: note.amount,
               chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
-              currency: currency.view.name,
+              currency: currency.view.name
             },
             description: 'Not enough token balance',
             key: 'mixer-deposit',
             level: 'error',
             message: `${currency.view.name} deposit`,
-            name: 'Transaction',
+            name: 'Transaction'
           });
         }
       }
@@ -170,7 +170,7 @@ export class Web3MixerDeposit extends Web3AnchorDeposit {
           key: 'mixer-deposit',
           level: 'error',
           message: `${currency.view.name} deposit`,
-          name: 'Transaction',
+          name: 'Transaction'
         });
       } else {
         this.inner.notificationHandler.remove('waiting-approval');
@@ -179,24 +179,24 @@ export class Web3MixerDeposit extends Web3AnchorDeposit {
           key: 'mixer-deposit',
           level: 'error',
           message: `${currency.view.name} deposit`,
-          name: 'Transaction',
+          name: 'Transaction'
         });
       }
     }
   }
 
-  async generateNote(mixerId: string): Promise<DepositPayload> {
+  async generateNote (mixerId: string): Promise<DepositPayload> {
     const evmId = await this.inner.getChainId();
     const chainIdType = computeChainIdType(ChainType.EVM, evmId);
     const generatedNote = await this.generateBridgeNote(mixerId, chainIdType);
 
     return {
       note: generatedNote.note,
-      params: generatedNote.params,
+      params: generatedNote.params
     };
   }
 
-  async getSizes(): Promise<MixerSize[]> {
+  async getSizes (): Promise<MixerSize[]> {
     const anchors = await this.bridgeApi.getAnchors();
     const currency = this.bridgeApi.currency;
 
@@ -205,7 +205,7 @@ export class Web3MixerDeposit extends Web3AnchorDeposit {
         amount: Number(anchor.amount),
         asset: currency.view.symbol,
         id: `Bridge=${anchor.amount}@${currency.view.name}`,
-        title: `${anchor.amount} ${currency.view.name}`,
+        title: `${anchor.amount} ${currency.view.name}`
       }));
     }
 

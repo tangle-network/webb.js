@@ -52,7 +52,7 @@ describe('test various conversion functions', () => {
 
     const result: ChainTypeId = {
       chainId: chainIdResult,
-      chainType: chainTypeResult,
+      chainType: chainTypeResult
     };
 
     expect(parseChainIdType(chainIdType)).to.deep.equal(result);

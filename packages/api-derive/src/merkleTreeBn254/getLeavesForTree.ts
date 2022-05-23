@@ -10,7 +10,7 @@ import { memo } from '@polkadot/rpc-core';
 import { Observable } from '@polkadot/types/types';
 
 // An optional `end` parameter is provided to allow for pagination, or defaults to the last index.
-export function getLeavesForTree(
+export function getLeavesForTree (
   instanceId: string,
   api: ApiInterfaceRx
 ): (treeId: number, start: number, end: number) => Observable<Uint8Array[]> {
@@ -23,7 +23,7 @@ export function getLeavesForTree(
         // Generate arrays for the multi calls of [treeId, index]
         ...arr.map((index) => {
           return [treeId, index];
-        }),
+        })
       ])
       .pipe(
         map((substrateLeafElement) => {

@@ -45,15 +45,15 @@ export class Web3Provider<T = unknown> {
     addNetworkRpc: false,
     hasSessions: false,
     listenForAccountChange: false,
-    listenForChainChane: false,
+    listenForChainChane: false
   };
 
-  private constructor(private _inner: Web3, readonly clientMeta: ClientMetaData | null = null) {}
+  private constructor (private _inner: Web3, readonly clientMeta: ClientMetaData | null = null) {}
 
   /**
    * Getter for the web3 provider inject by MetaMask
    **/
-  static get currentProvider() {
+  static get currentProvider () {
     // @ts-ignore
     if (typeof window !== 'undefined' && typeof window.web3 !== 'undefined') {
       // @ts-ignore
@@ -70,7 +70,7 @@ export class Web3Provider<T = unknown> {
   /**
    * Initialize web3 provider from extension
    **/
-  static async fromExtension() {
+  static async fromExtension () {
     // @ts-ignore
     if (typeof window !== 'undefined' && typeof window.web3 !== 'undefined') {
       // @ts-ignore
@@ -82,14 +82,14 @@ export class Web3Provider<T = unknown> {
         description: 'MetaMask',
         icons: [],
         name: 'MetaMask',
-        url: 'https://https://metamask.io',
+        url: 'https://https://metamask.io'
       });
 
       web3Provider._capabilities = {
         addNetworkRpc: true,
         hasSessions: false,
         listenForAccountChange: true,
-        listenForChainChane: true,
+        listenForChainChane: true
       };
 
       return web3Provider;
@@ -101,14 +101,14 @@ export class Web3Provider<T = unknown> {
   /**
    * Create a web3 provider from url  consuming `HttpProvider`
    **/
-  static fromUri(url: string) {
+  static fromUri (url: string) {
     const HttpProvider = new Web3.providers.HttpProvider(url);
     const web3 = new Web3(HttpProvider);
 
     return new Web3Provider(web3);
   }
 
-  static async fromWalletConnectProvider(WCProvider: WalletConnectProvider) {
+  static async fromWalletConnectProvider (WCProvider: WalletConnectProvider) {
     await WCProvider.enable();
     const web3 = new Web3(WCProvider as unknown as any);
     const web3Provider = new Web3Provider<WalletConnectProvider>(web3, WCProvider.walletMeta);
@@ -117,42 +117,42 @@ export class Web3Provider<T = unknown> {
       addNetworkRpc: false,
       hasSessions: true,
       listenForAccountChange: false,
-      listenForChainChane: false,
+      listenForChainChane: false
     };
     web3Provider.helperApi = WCProvider;
 
     return web3Provider;
   }
 
-  get network() {
+  get network () {
     return this._inner.eth.net.getId();
   }
 
-  get eth() {
+  get eth () {
     return this._inner.eth;
   }
 
-  get account() {
+  get account () {
     return this._inner.defaultAccount;
   }
 
-  get provider() {
+  get provider () {
     return this._inner.eth.currentProvider;
   }
 
-  public get capabilities() {
+  public get capabilities () {
     return this._capabilities;
   }
 
-  enable() {
+  enable () {
     // @ts-ignore
   }
 
-  intoEthersProvider() {
+  intoEthersProvider () {
     return new ethers.providers.Web3Provider(this.provider as any, 'any');
   }
 
-  async endSession() {
+  async endSession () {
     try {
       if (this.capabilities.hasSessions) {
         if (this.helperApi instanceof WalletConnectProvider) {
@@ -160,7 +160,7 @@ export class Web3Provider<T = unknown> {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           await this.helperApi.connector.killSession({
-            message: 'Session end error',
+            message: 'Session end error'
           });
         }
       }
@@ -169,25 +169,25 @@ export class Web3Provider<T = unknown> {
     }
   }
 
-  addChain(chainInput: AddEthereumChainParameter) {
+  addChain (chainInput: AddEthereumChainParameter) {
     const provider = this._inner.currentProvider as AbstractProvider;
 
     return provider.request?.({
       method: 'wallet_addEthereumChain',
-      params: [chainInput],
+      params: [chainInput]
     });
   }
 
-  switchChain(chainInput: SwitchEthereumChainParameter) {
+  switchChain (chainInput: SwitchEthereumChainParameter) {
     const provider = this._inner.currentProvider as AbstractProvider;
 
     return provider.request?.({
       method: 'wallet_switchEthereumChain',
-      params: [chainInput],
+      params: [chainInput]
     });
   }
 
-  addToken(addTokenInput: AddToken) {
+  addToken (addTokenInput: AddToken) {
     return (this._inner.currentProvider as AbstractProvider).request?.({
       method: 'wallet_watchAsset',
       params: {
@@ -195,10 +195,10 @@ export class Web3Provider<T = unknown> {
           address: addTokenInput.address, // The address that the token is at.
           decimals: addTokenInput.decimals, // The number of decimals in the token
           image: addTokenInput.image, // A string url of the token logo
-          symbol: addTokenInput.symbol, // A ticker symbol or shorthand, up to 5 chars.
+          symbol: addTokenInput.symbol // A ticker symbol or shorthand, up to 5 chars.
         },
-        type: 'ERC20', // Initially only supports ERC20, but eventually more!
-      },
+        type: 'ERC20' // Initially only supports ERC20, but eventually more!
+      }
     });
   }
 }

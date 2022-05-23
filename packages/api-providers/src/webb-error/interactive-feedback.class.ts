@@ -37,24 +37,24 @@ export class ActionsBuilder {
   private _actions: Record<string, Action> = {};
 
   /// Static method for `init`
-  static init() {
+  static init () {
     return new ActionsBuilder();
   }
 
   /// Adds an action for the builder actions
-  action(name: string, handler: () => any, level: FeedbackLevel = 'info', id: string | null = null): ActionsBuilder {
+  action (name: string, handler: () => any, level: FeedbackLevel = 'info', id: string | null = null): ActionsBuilder {
     this._actions[name] = {
       id,
       level,
       name,
-      onTrigger: handler,
+      onTrigger: handler
     };
 
     return this;
   }
 
   /// Access the actions to pass them to the constructor of the interactive feedback
-  actions() {
+  actions () {
     return this._actions;
   }
 }
@@ -66,16 +66,16 @@ export class InteractiveFeedback extends EventBus<{ canceled: InteractiveFeedbac
   private selectedAction: Action | null = null;
 
   /// Create a new action builder for the InteractiveFeedback
-  static actionsBuilder() {
+  static actionsBuilder () {
     return ActionsBuilder.init();
   }
 
   /// Create the body for the InteractiveFeedback
-  static feedbackEntries(feedbackBody: FeedbackBody): FeedbackBody {
+  static feedbackEntries (feedbackBody: FeedbackBody): FeedbackBody {
     return feedbackBody;
   }
 
-  constructor(
+  constructor (
     /// Level of the InteractiveFeedback for customised view
     public readonly level: FeedbackLevel,
     /// Actions available for the InteractiveFeedback instance without the cancel action
@@ -91,12 +91,12 @@ export class InteractiveFeedback extends EventBus<{ canceled: InteractiveFeedbac
   }
 
   /// getter for the user to know if this is canceled
-  get canceled() {
+  get canceled () {
     return this._canceled;
   }
 
   /// cancel without calling the onCancel handler
-  cancelWithoutHandler() {
+  cancelWithoutHandler () {
     if (this._canceled) {
       return;
     }
@@ -108,7 +108,7 @@ export class InteractiveFeedback extends EventBus<{ canceled: InteractiveFeedbac
   }
 
   /// cancel this will trigger the `canceled` event and set the interactiveFeedback as canceled
-  cancel() {
+  cancel () {
     if (this._canceled) {
       return;
     }
@@ -121,7 +121,7 @@ export class InteractiveFeedback extends EventBus<{ canceled: InteractiveFeedbac
     this._onCancel();
   }
 
-  trigger<ActionKey extends keyof this['actions']>(key: ActionKey) {
+  trigger<ActionKey extends keyof this['actions']> (key: ActionKey) {
     if (this._canceled) {
       return;
     }
@@ -136,7 +136,7 @@ export class InteractiveFeedback extends EventBus<{ canceled: InteractiveFeedbac
     }
   }
 
-  wait(): Promise<Action | null> {
+  wait (): Promise<Action | null> {
     if (this._canceled) {
       return Promise.resolve(null);
     }

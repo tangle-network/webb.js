@@ -11,17 +11,15 @@ import { ApiOptions } from '@polkadot/api/types';
  *
  * @returns Returns the `ApiOptions` for a Webb `protocol-substrate` node.
  */
-export const options = ({
-  types = {},
+export const options = ({ types = {},
   rpc = {},
   typesAlias = {},
   typesBundle = {},
   derives = {},
-  ...otherOptions
-}: ApiOptions = {}): ApiOptions => ({
+  ...otherOptions }: ApiOptions = {}): ApiOptions => ({
   derives: {
     ...webbDerives,
-    ...derives,
+    ...derives
   },
   rpc: {
     // TODO: Remove the mt_getLeaves rpc in favor of api derives.
@@ -32,45 +30,45 @@ export const options = ({
           {
             isOptional: false,
             name: 'tree_id',
-            type: 'u32',
+            type: 'u32'
           },
           {
             isOptional: false,
             name: 'from',
-            type: 'u32',
+            type: 'u32'
           },
           {
             isOptional: false,
             name: 'to',
-            type: 'u32',
+            type: 'u32'
           },
           {
             isOptional: true,
             name: 'at',
-            type: 'Hash',
-          },
+            type: 'Hash'
+          }
         ],
-        type: 'Vec<[u8; 32]>',
-      },
+        type: 'Vec<[u8; 32]>'
+      }
     },
-    ...rpc,
+    ...rpc
   },
   types: {
-    ...types,
+    ...types
   },
   typesAlias: {
-    ...typesAlias,
+    ...typesAlias
   },
   typesBundle: {
     ...typesBundle,
     spec: {
       ...typesBundle.spec,
       webb: {
-        ...typesBundle?.spec?.webb,
-      },
-    },
+        ...typesBundle?.spec?.webb
+      }
+    }
   },
-  ...otherOptions,
+  ...otherOptions
 });
 
 /**
@@ -80,26 +78,26 @@ export const options = ({
  */
 export const optionsWithChain =
   (chainTypes: any) =>
-  ({ types = {}, rpc = {}, typesAlias = {}, typesBundle = {}, ...otherOptions }: ApiOptions = {}): ApiOptions => ({
-    rpc: {
-      ...rpc,
-    },
-    types: {
-      ...chainTypes.types,
-      ...types,
-    },
-    typesAlias: {
-      ...typesAlias,
-    },
-    typesBundle: {
-      ...typesBundle,
-      spec: {
-        ...typesBundle.spec,
-        ...chainTypes.typesBundle.spec,
-        webb: {
-          ...typesBundle?.spec?.webb,
-        },
+    ({ types = {}, rpc = {}, typesAlias = {}, typesBundle = {}, ...otherOptions }: ApiOptions = {}): ApiOptions => ({
+      rpc: {
+        ...rpc
       },
-    },
-    ...otherOptions,
-  });
+      types: {
+        ...chainTypes.types,
+        ...types
+      },
+      typesAlias: {
+        ...typesAlias
+      },
+      typesBundle: {
+        ...typesBundle,
+        spec: {
+          ...typesBundle.spec,
+          ...chainTypes.typesBundle.spec,
+          webb: {
+            ...typesBundle?.spec?.webb
+          }
+        }
+      },
+      ...otherOptions
+    });

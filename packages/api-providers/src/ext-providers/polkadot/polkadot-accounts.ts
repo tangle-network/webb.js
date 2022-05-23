@@ -6,11 +6,11 @@ import { InjectedAccount, InjectedExtension } from '@polkadot/extension-inject/t
 import { Account, AccountsAdapter, PromiseOrT } from '../../account/Accounts.adapter.js';
 
 export class PolkadotAccount extends Account<InjectedAccount> {
-  get avatar() {
+  get avatar () {
     return null;
   }
 
-  get name(): string {
+  get name (): string {
     return this.inner.name || this.address;
   }
 }
@@ -19,13 +19,13 @@ export class PolkadotAccounts extends AccountsAdapter<InjectedExtension, Injecte
   providerName = 'Polka';
   private activeAccount: null | PolkadotAccount = null;
 
-  async accounts() {
+  async accounts () {
     const accounts = await this._inner.accounts.get();
 
     return accounts.map((account) => new PolkadotAccount(account, account.address));
   }
 
-  get activeOrDefault() {
+  get activeOrDefault () {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise<PolkadotAccount | null>(async (resolve, reject) => {
       try {
@@ -43,7 +43,7 @@ export class PolkadotAccounts extends AccountsAdapter<InjectedExtension, Injecte
     });
   }
 
-  setActiveAccount(account: PolkadotAccount): PromiseOrT<void> {
+  setActiveAccount (account: PolkadotAccount): PromiseOrT<void> {
     this.activeAccount = account;
 
     return undefined;

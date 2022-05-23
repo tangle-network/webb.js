@@ -1,15 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  AppConfig,
-  NotificationHandler,
-  Web3AnchorDeposit,
-  WebbApiProvider,
-  WebbMethods,
-  WebbProviderEvents,
-  WebbRelayerBuilder,
-} from '@webb-tools/api-providers/index.js';
+import { AppConfig, NotificationHandler, Web3AnchorDeposit, WebbApiProvider, WebbMethods, WebbProviderEvents, WebbRelayerBuilder } from '@webb-tools/api-providers/index.js';
 import { EventBus } from '@webb-tools/app-util/index.js';
 import { providers } from 'ethers';
 import { Eth } from 'web3-eth';
@@ -27,8 +19,7 @@ import { Web3WrapUnwrap } from './wrap-unwrap.js';
 
 export class WebbWeb3Provider
   extends EventBus<WebbProviderEvents<[number]>>
-  implements WebbApiProvider<WebbWeb3Provider>
-{
+  implements WebbApiProvider<WebbWeb3Provider> {
   readonly methods: WebbMethods<WebbWeb3Provider>;
   private ethersProvider: providers.Web3Provider;
   // TODO: make the factory configurable if the web3 interface in need of this functionality
@@ -36,7 +27,7 @@ export class WebbWeb3Provider
     return null;
   };
 
-  private constructor(
+  private constructor (
     private web3Provider: Web3Provider,
     protected chainId: number,
     readonly relayingManager: WebbRelayerBuilder,
@@ -63,39 +54,39 @@ export class WebbWeb3Provider
         core: null,
         deposit: {
           enabled: true,
-          inner: new Web3AnchorDeposit(this),
+          inner: new Web3AnchorDeposit(this)
         },
         withdraw: {
           enabled: true,
-          inner: new Web3AnchorWithdraw(this),
-        },
+          inner: new Web3AnchorWithdraw(this)
+        }
       },
       anchorApi: new Web3AnchorApi(this, this.config.bridgeByAsset),
       chainQuery: new Web3ChainQuery(this),
       mixer: {
         deposit: {
           enabled: true,
-          inner: new Web3MixerDeposit(this),
+          inner: new Web3MixerDeposit(this)
         },
         withdraw: {
           enabled: true,
-          inner: new Web3MixerWithdraw(this),
-        },
+          inner: new Web3MixerWithdraw(this)
+        }
       },
       wrapUnwrap: {
         core: {
           enabled: true,
-          inner: new Web3WrapUnwrap(this),
-        },
-      },
+          inner: new Web3WrapUnwrap(this)
+        }
+      }
     };
   }
 
-  getProvider(): Web3Provider {
+  getProvider (): Web3Provider {
     return this.web3Provider;
   }
 
-  async setChainListener() {
+  async setChainListener () {
     this.ethersProvider = this.web3Provider.intoEthersProvider();
 
     const handler = async () => {
@@ -109,40 +100,40 @@ export class WebbWeb3Provider
     this.ethersProvider.provider?.on?.('chainChanged', handler);
   }
 
-  async destroy(): Promise<void> {
+  async destroy (): Promise<void> {
     await this.endSession();
     this.subscriptions = {
       interactiveFeedback: [],
-      providerUpdate: [],
+      providerUpdate: []
     };
   }
 
-  async getChainId(): Promise<number> {
+  async getChainId (): Promise<number> {
     const chainId = (await this.ethersProvider.getNetwork()).chainId;
 
     return chainId;
   }
 
-  async getBlockNumber(): Promise<number> {
+  async getBlockNumber (): Promise<number> {
     const blockNumber = await this.ethersProvider.getBlockNumber();
 
     return blockNumber;
   }
 
-  getWebbAnchorByAddress(address: string): AnchorContract {
+  getWebbAnchorByAddress (address: string): AnchorContract {
     return new AnchorContract(this.ethersProvider, address);
   }
 
-  getWebbAnchorByAddressAndProvider(address: string, provider: providers.Web3Provider): AnchorContract {
+  getWebbAnchorByAddressAndProvider (address: string, provider: providers.Web3Provider): AnchorContract {
     return new AnchorContract(provider, address, true);
   }
 
-  getEthersProvider(): providers.Web3Provider {
+  getEthersProvider (): providers.Web3Provider {
     return this.ethersProvider;
   }
 
   // Init web3 provider with the `Web3Accounts` as the default account provider
-  static async init(
+  static async init (
     web3Provider: Web3Provider,
     chainId: number,
     relayerBuilder: WebbRelayerBuilder,
@@ -155,7 +146,7 @@ export class WebbWeb3Provider
   }
 
   // Init web3 provider with a generic account provider
-  static async initWithCustomAccountAdapter(
+  static async initWithCustomAccountAdapter (
     web3Provider: Web3Provider,
     chainId: number,
     relayerBuilder: WebbRelayerBuilder,
@@ -166,18 +157,18 @@ export class WebbWeb3Provider
     return new WebbWeb3Provider(web3Provider, chainId, relayerBuilder, appConfig, notification, web3AccountProvider);
   }
 
-  get capabilities() {
+  get capabilities () {
     return this.web3Provider.capabilities;
   }
 
-  endSession(): Promise<void> {
+  endSession (): Promise<void> {
     return this.web3Provider.endSession();
   }
 
-  switchOrAddChain(evmChainId: number) {
+  switchOrAddChain (evmChainId: number) {
     return this.web3Provider
       .switchChain({
-        chainId: `0x${evmChainId.toString(16)}`,
+        chainId: `0x${evmChainId.toString(16)}`
       })
       ?.catch(async (switchError) => {
         console.log('inside catch for switchChain', switchError);
@@ -196,9 +187,9 @@ export class WebbWeb3Provider
             nativeCurrency: {
               decimals: 18,
               name: currency.name,
-              symbol: currency.symbol,
+              symbol: currency.symbol
             },
-            rpcUrls: chain.evmRpcUrls!,
+            rpcUrls: chain.evmRpcUrls!
           });
           // add network will prompt the switch, check evmId again and throw if user rejected
           const newChainId = await this.web3Provider.network;
@@ -212,7 +203,7 @@ export class WebbWeb3Provider
       });
   }
 
-  public get innerProvider() {
+  public get innerProvider () {
     return this.web3Provider;
   }
 }

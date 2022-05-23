@@ -3,7 +3,7 @@
 
 import { NotificationHandler, NotificationPayload } from '@webb-tools/api-providers';
 
-function mockNotificationHandler(notification: NotificationPayload) {
+function mockNotificationHandler (notification: NotificationPayload) {
   switch (notification.name) {
     case 'Transaction': {
       return 'transaction sent';

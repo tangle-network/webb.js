@@ -24,7 +24,7 @@ export enum WebbCurrencyId {
   TEST,
 }
 
-export function webbCurrencyIdToString(c: WebbCurrencyId): string {
+export function webbCurrencyIdToString (c: WebbCurrencyId): string {
   switch (c) {
     case WebbCurrencyId.EDG:
       return 'EDG';
@@ -55,7 +55,7 @@ export function webbCurrencyIdToString(c: WebbCurrencyId): string {
   }
 }
 
-export function webbCurrencyIdFromString(c: string): WebbCurrencyId {
+export function webbCurrencyIdFromString (c: string): WebbCurrencyId {
   switch (c) {
     case 'EDG':
       return WebbCurrencyId.EDG;

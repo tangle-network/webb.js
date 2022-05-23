@@ -2,13 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
-import {
-  OptionalActiveRelayer,
-  OptionalRelayer,
-  RelayedWithdrawResult,
-  WebbRelayer,
-  WithdrawState,
-} from '@webb-tools/api-providers/index.js';
+import { OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, WebbRelayer, WithdrawState } from '@webb-tools/api-providers/index.js';
 import { fetchSubstrateTornadoProvingKey } from '@webb-tools/api-providers/ipfs/substrate/tornado.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note, ProvingManager } from '@webb-tools/sdk-core/index.js';
@@ -44,34 +38,34 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
   readonly loading = false;
   readonly initialised = true;
 
-  cancelWithdraw(): Promise<void> {
+  cancelWithdraw (): Promise<void> {
     return Promise.resolve(undefined);
   }
 
-  get relayers() {
+  get relayers () {
     return Promise.resolve(
       this.inner.relayingManager.getRelayer({
-        baseOn: 'substrate',
+        baseOn: 'substrate'
       })
     );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getRelayersByNote(evmNote: Note) {
+  async getRelayersByNote (evmNote: Note) {
     return Promise.resolve(
       this.inner.relayingManager.getRelayer({
-        baseOn: 'substrate',
+        baseOn: 'substrate'
       })
     );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getRelayersByChainAndAddress(_chainId: InternalChainId, _address: string) {
+  async getRelayersByChainAndAddress (_chainId: InternalChainId, _address: string) {
     // TODO: ! why don't we use ChainId and address?
     return this.inner.relayingManager.getRelayer({});
   }
 
-  async mapRelayerIntoActive(relayer: OptionalRelayer): Promise<OptionalActiveRelayer> {
+  async mapRelayerIntoActive (relayer: OptionalRelayer): Promise<OptionalActiveRelayer> {
     if (!relayer) {
       return null;
     }
@@ -80,18 +74,18 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
       relayer,
       {
         basedOn: 'substrate',
-        chain: InternalChainId.ProtocolSubstrateStandalone,
+        chain: InternalChainId.ProtocolSubstrateStandalone
       },
       async () => {
         return {
           totalFees: '0',
-          withdrawFeePercentage: 0,
+          withdrawFeePercentage: 0
         };
       }
     );
   }
 
-  async fetchTreeLeaves(treeId: string | number): Promise<Uint8Array[]> {
+  async fetchTreeLeaves (treeId: string | number): Promise<Uint8Array[]> {
     let done = false;
     let from = 0;
     let to = 511;
@@ -113,11 +107,11 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
     return leaves;
   }
 
-  async submitViaRelayer() {
+  async submitViaRelayer () {
     return null;
   }
 
-  async withdraw(note: string, recipient: string): Promise<string> {
+  async withdraw (note: string, recipient: string): Promise<string> {
     try {
       // Get the sender account
       const account = await this.inner.accounts.activeOrDefault;
@@ -161,7 +155,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
         provingKey,
         recipient: recipientAccountHex.replace('0x', ''),
         refund: 0,
-        relayer: relayerAccountHex.replace('0x', ''),
+        relayer: relayerAccountHex.replace('0x', '')
       };
 
       if (isValidRelayer) {
@@ -170,7 +164,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
           key: 'mixer-withdraw-sub',
           level: 'loading',
           message: 'mixerBn254:withdraw',
-          name: 'Transaction',
+          name: 'Transaction'
         });
       }
 
@@ -184,7 +178,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
         recipient: recipient,
         refund: 0,
         relayer: relayerAccountId,
-        root: `0x${zkProofMetadata.root}`,
+        root: `0x${zkProofMetadata.root}`
       };
 
       // withdraw through relayer
@@ -198,7 +192,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
             contractAddress: '',
             endpoint: '',
             // TODO change this from the config
-            name: 'localnode',
+            name: 'localnode'
           },
           Array.from(hexToU8a(withdrawProof.proofBytes)),
           {
@@ -209,7 +203,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
             recipient: withdrawProof.recipient,
             refund: withdrawProof.refund,
             relayer: withdrawProof.relayer,
-            root: Array.from(hexToU8a(withdrawProof.root)),
+            root: Array.from(hexToU8a(withdrawProof.root))
           }
         );
 
@@ -231,7 +225,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
                 key: 'mixer-withdraw-sub',
                 level: 'success',
                 message: 'mixerBn254:withdraw',
-                name: 'Transaction',
+                name: 'Transaction'
               });
 
               break;
@@ -244,7 +238,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
                 key: 'mixer-withdraw-sub',
                 level: 'success',
                 message: 'mixerBn254:withdraw',
-                name: 'Transaction',
+                name: 'Transaction'
               });
               break;
           }
@@ -256,7 +250,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
           level: 'loading',
           message: 'mixerBn254:withdraw',
 
-          name: 'Transaction',
+          name: 'Transaction'
         });
 
         relayerMixerTx.send(relayerWithdrawPayload);
@@ -277,7 +271,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
       const tx = this.inner.txBuilder.build(
         {
           method: 'withdraw',
-          section: 'mixerBn254',
+          section: 'mixerBn254'
         },
         [
           withdrawProof.id,
@@ -287,7 +281,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
           withdrawProof.recipient,
           withdrawProof.relayer,
           withdrawProof.fee,
-          withdrawProof.refund,
+          withdrawProof.refund
         ]
       );
       const hash = await tx.call(account.address);

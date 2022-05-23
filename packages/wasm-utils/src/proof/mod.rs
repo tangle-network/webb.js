@@ -1134,8 +1134,7 @@ impl JsProofInputBuilder {
 		Ok(())
 	}
 
-	#[wasm_bindgen(js_name = setNote)]
-	pub fn set_metadata_from_note(&mut self, note: &JsNote) -> Result<(), JsValue> {
+	fn set_meta_data(&mut self, note: &JsNote) -> Result<(), OperationError> {
 		let exponentiation = note.exponentiation.unwrap_or(5);
 		let backend = note.backend.unwrap_or(Backend::Circom);
 		let curve = note.curve.unwrap_or(Curve::Bn254);
@@ -1151,9 +1150,19 @@ impl JsProofInputBuilder {
 		self.inner.width(width)?;
 		self.inner.curve(curve)?;
 		self.inner.chain_id(chain_id)?;
+		Ok(())
+	}
+
+	#[wasm_bindgen(js_name = setNote)]
+	pub fn set_metadata_from_note(&mut self, note: &JsNote) -> Result<(), JsValue> {
 		// For the Mixer/Anchor secrets live in the the note
 		// For the VAnchor there is a call `set_notes` that will set UTXOs in the
 		// `ProofInput::VAnchor(VAnchorProofInput)`
+		match self.inner {
+			ProofInputBuilder::Mixer(_) | ProofInputBuilder::Anchor(_) => self.set_meta_data(note)?,
+			_ => return Err(OpStatusCode::InvalidNoteProtocol.into()),
+		}
+
 		match self.inner {
 			ProofInputBuilder::Mixer(_) => {
 				let leaf = note.get_leaf_and_nullifier()?;
@@ -1179,15 +1188,12 @@ impl JsProofInputBuilder {
 	/// Set notes for VAnchor
 	#[wasm_bindgen(js_name=setNotes)]
 	pub fn set_notes(&mut self, notes: Array) -> Result<(), JsValue> {
-		let utxos: Vec<_> = notes
-			.to_vec()
-			.into_iter()
-			.map(|v| {
-				js_note_of_jsval(v)
-					.ok_or(OpStatusCode::InvalidNoteSecrets)
-					.map(|n| n.get_js_utxo())?
-			})
-			.collect::<Result<Vec<_>, _>>()?;
+		let notes: Vec<JsNote> = notes
+			.iter()
+			.map(|v| js_note_of_jsval(v).ok_or(OpStatusCode::InvalidNoteSecrets))
+			.collect::<Result<Vec<JsNote>, _>>()?;
+		self.set_meta_data(&&notes[0])?;
+		let utxos = notes.iter().map(|n| n.get_js_utxo()).collect::<Result<Vec<_>, _>>()?;
 
 		self.inner.set_input_utxos(utxos)?;
 		Ok(())

@@ -35,7 +35,7 @@ const logger = LoggerService.get('Polkadot-Provider');
 export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
   private _accounts: PolkadotAccounts;
 
-  constructor(
+  constructor (
     protected apiPromise: ApiPromise,
     protected injectedExtension: InjectedExtension,
     readonly txBuilder: PolkaTXBuilder
@@ -52,7 +52,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
    * @param apiInitHandler - Error handler for stage of instantiating a provider
    * @param txBuilder - Transaction builder
    **/
-  static async fromExtension(
+  static async fromExtension (
     appName: string,
     endPoints: string[],
     apiInitHandler: ApiInitHandler,
@@ -74,7 +74,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
    * @param endPoints - URLs for the substrate node
    * @param onError - Error handler for stage of instantiating a provider
    **/
-  static async getApiPromise(appName: string, endPoints: string[], onError: ApiInitHandler['onError']) {
+  static async getApiPromise (appName: string, endPoints: string[], onError: ApiInitHandler['onError']) {
     const [endPoint, ...allEndPoints] = endPoints;
     // eslint-disable-next-line no-async-promise-executor
     const wsProvider = await new Promise<WsProvider>(async (resolve, reject) => {
@@ -148,11 +148,11 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
 
           const body = InteractiveFeedback.feedbackEntries([
             {
-              header: 'Failed to establish WS connection',
+              header: 'Failed to establish WS connection'
             },
             {
-              content: `Attempt to retry (${tryNumber}) after 6s..`,
-            },
+              content: `Attempt to retry (${tryNumber}) after 6s..`
+            }
           ]);
 
           const actions = InteractiveFeedback.actionsBuilder()
@@ -187,7 +187,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
 
     const apiPromise = await ApiPromise.create(
       options({
-        provider: wsProvider,
+        provider: wsProvider
       })
     );
 
@@ -200,7 +200,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
    * @param endPoints - URLs for the substrate node
    * @param onError - Error handler for stage of instantiating a provider
    **/
-  static async getParams(
+  static async getParams (
     appName: string,
     endPoints: string[],
     onError: ApiInitHandler['onError']
@@ -226,7 +226,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
     return [apiPromise, currentExtensions];
   }
 
-  hookListeners() {
+  hookListeners () {
     this.apiPromise.on('error', () => {
       this.emit('error', undefined);
     });
@@ -248,7 +248,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
     });
   }
 
-  destroy() {
+  destroy () {
     // close all listeners
     (Object.keys(this.subscriptions) as Array<keyof ExtensionProviderEvents>).forEach((entry) => {
       const cbs = this.subscriptions[entry];
@@ -262,14 +262,14 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
   }
 
   /// metaData:MetadataDef
-  updateMetaData(metaData: any) {
+  updateMetaData (metaData: any) {
     return this.injectedExtension.metadata?.provide(metaData);
   }
 
   /**
    * Get MetaData of the ext provider
    **/
-  getMetaData() {
+  getMetaData () {
     if (!this.apiPromise.isConnected) {
       return;
     }
@@ -283,7 +283,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
       ss58Format: isNumber(this.apiPromise.registry.chainSS58) ? this.apiPromise.registry.chainSS58 : 42,
       tokenDecimals: isNumber(this.apiPromise.registry.chainDecimals) ? this.apiPromise.registry.chainDecimals : 12,
       tokenSymbol: this.apiPromise.registry.chainTokens[0] || 'Unit',
-      types: options({}).types as any,
+      types: options({}).types as any
     };
 
     logger.trace('Polkadot api metadata', metadataDef);
@@ -294,7 +294,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
   /**
    *  Checks if MetaData has changed on the api and update it in the browser extension
    **/
-  async checkMetaDataUpdate() {
+  async checkMetaDataUpdate () {
     const metadataDef = this.getMetaData();
     const known = await this.injectedExtension?.metadata?.get();
 
@@ -313,11 +313,11 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
     return metadataDef;
   }
 
-  get accounts() {
+  get accounts () {
     return this._accounts;
   }
 
-  get api() {
+  get api () {
     return this.apiPromise;
   }
 }

@@ -15,20 +15,20 @@ export type ORMLAsset = {
 const logger = LoggerService.get('currencies');
 
 export class ORMLCurrency {
-  constructor(private api: WebbPolkadot) {}
+  constructor (private api: WebbPolkadot) {}
 
-  async list() {
+  async list () {
     const assets = await this.api.api.query.assetRegistry.assets.entries();
 
     return assets.map(([storageKey, i]) => ({
       // @ts-ignore
       ...i.toHuman(),
       // @ts-ignore
-      id: storageKey.toHuman()[0] as string,
+      id: storageKey.toHuman()[0] as string
     })) as ORMLAsset[];
   }
 
-  async getBalance() {
+  async getBalance () {
     const activeAccount = await this.api.accounts.activeOrDefault;
 
     logger.info('active account', activeAccount);
@@ -43,7 +43,7 @@ export class ORMLCurrency {
 
         return {
           balance: balance.toHuman(),
-          id: currencyId,
+          id: currencyId
         };
       });
     }

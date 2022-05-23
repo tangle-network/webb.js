@@ -57,13 +57,13 @@ export class Note {
   static CURRENT_VERSION: Version = 'v2';
 
   // Default constructor
-  private constructor(readonly note: JsNote) {}
+  private constructor (readonly note: JsNote) {}
 
   /**
    * Gets the WebAssembly module for the target environment.
    * Supports the browser and Node.js.
    */
-  private static get wasm() {
+  private static get wasm () {
     if (typeof process !== 'undefined' && process.versions != null && process.versions.node != null) {
       return import('@webb-tools/wasm-utils/njs/wasm-utils-njs.js');
     } else {
@@ -75,7 +75,7 @@ export class Note {
    * Generate a default JsUtxo which will have both index,amount = 0
    * @returns A note class instance.
    */
-  public getDefaultUtxoNote(): Note {
+  public getDefaultUtxoNote (): Note {
     const note = this.note.defaultUtxoNote();
 
     return new Note(note);
@@ -87,7 +87,7 @@ export class Note {
    * @param value - A serialized note.
    * @returns A note class instance.
    */
-  public static async deserialize(value: string): Promise<Note> {
+  public static async deserialize (value: string): Promise<Note> {
     try {
       const wasm = await Note.wasm;
       const depositNote = wasm.JsNote.deserialize(value);
@@ -97,7 +97,7 @@ export class Note {
       return Promise.reject({
         code: e.code,
         data: e.data,
-        message: e.error_message,
+        message: e.error_message
       });
     }
   }
@@ -107,7 +107,7 @@ export class Note {
    *
    * @returns The `JsNote` struct.
    */
-  async toDepositNote(): Promise<JsNote> {
+  async toDepositNote (): Promise<JsNote> {
     const wasm = await Note.wasm;
 
     return wasm.JsNote.deserialize(this.serialize());
@@ -118,7 +118,7 @@ export class Note {
    *
    * @returns The serialized note.
    */
-  public serialize(): string {
+  public serialize (): string {
     return this.note.serialize();
   }
 
@@ -128,7 +128,7 @@ export class Note {
    *
    * @returns Returns the leaf commitment of the note.
    */
-  getLeaf(): Uint8Array {
+  getLeaf (): Uint8Array {
     return this.note.getLeafCommitment();
   }
 
@@ -160,7 +160,7 @@ export class Note {
    * @param noteGenInput - The input data for generating a note.
    * @returns
    */
-  public static async generateNote(noteGenInput: NoteGenInput): Promise<Note> {
+  public static async generateNote (noteGenInput: NoteGenInput): Promise<Note> {
     try {
       const wasm = await Note.wasm;
       const noteBuilderInput = new wasm.JsNoteBuilder();
@@ -201,7 +201,7 @@ export class Note {
       return Promise.reject({
         code: e.code,
         data: e.data,
-        message: e.error_message,
+        message: e.error_message
       });
     }
   }

@@ -18,7 +18,7 @@ const logger = LoggerService.get('Web3MixerWithdraw');
 // The Web3Mixer Withdraw uses anchor withdraw, with the same target and source chain id.
 export class Web3MixerWithdraw extends Web3AnchorWithdraw {
   // Withdraw is overriden to emit notifications specific to 'mixer'
-  async withdraw(note: string, recipient: string): Promise<string> {
+  async withdraw (note: string, recipient: string): Promise<string> {
     logger.trace(`Withdraw using note ${note} , recipient ${recipient}`);
 
     const parseNote = await Note.deserialize(note);
@@ -48,7 +48,7 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
       key,
       level: 'loading',
       message: `${section} withdraw`,
-      name: 'Transaction',
+      name: 'Transaction'
     });
 
     // Fetch the leaves that we already have in storage
@@ -56,7 +56,7 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
     const storedContractInfo: BridgeStorage[0] = (await bridgeStorageStorage.get(contractAddress.toLowerCase())) || {
       lastQueriedBlock:
         getAnchorDeploymentBlockNumber(Number(depositNote.sourceChainId), contractAddress.toLowerCase()) || 0,
-      leaves: [] as string[],
+      leaves: [] as string[]
     };
 
     let allLeaves: string[] = [];
@@ -96,7 +96,7 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
       {
         wasm: Buffer.from(wasmBuf),
         witnessCalculator,
-        zkey: circuitKey,
+        zkey: circuitKey
       },
       this.inner.getEthersProvider().getSigner()
     );
@@ -118,7 +118,7 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
         key,
         level: 'error',
         message: `${section} withdraw`,
-        name: 'Transaction',
+        name: 'Transaction'
       });
       this.emit('stateChange', WithdrawState.Ideal);
 
@@ -131,7 +131,7 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
 
     try {
       const tx = await contract.inner.withdraw(withdrawSetup.publicInputs, withdrawSetup.extData, {
-        gasLimit: '0x5B8D80',
+        gasLimit: '0x5B8D80'
       });
       const receipt = await tx.wait();
 
@@ -144,7 +144,7 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
         key,
         level: 'error',
         message: `${section} withdraw`,
-        name: 'Transaction',
+        name: 'Transaction'
       });
 
       return txHash;
@@ -156,7 +156,7 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
       key,
       level: 'success',
       message: `${section} withdraw`,
-      name: 'Transaction',
+      name: 'Transaction'
     });
 
     return '';
