@@ -1192,7 +1192,7 @@ impl JsProofInputBuilder {
 			.iter()
 			.map(|v| js_note_of_jsval(v).ok_or(OpStatusCode::InvalidNoteSecrets))
 			.collect::<Result<Vec<JsNote>, _>>()?;
-		self.set_meta_data(&&notes[0])?;
+		self.set_meta_data(&notes[0])?;
 		let utxos = notes.iter().map(|n| n.get_js_utxo()).collect::<Result<Vec<_>, _>>()?;
 
 		self.inner.set_input_utxos(utxos)?;
