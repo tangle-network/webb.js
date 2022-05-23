@@ -384,7 +384,6 @@ pub fn generate_vanchor_test_setup_2_inputs() -> VAnchorTestSetup {
 
 pub fn generate_vanchor_test_setup_16_non_default_inputs() -> VAnchorTestSetup {
 	let curve = ArkCurve::Bn254;
-	let index = 0;
 	let mut rng = OsRng;
 	let chain_id = 0;
 
@@ -414,7 +413,7 @@ pub fn generate_vanchor_test_setup_16_non_default_inputs() -> VAnchorTestSetup {
 			&mut rng,
 		)
 		.unwrap();
-		utxo.set_index(index, &nullifier_hasher).unwrap();
+		utxo.set_index(next_utxo_index, &nullifier_hasher).unwrap();
 
 		inputs.push(utxo);
 		indices.push(next_utxo_index);
@@ -496,7 +495,7 @@ pub fn generate_vanchor_test_setup_16_mixed_inputs() -> VAnchorTestSetup {
 	let mut next_utxo_index = 0;
 	let mut indices = vec![];
 	loop {
-		if &inputs.len() == &8 {
+		if inputs.len() == 16 {
 			break;
 		}
 		let utxo = VAnchorR1CSProverBn254_30_2_16_2::new_utxo(
