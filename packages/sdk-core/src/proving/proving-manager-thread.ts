@@ -65,17 +65,29 @@ export type AnchorPMSetupInput = {
   refreshCommitment: string;
 }
 
+/**
+ * Proving Manager setup input for anchor API proving manager over sdk-core
+ * @param inputNotes - VAnchor notes representing input UTXOs for proving
+ * @param leavesMap - Leaves for generating the merkle path, it's indexed by the chain_id and for each entry the values are list of leaves for this chain
+ * @param indices -  Leaf indices for input UTXOs leaves
+ * @param roots - Roots set for every anchor
+ * @param chainId - The chain id where the input UTXOs being spent
+ * @param outputConfigs - Configuration to shape the output UTXOs
+ * @param publicAmount - Amount the is used to tell the transaction type : Sum. of inputs + public amount = Sum. of outputs
+ * @param externalDataHash - The hash of external data which contains other values (EX fees,relayer ,..etc)
+ * @param provingKey - Proving key bytes to pass in to the Zero-knowledge proof generation
+ * */
 export type VAnchorPMSetupInput = {
   inputNotes: string[];
-  provingKey: Uint8Array;
   leavesMap: Record<string, Leaves>,
+  indices: number[];
   roots: Leaves;
   chainId: string;
   outputConfigs: [OutputUtxoConfig, OutputUtxoConfig];
-  indices: number[];
   publicAmount: string;
   metaDataNote?: string;
   externalDataHash: string;
+  provingKey: Uint8Array;
 }
 
 interface ProvingManagerPayload extends Record<NoteProtocol, any> {
