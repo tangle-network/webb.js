@@ -172,6 +172,18 @@ export class ProvingManagerWrapper {
       pm.setFee(String(input.fee));
       pm.setPk(u8aToHex(input.provingKey).replace('0x', ''));
       pm.setNote(note);
+
+      const proofInput = pm.build_js();
+      const proofOutput = await this.generateProof(proofInput);
+      const proof = proofOutput.mixerProof;
+
+      const mixerProof: ProofI<'mixer'> = {
+        nullifierHash: proof.nullifierHash,
+        proof: proof.proof,
+        root: proof.root
+      };
+
+      return mixerProof as any;
     } else if (protocol === 'anchor') {
       const input = pmSetupInput as AnchorPMSetupInput;
       const { note } = await Note.deserialize(input.note);
@@ -186,6 +198,18 @@ export class ProvingManagerWrapper {
       pm.setNote(note);
       pm.setRoots(input.roots);
       pm.setRefreshCommitment(input.refreshCommitment);
+
+      const proofInput = pm.build_js();
+      const proofOutput = await this.generateProof(proofInput);
+      const proof = proofOutput.anchorProof;
+      const anchorProof: ProofI<'anchor'> = {
+        nullifierHash: proof.nullifierHash,
+        proof: proof.proof,
+        root: proof.root,
+        roots: proof.roots
+      };
+
+      return anchorProof as any;
     } else if (protocol === 'vanchor') {
       const input = pmSetupInput as VAnchorPMSetupInput;
       const metaDataNote = input.metaDataNote || input.inputNotes[0];
@@ -234,37 +258,20 @@ export class ProvingManagerWrapper {
       }
 
       pm.setLeavesMap(leavesMap);
-    } else {
-      throw new Error('invalid protocol');
-    }
 
-    const proofInput = pm.build_js();
-
-    const proofOutput = await this.generateProof(proofInput);
-
-    // Mixer and anchor share the same proof type
-    if (protocol === 'mixer' || protocol === 'anchor') {
-      const proof = proofOutput.proof;
-
-      const proofPayload: ProofI<'anchor'> = {
-        nullifierHash: proof.nullifierHash,
-        proof: proof.proof,
-        root: proof.root,
-        roots: proof.roots
-      };
-
-      return proofPayload as any;
-    } else {
+      const proofInput = pm.build_js();
+      const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.vanchorProof;
-
-      const proofPayload: ProofI<'vanchor'> = {
+      const anchorProof: ProofI<'vanchor'> = {
         inputUtxos: proof.inputUtxos,
         outputNotes: proof.outputNotes,
         proof: proof.proof,
         publicInputs: proof.publicInputs
       };
 
-      return proofPayload as any;
+      return anchorProof as any;
+    } else {
+      throw new Error('invalid protocol');
     }
   }
 }

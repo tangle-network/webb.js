@@ -11,13 +11,20 @@ type VAnchorProof = {
   readonly proof: string;
   readonly publicInputs: Array<string>;
 }
-type Proof = {
+type AnchorProof = {
   readonly nullifierHash: string;
   readonly proof: string;
   readonly root: string;
   readonly roots: Array<string>;
 }
-export type ProofI<T extends NoteProtocol> = T extends 'vanchor' ? VAnchorProof : Proof;
+
+type MixerProof = {
+  readonly nullifierHash: string;
+  readonly proof: string;
+  readonly root: string;
+}
+
+export type ProofI<T extends NoteProtocol> = T extends 'vanchor' ? VAnchorProof : T extends 'mixer' ? MixerProof : AnchorProof;
 
 export class ProvingManager {
   constructor (

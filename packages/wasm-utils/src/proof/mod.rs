@@ -89,8 +89,8 @@ impl VAnchorProof {
 
 #[derive(Debug, Clone)]
 pub enum ProofOutput {
-	Mixer(Proof),
-	Anchor(Proof),
+	Mixer(MixerProof),
+	Anchor(AnchorProof),
 	VAnchor(VAnchorProof),
 }
 
@@ -116,10 +116,20 @@ impl JsProofOutput {
 	}
 
 	#[wasm_bindgen(getter)]
-	pub fn proof(&self) -> Result<Proof, OperationError> {
+	#[wasm_bindgen(js_name = "anchorProof")]
+	pub fn anchor_proof(&self) -> Result<AnchorProof, OperationError> {
 		match self.inner.clone() {
-			ProofOutput::Mixer(proof) | ProofOutput::Anchor(proof) => Ok(proof),
-			ProofOutput::VAnchor(_) => Err(OpStatusCode::InvalidNoteProtocol.into()),
+			ProofOutput::Anchor(proof) => Ok(proof),
+			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),
+		}
+	}
+
+	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name = "mixerProof")]
+	pub fn mixer_proof(&self) -> Result<MixerProof, OperationError> {
+		match self.inner.clone() {
+			ProofOutput::Mixer(proof) => Ok(proof),
+			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),
 		}
 	}
 
@@ -136,7 +146,43 @@ impl JsProofOutput {
 #[allow(clippy::unused_unit)]
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
-pub struct Proof {
+pub struct MixerProof {
+	#[wasm_bindgen(skip)]
+	pub proof: Vec<u8>,
+	#[wasm_bindgen(skip)]
+	pub nullifier_hash: Vec<u8>,
+	#[wasm_bindgen(skip)]
+	pub root: Vec<u8>,
+	#[wasm_bindgen(skip)]
+	pub public_inputs: Vec<Vec<u8>>,
+	#[wasm_bindgen(skip)]
+	pub leaf: Vec<u8>,
+}
+#[wasm_bindgen]
+impl MixerProof {
+	#[wasm_bindgen(getter)]
+	pub fn proof(&self) -> JsString {
+		let proof_bytes = hex::encode(&self.proof);
+		proof_bytes.into()
+	}
+
+	#[wasm_bindgen(js_name = nullifierHash)]
+	#[wasm_bindgen(getter)]
+	pub fn nullifier_hash(&self) -> JsString {
+		let nullifier_bytes = hex::encode(&self.nullifier_hash);
+		nullifier_bytes.into()
+	}
+
+	#[wasm_bindgen(getter)]
+	pub fn root(&self) -> JsString {
+		let root = hex::encode(&self.root);
+		root.into()
+	}
+}
+
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct AnchorProof {
 	#[wasm_bindgen(skip)]
 	pub proof: Vec<u8>,
 	#[wasm_bindgen(skip)]
@@ -151,9 +197,8 @@ pub struct Proof {
 	pub leaf: Vec<u8>,
 }
 
-#[allow(clippy::unused_unit)]
 #[wasm_bindgen]
-impl Proof {
+impl AnchorProof {
 	#[wasm_bindgen(getter)]
 	pub fn proof(&self) -> JsString {
 		let proof_bytes = hex::encode(&self.proof);
@@ -1369,7 +1414,7 @@ pub fn generate_proof_js(proof_input: JsProofInput) -> Result<JsProofOutput, JsV
 }
 
 #[wasm_bindgen]
-pub fn validate_proof(proof: &Proof, vk: JsString, curve: WasmCurve) -> Result<bool, JsValue> {
+pub fn validate_proof(proof: &AnchorProof, vk: JsString, curve: WasmCurve) -> Result<bool, JsValue> {
 	let vk_string: String = vk.into();
 	let curve: String = JsValue::from(&curve).as_string().ok_or(OpStatusCode::InvalidCurve)?;
 	let curve: Curve = curve.parse().map_err(|_| OpStatusCode::InvalidCurve)?;

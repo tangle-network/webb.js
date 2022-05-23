@@ -434,7 +434,7 @@ export async function withdrawAnchorBnx5_4(
 
   const proofInput = proofInputBuilder.build_js();
 
-  const zkProofMetadata = generate_proof_js(proofInput).proof;
+  const zkProofMetadata = generate_proof_js(proofInput).anchorProof;
 
   const withdrawProof: AnchorWithdrawProof = {
     id: treeId,
@@ -508,7 +508,7 @@ export async function withdrawMixerBnX5_3(
 
   const proofInput = proofInputBuilder.build_js();
 
-  const zkProofMetadata = generate_proof_js(proofInput).proof;
+  const zkProofMetadata = generate_proof_js(proofInput).mixerProof;
 
   /*
   const vkPath = path.join(

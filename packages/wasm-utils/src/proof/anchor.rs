@@ -6,10 +6,10 @@ use rand::rngs::OsRng;
 use crate::{AnchorR1CSProverBls381_30_2, AnchorR1CSProverBn254_30_2, DEFAULT_LEAF};
 use arkworks_setups::AnchorProver;
 
-use crate::proof::{AnchorProofPayload, Proof};
+use crate::proof::{AnchorProof, AnchorProofPayload};
 use crate::types::{Backend, Curve, OpStatusCode, OperationError};
 
-pub fn create_proof(anchor_proof_input: AnchorProofPayload, rng: &mut OsRng) -> Result<Proof, OperationError> {
+pub fn create_proof(anchor_proof_input: AnchorProofPayload, rng: &mut OsRng) -> Result<AnchorProof, OperationError> {
 	let AnchorProofPayload {
 		exponentiation,
 		width,
@@ -72,7 +72,7 @@ pub fn create_proof(anchor_proof_input: AnchorProofPayload, rng: &mut OsRng) -> 
 		error.data = Some(format!("Anchor {}", e));
 		error
 	})?;
-	Ok(Proof {
+	Ok(AnchorProof {
 		proof: anchor_proof.proof,
 		nullifier_hash: anchor_proof.nullifier_hash_raw,
 		root: anchor_proof.roots_raw[0].clone(),

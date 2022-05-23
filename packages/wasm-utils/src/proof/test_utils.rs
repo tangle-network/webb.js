@@ -486,7 +486,6 @@ pub fn generate_vanchor_test_setup_16_mixed_inputs() -> VAnchorTestSetup {
 	let chain_id = 0;
 
 	let params3 = setup_params::<Bn254Fr>(curve, 5, 3);
-	let params4 = setup_params::<Bn254Fr>(curve, 5, 4);
 	let tree_hasher = Poseidon::new(params3);
 	let public_amount = 10;
 	let in_amount = 10u128;
@@ -530,7 +529,7 @@ pub fn generate_vanchor_test_setup_16_mixed_inputs() -> VAnchorTestSetup {
 	}
 
 	let output_1 = OutputUtxoConfig {
-		amount: 160,
+		amount: 80,
 		index: None,
 		chain_id,
 	};

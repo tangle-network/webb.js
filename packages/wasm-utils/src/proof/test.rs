@@ -102,7 +102,7 @@ mod test {
 		} = generate_mixer_test_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5);
 
 		let proof_input = proof_input_builder.build_js().unwrap();
-		let proof = generate_proof_js(proof_input).unwrap().proof().unwrap();
+		let proof = generate_proof_js(proof_input).unwrap().mixer_proof().unwrap();
 
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 		assert!(is_valid_proof);
@@ -121,7 +121,7 @@ mod test {
 		);
 
 		let proof_input = proof_input_builder.build_js().unwrap();
-		let proof = generate_proof_js(proof_input).unwrap().proof().unwrap();
+		let proof = generate_proof_js(proof_input).unwrap().anchor_proof().unwrap();
 
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 		assert!(is_valid_proof);
@@ -141,7 +141,7 @@ mod test {
 
 		let proof_input = proof_input_builder.build_js().unwrap();
 
-		let proof = generate_proof_js(proof_input.clone()).unwrap().proof().unwrap();
+		let proof = generate_proof_js(proof_input.clone()).unwrap().anchor_proof().unwrap();
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 		assert!(is_valid_proof);
 	}
