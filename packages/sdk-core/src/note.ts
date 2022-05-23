@@ -73,9 +73,7 @@ export class Note {
   }
 
   /**
-   * Deserializes a note from a string.
-   *
-   * @param value - A serialized note.
+   * Generate a default JsUtxo which will have both index,amount = 0
    * @returns A note class instance.
    */
   public getDefaultUtxoNote (): Note {
