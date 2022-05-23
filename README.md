@@ -82,6 +82,12 @@ rustup update
 rustup update nightly
 ```
 
+This repository makes use of `wasm-pack` for bindings between javascript and webassembly generated from rust. Install it with:
+
+```bash
+curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+```
+
 Great! Now your **Rust** environment is ready! 🦀 🦀
 
 ## Installation 💻
