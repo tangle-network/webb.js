@@ -11,9 +11,8 @@ import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
 import { GovernedTokenWrapper } from '@webb-tools/tokens';
 import { toFixedHex } from '@webb-tools/utils';
 
-import { AnchorApi, AnchorDeposit, Currency, DepositPayload as IDepositPayload, MixerSize } from '../abstracts/index.js';
+import { AnchorDeposit, Currency, DepositPayload as IDepositPayload, MixerSize } from '../abstracts/index.js';
 import { ChainType, ChainTypeId, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, InternalChainId, internalChainIdIntoEVMId, parseChainIdType } from '../chains/index.js';
-import { BridgeConfig } from '../index.js';
 import { WebbWeb3Provider } from './webb-provider.js';
 
 const logger = LoggerService.get('web3-bridge-deposit');
@@ -21,14 +20,6 @@ const logger = LoggerService.get('web3-bridge-deposit');
 type DepositPayload = IDepositPayload<Note, [IAnchorDepositInfo, number | string, string?]>;
 
 export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPayload> {
-  protected get bridgeApi () {
-    return this.inner.methods.anchorApi as AnchorApi<WebbWeb3Provider, BridgeConfig>;
-  }
-
-  protected get config () {
-    return this.inner.config;
-  }
-
   async deposit (depositPayload: DepositPayload): Promise<void> {
     const bridge = this.bridgeApi.activeBridge;
     const currency = this.bridgeApi.currency;
@@ -71,7 +62,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
         throw new Error(`No Anchor for the chain ${note.targetChainId}`);
       }
 
-      const contract = this.inner.getWebbAnchorByAddress(contractAddress as string);
+      const contract = this.inner.getFixedAnchorByAddress(contractAddress as string);
 
       // If a wrappableAsset was selected, perform a wrapAndDeposit
       if (depositPayload.params[2]) {
@@ -210,12 +201,14 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
     const currency = this.bridgeApi.currency;
 
     if (currency) {
-      return anchors.map((anchor) => ({
-        amount: Number(anchor.amount),
-        asset: currency.view.symbol,
-        id: `Bridge=${anchor.amount}@${currency.view.name}`,
-        title: `${anchor.amount} ${currency.view.name}`
-      }));
+      return anchors
+        .filter((anchor) => anchor.amount)
+        .map((anchor) => ({
+          amount: Number(anchor.amount),
+          asset: currency.view.symbol,
+          id: `Bridge=${anchor.amount}@${currency.view.name}`,
+          title: `${anchor.amount} ${currency.view.name}`
+        }));
     }
 
     return [];
@@ -294,15 +287,21 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       throw new Error('api not ready');
     }
 
+    const amount = String(anchorId).replace('Bridge=', '').split('@')[0];
     const tokenSymbol = currency.view.symbol;
     const sourceEvmId = await this.inner.getChainId();
     const sourceChainId = computeChainIdType(ChainType.EVM, sourceEvmId);
     const deposit = Anchor.generateDeposit(destChainId);
     const srcChainInternal = evmIdIntoInternalChainId(sourceEvmId);
     const destChainInternal = chainTypeIdToInternalId(parseChainIdType(destChainId));
-    const target = currency.getAddress(destChainInternal);
-    const srcAddress = currency.getAddress(srcChainInternal);
-    const amount = String(anchorId).replace('Bridge=', '').split('@')[0];
+    const anchorConfig = bridge.anchors.find((anchorConfig) => anchorConfig.type === 'fixed' && anchorConfig.amount === amount);
+
+    if (!anchorConfig) {
+      throw new Error(`cannot find anchor configuration with amount: ${amount}`);
+    }
+
+    const srcAddress = anchorConfig.anchorAddresses[srcChainInternal];
+    const destAddress = anchorConfig.anchorAddresses[destChainInternal];
 
     const noteInput: NoteGenInput = {
       amount: amount,
@@ -316,13 +315,12 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       sourceChain: sourceChainId.toString(),
       sourceIdentifyingData: srcAddress,
       targetChain: destChainId.toString(),
-      targetIdentifyingData: target,
+      targetIdentifyingData: destAddress,
       tokenSymbol: tokenSymbol,
       version: 'v2',
       width: '4'
     };
 
-    console.log(`noteInput to generateNote: ${noteInput}`);
     const note = await Note.generateNote(noteInput);
 
     return {

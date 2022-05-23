@@ -215,7 +215,6 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
         message: 'GovernedTokenwrapper:wrap',
         name: 'Transaction'
       });
-      console.log('address of token to wrap into webbGovernedToken', this.getAddressFromWrapTokenId(wrappableTokenId));
       let tx: ContractTransaction;
 
       // If wrapping an erc20, check for approvals
@@ -228,8 +227,6 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
           await this.inner.getEthersProvider().getSigner().getAddress(),
           wrappableTokenInstance.address
         );
-
-        console.log(wrappableTokenAllowance);
 
         if (wrappableTokenAllowance.lt(amount)) {
           this.inner.notificationHandler({

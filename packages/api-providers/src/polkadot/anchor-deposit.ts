@@ -1,7 +1,6 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { AnchorApi } from '@webb-tools/api-providers/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
 
@@ -9,7 +8,6 @@ import { u8aToHex } from '@polkadot/util';
 
 import { AnchorDeposit, AnchorSize, DepositPayload as IDepositPayload } from '../abstracts/index.js';
 import { computeChainIdType, InternalChainId } from '../chains/index.js';
-import { BridgeConfig } from '../types/bridge-config.interface.js';
 import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
 import { WebbPolkadot } from './webb-provider.js';
 
@@ -101,10 +99,6 @@ export class PolkadotAnchorDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
       note,
       params: [treeId, leafHex]
     };
-  }
-
-  private get bridgeApi () {
-    return this.inner.methods.anchorApi as AnchorApi<WebbPolkadot, BridgeConfig>;
   }
 
   async getSizes (): Promise<AnchorSize[]> {

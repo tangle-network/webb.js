@@ -12,7 +12,7 @@ type BridgeStore<BridgeConfigEntry, BridgeConfig = Record<BridgeCurrencyIndex, B
   activeBridge?: BridgeConfigEntry;
 };
 export type AnchorBase = {
-  amount: string | number;
+  amount?: string | number;
   neighbours: {
     [key in InternalChainId]?: string | number;
   };

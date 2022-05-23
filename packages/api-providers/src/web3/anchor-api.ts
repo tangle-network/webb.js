@@ -45,10 +45,11 @@ export class Web3AnchorApi extends AnchorApi<WebbWeb3Provider, BridgeConfig> {
 
   async getAnchors (): Promise<AnchorBase[]> {
     return (
-      this.store.activeBridge?.anchors.map((anchor) => ({
-        amount: anchor.amount,
-        neighbours: anchor.anchorAddresses
-      })) ?? []
+      this.store.activeBridge?.anchors
+        .map((anchor) => ({
+          amount: anchor.type === 'fixed' ? anchor.amount : undefined,
+          neighbours: anchor.anchorAddresses
+        })) ?? []
     );
   }
 

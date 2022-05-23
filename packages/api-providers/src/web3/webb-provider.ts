@@ -9,12 +9,14 @@ import { Eth } from 'web3-eth';
 import { AccountsAdapter } from '../account/Accounts.adapter.js';
 import { evmIdIntoInternalChainId } from '../chains/index.js';
 import { AnchorContract } from '../contracts/wrappers/index.js';
+import { VAnchorContract } from '../contracts/wrappers/webb-vanchor.js';
 import { Web3Accounts, Web3Provider } from '../ext-providers/index.js';
 import { Web3AnchorApi } from './anchor-api.js';
 import { Web3AnchorWithdraw } from './anchor-withdraw.js';
 import { Web3ChainQuery } from './chain-query.js';
 import { Web3MixerDeposit } from './mixer-deposit.js';
 import { Web3MixerWithdraw } from './mixer-withdraw.js';
+import { Web3VAnchorDeposit } from './vanchor-deposit.js';
 import { Web3WrapUnwrap } from './wrap-unwrap.js';
 
 export class WebbWeb3Provider
@@ -38,20 +40,10 @@ export class WebbWeb3Provider
     super();
     this.ethersProvider = web3Provider.intoEthersProvider();
 
-    // TODO: fix types
-    // Remove listeners for chainChanged on the previous object
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.ethersProvider.provider?.removeAllListeners('chainChanged');
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.ethersProvider.provider?.on?.('accountsChanged', () => {
-      this.emit('newAccounts', this.accounts);
-    });
     this.methods = {
-      anchor: {
-        core: null,
+      anchorApi: new Web3AnchorApi(this, this.config.bridgeByAsset),
+      chainQuery: new Web3ChainQuery(this),
+      fixedAnchor: {
         deposit: {
           enabled: true,
           inner: new Web3AnchorDeposit(this)
@@ -61,8 +53,6 @@ export class WebbWeb3Provider
           inner: new Web3AnchorWithdraw(this)
         }
       },
-      anchorApi: new Web3AnchorApi(this, this.config.bridgeByAsset),
-      chainQuery: new Web3ChainQuery(this),
       mixer: {
         deposit: {
           enabled: true,
@@ -71,6 +61,12 @@ export class WebbWeb3Provider
         withdraw: {
           enabled: true,
           inner: new Web3MixerWithdraw(this)
+        }
+      },
+      variableAnchor: {
+        deposit: {
+          enabled: true,
+          inner: new Web3VAnchorDeposit(this)
         }
       },
       wrapUnwrap: {
@@ -120,11 +116,16 @@ export class WebbWeb3Provider
     return blockNumber;
   }
 
-  getWebbAnchorByAddress (address: string): AnchorContract {
+  getFixedAnchorByAddress (address: string): AnchorContract {
     return new AnchorContract(this.ethersProvider, address);
   }
 
-  getWebbAnchorByAddressAndProvider (address: string, provider: providers.Web3Provider): AnchorContract {
+  // VAnchors require zero knowledge proofs on deposit - Fetch the small and large circuits.
+  async getVariableAnchorByAddress (address: string): Promise<VAnchorContract> {
+    return new VAnchorContract(this.ethersProvider, address);
+  }
+
+  getFixedAnchorByAddressAndProvider (address: string, provider: providers.Web3Provider): AnchorContract {
     return new AnchorContract(provider, address, true);
   }
 

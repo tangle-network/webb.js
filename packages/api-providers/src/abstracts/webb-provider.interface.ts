@@ -6,7 +6,7 @@ import { EventBus } from '@webb-tools/app-util/index.js';
 
 import { AccountsAdapter } from '../account/Accounts.adapter.js';
 import { InteractiveFeedback } from '../webb-error/index.js';
-import { AnchorDeposit, AnchorWithdraw, Bridge } from './anchor/index.js';
+import { AnchorDeposit, AnchorWithdraw, VAnchorDeposit } from './anchor/index.js';
 import { ChainQuery } from './chain-query/index.js';
 import { DepositPayload, MixerDeposit, MixerDepositEvents, MixerWithdraw, MixerWithdrawEvents } from './mixer/index.js';
 import { WebbRelayerBuilder } from './relayer/index.js';
@@ -17,14 +17,19 @@ import { AppConfig } from './common.js';
 export interface WebbMethods<T extends WebbApiProvider<any>> {
   // Mixer API
   mixer: WebbMixer<T>;
-  // Anchor/Bridge API
-  anchor: WebbAnchor<T>;
+  // Fixed Anchor API
+  fixedAnchor: WebbFixedAnchor<T>;
+  // Variable Anchor API
+  variableAnchor: WebbVariableAnchor<T>;
   // Wrap and unwrap API
   wrapUnwrap: WrapAndUnwrap<T>;
-  // Chain query : an API for querying storage used currently for balances
+  // Chain query : an API for querying chain storage used currently for balances
   chainQuery: ChainQuery<T>;
   // Anchor API developed initially for to handle the difference between
   // web3 (Chains that depend on static configs) and chains that will need to query the anchor
+  //
+  // Since a bridge is just the connection between LinkableAnchors,
+  // It also contains information about the Bridge API.
   anchorApi: AnchorApi<T, any>;
 }
 
@@ -41,19 +46,25 @@ export interface WebbMixer<T extends WebbApiProvider<any>> {
   withdraw: WebbMethod<MixerWithdraw<T>, MixerWithdrawEvents>;
 }
 
+export interface WebbFixedAnchor<T extends WebbApiProvider<any>> {
+  // deposit
+  deposit: WebbMethod<AnchorDeposit<T, DepositPayload>, MixerDepositEvents>;
+  // withdraw
+  withdraw: WebbMethod<AnchorWithdraw<T>, MixerWithdrawEvents>;
+}
+
+export interface WebbVariableAnchor<T extends WebbApiProvider<any>> {
+  // deposit
+  deposit: WebbMethod<VAnchorDeposit<T, DepositPayload>, MixerDepositEvents>;
+  // withdraw
+  // withdraw: WebbMethod<VAnchorWithdraw<T>, MixerWithdrawEvents>;
+}
+
 export interface WrapAndUnwrap<T> {
   core: {
     inner: WrapUnwrap<T>;
     enabled: boolean;
   };
-}
-
-export interface WebbAnchor<T extends WebbApiProvider<any>> {
-  core: Bridge | null;
-  // deposit
-  deposit: WebbMethod<AnchorDeposit<T, DepositPayload>, MixerDepositEvents>;
-  // withdraw
-  withdraw: WebbMethod<AnchorWithdraw<T>, MixerWithdrawEvents>;
 }
 
 /// TODO improve this and add a spec
