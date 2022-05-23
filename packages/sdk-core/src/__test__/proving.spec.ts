@@ -49,8 +49,9 @@ const vanchorBn2542_16_2 = setupKeys('vanchor', 'Bn254', 2, 16, 2);
 describe('Proving manager VAnchor', function () {
   this.timeout(120_1000);
 
-  it('should  proof js for VAnchor with one input note and one index', async () => {
+  it('should  prove using WASM API for VAnchor with one input note and one index', async () => {
     const keys = vanchorBn2542_2_2;
+
     const vanchorNote1 = generateVAnchorNote(20, 0, 0, 0);
 
     const publicAmount = 10;
@@ -58,7 +59,6 @@ describe('Proving manager VAnchor', function () {
     const outputChainId = BigInt(0);
 
     const leaf1 = vanchorNote1.getLeafCommitment();
-
     const tree = new MTBn254X5([leaf1], '0');
     const root = `0x${tree.root}`;
     const rootsSet = [hexToU8a(root), hexToU8a(root)];
@@ -83,15 +83,13 @@ describe('Proving manager VAnchor', function () {
       roots: rootsSet
 
     };
-
     const data = await provingManager.proof('vanchor', setup);
-
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
 
     expect(isValidProof).to.deep.equal(true);
   });
 
-  it('should proof js for VAnchor with two inputs and two indices', async () => {
+  it('should prove using WASM API for VAnchor with two inputs and two indices', async () => {
     const keys = vanchorBn2542_2_2;
 
     const vanchorNote1 = generateVAnchorNote(10, 0, 0, 0);
@@ -103,13 +101,13 @@ describe('Proving manager VAnchor', function () {
 
     const leaf1 = vanchorNote1.getLeafCommitment();
     const leaf2 = vanchorNote2.getLeafCommitment();
-
     const tree = new MTBn254X5([leaf1, leaf2], '0');
     const root = `0x${tree.root}`;
     const rootsSet = [hexToU8a(root), hexToU8a(root)];
     const leavesMap: any = {};
 
     leavesMap[0] = [leaf1, leaf2];
+
     const externalDataHash = '10101010101010101010';
 
     const outputConfig1 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
@@ -129,13 +127,12 @@ describe('Proving manager VAnchor', function () {
 
     };
     const data = await provingManager.proof('vanchor', setup);
-
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
 
     expect(isValidProof).to.deep.equal(true);
   });
 
-  it('should proof js for VAnchor with three inputs amd three indices', async () => {
+  it('should prove using WASM API for VAnchor with three inputs amd three indices', async () => {
     const keys = vanchorBn2542_16_2;
 
     const notes = Array(3).fill(0).map((_, index) => generateVAnchorNote(10, 0, 0, index));
@@ -171,14 +168,12 @@ describe('Proving manager VAnchor', function () {
     };
 
     const data = await provingManager.proof('vanchor', setup);
-
-    console.log(data);
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
 
     expect(isValidProof).to.deep.equal(true);
   });
 
-  it('should proof js for VAnchor with 16 inputs and 16 indices', async () => {
+  it('should prove using WASM API for VAnchor with 16 inputs and 16 indices', async () => {
     const keys = vanchorBn2542_16_2;
 
     const notes = Array(16).fill(0).map((_, index) => generateVAnchorNote(10, 0, 0, index));
@@ -214,13 +209,12 @@ describe('Proving manager VAnchor', function () {
     };
 
     const data = await provingManager.proof('vanchor', setup);
-
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
 
     expect(isValidProof).to.deep.equal(true);
   });
 
-  it('should fail to proof  for VAnchor with 16 inputs and 16 indices with invalid amounts', async () => {
+  it('should fail to prove using WASM API for VAnchor with 16 inputs and 16 indices with invalid amounts', async () => {
     let message = '';
 
     try {
@@ -232,7 +226,6 @@ describe('Proving manager VAnchor', function () {
       const outputAmount = String(10 * 80 + 5);
       const outputChainId = BigInt(0);
       const leaves = notes.map((note) => note.getLeafCommitment());
-
       const tree = new MTBn254X5(leaves, '0');
       const root = `0x${tree.root}`;
       const rootsSet = [hexToU8a(root), hexToU8a(root)];
