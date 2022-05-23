@@ -65,6 +65,7 @@ export class Note {
    */
   private static get wasm () {
     if (typeof process !== 'undefined' && process.versions != null && process.versions.node != null) {
+      // If node is running in an esm context, return esm compliant package.
       return import('@webb-tools/wasm-utils/njs/wasm-utils-njs.js');
     } else {
       return import('@webb-tools/wasm-utils/wasm-utils.js');

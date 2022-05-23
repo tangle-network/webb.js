@@ -1,5 +1,5 @@
 {
-  "version": "0.1.4-61",
+  "version": "0.1.4-62",
   "private": true,
   "type": "module",
   "engines": {
@@ -13,7 +13,7 @@
   "resolutions": {
     "@polkadot/api": "8.1.1",
     "@polkadot/types": "8.1.1",
-    "@webb-tools/protocol-solidity": "0.1.15"
+    "@webb-tools/protocol-solidity": "0.1.16"
   },
   "scripts": {
     "pumbp": "./scripts/update-version.js prerelease",
@@ -56,7 +56,7 @@
     "@types/jest": "^26.0.24",
     "@types/mocha": "^9.1.0",
     "@types/source-map-support": "^0.5.3",
-    "@webb-tools/protocol-solidity": "0.1.15",
+    "@webb-tools/protocol-solidity": "0.1.16",
     "cross-env": "^7.0.3",
     "dotenv": "^10.0.0",
     "eslint-plugin-prettier": "^4.0.0",

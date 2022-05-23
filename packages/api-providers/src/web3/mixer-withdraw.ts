@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Anchor } from '@webb-tools/anchors';
-import * as witnessCalculatorFile from '@webb-tools/api-providers/contracts/utils/witness-calculator.js';
+import * as witnessCalculatorFile from '@webb-tools/api-providers/contracts/utils/fixed-witness-calculator.js';
 import { BridgeStorage, bridgeStorageFactory, depositFromAnchorNote } from '@webb-tools/api-providers/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note } from '@webb-tools/sdk-core/index.js';
 
 import { WithdrawState } from '../abstracts/index.js';
 import { evmIdIntoInternalChainId } from '../chains/index.js';
-import { fetchKeyForEdges, fetchWasmForEdges } from '../ipfs/evm/index.js';
+import { fetchFixedAnchorKeyForEdges, fetchFixedAnchorWasmForEdges } from '../ipfs/evm/index.js';
 import { getAnchorDeploymentBlockNumber } from '../utils/storage-mock.js';
 import { Web3AnchorWithdraw } from './anchor-withdraw.js';
 
@@ -35,11 +35,11 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
     // Parse the intended target address for the note
     const activeChain = await this.inner.getChainId();
     const internalId = evmIdIntoInternalChainId(activeChain);
-    const contractAddresses = activeBridge.anchors.find((anchor) => anchor.amount === depositNote.amount)!;
+    const contractAddresses = activeBridge.anchors.find((anchor) => anchor.type === 'fixed' && anchor.amount === depositNote.amount)!;
     const contractAddress = contractAddresses.anchorAddresses[internalId]!;
 
     // create the Anchor instance
-    const contract = this.inner.getWebbAnchorByAddress(contractAddress);
+    const contract = this.inner.getFixedAnchorByAddress(contractAddress);
     const section = `Mixer ${activeBridge.asset}`;
     const key = 'web3-mixer-withdraw';
 
@@ -86,9 +86,9 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
 
     // Fetch the zero knowledge files required for creating witnesses and verifying.
     const maxEdges = await contract.inner.maxEdges();
-    const wasmBuf = await fetchWasmForEdges(maxEdges);
+    const wasmBuf = await fetchFixedAnchorWasmForEdges(maxEdges);
     const witnessCalculator = await witnessCalculatorFile.builder(wasmBuf, {});
-    const circuitKey = await fetchKeyForEdges(maxEdges);
+    const circuitKey = await fetchFixedAnchorKeyForEdges(maxEdges);
 
     // This anchor wrapper from protocol-solidity is used for public inputs generation
     const anchorWrapper = await Anchor.connect(

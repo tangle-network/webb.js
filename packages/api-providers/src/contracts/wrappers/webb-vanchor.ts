@@ -4,14 +4,16 @@
 /* eslint-disable camelcase */
 
 import { Log } from '@ethersproject/abstract-provider';
-import { Anchor } from '@webb-tools/anchors';
+import { VAnchor as VAnchorWrapper } from '@webb-tools/anchors';
+import * as witnessCalculatorFile from '@webb-tools/api-providers/contracts/utils/variable-witness-calculator.js';
+import { fetchVariableAnchorKeyForEdges, fetchVariableAnchorWasmForEdges } from '@webb-tools/api-providers/ipfs/index.js';
 import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
-import { ERC20, ERC20__factory as ERC20Factory, FixedDepositAnchor, FixedDepositAnchor__factory } from '@webb-tools/contracts';
+import { ERC20, ERC20__factory as ERC20Factory, VAnchor, VAnchor__factory } from '@webb-tools/contracts';
 import { IAnchorDepositInfo } from '@webb-tools/interfaces';
 import { MerkleTree } from '@webb-tools/merkle-tree';
-import { getFixedAnchorExtDataHash, toFixedHex } from '@webb-tools/utils';
-import { BigNumber, Contract, providers, Signer } from 'ethers';
+import { Utxo } from '@webb-tools/utils';
+import { BigNumber, BigNumberish, Contract, providers, Signer } from 'ethers';
 
 import { zeroAddress } from '../index.js';
 import { ZKPWebbAnchorInputWithMerkle } from './types.js';
@@ -29,14 +31,19 @@ export interface IPublicInputs {
 }
 
 // The AnchorContract defines useful functions over an anchor that do not depend on zero knowledge.
-export class AnchorContract {
-  private _contract: FixedDepositAnchor;
+export class VAnchorContract {
+  private wrapper: VAnchorWrapper | null = null;
+  private _contract: VAnchor;
   private readonly signer: Signer;
 
-  constructor (private web3Provider: providers.Web3Provider, address: string, useProvider = false) {
+  constructor (
+    private web3Provider: providers.Web3Provider,
+    address: string,
+    useProvider = false
+  ) {
     this.signer = this.web3Provider.getSigner();
     logger.info(`Init with address ${address} `);
-    this._contract = FixedDepositAnchor__factory.connect(address, useProvider ? this.web3Provider : this.signer);
+    this._contract = VAnchor__factory.connect(address, useProvider ? this.web3Provider : this.signer);
   }
 
   get getLastRoot () {
@@ -47,12 +54,38 @@ export class AnchorContract {
     return this._contract.nextIndex();
   }
 
-  get denomination () {
-    return this._contract.denomination();
-  }
-
   get inner () {
     return this._contract;
+  }
+
+  async initializeWrapper () {
+    if (!this.wrapper) {
+      const maxEdges = await this._contract.maxEdges();
+
+      const smallKey = await fetchVariableAnchorKeyForEdges(maxEdges, true);
+      const smallWasm = await fetchVariableAnchorWasmForEdges(maxEdges, true);
+      const smallWitnessCalc = await witnessCalculatorFile.builder(smallWasm, {});
+
+      const largeKey = await fetchVariableAnchorKeyForEdges(maxEdges, false);
+      const largeWasm = await fetchVariableAnchorWasmForEdges(maxEdges, false);
+      const largeWitnessCalc = await witnessCalculatorFile.builder(largeWasm, {});
+
+      // Get the necessary fixtures for populating the VAnchor wrapper instance.
+      this.wrapper = await VAnchorWrapper.connect(
+        this._contract.address,
+        {
+          wasm: Buffer.from(smallWasm),
+          witnessCalculator: smallWitnessCalc,
+          zkey: smallKey
+        },
+        {
+          wasm: Buffer.from(largeWasm),
+          witnessCalculator: largeWitnessCalc,
+          zkey: largeKey
+        },
+        this.web3Provider.getSigner()
+      );
+    }
   }
 
   async getWebbToken (): Promise<ERC20> {
@@ -62,14 +95,10 @@ export class AnchorContract {
     return tokenInstance;
   }
 
-  async isWebbTokenApprovalRequired () {
+  async isWebbTokenApprovalRequired (depositAmount: BigNumberish) {
     const userAddress = await this.signer.getAddress();
     const tokenInstance = await this.getWebbToken();
     const tokenAllowance = await tokenInstance.allowance(userAddress, this._contract.address);
-    const depositAmount = await this.denomination;
-
-    logger.log('tokenAllowance', tokenAllowance);
-    logger.log('depositAmount', depositAmount);
 
     if (tokenAllowance < depositAmount) {
       return true;
@@ -78,7 +107,7 @@ export class AnchorContract {
     return false;
   }
 
-  async isWrappableTokenApprovalRequired (tokenAddress: string) {
+  async isWrappableTokenApprovalRequired (tokenAddress: string, depositAmount: BigNumberish) {
     // Native token never requires approval
     if (tokenAddress === zeroAddress) {
       return false;
@@ -87,7 +116,6 @@ export class AnchorContract {
     const userAddress = await this.signer.getAddress();
     const webbToken = await this.getWebbToken();
     const tokenAllowance = await webbToken.allowance(userAddress, webbToken.address);
-    const depositAmount = await this.denomination;
 
     if (tokenAllowance < depositAmount) {
       return true;
@@ -96,9 +124,8 @@ export class AnchorContract {
     return false;
   }
 
-  async hasEnoughBalance (tokenAddress?: string) {
+  async hasEnoughBalance (depositAmount: BigNumberish, tokenAddress?: string) {
     const userAddress = await this.signer.getAddress();
-    const depositAmount = await this.denomination;
     let tokenBalance: BigNumber;
 
     // If a token address was supplied, the user is querying for enough balance of a wrappableToken
@@ -118,58 +145,69 @@ export class AnchorContract {
       tokenBalance = await tokenInstance.balanceOf(userAddress);
     }
 
-    if (tokenBalance < depositAmount) {
+    if (tokenBalance.lt(BigNumber.from(depositAmount))) {
       return false;
     }
 
     return true;
   }
 
-  async approve (tokenInstance: Contract) {
+  async approve (depositAmount: BigNumberish, tokenInstance: Contract) {
     // check the approved spending before attempting deposit
     if (tokenInstance == null) {
       return;
     }
 
     if (tokenInstance != null) {
-      const depositAmount = await this.denomination;
       const tx = await tokenInstance.approve(this._contract.address, depositAmount);
 
       await tx.wait();
     }
   }
 
-  async deposit (commitment: string) {
-    const overrides = {};
-    const recipient = await this._contract.deposit(commitment, overrides);
+  // Make a deposit. It will create a zkp and make a tx which will result in the passed utxo
+  // being registered on-chain.
+  async deposit (utxo: Utxo) {
+    await this.initializeWrapper();
 
-    await recipient.wait();
+    if (!this.wrapper) {
+      throw new Error('Wrapper failed to initialize for VAnchor');
+    }
+
+    const tx = await this.wrapper.transact(
+      [],
+      [utxo],
+      0,
+      '0x0000000000000000000000000000000000000001',
+      '0x0000000000000000000000000000000000000001'
+    );
+
+    console.log(tx);
   }
 
-  async wrapAndDeposit (commitment: string, tokenAddress: string) {
-    const value = await this._contract.denomination();
+  async wrapAndDeposit (utxo: Utxo, tokenAddress: string) {
+    await this.initializeWrapper();
 
-    if (tokenAddress === zeroAddress) {
-      const overrides = { value: value };
-
-      const tx = await this._contract.wrapAndDeposit(zeroAddress, commitment, overrides);
-
-      await tx.wait();
-      logger.log('wrapAndDeposit completed for native token to webb token');
-    } else {
-      const overrides = {};
-
-      const tx = await this._contract.wrapAndDeposit(tokenAddress, commitment, overrides);
-
-      await tx.wait();
-      logger.log('wrapAndDeposit completed for wrappable asset to webb token');
+    if (!this.wrapper) {
+      throw new Error('Wrapper failed to initialize for VAnchor');
     }
+
+    const tx = await this.wrapper.transactWrap(
+      tokenAddress,
+      [],
+      [utxo],
+      0,
+      '0x0000000000000000000000000000000000000001',
+      '0x0000000000000000000000000000000000000001'
+    );
+
+    console.log('transactWrap: ', tx);
   }
 
   // Verify the leaf occurred at the reported block
   // This is important to check the behavior of relayers before modifying local storage
   async leafCreatedAtBlock (leaf: string, blockNumber: number): Promise<boolean> {
-    const filter = this._contract.filters.Deposit(null, null, null);
+    const filter = this._contract.filters.NewCommitment(null, null, null);
     const logs = await this.web3Provider.getLogs({
       fromBlock: blockNumber,
       toBlock: blockNumber,
@@ -190,7 +228,7 @@ export class AnchorContract {
     startingBlock: number,
     finalBlock: number
   ): Promise<{ lastQueriedBlock: number; newLeaves: string[] }> {
-    const filter = this._contract.filters.Deposit(null, null, null);
+    const filter = this._contract.filters.NewCommitment(null, null, null);
 
     logger.trace('Getting leaves with filter', filter);
     finalBlock = finalBlock || (await this.web3Provider.getBlockNumber());
@@ -223,7 +261,7 @@ export class AnchorContract {
     const events = logs.map((log) => this._contract.interface.parseLog(log));
 
     const newCommitments = events
-      .sort((a, b) => a.args.leafIndex - b.args.leafIndex) // Sort events in chronological order
+      .sort((a, b) => a.args.index - b.args.index) // Sort events in chronological order
       .map((e) => e.args.commitment);
 
     return {
@@ -257,38 +295,9 @@ export class AnchorContract {
   }
 
   async withdraw (proof: any, zkp: ZKPWebbAnchorInputWithMerkle, pub: any): Promise<string> {
-    const overrides = {
-      gasLimit: 6000000
-    };
-    const proofBytes = await Anchor.generateWithdrawProofCallData(proof, pub);
-    const nullifierHash = toFixedHex(zkp.nullifierHash);
-    const roots = Anchor.createRootsBytes(pub.roots);
-    const extDataHash = getFixedAnchorExtDataHash({
-      _fee: toFixedHex(zkp.fee),
-      _recipient: zkp.recipient,
-      _refreshCommitment: toFixedHex('0'),
-      _refund: toFixedHex(zkp.refund),
-      _relayer: zkp.relayer
-    });
-    const tx = await this._contract.withdraw(
-      {
-        _extDataHash: extDataHash.toHexString(),
-        _nullifierHash: nullifierHash,
-        _roots: roots,
-        proof: `0x${proofBytes}`
-      },
-      {
-        _fee: toFixedHex(zkp.fee),
-        _recipient: zkp.recipient,
-        _refreshCommitment: toFixedHex('0'),
-        _refund: toFixedHex(zkp.refund),
-        _relayer: zkp.relayer
-      },
-      overrides
-    );
-    const receipt = await tx.wait();
+    console.log('withdraw not implemented', proof, zkp, pub);
 
-    return receipt.transactionHash;
+    return 'unimplemented';
   }
 
   /* wrap and unwrap */

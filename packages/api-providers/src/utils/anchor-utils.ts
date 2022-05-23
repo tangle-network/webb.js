@@ -6,14 +6,14 @@ import { AppConfig } from '@webb-tools/api-providers/index.js';
 import { InternalChainId } from '../chains/index.js';
 import { WebbCurrencyId } from '../enums/index.js';
 
-export const getAnchorAddressForBridge = (
+export const getFixedAnchorAddressForBridge = (
   assetId: WebbCurrencyId,
   chainId: number,
   amount: number,
   bridgeConfigByAsset: AppConfig['bridgeByAsset']
 ): string | undefined => {
   const linkedAnchorConfig = bridgeConfigByAsset[assetId]?.anchors.find(
-    (anchor) => anchor.amount === amount.toString()
+    (anchor) => anchor.type === 'fixed' && anchor.amount === amount.toString()
   );
 
   if (!linkedAnchorConfig) {
