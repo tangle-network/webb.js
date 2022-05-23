@@ -1,12 +1,13 @@
+use std::collections::BTreeMap;
+use std::process::Output;
+
 use ark_bn254::{Bn254, Fr as Bn254Fr};
-use ark_ff::{BigInteger, PrimeField};
+use ark_ff::{BigInteger, PrimeField, Zero};
 use arkworks_native_gadgets::poseidon::Poseidon;
 use arkworks_setups::common::{setup_keys_unchecked, setup_params, setup_tree_and_create_path};
 use arkworks_setups::Curve as ArkCurve;
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
-use std::collections::BTreeMap;
-use std::process::Output;
 use wasm_bindgen::prelude::*;
 
 use crate::note::{JsNote, JsNoteBuilder};
@@ -202,7 +203,7 @@ pub fn compute_chain_id_type(chain_id: u64, chain_type: [u8; 2]) -> u64 {
 	u64::from_be_bytes(buf)
 }
 
-pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded_ss58: &str) -> VAnchorTestSetup {
+pub fn generate_vanchor_test_js_setup() -> VAnchorTestSetup {
 	let curve = ArkCurve::Bn254;
 
 	let chain_type = [2, 0];
@@ -295,7 +296,8 @@ pub fn generate_vanchor_test_setup(relayer_decoded_ss58: &str, recipient_decoded
 		roots_raw: vec![],
 	}
 }
-pub fn generate_vanchor_test_rust_setup(relayer_decoded_ss58: &str, recipient_decoded_ss58: &str) -> VAnchorTestSetup {
+
+pub fn generate_vanchor_test_setup_2_inputs() -> VAnchorTestSetup {
 	let curve = ArkCurve::Bn254;
 	let index = 0;
 	let mut rng = OsRng;
@@ -308,7 +310,7 @@ pub fn generate_vanchor_test_rust_setup(relayer_decoded_ss58: &str, recipient_de
 	let public_amount = 10;
 	let in_amount = 5;
 	let in_chain_id = 0;
-	let in_amount_fr = Bn254Fr::from(5u32);
+	let in_amount_fr = Bn254Fr::from(in_amount);
 
 	let mut in_utxo1 =
 		VAnchorR1CSProverBn254_30_2_2_2::new_utxo(curve, in_chain_id, in_amount_fr.clone(), None, None, None, &mut rng)
@@ -335,7 +337,7 @@ pub fn generate_vanchor_test_rust_setup(relayer_decoded_ss58: &str, recipient_de
 
 	let leaf0 = in_utxo1.commitment.clone();
 	let leaf1 = in_utxo2.commitment.clone();
-	let (tree, in_path0) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
+	let (tree, _) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
 		&tree_hasher,
 		&vec![leaf0, leaf1],
 		0,
@@ -348,7 +350,7 @@ pub fn generate_vanchor_test_rust_setup(relayer_decoded_ss58: &str, recipient_de
 	let mut leave_map: BTreeMap<u64, Vec<Vec<u8>>> = BTreeMap::new();
 	let leaves: Vec<_> = vec![leaf0, leaf1].iter().map(|x| x.into_repr().to_bytes_le()).collect();
 	leave_map.insert(0, leaves.clone());
-	proof_builder.public_amount(10).unwrap();
+	proof_builder.public_amount(public_amount).unwrap();
 	proof_builder.ext_data_hash([1u8; 32].to_vec()).unwrap();
 	proof_builder.leaf_indices(vec![0, 1]).unwrap();
 	proof_builder.leaves_map(leave_map).unwrap();
@@ -357,6 +359,216 @@ pub fn generate_vanchor_test_rust_setup(relayer_decoded_ss58: &str, recipient_de
 			JsUtxo::new_from_bn254_utxo(in_utxo1),
 			JsUtxo::new_from_bn254_utxo(in_utxo2),
 		])
+		.unwrap();
+
+	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
+	let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
+	proof_builder.exponentiation(5).unwrap();
+	proof_builder.width(5).unwrap();
+	proof_builder.chain_id(0).unwrap();
+
+	proof_builder.backend(Backend::Arkworks).unwrap();
+	proof_builder.curve(Curve::Bn254).unwrap();
+	proof_builder.set_output_config([output_1, output_2]).unwrap();
+	proof_builder.roots(in_root_set).unwrap();
+	proof_builder.pk(pk).unwrap();
+
+	VAnchorTestSetup {
+		proof_input_builder: JsProofInputBuilder { inner: proof_builder },
+		notes: vec![],
+		roots_raw: vec![],
+		vk,
+		leaf_index: 0,
+	}
+}
+
+pub fn generate_vanchor_test_setup_16_non_default_inputs() -> VAnchorTestSetup {
+	let curve = ArkCurve::Bn254;
+	let index = 0;
+	let mut rng = OsRng;
+	let chain_id = 0;
+
+	let params3 = setup_params::<Bn254Fr>(curve, 5, 3);
+	let params4 = setup_params::<Bn254Fr>(curve, 5, 4);
+	let tree_hasher = Poseidon::new(params3);
+	let nullifier_hasher = Poseidon::new(params4);
+	let public_amount = 10;
+	let in_amount = 10u128;
+	let in_chain_id = 0;
+	let in_amount_fr = Bn254Fr::from(in_amount);
+
+	let mut inputs = vec![];
+	let mut next_utxo_index = 0;
+	let mut indices = vec![];
+	loop {
+		if &inputs.len() == &16 {
+			break;
+		}
+		let mut utxo = VAnchorR1CSProverBn254_30_2_2_2::new_utxo(
+			curve,
+			in_chain_id,
+			in_amount_fr.clone(),
+			Some(next_utxo_index),
+			None,
+			None,
+			&mut rng,
+		)
+		.unwrap();
+		utxo.set_index(index, &nullifier_hasher).unwrap();
+
+		inputs.push(utxo);
+		indices.push(next_utxo_index);
+		next_utxo_index += 1;
+	}
+
+	let output_1 = OutputUtxoConfig {
+		amount: 160,
+		index: None,
+		chain_id,
+	};
+	let output_2 = OutputUtxoConfig {
+		amount: 10,
+		index: None,
+		chain_id,
+	};
+
+	let mut proof_builder = ProofInputBuilder::VAnchor(VAnchorProofInput::default());
+
+	let leaves = inputs.iter().map(|i| i.commitment).collect::<Vec<_>>();
+
+	let (tree, _) =
+		setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(&tree_hasher, &leaves, 0, &DEFAULT_LEAF)
+			.unwrap();
+	let root = tree.root();
+	let in_root_set = [root; 2].iter().map(|x| x.into_repr().to_bytes_le()).collect();
+
+	let mut leave_map: BTreeMap<u64, Vec<Vec<u8>>> = BTreeMap::new();
+	let leaves: Vec<_> = leaves.iter().map(|x| x.into_repr().to_bytes_le()).collect();
+	leave_map.insert(0, leaves.clone());
+	proof_builder.public_amount(public_amount).unwrap();
+	proof_builder.ext_data_hash([1u8; 32].to_vec()).unwrap();
+	proof_builder.leaf_indices(indices).unwrap();
+	proof_builder.leaves_map(leave_map).unwrap();
+	proof_builder
+		.set_input_utxos(
+			inputs
+				.clone()
+				.into_iter()
+				.map(|u| JsUtxo::new_from_bn254_utxo(u))
+				.collect(),
+		)
+		.unwrap();
+
+	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
+	let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
+	proof_builder.exponentiation(5).unwrap();
+	proof_builder.width(5).unwrap();
+	proof_builder.chain_id(0).unwrap();
+
+	proof_builder.backend(Backend::Arkworks).unwrap();
+	proof_builder.curve(Curve::Bn254).unwrap();
+	proof_builder.set_output_config([output_1, output_2]).unwrap();
+	proof_builder.roots(in_root_set).unwrap();
+	proof_builder.pk(pk).unwrap();
+
+	VAnchorTestSetup {
+		proof_input_builder: JsProofInputBuilder { inner: proof_builder },
+		notes: vec![],
+		roots_raw: vec![],
+		vk,
+		leaf_index: 0,
+	}
+}
+
+pub fn generate_vanchor_test_setup_16_mixed_inputs() -> VAnchorTestSetup {
+	let curve = ArkCurve::Bn254;
+	let mut rng = OsRng;
+	let chain_id = 0;
+
+	let params3 = setup_params::<Bn254Fr>(curve, 5, 3);
+	let params4 = setup_params::<Bn254Fr>(curve, 5, 4);
+	let tree_hasher = Poseidon::new(params3);
+	let public_amount = 10;
+	let in_amount = 10u128;
+	let in_chain_id = 0;
+	let in_amount_fr = Bn254Fr::from(in_amount);
+
+	let mut inputs = vec![];
+	let mut next_utxo_index = 0;
+	let mut indices = vec![];
+	loop {
+		if &inputs.len() == &8 {
+			break;
+		}
+		let utxo = VAnchorR1CSProverBn254_30_2_2_2::new_utxo(
+			curve,
+			in_chain_id,
+			in_amount_fr.clone(),
+			Some(next_utxo_index),
+			None,
+			None,
+			&mut rng,
+		)
+		.unwrap();
+		let def_utxo = VAnchorR1CSProverBn254_30_2_2_2::new_utxo(
+			curve,
+			in_chain_id,
+			Bn254Fr::from(0),
+			Some(0),
+			None,
+			None,
+			&mut rng,
+		)
+		.unwrap();
+
+		inputs.push(utxo);
+		inputs.push(def_utxo);
+
+		indices.push(next_utxo_index);
+		indices.push(0);
+		next_utxo_index += 1;
+	}
+
+	let output_1 = OutputUtxoConfig {
+		amount: 160,
+		index: None,
+		chain_id,
+	};
+	let output_2 = OutputUtxoConfig {
+		amount: 10,
+		index: None,
+		chain_id,
+	};
+
+	let mut proof_builder = ProofInputBuilder::VAnchor(VAnchorProofInput::default());
+
+	let leaves = inputs
+		.iter()
+		.filter(|i| i.amount != Bn254Fr::zero())
+		.map(|i| i.commitment)
+		.collect::<Vec<_>>();
+
+	let (tree, _) =
+		setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(&tree_hasher, &leaves, 0, &DEFAULT_LEAF)
+			.unwrap();
+	let root = tree.root();
+	let in_root_set = [root; 2].iter().map(|x| x.into_repr().to_bytes_le()).collect();
+
+	let mut leave_map: BTreeMap<u64, Vec<Vec<u8>>> = BTreeMap::new();
+	let leaves: Vec<_> = leaves.iter().map(|x| x.into_repr().to_bytes_le()).collect();
+	leave_map.insert(0, leaves.clone());
+	proof_builder.public_amount(public_amount).unwrap();
+	proof_builder.ext_data_hash([1u8; 32].to_vec()).unwrap();
+	proof_builder.leaf_indices(indices).unwrap();
+	proof_builder.leaves_map(leave_map).unwrap();
+	proof_builder
+		.set_input_utxos(
+			inputs
+				.clone()
+				.into_iter()
+				.map(|u| JsUtxo::new_from_bn254_utxo(u))
+				.collect(),
+		)
 		.unwrap();
 
 	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();

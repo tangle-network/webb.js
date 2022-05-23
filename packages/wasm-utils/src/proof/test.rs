@@ -11,8 +11,9 @@ mod test {
 
 	use crate::note::JsNote;
 	use crate::proof::test_utils::{
-		generate_anchor_test_setup, generate_mixer_test_setup, generate_vanchor_note, generate_vanchor_test_rust_setup,
-		generate_vanchor_test_setup, AnchorTestSetup, MixerTestSetup, VAnchorTestSetup, ANCHOR_NOTE_V1_X5_4,
+		generate_anchor_test_setup, generate_mixer_test_setup, generate_vanchor_note,
+		generate_vanchor_test_setup_16_mixed_inputs, generate_vanchor_test_setup_16_non_default_inputs,
+		generate_vanchor_test_setup_2_inputs, AnchorTestSetup, MixerTestSetup, VAnchorTestSetup, ANCHOR_NOTE_V1_X5_4,
 		ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V2_X5_4,
 	};
 	use crate::proof::{generate_proof_js, truncate_and_pad, JsProofInputBuilder, LeavesMapInput, OutputUtxoConfig};
@@ -481,7 +482,8 @@ mod test {
 			message = e.as_string().unwrap();
 		}
 		let expected_error_message =
-			"Input  set has 1 UTXOs while the supported set length should be one of [2, 16]".to_string();
+			"Code 24, message Input set has 1 UTXOs while the supported set length should be one of [2, 16], data {}"
+				.to_string();
 		assert_eq!(message, expected_error_message)
 	}
 
@@ -560,14 +562,45 @@ mod test {
 		assert_eq!(message, expected_error_message)
 	}
 	#[wasm_bindgen_test]
-	fn generate_vanchor_proof() {
+	fn generate_vanchor_proof_2_inputs() {
 		let VAnchorTestSetup {
 			proof_input_builder,
 			roots_raw,
 			notes,
 			leaf_index,
 			vk,
-		} = generate_vanchor_test_rust_setup(DECODED_SUBSTRATE_ADDRESS, DECODED_SUBSTRATE_ADDRESS);
+		} = generate_vanchor_test_setup_2_inputs();
+		let proof_input = proof_input_builder.build_js().unwrap();
+		let proof = generate_proof_js(proof_input).unwrap().vanchor_proof().unwrap();
+		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
+
+		assert!(is_valid_proof);
+	}
+
+	#[wasm_bindgen_test]
+	fn generate_vanchor_proof_16_inputs() {
+		let VAnchorTestSetup {
+			proof_input_builder,
+			roots_raw,
+			notes,
+			leaf_index,
+			vk,
+		} = generate_vanchor_test_setup_16_non_default_inputs();
+		let proof_input = proof_input_builder.build_js().unwrap();
+		let proof = generate_proof_js(proof_input).unwrap().vanchor_proof().unwrap();
+		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
+
+		assert!(is_valid_proof);
+	}
+	#[wasm_bindgen_test]
+	fn generate_vanchor_proof_16_mixed_inputs() {
+		let VAnchorTestSetup {
+			proof_input_builder,
+			roots_raw,
+			notes,
+			leaf_index,
+			vk,
+		} = generate_vanchor_test_setup_16_mixed_inputs();
 		let proof_input = proof_input_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_input).unwrap().vanchor_proof().unwrap();
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
