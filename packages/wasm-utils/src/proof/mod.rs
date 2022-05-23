@@ -1,7 +1,6 @@
 #![allow(clippy::unused_unit)]
 
 use core::convert::{TryFrom, TryInto};
-use std::ops::Add;
 
 use ark_bls12_381::Bls12_381;
 use ark_bn254::{Bn254, Fr as Bn254Fr};
@@ -520,10 +519,10 @@ impl VAnchorProofInput {
 				invalid_utxo_dublicate_nullifiers.push(index)
 			}
 		});
-		if &invalid_utxo_chain_id_indices.len() > &0 || &invalid_utxo_dublicate_nullifiers.len() > &0 {
+		if !invalid_utxo_chain_id_indices.is_empty() || !invalid_utxo_dublicate_nullifiers.is_empty() {
 			let message = format!(
 				"Invalid UTXOs: utxo indices has invalid chain_id {:?} ,non-default utxos with an duplicate index {:?}",
-				&invalid_utxo_chain_id_indices, &invalid_utxo_dublicate_nullifiers
+				invalid_utxo_chain_id_indices, invalid_utxo_dublicate_nullifiers
 			);
 			let mut op: OperationError =
 				OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message);
@@ -534,7 +533,7 @@ impl VAnchorProofInput {
 			return Err(op);
 		}
 
-		/// validate amounts
+		// validate amounts
 		let mut in_amount: u128 = public_amount
 			.try_into()
 			.expect("Failed to convert the public amount to u128");

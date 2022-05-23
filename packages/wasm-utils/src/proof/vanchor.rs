@@ -84,11 +84,11 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		));
 	};
 	// Insure the length of the indices
-	if &indices.len() != &in_utxos.len() {
+	if indices.len() != in_utxos.len() {
 		let message = format!(
       "Indices Array don't match with the Input size , supplied {} indices while there are {} utxos in the input ",
-      &indices.len(),
-      &in_utxos.len(),
+      indices.len(),
+      in_utxos.len(),
     );
 		return Err(OperationError::new_with_message(
 			OpStatusCode::InvalidProofParameters,
