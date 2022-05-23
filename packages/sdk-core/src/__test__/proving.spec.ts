@@ -172,6 +172,7 @@ describe('Proving manager VAnchor', function () {
 
     const data = await provingManager.proof('vanchor', setup);
 
+    console.log(data);
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
 
     expect(isValidProof).to.deep.equal(true);

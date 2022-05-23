@@ -1,21 +1,21 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import type { NoteProtocol } from '@webb-tools/wasm-utils';
+import type { JsNote, JsUtxo, NoteProtocol } from '@webb-tools/wasm-utils';
 
 import { ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
 
 type VAnchorProof = {
-  readonly inputUtxos: Array<any>;
-  readonly outputNotes: Array<any>;
+  readonly inputUtxos: Array<JsUtxo>;
+  readonly outputNotes: Array<JsNote>;
   readonly proof: string;
-  readonly publicInputs: Array<any>;
+  readonly publicInputs: Array<string>;
 }
 type Proof = {
   readonly nullifierHash: string;
   readonly proof: string;
   readonly root: string;
-  readonly roots: Array<any>;
+  readonly roots: Array<string>;
 }
 export type ProofI<T extends NoteProtocol> = T extends 'vanchor' ? VAnchorProof : Proof;
 
