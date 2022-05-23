@@ -169,7 +169,6 @@ mod test {
 		.into_iter()
 		.collect();
 		proof_input_builder.set_leaves_map(tree_leaves).unwrap();
-		proof_input_builder.set_metadata_from_note(&note).unwrap();
 
 		proof_input_builder
 			.set_indices(Indices::from(JsValue::from(indices)))
