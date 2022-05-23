@@ -5,7 +5,15 @@ import type { ApiTypes } from '@polkadot/api-base/types';
 import type { Option, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { Codec } from '@polkadot/types-codec/types';
 import type { Perbill, Permill } from '@polkadot/types/interfaces/runtime';
-import type { FrameSupportPalletId, FrameSupportWeightsRuntimeDbWeight, FrameSupportWeightsWeightToFeeCoefficient, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpVersionRuntimeVersion, WebbProposalsHeaderTypedChainId } from '@polkadot/types/lookup';
+import type {
+  FrameSupportPalletId,
+  FrameSupportWeightsRuntimeDbWeight,
+  FrameSupportWeightsWeightToFeeCoefficient,
+  FrameSystemLimitsBlockLength,
+  FrameSystemLimitsBlockWeights,
+  SpVersionRuntimeVersion,
+  WebbProposalsHeaderTypedChainId,
+} from '@polkadot/types/lookup';
 
 declare module '@polkadot/api-base/types/consts' {
   export interface AugmentedConsts<ApiType extends ApiTypes> {
@@ -45,35 +53,35 @@ declare module '@polkadot/api-base/types/consts' {
     bagsList: {
       /**
        * The list of thresholds separating the various bags.
-       * 
+       *
        * Ids are separated into unsorted bags according to their vote weight. This specifies the
        * thresholds separating the bags. An id's bag is the largest bag for which the id's weight
        * is less than or equal to its upper threshold.
-       * 
+       *
        * When ids are iterated, higher bags are iterated completely before lower bags. This means
        * that iteration is _semi-sorted_: ids of higher weight tend to come before ids of lower
        * weight, but peer ids within a particular bag are sorted in insertion order.
-       * 
+       *
        * # Expressing the constant
-       * 
+       *
        * This constant must be sorted in strictly increasing order. Duplicate items are not
        * permitted.
-       * 
+       *
        * There is an implied upper limit of `VoteWeight::MAX`; that value does not need to be
        * specified within the bag. For any two threshold lists, if one ends with
        * `VoteWeight::MAX`, the other one does not, and they are otherwise equal, the two lists
        * will behave identically.
-       * 
+       *
        * # Calculation
-       * 
+       *
        * It is recommended to generate the set of thresholds in a geometric series, such that
        * there exists some constant ratio such that `threshold[k + 1] == (threshold[k] *
        * constant_ratio).max(threshold[k] + 1)` for all `k`.
-       * 
+       *
        * The helpers in the `/utils/frame/generate-bags` module can simplify this calculation.
-       * 
+       *
        * # Examples
-       * 
+       *
        * - If `BagThresholds::get().is_empty()`, then all ids are put into the same bag, and
        * iteration is strictly in insertion order.
        * - If `BagThresholds::get().len() == 64`, and the thresholds are determined according to
@@ -82,9 +90,9 @@ declare module '@polkadot/api-base/types/consts' {
        * the procedure given above, then the constant ratio is approximately equal to 1.248.
        * - If the threshold list begins `[1, 2, 3, ...]`, then an id with weight 0 or 1 will fall
        * into bag 0, an id with weight 2 will fall into bag 1, etc.
-       * 
+       *
        * # Migration
-       * 
+       *
        * In the event that this list ever changes, a copy of the old bags list must be retained.
        * With that `List::migrate` can be called, which will perform the appropriate migration.
        **/
@@ -141,7 +149,7 @@ declare module '@polkadot/api-base/types/consts' {
       dataDepositPerByte: u128 & AugmentedConst<ApiType>;
       /**
        * Maximum acceptable reason length.
-       * 
+       *
        * Benchmarks depend on this value, be sure to update weights file when changing this value
        **/
       maximumReasonLength: u32 & AugmentedConst<ApiType>;
@@ -202,7 +210,7 @@ declare module '@polkadot/api-base/types/consts' {
       cooloffPeriod: u32 & AugmentedConst<ApiType>;
       /**
        * The period between a proposal being approved and enacted.
-       * 
+       *
        * It should generally be a little more than the unstake period to ensure that
        * voting stakers have an opportunity to remove themselves from the system in the case
        * where they are on the losing side of a vote.
@@ -228,7 +236,7 @@ declare module '@polkadot/api-base/types/consts' {
       maxProposals: u32 & AugmentedConst<ApiType>;
       /**
        * The maximum number of votes for an account.
-       * 
+       *
        * Also used to compute weight, an overly big value can
        * lead to extrinsic with very big weight: see `delegate` for instance.
        **/
@@ -243,7 +251,7 @@ declare module '@polkadot/api-base/types/consts' {
       preimageByteDeposit: u128 & AugmentedConst<ApiType>;
       /**
        * The minimum period of vote locking.
-       * 
+       *
        * It should be no shorter than enactment period to ensure that in the case of an approval,
        * those successful voters are locked into the consequences that their votes entail.
        **/
@@ -297,14 +305,14 @@ declare module '@polkadot/api-base/types/consts' {
     electionProviderMultiPhase: {
       /**
        * Maximum length (bytes) that the mined solution should consume.
-       * 
+       *
        * The miner will ensure that the total length of the unsigned solution will not exceed
        * this value.
        **/
       minerMaxLength: u32 & AugmentedConst<ApiType>;
       /**
        * Maximum weight that the miner should consume.
-       * 
+       *
        * The miner will ensure that the total weight of the unsigned solution will not exceed
        * this value, based on [`WeightInfo::submit_unsigned`].
        **/
@@ -315,7 +323,7 @@ declare module '@polkadot/api-base/types/consts' {
       minerTxPriority: u64 & AugmentedConst<ApiType>;
       /**
        * The repeat threshold of the offchain worker.
-       * 
+       *
        * For example, if it is 5, that means that at least 5 blocks will elapse between attempts
        * to submit the worker's solution.
        **/
@@ -334,7 +342,7 @@ declare module '@polkadot/api-base/types/consts' {
       signedDepositWeight: u128 & AugmentedConst<ApiType>;
       /**
        * Maximum number of signed submissions that can be queued.
-       * 
+       *
        * It is best to avoid adjusting this during an election, as it impacts downstream data
        * structures. In particular, `SignedSubmissionIndices<T>` is bounded on this value. If you
        * update this value during an election, you _must_ ensure that
@@ -344,7 +352,7 @@ declare module '@polkadot/api-base/types/consts' {
       signedMaxSubmissions: u32 & AugmentedConst<ApiType>;
       /**
        * Maximum weight of a signed solution.
-       * 
+       *
        * This should probably be similar to [`Config::MinerMaxWeight`].
        **/
       signedMaxWeight: u64 & AugmentedConst<ApiType>;
@@ -369,7 +377,7 @@ declare module '@polkadot/api-base/types/consts' {
        * The maximum number of voters to put in the snapshot. At the moment, snapshots are only
        * over a single block, but once multi-block elections are introduced they will take place
        * over multiple blocks.
-       * 
+       *
        * Also, note the data type: If the voters are represented by a `u32` in `type
        * CompactSolution`, the same `u32` is used here to ensure bounds are respected.
        **/
@@ -404,7 +412,7 @@ declare module '@polkadot/api-base/types/consts' {
       termDuration: u32 & AugmentedConst<ApiType>;
       /**
        * Base deposit associated with voting.
-       * 
+       *
        * This should be sensibly high to economically ensure the pallet cannot be attacked by
        * creating a gigantic number of votes.
        **/
@@ -477,7 +485,7 @@ declare module '@polkadot/api-base/types/consts' {
       bondingDuration: u32 & AugmentedConst<ApiType>;
       /**
        * The maximum number of nominators rewarded for each validator.
-       * 
+       *
        * For each validator only the `$MaxNominatorRewardedPerValidator` biggest stakers can
        * claim their reward. This used to limit the i/o cost for the nominator payout.
        **/
@@ -488,7 +496,7 @@ declare module '@polkadot/api-base/types/consts' {
       sessionsPerEra: u32 & AugmentedConst<ApiType>;
       /**
        * Number of eras that slashes are deferred by, after computation.
-       * 
+       *
        * This should be less than the bonding duration. Set to 0 if slashes
        * should be applied immediately, without opportunity for intervention.
        **/
@@ -517,7 +525,7 @@ declare module '@polkadot/api-base/types/consts' {
       dbWeight: FrameSupportWeightsRuntimeDbWeight & AugmentedConst<ApiType>;
       /**
        * The designated SS85 prefix of this chain.
-       * 
+       *
        * This replaces the "ss58Format" property declared in the chain spec. Reason is
        * that the runtime should know about the prefix in order to make use of it as
        * an identifier of the chain.
@@ -565,21 +573,21 @@ declare module '@polkadot/api-base/types/consts' {
       /**
        * A fee mulitplier for `Operational` extrinsics to compute "virtual tip" to boost their
        * `priority`
-       * 
+       *
        * This value is multipled by the `final_fee` to obtain a "virtual tip" that is later
        * added to a tip component in regular `priority` calculations.
        * It means that a `Normal` transaction can front-run a similarly-sized `Operational`
        * extrinsic (with no tip), by including a tip value greater than the virtual tip.
-       * 
+       *
        * ```rust,ignore
        * // For `Normal`
        * let priority = priority_calc(tip);
-       * 
+       *
        * // For `Operational`
        * let virtual_tip = (inclusion_fee + tip) * OperationalFeeMultiplier;
        * let priority = priority_calc(tip + virtual_tip);
        * ```
-       * 
+       *
        * Note that since we use `final_fee` the multiplier applies also to the regular `tip`
        * sent with the transaction. So, not only does the transaction get a priority bump based
        * on the `inclusion_fee`, but we also amplify the impact of tips applied to `Operational`
@@ -606,7 +614,7 @@ declare module '@polkadot/api-base/types/consts' {
       burn: Permill & AugmentedConst<ApiType>;
       /**
        * The maximum number of approvals that can wait in the spending queue.
-       * 
+       *
        * NOTE: This parameter is also used within the Bounties Pallet extension if enabled.
        **/
       maxApprovals: u32 & AugmentedConst<ApiType>;

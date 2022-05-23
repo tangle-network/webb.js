@@ -1,11 +1,7 @@
 import { execSync, spawn, SpawnOptionsWithoutStdio } from 'child_process';
 import { sleep } from './index.js';
 
-function spawnWithLogger(
-  command: string,
-  options?: SpawnOptionsWithoutStdio,
-  allLogs = false
-) {
+function spawnWithLogger(command: string, options?: SpawnOptionsWithoutStdio, allLogs = false) {
   const process = spawn(command, options);
 
   if (allLogs) {
@@ -26,10 +22,7 @@ function spawnWithLogger(
 }
 export type KillTask = () => Promise<void>;
 export function startWebbNode(): KillTask {
-  execSync(
-    'docker pull ghcr.io/webb-tools/protocol-substrate-standalone-node:edge',
-    { stdio: 'inherit' }
-  );
+  execSync('docker pull ghcr.io/webb-tools/protocol-substrate-standalone-node:edge', { stdio: 'inherit' });
   const DOCKER_NETWORK_NAME = 'webb-network';
   try {
     execSync(`docker network create -d bridge ${DOCKER_NETWORK_NAME}`);

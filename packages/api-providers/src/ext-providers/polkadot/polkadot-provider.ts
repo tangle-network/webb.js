@@ -74,11 +74,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
    * @param endPoints - URLs for the substrate node
    * @param onError - Error handler for stage of instantiating a provider
    **/
-  static async getApiPromise (
-    appName: string,
-    endPoints: string[],
-    onError: ApiInitHandler['onError']
-  ) {
+  static async getApiPromise (appName: string, endPoints: string[], onError: ApiInitHandler['onError']) {
     const [endPoint, ...allEndPoints] = endPoints;
     // eslint-disable-next-line no-async-promise-executor
     const wsProvider = await new Promise<WsProvider>(async (resolve, reject) => {
@@ -189,9 +185,11 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
       }
     });
 
-    const apiPromise = await ApiPromise.create(options({
-      provider: wsProvider
-    }));
+    const apiPromise = await ApiPromise.create(
+      options({
+        provider: wsProvider
+      })
+    );
 
     return apiPromise;
   }
@@ -217,7 +215,7 @@ export class PolkadotProvider extends EventBus<ExtensionProviderEvents> {
 
     // Check for extensions length to insure polkadot extension is installed
     if (extensions.length === 0) {
-      logger.warn('Polkadot extension isn\'t installed');
+      logger.warn("Polkadot extension isn't installed");
       throw WebbError.from(WebbErrorCodes.PolkaDotExtensionNotInstalled);
     }
 

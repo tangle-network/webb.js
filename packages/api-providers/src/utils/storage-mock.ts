@@ -34,7 +34,9 @@ export const anchorDeploymentBlock: Record<number, Record<string, number>> = {
 };
 
 export const getAnchorDeploymentBlockNumber = (chainIdType: number, contractAddress: string): number | undefined => {
-  return Object.entries(anchorDeploymentBlock[chainIdType]).find((entry) => entry[0] === contractAddress.toLowerCase())?.[1];
+  return Object.entries(anchorDeploymentBlock[chainIdType]).find(
+    (entry) => entry[0] === contractAddress.toLowerCase()
+  )?.[1];
 };
 
 // Expects the chainIdType

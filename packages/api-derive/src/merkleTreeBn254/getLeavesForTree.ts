@@ -18,17 +18,19 @@ export function getLeavesForTree (
     // get an array of numbers from start to end.
     const arr = [...Array(end - start + 1).keys()].map((x) => x + start);
 
-    return api.query.merkleTreeBn254.leaves.multi([
-      // Generate arrays for the multi calls of [treeId, index]
-      ...arr.map((index) => {
-        return [treeId, index];
-      })
-    ]).pipe(
-      map((substrateLeafElement) => {
-        return substrateLeafElement.map((element) => {
-          return element.toU8a();
-        });
-      })
-    );
+    return api.query.merkleTreeBn254.leaves
+      .multi([
+        // Generate arrays for the multi calls of [treeId, index]
+        ...arr.map((index) => {
+          return [treeId, index];
+        })
+      ])
+      .pipe(
+        map((substrateLeafElement) => {
+          return substrateLeafElement.map((element) => {
+            return element.toU8a();
+          });
+        })
+      );
   });
 }

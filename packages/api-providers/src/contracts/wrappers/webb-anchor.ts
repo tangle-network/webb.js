@@ -33,11 +33,7 @@ export class AnchorContract {
   private _contract: FixedDepositAnchor;
   private readonly signer: Signer;
 
-  constructor (
-    private web3Provider: providers.Web3Provider,
-    address: string,
-    useProvider = false
-  ) {
+  constructor (private web3Provider: providers.Web3Provider, address: string, useProvider = false) {
     this.signer = this.web3Provider.getSigner();
     logger.info(`Init with address ${address} `);
     this._contract = FixedDepositAnchor__factory.connect(address, useProvider ? this.web3Provider : this.signer);

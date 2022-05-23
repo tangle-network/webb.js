@@ -1,6 +1,6 @@
-import {ApiPromise, WsProvider} from "@polkadot/api";
-import {KeyringPair} from "@polkadot/keyring/types";
-import {BigNumber} from "ethers";
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import { KeyringPair } from '@polkadot/keyring/types';
+import { BigNumber } from 'ethers';
 
 type MethodPath = {
   section: string;
@@ -11,20 +11,13 @@ export function currencyToUnitI128(currencyAmount: number) {
   let bn = BigNumber.from(currencyAmount);
   return bn.mul(1_000_000_000_000);
 }
-export function polkadotTx(
-  api: ApiPromise,
-  path: MethodPath,
-  params: any[],
-  signer: KeyringPair
-) {
+export function polkadotTx(api: ApiPromise, path: MethodPath, params: any[], signer: KeyringPair) {
   // @ts-ignore
   const tx = api.tx[path.section][path.method](...params);
   return new Promise<string>((resolve, reject) => {
     tx.signAndSend(signer, (result) => {
       const status = result.status;
-      const events = result.events.filter(
-        ({ event: { section } }) => section === 'system'
-      );
+      const events = result.events.filter(({ event: { section } }) => section === 'system');
       if (status.isInBlock || status.isFinalized) {
         for (const event of events) {
           const {
@@ -113,22 +106,14 @@ export async function transferBalance(
   }
 }
 
-
-export async function fetchRPCTreeLeaves(
-  api: ApiPromise,
-  treeId: string | number
-): Promise<Uint8Array[]> {
+export async function fetchRPCTreeLeaves(api: ApiPromise, treeId: string | number): Promise<Uint8Array[]> {
   let done = false;
   let from = 0;
   let to = 511;
   const leaves: Uint8Array[] = [];
 
   while (done === false) {
-    const treeLeaves: any[] = await (api.rpc as any).mt.getLeaves(
-      treeId,
-      from,
-      to
-    );
+    const treeLeaves: any[] = await (api.rpc as any).mt.getLeaves(treeId, from, to);
     if (treeLeaves.length === 0) {
       done = true;
       break;

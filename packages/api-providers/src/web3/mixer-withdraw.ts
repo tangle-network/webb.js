@@ -53,10 +53,9 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
 
     // Fetch the leaves that we already have in storage
     const bridgeStorageStorage = await bridgeStorageFactory(Number(depositNote.sourceChainId));
-    const storedContractInfo: BridgeStorage[0] = (await bridgeStorageStorage.get(
-      contractAddress.toLowerCase()
-    )) || {
-      lastQueriedBlock: getAnchorDeploymentBlockNumber(Number(depositNote.sourceChainId), contractAddress.toLowerCase()) || 0,
+    const storedContractInfo: BridgeStorage[0] = (await bridgeStorageStorage.get(contractAddress.toLowerCase())) || {
+      lastQueriedBlock:
+        getAnchorDeploymentBlockNumber(Number(depositNote.sourceChainId), contractAddress.toLowerCase()) || 0,
       leaves: [] as string[]
     };
 
@@ -69,7 +68,10 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
       // fetch the new leaves (all leaves) from the relayer
     } else {
       // fetch the new leaves from on-chain
-      const depositLeaves = await contract.getDepositLeaves(storedContractInfo.lastQueriedBlock, await this.inner.getBlockNumber());
+      const depositLeaves = await contract.getDepositLeaves(
+        storedContractInfo.lastQueriedBlock,
+        await this.inner.getBlockNumber()
+      );
 
       allLeaves = [...storedContractInfo.leaves, ...depositLeaves.newLeaves];
     }
@@ -89,14 +91,25 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
     const circuitKey = await fetchFixedAnchorKeyForEdges(maxEdges);
 
     // This anchor wrapper from protocol-solidity is used for public inputs generation
-    const anchorWrapper = await Anchor.connect(contractAddress, {
-      wasm: Buffer.from(wasmBuf),
-      witnessCalculator,
-      zkey: circuitKey
-    }, this.inner.getEthersProvider().getSigner());
+    const anchorWrapper = await Anchor.connect(
+      contractAddress,
+      {
+        wasm: Buffer.from(wasmBuf),
+        witnessCalculator,
+        zkey: circuitKey
+      },
+      this.inner.getEthersProvider().getSigner()
+    );
 
     this.emit('stateChange', WithdrawState.GeneratingZk);
-    const withdrawSetup = await anchorWrapper.setupWithdraw(deposit, leafIndex, account.address, account.address, BigInt(0), 0);
+    const withdrawSetup = await anchorWrapper.setupWithdraw(
+      deposit,
+      leafIndex,
+      account.address,
+      account.address,
+      BigInt(0),
+      0
+    );
 
     // Check for cancelled here, abort if it was set.
     if (this.cancelToken.cancelled) {
@@ -117,11 +130,9 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
     this.emit('stateChange', WithdrawState.SendingTransaction);
 
     try {
-      const tx = await contract.inner.withdraw(
-        withdrawSetup.publicInputs,
-        withdrawSetup.extData,
-        { gasLimit: '0x5B8D80' }
-      );
+      const tx = await contract.inner.withdraw(withdrawSetup.publicInputs, withdrawSetup.extData, {
+        gasLimit: '0x5B8D80'
+      });
       const receipt = await tx.wait();
 
       txHash = receipt.transactionHash;

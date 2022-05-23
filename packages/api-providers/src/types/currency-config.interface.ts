@@ -10,7 +10,7 @@ import { ReactElement } from './abstracts.js';
 export enum CurrencyType {
   ERC20,
   NATIVE,
-  ORML
+  ORML,
 }
 
 // The CurrencyRole distinguishes how a currency may interact in the webb application
@@ -19,7 +19,7 @@ export enum CurrencyType {
 //   which can be modified from governance.
 export enum CurrencyRole {
   Wrappable,
-  Governable
+  Governable,
 }
 
 export interface CurrencyView {

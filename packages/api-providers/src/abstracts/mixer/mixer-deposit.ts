@@ -28,8 +28,10 @@ export type MixerSize = {
  * The underlying method should be implemented to  get a functioning mixerDeposit for a `WebbApiProvider`
  * @param  T - the provider `WebbApiProvider`
  */
-export abstract class MixerDeposit<T extends WebbApiProvider<any> = WebbApiProvider<any>,
-  K extends DepositPayload = DepositPayload<any>> extends EventBus<MixerDepositEvents> {
+export abstract class MixerDeposit<
+  T extends WebbApiProvider<any> = WebbApiProvider<any>,
+  K extends DepositPayload = DepositPayload<any>
+> extends EventBus<MixerDepositEvents> {
   constructor (protected inner: T) {
     super();
   }

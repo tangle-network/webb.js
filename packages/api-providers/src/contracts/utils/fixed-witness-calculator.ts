@@ -36,12 +36,10 @@ export async function builder (code, options) {
       showSharedRWMemory: function () {
         printSharedRWMemory();
       }
-
     }
   });
 
-  const sanityCheck =
-      options;
+  const sanityCheck = options;
   //        options &&
   //        (
   //            options.sanityCheck ||
@@ -106,7 +104,7 @@ class WitnessCalculator {
 
   async _doCalculateWitness (input, sanityCheck) {
     // input is assumed to be a map from signals to arrays of bigints
-    this.instance.exports.init((this.sanityCheck || sanityCheck) ? 1 : 0);
+    this.instance.exports.init(this.sanityCheck || sanityCheck ? 1 : 0);
     const keys = Object.keys(input);
 
     keys.forEach((k) => {
@@ -265,7 +263,8 @@ function toArray32 (s, size) {
   return res;
 }
 
-function fromArray32 (arr) { // returns a BigInt
+function fromArray32 (arr) {
+  // returns a BigInt
   let res = BigInt(0);
   const radix = BigInt(0x100000000);
 
@@ -300,7 +299,7 @@ function fnvHash (str) {
 
   for (let i = 0; i < str.length; i++) {
     hash ^= BigInt(str[i].charCodeAt());
-    hash *= BigInt(0x100000001B3);
+    hash *= BigInt(0x100000001b3);
     hash %= uint64_max;
   }
 

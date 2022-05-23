@@ -351,6 +351,27 @@ pub enum OpStatusCode {
 	InvalidUTXOIndex = 41,
 	/// Unsupported Backend
 	UnsupportedBackend = 42,
+	/// Public amount not set
+	PublicAmountNotSet = 43,
+	/// VAnchor Proof Chain Id not set
+	VAnchorProofChainId = 44,
+	/// VAnchor proof not set
+	VAnchorNotesNotSet = 45,
+	/// VAnchor proof indices
+	VAnchorProofIndices = 46,
+	/// VAnchor proof leaves map not defined
+	VAnchorProofLeavesMap = 47,
+	/// Generic error while trying to instantiate proof input field
+	ProofInputFieldInstantiationError = 48,
+	/// Invalid filed for the proof input protocol
+	ProofInputFieldInstantiationProtocolInvalid = 49,
+	InvalidNullifer = 50,
+	InvalidRoots = 51,
+	InvalidChainId = 52,
+	InvalidIndices = 53,
+	InvalidPublicAmount = 54,
+	InvalidOutputUtxoConfig = 55,
+	InvalidExtDataHash = 56,
 }
 
 #[wasm_bindgen]
@@ -377,6 +398,10 @@ extern "C" {
 
 	#[wasm_bindgen(typescript_type = "Leaves")]
 	pub type Leaves;
+
+	#[wasm_bindgen(typescript_type = "Indices")]
+	pub type Indices;
+
 }
 
 #[wasm_bindgen(typescript_custom_section)]
@@ -384,6 +409,9 @@ const NOTE_PROTOCOL: &str = "type NoteProtocol = 'mixer'|'anchor'|'vanchor' ";
 
 #[wasm_bindgen(typescript_custom_section)]
 const LEAVES: &str = "type Leaves = Array<Uint8Array>;";
+
+#[wasm_bindgen(typescript_custom_section)]
+const INDICES: &str = "type Indices = Array<number>;";
 
 #[wasm_bindgen(typescript_custom_section)]
 const HF: &str = "type HashFunction = 'Poseidon'|'MiMCTornado'";
@@ -464,6 +492,22 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::InvalidProof => "Proof verification failed",
 			OpStatusCode::InvalidUTXOIndex => "Invalid UTXO Index value",
 			OpStatusCode::UnsupportedBackend => "Unsupported backend",
+			OpStatusCode::PublicAmountNotSet => "VAnchor proof input requires public amount field",
+			OpStatusCode::VAnchorProofChainId => "VAnchor proof input requires chain id",
+			OpStatusCode::VAnchorNotesNotSet => "VAnchor proof input requires list of notes",
+			OpStatusCode::VAnchorProofIndices => "VAnchor proof input require list of indices",
+			OpStatusCode::VAnchorProofLeavesMap => "VAnchor proof input require leaves  map",
+			OpStatusCode::ProofInputFieldInstantiationError => "The proof input field installation failed",
+			OpStatusCode::ProofInputFieldInstantiationProtocolInvalid => {
+				"The proof input field installation failed wrong protocol or field"
+			}
+			OpStatusCode::InvalidNullifer => "Invalid nullifer value",
+			OpStatusCode::InvalidRoots => "Invalid roots value",
+			OpStatusCode::InvalidChainId => "Invalid chain id",
+			OpStatusCode::InvalidIndices => "Invalid indices value",
+			OpStatusCode::InvalidPublicAmount => "Invalid public amount",
+			OpStatusCode::InvalidOutputUtxoConfig => "Invalid output UTXO config",
+			OpStatusCode::InvalidExtDataHash => "Invalid external data hash",
 		}
 		.to_string()
 	}

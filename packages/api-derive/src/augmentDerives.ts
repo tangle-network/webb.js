@@ -9,9 +9,9 @@ declare module '@polkadot/api-derive/derive' {
   // https://github.com/polkadot-js/api/pull/4578
   export interface ExactDerive {
     merkleTreeBn254: {
-      getLeafCountForTree: ReturnType<() => (treeId: number) => Observable<number>>,
+      getLeafCountForTree: ReturnType<() => (treeId: number) => Observable<number>>;
       // api for pagination support
-      getLeavesForTree: ReturnType<() => (treeId: number, start: number, end: number) => Observable<Uint8Array[]>>,
-    }
+      getLeavesForTree: ReturnType<() => (treeId: number, start: number, end: number) => Observable<Uint8Array[]>>;
+    };
   }
 }

@@ -32,7 +32,10 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     return this.inner.config;
   }
 
-  async mapRelayerIntoActive (relayer: OptionalRelayer, internalChainId: InternalChainId): Promise<OptionalActiveRelayer> {
+  async mapRelayerIntoActive (
+    relayer: OptionalRelayer,
+    internalChainId: InternalChainId
+  ): Promise<OptionalActiveRelayer> {
     if (!relayer) {
       return null;
     }
@@ -152,10 +155,9 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
     // Fetch the leaves that we already have in storage
     const bridgeStorageStorage = await bridgeStorageFactory(Number(note.sourceChainId));
-    const storedContractInfo: BridgeStorage[0] = (await bridgeStorageStorage.get(
-      contractAddress.toLowerCase()
-    )) || {
-      lastQueriedBlock: getAnchorDeploymentBlockNumber(computeChainIdType(ChainType.EVM, activeChain), contractAddress) || 0,
+    const storedContractInfo: BridgeStorage[0] = (await bridgeStorageStorage.get(contractAddress.toLowerCase())) || {
+      lastQueriedBlock:
+        getAnchorDeploymentBlockNumber(computeChainIdType(ChainType.EVM, activeChain), contractAddress) || 0,
       leaves: [] as string[]
     };
 
@@ -168,7 +170,10 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       // fetch the new leaves (all leaves) from the relayer
     } else {
       // fetch the new leaves from on-chain
-      const depositLeaves = await contract.getDepositLeaves(storedContractInfo.lastQueriedBlock, await this.inner.getBlockNumber());
+      const depositLeaves = await contract.getDepositLeaves(
+        storedContractInfo.lastQueriedBlock,
+        await this.inner.getBlockNumber()
+      );
 
       allLeaves = [...storedContractInfo.leaves, ...depositLeaves.newLeaves];
     }
@@ -189,11 +194,15 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     const circuitKey = await fetchFixedAnchorKeyForEdges(maxEdges);
 
     // This anchor wrapper from protocol-solidity is used for public inputs generation
-    const anchorWrapper = await Anchor.connect(contractAddress, {
-      wasm: Buffer.from(wasmBuf),
-      witnessCalculator,
-      zkey: circuitKey
-    }, this.inner.getEthersProvider().getSigner());
+    const anchorWrapper = await Anchor.connect(
+      contractAddress,
+      {
+        wasm: Buffer.from(wasmBuf),
+        witnessCalculator,
+        zkey: circuitKey
+      },
+      this.inner.getEthersProvider().getSigner()
+    );
 
     // Give the anchor wrapper the fetched leaves
     const successfulSet = await anchorWrapper.setWithLeaves(allLeaves);
@@ -220,7 +229,14 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     }
 
     this.emit('stateChange', WithdrawState.GeneratingZk);
-    const withdrawSetup = await anchorWrapper.setupWithdraw(deposit, leafIndex, account.address, account.address, BigInt(0), 0);
+    const withdrawSetup = await anchorWrapper.setupWithdraw(
+      deposit,
+      leafIndex,
+      account.address,
+      account.address,
+      BigInt(0),
+      0
+    );
     let txHash = '';
 
     this.emit('stateChange', WithdrawState.SendingTransaction);
@@ -234,11 +250,9 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     });
 
     try {
-      const tx = await anchorWrapper.contract.withdraw(
-        withdrawSetup.publicInputs,
-        withdrawSetup.extData,
-        { gasLimit: '0x5B8D80' }
-      );
+      const tx = await anchorWrapper.contract.withdraw(withdrawSetup.publicInputs, withdrawSetup.extData, {
+        gasLimit: '0x5B8D80'
+      });
       const receipt = await tx.wait();
 
       txHash = receipt.transactionHash;
@@ -362,8 +376,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       // check if we already cached some values.
       const storedContractInfo: BridgeStorage[0] = (await sourceBridgeStorage.get(
         sourceContractAddress.toLowerCase()
-      )) ||
-      {
+      )) || {
         lastQueriedBlock: getAnchorDeploymentBlockNumber(Number(note.sourceChainId), sourceContractAddress) || 0,
         leaves: [] as string[]
       };
@@ -393,11 +406,15 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     const circuitKey = await fetchFixedAnchorKeyForEdges(maxEdges);
 
     // This anchor wrapper from protocol-solidity is used for public inputs generation
-    const anchorWrapper = await Anchor.connect(destAnchor.inner.address, {
-      wasm: Buffer.from(wasmBuf),
-      witnessCalculator,
-      zkey: circuitKey
-    }, this.inner.getEthersProvider().getSigner());
+    const anchorWrapper = await Anchor.connect(
+      destAnchor.inner.address,
+      {
+        wasm: Buffer.from(wasmBuf),
+        witnessCalculator,
+        zkey: circuitKey
+      },
+      this.inner.getEthersProvider().getSigner()
+    );
 
     // Check for cancelled here, abort if it was set.
     if (this.cancelToken.cancelled) {
@@ -423,7 +440,14 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
       // setup the cross chain withdraw with the generated merkle proof
       this.emit('stateChange', WithdrawState.GeneratingZk);
-      const withdrawSetup = await anchorWrapper.setupBridgedWithdraw(sourceDeposit, merkleProof, recipient, activeRelayer.beneficiary, BigInt(0), 0);
+      const withdrawSetup = await anchorWrapper.setupBridgedWithdraw(
+        sourceDeposit,
+        merkleProof,
+        recipient,
+        activeRelayer.beneficiary,
+        BigInt(0),
+        0
+      );
 
       this.emit('stateChange', WithdrawState.SendingTransaction);
       const relayedWithdraw = await activeRelayer.initWithdraw('anchor');
@@ -505,7 +529,14 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
       try {
         // setup the cross chain withdraw with the generated merkle proof
         this.emit('stateChange', WithdrawState.GeneratingZk);
-        const withdrawSetup = await anchorWrapper.setupBridgedWithdraw(sourceDeposit, merkleProof, recipient, account.address, BigInt(0), 0);
+        const withdrawSetup = await anchorWrapper.setupBridgedWithdraw(
+          sourceDeposit,
+          merkleProof,
+          recipient,
+          account.address,
+          BigInt(0),
+          0
+        );
 
         this.emit('stateChange', WithdrawState.SendingTransaction);
         console.log(withdrawSetup);
