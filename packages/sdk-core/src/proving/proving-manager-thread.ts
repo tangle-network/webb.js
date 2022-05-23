@@ -82,8 +82,8 @@ export class ProvingManagerWrapper {
 
         switch (key) {
           case 'proof': {
-            const [proto, input] = message.proof!;
-            const proof = await this.proof(proto, input);
+            const [protocol, input] = message.proof!;
+            const proof = await this.proof(protocol, input);
 
             (self as unknown as Worker).postMessage({
               data: proof,
