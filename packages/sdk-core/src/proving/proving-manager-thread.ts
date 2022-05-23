@@ -40,10 +40,27 @@ type PMEvents<T extends NoteProtocol = 'mixer'> = {
 };
 
 /**
+ * Proving Manager setup input for anchor API proving manager over sdk-core
+ * @param note - Serialized note representation
+ * @param relayer - Relayer account id converted to hex string (Without a `0x` prefix)
+ * @param recipient - Recipient account id converted to hex string (Without a `0x` prefix)
+ * @param leaves - Leaves for generating the merkle path
+ * @param leafIndex - The index of  the Leaf commitment
+ * @param fee - The fee for the transaction
+ * @param refund - The refund for the transaction
+ * @param provingKey - Proving key bytes to pass in to the Zero-knowledge proof generation
  * @param roots - Roots for anchor API
  * @param refreshCommitment - Refresh commitment in hex representation ( without prefix `0x` ) Required for anchor, ignored for the mixer
  * */
-export type AnchorPMSetupInput = MixerPMSetupInput & {
+export type AnchorPMSetupInput = {
+  note: string;
+  relayer: string;
+  recipient: string;
+  leaves: Leaves;
+  leafIndex: number;
+  fee: number;
+  refund: number;
+  provingKey: Uint8Array;
   roots: Leaves;
   refreshCommitment: string;
 }
