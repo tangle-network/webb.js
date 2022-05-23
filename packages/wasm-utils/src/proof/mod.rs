@@ -521,7 +521,10 @@ impl VAnchorProofInput {
 			}
 		});
 		if &invalid_utxo_chain_id_indices.len() > &0 || &invalid_utxo_dublicate_nullifiers.len() > &0 {
-			let message  = format!("Invalid UTXOs: utxo indices has invalid chain_id {:?} , non-default utxos with an  duplicate index {:?}" , &invalid_utxo_chain_id_indices , &invalid_utxo_dublicate_nullifiers);
+			let message = format!(
+				"Invalid UTXOs: utxo indices has invalid chain_id {:?} ,non-default utxos with an duplicate index {:?}",
+				&invalid_utxo_chain_id_indices, &invalid_utxo_dublicate_nullifiers
+			);
 			let mut op: OperationError =
 				OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message);
 			op.data = Some(format!(

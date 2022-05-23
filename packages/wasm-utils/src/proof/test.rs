@@ -146,7 +146,7 @@ mod test {
 	}
 
 	#[wasm_bindgen_test]
-	fn generate_vanchor_proof_input() {
+	fn should_generate_vanchor_proof_input() {
 		let vanchor_note_str: String = generate_vanchor_note(10, 0, 0, Some(0)).serialize().into();
 		let protocol = JsValue::from("vanchor").into();
 		let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
@@ -222,6 +222,343 @@ mod test {
 		assert_eq!(hex::encode(vanchor_proof_input_payload.pk), "0000");
 	}
 
+	#[wasm_bindgen_test]
+	fn should_fail_to_generate_vanchor_proof_input_with_invalid_amounts() {
+		let vanchor_note_str: String = generate_vanchor_note(15, 0, 0, Some(0)).serialize().into();
+		let protocol = JsValue::from("vanchor").into();
+		let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
+
+		let note = JsNote::deserialize(&vanchor_note_str).unwrap();
+		let leaf = note.get_leaf_commitment().unwrap();
+		let leaves: Array = vec![leaf].into_iter().collect();
+
+		let mut tree_leaves = LeavesMapInput::new();
+		tree_leaves
+			.set_chain_leaves(0, Leaves::from(JsValue::from(leaves.clone())))
+			.unwrap();
+
+		let indices: Array = vec![JsValue::from("0"), JsValue::from("0")].into_iter().collect();
+		let roots: Array = vec![
+			Uint8Array::from([0u8; 32].to_vec().as_slice()),
+			Uint8Array::from([0u8; 32].to_vec().as_slice()),
+		]
+		.into_iter()
+		.collect();
+		proof_input_builder.set_leaves_map(tree_leaves).unwrap();
+		proof_input_builder.set_metadata_from_note(&note).unwrap();
+
+		proof_input_builder
+			.set_indices(Indices::from(JsValue::from(indices)))
+			.unwrap();
+		proof_input_builder
+			.set_roots(Leaves::from(JsValue::from(roots)))
+			.unwrap();
+
+		proof_input_builder.set_pk(JsString::from("0000")).unwrap();
+		proof_input_builder.public_amount(JsString::from("10")).unwrap();
+		proof_input_builder.chain_id(JsString::from("0")).unwrap();
+		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
+		proof_input_builder
+			.set_vanchor_output_config(
+				OutputUtxoConfig {
+					index: None,
+					amount: 10,
+					chain_id: 0,
+				},
+				OutputUtxoConfig {
+					index: None,
+					amount: 10,
+					chain_id: 3,
+				},
+			)
+			.unwrap();
+		let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
+		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
+		// `note::JsNote`
+		proof_input_builder.set_notes(notes).unwrap();
+		let proof_builder = proof_input_builder.build();
+		let mut message = "".to_string();
+		if let Err(e) = proof_builder {
+			message = e.error_message
+		}
+		let expected_error_message = "Output amount and input amount  don't match input(25) != output(20)".to_string();
+		assert_eq!(message, expected_error_message)
+	}
+
+	#[wasm_bindgen_test]
+	fn should_fail_to_generate_vanchor_proof_input_with_inconsistent_notes_chain_id() {
+		let note = generate_vanchor_note(15, 0, 0, Some(0));
+		let note2 = generate_vanchor_note(15, 1, 1, Some(1));
+		let protocol = JsValue::from("vanchor").into();
+		let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
+
+		let leaf = note.get_leaf_commitment().unwrap();
+		let leaf2 = note2.get_leaf_commitment().unwrap();
+		let leaves: Array = vec![leaf, leaf2].into_iter().collect();
+
+		let mut tree_leaves = LeavesMapInput::new();
+		tree_leaves
+			.set_chain_leaves(0, Leaves::from(JsValue::from(leaves.clone())))
+			.unwrap();
+
+		let indices: Array = vec![JsValue::from("0"), JsValue::from("1")].into_iter().collect();
+		let roots: Array = vec![
+			Uint8Array::from([0u8; 32].to_vec().as_slice()),
+			Uint8Array::from([0u8; 32].to_vec().as_slice()),
+		]
+		.into_iter()
+		.collect();
+		proof_input_builder.set_leaves_map(tree_leaves).unwrap();
+		proof_input_builder.set_metadata_from_note(&note).unwrap();
+
+		proof_input_builder
+			.set_indices(Indices::from(JsValue::from(indices)))
+			.unwrap();
+		proof_input_builder
+			.set_roots(Leaves::from(JsValue::from(roots)))
+			.unwrap();
+
+		proof_input_builder.set_pk(JsString::from("0000")).unwrap();
+		proof_input_builder.public_amount(JsString::from("10")).unwrap();
+		proof_input_builder.chain_id(JsString::from("0")).unwrap();
+		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
+		proof_input_builder
+			.set_vanchor_output_config(
+				OutputUtxoConfig {
+					index: None,
+					amount: 20,
+					chain_id: 0,
+				},
+				OutputUtxoConfig {
+					index: None,
+					amount: 20,
+					chain_id: 0,
+				},
+			)
+			.unwrap();
+		let notes: Array = vec![JsValue::from(note.clone()), JsValue::from(note2.clone())]
+			.into_iter()
+			.collect();
+		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
+		// `note::JsNote`
+		proof_input_builder.set_notes(notes).unwrap();
+		let proof_builder = proof_input_builder.build();
+		let mut message = "".to_string();
+		if let Err(e) = proof_builder {
+			message = e.error_message
+		}
+		let expected_error_message =
+			"Invalid UTXOs: utxo indices has invalid chain_id [1] ,non-default utxos with an duplicate index []"
+				.to_string();
+		assert_eq!(message, expected_error_message)
+	}
+
+	#[wasm_bindgen_test]
+	fn should_fail_to_generate_vanchor_proof_input_with_inconsistent_notes_indices() {
+		let note = generate_vanchor_note(15, 0, 0, Some(0));
+		let note2 = generate_vanchor_note(15, 1, 1, Some(0));
+		let protocol = JsValue::from("vanchor").into();
+		let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
+
+		let leaf = note.get_leaf_commitment().unwrap();
+		let leaf2 = note2.get_leaf_commitment().unwrap();
+		let leaves: Array = vec![leaf, leaf2].into_iter().collect();
+
+		let mut tree_leaves = LeavesMapInput::new();
+		tree_leaves
+			.set_chain_leaves(0, Leaves::from(JsValue::from(leaves.clone())))
+			.unwrap();
+
+		let indices: Array = vec![JsValue::from("0"), JsValue::from("1")].into_iter().collect();
+		let roots: Array = vec![
+			Uint8Array::from([0u8; 32].to_vec().as_slice()),
+			Uint8Array::from([0u8; 32].to_vec().as_slice()),
+		]
+		.into_iter()
+		.collect();
+		proof_input_builder.set_leaves_map(tree_leaves).unwrap();
+		proof_input_builder.set_metadata_from_note(&note).unwrap();
+
+		proof_input_builder
+			.set_indices(Indices::from(JsValue::from(indices)))
+			.unwrap();
+		proof_input_builder
+			.set_roots(Leaves::from(JsValue::from(roots)))
+			.unwrap();
+
+		proof_input_builder.set_pk(JsString::from("0000")).unwrap();
+		proof_input_builder.public_amount(JsString::from("10")).unwrap();
+		proof_input_builder.chain_id(JsString::from("0")).unwrap();
+		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
+		proof_input_builder
+			.set_vanchor_output_config(
+				OutputUtxoConfig {
+					index: None,
+					amount: 20,
+					chain_id: 0,
+				},
+				OutputUtxoConfig {
+					index: None,
+					amount: 20,
+					chain_id: 0,
+				},
+			)
+			.unwrap();
+		let notes: Array = vec![JsValue::from(note.clone()), JsValue::from(note2.clone())]
+			.into_iter()
+			.collect();
+		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
+		// `note::JsNote`
+		proof_input_builder.set_notes(notes).unwrap();
+		let proof_builder = proof_input_builder.build();
+		let mut message = "".to_string();
+		if let Err(e) = proof_builder {
+			message = e.error_message
+		}
+		let expected_error_message =
+			"Invalid UTXOs: utxo indices has invalid chain_id [1] ,non-default utxos with an duplicate index []"
+				.to_string();
+		assert_eq!(message, expected_error_message)
+	}
+
+	#[wasm_bindgen_test]
+	fn should_fail_to_proof_with_1_input() {
+		let note = generate_vanchor_note(30, 0, 0, Some(0));
+		let protocol = JsValue::from("vanchor").into();
+		let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
+
+		let leaf = note.get_leaf_commitment().unwrap();
+		let leaves: Array = vec![leaf].into_iter().collect();
+
+		let mut tree_leaves = LeavesMapInput::new();
+		tree_leaves
+			.set_chain_leaves(0, Leaves::from(JsValue::from(leaves.clone())))
+			.unwrap();
+
+		let indices: Array = vec![JsValue::from("0"), JsValue::from("0")].into_iter().collect();
+		let roots: Array = vec![
+			Uint8Array::from([0u8; 32].to_vec().as_slice()),
+			Uint8Array::from([0u8; 32].to_vec().as_slice()),
+		]
+		.into_iter()
+		.collect();
+		proof_input_builder.set_leaves_map(tree_leaves).unwrap();
+		proof_input_builder.set_metadata_from_note(&note).unwrap();
+
+		proof_input_builder
+			.set_indices(Indices::from(JsValue::from(indices)))
+			.unwrap();
+		proof_input_builder
+			.set_roots(Leaves::from(JsValue::from(roots)))
+			.unwrap();
+
+		proof_input_builder.set_pk(JsString::from("0000")).unwrap();
+		proof_input_builder.public_amount(JsString::from("10")).unwrap();
+		proof_input_builder.chain_id(JsString::from("0")).unwrap();
+		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
+		proof_input_builder
+			.set_vanchor_output_config(
+				OutputUtxoConfig {
+					index: None,
+					amount: 20,
+					chain_id: 0,
+				},
+				OutputUtxoConfig {
+					index: None,
+					amount: 20,
+					chain_id: 0,
+				},
+			)
+			.unwrap();
+		let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
+		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
+		// `note::JsNote`
+		proof_input_builder.set_notes(notes).unwrap();
+		let proof_input = proof_input_builder.build_js().unwrap();
+		let proof = generate_proof_js(proof_input);
+		let mut message = "".to_string();
+		if let Err(e) = proof {
+			message = e.as_string().unwrap();
+		}
+		let expected_error_message =
+			"Input  set has 1 UTXOs while the supported set length should be one of [2, 16]".to_string();
+		assert_eq!(message, expected_error_message)
+	}
+
+	#[wasm_bindgen_test]
+	fn should_fail_to_proof_with_3_inputs() {
+		let note = generate_vanchor_note(10, 0, 0, Some(0));
+		let note2 = generate_vanchor_note(10, 0, 0, Some(0));
+		let note3 = generate_vanchor_note(10, 0, 0, Some(0));
+		let protocol = JsValue::from("vanchor").into();
+		let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
+
+		let leaf = note.get_leaf_commitment().unwrap();
+		let leaf2 = note2.get_leaf_commitment().unwrap();
+		let leaf3 = note2.get_leaf_commitment().unwrap();
+		let leaves: Array = vec![leaf, leaf2, leaf3].into_iter().collect();
+
+		let mut tree_leaves = LeavesMapInput::new();
+		tree_leaves
+			.set_chain_leaves(0, Leaves::from(JsValue::from(leaves.clone())))
+			.unwrap();
+
+		let indices: Array = vec![JsValue::from("0"), JsValue::from("1")].into_iter().collect();
+		let roots: Array = vec![
+			Uint8Array::from([0u8; 32].to_vec().as_slice()),
+			Uint8Array::from([0u8; 32].to_vec().as_slice()),
+		]
+		.into_iter()
+		.collect();
+		proof_input_builder.set_leaves_map(tree_leaves).unwrap();
+		proof_input_builder.set_metadata_from_note(&note).unwrap();
+
+		proof_input_builder
+			.set_indices(Indices::from(JsValue::from(indices)))
+			.unwrap();
+		proof_input_builder
+			.set_roots(Leaves::from(JsValue::from(roots)))
+			.unwrap();
+
+		proof_input_builder.set_pk(JsString::from("0000")).unwrap();
+		proof_input_builder.public_amount(JsString::from("10")).unwrap();
+		proof_input_builder.chain_id(JsString::from("0")).unwrap();
+		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
+		proof_input_builder
+			.set_vanchor_output_config(
+				OutputUtxoConfig {
+					index: None,
+					amount: 20,
+					chain_id: 0,
+				},
+				OutputUtxoConfig {
+					index: None,
+					amount: 20,
+					chain_id: 0,
+				},
+			)
+			.unwrap();
+		let notes: Array = vec![
+			JsValue::from(note.clone()),
+			JsValue::from(note2.clone()),
+			JsValue::from(note3.clone()),
+		]
+		.into_iter()
+		.collect();
+		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
+		// `note::JsNote`
+		proof_input_builder.set_notes(notes).unwrap();
+		let proof_builder = proof_input_builder.build_js().unwrap();
+		let proof = generate_proof_js(proof_builder);
+		let mut message = "".to_string();
+		if let Err(e) = proof {
+			message = e.as_string().unwrap();
+		}
+		let expected_error_message =
+			"Code 24, message Input set has 3 UTXOs while the supported set length should be one of [2, 16], data {}"
+				.to_string();
+		assert_eq!(message, expected_error_message)
+	}
 	#[wasm_bindgen_test]
 	fn generate_vanchor_proof() {
 		let VAnchorTestSetup {

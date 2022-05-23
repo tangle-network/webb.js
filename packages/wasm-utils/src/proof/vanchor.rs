@@ -74,7 +74,7 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		secret
 	} else {
 		let message = format!(
-			"Input  set has {} UTXOs while the supported set length should be one of {:?}",
+			"Input set has {} UTXOs while the supported set length should be one of {:?}",
 			&secret.len(),
 			&SUPPORTED_INPUT_COUNT,
 		);
