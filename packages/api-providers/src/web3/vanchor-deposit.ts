@@ -87,8 +87,6 @@ export class Web3VAnchorDeposit extends VAnchorDeposit<WebbWeb3Provider, Deposit
       width: '4'
     };
 
-    console.log(noteInput.secrets);
-
     const note = await Note.generateNote(noteInput);
 
     return {

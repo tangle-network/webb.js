@@ -62,12 +62,10 @@ export class VAnchorContract {
     if (!this.wrapper) {
       const maxEdges = await this._contract.maxEdges();
 
-      console.log('deposit: fetching small fixtures');
       const smallKey = await fetchVariableAnchorKeyForEdges(maxEdges, true);
       const smallWasm = await fetchVariableAnchorWasmForEdges(maxEdges, true);
       const smallWitnessCalc = await witnessCalculatorFile.builder(smallWasm, {});
 
-      console.log('deposit: fetching large fixtures');
       const largeKey = await fetchVariableAnchorKeyForEdges(maxEdges, false);
       const largeWasm = await fetchVariableAnchorWasmForEdges(maxEdges, false);
       const largeWitnessCalc = await witnessCalculatorFile.builder(largeWasm, {});
@@ -102,9 +100,6 @@ export class VAnchorContract {
     const tokenInstance = await this.getWebbToken();
     const tokenAllowance = await tokenInstance.allowance(userAddress, this._contract.address);
 
-    logger.log('tokenAllowance', tokenAllowance);
-    logger.log('depositAmount', depositAmount);
-
     if (tokenAllowance < depositAmount) {
       return true;
     }
@@ -133,8 +128,6 @@ export class VAnchorContract {
     const userAddress = await this.signer.getAddress();
     let tokenBalance: BigNumber;
 
-    console.log('depositAmount in hasEnoughBalance: ', depositAmount);
-
     // If a token address was supplied, the user is querying for enough balance of a wrappableToken
     if (tokenAddress) {
       // query for native balance
@@ -144,19 +137,15 @@ export class VAnchorContract {
         const tokenInstance = ERC20Factory.connect(tokenAddress, this.signer);
 
         tokenBalance = await tokenInstance.balanceOf(userAddress);
-        console.log('tokenBalance for the wrappableToken: ', tokenBalance);
       }
     } else {
       // Querying for balance of the webbToken
       const tokenInstance = await this.getWebbToken();
 
       tokenBalance = await tokenInstance.balanceOf(userAddress);
-      console.log('tokenBalance for the webbToken: ', tokenBalance);
     }
 
     if (tokenBalance.lt(BigNumber.from(depositAmount))) {
-      console.log('return false for hasEnoughBalance');
-
       return false;
     }
 
@@ -286,7 +275,6 @@ export class VAnchorContract {
     const edgeIndex = await this._contract.edgeIndex(sourceChainId);
     const edge = await this._contract.edgeList(edgeIndex);
 
-    console.log('retrieved edge while generating merkle proof: ', edge);
     const latestSourceRoot = edge[1];
 
     const levels = await this._contract.levels();
@@ -295,10 +283,7 @@ export class VAnchorContract {
     if (tree) {
       const index = tree.getIndexByElement(sourceDeposit.commitment);
 
-      console.log('index of element: ', index);
       const path = tree.path(index);
-
-      console.log('path for proof: ', path);
 
       return {
         index: index,

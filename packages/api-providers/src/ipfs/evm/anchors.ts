@@ -110,8 +110,6 @@ export const fetchVariableAnchorKeyForEdges = async (maxEdges: number, small: bo
   let ipfsHash: string;
   let cachedURI: string;
 
-  console.log('fetching maxEdges: ', maxEdges);
-
   switch (maxEdges) {
     case 1:
       if (small) {
@@ -220,7 +218,7 @@ export const fetchVariableAnchorWasmForEdges = async (maxEdges: number, small: b
       return circuitKey;
     }
   } catch (e) {
-    console.log('error when fetching circuit key from ipfs: ', e);
+    console.log('error when fetching wasm from ipfs: ', e);
     throw e;
   }
 };

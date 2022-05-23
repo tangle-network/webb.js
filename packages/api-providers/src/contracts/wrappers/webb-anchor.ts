@@ -241,7 +241,6 @@ export class AnchorContract {
     const edgeIndex = await this._contract.edgeIndex(sourceChainId);
     const edge = await this._contract.edgeList(edgeIndex);
 
-    console.log('retrieved edge while generating merkle proof: ', edge);
     const latestSourceRoot = edge[1];
 
     const levels = await this._contract.levels();
@@ -250,10 +249,7 @@ export class AnchorContract {
     if (tree) {
       const index = tree.getIndexByElement(sourceDeposit.commitment);
 
-      console.log('index of element: ', index);
       const path = tree.path(index);
-
-      console.log('path for proof: ', path);
 
       return {
         index: index,
