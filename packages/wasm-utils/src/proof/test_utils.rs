@@ -17,8 +17,8 @@ use crate::types::{
 };
 use crate::utxo::JsUtxo;
 use crate::{
-	AnchorR1CSProverBn254_30_2, MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_2_2, ANCHOR_COUNT, DEFAULT_LEAF,
-	TREE_HEIGHT,
+	AnchorR1CSProverBn254_30_2, MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_16_2,
+	VAnchorR1CSProverBn254_30_2_2_2, ANCHOR_COUNT, DEFAULT_LEAF, TREE_HEIGHT,
 };
 
 pub const MIXER_NOTE_V1_X5_5:&str  = "webb.mixer:v1:16:16:Arkworks:Bn254:Poseidon:WEBB:12:10:5:3:7dc8420a25a15d2e7b712b4df15c6f6f9f5a8bacfa466671eb1f078406b09a2a00b7063c9fc19d488c25a18cb9c40bc4c29c00f822fdecd58d579cafa46ac31f";
@@ -404,7 +404,7 @@ pub fn generate_vanchor_test_setup_16_non_default_inputs() -> VAnchorTestSetup {
 		if &inputs.len() == &16 {
 			break;
 		}
-		let mut utxo = VAnchorR1CSProverBn254_30_2_2_2::new_utxo(
+		let mut utxo = VAnchorR1CSProverBn254_30_2_16_2::new_utxo(
 			curve,
 			in_chain_id,
 			in_amount_fr.clone(),
@@ -459,7 +459,7 @@ pub fn generate_vanchor_test_setup_16_non_default_inputs() -> VAnchorTestSetup {
 		)
 		.unwrap();
 
-	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
+	let c = VAnchorR1CSProverBn254_30_2_16_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
 	let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
 	proof_builder.exponentiation(5).unwrap();
 	proof_builder.width(5).unwrap();
@@ -499,7 +499,7 @@ pub fn generate_vanchor_test_setup_16_mixed_inputs() -> VAnchorTestSetup {
 		if &inputs.len() == &8 {
 			break;
 		}
-		let utxo = VAnchorR1CSProverBn254_30_2_2_2::new_utxo(
+		let utxo = VAnchorR1CSProverBn254_30_2_16_2::new_utxo(
 			curve,
 			in_chain_id,
 			in_amount_fr.clone(),
@@ -509,7 +509,7 @@ pub fn generate_vanchor_test_setup_16_mixed_inputs() -> VAnchorTestSetup {
 			&mut rng,
 		)
 		.unwrap();
-		let def_utxo = VAnchorR1CSProverBn254_30_2_2_2::new_utxo(
+		let def_utxo = VAnchorR1CSProverBn254_30_2_16_2::new_utxo(
 			curve,
 			in_chain_id,
 			Bn254Fr::from(0),
@@ -570,7 +570,7 @@ pub fn generate_vanchor_test_setup_16_mixed_inputs() -> VAnchorTestSetup {
 		)
 		.unwrap();
 
-	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
+	let c = VAnchorR1CSProverBn254_30_2_16_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
 	let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
 	proof_builder.exponentiation(5).unwrap();
 	proof_builder.width(5).unwrap();
