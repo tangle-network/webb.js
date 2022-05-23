@@ -3,7 +3,7 @@
 
 import { InternalChainId } from '../chains/index.js';
 
-export function relayerSubstrateNameToChainId (name: string): InternalChainId {
+export function relayerSubstrateNameToChainId(name: string): InternalChainId {
   switch (name) {
     case 'localnode':
       return InternalChainId.ProtocolSubstrateStandalone;
@@ -14,7 +14,7 @@ export function relayerSubstrateNameToChainId (name: string): InternalChainId {
   throw new Error('unhandled relayed chain name  ' + name);
 }
 
-export function relayerNameToChainId (name: string): InternalChainId {
+export function relayerNameToChainId(name: string): InternalChainId {
   switch (name) {
     case 'beresheet':
       return InternalChainId.EdgewareTestNet;
@@ -80,7 +80,7 @@ enum RelayerChainName {
   Demeter = 'demeter',
 }
 
-export function chainIdToRelayerName (id: InternalChainId): string {
+export function chainIdToRelayerName(id: InternalChainId): string {
   switch (id) {
     case InternalChainId.Edgeware:
       return RelayerChainName.Edgeware;

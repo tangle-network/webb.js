@@ -7,12 +7,12 @@ import { InternalChainId } from '../index.js';
 import { WebbPolkadot } from './webb-provider.js';
 
 export class PolkadotChainQuery extends ChainQuery<WebbPolkadot> {
-  constructor (protected inner: WebbPolkadot) {
+  constructor(protected inner: WebbPolkadot) {
     super(inner);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async tokenBalanceByCurrencyId (chainId: InternalChainId, currency: WebbCurrencyId): Promise<string> {
+  async tokenBalanceByCurrencyId(chainId: InternalChainId, currency: WebbCurrencyId): Promise<string> {
     const assetId = this.inner.config.currencies[currency].addresses.get(chainId);
 
     const activeAccount = await this.inner.accounts.activeOrDefault;
@@ -28,7 +28,7 @@ export class PolkadotChainQuery extends ChainQuery<WebbPolkadot> {
         let tokenBalance: string = json.free;
 
         tokenBalance = tokenBalance.replaceAll(',', '');
-        const denominatedTokenBalance = Number(tokenBalance) / (10 ** 12);
+        const denominatedTokenBalance = Number(tokenBalance) / 10 ** 12;
 
         return denominatedTokenBalance.toString();
       } else {
@@ -40,7 +40,7 @@ export class PolkadotChainQuery extends ChainQuery<WebbPolkadot> {
         let tokenBalance: string = json.data.free;
 
         tokenBalance = tokenBalance.replaceAll(',', '');
-        const denominatedTokenBalance = Number(tokenBalance) / (10 ** 12);
+        const denominatedTokenBalance = Number(tokenBalance) / 10 ** 12;
 
         return denominatedTokenBalance.toString();
       }
@@ -50,7 +50,7 @@ export class PolkadotChainQuery extends ChainQuery<WebbPolkadot> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async tokenBalanceByAddress (address: string): Promise<string> {
+  async tokenBalanceByAddress(address: string): Promise<string> {
     return '';
   }
 }

@@ -22,7 +22,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '4'
+      width: '4',
     };
 
     const note = await Note.generateNote(noteInput);
@@ -56,7 +56,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '4'
+      width: '4',
     };
 
     const note = await Note.generateNote(noteInput);
@@ -92,7 +92,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '4'
+      width: '4',
     };
 
     const note = await Note.generateNote(noteInput);
@@ -118,7 +118,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '4'
+      width: '4',
     };
 
     try {
@@ -144,7 +144,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '4'
+      width: '4',
     };
 
     const { note } = await Note.generateNote(noteInput);
@@ -153,7 +153,8 @@ describe('Note class', () => {
   });
 
   it('should fail to deserialize invalid protocol', async () => {
-    const serialized = 'webb://' +
+    const serialized =
+      'webb://' +
       'v2:invalid/' +
       '1:1/' +
       '1:1/' +
@@ -169,7 +170,8 @@ describe('Note class', () => {
   });
 
   it('should fail to deserialize invalid version', async () => {
-    const serialized = 'webb://' +
+    const serialized =
+      'webb://' +
       'v3:anchor/' +
       '1:1/' +
       '1:1/' +
@@ -185,7 +187,8 @@ describe('Note class', () => {
   });
 
   it('should fail to deserialize invalid source chain id', async () => {
-    const serialized = 'webb://' +
+    const serialized =
+      'webb://' +
       'v2:anchor/' +
       'invalid_source_chain_id:1/' +
       '1:1/' +
@@ -201,7 +204,8 @@ describe('Note class', () => {
   });
 
   it('should fail to deserialize invalid target chain id', async () => {
-    const serialized = 'webb://' +
+    const serialized =
+      'webb://' +
       'v2:anchor/' +
       '1:invalid_target_chain_id/' +
       '1:1/' +
@@ -217,7 +221,8 @@ describe('Note class', () => {
   });
 
   it('should fail to deserialize invalid note length', async () => {
-    const serialized = 'webb://' +
+    const serialized =
+      'webb://' +
       'v2:anchor/' +
       '1:1/' +
       // + '1:1/' Nullify the source identify data
@@ -233,7 +238,8 @@ describe('Note class', () => {
   });
 
   it('should fail to deserialize anchor invalid secrets (invalid chain id item - too large)', async () => {
-    const serialized = 'webb://' +
+    const serialized =
+      'webb://' +
       'v2:anchor/' +
       '1:1/' +
       '1:1/' +
@@ -250,7 +256,8 @@ describe('Note class', () => {
   });
 
   it('should fail to deserialize anchor invalid secrets (invalid chain id item - too small)', async () => {
-    const serialized = 'webb://' +
+    const serialized =
+      'webb://' +
       'v2:anchor/' +
       '1:1/' +
       '1:1/' +
@@ -267,7 +274,8 @@ describe('Note class', () => {
   });
 
   it('should fail to deserialize anchor invalid secrets (missing chain id item)', async () => {
-    const serialized = 'webb://' +
+    const serialized =
+      'webb://' +
       'v2:anchor/' +
       '1:1/' +
       '1:1/' +
@@ -284,7 +292,8 @@ describe('Note class', () => {
   });
 
   it('should fail to deserialize anchor invalid secrets (nullifier item)', async () => {
-    const serialized = 'webb://' +
+    const serialized =
+      'webb://' +
       'v2:anchor/' +
       '1:1/' +
       '1:1/' +
@@ -301,7 +310,8 @@ describe('Note class', () => {
   });
 
   it('should fail to deserialize anchor invalid secrets (multiple colons)', async () => {
-    const serialized = 'webb://' +
+    const serialized =
+      'webb://' +
       'v2:anchor/' +
       '1:1/' +
       '1:1/' +
@@ -318,7 +328,8 @@ describe('Note class', () => {
   });
 
   it('should fail to deserialize anchor invalid secrets (1 colon)', async () => {
-    const serialized = 'webb://' +
+    const serialized =
+      'webb://' +
       'v2:anchor/' +
       '1:1/' +
       '1:1/' +
@@ -335,7 +346,8 @@ describe('Note class', () => {
   });
 
   it('should deserialized vanchor note', async () => {
-    const serialized = 'webb://v2:vanchor/' +
+    const serialized =
+      'webb://v2:vanchor/' +
       '1:1/1:1/' +
       '0100000000000000000000000000000000000000000000000000000000000000:0100000000000000000000000000000000000000000000000000000000000000:a5ae2e56bf539da01d46e9f762faf1fa6cf4547822bd1ec720a10aec2fe6651f:fdda3612a8761648547834e50313935409a1faea9eb27bf2574fc7828c332f26/' +
       '?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=WEBB&denom=18&amount=1';
@@ -349,7 +361,8 @@ describe('Note class', () => {
   });
 
   it('should fail to deserialize vanchor note with secrets less than 5 (Leaf gen failure)', async () => {
-    const serialized = 'webb://v2:vanchor/' +
+    const serialized =
+      'webb://v2:vanchor/' +
       '1:1/' +
       '1:1/' +
       '0100000000000000000000000000000000000000000000000000000000000000:c841cfb05415b4fb9872576dc0f7f366cb5cc909e196c53522879a01fa807e0e:4f5cf320dd74031fc6d190e2d17c807828efc03accd6a6c466e09eb4f5aceb13:0002000000000000/' +
@@ -385,7 +398,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '5'
+      width: '5',
     };
 
     try {
@@ -405,14 +418,15 @@ describe('Note class', () => {
       exponentiation: '5',
       hashFunction: 'Poseidon',
       protocol: 'vanchor',
-      secrets: '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b',
+      secrets:
+        '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b',
       sourceChain: '1',
       sourceIdentifyingData: '1',
       targetChain: '1',
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '5'
+      width: '5',
     };
 
     try {
@@ -438,7 +452,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '5'
+      width: '5',
     };
     const note = await Note.generateNote(noteInput);
 
@@ -476,21 +490,24 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '5'
+      width: '5',
     };
     // Note generated
     const { note } = await Note.generateNote(noteInput);
     const noteWithoutIndex = note.serialize();
 
     const miscPartsObj = (note: string): Record<string, string> => {
-      return note.split('?')[1].split('&').reduce((acc, entry) => {
-        const [key, value] = entry.split('=');
+      return note
+        .split('?')[1]
+        .split('&')
+        .reduce((acc, entry) => {
+          const [key, value] = entry.split('=');
 
-        return {
-          ...acc,
-          [key]: value
-        };
-      }, {});
+          return {
+            ...acc,
+            [key]: value,
+          };
+        }, {});
     };
 
     const miscPartsWithoutIndex: any = miscPartsObj(noteWithoutIndex);

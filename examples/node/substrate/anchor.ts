@@ -1,18 +1,17 @@
-import {cryptoWaitReady} from "@polkadot/util-crypto";
-import {decodeAddress, Keyring} from "@polkadot/keyring";
-import {fetchRPCTreeLeaves, polkadotTx, preparePolkadotApi, transferBalance} from "../utils.js";
-import {Note, NoteGenInput, ProvingManager, ProvingManagerSetupInput} from "@webb-tools/sdk-core/index.js";
-import path from "path";
-import fs from "fs";
-import {AnchorWithdrawProof} from "../../../tests/utils/index.js";
+import { cryptoWaitReady } from '@polkadot/util-crypto';
+import { decodeAddress, Keyring } from '@polkadot/keyring';
+import { fetchRPCTreeLeaves, polkadotTx, preparePolkadotApi, transferBalance } from '../utils.js';
+import { Note, NoteGenInput, ProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core/index.js';
+import path from 'path';
+import fs from 'fs';
+import { AnchorWithdrawProof } from '../../../tests/utils/index.js';
 
 import { u8aToHex } from '@polkadot/util';
 
 export async function anchorBn254() {
-  const BOBPhrase =
-    'asthma early danger glue satisfy spatial decade wing organ bean census announce';
+  const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
   await cryptoWaitReady();
-  const k = new Keyring({type: 'sr25519'});
+  const k = new Keyring({ type: 'sr25519' });
   const bob = k.addFromMnemonic(BOBPhrase);
   const charlie = k.addFromUri('//Charlie');
   // API promise inlining
@@ -24,28 +23,23 @@ export async function anchorBn254() {
   const treeId = '3';
   // => Depositing with bob account <=
   const noteGenInput: NoteGenInput = {
-    amount: "10",
+    amount: '10',
     backend: 'Arkworks',
     curve: 'Bn254',
-    denomination: "18",
-    exponentiation: "5",
-    hashFunction: "Poseidon",
+    denomination: '18',
+    exponentiation: '5',
+    hashFunction: 'Poseidon',
     protocol: 'anchor',
-    sourceChain: "2199023256632",
-    targetChain: "2199023256632",
-    tokenSymbol: "WEBB",
-    version: "v2",
-    width: "4"
-  }
+    sourceChain: '2199023256632',
+    targetChain: '2199023256632',
+    tokenSymbol: 'WEBB',
+    version: 'v2',
+    width: '4',
+  };
   const note = await Note.generateNote(noteGenInput);
   console.info(`[ anchorBn254 ] Generated the deposit note ${note.serialize()}`);
   const leaf = note.getLeaf();
-  await polkadotTx(
-    apiPromise,
-    {section: 'anchorBn254', method: 'deposit'},
-    [treeId, leaf],
-    bob
-  );
+  await polkadotTx(apiPromise, { section: 'anchorBn254', method: 'deposit' }, [treeId, leaf], bob);
   console.log(`[ anchorBn254 ] Deposited successfully`);
   // withdraw
   const accountId = bob.address;
@@ -80,10 +74,9 @@ export async function anchorBn254() {
     refund: 0,
     relayer: relayerAddressHex.replace('0x', ''),
     refreshCommitment: '0000000000000000000000000000000000000000000000000000000000000000',
-    roots:[]
-
+    roots: [],
   };
-  const proof = await pm.prove('anchor',proveInput);
+  const proof = await pm.prove('anchor', proveInput);
   const withdrawProof: AnchorWithdrawProof = {
     id: treeId,
     proofBytes: `0x${proof.proof}` as any,
@@ -107,14 +100,9 @@ export async function anchorBn254() {
     withdrawProof.commitment,
   ];
 
-  return polkadotTx(
-    apiPromise,
-    { method: 'withdraw', section: 'anchorBn254' },
-    params,
-    bob
-  );
+  return polkadotTx(apiPromise, { method: 'withdraw', section: 'anchorBn254' }, params, bob);
 }
 
-anchorBn254().catch(e => {
+anchorBn254().catch((e) => {
   console.error(e);
-})
+});

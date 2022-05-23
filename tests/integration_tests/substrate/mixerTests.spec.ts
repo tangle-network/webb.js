@@ -22,8 +22,7 @@ let keyring: {
 } | null = null;
 let nodes: KillTask | undefined;
 
-const BOBPhrase =
-  'asthma early danger glue satisfy spatial decade wing organ bean census announce';
+const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
 
 function getKeyring() {
   if (keyring) {
@@ -54,16 +53,16 @@ describe('Mixer tests', function () {
     try {
       const { bob, charlie, alice } = getKeyring();
       // transfer some funds to sudo & test account
-      console.log(`Transferring 10,000 balance to Alice and Bob`)
+      console.log(`Transferring 10,000 balance to Alice and Bob`);
       await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
       let note: JsNote;
       // deposit to the mixer
-      console.log(`Depositing to the mixer`)
+      console.log(`Depositing to the mixer`);
       note = await catchWasmError(() => depositMixerBnX5_3(apiPromise!, bob));
       ///Give the chain sometime to insure the leaf is there
       await sleep(10_000);
       // withdraw fro the mixer
-      console.log(`Withdrawing from the mixer`)
+      console.log(`Withdrawing from the mixer`);
       await catchWasmError(() => withdrawMixerBnX5_3(apiPromise!, bob, note!, bob.address));
     } catch (e) {
       if (e instanceof OperationError) {

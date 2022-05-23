@@ -27,17 +27,17 @@ export const presetTokensConfig: Record<CHAIN, Record<PresetToken, TokenConfig>>
       chain: 'dev',
       name: 'DEV',
       precision: 12,
-      symbol: 'DEV'
-    }
+      symbol: 'DEV',
+    },
   } as Record<PresetToken, TokenConfig>,
   webb: {
     WEBB: {
       chain: 'webb',
       name: 'WEBB',
       precision: 18,
-      symbol: 'WEBB'
-    }
-  } as Record<PresetToken, TokenConfig>
+      symbol: 'WEBB',
+    },
+  } as Record<PresetToken, TokenConfig>,
 };
 
 export const TokenAmount = FixedPointNumber;
@@ -50,7 +50,7 @@ export class Token {
   readonly precision!: number;
   public amount!: FixedPointNumber;
 
-  constructor (config: TokenConfig) {
+  constructor(config: TokenConfig) {
     this.name = config.name;
     this.symbol = config.symbol || config.name;
     this.precision = config.precision || 18;
@@ -65,30 +65,30 @@ export class Token {
     }
   }
 
-  public isEqual (token: Token): boolean {
+  public isEqual(token: Token): boolean {
     return this.chain === token.chain && this.name === token.name;
   }
 
-  public toString (): string {
+  public toString(): string {
     return this.name;
   }
 
-  public toChainData (): { Token: string } | string {
+  public toChainData(): { Token: string } | string {
     return this.name;
   }
 
-  public clone (newConfig?: Partial<TokenConfig>): Token {
+  public clone(newConfig?: Partial<TokenConfig>): Token {
     return new Token({
       amount: newConfig?.amount || this.amount || new FixedPointNumber(0),
       chain: newConfig?.chain || this.chain || '',
       name: newConfig?.name || this.name || '',
       precision: newConfig?.precision || this.precision || 0,
-      symbol: newConfig?.symbol || this.symbol || ''
+      symbol: newConfig?.symbol || this.symbol || '',
     });
   }
 }
 
-function convert (config: Record<CHAIN, Record<string, TokenConfig>>): Record<CHAIN, Record<string, Token>> {
+function convert(config: Record<CHAIN, Record<string, TokenConfig>>): Record<CHAIN, Record<string, Token>> {
   return Object.keys(config).reduce((prev, chain) => {
     prev[chain as CHAIN] = Object.keys(config[chain as CHAIN]).reduce((prev, name) => {
       prev[name] = new Token(config[chain as CHAIN][name]);
@@ -102,26 +102,26 @@ function convert (config: Record<CHAIN, Record<string, TokenConfig>>): Record<CH
 
 export const PRESET_TOKENS = convert(presetTokensConfig);
 
-export function getPresetToken (name: PresetToken, chain: CHAIN = 'webb'): Token {
+export function getPresetToken(name: PresetToken, chain: CHAIN = 'webb'): Token {
   return PRESET_TOKENS[chain][name];
 }
 
 const TOKEN_SORT: Record<string, number> = {
-  WEBB: 0
+  WEBB: 0,
 };
 
 const Tokens: Array<PresetToken> = ['WEBB'];
 
-export function sortTokens (token1: Token, token2: Token, ...other: Token[]): Token[] {
+export function sortTokens(token1: Token, token2: Token, ...other: Token[]): Token[] {
   const result = [token1, token2, ...other];
 
   return result.sort((a, b) => TOKEN_SORT[a.name] - TOKEN_SORT[b.name]);
 }
 
-export function token2CurrencyId (api: ApiPromise | ApiRx, token: Token): CurrencyId {
+export function token2CurrencyId(api: ApiPromise | ApiRx, token: Token): CurrencyId {
   return api.createType('CurrencyId', token.toChainData());
 }
 
-export function currencyId2Token (token: CurrencyId): Token {
+export function currencyId2Token(token: CurrencyId): Token {
   return getPresetToken(Tokens[token.toNumber()]);
 }

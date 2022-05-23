@@ -11,26 +11,26 @@ export default {
         {
           isOptional: false,
           name: 'tree_id',
-          type: 'u32'
+          type: 'u32',
         },
         {
           isOptional: false,
           name: 'from',
-          type: 'u32'
+          type: 'u32',
         },
         {
           isOptional: false,
           name: 'to',
-          type: 'u32'
+          type: 'u32',
         },
         {
           isOptional: true,
           name: 'at',
-          type: 'Hash'
-        }
+          type: 'Hash',
+        },
       ],
-      type: 'Vec<[u8; 32]>'
-    }
+      type: 'Vec<[u8; 32]>',
+    },
   },
-  types: {}
+  types: {},
 } as Definitions;

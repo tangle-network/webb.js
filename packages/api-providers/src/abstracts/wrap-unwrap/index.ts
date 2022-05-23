@@ -37,43 +37,43 @@ export abstract class WrapUnwrap<T, WrapPayload extends Amount = Amount, UnwrapP
   protected _wrappableToken: BehaviorSubject<WebbCurrencyId | null> = new BehaviorSubject<null | WebbCurrencyId>(null);
   protected _governedToken: BehaviorSubject<WebbCurrencyId | null> = new BehaviorSubject<null | WebbCurrencyId>(null);
 
-  constructor (protected inner: T) {}
+  constructor(protected inner: T) {}
 
   abstract get subscription(): Observable<Partial<WrappingEvent>>;
 
-  setGovernedToken (nextToken: WebbCurrencyId | null) {
+  setGovernedToken(nextToken: WebbCurrencyId | null) {
     this._governedToken.next(nextToken);
   }
 
   /**
    *  Current token
    *  */
-  get governedToken () {
+  get governedToken() {
     return this._governedToken.value;
   }
 
   /**
    *  watcher of the current token
    *  */
-  get $governedToken () {
+  get $governedToken() {
     return this._governedToken.asObservable();
   }
 
-  setWrappableToken (nextToken: WebbCurrencyId | null) {
+  setWrappableToken(nextToken: WebbCurrencyId | null) {
     this._wrappableToken.next(nextToken);
   }
 
   /**
    *  Other EDG token
    *  */
-  get wrappableToken () {
+  get wrappableToken() {
     return this._wrappableToken.value;
   }
 
   /**
    *  Watcher for other edg token
    *  */
-  get $wrappableToken () {
+  get $wrappableToken() {
     return this._wrappableToken.asObservable();
   }
 
@@ -131,7 +131,7 @@ export abstract class WrapUnwrap<T, WrapPayload extends Amount = Amount, UnwrapP
 export class WrappingBalanceWatcher {
   private subscription: Subscription | null = null;
 
-  constructor (
+  constructor(
     private token1: WebbCurrencyId | null = null,
     private token2: WebbCurrencyId | null = null,
     private signal: Observable<[WebbCurrencyId | null, WebbCurrencyId | null]>
@@ -139,7 +139,7 @@ export class WrappingBalanceWatcher {
     this.sub();
   }
 
-  sub () {
+  sub() {
     this.subscription = this.signal.subscribe(([token1, token2]) => {
       const token1Updated = token1 !== this.token1;
       const token2Updated = token2 !== this.token2;

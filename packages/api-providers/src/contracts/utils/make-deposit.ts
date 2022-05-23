@@ -5,7 +5,7 @@ import { IAnchorDepositInfo } from '@webb-tools/interfaces';
 import { PoseidonHasher, toFixedHex } from '@webb-tools/utils';
 import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
 
-export function depositFromAnchorNote (note: DepositNote): IAnchorDepositInfo {
+export function depositFromAnchorNote(note: DepositNote): IAnchorDepositInfo {
   const poseidonHasher = new PoseidonHasher();
   const noteSecretParts = note.secrets.split(':');
   const chainId = Number(note.targetChainId);
@@ -20,7 +20,7 @@ export function depositFromAnchorNote (note: DepositNote): IAnchorDepositInfo {
     commitment: `0x${commitment}`,
     nullifier: BigInt(toFixedHex(nullifier)),
     nullifierHash,
-    secret: BigInt(toFixedHex(secret))
+    secret: BigInt(toFixedHex(secret)),
   };
 
   return deposit;

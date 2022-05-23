@@ -8,7 +8,7 @@ import { InternalChainId } from '@webb-tools/api-providers/index.js';
 import { WebbCurrencyId } from '../../enums/index.js';
 
 export abstract class ChainQuery<Provider> {
-  constructor (protected inner: Provider) {}
+  constructor(protected inner: Provider) {}
 
   abstract tokenBalanceByCurrencyId(chainId: InternalChainId, currency: WebbCurrencyId): Promise<string>;
   abstract tokenBalanceByAddress(address: string): Promise<string>;

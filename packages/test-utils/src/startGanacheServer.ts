@@ -8,7 +8,7 @@ export type GanacheAccounts = {
   secretKey: string;
 };
 
-export async function startGanacheServer (
+export async function startGanacheServer(
   port: number,
   networkId: number,
   populatedAccounts: GanacheAccounts[],
@@ -19,10 +19,10 @@ export async function startGanacheServer (
     // quiet: true,
     chainId: networkId,
     miner: {
-      blockTime: 1
+      blockTime: 1,
     },
     network_id: networkId,
-    ...options
+    ...options,
   });
 
   await ganacheServer.listen(port);

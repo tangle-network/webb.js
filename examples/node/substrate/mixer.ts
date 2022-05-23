@@ -1,22 +1,20 @@
-import {fetchRPCTreeLeaves, polkadotTx, preparePolkadotApi, transferBalance} from "../utils.js";
-import {decodeAddress, Keyring} from "@polkadot/keyring";
-import {cryptoWaitReady} from '@polkadot/util-crypto'
-import {Note, NoteGenInput, ProvingManager, ProvingManagerSetupInput} from "@webb-tools/sdk-core/src/index.js";
-import path from "path";
-import fs from "fs";
-import {hexToU8a, u8aToHex} from "@polkadot/util";
-import {WithdrawProof} from "../../../tests/utils/index.js";
+import { fetchRPCTreeLeaves, polkadotTx, preparePolkadotApi, transferBalance } from '../utils.js';
+import { decodeAddress, Keyring } from '@polkadot/keyring';
+import { cryptoWaitReady } from '@polkadot/util-crypto';
+import { Note, NoteGenInput, ProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core/src/index.js';
+import path from 'path';
+import fs from 'fs';
+import { hexToU8a, u8aToHex } from '@polkadot/util';
+import { WithdrawProof } from '../../../tests/utils/index.js';
 
 // This script details usage of our mixer pallets (and proving / verifying) from nodejs.
 async function mixerBn254() {
-
   // The application environment will define components for interacting with the chain which implements our mixer pallets.
   // For this script, we hard-code the account to be the well-known 'Bob' account,
   // but DApp developers will likely take this information from the injected polkadot.js extension.
-  const BOBPhrase =
-    'asthma early danger glue satisfy spatial decade wing organ bean census announce';
+  const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
   await cryptoWaitReady();
-  const k = new Keyring({type: 'sr25519'});
+  const k = new Keyring({ type: 'sr25519' });
   const bob = k.addFromMnemonic(BOBPhrase);
   const apiPromise = await preparePolkadotApi();
   console.info(`[ mixerBn254 ] Prepared the api promise`);
@@ -65,22 +63,22 @@ async function mixerBn254() {
   const noteGenInput: NoteGenInput = {
     protocol: 'mixer',
     version: 'v2',
-    sourceChain: "1",
-    targetChain: "1",
-    amount: "1",
-    tokenSymbol: "WEBB",
-    sourceIdentifyingData: "3",
+    sourceChain: '1',
+    targetChain: '1',
+    amount: '1',
+    tokenSymbol: 'WEBB',
+    sourceIdentifyingData: '3',
     targetIdentifyingData: '3',
-    denomination: "18",
-    backend: "Arkworks",
-    hashFunction: "Poseidon",
-    curve: "Bn254",
+    denomination: '18',
+    backend: 'Arkworks',
+    hashFunction: 'Poseidon',
+    curve: 'Bn254',
     width: '3',
-    exponentiation: "5"
-  }
+    exponentiation: '5',
+  };
 
   // Generate deposit note, and the secrets associated with the deposit.
-  const note = await Note.generateNote(noteGenInput)
+  const note = await Note.generateNote(noteGenInput);
 
   // The leaf is the value inserted on-chain. Users can prove knowledge of
   // the secrets which were used in generating a leaf, without revealing the secrets.
@@ -91,7 +89,7 @@ async function mixerBn254() {
   // Do the transaction for depositing
   await polkadotTx(
     apiPromise,
-    {section: 'mixerBn254', method: 'deposit'},
+    { section: 'mixerBn254', method: 'deposit' },
     [0, leaf], // Deposit into the treeId 0, the leaf value.
     bob
   );
@@ -120,7 +118,6 @@ async function mixerBn254() {
   // Proving key
   const pk = fs.readFileSync(pkPath);
 
-
   // Define the different parameters involved for generating a proof and successfully withdrawing:
   //
   // leafIndex:
@@ -134,7 +131,7 @@ async function mixerBn254() {
   //        we need to be able to build the merkle tree ourselves.
   // fee: Fees can be specified to pay out the relayer of a withdraw transaction. This example does not use a relayer.
   // relayer: Who should be paid the fees of the withdraw transaction? Bob puts his own address as the relayer.
-  const provingInput: ProvingManagerSetupInput<"mixer"> = {
+  const provingInput: ProvingManagerSetupInput<'mixer'> = {
     leafIndex: 0,
     provingKey: hexToU8a(pk.toString('hex')),
     note: note.serialize(),
@@ -142,11 +139,11 @@ async function mixerBn254() {
     refund: 0,
     leaves,
     recipient: addressHex.replace('0x', ''),
-    relayer: relayerAddressHex.replace('0x', '')
+    relayer: relayerAddressHex.replace('0x', ''),
   };
 
   // Generate the proof
-  const proof = await pm.prove('mixer',provingInput);
+  const proof = await pm.prove('mixer', provingInput);
 
   // Format the proof information in the forms that substrate expects
   const withdrawProof: WithdrawProof = {
@@ -173,21 +170,14 @@ async function mixerBn254() {
   ];
 
   // Sending the transaction
-  const txHash = await polkadotTx(
-    apiPromise,
-    {section: 'mixerBn254', method: 'withdraw'},
-    params,
-    bob
-  );
+  const txHash = await polkadotTx(apiPromise, { section: 'mixerBn254', method: 'withdraw' }, params, bob);
 
   console.log('[ mixerBn254 ] withdraw complete, txHash: ', txHash);
   await apiPromise.disconnect();
-// Kill the process
+  // Kill the process
   process.exit(0);
 }
 
-
-mixerBn254()
-  .catch(e => {
-    console.error(e);
-  })
+mixerBn254().catch((e) => {
+  console.error(e);
+});

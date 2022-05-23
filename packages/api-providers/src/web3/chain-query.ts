@@ -12,15 +12,15 @@ import { WebbCurrencyId } from '../enums/index.js';
 import { WebbWeb3Provider } from './webb-provider.js';
 
 export class Web3ChainQuery extends ChainQuery<WebbWeb3Provider> {
-  constructor (protected inner: WebbWeb3Provider) {
+  constructor(protected inner: WebbWeb3Provider) {
     super(inner);
   }
 
-  private get config () {
+  private get config() {
     return this.inner.config;
   }
 
-  async tokenBalanceByCurrencyId (chainId: InternalChainId, currencyId: WebbCurrencyId): Promise<string> {
+  async tokenBalanceByCurrencyId(chainId: InternalChainId, currencyId: WebbCurrencyId): Promise<string> {
     const provider = this.inner.getEthersProvider();
 
     // check if the token is the native token of this chain
@@ -57,7 +57,7 @@ export class Web3ChainQuery extends ChainQuery<WebbWeb3Provider> {
     }
   }
 
-  async tokenBalanceByAddress (address: string): Promise<string> {
+  async tokenBalanceByAddress(address: string): Promise<string> {
     const provider = this.inner.getEthersProvider();
 
     const accounts = await this.inner.accounts.accounts();

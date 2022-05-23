@@ -1,7 +1,17 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiInitHandler, AppConfig, NotificationHandler, ProvideCapabilities, WasmFactory, WebbApiProvider, WebbMethods, WebbProviderEvents, WebbRelayerBuilder } from '@webb-tools/api-providers/index.js';
+import {
+  ApiInitHandler,
+  AppConfig,
+  NotificationHandler,
+  ProvideCapabilities,
+  WasmFactory,
+  WebbApiProvider,
+  WebbMethods,
+  WebbProviderEvents,
+  WebbRelayerBuilder,
+} from '@webb-tools/api-providers/index.js';
 import { EventBus } from '@webb-tools/app-util/index.js';
 
 import { ApiPromise } from '@polkadot/api';
@@ -24,7 +34,7 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
   readonly api: ApiPromise;
   readonly txBuilder: PolkaTXBuilder;
 
-  private constructor (
+  private constructor(
     apiPromise: ApiPromise,
     injectedExtension: InjectedExtension,
     readonly relayingManager: WebbRelayerBuilder,
@@ -48,41 +58,41 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
         core: null,
         deposit: {
           enabled: true,
-          inner: new PolkadotAnchorDeposit(this)
+          inner: new PolkadotAnchorDeposit(this),
         },
         withdraw: {
           enabled: true,
-          inner: new PolkadotAnchorWithdraw(this)
-        }
+          inner: new PolkadotAnchorWithdraw(this),
+        },
       },
       anchorApi: new PolkadotAnchorApi(this, this.config.bridgeByAsset),
       chainQuery: new PolkadotChainQuery(this),
       mixer: {
         deposit: {
           enabled: true,
-          inner: new PolkadotMixerDeposit(this)
+          inner: new PolkadotMixerDeposit(this),
         },
         withdraw: {
           enabled: true,
-          inner: new PolkadotMixerWithdraw(this)
-        }
+          inner: new PolkadotMixerWithdraw(this),
+        },
       },
       wrapUnwrap: {
         core: {
           enabled: false,
-          inner: new PolkadotWrapUnwrap(this)
-        }
-      }
+          inner: new PolkadotWrapUnwrap(this),
+        },
+      },
     };
   }
 
   capabilities?: ProvideCapabilities | undefined;
 
-  getProvider () {
+  getProvider() {
     return this.provider;
   }
 
-  async awaitMetaDataCheck () {
+  async awaitMetaDataCheck() {
     /// delay some time till the UI is instantiated and then check if the dApp needs to update extension meta data
     await new Promise((resolve) => setTimeout(resolve, 3000));
     const metaData = await this.provider.checkMetaDataUpdate();
@@ -91,8 +101,8 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
       /// feedback body
       const feedbackEntries = InteractiveFeedback.feedbackEntries([
         {
-          header: 'Update Polkadot MetaData'
-        }
+          header: 'Update Polkadot MetaData',
+        },
       ]);
       /// feedback actions
       const actions = ActionsBuilder.init()
@@ -113,7 +123,7 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
     }
   }
 
-  private async insureApiInterface () {
+  private async insureApiInterface() {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const merkleRPC = Boolean(this.api.rpc.mt.getLeaves);
@@ -126,7 +136,7 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
     }
   }
 
-  static async init (
+  static async init(
     appName: string, // App name Arbitrary name
     endpoints: string[], // Endpoints of the substrate node
     errorHandler: ApiInitHandler, // Error handler that will be used to catch errors while initializing the provider
@@ -157,7 +167,7 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
     return instance;
   }
 
-  static async initWithCustomAccountsAdapter (
+  static async initWithCustomAccountsAdapter(
     appName: string, // App name Arbitrary name
     endpoints: string[], // Endpoints of the substrate node
     errorHandler: ApiInitHandler, // Error handler that will be used to catch errors while initializing the provider
@@ -189,7 +199,7 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
     return instance;
   }
 
-  async destroy (): Promise<void> {
+  async destroy(): Promise<void> {
     await this.provider.destroy();
   }
 }

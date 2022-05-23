@@ -6,7 +6,7 @@ import { LoggerService } from '@webb-tools/app-util/index.js';
 
 const logger = LoggerService.get('IPFS');
 
-export async function fetchSubstrateAnchorProvingKey () {
+export async function fetchSubstrateAnchorProvingKey() {
   // TODO: change to anchor fixture
   const IPFSUrl = 'https://ipfs.io/ipfs/QmXRGKJZvFpCRw5ZvdxoeXtyteof4w1tPrdu9Jopz8YzB3';
   const cachedURI = getCachedFixtureURI('proving_key_substrate_anchor.bin');

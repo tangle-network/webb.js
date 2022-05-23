@@ -18,7 +18,7 @@ export type Web3WrapPayload = Amount;
 export type Web3UnwrapPayload = Amount;
 const defaultBalance: WrappingBalance = {
   balance: '0',
-  tokenId: undefined
+  tokenId: undefined,
 };
 
 export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
@@ -27,67 +27,70 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
   private _currentChainId = new BehaviorSubject<InternalChainId | null>(null);
   private _event = new Subject<Partial<WrappingEvent>>();
 
-  private get config () {
+  private get config() {
     return this.inner.config;
   }
 
-  get balances (): Observable<[WrappingBalance, WrappingBalance]> {
+  get balances(): Observable<[WrappingBalance, WrappingBalance]> {
     return this._balances.asObservable();
   }
 
-  get liquidity (): Observable<[WrappingBalance, WrappingBalance]> {
+  get liquidity(): Observable<[WrappingBalance, WrappingBalance]> {
     return this._liquidity.asObservable();
   }
 
-  get subscription (): Observable<Partial<WrappingEvent>> {
+  get subscription(): Observable<Partial<WrappingEvent>> {
     return this._event.asObservable();
   }
 
-  constructor (protected inner: WebbWeb3Provider) {
+  constructor(protected inner: WebbWeb3Provider) {
     super(inner);
 
-    inner.getChainId().then((evmChainId) => {
-      this._currentChainId.next(evmIdIntoInternalChainId(evmChainId));
-      this._event.next({
-        ready: null
+    inner
+      .getChainId()
+      .then((evmChainId) => {
+        this._currentChainId.next(evmIdIntoInternalChainId(evmChainId));
+        this._event.next({
+          ready: null,
+        });
+      })
+      .catch((e) => {
+        throw e;
       });
-    }).catch((e) => {
-      throw e;
-    });
 
     inner.on('providerUpdate', ([evmChainId]) => {
       this._currentChainId.next(evmIdIntoInternalChainId(evmChainId));
       this._event.next({
-        stateUpdate: null
+        stateUpdate: null,
       });
     });
   }
 
-  setGovernedToken (nextToken: WebbCurrencyId | null) {
+  setGovernedToken(nextToken: WebbCurrencyId | null) {
     this._governedToken.next(nextToken);
     this._event.next({
-      governedTokenUpdate: nextToken
+      governedTokenUpdate: nextToken,
     });
   }
 
-  setWrappableToken (nextToken: WebbCurrencyId | null) {
+  setWrappableToken(nextToken: WebbCurrencyId | null) {
     this._wrappableToken.next(nextToken);
     this._event.next({
-      wrappableTokenUpdate: nextToken
+      wrappableTokenUpdate: nextToken,
     });
   }
 
-  getSizes (): Promise<MixerSize[]> {
+  getSizes(): Promise<MixerSize[]> {
     return Promise.resolve([]);
   }
 
-  private get currentChainId () {
+  private get currentChainId() {
     return this._currentChainId.value;
   }
 
   // TODO: Dynamic wrappable currencies
   //
-  async getWrappableTokens (governedCurrency?: WebbCurrencyId | null): Promise<WebbCurrencyId[]> {
+  async getWrappableTokens(governedCurrency?: WebbCurrencyId | null): Promise<WebbCurrencyId[]> {
     if (this.currentChainId) {
       const currenciesOfChain = this.config.chains[this.currentChainId].currencies;
       const wrappableCurrencies = currenciesOfChain.filter((currencyId) => {
@@ -110,7 +113,7 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
     return [];
   }
 
-  async getGovernedTokens (): Promise<WebbCurrencyId[]> {
+  async getGovernedTokens(): Promise<WebbCurrencyId[]> {
     if (this.currentChainId) {
       return Bridge.getTokensOfChain(this.inner.config.currencies, this.currentChainId).map(
         (currency) => currency.view.id
@@ -120,7 +123,7 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
     return [];
   }
 
-  async canUnwrap (unwrapPayload: Web3UnwrapPayload): Promise<boolean> {
+  async canUnwrap(unwrapPayload: Web3UnwrapPayload): Promise<boolean> {
     const { amount } = unwrapPayload;
     const governedTokenId = this.governedToken!;
     const webbGovernedToken = this.governedTokenwrapper(governedTokenId);
@@ -131,7 +134,7 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
     return webbGovernedToken.canUnwrap(currentAccount.address, Number(amount));
   }
 
-  async unwrap (unwrapPayload: Web3UnwrapPayload): Promise<string> {
+  async unwrap(unwrapPayload: Web3UnwrapPayload): Promise<string> {
     const { amount: amountNumber } = unwrapPayload;
 
     const governedTokenId = this.governedToken!;
@@ -148,7 +151,7 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
         key: 'unwrap-asset',
         level: 'loading',
         message: 'GovernedTokenwrapper:unwrap',
-        name: 'Transaction'
+        name: 'Transaction',
       });
       const tx = await webbGovernedToken.unwrap(
         this.config.currencies[wrappableTokenId].addresses.get(this.currentChainId!)!,
@@ -163,7 +166,7 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
         key: 'unwrap-asset',
         level: 'success',
         message: 'GovernedTokenwrapper:unwrap',
-        name: 'Transaction'
+        name: 'Transaction',
       });
 
       return tx.hash;
@@ -176,14 +179,14 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
         key: 'unwrap-asset',
         level: 'error',
         message: 'GovernedTokenwrapper:unwrap',
-        name: 'Transaction'
+        name: 'Transaction',
       });
 
       return '';
     }
   }
 
-  async canwrap (): Promise<boolean> {
+  async canwrap(): Promise<boolean> {
     const governedToken = this.governedToken!;
     const wrappableToken = this.wrappableToken!;
     const webbGovernedToken = this.governedTokenwrapper(governedToken);
@@ -197,7 +200,7 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
     }
   }
 
-  async wrap (wrapPayload: Web3WrapPayload): Promise<string> {
+  async wrap(wrapPayload: Web3WrapPayload): Promise<string> {
     const { amount: amountNumber } = wrapPayload;
 
     const wrappableTokenId = this.wrappableToken!;
@@ -213,7 +216,7 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
         key: 'wrap-asset',
         level: 'loading',
         message: 'GovernedTokenwrapper:wrap',
-        name: 'Transaction'
+        name: 'Transaction',
       });
       console.log('address of token to wrap into webbGovernedToken', this.getAddressFromWrapTokenId(wrappableTokenId));
       let tx: ContractTransaction;
@@ -238,7 +241,7 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
             level: 'info',
             message: 'Waiting for token approval',
             name: 'Approval',
-            persist: true
+            persist: true,
           });
           tx = await wrappableTokenInstance.approve(webbGovernedToken.address, amount);
           await tx.wait();
@@ -255,7 +258,7 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
         key: 'wrap-asset',
         level: 'success',
         message: 'GovernedTokenwrapper:wrap',
-        name: 'Transaction'
+        name: 'Transaction',
       });
 
       return tx.hash;
@@ -268,22 +271,21 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
         key: 'wrap-asset',
         level: 'error',
         message: 'GovernedTokenwrapper:wrap',
-        name: 'Transaction'
-
+        name: 'Transaction',
       });
 
       return '';
     }
   }
 
-  private getAddressFromWrapTokenId (id: WebbCurrencyId): string {
+  private getAddressFromWrapTokenId(id: WebbCurrencyId): string {
     const currentNetwork = this.currentChainId!;
     const address = this.config.currencies[id].addresses.get(currentNetwork)!;
 
     return address;
   }
 
-  governedTokenwrapper (id: WebbCurrencyId): WebbGovernedToken {
+  governedTokenwrapper(id: WebbCurrencyId): WebbGovernedToken {
     const contractAddress = this.getAddressFromWrapTokenId(id);
 
     return new WebbGovernedToken(this.inner.getEthersProvider(), contractAddress);

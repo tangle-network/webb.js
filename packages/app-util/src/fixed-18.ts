@@ -41,7 +41,7 @@ export class Fixed18 {
    * constructor of Fixed18
    * @param  origin - the origin number
    */
-  constructor (origin: NumLike | BigNumber) {
+  constructor(origin: NumLike | BigNumber) {
     if (origin instanceof BigNumber) {
       this.inner = origin;
     } else {
@@ -54,7 +54,7 @@ export class Fixed18 {
   /**
    * get the inner BigNumber value
    */
-  public getInner (): BigNumber {
+  public getInner(): BigNumber {
     return this.inner;
   }
 
@@ -63,7 +63,7 @@ export class Fixed18 {
    * @param  dp - decimal places deafult is 6
    * @param  rm - round modle, default is ROUND_FLOOR
    */
-  public toString (dp = 6, rm: ROUND_MODE = 3): string {
+  public toString(dp = 6, rm: ROUND_MODE = 3): string {
     let result = this.inner.div(Fixed18.PRECISION);
 
     result = result.decimalPlaces(dp, rm);
@@ -76,7 +76,7 @@ export class Fixed18 {
    * @param  dp - decimal places deafult is 6
    * @param  rm - round modle, default is ROUND_FLOOR
    */
-  public toFixed (dp = 6, rm: ROUND_MODE = 3): string {
+  public toFixed(dp = 6, rm: ROUND_MODE = 3): string {
     let result = this.inner.div(Fixed18.PRECISION);
 
     result = result.decimalPlaces(dp, rm);
@@ -89,7 +89,7 @@ export class Fixed18 {
    * @param  dp - decimal places deafult is 0
    * @param  rm - round modle, default is ROUND_FLOOR
    */
-  public innerToString (dp = 0, rm: ROUND_MODE = 3): string {
+  public innerToString(dp = 0, rm: ROUND_MODE = 3): string {
     // return 0 if the value is Infinity, -Infinity and NaN
     if (!this.isFinity()) {
       return '0';
@@ -103,7 +103,7 @@ export class Fixed18 {
    * @param  dp - decimal places deafult is 0
    * @param  rm - round modle, default is ROUND_FLOOR
    */
-  public innerToNumber (dp = 0, rm: ROUND_MODE = 3): number {
+  public innerToNumber(dp = 0, rm: ROUND_MODE = 3): number {
     // return 0 if the value is Infinity, -Infinity and NaN
     if (!this.isFinity()) {
       return 0;
@@ -117,7 +117,7 @@ export class Fixed18 {
    * @param  dp - decimal places deafult is 6
    * @param  rm - round modle, default is ROUND_FLOOR
    */
-  public toNumber (dp = 6, rm: ROUND_MODE = 3): number {
+  public toNumber(dp = 6, rm: ROUND_MODE = 3): number {
     let result = this.inner.div(Fixed18.PRECISION);
 
     result = result.decimalPlaces(dp, rm);
@@ -130,7 +130,7 @@ export class Fixed18 {
    * @param  dp - decimal places
    * @param  rm - round modle, default is ROUND_FLOOR
    */
-  public decimalPlaces (dp = 18, rm: ROUND_MODE = 3): Fixed18 {
+  public decimalPlaces(dp = 18, rm: ROUND_MODE = 3): Fixed18 {
     return Fixed18.fromNatural(this.toNumber(dp, rm));
   }
 
@@ -138,7 +138,7 @@ export class Fixed18 {
    * get Fixed18 from real number, will multiply by precision
    * @param  target - target number
    */
-  static fromNatural (target: NumLike): Fixed18 {
+  static fromNatural(target: NumLike): Fixed18 {
     return new Fixed18(new BigNumber(target).times(Fixed18.PRECISION));
   }
 
@@ -146,7 +146,7 @@ export class Fixed18 {
    * get Fixed18 from real number, will not multiply by precision
    * @param  parts - parts number
    */
-  static fromParts (parts: NumLike): Fixed18 {
+  static fromParts(parts: NumLike): Fixed18 {
     return new Fixed18(parts);
   }
 
@@ -154,7 +154,7 @@ export class Fixed18 {
    * @param  n - numerator
    * @param  d - denominator
    */
-  static fromRational (n: NumLike, d: NumLike): Fixed18 {
+  static fromRational(n: NumLike, d: NumLike): Fixed18 {
     const _n = new BigNumber(n);
     const _d = new BigNumber(d);
 
@@ -165,7 +165,7 @@ export class Fixed18 {
    *  fixed-point addition operator
    * @param  target - target number
    */
-  public add (target: Fixed18): Fixed18 {
+  public add(target: Fixed18): Fixed18 {
     return new Fixed18(this.inner.plus(target.inner).decimalPlaces(0, 3));
   }
 
@@ -173,7 +173,7 @@ export class Fixed18 {
    * fixed-point subtraction operator
    * @param  target - target number
    */
-  public sub (target: Fixed18): Fixed18 {
+  public sub(target: Fixed18): Fixed18 {
     return new Fixed18(this.inner.minus(target.inner).decimalPlaces(0, 3));
   }
 
@@ -181,7 +181,7 @@ export class Fixed18 {
    *  fixed-point multiplication operator
    * @param  target - target number
    */
-  public mul (target: Fixed18): Fixed18 {
+  public mul(target: Fixed18): Fixed18 {
     const inner = this.inner.times(target.inner).div(Fixed18.PRECISION).decimalPlaces(0, 3);
 
     return new Fixed18(inner);
@@ -191,7 +191,7 @@ export class Fixed18 {
    * Fixed-point divided operator
    * @param  target - target number
    */
-  public div (target: Fixed18): Fixed18 {
+  public div(target: Fixed18): Fixed18 {
     const inner = this.inner.div(target.inner).times(Fixed18.PRECISION).decimalPlaces(0, 3);
 
     return new Fixed18(inner);
@@ -201,7 +201,7 @@ export class Fixed18 {
    * Return true if the value is less than the target value
    * @param  target  - target number
    */
-  public isLessThan (target: Fixed18): boolean {
+  public isLessThan(target: Fixed18): boolean {
     return this.inner.isLessThan(target.inner);
   }
 
@@ -209,7 +209,7 @@ export class Fixed18 {
    * Return true if the value is greater than the target value
    * @param  target - target number
    */
-  public isGreaterThan (target: Fixed18): boolean {
+  public isGreaterThan(target: Fixed18): boolean {
     return this.inner.isGreaterThan(target.inner);
   }
 
@@ -217,7 +217,7 @@ export class Fixed18 {
    *  return true if the values are equal
    * @param  target - target number
    */
-  public isEqualTo (target: Fixed18): boolean {
+  public isEqualTo(target: Fixed18): boolean {
     return this.inner.isEqualTo(target.inner);
   }
 
@@ -225,7 +225,7 @@ export class Fixed18 {
    * Return the max value
    * @param  target - target numbers
    */
-  public max (...targets: Fixed18[]): Fixed18 {
+  public max(...targets: Fixed18[]): Fixed18 {
     return new Fixed18(BigNumber.max.apply(null, [this.inner, ...targets.map((i) => i.inner)]));
   }
 
@@ -233,41 +233,41 @@ export class Fixed18 {
    * return the min value
    * @param  target - target numbers
    */
-  public min (...targets: Fixed18[]): Fixed18 {
+  public min(...targets: Fixed18[]): Fixed18 {
     return new Fixed18(BigNumber.min.apply(null, [this.inner, ...targets.map((i) => i.inner)]));
   }
 
   /**
    * Return the negated value
    */
-  public negated (): Fixed18 {
+  public negated(): Fixed18 {
     return new Fixed18(this.inner.negated());
   }
 
   /**
    * Return true if the value of inner is 0
    */
-  public isZero (): boolean {
+  public isZero(): boolean {
     return this.inner.isZero();
   }
 
   /**
    * Return true if the value of inner is NaN
    */
-  public isNaN (): boolean {
+  public isNaN(): boolean {
     return this.inner.isNaN();
   }
 
   /**
    * Return true if the value of inner is finity, only return false when the value is NaN, -Infinity or Infinity.
    */
-  public isFinity (): boolean {
+  public isFinity(): boolean {
     return this.inner.isFinite();
   }
 }
 
 // force to Fixed18
-export function convertToFixed18 (data: Codec | number | Fixed18): Fixed18 {
+export function convertToFixed18(data: Codec | number | Fixed18): Fixed18 {
   if (data instanceof Fixed18) {
     return data;
   } else if (typeof data === 'number') {

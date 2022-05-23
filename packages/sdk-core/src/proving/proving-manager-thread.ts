@@ -30,7 +30,7 @@ export type MixerPMSetupInput = {
   fee: number;
   refund: number;
   provingKey: Uint8Array;
-}
+};
 
 export type ProvingManagerSetupInput<T extends NoteProtocol> = ProvingManagerPayload[T];
 
@@ -63,7 +63,7 @@ export type AnchorPMSetupInput = {
   provingKey: Uint8Array;
   roots: Leaves;
   refreshCommitment: string;
-}
+};
 
 /**
  * Proving Manager setup input for anchor API proving manager over sdk-core
@@ -79,7 +79,7 @@ export type AnchorPMSetupInput = {
  * */
 export type VAnchorPMSetupInput = {
   inputNotes: string[];
-  leavesMap: Record<string, Leaves>,
+  leavesMap: Record<string, Leaves>;
   indices: number[];
   roots: Leaves;
   chainId: string;
@@ -88,7 +88,7 @@ export type VAnchorPMSetupInput = {
   metaDataNote?: string;
   externalDataHash: string;
   provingKey: Uint8Array;
-}
+};
 
 interface ProvingManagerPayload extends Record<NoteProtocol, any> {
   mixer: MixerPMSetupInput;
@@ -102,7 +102,7 @@ export class ProvingManagerWrapper {
    * Defaults to worker mode assuming that the Proving manager is running in the browser
    * if it's set to direct-call which is done in nodejs then this is running without worker
    **/
-  constructor (private ctx: 'worker' | 'direct-call' = 'worker') {
+  constructor(private ctx: 'worker' | 'direct-call' = 'worker') {
     // if the Manager is running in side worker it registers an event listener
     if (ctx === 'worker') {
       self.addEventListener('message', async (event) => {
@@ -110,15 +110,16 @@ export class ProvingManagerWrapper {
         const key = Object.keys(message)[0] as keyof PMEvents;
 
         switch (key) {
-          case 'proof': {
-            const [protocol, input] = message.proof!;
-            const proof = await this.proof(protocol, input);
+          case 'proof':
+            {
+              const [protocol, input] = message.proof!;
+              const proof = await this.proof(protocol, input);
 
-            (self as unknown as Worker).postMessage({
-              data: proof,
-              name: key
-            });
-          }
+              (self as unknown as Worker).postMessage({
+                data: proof,
+                name: key,
+              });
+            }
 
             break;
           case 'destroy':
@@ -133,19 +134,19 @@ export class ProvingManagerWrapper {
    * Getter for wasm blob
    * for worker wasm it will resolve the browser build of wasm-utils,and Nodejs build for direct-call
    **/
-  private get wasmBlob () {
+  private get wasmBlob() {
     return this.ctx === 'worker'
       ? import('@webb-tools/wasm-utils/wasm-utils.js')
       : import('@webb-tools/wasm-utils/njs/wasm-utils-njs.js');
   }
 
-  private get proofBuilder () {
+  private get proofBuilder() {
     return this.wasmBlob.then((wasm) => {
       return wasm.JsProofInputBuilder;
     });
   }
 
-  private async generateProof (proofInput: JsProofInput): Promise<JsProofOutput> {
+  private async generateProof(proofInput: JsProofInput): Promise<JsProofOutput> {
     const wasm = await this.wasmBlob;
 
     return wasm.generate_proof_js(proofInput);
@@ -154,9 +155,7 @@ export class ProvingManagerWrapper {
   /**
    * Generate the Zero-knowledge proof from the proof input
    **/
-  async proof<T extends NoteProtocol> (
-    protocol: T,
-    pmSetupInput: ProvingManagerSetupInput<T>): Promise<ProofI<T>> {
+  async proof<T extends NoteProtocol>(protocol: T, pmSetupInput: ProvingManagerSetupInput<T>): Promise<ProofI<T>> {
     const Manager = await this.proofBuilder;
     const pm = new Manager(protocol);
 
@@ -180,7 +179,7 @@ export class ProvingManagerWrapper {
       const mixerProof: ProofI<'mixer'> = {
         nullifierHash: proof.nullifierHash,
         proof: proof.proof,
-        root: proof.root
+        root: proof.root,
       };
 
       return mixerProof as any;
@@ -206,7 +205,7 @@ export class ProvingManagerWrapper {
         nullifierHash: proof.nullifierHash,
         proof: proof.proof,
         root: proof.root,
-        roots: proof.roots
+        roots: proof.roots,
       };
 
       return anchorProof as any;
@@ -220,7 +219,9 @@ export class ProvingManagerWrapper {
       const indices = rawIndices;
 
       if (rawNotes.length !== indices.length) {
-        throw new Error(`Input notes and indices size don't match notes count (${rawNotes.length}) indices count (${indices.length})`);
+        throw new Error(
+          `Input notes and indices size don't match notes count (${rawNotes.length}) indices count (${indices.length})`
+        );
       }
 
       // Pad the 1 note to make 2 inputs
@@ -232,7 +233,11 @@ export class ProvingManagerWrapper {
       if (rawNotes.length > 2 && rawNotes.length < 16) {
         const inputGap = 16 - rawNotes.length;
 
-        jsNotes.push(...Array(inputGap).fill(0).map(() => note.defaultUtxoNote()));
+        jsNotes.push(
+          ...Array(inputGap)
+            .fill(0)
+            .map(() => note.defaultUtxoNote())
+        );
         indices.push(...Array(inputGap).fill(0));
       }
 
@@ -266,7 +271,7 @@ export class ProvingManagerWrapper {
         inputUtxos: proof.inputUtxos,
         outputNotes: proof.outputNotes,
         proof: proof.proof,
-        publicInputs: proof.publicInputs
+        publicInputs: proof.publicInputs,
       };
 
       return anchorProof as any;
@@ -296,7 +301,7 @@ for (let n = 0; n < 256; n++) {
 for (let i = 0; i < 256; i++) {
   for (let j = 0; j < 256; j++) {
     const hex = U8_TO_HEX[i] + U8_TO_HEX[j];
-    const n = i << 8 | j;
+    const n = (i << 8) | j;
 
     U16_TO_HEX[n] = hex;
     // @ts-ignore
@@ -305,7 +310,7 @@ for (let i = 0; i < 256; i++) {
 }
 
 // @ts-ignore
-function hex (value) {
+function hex(value) {
   const mod = value.length % 2;
   const length = value.length - mod;
   const dv = new DataView(value.buffer, value.byteOffset);
@@ -323,8 +328,14 @@ function hex (value) {
 }
 
 // @ts-ignore
-export function u8aToHex (value, bitLength = -1, isPrefixed = true) {
+export function u8aToHex(value, bitLength = -1, isPrefixed = true) {
   const length = Math.ceil(bitLength / 8);
 
-  return `${isPrefixed ? '0x' : ''}${!value || !value.length ? '' : length > 0 && value.length > length ? `${hex(value.subarray(0, length / 2))}…${hex(value.subarray(value.length - length / 2))}` : hex(value)}`;
+  return `${isPrefixed ? '0x' : ''}${
+    !value || !value.length
+      ? ''
+      : length > 0 && value.length > length
+      ? `${hex(value.subarray(0, length / 2))}…${hex(value.subarray(value.length - length / 2))}`
+      : hex(value)
+  }`;
 }

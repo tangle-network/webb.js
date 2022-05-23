@@ -3,34 +3,40 @@
 
 import type { JsNote, JsUtxo, NoteProtocol } from '@webb-tools/wasm-utils';
 
-import { ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
+import {
+  ProvingManagerSetupInput,
+  ProvingManagerWrapper,
+} from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
 
 type VAnchorProof = {
   readonly inputUtxos: Array<JsUtxo>;
   readonly outputNotes: Array<JsNote>;
   readonly proof: string;
   readonly publicInputs: Array<string>;
-}
+};
 type AnchorProof = {
   readonly nullifierHash: string;
   readonly proof: string;
   readonly root: string;
   readonly roots: Array<string>;
-}
+};
 
 type MixerProof = {
   readonly nullifierHash: string;
   readonly proof: string;
   readonly root: string;
-}
+};
 
-export type ProofI<T extends NoteProtocol> = T extends 'vanchor' ? VAnchorProof : T extends 'mixer' ? MixerProof : AnchorProof;
+export type ProofI<T extends NoteProtocol> = T extends 'vanchor'
+  ? VAnchorProof
+  : T extends 'mixer'
+  ? MixerProof
+  : AnchorProof;
 
 export class ProvingManager {
-  constructor (
+  constructor(
     private readonly worker: Worker | null | undefined // Optional WebWorker
-  ) {
-  }
+  ) {}
 
   /**
    * Checks the current `ProvingManager` status wither it is proving with a Worker(browser) or directly(Nodejs),
@@ -39,7 +45,7 @@ export class ProvingManager {
    *
    * @param  input - input for the manager
    **/
-  public prove<T extends NoteProtocol> (protocol: T, input: ProvingManagerSetupInput<T>) {
+  public prove<T extends NoteProtocol>(protocol: T, input: ProvingManagerSetupInput<T>) {
     const worker = this.worker;
 
     if (worker) {
@@ -49,16 +55,17 @@ export class ProvingManager {
     return ProvingManager.proveWithoutWorker(protocol, input);
   }
 
-  private static proveWithoutWorker<T extends NoteProtocol> (
-    protocol: T,
-    input: ProvingManagerSetupInput<T>) {
+  private static proveWithoutWorker<T extends NoteProtocol>(protocol: T, input: ProvingManagerSetupInput<T>) {
     // If the worker CTX is direct-call
     const pm = new ProvingManagerWrapper('direct-call');
 
     return pm.proof(protocol, input);
   }
 
-  private static proveWithWorker<T extends NoteProtocol> (input: [T, ProvingManagerSetupInput<T>], worker: Worker): Promise<ProofI<T>> {
+  private static proveWithWorker<T extends NoteProtocol>(
+    input: [T, ProvingManagerSetupInput<T>],
+    worker: Worker
+  ): Promise<ProofI<T>> {
     return new Promise<ProofI<T>>((resolve, reject) => {
       try {
         worker.addEventListener('message', (e) => {
@@ -67,7 +74,7 @@ export class ProvingManager {
           resolve(payload);
         });
         worker.postMessage({
-          proof: input
+          proof: input,
         });
       } catch (e) {
         reject(e);

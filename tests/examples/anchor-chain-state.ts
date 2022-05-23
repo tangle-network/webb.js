@@ -18,8 +18,7 @@ let keyring: {
   charlie: KeyringPair;
 } | null = null;
 
-const BOBPhrase =
-  'asthma early danger glue satisfy spatial decade wing organ bean census announce';
+const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
 
 function getKeyring() {
   if (keyring) {

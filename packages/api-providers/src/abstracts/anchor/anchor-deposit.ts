@@ -12,9 +12,11 @@ export type AnchorSize = MixerSize;
  * Anchor deposit abstract interface as fixed anchor share similar functionality as the mixer
  * The interface looks the same but there's a different function for note Generation
  **/
-export abstract class AnchorDeposit<T extends WebbApiProvider<any>,
-  K extends DepositPayload = DepositPayload<any>> extends MixerDeposit<T, K> {
-  generateNote (anchorId: number | string): Promise<K> {
+export abstract class AnchorDeposit<
+  T extends WebbApiProvider<any>,
+  K extends DepositPayload = DepositPayload<any>
+> extends MixerDeposit<T, K> {
+  generateNote(anchorId: number | string): Promise<K> {
     throw new Error('api not ready:Not mixer api for ' + anchorId);
   }
 

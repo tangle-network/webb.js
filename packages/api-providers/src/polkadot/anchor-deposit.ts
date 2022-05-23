@@ -21,11 +21,11 @@ type DepositPayload = IDepositPayload<Note, [number, string]>;
  * Webb Anchor API implementation for Polkadot
  **/
 export class PolkadotAnchorDeposit extends AnchorDeposit<WebbPolkadot, DepositPayload> {
-  async deposit (depositPayload: DepositPayload): Promise<void> {
+  async deposit(depositPayload: DepositPayload): Promise<void> {
     const tx = this.inner.txBuilder.build(
       {
         method: 'deposit',
-        section: 'anchorBn254'
+        section: 'anchorBn254',
       },
       depositPayload.params
     );
@@ -41,7 +41,7 @@ export class PolkadotAnchorDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
   }
 
   // anchorId is formatted as 'Bridge=<amount>@<assetName>@<linkableTreeId>.
-  async generateBridgeNote (
+  async generateBridgeNote(
     anchorId: number | string,
     destination: number,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -85,7 +85,7 @@ export class PolkadotAnchorDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
       targetChain: destChainId.toString(),
       targetIdentifyingData: treeId.toString(),
       tokenSymbol: tokenSymbol,
-      width: '4'
+      width: '4',
     };
 
     logger.log('note input', noteInput);
@@ -99,15 +99,15 @@ export class PolkadotAnchorDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
 
     return {
       note,
-      params: [treeId, leafHex]
+      params: [treeId, leafHex],
     };
   }
 
-  private get bridgeApi () {
+  private get bridgeApi() {
     return this.inner.methods.anchorApi as AnchorApi<WebbPolkadot, BridgeConfig>;
   }
 
-  async getSizes (): Promise<AnchorSize[]> {
+  async getSizes(): Promise<AnchorSize[]> {
     const anchors = await this.bridgeApi.getAnchors();
     const currency = this.bridgeApi.currency;
 
@@ -116,7 +116,7 @@ export class PolkadotAnchorDeposit extends AnchorDeposit<WebbPolkadot, DepositPa
         amount: Number(anchor.amount),
         asset: currency.view.symbol,
         id: `Bridge=${anchor.amount}@${currency.view.name}@${anchorIndex}`,
-        title: `${anchor.amount} ${currency.view.name}`
+        title: `${anchor.amount} ${currency.view.name}`,
       }));
     }
 

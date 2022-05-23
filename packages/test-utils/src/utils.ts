@@ -12,31 +12,26 @@ type MethodPath = {
   method: string;
 };
 
-export function currencyToUnitI128 (currencyAmount: number) {
+export function currencyToUnitI128(currencyAmount: number) {
   const bn = BigNumber.from(currencyAmount);
 
   return bn.mul(1_000_000_000_000);
 }
 
-export function polkadotTx (
-  api: ApiPromise,
-  path: MethodPath,
-  params: any[],
-  signer: KeyringPair
-) {
+export function polkadotTx(api: ApiPromise, path: MethodPath, params: any[], signer: KeyringPair) {
   // @ts-ignore
   const tx = api.tx[path.section][path.method](...params);
 
   return new Promise<string>((resolve, reject) => {
     tx.signAndSend(signer, (result) => {
       const status = result.status;
-      const events = result.events.filter(
-        ({ event: { section } }) => section === 'system'
-      );
+      const events = result.events.filter(({ event: { section } }) => section === 'system');
 
       if (status.isInBlock || status.isFinalized) {
         for (const event of events) {
-          const { event: { data, method } } = event;
+          const {
+            event: { data, method },
+          } = event;
           const [dispatchError] = data as any;
 
           if (method === 'ExtrinsicFailed') {
@@ -65,16 +60,18 @@ export function polkadotTx (
   });
 }
 
-export async function createLocalPolkadotApi () {
+export async function createLocalPolkadotApi() {
   const wsProvider = new WsProvider('ws://127.0.0.1:9944');
-  const api = await ApiPromise.create(options({
-    provider: wsProvider
-  }));
+  const api = await ApiPromise.create(
+    options({
+      provider: wsProvider,
+    })
+  );
 
   return api.isReady;
 }
 
-export async function transferBalance (
+export async function transferBalance(
   api: ApiPromise,
   source: KeyringPair,
   receiverPairs: KeyringPair[],
@@ -92,21 +89,14 @@ export async function transferBalance (
   }
 }
 
-export async function fetchRPCTreeLeaves (
-  api: ApiPromise,
-  treeId: string | number
-): Promise<Uint8Array[]> {
+export async function fetchRPCTreeLeaves(api: ApiPromise, treeId: string | number): Promise<Uint8Array[]> {
   let done = false;
   let from = 0;
   let to = 511;
   const leaves: Uint8Array[] = [];
 
   while (done === false) {
-    const treeLeaves: any[] = await (api.rpc as any).mt.getLeaves(
-      treeId,
-      from,
-      to
-    );
+    const treeLeaves: any[] = await (api.rpc as any).mt.getLeaves(treeId, from, to);
 
     if (treeLeaves.length === 0) {
       done = true;

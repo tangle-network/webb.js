@@ -11,8 +11,23 @@ import { Note, NoteGenInput } from '@webb-tools/sdk-core/index.js';
 import { GovernedTokenWrapper } from '@webb-tools/tokens';
 import { toFixedHex } from '@webb-tools/utils';
 
-import { AnchorApi, AnchorDeposit, Currency, DepositPayload as IDepositPayload, MixerSize } from '../abstracts/index.js';
-import { ChainType, ChainTypeId, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, InternalChainId, internalChainIdIntoEVMId, parseChainIdType } from '../chains/index.js';
+import {
+  AnchorApi,
+  AnchorDeposit,
+  Currency,
+  DepositPayload as IDepositPayload,
+  MixerSize,
+} from '../abstracts/index.js';
+import {
+  ChainType,
+  ChainTypeId,
+  chainTypeIdToInternalId,
+  computeChainIdType,
+  evmIdIntoInternalChainId,
+  InternalChainId,
+  internalChainIdIntoEVMId,
+  parseChainIdType,
+} from '../chains/index.js';
 import { BridgeConfig } from '../index.js';
 import { WebbWeb3Provider } from './webb-provider.js';
 
@@ -21,15 +36,15 @@ const logger = LoggerService.get('web3-bridge-deposit');
 type DepositPayload = IDepositPayload<Note, [IAnchorDepositInfo, number | string, string?]>;
 
 export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPayload> {
-  protected get bridgeApi () {
+  protected get bridgeApi() {
     return this.inner.methods.anchorApi as AnchorApi<WebbWeb3Provider, BridgeConfig>;
   }
 
-  protected get config () {
+  protected get config() {
     return this.inner.config;
   }
 
-  async deposit (depositPayload: DepositPayload): Promise<void> {
+  async deposit(depositPayload: DepositPayload): Promise<void> {
     const bridge = this.bridgeApi.activeBridge;
     const currency = this.bridgeApi.currency;
 
@@ -47,13 +62,13 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
         data: {
           amount: note.amount,
           chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
-          currency: currency.view.name
+          currency: currency.view.name,
         },
         description: 'Depositing',
         key: 'bridge-deposit',
         level: 'loading',
         message: `bridge:${depositPayload.params[2] ? 'wrap and deposit' : 'deposit'}`,
-        name: 'Transaction'
+        name: 'Transaction',
       });
 
       const anchors = await this.bridgeApi.getAnchors();
@@ -84,7 +99,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
             level: 'info',
             message: 'Waiting for token approval',
             name: 'Approval',
-            persist: true
+            persist: true,
           });
           const tokenInstance = await ERC20Factory.connect(
             depositPayload.params[2],
@@ -106,26 +121,26 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
             data: {
               amount: note.amount,
               chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
-              currency: currency.view.name
+              currency: currency.view.name,
             },
             description: 'Depositing',
             key: 'bridge-deposit',
             level: 'success',
             message: `${currency.view.name}:wrap and deposit`,
-            name: 'Transaction'
+            name: 'Transaction',
           });
         } else {
           this.inner.notificationHandler({
             data: {
               amount: note.amount,
               chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
-              currency: currency.view.name
+              currency: currency.view.name,
             },
             description: 'Not enough token balance',
             key: 'bridge-deposit',
             level: 'error',
             message: `${currency.view.name}:wrap and deposit`,
-            name: 'Transaction'
+            name: 'Transaction',
           });
         }
 
@@ -140,7 +155,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
             level: 'info',
             message: 'Waiting for token approval',
             name: 'Approval',
-            persist: true
+            persist: true,
           });
           const tokenInstance = await contract.getWebbToken();
           const tx = await tokenInstance.approve(contract.inner.address, await contract.denomination);
@@ -157,40 +172,40 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
             data: {
               amount: note.amount,
               chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
-              currency: currency.view.name
+              currency: currency.view.name,
             },
             description: 'Depositing',
             key: 'bridge-deposit',
             level: 'success',
             message: `${currency.view.name} deposit`,
-            name: 'Transaction'
+            name: 'Transaction',
           });
         } else {
           this.inner.notificationHandler({
             data: {
               amount: note.amount,
               chain: getEVMChainNameFromInternal(this.inner.config, Number(sourceInternalId)),
-              currency: currency.view.name
+              currency: currency.view.name,
             },
             description: 'Not enough token balance',
             key: 'bridge-deposit',
             level: 'error',
             message: 'Not enough token balance',
-            name: 'Transaction'
+            name: 'Transaction',
           });
         }
       }
     } catch (e: any) {
       console.log(e);
 
-      if ((e)?.code === 4001) {
+      if (e?.code === 4001) {
         this.inner.notificationHandler.remove('waiting-approval');
         this.inner.notificationHandler({
           description: 'user rejected deposit',
           key: 'bridge-deposit',
           level: 'error',
           message: `${currency.view.name}:deposit`,
-          name: 'Transaction'
+          name: 'Transaction',
         });
       } else {
         this.inner.notificationHandler.remove('waiting-approval');
@@ -199,13 +214,13 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
           key: 'bridge-deposit',
           level: 'error',
           message: `${currency.view.name}:deposit`,
-          name: 'Transaction'
+          name: 'Transaction',
         });
       }
     }
   }
 
-  async getSizes (): Promise<MixerSize[]> {
+  async getSizes(): Promise<MixerSize[]> {
     const anchors = await this.bridgeApi.getAnchors();
     const currency = this.bridgeApi.currency;
 
@@ -214,20 +229,20 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
         amount: Number(anchor.amount),
         asset: currency.view.symbol,
         id: `Bridge=${anchor.amount}@${currency.view.name}`,
-        title: `${anchor.amount} ${currency.view.name}`
+        title: `${anchor.amount} ${currency.view.name}`,
       }));
     }
 
     return [];
   }
 
-  async getWrappableAssets (chainId: InternalChainId): Promise<Currency[]> {
+  async getWrappableAssets(chainId: InternalChainId): Promise<Currency[]> {
     const bridge = this.bridgeApi;
 
     logger.log('getWrappableAssets of chain: ', chainId);
     const chainIdType: ChainTypeId = {
       chainId: internalChainIdIntoEVMId(chainId),
-      chainType: ChainType.EVM
+      chainType: ChainType.EVM,
     };
 
     if (bridge) {
@@ -238,7 +253,10 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       }
 
       // Get the available token addresses which can wrap into the wrappedToken
-      const wrappedToken = GovernedTokenWrapper.connect(wrappedTokenAddress, this.inner.getEthersProvider().getSigner());
+      const wrappedToken = GovernedTokenWrapper.connect(
+        wrappedTokenAddress,
+        this.inner.getEthersProvider().getSigner()
+      );
       const tokenAddresses = await wrappedToken.contract.getTokens();
 
       // TODO: dynamic wrappable assets - consider some Currency constructor via address & default token config.
@@ -282,7 +300,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
    * destChainId => the Chain the token will be bridged to
    * If the wrappableAssetAddress is not provided, it is assumed to be the address of the webbToken
    **/
-  async generateBridgeNote (
+  async generateBridgeNote(
     anchorId: number | string,
     destChainId: number,
     wrappableAssetAddress?: string
@@ -312,14 +330,16 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       exponentiation: '5',
       hashFunction: 'Poseidon',
       protocol: 'anchor',
-      secrets: `${toFixedHex(destChainId, 6).substring(2)}:${deposit.nullifier.toString(16)}:${deposit.secret.toString(16)}`,
+      secrets: `${toFixedHex(destChainId, 6).substring(2)}:${deposit.nullifier.toString(16)}:${deposit.secret.toString(
+        16
+      )}`,
       sourceChain: sourceChainId.toString(),
       sourceIdentifyingData: srcAddress,
       targetChain: destChainId.toString(),
       targetIdentifyingData: target,
       tokenSymbol: tokenSymbol,
       version: 'v2',
-      width: '4'
+      width: '4',
     };
 
     console.log(`noteInput to generateNote: ${noteInput}`);
@@ -327,7 +347,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
 
     return {
       note: note,
-      params: [deposit, anchorId, wrappableAssetAddress]
+      params: [deposit, anchorId, wrappableAssetAddress],
     };
   }
 }

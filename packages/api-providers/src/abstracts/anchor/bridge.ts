@@ -13,7 +13,7 @@ export class Bridge {
   /*
    *  Get all Bridge tokens
    * */
-  static getTokens (currenciesConfig: AppConfig['currencies']): Currency[] {
+  static getTokens(currenciesConfig: AppConfig['currencies']): Currency[] {
     const bridgeCurrenciesConfig = Object.values(currenciesConfig).filter((i) => i.role === CurrencyRole.Governable);
 
     return bridgeCurrenciesConfig.map((config) => {
@@ -24,7 +24,7 @@ export class Bridge {
   /*
    *  Get all Bridge tokens for a given chain
    * */
-  static getTokensOfChain (currenciesConfig: AppConfig['currencies'], chainId: InternalChainId): Currency[] {
+  static getTokensOfChain(currenciesConfig: AppConfig['currencies'], chainId: InternalChainId): Currency[] {
     const tokens = Bridge.getTokens(currenciesConfig);
 
     return tokens.filter((token) => token.hasChain(chainId));

@@ -7,7 +7,12 @@ import { Log } from '@ethersproject/abstract-provider';
 import { Anchor } from '@webb-tools/anchors';
 import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
-import { ERC20, ERC20__factory as ERC20Factory, FixedDepositAnchor, FixedDepositAnchor__factory } from '@webb-tools/contracts';
+import {
+  ERC20,
+  ERC20__factory as ERC20Factory,
+  FixedDepositAnchor,
+  FixedDepositAnchor__factory,
+} from '@webb-tools/contracts';
 import { IAnchorDepositInfo } from '@webb-tools/interfaces';
 import { MerkleTree } from '@webb-tools/merkle-tree';
 import { getFixedAnchorExtDataHash, toFixedHex } from '@webb-tools/utils';
@@ -33,33 +38,29 @@ export class AnchorContract {
   private _contract: FixedDepositAnchor;
   private readonly signer: Signer;
 
-  constructor (
-    private web3Provider: providers.Web3Provider,
-    address: string,
-    useProvider = false
-  ) {
+  constructor(private web3Provider: providers.Web3Provider, address: string, useProvider = false) {
     this.signer = this.web3Provider.getSigner();
     logger.info(`Init with address ${address} `);
     this._contract = FixedDepositAnchor__factory.connect(address, useProvider ? this.web3Provider : this.signer);
   }
 
-  get getLastRoot () {
+  get getLastRoot() {
     return this._contract.getLastRoot();
   }
 
-  get nextIndex () {
+  get nextIndex() {
     return this._contract.nextIndex();
   }
 
-  get denomination () {
+  get denomination() {
     return this._contract.denomination();
   }
 
-  get inner () {
+  get inner() {
     return this._contract;
   }
 
-  static createTreeWithRoot (leaves: string[], targetRoot: string): MerkleTree | undefined {
+  static createTreeWithRoot(leaves: string[], targetRoot: string): MerkleTree | undefined {
     const tree = new MerkleTree(30, []);
 
     for (let i = 0; i < leaves.length; i++) {
@@ -77,14 +78,14 @@ export class AnchorContract {
     return undefined;
   }
 
-  async getWebbToken (): Promise<ERC20> {
+  async getWebbToken(): Promise<ERC20> {
     const tokenAddress = await this._contract.token();
     const tokenInstance = ERC20Factory.connect(tokenAddress, this.signer);
 
     return tokenInstance;
   }
 
-  async isWebbTokenApprovalRequired () {
+  async isWebbTokenApprovalRequired() {
     const userAddress = await this.signer.getAddress();
     const tokenInstance = await this.getWebbToken();
     const tokenAllowance = await tokenInstance.allowance(userAddress, this._contract.address);
@@ -100,7 +101,7 @@ export class AnchorContract {
     return false;
   }
 
-  async isWrappableTokenApprovalRequired (tokenAddress: string) {
+  async isWrappableTokenApprovalRequired(tokenAddress: string) {
     // Native token never requires approval
     if (tokenAddress === zeroAddress) {
       return false;
@@ -118,7 +119,7 @@ export class AnchorContract {
     return false;
   }
 
-  async hasEnoughBalance (tokenAddress?: string) {
+  async hasEnoughBalance(tokenAddress?: string) {
     const userAddress = await this.signer.getAddress();
     const depositAmount = await this.denomination;
     let tokenBalance: BigNumber;
@@ -147,7 +148,7 @@ export class AnchorContract {
     return true;
   }
 
-  async approve (tokenInstance: Contract) {
+  async approve(tokenInstance: Contract) {
     // check the approved spending before attempting deposit
     if (tokenInstance == null) {
       return;
@@ -161,14 +162,14 @@ export class AnchorContract {
     }
   }
 
-  async deposit (commitment: string) {
+  async deposit(commitment: string) {
     const overrides = {};
     const recipient = await this._contract.deposit(commitment, overrides);
 
     await recipient.wait();
   }
 
-  async wrapAndDeposit (commitment: string, tokenAddress: string) {
+  async wrapAndDeposit(commitment: string, tokenAddress: string) {
     const value = await this._contract.denomination();
 
     if (tokenAddress === zeroAddress) {
@@ -190,12 +191,12 @@ export class AnchorContract {
 
   // Verify the leaf occurred at the reported block
   // This is important to check the behavior of relayers before modifying local storage
-  async leafCreatedAtBlock (leaf: string, blockNumber: number): Promise<boolean> {
+  async leafCreatedAtBlock(leaf: string, blockNumber: number): Promise<boolean> {
     const filter = this._contract.filters.Deposit(null, null, null);
     const logs = await this.web3Provider.getLogs({
       fromBlock: blockNumber,
       toBlock: blockNumber,
-      ...filter
+      ...filter,
     });
     const events = logs.map((log) => this._contract.interface.parseLog(log));
 
@@ -208,7 +209,7 @@ export class AnchorContract {
     return false;
   }
 
-  async getDepositLeaves (
+  async getDepositLeaves(
     startingBlock: number,
     finalBlock: number
   ): Promise<{ lastQueriedBlock: number; newLeaves: string[] }> {
@@ -229,7 +230,7 @@ export class AnchorContract {
           return this.web3Provider.getLogs({
             fromBlock: i,
             toBlock: finalBlock - i > step ? i + step : finalBlock,
-            ...filter
+            ...filter,
           });
         });
 
@@ -250,11 +251,11 @@ export class AnchorContract {
 
     return {
       lastQueriedBlock: finalBlock,
-      newLeaves: newCommitments
+      newLeaves: newCommitments,
     };
   }
 
-  async generateLinkedMerkleProof (sourceDeposit: IAnchorDepositInfo, sourceLeaves: string[], sourceChainId: number) {
+  async generateLinkedMerkleProof(sourceDeposit: IAnchorDepositInfo, sourceLeaves: string[], sourceChainId: number) {
     // Grab the root of the source chain to prove against
     const edgeIndex = await this._contract.edgeIndex(sourceChainId);
     const edge = await this._contract.edgeList(edgeIndex);
@@ -274,16 +275,16 @@ export class AnchorContract {
 
       return {
         index: index,
-        path: path
+        path: path,
       };
     }
 
     return undefined;
   }
 
-  async withdraw (proof: any, zkp: ZKPWebbAnchorInputWithMerkle, pub: any): Promise<string> {
+  async withdraw(proof: any, zkp: ZKPWebbAnchorInputWithMerkle, pub: any): Promise<string> {
     const overrides = {
-      gasLimit: 6000000
+      gasLimit: 6000000,
     };
     const proofBytes = await Anchor.generateWithdrawProofCallData(proof, pub);
     const nullifierHash = toFixedHex(zkp.nullifierHash);
@@ -293,21 +294,21 @@ export class AnchorContract {
       _recipient: zkp.recipient,
       _refreshCommitment: toFixedHex('0'),
       _refund: toFixedHex(zkp.refund),
-      _relayer: zkp.relayer
+      _relayer: zkp.relayer,
     });
     const tx = await this._contract.withdraw(
       {
         _extDataHash: extDataHash.toHexString(),
         _nullifierHash: nullifierHash,
         _roots: roots,
-        proof: `0x${proofBytes}`
+        proof: `0x${proofBytes}`,
       },
       {
         _fee: toFixedHex(zkp.fee),
         _recipient: zkp.recipient,
         _refreshCommitment: toFixedHex('0'),
         _refund: toFixedHex(zkp.refund),
-        _relayer: zkp.relayer
+        _relayer: zkp.relayer,
       },
       overrides
     );

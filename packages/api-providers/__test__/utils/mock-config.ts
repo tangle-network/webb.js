@@ -13,23 +13,23 @@ const anchorsConfig: AppConfig['anchors'] = {
       amount: '10',
       anchorAddresses: {},
       anchorTreeIds: {
-        [InternalChainId.ProtocolSubstrateStandalone]: '3'
-      }
+        [InternalChainId.ProtocolSubstrateStandalone]: '3',
+      },
     },
     {
       amount: '100',
       anchorAddresses: {},
       anchorTreeIds: {
-        [InternalChainId.ProtocolSubstrateStandalone]: '4'
-      }
+        [InternalChainId.ProtocolSubstrateStandalone]: '4',
+      },
     },
     {
       amount: '1000',
       anchorAddresses: {},
       anchorTreeIds: {
-        [InternalChainId.ProtocolSubstrateStandalone]: '5'
-      }
-    }
+        [InternalChainId.ProtocolSubstrateStandalone]: '5',
+      },
+    },
   ],
   [WebbCurrencyId.webbDEV]: [
     {
@@ -37,11 +37,11 @@ const anchorsConfig: AppConfig['anchors'] = {
       anchorAddresses: {
         [InternalChainId.HermesLocalnet]: '0xbfce6B877Ebff977bB6e80B24FbBb7bC4eBcA4df',
         [InternalChainId.AthenaLocalnet]: '0xcd75Ad7AC9C9325105f798c476E84176648F391A',
-        [InternalChainId.DemeterLocalnet]: '0x4e3df2073bf4b43B9944b8e5A463b1E185D6448C'
+        [InternalChainId.DemeterLocalnet]: '0x4e3df2073bf4b43B9944b8e5A463b1E185D6448C',
       },
-      anchorTreeIds: {}
-    }
-  ]
+      anchorTreeIds: {},
+    },
+  ],
 };
 const chainsConfig: AppConfig['chains'] = {
   [InternalChainId.ProtocolSubstrateStandalone]: {
@@ -54,7 +54,7 @@ const chainsConfig: AppConfig['chains'] = {
     name: 'Webb Development',
     nativeCurrencyId: WebbCurrencyId.WEBB,
     tag: 'dev',
-    url: 'ws://127.0.0.1:9944'
+    url: 'ws://127.0.0.1:9944',
   },
   [InternalChainId.HermesLocalnet]: {
     chainId: EVMChainId.HermesLocalnet,
@@ -67,7 +67,7 @@ const chainsConfig: AppConfig['chains'] = {
     name: 'Hermes Localnet',
     nativeCurrencyId: WebbCurrencyId.ETH,
     tag: 'dev',
-    url: 'http://127.0.0.1:5001'
+    url: 'http://127.0.0.1:5001',
   },
   [InternalChainId.AthenaLocalnet]: {
     chainId: EVMChainId.AthenaLocalnet,
@@ -80,7 +80,7 @@ const chainsConfig: AppConfig['chains'] = {
     name: 'Athena Localnet',
     nativeCurrencyId: WebbCurrencyId.ETH,
     tag: 'dev',
-    url: 'http://127.0.0.1:5002'
+    url: 'http://127.0.0.1:5002',
   },
   [InternalChainId.DemeterLocalnet]: {
     chainId: EVMChainId.DemeterLocalnet,
@@ -93,18 +93,18 @@ const chainsConfig: AppConfig['chains'] = {
     name: 'Demeter Localnet',
     nativeCurrencyId: WebbCurrencyId.ETH,
     tag: 'dev',
-    url: 'http://127.0.0.1:5003'
-  }
+    url: 'http://127.0.0.1:5003',
+  },
 };
 const bridgeConfigByAsset: AppConfig['bridgeByAsset'] = {
   [WebbCurrencyId.WEBB]: {
     anchors: anchorsConfig[WebbCurrencyId.WEBB],
-    asset: WebbCurrencyId.WEBB
+    asset: WebbCurrencyId.WEBB,
   },
   [WebbCurrencyId.webbDEV]: {
     anchors: anchorsConfig[WebbCurrencyId.webbDEV],
-    asset: WebbCurrencyId.webbDEV
-  }
+    asset: WebbCurrencyId.webbDEV,
+  },
 };
 const currenciesConfig: AppConfig['currencies'] = {
   [WebbCurrencyId.WEBB]: {
@@ -116,13 +116,13 @@ const currenciesConfig: AppConfig['currencies'] = {
     name: 'WEBB',
     role: CurrencyRole.Governable,
     symbol: 'WEBB',
-    type: CurrencyType.ORML
+    type: CurrencyType.ORML,
   },
   [WebbCurrencyId.DEV]: {
     addresses: new Map([
       [InternalChainId.HermesLocalnet, '0x2946259E0334f33A064106302415aD3391BeD384'],
       [InternalChainId.AthenaLocalnet, '0xDe09E74d4888Bc4e65F589e8c13Bce9F71DdF4c7'],
-      [InternalChainId.DemeterLocalnet, '0xF2E246BB76DF876Cef8b38ae84130F4F55De395b']
+      [InternalChainId.DemeterLocalnet, '0xF2E246BB76DF876Cef8b38ae84130F4F55De395b'],
     ]),
     color: '',
     icon: undefined,
@@ -130,13 +130,13 @@ const currenciesConfig: AppConfig['currencies'] = {
     name: 'Development Token',
     role: CurrencyRole.Wrappable,
     symbol: 'DEV',
-    type: CurrencyType.ERC20
+    type: CurrencyType.ERC20,
   },
   [WebbCurrencyId.webbDEV]: {
     addresses: new Map([
       [InternalChainId.HermesLocalnet, '0x510C6297cC30A058F41eb4AF1BFC9953EaD8b577'],
       [InternalChainId.AthenaLocalnet, '0xcbD945E77ADB65651F503723aC322591f3435cC5'],
-      [InternalChainId.DemeterLocalnet, '0x7758F98C1c487E5653795470eEab6C4698bE541b']
+      [InternalChainId.DemeterLocalnet, '0x7758F98C1c487E5653795470eEab6C4698bE541b'],
     ]),
     color: '',
     icon: undefined,
@@ -144,13 +144,13 @@ const currenciesConfig: AppConfig['currencies'] = {
     name: 'Webb Development Token',
     role: CurrencyRole.Governable,
     symbol: 'webbDEV',
-    type: CurrencyType.ERC20
+    type: CurrencyType.ERC20,
   },
   [WebbCurrencyId.ETH]: {
     addresses: new Map([
       [InternalChainId.HermesLocalnet, zeroAddress],
       [InternalChainId.AthenaLocalnet, zeroAddress],
-      [InternalChainId.DemeterLocalnet, zeroAddress]
+      [InternalChainId.DemeterLocalnet, zeroAddress],
     ]),
     color: '',
     icon: undefined,
@@ -158,8 +158,8 @@ const currenciesConfig: AppConfig['currencies'] = {
     name: 'Ethereum',
     role: CurrencyRole.Wrappable,
     symbol: 'ETH',
-    type: CurrencyType.NATIVE
-  }
+    type: CurrencyType.NATIVE,
+  },
 };
 
 const walletsConfig: AppConfig['wallet'] = {};
@@ -169,5 +169,5 @@ export const mockAppConfig: AppConfig = {
   bridgeByAsset: bridgeConfigByAsset,
   chains: chainsConfig,
   currencies: currenciesConfig,
-  wallet: walletsConfig
+  wallet: walletsConfig,
 };

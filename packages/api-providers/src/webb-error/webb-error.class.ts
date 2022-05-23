@@ -42,18 +42,18 @@ export class WebbError extends Error {
   /// error message for this error
   readonly errorMessage: WebbErrorMessage;
 
-  constructor (readonly code: WebbErrorCodes) {
+  constructor(readonly code: WebbErrorCodes) {
     super(WebbError.getErrorMessage(code).message);
     this.errorMessage = WebbError.getErrorMessage(code);
   }
 
   /// create a `WebbError` from the error code
-  static from (code: WebbErrorCodes) {
+  static from(code: WebbErrorCodes) {
     return new WebbError(code);
   }
 
   /// Static method to ge the error of the map if it's there, or create it and append the map
-  static getErrorMessage (code: WebbErrorCodes): WebbErrorMessage {
+  static getErrorMessage(code: WebbErrorCodes): WebbErrorMessage {
     const errorMessage = WebbError.errorMessageMap.get(code);
 
     if (errorMessage) {
@@ -64,74 +64,74 @@ export class WebbError extends Error {
       case WebbErrorCodes.UnsupportedChain:
         return {
           code,
-          message: 'you have switched to unsupported chain'
+          message: 'you have switched to unsupported chain',
         };
       case WebbErrorCodes.UnselectedChain:
         return {
           code,
-          message: 'User did not select the chain'
+          message: 'User did not select the chain',
         };
       case WebbErrorCodes.MixerSizeNotFound:
         return {
           code,
-          message: 'Mixer size not found in contract'
+          message: 'Mixer size not found in contract',
         };
       case WebbErrorCodes.NoAccountAvailable:
         return {
           code,
-          message: 'No account available'
+          message: 'No account available',
         };
       case WebbErrorCodes.NoteParsingFailure:
         return {
           code,
-          message: 'Failed to parse deposit note'
+          message: 'Failed to parse deposit note',
         };
       case WebbErrorCodes.PolkaDotExtensionNotInstalled:
         return {
           code,
-          message: 'PolkaDot extension no installed'
+          message: 'PolkaDot extension no installed',
         };
       case WebbErrorCodes.MetaMaskExtensionNotInstalled:
         return {
           code,
-          message: 'MetaMask extension no installed'
+          message: 'MetaMask extension no installed',
         };
       case WebbErrorCodes.InsufficientProviderInterface:
         return {
           code,
-          message: 'switched to insufficient api interface'
+          message: 'switched to insufficient api interface',
         };
       case WebbErrorCodes.EVMSessionAlreadyEnded:
         return {
           code,
-          message: 'Attempt to end session and it\' already ended or unknown error'
+          message: "Attempt to end session and it' already ended or unknown error",
         };
       case WebbErrorCodes.RelayerUnsupportedMixer:
         return {
           code,
-          message: 'Attempt to use a relayer which does not support the mixer'
+          message: 'Attempt to use a relayer which does not support the mixer',
         };
       case WebbErrorCodes.RelayerMisbehaving:
         return {
           code,
-          message: 'The selected relayer is not operating properly'
+          message: 'The selected relayer is not operating properly',
         };
       case WebbErrorCodes.ChainIdTypeUnformatted:
         return {
           code,
-          message: 'Parsing of a ChainIdType failed'
+          message: 'Parsing of a ChainIdType failed',
         };
 
       default:
         return {
           code,
-          message: 'Unknown error'
+          message: 'Unknown error',
         };
     }
   }
 
   /// Coercion to sting
-  toString () {
+  toString() {
     return this.message;
   }
 }

@@ -1,19 +1,17 @@
-import {Note, NoteGenInput, ProvingManager, u8aToHex} from '@webb-tools/sdk-core';
-import {fetchRPCTreeLeaves, polkadotTx, preparePolkadotApi, transferBalance} from "../utils.js";
-import {decodeAddress, Keyring} from "@polkadot/keyring";
-import {cryptoWaitReady} from '@polkadot/util-crypto'
-import {ProvingManagerSetupInput} from "@webb-tools/sdk-core/src";
-import path from "path";
-import fs from "fs";
-import {hexToU8a} from "@polkadot/util";
-import {WithdrawProof} from "../../../tests/utils";
-
+import { Note, NoteGenInput, ProvingManager, u8aToHex } from '@webb-tools/sdk-core';
+import { fetchRPCTreeLeaves, polkadotTx, preparePolkadotApi, transferBalance } from '../utils.js';
+import { decodeAddress, Keyring } from '@polkadot/keyring';
+import { cryptoWaitReady } from '@polkadot/util-crypto';
+import { ProvingManagerSetupInput } from '@webb-tools/sdk-core/src';
+import path from 'path';
+import fs from 'fs';
+import { hexToU8a } from '@polkadot/util';
+import { WithdrawProof } from '../../../tests/utils';
 
 async function mixerBn254() {
-  const BOBPhrase =
-    'asthma early danger glue satisfy spatial decade wing organ bean census announce';
+  const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
   await cryptoWaitReady();
-  const k = new Keyring({type: 'sr25519'});
+  const k = new Keyring({ type: 'sr25519' });
   const bob = k.addFromMnemonic(BOBPhrase);
   const charlie = k.addFromUri('//Charlie');
   // API promise inlining
@@ -27,30 +25,25 @@ async function mixerBn254() {
   const noteGenInput: NoteGenInput = {
     protocol: 'mixer',
     version: 'v2',
-    sourceChain: "1",
-    targetChain: "1",
-    amount: "1",
-    tokenSymbol: "WEBB",
-    sourceIdentifyingData: "3",
+    sourceChain: '1',
+    targetChain: '1',
+    amount: '1',
+    tokenSymbol: 'WEBB',
+    sourceIdentifyingData: '3',
     targetIdentifyingData: '3',
-    denomination: "18",
-    backend: "Arkworks",
-    hashFunction: "Poseidon",
-    curve: "Bn254",
+    denomination: '18',
+    backend: 'Arkworks',
+    hashFunction: 'Poseidon',
+    curve: 'Bn254',
     width: '3',
-    exponentiation: "5"
-  }
+    exponentiation: '5',
+  };
   // Generate deposit note
-  const note = await Note.generateNote(noteGenInput)
+  const note = await Note.generateNote(noteGenInput);
   const leaf = note.getLeaf();
   console.info(`[ mixerBn254 ] Note generate the leaf is ${u8aToHex(leaf)}`);
   // Do the transaction for depositing
-  await polkadotTx(
-    apiPromise,
-    {section: 'mixerBn254', method: 'deposit'},
-    [0, leaf],
-    bob
-  );
+  await polkadotTx(apiPromise, { section: 'mixerBn254', method: 'deposit' }, [0, leaf], bob);
   console.log(`[ mixerBn254 ] Deposit is Done successfully`);
   // Withdraw for mixerBn254
   const accountId = bob.address;
@@ -82,11 +75,11 @@ async function mixerBn254() {
     refund: 0,
     leaves,
     recipient: addressHex.replace('0x', ''),
-    relayer: relayerAddressHex.replace('0x', '')
+    relayer: relayerAddressHex.replace('0x', ''),
   };
 
   // Proof
-  const proof = await pm.prove('mixer',provingInput)
+  const proof = await pm.prove('mixer', provingInput);
 
   const withdrawProof: WithdrawProof = {
     id: String(0),
@@ -112,21 +105,14 @@ async function mixerBn254() {
   ];
 
   // Sending the transaction
-  const txHash = await polkadotTx(
-    apiPromise,
-    {section: 'mixerBn254', method: 'withdraw'},
-    params,
-    bob
-  );
+  const txHash = await polkadotTx(apiPromise, { section: 'mixerBn254', method: 'withdraw' }, params, bob);
 
   console.log(txHash);
   await apiPromise.disconnect();
-// Kill the process
+  // Kill the process
   process.exit(0);
 }
 
-
-mixerBn254()
-  .catch(e => {
-    console.error(e);
-  })
+mixerBn254().catch((e) => {
+  console.error(e);
+});

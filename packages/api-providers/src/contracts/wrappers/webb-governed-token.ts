@@ -11,7 +11,7 @@ import { zeroAddress } from '../index.js';
 
 const logger = LoggerService.get('WebbGovernedToken');
 
-function checkNativeAddress (tokenAddress: string): boolean {
+function checkNativeAddress(tokenAddress: string): boolean {
   if (tokenAddress === zeroAddress || tokenAddress === '0') {
     return true;
   }
@@ -23,40 +23,40 @@ export class WebbGovernedToken {
   private _contract: GovernedTokenWrapper;
   private readonly signer: Signer;
 
-  constructor (private web3Provider: providers.Web3Provider, address: string) {
+  constructor(private web3Provider: providers.Web3Provider, address: string) {
     this.signer = this.web3Provider.getSigner();
     logger.info(`Init with address ${address} `);
     this._contract = new Contract(address, GovernedTokenWrapper__factory.abi, this.signer) as any;
   }
 
-  get address () {
+  get address() {
     return this._contract.address;
   }
 
-  get tokens () {
+  get tokens() {
     return this._contract.getTokens();
   }
 
-  async getInfo () {
+  async getInfo() {
     const [symbol, name] = await Promise.all([this._contract.symbol(), this._contract.name()]);
 
     return {
       name,
-      symbol
+      symbol,
     };
   }
 
-  getBalanceOf (account: string) {
+  getBalanceOf(account: string) {
     return this._contract.balanceOf(account);
   }
 
   /// todo assume native
-  async wrap (address: string, amount: BigNumberish) {
+  async wrap(address: string, amount: BigNumberish) {
     const isNative = checkNativeAddress(address);
     const amountParam = isNative ? 0 : amount;
 
     const overrides: PayableOverrides = {
-      gasLimit: 6000000
+      gasLimit: 6000000,
     };
 
     if (isNative) {
@@ -68,9 +68,9 @@ export class WebbGovernedToken {
     return this._contract.wrap(address, amountParam, overrides);
   }
 
-  async unwrap (address: string, amount: BigNumberish) {
+  async unwrap(address: string, amount: BigNumberish) {
     const overrides: PayableOverrides = {
-      gasLimit: 6000000
+      gasLimit: 6000000,
     };
 
     logger.info(
@@ -80,18 +80,18 @@ export class WebbGovernedToken {
     return this._contract.unwrap(address, amount, overrides);
   }
 
-  get currentLiquidity () {
+  get currentLiquidity() {
     return this._contract.totalSupply();
   }
 
-  get contractBalance () {
+  get contractBalance() {
     return this.web3Provider.getBalance(this._contract.address);
   }
 
-  async canUnwrap (account: string, amount: BigNumberish) {
+  async canUnwrap(account: string, amount: BigNumberish) {
     const [currentWrappedLiquidity] = await Promise.all([
       this.currentLiquidity,
-      this.web3Provider.getBalance(this._contract.address)
+      this.web3Provider.getBalance(this._contract.address),
     ]);
 
     if (currentWrappedLiquidity.lt(amount) || currentWrappedLiquidity.lt(amount)) {
@@ -108,7 +108,7 @@ export class WebbGovernedToken {
     return false;
   }
 
-  async isNativeAllowed () {
+  async isNativeAllowed() {
     const nativeAllowed = await this._contract.isNativeAllowed();
 
     return nativeAllowed;
@@ -116,7 +116,7 @@ export class WebbGovernedToken {
 
   // Checks if the governed token wraps a particular token.
   // Does NOT check if allowances for ERC20s are satisfied.
-  async canwrap (tokenAddress: string) {
+  async canwrap(tokenAddress: string) {
     const tokens = await this._contract.getTokens();
 
     if (tokens.includes(tokenAddress)) {

@@ -18,7 +18,7 @@ export enum WithdrawState {
   SendingTransaction, // There is a withdraw in progress, and it's on the step Sending the Transaction whether directly or through relayers
 
   Done, // the withdraw is Done and succeeded, the next tic the instance should be ideal
-  Failed // the withdraw is Done with a failure, the next tic the instance should be ideal
+  Failed, // the withdraw is Done with a failure, the next tic the instance should be ideal
 }
 
 // Events that can be emitted using the {EventBus}
@@ -55,18 +55,18 @@ export abstract class MixerWithdraw<T extends WebbApiProvider<any>> extends Even
   private _activeRelayer: OptionalActiveRelayer = null;
   cancelToken: CancelToken = { cancelled: false };
 
-  constructor (protected inner: T) {
+  constructor(protected inner: T) {
     super();
     this.watcher = this.emitter.asObservable();
   }
 
   // Whether  there is an active relayer
-  get hasRelayer (): Promise<boolean> {
+  get hasRelayer(): Promise<boolean> {
     return Promise.resolve(false);
   }
 
   // Getter for the active relayer First arg of the tuple will be the OptionalActiveRelayer, the other one is a watcher
-  get activeRelayer (): [OptionalActiveRelayer, Observable<OptionalActiveRelayer>] {
+  get activeRelayer(): [OptionalActiveRelayer, Observable<OptionalActiveRelayer>] {
     return [this._activeRelayer, this.watcher];
   }
 
@@ -75,20 +75,20 @@ export abstract class MixerWithdraw<T extends WebbApiProvider<any>> extends Even
    * It maps a relayer to the active relayer type that can be used for relaying withdrawing
    **/
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  mapRelayerIntoActive (relayer: OptionalRelayer, internalChainId: InternalChainId): Promise<OptionalActiveRelayer> {
+  mapRelayerIntoActive(relayer: OptionalRelayer, internalChainId: InternalChainId): Promise<OptionalActiveRelayer> {
     return Promise.resolve(null);
   }
 
   /**
    * Set/unset the active relayer
    **/
-  public async setActiveRelayer (relayer: OptionalRelayer, internalChainId: InternalChainId) {
+  public async setActiveRelayer(relayer: OptionalRelayer, internalChainId: InternalChainId) {
     this._activeRelayer = await this.mapRelayerIntoActive(relayer, internalChainId);
     this.emitter.next(this._activeRelayer);
   }
 
   // todo switch to the reactive api
-  get relayers (): Promise<WebbRelayer[]> {
+  get relayers(): Promise<WebbRelayer[]> {
     return Promise.resolve([]);
   }
 
@@ -98,7 +98,7 @@ export abstract class MixerWithdraw<T extends WebbApiProvider<any>> extends Even
    *
    **/
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getRelayersByNote (note: Note): Promise<WebbRelayer[]> {
+  getRelayersByNote(note: Note): Promise<WebbRelayer[]> {
     return Promise.resolve([]);
   }
 
@@ -108,13 +108,13 @@ export abstract class MixerWithdraw<T extends WebbApiProvider<any>> extends Even
    *
    **/
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getRelayersByChainAndAddress (chainId: InternalChainId, address: string): Promise<WebbRelayer[]> {
+  getRelayersByChainAndAddress(chainId: InternalChainId, address: string): Promise<WebbRelayer[]> {
     return Promise.resolve([]);
   }
 
   /**
    *  cancel the withdraw */
-  cancelWithdraw (): Promise<void> {
+  cancelWithdraw(): Promise<void> {
     this.cancelToken.cancelled = true;
     this.emit('stateChange', WithdrawState.Cancelling);
 

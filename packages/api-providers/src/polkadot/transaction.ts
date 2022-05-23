@@ -72,11 +72,11 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
   private transactionAddress: AddressOrPair | null = null;
   private isWrapped = false;
 
-  constructor (private apiPromise: ApiPromise, private path: MethodPath, private parms: P) {
+  constructor(private apiPromise: ApiPromise, private path: MethodPath, private parms: P) {
     super();
   }
 
-  async call (signAddress: AddressOrPair) {
+  async call(signAddress: AddressOrPair) {
     txLogger.info(`Sending ${this.path.section} ${this.path.method} transaction by`, signAddress, this.parms);
     this.transactionAddress = signAddress;
     const api = this.apiPromise;
@@ -100,7 +100,7 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
     }
 
     const txResults = await api.tx[this.path.section][this.path.method](...this.parms).signAsync(signAddress, {
-      nonce: -1
+      nonce: -1,
     });
 
     await this.emitWithPayload('beforeSend', undefined);
@@ -116,7 +116,7 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
     return hash;
   }
 
-  protected async emitWithPayload<E extends keyof PolkadotTXEvents> (
+  protected async emitWithPayload<E extends keyof PolkadotTXEvents>(
     event: E,
     data: PolkadotTXEvents[E]['data']
   ): Promise<void> {
@@ -128,11 +128,11 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
       address: this.transactionAddress ?? '',
       data: data,
       key: this.notificationKey,
-      path: this.path
+      path: this.path,
     } as any);
   }
 
-  private errorHandler (r: SubmittableResult) {
+  private errorHandler(r: SubmittableResult) {
     // @ts-ignore
     let message = r.dispatchError?.type || r.type || r.message;
 
@@ -155,7 +155,7 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
     return message;
   }
 
-  private async send (tx: SubmittableExtrinsic<any>) {
+  private async send(tx: SubmittableExtrinsic<any>) {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       try {
@@ -165,7 +165,9 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
 
           if (status.isInBlock || status.isFinalized) {
             for (const event of events) {
-              const { event: { data, method } } = event;
+              const {
+                event: { data, method },
+              } = event;
               const [dispatchError] = data as any;
 
               if (method === 'ExtrinsicFailed') {
@@ -210,14 +212,13 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
 }
 
 export class PolkaTXBuilder {
-  constructor (private apiPromise: ApiPromise, private notificationHandler: NotificationHandler) {
-  }
+  constructor(private apiPromise: ApiPromise, private notificationHandler: NotificationHandler) {}
 
-  buildWithoutNotification<P extends Array<any>> ({ method, section }: MethodPath, params: P): PolkadotTx<P> {
+  buildWithoutNotification<P extends Array<any>>({ method, section }: MethodPath, params: P): PolkadotTx<P> {
     return new PolkadotTx<P>(this.apiPromise.clone(), { method, section }, params);
   }
 
-  build<P extends Array<any>> (path: MethodPath, params: P, notificationHandler?: NotificationHandler): PolkadotTx<P> {
+  build<P extends Array<any>>(path: MethodPath, params: P, notificationHandler?: NotificationHandler): PolkadotTx<P> {
     const tx = this.buildWithoutNotification(path, params);
     const handler = notificationHandler || this.notificationHandler;
 
@@ -228,7 +229,7 @@ export class PolkaTXBuilder {
         level: 'loading',
         message: `${data.path.section}:${data.path.method}`,
         name: 'Transaction',
-        persist: true
+        persist: true,
       });
     });
 
@@ -239,7 +240,7 @@ export class PolkaTXBuilder {
         level: 'success',
         message: `${data.path.section}:${data.path.method}`,
         name: 'Transaction',
-        persist: true
+        persist: true,
       });
     });
 
@@ -251,7 +252,7 @@ export class PolkaTXBuilder {
         level: 'error',
         message: `${data.path.section}:${data.path.method}`,
         name: 'Transaction',
-        persist: true
+        persist: true,
       });
     });
 
