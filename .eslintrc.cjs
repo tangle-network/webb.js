@@ -4,7 +4,8 @@ module.exports = {
   ...base,
   plugins:[
     ...base.plugins,
-    "eslint-plugin-tsdoc"
+    "eslint-plugin-tsdoc",
+    "prettier"
   ],
   ignorePatterns: [
     '.eslintrc.cjs',
@@ -27,7 +28,7 @@ module.exports = {
   rules: {
     ...base.rules,
     '@typescript-eslint/no-explicit-any': 'off',
-    'prettier/prettier': 0,
+    'prettier/prettier': "error",
     'header/header': [2, 'line', [
       {pattern: ' Copyright 2022 @webb-tools/'},
       ' SPDX-License-Identifier: Apache-2.0'
