@@ -4,9 +4,57 @@
   "description": "the core of webb tools sdk",
   "author": "Webb Developers <drew@webb.tools>",
   "license": "Apache-2.0",
-  "main": "index.cjs",
-  "module": "index.js",
   "type": "module",
+  "main": "./cjs/index.js",
+  "module": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "require": "./cjs/index.js",
+      "default": "./index.js"
+    },
+    "./index.js": {
+      "types": "./index.d.ts",
+      "require": "./cjs/index.js",
+      "default": "./index.js"
+    },
+    "./src/index.js": {
+      "types": "./src/index.d.ts",
+      "require": "./src/cjs/index.js",
+      "default": "./src/index.js"
+    },
+    "./proving": {
+      "types": "./proving/index.d.ts",
+      "require": "./cjs/proving/index.js",
+      "default": "./proving/index.js"
+    },
+    "./cjs/proving": {
+      "types": "./proving/index.d.ts",
+      "require": "./cjs/proving/index.js",
+      "default": "./cjs/proving/index.js"
+    },
+    "./proving/proving-manager.js": {
+      "types": "./proving/proving-manager.d.ts",
+      "require": "./cjs/proving/proving-manager.js",
+      "default": "./proving/proving-manager.js"
+    },
+    "./cjs/proving/proving-manager.js": {
+      "types": "./proving/proving-manager.d.ts",
+      "require": "./cjs/proving/proving-manager.js",
+      "default": "./cjs/proving/proving-manager.js"
+    },
+    "./proving/proving-manager-thread.js": {
+      "types": "./proving/proving-manager-thread.d.ts",
+      "require": "./cjs/proving/proving-manager-thread.js",
+      "default": "./proving/proving-manager-thread.js"
+    },
+    "./cjs/proving/proving-manager-thread.js": {
+      "types": "./proving/proving-manager-thread.d.ts",
+      "require": "./cjs/proving/proving-manager-thread.js",
+      "default": "./cjs/proving/proving-manager-thread.js"
+    }
+  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"

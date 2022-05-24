@@ -3,9 +3,27 @@
   "version": "0.1.4-62",
   "description": "dApp provider to work with Webb",
   "author": "Webb Developers <drew@webb.tools>",
-  "main": "index.cjs",
-  "module": "index.js",
   "type": "module",
+  "main": "./cjs/index.js",
+  "module": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "require": "./cjs/index.js",
+      "default": "./index.js"
+    },
+    "./index.js": {
+      "types": "./index.d.ts",
+      "require": "./cjs/index.js",
+      "default": "./index.js"
+    },
+    "./src/index.js": {
+      "types": "./src/index.d.ts",
+      "require": "./src/cjs/index.js",
+      "default": "./src/index.js"
+    }
+  },
   "license": "Apache-2.0",
   "publishConfig": {
     "access": "public",
