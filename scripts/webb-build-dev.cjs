@@ -91,7 +91,7 @@ function postProcessingForCjs(dir) {
 
         // If a string contains '@webb-tools/<x>/' (where x != wasm-utils),
         // then this is a path which should be accommodated for cjs
-        const rexexp = new RegExp('((@webb-tools\/)((?!wasm-utils).)[^/\s]*\/)', 'g');
+        const rexexp = new RegExp('((@webb-tools\/)((?!wasm-utils).)[^/s]*\/)', 'g');
         const modifiedFileText = rawFileText.replaceAll(rexexp, "$1cjs/");
 
         fs.writeFileSync(filePath, modifiedFileText);
