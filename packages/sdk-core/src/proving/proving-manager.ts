@@ -56,7 +56,7 @@ export class ProvingManager {
     // If the worker CTX is direct-call
     const pm = new ProvingManagerWrapper('direct-call');
 
-    return pm.proof(protocol, input);
+    return pm.prove(protocol, input);
   }
 
   private static proveWithWorker<T extends NoteProtocol> (
