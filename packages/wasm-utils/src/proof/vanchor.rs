@@ -7,7 +7,7 @@ use arkworks_setups::{Curve as ArkCurve, VAnchorProver};
 use rand::rngs::OsRng;
 
 use crate::note::JsNote;
-use crate::proof::{VAnchorProof, VAnchorProofPayload};
+use crate::proof::{OutputUtxoConfig, VAnchorProof, VAnchorProofPayload};
 use crate::types::{Backend, Curve, HashFunction, NoteProtocol, NoteVersion, OpStatusCode, OperationError};
 use crate::utxo::JsUtxo;
 use crate::{VAnchorR1CSProverBn254_30_2_16_2, VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF};
@@ -52,6 +52,63 @@ fn get_output_notes(
 			OperationError::new_with_message(OpStatusCode::Unknown, "Failed to generate the notes".to_string())
 		})
 }
+
+pub fn setup_output_utxos(
+	output_config: [OutputUtxoConfig; 2],
+	backend: Backend,
+	curve: Curve,
+	input_size: usize,
+	anchor_size: usize,
+	rng: &mut OsRng,
+) -> Result<[JsUtxo; 2], OperationError> {
+	match (backend, curve, input_size, anchor_size) {
+		(Backend::Circom, Curve::Bn254, 2, 2) => {
+			let utxo_o_1 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
+				ArkCurve::Bn254,
+				output_config[0].chain_id,
+				output_config[0].amount,
+				None,
+				rng,
+			)
+			.unwrap();
+			let utxo_o_2 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
+				ArkCurve::Bn254,
+				output_config[1].chain_id,
+				output_config[1].amount,
+				None,
+				rng,
+			)
+			.unwrap();
+			Ok([
+				JsUtxo::new_from_bn254_utxo(utxo_o_1),
+				JsUtxo::new_from_bn254_utxo(utxo_o_2),
+			])
+		}
+		(Backend::Circom, Curve::Bn254, 16, 2) => {
+			let utxo_o_1 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
+				ArkCurve::Bn254,
+				output_config[0].chain_id,
+				output_config[0].amount,
+				None,
+				rng,
+			)
+			.unwrap();
+			let utxo_o_2 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
+				ArkCurve::Bn254,
+				output_config[1].chain_id,
+				output_config[1].amount,
+				None,
+				rng,
+			)
+			.unwrap();
+			Ok([
+				JsUtxo::new_from_bn254_utxo(utxo_o_1),
+				JsUtxo::new_from_bn254_utxo(utxo_o_2),
+			])
+		}
+		_ => Err(OpStatusCode::InvalidProofParameters.into()),
+	}
+}
 pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -> Result<VAnchorProof, OperationError> {
 	let VAnchorProofPayload {
 		public_amount,
@@ -65,7 +122,7 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		roots,
 		pk,
 		chain_id,
-		output_config,
+		output_utxos,
 		ext_data_hash,
 	} = vanchor_proof_input.clone();
 
@@ -108,31 +165,15 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		));
 	};
 	// Initialize the output notes vec
-	let mut output_notes = vec![];
+	let output_notes = get_output_notes(&vanchor_proof_input, output_utxos.clone())?.to_vec();
 	let proof = match (backend, curve, roots.len()) {
 		(Backend::Arkworks, Curve::Bn254, 2) => {
-			let utxo_o_1 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
-				ArkCurve::Bn254,
-				output_config[0].chain_id,
-				output_config[0].amount,
-				None,
-				rng,
-			)
-			.unwrap();
-			let utxo_o_2 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
-				ArkCurve::Bn254,
-				output_config[1].chain_id,
-				output_config[1].amount,
-				None,
-				rng,
-			)
-			.unwrap();
-			let utxos_out = [utxo_o_1.clone(), utxo_o_2.clone()];
-			output_notes = get_output_notes(&vanchor_proof_input, [
-				JsUtxo::new_from_bn254_utxo(utxo_o_1),
-				JsUtxo::new_from_bn254_utxo(utxo_o_2),
-			])?
-			.to_vec();
+			let utxos_out = output_utxos
+				.iter()
+				.map(|js_utx| js_utx.get_bn254_utxo())
+				.collect::<Result<Vec<_>, OpStatusCode>>()?
+				.try_into()
+				.map_err(|_| OpStatusCode::InvalidProofParameters)?;
 			match (exponentiation, width, in_utxos.len()) {
 				(5, 5, 2) => {
 					let utxos_in: [Utxo<Bn254Fr>; 2] = [in_utxos[0].get_bn254_utxo()?, in_utxos[1].get_bn254_utxo()?];

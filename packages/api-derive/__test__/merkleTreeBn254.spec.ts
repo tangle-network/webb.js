@@ -1,12 +1,14 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
+/* tslint:disable */
+/* eslint-disable */
 import '@webb-tools/types/build/index.js';
 
-import { MerkleTree } from '@webb-tools/merkle-tree';
+// import { MerkleTree } from '@webb-tools/merkle-tree';
 import { createLocalPolkadotApi, polkadotTx } from '@webb-tools/test-utils/src/index.js';
 import { expect } from 'chai';
-import { BigNumber } from 'ethers';
+// import { BigNumber } from 'ethers';
 
 import { ApiPromise, Keyring } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -53,22 +55,5 @@ describe('getLeafCountForTree should work', function () {
     expect(leafCountAfter).to.eq(leafCountBefore + 1);
   });
 
-  it.skip('should match on-chain merkle tree and tree created from leaves for getLeaves', async () => {
-    api = await createLocalPolkadotApi();
 
-    const leafCount = await api.derive.merkleTreeBn254.getLeafCountForTree(0);
-    const chainTree = await api.query.merkleTreeBn254.trees(0);
-    const chainRoot = chainTree.unwrap().root.toString();
-
-    const leaves = await api.derive.merkleTreeBn254.getLeavesForTree(0, 0, leafCount - 1);
-    const stringLeaves = leaves.map((leaf) => {
-      return `0x${Buffer.from(leaf).toString('hex')}`;
-    });
-
-    console.log('chainRoot: ', chainRoot);
-    console.log(stringLeaves);
-    const calculatedTree = new MerkleTree(30, stringLeaves);
-
-    expect(BigNumber.from(calculatedTree.root())).to.eq(BigNumber.from(chainRoot));
-  });
 });

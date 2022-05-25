@@ -19,6 +19,7 @@ use wasm_bindgen::convert::FromWasmAbi;
 use wasm_bindgen::prelude::*;
 
 use crate::note::JsNote;
+use crate::proof::vanchor::setup_output_utxos;
 use crate::types::{
 	Backend, Curve, Indices, Leaves, NoteProtocol, OpStatusCode, OperationError, Protocol, Uint8Arrayx32, WasmCurve,
 };
@@ -409,7 +410,7 @@ pub struct VAnchorProofPayload {
 	// Public amount
 	pub public_amount: i128,
 	// utxo config
-	pub output_config: [OutputUtxoConfig; 2],
+	pub output_utxos: [JsUtxo; 2],
 }
 #[wasm_bindgen]
 #[derive(Clone, Debug)]
@@ -597,6 +598,8 @@ impl VAnchorProofInput {
 			oe.data = Some(format!("{{ inputAmount:{} ,outputAmount:{}}}", in_amount, out_amount));
 			return Err(oe);
 		}
+		let output_utxos =
+			vanchor::setup_output_utxos(output_config, backend, curve, secret.len(), roots.len(), &mut OsRng)?;
 
 		Ok(VAnchorProofPayload {
 			exponentiation,
@@ -611,7 +614,7 @@ impl VAnchorProofInput {
 			indices,
 			chain_id: chain_id.try_into().unwrap(),
 			public_amount,
-			output_config,
+			output_utxos,
 		})
 	}
 }
