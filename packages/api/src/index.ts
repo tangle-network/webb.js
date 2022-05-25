@@ -76,30 +76,28 @@ export const options = ({ types = {},
  * @param chainTypes - An object containing the `types` and `typesBundle` of another chain
  * @returns The `ApiOptions` of the chain with Webb's types added.
  */
-export const optionsWithChain = (chainTypes: any) => ({ types = {},
-  rpc = {},
-  typesAlias = {},
-  typesBundle = {},
-  ...otherOptions }: ApiOptions = {}): ApiOptions => ({
-  rpc: {
-    ...rpc
-  },
-  types: {
-    ...chainTypes.types,
-    ...types
-  },
-  typesAlias: {
-    ...typesAlias
-  },
-  typesBundle: {
-    ...typesBundle,
-    spec: {
-      ...typesBundle.spec,
-      ...chainTypes.typesBundle.spec,
-      webb: {
-        ...typesBundle?.spec?.webb
-      }
-    }
-  },
-  ...otherOptions
-});
+export const optionsWithChain =
+  (chainTypes: any) =>
+    ({ types = {}, rpc = {}, typesAlias = {}, typesBundle = {}, ...otherOptions }: ApiOptions = {}): ApiOptions => ({
+      rpc: {
+        ...rpc
+      },
+      types: {
+        ...chainTypes.types,
+        ...types
+      },
+      typesAlias: {
+        ...typesAlias
+      },
+      typesBundle: {
+        ...typesBundle,
+        spec: {
+          ...typesBundle.spec,
+          ...chainTypes.typesBundle.spec,
+          webb: {
+            ...typesBundle?.spec?.webb
+          }
+        }
+      },
+      ...otherOptions
+    });

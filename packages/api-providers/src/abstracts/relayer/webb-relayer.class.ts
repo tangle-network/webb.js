@@ -77,8 +77,10 @@ export type RelayerCMDs<A extends RelayerCMDBase, C extends CMDSwitcher<A>> = A 
     ? RelayerSubstrateCommands[C]
     : never;
 
-export type WithdrawRelayerArgs<A extends RelayerCMDBase, C extends CMDSwitcher<A>> = Omit<RelayerCMDs<A, C>,
-keyof RelayedChainInput | 'proof'>;
+export type WithdrawRelayerArgs<A extends RelayerCMDBase, C extends CMDSwitcher<A>> = Omit<
+RelayerCMDs<A, C>,
+keyof RelayedChainInput | 'proof'
+>;
 
 export interface RelayerInfo {
   substrate: Record<string, RelayedChainConfig | null>;
@@ -124,9 +126,7 @@ export class WebbRelayerBuilder {
       supportedChains: {
         evm: info.evm
           ? Object.keys(info.evm)
-            .filter(
-              (key) => (info.evm[key]?.beneficiary) && nameAdapter(key, 'evm') != null
-            )
+            .filter((key) => info.evm[key]?.beneficiary && nameAdapter(key, 'evm') != null)
             .reduce((m, key) => {
               m.set(nameAdapter(key, 'evm'), info.evm[key]);
 
@@ -291,7 +291,7 @@ export enum RelayedWithdrawResult {
   OnFlight,
   Continue,
   CleanExit,
-  Errored
+  Errored,
 }
 
 /**
@@ -402,8 +402,7 @@ class RelayedWithdraw {
 }
 
 export class WebbRelayer {
-  constructor (readonly endpoint: string, readonly capabilities: Capabilities) {
-  }
+  constructor (readonly endpoint: string, readonly capabilities: Capabilities) {}
 
   async initWithdraw<Target extends RelayerCMDKey> (target: Target) {
     const ws = new WebSocket(this.endpoint.replace('http', 'ws') + '/ws');
@@ -415,7 +414,7 @@ export class WebbRelayer {
 
     /// insure the socket is open
     /// maybe removed soon
-    for (; ;) {
+    for (;;) {
       if (ws.readyState === 1) {
         break;
       }

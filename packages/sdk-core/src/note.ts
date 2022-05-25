@@ -44,7 +44,7 @@ export type NoteGenInput = {
   secrets?: string;
   width: string;
   exponentiation: string;
-  index?: number
+  index?: number;
 };
 
 /**
@@ -57,8 +57,7 @@ export class Note {
   static CURRENT_VERSION: Version = 'v2';
 
   // Default constructor
-  private constructor (readonly note: JsNote) {
-  }
+  private constructor (readonly note: JsNote) {}
 
   /**
    * Gets the WebAssembly module for the target environment.
@@ -71,6 +70,16 @@ export class Note {
     } else {
       return import('@webb-tools/wasm-utils/wasm-utils.js');
     }
+  }
+
+  /**
+   * Generate a default JsUtxo which will have both index,amount = 0
+   * @returns A note class instance.
+   */
+  public getDefaultUtxoNote (): Note {
+    const note = this.note.defaultUtxoNote();
+
+    return new Note(note);
   }
 
   /**

@@ -3,12 +3,12 @@ import { options } from '@webb-tools/api/index.js';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import {
-  AnchorMTBn254X5,
+  MTBn254X5,
   generate_proof_js,
   JsNote,
   JsNoteBuilder,
   OperationError,
-  ProofInputBuilder,
+  JsProofInputBuilder,
 } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/keyring';
@@ -29,20 +29,13 @@ type MethodPath = {
   method: string;
 };
 
-export function polkadotTx(
-  api: ApiPromise,
-  path: MethodPath,
-  params: any[],
-  signer: KeyringPair
-) {
+export function polkadotTx(api: ApiPromise, path: MethodPath, params: any[], signer: KeyringPair) {
   // @ts-ignore
   const tx = api.tx[path.section][path.method](...params);
   return new Promise<string>((resolve, reject) => {
     tx.signAndSend(signer, (result) => {
       const status = result.status;
-      const events = result.events.filter(
-        ({ event: { section } }) => section === 'system'
-      );
+      const events = result.events.filter(({ event: { section } }) => section === 'system');
       if (status.isInBlock || status.isFinalized) {
         for (const event of events) {
           const {
@@ -78,64 +71,63 @@ export function polkadotTx(
 
 export async function preparePolkadotApi() {
   const wsProvider = new WsProvider('ws://127.0.0.1:9944');
-  const api = await ApiPromise.create(options({
-    provider: wsProvider,
-    rpc: {
-      mt: {
-        getLeaves: {
-          description: 'Query for the tree leaves',
-          params: [
-            {
-              name: 'tree_id',
-              type: 'u32',
-              isOptional: false,
-            },
-            {
-              name: 'from',
-              type: 'u32',
-              isOptional: false,
-            },
-            {
-              name: 'to',
-              type: 'u32',
-              isOptional: false,
-            },
-            {
-              name: 'at',
-              type: 'Hash',
-              isOptional: true,
-            },
-          ],
-          type: 'Vec<[u8; 32]>',
+  const api = await ApiPromise.create(
+    options({
+      provider: wsProvider,
+      rpc: {
+        mt: {
+          getLeaves: {
+            description: 'Query for the tree leaves',
+            params: [
+              {
+                name: 'tree_id',
+                type: 'u32',
+                isOptional: false,
+              },
+              {
+                name: 'from',
+                type: 'u32',
+                isOptional: false,
+              },
+              {
+                name: 'to',
+                type: 'u32',
+                isOptional: false,
+              },
+              {
+                name: 'at',
+                type: 'Hash',
+                isOptional: true,
+              },
+            ],
+            type: 'Vec<[u8; 32]>',
+          },
+        },
+        lt: {
+          getNeighborRoots: {
+            description: 'Query for the neighbor roots',
+            params: [
+              {
+                name: 'tree_id',
+                type: 'u32',
+                isOptional: false,
+              },
+              {
+                name: 'at',
+                type: 'Hash',
+                isOptional: true,
+              },
+            ],
+            type: 'Vec<[u8; 32]>',
+          },
         },
       },
-      lt: {
-        getNeighborRoots: {
-          description: 'Query for the neighbor roots',
-          params: [
-            {
-              name: 'tree_id',
-              type: 'u32',
-              isOptional: false,
-            },
-            {
-              name: 'at',
-              type: 'Hash',
-              isOptional: true,
-            },
-          ],
-          type: 'Vec<[u8; 32]>',
-        },
-      },
-    },
-  }));
+    })
+  );
   return api.isReady;
 }
 
-export function awaitPolkadotTxFinalization(
-  tx: SubmittableExtrinsic,
-  signer: KeyringPair
-) {
+export function awaitPolkadotTxFinalization(tx: SubmittableExtrinsic, signer: KeyringPair) {
   return new Promise((resolve, reject) => {
     tx.signAndSend(signer, { nonce: -1 }, (status) => {
       if (status.isFinalized || status.isCompleted) {
@@ -178,11 +170,7 @@ export async function setORMLTokenBalance(
     });
     api.tx.sudo
       .sudo(
-        api.tx.currencies.updateBalance(
-          address,
-          ORMLCurrencyId,
-          api.createType('i128', currencyToUnitI128(amount)),
-        )
+        api.tx.currencies.updateBalance(address, ORMLCurrencyId, api.createType('i128', currencyToUnitI128(amount)))
       )
       .signAndSend(sudoPair, (res) => {
         if (res.isFinalized || res.isCompleted) {
@@ -217,21 +205,14 @@ export async function getAnchors(apiPromise: ApiPromise) {
   return anc;
 }
 
-export async function fetchRPCTreeLeaves(
-  api: ApiPromise,
-  treeId: string | number
-): Promise<Uint8Array[]> {
+export async function fetchRPCTreeLeaves(api: ApiPromise, treeId: string | number): Promise<Uint8Array[]> {
   let done = false;
   let from = 0;
   let to = 511;
   const leaves: Uint8Array[] = [];
 
   while (done === false) {
-    const treeLeaves: any[] = await (api.rpc as any).mt.getLeaves(
-      treeId,
-      from,
-      to
-    );
+    const treeLeaves: any[] = await (api.rpc as any).mt.getLeaves(treeId, from, to);
     if (treeLeaves.length === 0) {
       done = true;
       break;
@@ -243,10 +224,7 @@ export async function fetchRPCTreeLeaves(
   return leaves;
 }
 
-export async function depositMixerBnX5_3(
-  api: ApiPromise,
-  depositor: KeyringPair
-) {
+export async function depositMixerBnX5_3(api: ApiPromise, depositor: KeyringPair) {
   let noteBuilder = new JsNoteBuilder();
   noteBuilder.protocol('mixer');
   noteBuilder.version('v2');
@@ -268,12 +246,7 @@ export async function depositMixerBnX5_3(
   const note = noteBuilder.build();
   const leaf = note.getLeafCommitment();
 
-  await polkadotTx(
-    api,
-    { section: 'mixerBn254', method: 'deposit' },
-    [0, leaf],
-    depositor
-  );
+  await polkadotTx(api, { section: 'mixerBn254', method: 'deposit' }, [0, leaf], depositor);
   return note;
 }
 
@@ -291,9 +264,7 @@ export type AnchorWithdrawProof = WithdrawProof & {
   commitment: string;
 };
 
-export function catchWasmError<T extends (...args: any) => any>(
-  fn: T
-): ReturnType<T> {
+export function catchWasmError<T extends (...args: any) => any>(fn: T): ReturnType<T> {
   try {
     return fn();
   } catch (e) {
@@ -313,10 +284,7 @@ function firstAnchorTreeId(apiPromise: ApiPromise) {
   return getAnchors(apiPromise).then((i) => i[0]!.treeId) as Promise<string>;
 }
 
-export async function depositAnchorBnX5_4(
-  api: ApiPromise,
-  depositor: KeyringPair
-) {
+export async function depositAnchorBnX5_4(api: ApiPromise, depositor: KeyringPair) {
   const treeId = await firstAnchorTreeId(api);
 
   let noteBuilder = new JsNoteBuilder();
@@ -340,12 +308,7 @@ export async function depositAnchorBnX5_4(
   const note = noteBuilder.build();
   const leaf = note.getLeafCommitment();
 
-  await polkadotTx(
-    api,
-    { method: 'deposit', section: 'anchorBn254' },
-    [treeId, leaf],
-    depositor
-  );
+  await polkadotTx(api, { method: 'deposit', section: 'anchorBn254' }, [treeId, leaf], depositor);
   return note;
 }
 
@@ -362,12 +325,7 @@ export async function createAnchor(
     { method: 'sudo', section: 'sudo' },
     [
       // @ts-ignore
-      api.tx.anchorBn254.create(
-        currencyToUnitI128(size).toString(),
-        maxEdges,
-        depth,
-        assetId
-      ),
+      api.tx.anchorBn254.create(currencyToUnitI128(size).toString(), maxEdges, depth, assetId),
     ],
     sudoPair
   );
@@ -388,7 +346,7 @@ export async function withdrawAnchorBnx5_4(
   // fetch leaves
   const leafCount = await api.derive.merkleTreeBn254.getLeafCountForTree(Number(treeId));
   const leaves = await api.derive.merkleTreeBn254.getLeavesForTree(Number(treeId), 0, leafCount - 1);
-  const proofInputBuilder = new ProofInputBuilder();
+  const proofInputBuilder = new JsProofInputBuilder('anchor');
   const leafHex = u8aToHex(note.getLeafCommitment());
   proofInputBuilder.setNote(note);
   proofInputBuilder.setLeaves(leaves);
@@ -398,11 +356,11 @@ export async function withdrawAnchorBnx5_4(
 
   proofInputBuilder.setFee('5');
   proofInputBuilder.setRefund('1');
-  const merkeTree = new AnchorMTBn254X5(leaves, String(leafIndex));
+  const merkeTree = new MTBn254X5(leaves, String(leafIndex));
   const root = `0x${merkeTree.root}`;
 
   proofInputBuilder.setRefreshCommitment('0000000000000000000000000000000000000000000000000000000000000000');
-  
+
   // get the neighbor roots
   // @ts-ignore
   const neighborRoots = await api.rpc.lt.getNeighborRoots(treeId);
@@ -434,7 +392,7 @@ export async function withdrawAnchorBnx5_4(
 
   const proofInput = proofInputBuilder.build_js();
 
-  const zkProofMetadata = generate_proof_js(proofInput);
+  const zkProofMetadata = generate_proof_js(proofInput).anchorProof;
 
   const withdrawProof: AnchorWithdrawProof = {
     id: treeId,
@@ -458,12 +416,7 @@ export async function withdrawAnchorBnx5_4(
     withdrawProof.refund,
     withdrawProof.commitment,
   ];
-  return polkadotTx(
-    api,
-    { method: 'withdraw', section: 'anchorBn254' },
-    params,
-    signer
-  );
+  return polkadotTx(api, { method: 'withdraw', section: 'anchorBn254' }, params, signer);
 }
 
 export async function withdrawMixerBnX5_3(
@@ -478,7 +431,7 @@ export async function withdrawMixerBnX5_3(
   const relayerAddressHex = u8aToHex(decodeAddress(relayerAccountId));
   // Fetch leaves
   const leaves = await fetchRPCTreeLeaves(api, 0);
-  const proofInputBuilder = new ProofInputBuilder();
+  const proofInputBuilder = new JsProofInputBuilder('mixer');
   const leafHex = u8aToHex(note.getLeafCommitment());
   proofInputBuilder.setNote(note);
   proofInputBuilder.setLeaves(leaves);
@@ -508,7 +461,7 @@ export async function withdrawMixerBnX5_3(
 
   const proofInput = proofInputBuilder.build_js();
 
-  const zkProofMetadata = generate_proof_js(proofInput);
+  const zkProofMetadata = generate_proof_js(proofInput).mixerProof;
 
   /*
   const vkPath = path.join(
@@ -544,10 +497,5 @@ export async function withdrawMixerBnX5_3(
     withdrawProof.fee,
     withdrawProof.refund,
   ];
-  return polkadotTx(
-    api,
-    { section: 'mixerBn254', method: 'withdraw' },
-    params,
-    signer
-  );
+  return polkadotTx(api, { section: 'mixerBn254', method: 'withdraw' }, params, signer);
 }

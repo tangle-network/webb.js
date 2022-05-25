@@ -46,14 +46,17 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
   constructor (protected inner: WebbWeb3Provider) {
     super(inner);
 
-    inner.getChainId().then((evmChainId) => {
-      this._currentChainId.next(evmIdIntoInternalChainId(evmChainId));
-      this._event.next({
-        ready: null
+    inner
+      .getChainId()
+      .then((evmChainId) => {
+        this._currentChainId.next(evmIdIntoInternalChainId(evmChainId));
+        this._event.next({
+          ready: null
+        });
+      })
+      .catch((e) => {
+        throw e;
       });
-    }).catch((e) => {
-      throw e;
-    });
 
     inner.on('providerUpdate', ([evmChainId]) => {
       this._currentChainId.next(evmIdIntoInternalChainId(evmChainId));
@@ -266,7 +269,6 @@ export class Web3WrapUnwrap extends WrapUnwrap<WebbWeb3Provider> {
         level: 'error',
         message: 'GovernedTokenwrapper:wrap',
         name: 'Transaction'
-
       });
 
       return '';

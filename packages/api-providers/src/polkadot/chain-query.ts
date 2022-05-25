@@ -28,7 +28,7 @@ export class PolkadotChainQuery extends ChainQuery<WebbPolkadot> {
         let tokenBalance: string = json.free;
 
         tokenBalance = tokenBalance.replaceAll(',', '');
-        const denominatedTokenBalance = Number(tokenBalance) / (10 ** 12);
+        const denominatedTokenBalance = Number(tokenBalance) / 10 ** 12;
 
         return denominatedTokenBalance.toString();
       } else {
@@ -40,7 +40,7 @@ export class PolkadotChainQuery extends ChainQuery<WebbPolkadot> {
         let tokenBalance: string = json.data.free;
 
         tokenBalance = tokenBalance.replaceAll(',', '');
-        const denominatedTokenBalance = Number(tokenBalance) / (10 ** 12);
+        const denominatedTokenBalance = Number(tokenBalance) / 10 ** 12;
 
         return denominatedTokenBalance.toString();
       }

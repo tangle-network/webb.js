@@ -174,7 +174,7 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
     } catch (e: any) {
       console.log(e);
 
-      if ((e)?.code === 4001) {
+      if (e?.code === 4001) {
         this.inner.notificationHandler.remove('waiting-approval');
         this.inner.notificationHandler({
           description: 'user rejected deposit',
@@ -231,7 +231,10 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       }
 
       // Get the available token addresses which can wrap into the wrappedToken
-      const wrappedToken = GovernedTokenWrapper.connect(wrappedTokenAddress, this.inner.getEthersProvider().getSigner());
+      const wrappedToken = GovernedTokenWrapper.connect(
+        wrappedTokenAddress,
+        this.inner.getEthersProvider().getSigner()
+      );
       const tokenAddresses = await wrappedToken.contract.getTokens();
 
       // TODO: dynamic wrappable assets - consider some Currency constructor via address & default token config.
@@ -311,7 +314,9 @@ export class Web3AnchorDeposit extends AnchorDeposit<WebbWeb3Provider, DepositPa
       exponentiation: '5',
       hashFunction: 'Poseidon',
       protocol: 'anchor',
-      secrets: `${toFixedHex(destChainId, 6).substring(2)}:${deposit.nullifier.toString(16)}:${deposit.secret.toString(16)}`,
+      secrets: `${toFixedHex(destChainId, 6).substring(2)}:${deposit.nullifier.toString(16)}:${deposit.secret.toString(
+        16
+      )}`,
       sourceChain: sourceChainId.toString(),
       sourceIdentifyingData: srcAddress,
       targetChain: destChainId.toString(),

@@ -163,7 +163,7 @@ export class Web3MixerDeposit extends Web3AnchorDeposit {
     } catch (e: any) {
       console.log(e);
 
-      if ((e)?.code === 4001) {
+      if (e?.code === 4001) {
         this.inner.notificationHandler.remove('waiting-approval');
         this.inner.notificationHandler({
           description: 'User Rejected Deposit',

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
-import { chainIdToRelayerName, OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, WebbRelayer, WithdrawState } from '@webb-tools/api-providers/index.js';
+import { OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, WebbRelayer, WithdrawState } from '@webb-tools/api-providers/index.js';
 import { fetchSubstrateTornadoProvingKey } from '@webb-tools/api-providers/ipfs/substrate/tornado.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note, ProvingManager } from '@webb-tools/sdk-core/index.js';
@@ -12,8 +12,9 @@ import { decodeAddress } from '@polkadot/keyring';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { MixerWithdraw } from '../abstracts/index.js';
-import { chainTypeIdToInternalId, InternalChainId, parseChainIdType } from '../chains/index.js';
+import { InternalChainId } from '../chains/index.js';
 import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
+import { PolkadotMixerDeposit } from './index.js';
 import { WebbPolkadot } from './webb-provider.js';
 
 const logger = LoggerService.get('PolkadotMixerWithdraw');
@@ -64,7 +65,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
     return this.inner.relayingManager.getRelayer({});
   }
 
-  async mapRelayerIntoActive (relayer: OptionalRelayer, internalChainId: InternalChainId): Promise<OptionalActiveRelayer> {
+  async mapRelayerIntoActive (relayer: OptionalRelayer): Promise<OptionalActiveRelayer> {
     if (!relayer) {
       return null;
     }
@@ -73,7 +74,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
       relayer,
       {
         basedOn: 'substrate',
-        chain: internalChainId
+        chain: InternalChainId.ProtocolSubstrateStandalone
       },
       async () => {
         return {
@@ -84,14 +85,26 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
     );
   }
 
-  async fetchTreeLeaves (treeId: number): Promise<Uint8Array[]> {
-    const leafCount = await this.inner.api.derive.merkleTreeBn254.getLeafCountForTree(treeId);
+  async fetchTreeLeaves (treeId: string | number): Promise<Uint8Array[]> {
+    let done = false;
+    let from = 0;
+    let to = 511;
+    const leaves: Uint8Array[] = [];
 
-    // retrieve all leaves between 0 and leafCount - 1 (inclusive)
-    const treeLeaves = await this.inner.api.derive.merkleTreeBn254.getLeavesForTree(treeId, 0, leafCount - 1);
+    while (done === false) {
+      const treeLeaves: any[] = await (this.inner.api.rpc as any).mt.getLeaves(treeId, from, to);
 
-    // TODO: proper pagination of leaves
-    return treeLeaves;
+      if (treeLeaves.length === 0) {
+        done = true;
+        break;
+      }
+
+      leaves.push(...treeLeaves.map((i) => i.toU8a()));
+      from = to;
+      to = to + 511;
+    }
+
+    return leaves;
   }
 
   async submitViaRelayer () {
@@ -111,14 +124,17 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
 
       // parse the note
       const noteParsed = await Note.deserialize(note);
-      const treeId = noteParsed.note.targetIdentifyingData;
+      const depositAmount = noteParsed.note.amount;
+      const amount = depositAmount;
+      const sizes = await PolkadotMixerDeposit.getSizes(this.inner);
+      const treeId = sizes.find((s) => s.amount === Number(amount))?.treeId!;
 
-      const leaves = await this.fetchTreeLeaves(Number(treeId));
+      logger.trace('Tree Id ', treeId);
+      const leaves = await this.fetchTreeLeaves(treeId);
       const leaf = u8aToHex(noteParsed.getLeaf());
-      const leafIndex = leaves.findIndex((l) => {
-        return u8aToHex(l) === leaf;
-      });
+      const leafIndex = leaves.findIndex((l) => u8aToHex(l) === leaf);
 
+      logger.trace(`leaf ${leaf} has index `, leafIndex);
       logger.trace(leaves.map((i) => u8aToHex(i)));
       const activeRelayer = this.activeRelayer[0];
       const worker = this.inner.wasmFactory('wasm-utils');
@@ -126,12 +142,12 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
 
       const recipientAccountHex = u8aToHex(decodeAddress(recipient));
       // ss58 format
-      const relayerAccountId = activeRelayer ? activeRelayer.beneficiary ?? recipient : recipient;
+      const relayerAccountId = activeRelayer ? activeRelayer.beneficiary! : recipient;
       const relayerAccountHex = u8aToHex(decodeAddress(relayerAccountId));
       // fetching the proving key
       const provingKey = await fetchSubstrateTornadoProvingKey();
       const isValidRelayer = Boolean(activeRelayer && activeRelayer.beneficiary);
-      const proofInput: ProvingManagerSetupInput = {
+      const proofInput: ProvingManagerSetupInput<'mixer'> = {
         fee: 0,
         leafIndex,
         leaves,
@@ -152,9 +168,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
         });
       }
 
-      console.log('proofInput: ', proofInput);
-
-      const zkProofMetadata = await pm.prove(proofInput);
+      const zkProofMetadata = await pm.prove('mixer', proofInput);
 
       const withdrawProof: WithdrawProof = {
         fee: 0,
@@ -167,27 +181,22 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
         root: `0x${zkProofMetadata.root}`
       };
 
-      console.log('withdrawProof: ', withdrawProof);
-
       // withdraw through relayer
       if (isValidRelayer) {
         logger.info('withdrawing through relayer', activeRelayer);
         this.emit('stateChange', WithdrawState.SendingTransaction);
         const relayerMixerTx = await activeRelayer!.initWithdraw('mixer');
-        // Fetch the internal ID for the intended withdraw chain
-        const internalId = chainTypeIdToInternalId(parseChainIdType(Number(noteParsed.note.targetChainId)));
-
         const relayerWithdrawPayload = relayerMixerTx.generateWithdrawRequest(
           {
             baseOn: 'substrate',
             contractAddress: '',
             endpoint: '',
             // TODO change this from the config
-            name: chainIdToRelayerName(internalId)
+            name: 'localnode'
           },
           Array.from(hexToU8a(withdrawProof.proofBytes)),
           {
-            chain: chainIdToRelayerName(internalId),
+            chain: 'localnode',
             fee: withdrawProof.fee,
             id: Number(treeId),
             nullifierHash: Array.from(hexToU8a(withdrawProof.nullifierHash)),

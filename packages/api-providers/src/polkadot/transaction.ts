@@ -210,8 +210,7 @@ export class PolkadotTx<P extends Array<any>> extends EventBus<PolkadotTXEvents>
 }
 
 export class PolkaTXBuilder {
-  constructor (private apiPromise: ApiPromise, private notificationHandler: NotificationHandler) {
-  }
+  constructor (private apiPromise: ApiPromise, private notificationHandler: NotificationHandler) {}
 
   buildWithoutNotification<P extends Array<any>> ({ method, section }: MethodPath, params: P): PolkadotTx<P> {
     return new PolkadotTx<P>(this.apiPromise.clone(), { method, section }, params);

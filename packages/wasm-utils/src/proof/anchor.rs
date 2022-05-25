@@ -6,11 +6,11 @@ use rand::rngs::OsRng;
 use crate::{AnchorR1CSProverBls381_30_2, AnchorR1CSProverBn254_30_2, DEFAULT_LEAF};
 use arkworks_setups::AnchorProver;
 
-use crate::proof::{AnchorProofInput, Proof};
+use crate::proof::{AnchorProof, AnchorProofPayload};
 use crate::types::{Backend, Curve, OpStatusCode, OperationError};
 
-pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Result<Proof, OperationError> {
-	let AnchorProofInput {
+pub fn create_proof(anchor_proof_input: AnchorProofPayload, rng: &mut OsRng) -> Result<AnchorProof, OperationError> {
+	let AnchorProofPayload {
 		exponentiation,
 		width,
 		curve,
@@ -28,7 +28,7 @@ pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Re
 		roots,
 		refresh_commitment,
 	} = anchor_proof_input;
-	let roots_array: [Vec<u8>; 2] = roots.try_into().map_err(|_| OpStatusCode::InvalidProofParameters)?;
+	let roots_array: [Vec<u8>; 2] = roots.try_into().map_err(|_| OpStatusCode::InvalidRoots)?;
 
 	let anchor_proof = match (backend, curve, exponentiation, width) {
 		(Backend::Arkworks, Curve::Bn254, 5, 4) => AnchorR1CSProverBn254_30_2::create_proof(
@@ -72,7 +72,7 @@ pub fn create_proof(anchor_proof_input: AnchorProofInput, rng: &mut OsRng) -> Re
 		error.data = Some(format!("Anchor {}", e));
 		error
 	})?;
-	Ok(Proof {
+	Ok(AnchorProof {
 		proof: anchor_proof.proof,
 		nullifier_hash: anchor_proof.nullifier_hash_raw,
 		root: anchor_proof.roots_raw[0].clone(),

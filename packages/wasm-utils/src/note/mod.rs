@@ -25,18 +25,60 @@ macro_rules! console_log {
 	// `bare_bones`
 	($($t:tt)*) => (crate::types::log(&format_args!($($t)*).to_string()))
 }
-
 pub enum JsLeafInner {
 	Mixer(Leaf),
 	Anchor(Leaf),
 	VAnchor(JsUtxo),
+}
+
+impl Clone for JsLeafInner {
+	fn clone(&self) -> Self {
+		match self {
+			JsLeafInner::Mixer(leaf) => JsLeafInner::Mixer(Leaf {
+				chain_id_bytes: leaf.chain_id_bytes.clone(),
+				secret_bytes: leaf.secret_bytes.clone(),
+				nullifier_bytes: leaf.nullifier_bytes.clone(),
+				leaf_bytes: leaf.leaf_bytes.clone(),
+				nullifier_hash_bytes: leaf.nullifier_hash_bytes.clone(),
+			}),
+			JsLeafInner::Anchor(leaf) => JsLeafInner::Anchor(Leaf {
+				chain_id_bytes: leaf.chain_id_bytes.clone(),
+				secret_bytes: leaf.secret_bytes.clone(),
+				nullifier_bytes: leaf.nullifier_bytes.clone(),
+				leaf_bytes: leaf.leaf_bytes.clone(),
+				nullifier_hash_bytes: leaf.nullifier_hash_bytes.clone(),
+			}),
+			JsLeafInner::VAnchor(utxo) => JsLeafInner::VAnchor(utxo.clone()),
+		}
+	}
 }
 #[wasm_bindgen]
 pub struct JsLeaf {
 	#[wasm_bindgen(skip)]
 	pub inner: JsLeafInner,
 }
+impl JsLeaf {
+	pub fn mixer_leaf(&self) -> Result<Leaf, OperationError> {
+		match self.inner.clone() {
+			JsLeafInner::Mixer(leaf) => Ok(leaf),
+			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),
+		}
+	}
 
+	pub fn anchor_leaf(&self) -> Result<Leaf, OperationError> {
+		match self.inner.clone() {
+			JsLeafInner::Anchor(leaf) => Ok(leaf),
+			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),
+		}
+	}
+
+	pub fn vanchor_leaf(&self) -> Result<JsUtxo, OperationError> {
+		match self.inner.clone() {
+			JsLeafInner::VAnchor(leaf) => Ok(leaf),
+			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),
+		}
+	}
+}
 #[wasm_bindgen]
 impl JsLeaf {
 	#[wasm_bindgen(getter)]
@@ -53,8 +95,7 @@ impl JsLeaf {
 	#[wasm_bindgen(getter)]
 	pub fn commitment(&self) -> Uint8Array {
 		match &self.inner {
-			JsLeafInner::Mixer(mixer_leaf) => Uint8Array::from(mixer_leaf.leaf_bytes.as_slice()),
-			JsLeafInner::Anchor(anchor_leaf) => Uint8Array::from(anchor_leaf.leaf_bytes.as_slice()),
+			JsLeafInner::Mixer(leaf) | JsLeafInner::Anchor(leaf) => Uint8Array::from(leaf.leaf_bytes.as_slice()),
 			JsLeafInner::VAnchor(vanchor_leaf) => vanchor_leaf.commitment(),
 		}
 	}
@@ -204,6 +245,14 @@ impl JsNote {
 					}
 				}
 			},
+		}
+	}
+
+	pub fn get_js_utxo(&self) -> Result<JsUtxo, OperationError> {
+		let leaf = self.get_leaf_and_nullifier()?;
+		match leaf.inner {
+			JsLeafInner::VAnchor(utxo) => Ok(utxo),
+			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),
 		}
 	}
 }
@@ -766,6 +815,37 @@ impl JsNote {
 		self.mutate_index(index).map_err(|e| e.into())
 	}
 
+	#[wasm_bindgen(js_name = defaultUtxoNote)]
+	pub fn default_utxo_note(&self) -> Result<JsNote, OperationError> {
+		let mut new_note = self.clone();
+		let chain_id: u64 = self
+			.target_chain_id
+			.parse()
+			.map_err(|_| OpStatusCode::InvalidTargetChain)?;
+
+		let utxo = vanchor::generate_secrets(
+			0,
+			self.exponentiation.unwrap_or(5),
+			self.width.unwrap_or(4),
+			self.curve.unwrap_or(Curve::Bn254),
+			chain_id,
+			Some(0),
+			&mut OsRng,
+		)?;
+		new_note.update_vanchor_utxo(utxo)?;
+		Ok(new_note)
+	}
+
+	// for test and internal usage
+	pub fn update_vanchor_utxo(&mut self, utxo: JsUtxo) -> Result<(), OperationError> {
+		let chain_id = utxo.get_chain_id_bytes();
+		let amount = utxo.get_amount();
+		let blinding = utxo.get_blinding();
+		let secret_key = utxo.get_secret_key();
+		self.secrets = vec![chain_id, amount, blinding, secret_key];
+		Ok(())
+	}
+
 	#[wasm_bindgen(getter)]
 	pub fn index(&self) -> JsString {
 		match self.index {
@@ -1022,6 +1102,14 @@ mod test {
 
 		assert_eq!(vanchor_note.secrets.len(), 4);
 
-		assert_eq!(hex::encode(leaf_vec), hex::encode(leaf_2_vec))
+		assert_eq!(hex::encode(leaf_vec), hex::encode(leaf_2_vec));
+	}
+
+	#[wasm_bindgen_test]
+	fn should_deserialize_vanchor_note() {
+		let vanchor_note_str = "webb://v2:vanchor/2:3/2:3/0300000000000000000000000000000000000000000000000000000000000000:0a00000000000000000000000000000000000000000000000000000000000000:7798d054444ec463be7d41ad834147b5b2c468182c7cd6a601aec29a273fca05:bf5d780608f5b8a8db1dc87356a225a0324a1db61903540daaedd54ab10a4124/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
+		let note = JsNote::deserialize(vanchor_note_str).unwrap();
+		// Generate leaf to trigger any errors
+		let leaf = note.get_leaf_commitment().unwrap();
 	}
 }
