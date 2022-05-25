@@ -6,6 +6,7 @@ import type { Leaves, NoteProtocol, OutputUtxoConfig } from '@webb-tools/wasm-ut
 import { ProofI } from '@webb-tools/sdk-core/proving/proving-manager.js';
 import { JsProofInput, JsProofOutput } from '@webb-tools/wasm-utils';
 import { JsNote } from '@webb-tools/wasm-utils/njs';
+
 import { u8aToHex } from '@polkadot/util';
 
 import { Note } from '../note.js';
