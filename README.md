@@ -161,6 +161,8 @@ NODE_OPTIONS="--loader ./loader.js" node ./examples/node/substrate/mixer.ts
 
 The following instructions outlines how to run webb.js API unit test suite and integration test suite.
 
+**Note**: You will need to run `yarn build` prior to running test suite. For integration tests, a Docker daemon must also be available.
+
 ### To run all tests - unit, integration, wasm, providers
 
 ```
