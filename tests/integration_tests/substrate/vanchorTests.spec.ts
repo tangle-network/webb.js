@@ -1,8 +1,13 @@
-import { ExtData, JsNoteBuilder, OutputUtxoConfig } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
+import {
+  ExtData,
+  JsNoteBuilder,
+  OutputUtxoConfig,
+  verify_js_proof
+} from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { ApiPromise } from '@polkadot/api';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
+import { currencyToUnitI128, KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
 import { ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/index.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { polkadotTx } from '@webb-tools/test-utils/index.js';
@@ -83,7 +88,7 @@ describe('VAnchor tests', function() {
   it.only('VAnchor deposit', async function() {
     const { bob, charlie, alice } = getKeyring();
     // transfer some funds to sudo & test account
-    const outputChainId = BigInt(0);
+    const outputChainId = BigInt('2199023256632');
     const pkPath = path.join(
       // tests path
       process.cwd(),
@@ -98,33 +103,45 @@ describe('VAnchor tests', function() {
     const pk_hex = fs.readFileSync(pkPath).toString('hex');
     const pk = hexToU8a(pk_hex)
 
-
+    const vkPath = path.join(
+      // tests path
+      process.cwd(),
+      'tests',
+      'protocol-substrate-fixtures',
+      'vanchor',
+      'bn254',
+      'x5',
+      '2-2-2',
+      'verifying_key_uncompressed.bin'
+    );
+    const vk_hex = fs.readFileSync(vkPath).toString('hex');
+    const vk = hexToU8a(vk_hex)
     console.log(`Transferring 10,000 balance to Alice and Bob`);
     await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
     const treeId = await createVAnchor(apiPromise!, alice);
 
 
-    const note1 = generateVAnchorNote(0, 0, 0, 0);
+    const note1 = generateVAnchorNote(0, 2199023256632, 2199023256632, 0).defaultUtxoNote();
     const note2 = note1.defaultUtxoNote();
-    const publicAmount = 10;
+    const publicAmount = currencyToUnitI128(10);
     const notes = [note1, note2];
-    const outputConfig1 = new OutputUtxoConfig('10', undefined, outputChainId);
+    const outputConfig1 = new OutputUtxoConfig(publicAmount.toString(), undefined, outputChainId);
     const outputConfig2 = new OutputUtxoConfig('0', undefined, outputChainId);
 
     const provingManager = new ProvingManagerWrapper('direct-call');
     const leavesMap: any = {};
 
     const address = alice.address;
-    const extAmount = 10;
+    const extAmount = currencyToUnitI128(10);
     const fee = 0;
-    leavesMap[0] = [];
+    leavesMap[outputChainId.toString()] = [];
     const tree = await apiPromise!.query.merkleTreeBn254.trees(treeId);
     const root = tree.unwrap().root.toHex();
     const rootsSet = [hexToU8a(root), hexToU8a(root)];
     let extdata: any = null;
     let hash :any= null
     const setup: ProvingManagerSetupInput<'vanchor'> = {
-      chainId: '0',
+      chainId: outputChainId.toString(),
       calcExtHash([o1, o2]): string {
         let deocdedAddress = decodeAddress(address);
         extdata = {
@@ -152,12 +169,19 @@ describe('VAnchor tests', function() {
       roots: rootsSet
     };
     const data = await provingManager.proof('vanchor', setup);
+    const validProof = verify_js_proof(
+      data.proof,
+      data.publicInputs,
+      u8aToHex(vk).replace('0x' , ''),
+      'Bn254'
+    )
+    console.log(`is Valid proof ${validProof}`);
     let vanchorProofData = {
       proof: `0x${data.proof}`,
       publicAmount: data.publicAmount,
       roots: rootsSet,
       inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-      outputCommitments: data.outputNotes.map(note => note.getLeafCommitment()),
+      outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeafCommitment())),
       extDataHash: hash
     };
     console.log([treeId, vanchorProofData, extdata]);
