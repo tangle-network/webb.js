@@ -1,3 +1,5 @@
+use ark_bn254::Fr as Bn254Fr;
+use ark_ff::{BigInteger, PrimeField};
 use ethabi::{encode, Token, Uint};
 use js_sys::{JsString, Uint8Array};
 use parity_scale_codec::{Decode, Encode};
@@ -54,8 +56,10 @@ impl ExtData {
 		keccak.update(codec.as_slice());
 		let mut output = [0u8; 32];
 		keccak.finalize(&mut output);
+		let field_res = Bn254Fr::from_le_bytes_mod_order(&output);
+		let value = field_res.into_repr().to_bytes_le();
 
-		Uint8Array::from(output.as_slice())
+		Uint8Array::from(value.as_slice())
 	}
 }
 

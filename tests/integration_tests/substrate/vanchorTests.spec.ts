@@ -1,13 +1,13 @@
-import { ExtData, JsNoteBuilder, OutputUtxoConfig, setupKeys } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
+import { ExtData, JsNoteBuilder, OutputUtxoConfig } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { ApiPromise } from '@polkadot/api';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { ethers } from 'ethers';
 import { KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
 import { ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/index.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
-import { addressToEvm } from '@polkadot/util-crypto';
 import { polkadotTx } from '@webb-tools/test-utils/index.js';
+import path from 'path';
+import fs from 'fs';
 
 let apiPromise: ApiPromise | null = null;
 let keyring: {
@@ -62,13 +62,6 @@ function generateVAnchorNote(amount: number, chainId: number, outputChainId: num
   return note;
 }
 
-const vanchorBn2542_2_2 = setupKeys('vanchor', 'Bn254', 2, 2, 2);
-
-console.log({
-  evm:u8aToHex(addressToEvm("5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY")),
-  substrate:"5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
-  decoded:u8aToHex(decodeAddress("5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"))
-});
 
 describe('VAnchor tests', function() {
   this.timeout(120_000)
@@ -90,8 +83,21 @@ describe('VAnchor tests', function() {
   it.only('VAnchor deposit', async function() {
     const { bob, charlie, alice } = getKeyring();
     // transfer some funds to sudo & test account
-    const keys = vanchorBn2542_2_2;
     const outputChainId = BigInt(0);
+    const pkPath = path.join(
+      // tests path
+      process.cwd(),
+      'tests',
+      'protocol-substrate-fixtures',
+      'vanchor',
+      'bn254',
+      'x5',
+      '2-2-2',
+      'proving_key_uncompressed.bin'
+    );
+    const pk_hex = fs.readFileSync(pkPath).toString('hex');
+    const pk = hexToU8a(pk_hex)
+
 
     console.log(`Transferring 10,000 balance to Alice and Bob`);
     await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
@@ -122,8 +128,8 @@ describe('VAnchor tests', function() {
       calcExtHash([o1, o2]): string {
         let deocdedAddress = decodeAddress(address);
         extdata = {
-          relayer:deocdedAddress,
-          recipient:deocdedAddress,
+          relayer:address,
+          recipient:address,
           fee,
           ext_amount: extAmount,
           encrypted_output1: o1.commitment,
@@ -133,34 +139,35 @@ describe('VAnchor tests', function() {
           o1.commitment,
           o2.commitment
           )
-       hash = ethers.utils.keccak256(extData2.get_encode());
+       hash = u8aToHex(extData2.get_encode());
+
         return hash.replace('0x', '');
       },
       indices: [0, 0],
       inputNotes: notes.map((note) => note.serialize()),
       leavesMap: leavesMap,
       outputConfigs: [outputConfig1, outputConfig2],
-      provingKey: keys.pk,
+      provingKey: pk,
       publicAmount: String(publicAmount),
       roots: rootsSet
     };
     const data = await provingManager.proof('vanchor', setup);
-    let vanchorTxPayloda = {
+    let vanchorProofData = {
       proof: `0x${data.proof}`,
-      public_amount: data.publicAmount,
+      publicAmount: data.publicAmount,
       roots: rootsSet,
-      input_nullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-      output_commitments: data.outputNotes.map(note => note.getLeafCommitment()),
-      ext_data_hash:hash
+      inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
+      outputCommitments: data.outputNotes.map(note => note.getLeafCommitment()),
+      extDataHash: hash
     };
-    console.log([treeId, vanchorTxPayloda, extdata]);
+    console.log([treeId, vanchorProofData, extdata]);
     try{
 
 
     await polkadotTx(apiPromise!, {
       section: 'vAnchorBn254',
       method: 'transact'
-    }, [treeId, vanchorTxPayloda,extdata], bob);
+    }, [treeId, vanchorProofData,extdata], bob);
 
     }catch (e) {
       console.log(e);
