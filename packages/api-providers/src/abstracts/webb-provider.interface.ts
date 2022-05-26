@@ -8,10 +8,11 @@ import { AccountsAdapter } from '../account/Accounts.adapter.js';
 import { InteractiveFeedback } from '../webb-error/index.js';
 import { AnchorDeposit, AnchorWithdraw, VAnchorDeposit } from './anchor/index.js';
 import { ChainQuery } from './chain-query/index.js';
-import { DepositPayload, MixerDeposit, MixerDepositEvents, MixerWithdraw, MixerWithdrawEvents } from './mixer/index.js';
-import { WebbRelayerBuilder } from './relayer/index.js';
+import { DepositPayload, MixerDeposit, MixerDepositEvents, MixerWithdraw, WebbWithdrawEvents } from './mixer/index.js';
 import { WrapUnwrap } from './wrap-unwrap/index.js';
 import { AppConfig } from './common.js';
+
+import { WebbRelayerManager } from './relayer/webb-relayer-manager.js';
 
 /// list of the apis that are available for  the provider
 export interface WebbMethods<T extends WebbApiProvider<any>> {
@@ -43,21 +44,21 @@ export interface WebbMixer<T extends WebbApiProvider<any>> {
   // deposit
   deposit: WebbMethod<MixerDeposit<T, DepositPayload>, MixerDepositEvents>;
   // withdraw
-  withdraw: WebbMethod<MixerWithdraw<T>, MixerWithdrawEvents>;
+  withdraw: WebbMethod<MixerWithdraw<T>, WebbWithdrawEvents>;
 }
 
 export interface WebbFixedAnchor<T extends WebbApiProvider<any>> {
   // deposit
   deposit: WebbMethod<AnchorDeposit<T, DepositPayload>, MixerDepositEvents>;
   // withdraw
-  withdraw: WebbMethod<AnchorWithdraw<T>, MixerWithdrawEvents>;
+  withdraw: WebbMethod<AnchorWithdraw<T>, WebbWithdrawEvents>;
 }
 
 export interface WebbVariableAnchor<T extends WebbApiProvider<any>> {
   // deposit
   deposit: WebbMethod<VAnchorDeposit<T, DepositPayload>, MixerDepositEvents>;
   // withdraw
-  // withdraw: WebbMethod<VAnchorWithdraw<T>, MixerWithdrawEvents>;
+  // withdraw: WebbMethod<VAnchorWithdraw<T>, WebbWithdrawEvents>;
 }
 
 export interface WrapAndUnwrap<T> {
@@ -201,7 +202,7 @@ export interface WebbApiProvider<T> extends EventBus<WebbProviderEvents> {
 
   endSession?(): Promise<void>;
 
-  relayingManager: WebbRelayerBuilder;
+  relayerManager: WebbRelayerManager;
 
   getProvider(): any;
 

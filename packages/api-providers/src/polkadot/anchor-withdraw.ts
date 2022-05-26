@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { fetchSubstrateAnchorProvingKey } from '@webb-tools/api-providers/ipfs/substrate/anchor.js';
-import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note, ProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core/index.js';
 
 import { decodeAddress } from '@polkadot/keyring';
@@ -12,8 +11,6 @@ import { AnchorWithdraw, WithdrawState } from '../abstracts/index.js';
 import { InternalChainId } from '../chains/index.js';
 import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
 import { WebbPolkadot } from './webb-provider.js';
-
-const logger = LoggerService.get('PolkadotBridgeWithdraw');
 
 /**
  * @param id - Anchor tree id
@@ -40,7 +37,6 @@ export type AnchorWithdrawProof = {
 
 export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
   async fetchRPCTreeLeaves (treeId: string | number): Promise<Uint8Array[]> {
-    logger.trace(`Fetching leaves for tree with id ${treeId}`);
     let done = false;
     let from = 0;
     let to = 511;
@@ -63,7 +59,6 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
   }
 
   async fetchRoot (treeId: string) {
-    logger.trace(`fetching metadata for tree id ${treeId}`);
     const storage =
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -90,7 +85,6 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
       const relayerAccountId = account.address;
 
       this.emit('stateChange', WithdrawState.GeneratingZk);
-      logger.trace(`Withdraw using note ${note}, recipient ${recipient}`);
       const parseNote = await Note.deserialize(note);
       const depositNote = parseNote.note;
       const amount = parseNote.note.amount;
@@ -107,7 +101,6 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
       // Find the index of the note's leaf commitment
       const leafIndex = leaves.findIndex((leaf) => u8aToHex(leaf) === leafHex);
 
-      logger.trace(leaves.map((i) => u8aToHex(i)));
       // Init a worker from the factory with `wasm-utils` key
       const worker = this.inner.wasmFactory('wasm-utils');
       const pm = new ProvingManager(worker);
@@ -136,7 +129,6 @@ export class PolkadotAnchorWithdraw extends AnchorWithdraw<WebbPolkadot> {
         roots: [hexToU8a(root), hexToU8a(root)]
       };
 
-      logger.log('proofInput to webb.js: ', proofInput);
       const zkProofMetadata = await pm.prove('anchor', proofInput);
       const withdrawProof: AnchorWithdrawProof = {
         fee: 0,
