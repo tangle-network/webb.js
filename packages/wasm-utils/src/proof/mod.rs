@@ -459,7 +459,7 @@ pub struct VAnchorProofInput {
 	// Public amount
 	pub public_amount: Option<i128>,
 	// ouput utxos
-	pub output_config: Option<[OutputUtxoConfig; 2]>,
+	pub output_config: Option<[JsUtxo; 2]>,
 }
 
 pub fn generic_of_jsval<T: FromWasmAbi<Abi = u32>>(js: JsValue, classname: &str) -> Result<T, JsValue> {
@@ -529,7 +529,7 @@ impl VAnchorProofInput {
 		let chain_id = self.chain_id.ok_or(OpStatusCode::InvalidChainId)?;
 		let indices = self.indices.ok_or(OpStatusCode::InvalidIndices)?;
 		let public_amount = self.public_amount.ok_or(OpStatusCode::InvalidPublicAmount)?;
-		let output_config = self.output_config.ok_or(OpStatusCode::InvalidPublicAmount)?;
+		let output_utxos = self.output_config.ok_or(OpStatusCode::InvalidPublicAmount)?;
 
 		let exponentiation = self.exponentiation.unwrap_or(5);
 		let width = self.width.unwrap_or(3);
@@ -585,9 +585,9 @@ impl VAnchorProofInput {
 			.expect("Failed to convert the public amount to u128");
 		secret.iter().for_each(|utxo| in_amount += utxo.amount_raw());
 		let mut out_amount = 0u128;
-		output_config
+		output_utxos
 			.iter()
-			.for_each(|output_config| out_amount += output_config.amount);
+			.for_each(|output_config| out_amount += output_config.amount_raw());
 
 		if out_amount != in_amount {
 			let message = format!(
@@ -598,9 +598,6 @@ impl VAnchorProofInput {
 			oe.data = Some(format!("{{ inputAmount:{} ,outputAmount:{}}}", in_amount, out_amount));
 			return Err(oe);
 		}
-		let output_utxos =
-			vanchor::setup_output_utxos(output_config, backend, curve, secret.len(), roots.len(), &mut OsRng)?;
-
 		Ok(VAnchorProofPayload {
 			exponentiation,
 			width,
@@ -697,11 +694,18 @@ impl ProofInputBuilder {
 		}
 	}
 
-	pub fn set_output_config(&mut self, output_config: [OutputUtxoConfig; 2]) -> Result<(), OperationError> {
+	// Should be called after setting backend curve roots secret
+	pub fn set_output_config(&mut self, output_config: [OutputUtxoConfig; 2]) -> Result<[JsUtxo; 2], OperationError> {
 		match self {
 			Self::VAnchor(input) => {
-				input.output_config = Some(output_config);
-				Ok(())
+				let backend = input.backend.ok_or(OpStatusCode::InvalidBackend)?;
+				let curve = input.curve.ok_or(OpStatusCode::InvalidCurve)?;
+				let roots = input.roots.as_ref().ok_or(OpStatusCode::InvalidRoots)?.len();
+				let secret = input.secret.as_ref().ok_or(OpStatusCode::InvalidNoteSecrets)?.len();
+				let output_utxo =
+					vanchor::setup_output_utxos(output_config, backend, curve, secret, roots, &mut OsRng)?;
+				input.output_config = Some(output_utxo.clone());
+				Ok(output_utxo)
 			}
 			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
 		}
@@ -1058,9 +1062,10 @@ impl JsProofInputBuilder {
 		&mut self,
 		utxo1: OutputUtxoConfig,
 		utxo2: OutputUtxoConfig,
-	) -> Result<(), JsValue> {
-		self.inner.set_output_config([utxo1, utxo2])?;
-		Ok(())
+	) -> Result<Array, JsValue> {
+		let output = self.inner.set_output_config([utxo1, utxo2])?;
+		let output: Array = output.clone().into_iter().map(JsValue::from).collect();
+		Ok(output)
 	}
 
 	#[wasm_bindgen(js_name = setLeavesMap)]
