@@ -31,6 +31,7 @@ use crate::{
 };
 
 mod anchor;
+mod ext_data;
 mod mixer;
 mod test;
 #[cfg(test)]

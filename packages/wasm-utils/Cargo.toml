@@ -35,7 +35,9 @@ ark-bls12-381 = { version = "^0.3.0", default-features = false, features = ["cur
 ark-std = { version = "^0.3.0", default-features = false }
 arkworks-setups = { version = "1.0.2", default-features = false, features = ["r1cs"] }
 arkworks-native-gadgets = { version = "1.0.0", default-features = false }
-
+ethabi = { version = "15.0.0", default-features = false }
+parity-scale-codec ="*"
+tiny-keccak="2.0.2"
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 js-sys = "0.3"
 rand = { version = "0.8.3", features = ["getrandom"] }

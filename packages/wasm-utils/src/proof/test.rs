@@ -601,12 +601,4 @@ mod test {
 
 		assert!(is_valid_proof);
 	}
-
-	#[wasm_bindgen_test]
-	fn test_address() {
-		let account_id_decoded = hex::decode("d43593c715fdd31c61141abd04a99fd6822c8558").unwrap();
-		let mut padded = [0u8; 32];
-		padded[12..].copy_from_slice(account_id_decoded.as_slice());
-		assert_eq!(hex::encode(padded), "");
-	}
 }

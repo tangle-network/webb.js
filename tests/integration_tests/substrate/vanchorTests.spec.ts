@@ -1,11 +1,10 @@
-import { JsNoteBuilder, OutputUtxoConfig, setupKeys } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
+import { ExtData, JsNoteBuilder, OutputUtxoConfig, setupKeys } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { ApiPromise } from '@polkadot/api';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
-
+import { ethers } from 'ethers';
 import { KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
 import { ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/index.js';
-import { getExtDataHash } from '@webb-tools/utils';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { addressToEvm } from '@polkadot/util-crypto';
 import { polkadotTx } from '@webb-tools/test-utils/index.js';
@@ -117,19 +116,25 @@ describe('VAnchor tests', function() {
     const root = tree.unwrap().root.toHex();
     const rootsSet = [hexToU8a(root), hexToU8a(root)];
     let extdata: any = null;
+    let hash :any= null
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: '0',
       calcExtHash([o1, o2]): string {
+        let deocdedAddress = decodeAddress(address);
         extdata = {
-          recipient: `${u8aToHex(addressToEvm(address))}`,
-          relayer: `${u8aToHex(addressToEvm(address))}`,
-          extAmount,
+          relayer:deocdedAddress,
+          recipient:deocdedAddress,
           fee,
-          encryptedOutput1: o1.commitment,
-          encryptedOutput2: o2.commitment
-        };
-        const extDataHash = getExtDataHash(extdata);
-        return extDataHash.toHexString().replace('0x', '');
+          ext_amount: extAmount,
+          encrypted_output1: o1.commitment,
+          encrypted_output2: o2.commitment
+        }
+        const extData2 = new ExtData(deocdedAddress,deocdedAddress,extAmount.toString(),fee.toString(),
+          o1.commitment,
+          o2.commitment
+          )
+       hash = ethers.utils.keccak256(extData2.get_encode());
+        return hash.replace('0x', '');
       },
       indices: [0, 0],
       inputNotes: notes.map((note) => note.serialize()),
@@ -145,30 +150,17 @@ describe('VAnchor tests', function() {
       public_amount: data.publicAmount,
       roots: rootsSet,
       input_nullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-      output_commitments: data.outputNotes.map(note => note.getLeafCommitment())
+      output_commitments: data.outputNotes.map(note => note.getLeafCommitment()),
+      ext_data_hash:hash
     };
-    console.log([treeId, vanchorTxPayloda, {
-      relayer:address,
-      recipient:address,
-      fee:extdata.fee,
-      ext_amount: extdata.extAmount,
-      encrypted_output1: extdata.encryptedOutput1,
-      encrypted_output2: extdata.encryptedOutput2
-    }]);
+    console.log([treeId, vanchorTxPayloda, extdata]);
     try{
 
 
     await polkadotTx(apiPromise!, {
       section: 'vAnchorBn254',
       method: 'transact'
-    }, [treeId, vanchorTxPayloda, {
-      relayer:address,
-      recipient:address,
-      fee:extdata.fee,
-      ext_amount: extdata.extAmount,
-      encrypted_output1: extdata.encryptedOutput1,
-      encrypted_output2: extdata.encryptedOutput2
-    }], bob);
+    }, [treeId, vanchorTxPayloda,extdata], bob);
 
     }catch (e) {
       console.log(e);
