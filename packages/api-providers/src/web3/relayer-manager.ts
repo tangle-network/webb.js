@@ -1,15 +1,15 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { Note } from "@webb-tools/sdk-core/index.js";
-import { ethers } from "ethers";
-import { getFixedAnchorAddressForBridge, webbCurrencyIdFromString, WebbError, WebbErrorCodes } from "../index.js";
-import { OptionalRelayer, OptionalActiveRelayer, RelayerQuery, WebbRelayer, shuffleRelayers } from "../abstracts/index.js";
-import { WebbRelayerManager } from "../abstracts/relayer/webb-relayer-manager.js";
-import { chainTypeIdToInternalId, InternalChainId, parseChainIdType } from "../chains/index.js";
+import { Note } from '@webb-tools/sdk-core/index.js';
+import { ethers } from 'ethers';
+
+import { OptionalActiveRelayer, OptionalRelayer, RelayerQuery, shuffleRelayers, WebbRelayer } from '../abstracts/index.js';
+import { WebbRelayerManager } from '../abstracts/relayer/webb-relayer-manager.js';
+import { chainTypeIdToInternalId, InternalChainId, parseChainIdType } from '../chains/index.js';
+import { getFixedAnchorAddressForBridge, webbCurrencyIdFromString, WebbError, WebbErrorCodes } from '../index.js';
 
 export class Web3RelayerManager extends WebbRelayerManager {
-  
   async mapRelayerIntoActive (
     relayer: OptionalRelayer,
     internalChainId: InternalChainId
@@ -81,7 +81,7 @@ export class Web3RelayerManager extends WebbRelayerManager {
     const relayers = this.relayers
       .filter((relayer) => {
         const capabilities = relayer.capabilities;
-        
+
         if (ipService) {
           if (!capabilities.hasIpService) {
             return false;
@@ -108,7 +108,7 @@ export class Web3RelayerManager extends WebbRelayerManager {
               bridgeSupport.amount,
               this.config.bridgeByAsset
             );
-  
+
             if (anchorAddress) {
               return Boolean(
                 capabilities.supportedChains[baseOn]
@@ -132,13 +132,12 @@ export class Web3RelayerManager extends WebbRelayerManager {
         }
 
         return true;
-      })
+      });
 
     shuffleRelayers(relayers);
 
     return relayers;
   }
-
 
   async getRelayersByNote (evmNote: Note) {
     const chainTypeId = Number(evmNote.note.targetChainId);
@@ -162,4 +161,3 @@ export class Web3RelayerManager extends WebbRelayerManager {
     });
   }
 }
-

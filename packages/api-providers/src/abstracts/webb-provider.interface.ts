@@ -9,10 +9,9 @@ import { InteractiveFeedback } from '../webb-error/index.js';
 import { AnchorDeposit, AnchorWithdraw, VAnchorDeposit } from './anchor/index.js';
 import { ChainQuery } from './chain-query/index.js';
 import { DepositPayload, MixerDeposit, MixerDepositEvents, MixerWithdraw, WebbWithdrawEvents } from './mixer/index.js';
+import { WebbRelayerManager } from './relayer/webb-relayer-manager.js';
 import { WrapUnwrap } from './wrap-unwrap/index.js';
 import { AppConfig } from './common.js';
-
-import { WebbRelayerManager } from './relayer/webb-relayer-manager.js';
 
 /// list of the apis that are available for  the provider
 export interface WebbMethods<T extends WebbApiProvider<any>> {

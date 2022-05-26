@@ -16,10 +16,10 @@ import { PolkadotAnchorWithdraw } from './anchor-withdraw.js';
 import { PolkadotChainQuery } from './chain-query.js';
 import { PolkadotMixerDeposit } from './mixer-deposit.js';
 import { PolkadotMixerWithdraw } from './mixer-withdraw.js';
+import { PolkadotRelayerManager } from './relayer-manager.js';
 import { PolkaTXBuilder } from './transaction.js';
 import { PolkadotVAnchorDeposit } from './vanchor-deposit.js';
 import { PolkadotWrapUnwrap } from './wrap-unwrap.js';
-import { PolkadotRelayerManager } from './relayer-manager.js';
 
 export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbApiProvider<WebbPolkadot> {
   readonly methods: WebbMethods<WebbPolkadot>;

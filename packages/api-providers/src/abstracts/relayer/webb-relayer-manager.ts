@@ -3,7 +3,8 @@
 
 import { AppConfig, InternalChainId } from '@webb-tools/api-providers/index.js';
 import { Note } from '@webb-tools/sdk-core/index.js';
-import { Observable, BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+
 import { RelayerQuery } from './types.js';
 import { OptionalActiveRelayer, OptionalRelayer, WebbRelayer } from './webb-relayer.js';
 
@@ -16,7 +17,7 @@ export abstract class WebbRelayerManager {
   protected config: AppConfig;
   public activeRelayer: OptionalActiveRelayer = null;
 
-  constructor(relayers: WebbRelayer[], config: AppConfig) {
+  constructor (relayers: WebbRelayer[], config: AppConfig) {
     this.relayers = relayers;
     this.config = config;
     this.activeRelayerWatcher = this.activeRelayerSubject.asObservable();
@@ -25,13 +26,14 @@ export abstract class WebbRelayerManager {
 
   async setActiveRelayer (relayer: WebbRelayer, internalChainId: InternalChainId): Promise<void> {
     const active = await this.mapRelayerIntoActive(relayer, internalChainId);
+
     this.activeRelayer = active;
     this.activeRelayerSubject.next(active);
   }
 
   abstract mapRelayerIntoActive (relayer: OptionalRelayer, internalChainId: InternalChainId): Promise<OptionalActiveRelayer>;
 
-   /*
+  /*
    *  get a list of the suitable relayers for a given query
    *  the list is randomized
    *  Accepts a 'RelayerQuery' object with optional, indexible fields.

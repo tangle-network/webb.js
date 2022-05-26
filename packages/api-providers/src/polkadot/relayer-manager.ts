@@ -1,14 +1,14 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { Note } from "@webb-tools/sdk-core/index.js";
-import { getFixedAnchorAddressForBridge, webbCurrencyIdFromString } from "../index.js";
-import { OptionalRelayer, OptionalActiveRelayer, RelayerQuery, WebbRelayer, shuffleRelayers } from "../abstracts/index.js";
-import { WebbRelayerManager } from "../abstracts/relayer/webb-relayer-manager.js";
-import { InternalChainId } from "../chains/index.js";
+import { Note } from '@webb-tools/sdk-core/index.js';
+
+import { OptionalActiveRelayer, OptionalRelayer, RelayerQuery, shuffleRelayers, WebbRelayer } from '../abstracts/index.js';
+import { WebbRelayerManager } from '../abstracts/relayer/webb-relayer-manager.js';
+import { InternalChainId } from '../chains/index.js';
+import { getFixedAnchorAddressForBridge, webbCurrencyIdFromString } from '../index.js';
 
 export class PolkadotRelayerManager extends WebbRelayerManager {
-  
   async mapRelayerIntoActive (relayer: OptionalRelayer, internalChainId: InternalChainId): Promise<OptionalActiveRelayer> {
     if (!relayer) {
       return null;
@@ -39,7 +39,7 @@ export class PolkadotRelayerManager extends WebbRelayerManager {
     const relayers = this.relayers
       .filter((relayer) => {
         const capabilities = relayer.capabilities;
-        
+
         if (ipService) {
           if (!capabilities.hasIpService) {
             return false;
@@ -66,7 +66,7 @@ export class PolkadotRelayerManager extends WebbRelayerManager {
               bridgeSupport.amount,
               this.config.bridgeByAsset
             );
-  
+
             if (anchorAddress) {
               return Boolean(
                 capabilities.supportedChains[baseOn]
@@ -90,13 +90,12 @@ export class PolkadotRelayerManager extends WebbRelayerManager {
         }
 
         return true;
-      })
+      });
 
     shuffleRelayers(relayers);
 
     return relayers;
   }
-
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getRelayersByNote (evmNote: Note) {
@@ -109,7 +108,6 @@ export class PolkadotRelayerManager extends WebbRelayerManager {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getRelayersByChainAndAddress (_chainId: InternalChainId, _address: string) {
-    return this.getRelayers ({});
+    return this.getRelayers({});
   }
 }
-

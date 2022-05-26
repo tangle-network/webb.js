@@ -1,12 +1,13 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { AppConfig, WebbRelayer } from "../index.js";
-import { Capabilities, ChainNameIntoChainId, RelayerConfig, RelayerInfo, RelayerManagerType } from "../abstracts/relayer/types.js";
 import { Observable, Subject } from 'rxjs';
-import { WebbRelayerManager } from "../abstracts/relayer/webb-relayer-manager.js";
-import { Web3RelayerManager } from "../web3/relayer-manager.js";
-import { PolkadotRelayerManager } from "../polkadot/relayer-manager.js";
+
+import { Capabilities, ChainNameIntoChainId, RelayerConfig, RelayerInfo, RelayerManagerType } from '../abstracts/relayer/types.js';
+import { WebbRelayerManager } from '../abstracts/relayer/webb-relayer-manager.js';
+import { AppConfig, WebbRelayer } from '../index.js';
+import { PolkadotRelayerManager } from '../polkadot/relayer-manager.js';
+import { Web3RelayerManager } from '../web3/relayer-manager.js';
 
 /**
  * The WebbRelayerManagerFactory will initiate communication with relayers,
@@ -116,12 +117,12 @@ export class WebbRelayerManagerFactory {
     return relayerManagerFactory;
   }
 
-  async getRelayerManager(type: RelayerManagerType): Promise<WebbRelayerManager> {
+  async getRelayerManager (type: RelayerManagerType): Promise<WebbRelayerManager> {
     const relayers = Object.keys(this.capabilities).map((endpoint) => {
       return new WebbRelayer(endpoint, this.capabilities[endpoint]);
-    })
+    });
 
-    switch(type) {
+    switch (type) {
       case ('evm'):
         return new Web3RelayerManager(relayers, this.appConfig);
       case ('substrate'):
