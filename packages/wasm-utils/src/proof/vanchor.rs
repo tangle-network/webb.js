@@ -62,7 +62,7 @@ pub fn setup_output_utxos(
 	rng: &mut OsRng,
 ) -> Result<[JsUtxo; 2], OperationError> {
 	match (backend, curve, input_size, anchor_size) {
-		(Backend::Circom, Curve::Bn254, 2, 2) => {
+		(Backend::Arkworks, Curve::Bn254, 2, 2) => {
 			let utxo_o_1 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
 				ArkCurve::Bn254,
 				output_config[0].chain_id,
@@ -84,7 +84,7 @@ pub fn setup_output_utxos(
 				JsUtxo::new_from_bn254_utxo(utxo_o_2),
 			])
 		}
-		(Backend::Circom, Curve::Bn254, 16, 2) => {
+		(Backend::Arkworks, Curve::Bn254, 16, 2) => {
 			let utxo_o_1 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
 				ArkCurve::Bn254,
 				output_config[0].chain_id,
@@ -106,7 +106,14 @@ pub fn setup_output_utxos(
 				JsUtxo::new_from_bn254_utxo(utxo_o_2),
 			])
 		}
-		_ => Err(OpStatusCode::InvalidProofParameters.into()),
+		_ => {
+			let message = format!(
+				"(backend {}, curve {}, input_size {}, anchor_size {})",
+				backend, curve, input_size, anchor_size
+			);
+			let oe = OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message);
+			Err(oe)
+		}
 	}
 }
 pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -> Result<VAnchorProof, OperationError> {
