@@ -10,6 +10,7 @@ type VAnchorProof = {
   readonly outputNotes: Array<JsNote>;
   readonly proof: string;
   readonly publicInputs: Array<string>;
+  readonly publicAmount: Uint8Array
 };
 type AnchorProof = {
   readonly nullifierHash: string;

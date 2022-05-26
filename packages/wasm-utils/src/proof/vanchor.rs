@@ -2,6 +2,7 @@ use core::convert::TryInto;
 
 use ark_bn254::Fr as Bn254Fr;
 use ark_crypto_primitives::Error;
+use ark_ff::{BigInteger, PrimeField};
 use arkworks_setups::utxo::Utxo;
 use arkworks_setups::{Curve as ArkCurve, VAnchorProver};
 use rand::rngs::OsRng;
@@ -132,7 +133,11 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		output_utxos,
 		ext_data_hash,
 	} = vanchor_proof_input.clone();
-
+	let public_amount_bytes = Bn254Fr::from(public_amount)
+		.into_repr()
+		.to_bytes_le()
+		.try_into()
+		.expect("Failed to wrap public amount to bytes");
 	// Insure UTXO set has the required/supported input count
 	let in_utxos: Vec<JsUtxo> = if SUPPORTED_INPUT_COUNT.contains(&secret.len()) {
 		secret
@@ -259,5 +264,6 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		public_inputs: proof.public_inputs_raw,
 		output_notes: output_notes.to_vec(),
 		input_utxos: in_utxos,
+		public_amount: public_amount_bytes,
 	})
 }

@@ -4,7 +4,7 @@
 import type { Leaves, NoteProtocol, OutputUtxoConfig } from '@webb-tools/wasm-utils';
 
 import { ProofI } from '@webb-tools/sdk-core/proving/proving-manager.js';
-import { JsProofInput, JsProofOutput } from '@webb-tools/wasm-utils';
+import { JsProofInput, JsProofOutput, JsUtxo } from '@webb-tools/wasm-utils';
 import { JsNote } from '@webb-tools/wasm-utils/njs';
 
 import { Note } from '../note.js';
@@ -85,8 +85,8 @@ export type VAnchorPMSetupInput = {
   chainId: string;
   outputConfigs: [OutputUtxoConfig, OutputUtxoConfig];
   publicAmount: string;
-  externalDataHash: string;
   provingKey: Uint8Array;
+  calcExtHash(output: [JsUtxo, JsUtxo]): string;
 };
 
 interface ProvingManagerPayload extends Record<NoteProtocol, any> {
@@ -250,8 +250,10 @@ export class ProvingManagerWrapper {
       pm.setRoots(input.roots);
       pm.chain_id(input.chainId);
       pm.public_amount(input.publicAmount);
-      pm.setVanchorOutputConfig(...input.outputConfigs);
-      pm.setExtDatahash(input.externalDataHash);
+      const utxos = pm.setVanchorOutputConfig(...input.outputConfigs);
+      const dataHash = input.calcExtHash(utxos as any);
+
+      pm.setExtDatahash(dataHash);
       // leaves insertion
       const wasm = await this.wasmBlob;
       const leavesMap = new wasm.LeavesMapInput();
@@ -269,6 +271,7 @@ export class ProvingManagerWrapper {
         inputUtxos: proof.inputUtxos,
         outputNotes: proof.outputNotes,
         proof: proof.proof,
+        publicAmount: proof.publicAmount,
         publicInputs: proof.publicInputs
       };
 

@@ -54,6 +54,8 @@ pub struct VAnchorProof {
 	pub output_notes: Vec<JsNote>,
 	#[wasm_bindgen(skip)]
 	pub input_utxos: Vec<JsUtxo>,
+	#[wasm_bindgen(skip)]
+	pub public_amount: [u8; 32],
 }
 #[wasm_bindgen]
 impl VAnchorProof {
@@ -85,6 +87,12 @@ impl VAnchorProof {
 	#[wasm_bindgen(getter)]
 	pub fn proof(&self) -> JsString {
 		JsString::from(hex::encode(&self.proof))
+	}
+
+	#[wasm_bindgen(js_name = publicAmount)]
+	#[wasm_bindgen(getter)]
+	pub fn public_amount(&self) -> Uint8Array {
+		Uint8Array::from(self.public_amount.to_vec().as_slice())
 	}
 }
 

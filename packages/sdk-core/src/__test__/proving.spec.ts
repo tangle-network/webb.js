@@ -4,7 +4,7 @@
 /* eslint-disable camelcase */
 
 // eslint-disable-next-line camelcase
-import { JsNoteBuilder, MTBn254X5, OutputUtxoConfig, setupKeys, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
+import { JsNoteBuilder, JsUtxo, MTBn254X5, OutputUtxoConfig, setupKeys, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { expect } from 'chai';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
@@ -60,15 +60,16 @@ describe('Proving manager VAnchor', function () {
     const leavesMap: any = {};
 
     leavesMap[0] = [leaf1];
-    const externalDataHash = '10101010101010101010';
 
     const outputConfig1 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
     const outputConfig2 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
 
     const provingManager = new ProvingManagerWrapper('direct-call');
     const setup: ProvingManagerSetupInput<'vanchor'> = {
+      calcExtHash (_output: [JsUtxo, JsUtxo]): string {
+        return '10101010101010101010';
+      },
       chainId: '0',
-      externalDataHash,
       indices: [0],
       inputNotes: [vanchorNote1.serialize()],
       leavesMap: leavesMap,
@@ -102,15 +103,15 @@ describe('Proving manager VAnchor', function () {
 
     leavesMap[0] = [leaf1, leaf2];
 
-    const externalDataHash = '10101010101010101010';
-
     const outputConfig1 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
     const outputConfig2 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
 
     const provingManager = new ProvingManagerWrapper('direct-call');
     const setup: ProvingManagerSetupInput<'vanchor'> = {
+      calcExtHash (_output: [JsUtxo, JsUtxo]): string {
+        return '10101010101010101010';
+      },
       chainId: '0',
-      externalDataHash,
       indices: [0, 1],
       inputNotes: [vanchorNote1.serialize(), vanchorNote2.serialize()],
       leavesMap: leavesMap,
@@ -143,15 +144,16 @@ describe('Proving manager VAnchor', function () {
     const leavesMap: any = {};
 
     leavesMap[0] = leaves;
-    const externalDataHash = '10101010101010101010';
 
     const outputConfig1 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
     const outputConfig2 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
 
     const provingManager = new ProvingManagerWrapper('direct-call');
     const setup: ProvingManagerSetupInput<'vanchor'> = {
+      calcExtHash (_output: [JsUtxo, JsUtxo]): string {
+        return '10101010101010101010';
+      },
       chainId: '0',
-      externalDataHash,
       indices: notes.map((_, index) => index),
       inputNotes: notes.map((note) => note.serialize()),
       leavesMap: leavesMap,
@@ -185,15 +187,16 @@ describe('Proving manager VAnchor', function () {
     const leavesMap: any = {};
 
     leavesMap[0] = leaves;
-    const externalDataHash = '10101010101010101010';
 
     const outputConfig1 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
     const outputConfig2 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
 
     const provingManager = new ProvingManagerWrapper('direct-call');
     const setup: ProvingManagerSetupInput<'vanchor'> = {
+      calcExtHash (_output: [JsUtxo, JsUtxo]): string {
+        return '10101010101010101010';
+      },
       chainId: '0',
-      externalDataHash,
       indices: notes.map((_, index) => index),
       inputNotes: notes.map((note) => note.serialize()),
       leavesMap: leavesMap,
@@ -229,15 +232,16 @@ describe('Proving manager VAnchor', function () {
       const leavesMap: any = {};
 
       leavesMap[0] = leaves;
-      const externalDataHash = '10101010101010101010';
 
       const outputConfig1 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
       const outputConfig2 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
 
       const provingManager = new ProvingManagerWrapper('direct-call');
       const setup: ProvingManagerSetupInput<'vanchor'> = {
+        calcExtHash (_output: [JsUtxo, JsUtxo]): string {
+          return '10101010101010101010';
+        },
         chainId: '0',
-        externalDataHash,
         indices: notes.map((_, index) => index),
         inputNotes: notes.map((note) => note.serialize()),
         leavesMap: leavesMap,
@@ -252,6 +256,6 @@ describe('Proving manager VAnchor', function () {
       message = e.message;
     }
 
-    expect(message).to.deep.equal("Output amount and input amount  don't match input(170) != output(1610)");
+    expect(message).to.deep.equal('Output amount and input amount  don\'t match input(170) != output(1610)');
   });
 });
