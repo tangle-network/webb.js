@@ -242,7 +242,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
     // loop through the sourceRelayers to fetch leaves
     for (let i = 0; i < sourceRelayers.length; i++) {
-      const relayerLeaves = await sourceRelayers[i].getLeaves(sourceEvmId.toString(16), sourceContractAddress);
+      const relayerLeaves = await sourceRelayers[i].getLeaves(sourceEvmId, sourceContractAddress);
 
       const validLatestLeaf = await sourceContract.leafCreatedAtBlock(
         relayerLeaves.leaves[relayerLeaves.leaves.length - 1],
