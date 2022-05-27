@@ -72,7 +72,7 @@ type RelayerLeaves = {
  * Relayed withdraw is a class meant to encapsulate the communication between client (WebbRelayer instance)
  * and relayer during a withdraw.
  * @param status - Status for the relayed Withdraw initially it's `PreFlight`
- * @param wacher - watch for the current withdraw status [Status, Error or transaction hash]
+ * @param watcher - watch for the current withdraw status [Status, Error or transaction hash]
  * @param prefix - Prefix is used in the Record as a key for indicating the command that the relayer will parse
  * ```typescript
  * // anchorRelayTx is a prefix
