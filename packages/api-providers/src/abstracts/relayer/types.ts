@@ -72,35 +72,37 @@ export type RelayerConfig = {
   endpoint: string;
 };
 
-export type MixerQuery = {
-  amount: number;
-  tokenSymbol: string;
-};
-
+// An object which contains the fields necessary for generating
+// A withdraw request
 export type RelayedChainInput = {
   endpoint: string;
   name: string;
   baseOn: RelayerCMDBase;
-  // TODO: change to just contract
   contractAddress: string;
+};
+
+// An object to represent a token / amount pair which will be used
+// for querying relayer support.
+export type FixedSizeQuery = {
+  amount: number;
+  tokenSymbol: string;
 };
 
 /**
  * Relayer query object all the values are optional
  *
- * @param baseOn - Whither relayer supports evm or substrate.
- * @param ipService - Whither relayer supports the IP service
+ * @param baseOn - Whether relayer supports evm or substrate.
+ * @param ipService - Whether relayer supports the IP service
  * @param chainId - Relayer supportedChains has a chainId
  * @param contractAddress - Relayer supports the contract address
- * @param tornadoSupport - Relayer has support for  a contract with the amount and symbol `MixerQuery`
- * @param bridgeSupport - Relayer has support a contract with the amount and symbol `MixerQuery`
+ * @param bridgeSupport - Relayer has support a contract with the amount and symbol `FixedAnchorQuery`
  **/
 export type RelayerQuery = {
   baseOn?: 'evm' | 'substrate';
   ipService?: true;
   chainId?: InternalChainId;
   contractAddress?: string;
-  bridgeSupport?: MixerQuery;
+  bridgeSupport?: FixedSizeQuery;
 };
 
 export type ChainNameIntoChainId = (name: string, basedOn: 'evm' | 'substrate') => InternalChainId | null;

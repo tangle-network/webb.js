@@ -69,8 +69,8 @@ type RelayerLeaves = {
 };
 
 /**
- * Relayed withdraw is integrating with a relayer for doing the Withdrawal transaction without the user/owner of the commitment
- * have ot do it directly for more privacy, it's connected to the relayer via WebSocket, a new instance is instantiated for every transaction relaying
+ * Relayed withdraw is a class meant to encapsulate the communication between client (WebbRelayer instance)
+ * and relayer during a withdraw.
  * @param status - Status for the relayed Withdraw initially it's `PreFlight`
  * @param wacher - watch for the current withdraw status [Status, Error or transaction hash]
  * @param prefix - Prefix is used in the Record as a key for indicating the command that the relayer will parse
