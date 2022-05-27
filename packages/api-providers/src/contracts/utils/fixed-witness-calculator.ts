@@ -5,7 +5,7 @@
 // @ts-nocheck
 /* eslint-disable camelcase */
 
-export async function builder (code, options) {
+export async function buildFixedWitness (code, options) {
   options = options || {};
 
   const wasmModule = await WebAssembly.compile(code);

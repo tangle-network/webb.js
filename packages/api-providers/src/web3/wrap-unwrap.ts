@@ -1,8 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { Bridge, Currency, MixerSize, WrapUnwrap } from '@webb-tools/api-providers/abstracts/index.js';
-import { Amount, WrappingBalance, WrappingEvent } from '@webb-tools/api-providers/index.js';
+import { Amount, Bridge, Currency, MixerSize, WrappingBalance, WrappingEvent, WrapUnwrap } from '@webb-tools/api-providers/index.js';
 import { ERC20__factory as ERC20Factory } from '@webb-tools/contracts';
 import { ContractTransaction } from 'ethers';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';

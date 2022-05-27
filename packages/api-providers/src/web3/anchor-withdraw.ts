@@ -3,24 +3,18 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 
-import { parseUnits } from '@ethersproject/units';
 import { Anchor } from '@webb-tools/anchors';
-import * as witnessCalculatorFile from '@webb-tools/api-providers/contracts/utils/fixed-witness-calculator.js';
-import { BridgeConfig, OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, RelayerCMDBase, WebbRelayer, WithdrawState } from '@webb-tools/api-providers/index.js';
-import { BridgeStorage, bridgeStorageFactory, chainIdToRelayerName, getAnchorDeploymentBlockNumber, getEVMChainNameFromInternal, getFixedAnchorAddressForBridge } from '@webb-tools/api-providers/utils/index.js';
+import { BridgeConfig, BridgeStorage, bridgeStorageFactory, buildFixedWitness, chainIdToRelayerName, getAnchorDeploymentBlockNumber, getEVMChainNameFromInternal, RelayedWithdrawResult, RelayerCMDBase, WithdrawState } from '@webb-tools/api-providers/index.js';
 import { MerkleTree } from '@webb-tools/merkle-tree';
 import { Note } from '@webb-tools/sdk-core/index.js';
 import { toFixedHex } from '@webb-tools/utils';
 import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
-import { BigNumber } from 'ethers';
 
 import { AnchorApi, AnchorWithdraw } from '../abstracts/index.js';
-import { ChainType, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, InternalChainId, parseChainIdType } from '../chains/index.js';
+import { ChainType, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, parseChainIdType } from '../chains/index.js';
 import { depositFromAnchorNote } from '../contracts/utils/make-deposit.js';
-import { webbCurrencyIdFromString } from '../enums/index.js';
 import { Web3Provider } from '../ext-providers/index.js';
 import { fetchFixedAnchorKeyForEdges, fetchFixedAnchorWasmForEdges } from '../ipfs/evm/anchors.js';
-import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
 import { WebbWeb3Provider } from './webb-provider.js';
 
 export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
@@ -30,100 +24,6 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
   protected get config () {
     return this.inner.config;
-  }
-
-  async mapRelayerIntoActive (
-    relayer: OptionalRelayer,
-    internalChainId: InternalChainId
-  ): Promise<OptionalActiveRelayer> {
-    if (!relayer) {
-      return null;
-    }
-
-    return WebbRelayer.intoActiveWebRelayer(
-      relayer,
-      {
-        basedOn: 'evm',
-        chain: internalChainId
-      },
-      // Define the function for retrieving fee information for the relayer
-      async (note: string) => {
-        const depositNote = await Note.deserialize(note);
-        const evmNote = depositNote.note;
-        const internalId = chainTypeIdToInternalId(parseChainIdType(Number(depositNote.note.targetChainId)));
-        const contractAddress = await getFixedAnchorAddressForBridge(
-          webbCurrencyIdFromString(evmNote.tokenSymbol),
-          internalId,
-          Number(evmNote.amount),
-          this.config.bridgeByAsset
-        );
-
-        if (!contractAddress) {
-          throw new Error('Unsupported configuration for bridge');
-        }
-
-        // Given the note, iterate over the relayer's supported contracts and find the corresponding configuration
-        // for the contract.
-        const supportedContract = relayer.capabilities.supportedChains.evm
-          .get(internalId)
-          ?.contracts.find(({ address, size }) => {
-            // Match on the relayer configuration as well as note
-            return address.toLowerCase() === contractAddress.toLowerCase() && size === Number(evmNote.amount);
-          });
-
-        // The user somehow selected a relayer which does not support the mixer.
-        // This should not be possible as only supported mixers should be selectable in the UI.
-        if (!supportedContract) {
-          throw WebbError.from(WebbErrorCodes.RelayerUnsupportedMixer);
-        }
-
-        const principleBig = parseUnits(supportedContract.size.toString(), evmNote.denomination);
-        const withdrawFeeMill = supportedContract.withdrawFeePercentage * 1000000;
-
-        const withdrawFeeMillBig = BigNumber.from(withdrawFeeMill);
-        const feeBigMill = principleBig.mul(withdrawFeeMillBig);
-
-        const feeBig = feeBigMill.div(BigNumber.from(1000000));
-
-        return {
-          totalFees: feeBig.toString(),
-          withdrawFeePercentage: supportedContract.withdrawFeePercentage
-        };
-      }
-    );
-  }
-
-  async getRelayersByChainAndAddress (chainId: InternalChainId, address: string) {
-    return this.inner.relayingManager.getRelayer({
-      baseOn: 'evm',
-      chainId: chainId,
-      contractAddress: address
-    });
-  }
-
-  get relayers () {
-    return this.inner.getChainId().then((evmId) => {
-      const chainId = evmIdIntoInternalChainId(evmId);
-
-      return this.inner.relayingManager.getRelayer({
-        baseOn: 'evm',
-        chainId
-      });
-    });
-  }
-
-  async getRelayersByNote (evmNote: Note) {
-    const chainTypeId = Number(evmNote.note.targetChainId);
-    const internalId = chainTypeIdToInternalId(parseChainIdType(chainTypeId));
-
-    return this.inner.relayingManager.getRelayer({
-      baseOn: 'evm',
-      bridgeSupport: {
-        amount: Number(evmNote.note.amount),
-        tokenSymbol: evmNote.note.tokenSymbol
-      },
-      chainId: internalId
-    });
   }
 
   // Same chain ('mixer') withdraw flow.
@@ -190,7 +90,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     const maxEdges = await contract.inner.maxEdges();
     const wasmBuf = await fetchFixedAnchorWasmForEdges(maxEdges);
 
-    const witnessCalculator = await witnessCalculatorFile.builder(wasmBuf, {});
+    const witnessCalculator = await buildFixedWitness(wasmBuf, {});
     const circuitKey = await fetchFixedAnchorKeyForEdges(maxEdges);
 
     // This anchor wrapper from protocol-solidity is used for public inputs generation
@@ -329,7 +229,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     const sourceLatestRoot = await sourceContract.inner.getLastRoot();
 
     // get relayers for the source chain
-    const sourceRelayers = this.inner.relayingManager.getRelayer({
+    const sourceRelayers = this.inner.relayerManager.getRelayers({
       baseOn: 'evm',
       bridgeSupport: {
         amount: Number(note.amount),
@@ -342,7 +242,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
 
     // loop through the sourceRelayers to fetch leaves
     for (let i = 0; i < sourceRelayers.length; i++) {
-      const relayerLeaves = await sourceRelayers[i].getLeaves(sourceEvmId.toString(16), sourceContractAddress);
+      const relayerLeaves = await sourceRelayers[i].getLeaves(sourceEvmId, sourceContractAddress);
 
       const validLatestLeaf = await sourceContract.leafCreatedAtBlock(
         relayerLeaves.leaves[relayerLeaves.leaves.length - 1],
@@ -402,7 +302,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     // Fetch the zero knowledge files required for creating witnesses and verifying.
     const maxEdges = await destAnchor.inner.maxEdges();
     const wasmBuf = await fetchFixedAnchorWasmForEdges(maxEdges);
-    const witnessCalculator = await witnessCalculatorFile.builder(wasmBuf, {});
+    const witnessCalculator = await buildFixedWitness(wasmBuf, {});
     const circuitKey = await fetchFixedAnchorKeyForEdges(maxEdges);
 
     // This anchor wrapper from protocol-solidity is used for public inputs generation
@@ -433,7 +333,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     const merkleProof = linkedMerkleProof.path;
 
     let txHash: string;
-    const activeRelayer = this.activeRelayer[0];
+    const activeRelayer = this.inner.relayerManager.activeRelayer;
 
     if (activeRelayer && activeRelayer !== null && activeRelayer.beneficiary) {
       console.log('withdrawing through relayer');

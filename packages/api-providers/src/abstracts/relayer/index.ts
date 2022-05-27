@@ -2,4 +2,5 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export * from './types.js';
-export * from './webb-relayer.class.js';
+export * from './webb-relayer.js';
+export * from './webb-relayer-manager.js';

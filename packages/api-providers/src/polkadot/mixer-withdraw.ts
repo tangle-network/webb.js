@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
-import { OptionalActiveRelayer, OptionalRelayer, RelayedWithdrawResult, WebbRelayer, WithdrawState } from '@webb-tools/api-providers/index.js';
-import { fetchSubstrateTornadoProvingKey } from '@webb-tools/api-providers/ipfs/substrate/tornado.js';
+import { fetchSubstrateTornadoProvingKey, RelayedWithdrawResult, WithdrawState } from '@webb-tools/api-providers/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note, ProvingManager } from '@webb-tools/sdk-core/index.js';
 import { ProvingManagerSetupInput } from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
@@ -12,7 +11,6 @@ import { decodeAddress } from '@polkadot/keyring';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { MixerWithdraw } from '../abstracts/index.js';
-import { InternalChainId } from '../chains/index.js';
 import { WebbError, WebbErrorCodes } from '../webb-error/index.js';
 import { PolkadotMixerDeposit } from './index.js';
 import { WebbPolkadot } from './webb-provider.js';
@@ -42,49 +40,6 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
     return Promise.resolve(undefined);
   }
 
-  get relayers () {
-    return Promise.resolve(
-      this.inner.relayingManager.getRelayer({
-        baseOn: 'substrate'
-      })
-    );
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getRelayersByNote (evmNote: Note) {
-    return Promise.resolve(
-      this.inner.relayingManager.getRelayer({
-        baseOn: 'substrate'
-      })
-    );
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getRelayersByChainAndAddress (_chainId: InternalChainId, _address: string) {
-    // TODO: ! why don't we use ChainId and address?
-    return this.inner.relayingManager.getRelayer({});
-  }
-
-  async mapRelayerIntoActive (relayer: OptionalRelayer): Promise<OptionalActiveRelayer> {
-    if (!relayer) {
-      return null;
-    }
-
-    return WebbRelayer.intoActiveWebRelayer(
-      relayer,
-      {
-        basedOn: 'substrate',
-        chain: InternalChainId.ProtocolSubstrateStandalone
-      },
-      async () => {
-        return {
-          totalFees: '0',
-          withdrawFeePercentage: 0
-        };
-      }
-    );
-  }
-
   async fetchTreeLeaves (treeId: string | number): Promise<Uint8Array[]> {
     let done = false;
     let from = 0;
@@ -105,10 +60,6 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
     }
 
     return leaves;
-  }
-
-  async submitViaRelayer () {
-    return null;
   }
 
   async withdraw (note: string, recipient: string): Promise<string> {
@@ -136,7 +87,7 @@ export class PolkadotMixerWithdraw extends MixerWithdraw<WebbPolkadot> {
 
       logger.trace(`leaf ${leaf} has index `, leafIndex);
       logger.trace(leaves.map((i) => u8aToHex(i)));
-      const activeRelayer = this.activeRelayer[0];
+      const activeRelayer = this.inner.relayerManager.activeRelayer;
       const worker = this.inner.wasmFactory('wasm-utils');
       const pm = new ProvingManager(worker);
 
