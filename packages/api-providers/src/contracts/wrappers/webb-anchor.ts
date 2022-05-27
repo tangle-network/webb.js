@@ -18,7 +18,7 @@ import { ZKPWebbAnchorInputWithMerkle } from './types.js';
 
 const logger = LoggerService.get('AnchorContract');
 
-export interface IFixedPublicInputs {
+export interface IFixedAnchorPublicInputs {
   _roots: string;
   _nullifierHash: string;
   _refreshCommitment: string;
@@ -141,7 +141,7 @@ export class AnchorContract {
 
   async deposit (commitment: string) {
     const overrides = {};
-    const recipient = await this._contract.deposit(commitment, overrides);
+    const recipient = await this._contract.deposit(toFixedHex(commitment), overrides);
 
     await recipient.wait();
   }
@@ -152,14 +152,14 @@ export class AnchorContract {
     if (tokenAddress === zeroAddress) {
       const overrides = { value: value };
 
-      const tx = await this._contract.wrapAndDeposit(zeroAddress, commitment, overrides);
+      const tx = await this._contract.wrapAndDeposit(zeroAddress, toFixedHex(commitment), overrides);
 
       await tx.wait();
       logger.log('wrapAndDeposit completed for native token to webb token');
     } else {
       const overrides = {};
 
-      const tx = await this._contract.wrapAndDeposit(tokenAddress, commitment, overrides);
+      const tx = await this._contract.wrapAndDeposit(tokenAddress, toFixedHex(commitment), overrides);
 
       await tx.wait();
       logger.log('wrapAndDeposit completed for wrappable asset to webb token');

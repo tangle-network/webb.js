@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { AppConfig, NotificationHandler, Web3AnchorDeposit, WebbApiProvider, WebbMethods, WebbProviderEvents, WebbRelayerBuilder } from '@webb-tools/api-providers/index.js';
+import { AppConfig, NotificationHandler, Web3AnchorDeposit, WebbApiProvider, WebbMethods, WebbProviderEvents } from '@webb-tools/api-providers/index.js';
 import { EventBus } from '@webb-tools/app-util/index.js';
 import { providers } from 'ethers';
 import { Eth } from 'web3-eth';
@@ -16,6 +16,7 @@ import { Web3AnchorWithdraw } from './anchor-withdraw.js';
 import { Web3ChainQuery } from './chain-query.js';
 import { Web3MixerDeposit } from './mixer-deposit.js';
 import { Web3MixerWithdraw } from './mixer-withdraw.js';
+import { Web3RelayerManager } from './relayer-manager.js';
 import { Web3VAnchorDeposit } from './vanchor-deposit.js';
 import { Web3VAnchorWithdraw } from './vanchor-withdraw.js';
 import { Web3WrapUnwrap } from './wrap-unwrap.js';
@@ -33,7 +34,7 @@ export class WebbWeb3Provider
   private constructor (
     private web3Provider: Web3Provider,
     protected chainId: number,
-    readonly relayingManager: WebbRelayerBuilder,
+    readonly relayerManager: Web3RelayerManager,
     readonly config: AppConfig,
     readonly notificationHandler: NotificationHandler,
     readonly accounts: AccountsAdapter<Eth>
@@ -142,25 +143,25 @@ export class WebbWeb3Provider
   static async init (
     web3Provider: Web3Provider,
     chainId: number,
-    relayerBuilder: WebbRelayerBuilder,
+    relayerManager: Web3RelayerManager,
     appConfig: AppConfig,
     notification: NotificationHandler
   ) {
     const accounts = new Web3Accounts(web3Provider.eth);
 
-    return new WebbWeb3Provider(web3Provider, chainId, relayerBuilder, appConfig, notification, accounts);
+    return new WebbWeb3Provider(web3Provider, chainId, relayerManager, appConfig, notification, accounts);
   }
 
   // Init web3 provider with a generic account provider
   static async initWithCustomAccountAdapter (
     web3Provider: Web3Provider,
     chainId: number,
-    relayerBuilder: WebbRelayerBuilder,
+    relayerManager: Web3RelayerManager,
     appConfig: AppConfig,
     notification: NotificationHandler,
     web3AccountProvider: AccountsAdapter<Eth>
   ) {
-    return new WebbWeb3Provider(web3Provider, chainId, relayerBuilder, appConfig, notification, web3AccountProvider);
+    return new WebbWeb3Provider(web3Provider, chainId, relayerManager, appConfig, notification, web3AccountProvider);
   }
 
   get capabilities () {

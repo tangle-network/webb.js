@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 // eslint-disable-next-line header/header
-import { Account, AccountsAdapter, InteractiveFeedback, NotificationPayload, PolkadotProvider, PromiseOrT, RelayerConfig, relayerNameToChainId, relayerSubstrateNameToChainId, WebbPolkadot, WebbRelayerBuilder } from '@webb-tools/api-providers/index.js';
+import { Account, AccountsAdapter, InteractiveFeedback, NotificationPayload, PolkadotProvider, PromiseOrT, RelayerConfig, relayerNameToChainId, relayerSubstrateNameToChainId, WebbPolkadot, WebbRelayerManagerFactory } from '@webb-tools/api-providers/index.js';
 
 import { InjectedAccount, InjectedExtension } from '@polkadot/extension-inject/types';
 
@@ -55,7 +55,7 @@ class PolkadotAccounts extends AccountsAdapter<InjectedExtension, InjectedAccoun
 }
 
 export async function initPolkadotProvider (): Promise<WebbPolkadot> {
-  const webbRelayerBuilder = await WebbRelayerBuilder.initBuilder(
+  const relayerFactory = await WebbRelayerManagerFactory.init(
     relayerConfig,
     (name, basedOn) => {
       try {
@@ -73,6 +73,7 @@ export async function initPolkadotProvider (): Promise<WebbPolkadot> {
       console.log(error);
     }
   });
+  const relayerManager = await relayerFactory.getRelayerManager('substrate');
   const provider = await WebbPolkadot.initWithCustomAccountsAdapter(
     'Webb DApp',
     ['ws://127.0.0.1:9944'],
@@ -82,7 +83,7 @@ export async function initPolkadotProvider (): Promise<WebbPolkadot> {
         console.log(error);
       }
     },
-    webbRelayerBuilder,
+    relayerManager,
     mockAppConfig,
     notificationHandler,
     new PolkadotAccounts({} as any),

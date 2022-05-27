@@ -3,7 +3,7 @@
 
 import { WebbApiProvider } from '@webb-tools/api-providers/index.js';
 import { EventBus } from '@webb-tools/app-util/index.js';
-import { Note } from '@webb-tools/sdk-core';
+import { Note } from '@webb-tools/sdk-core/index.js';
 
 export type DepositPayload<T extends Note = Note, DepositParams = unknown> = {
   note: T;

@@ -18,7 +18,7 @@ import { ZKPWebbAnchorInputWithMerkle } from './types.js';
 
 const logger = LoggerService.get('AnchorContract');
 
-export interface IVariablePublicInputs {
+export interface IVariableAnchorPublicInputs {
   _roots: string;
   _nullifierHash: string;
   _refreshCommitment: string;
