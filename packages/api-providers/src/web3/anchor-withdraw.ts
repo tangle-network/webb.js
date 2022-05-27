@@ -4,9 +4,18 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 
 import { Anchor } from '@webb-tools/anchors';
-import * as witnessCalculatorFile from '@webb-tools/api-providers/contracts/utils/fixed-witness-calculator.js';
-import { BridgeConfig, RelayedWithdrawResult, RelayerCMDBase, WithdrawState } from '@webb-tools/api-providers/index.js';
-import { BridgeStorage, bridgeStorageFactory, chainIdToRelayerName, getAnchorDeploymentBlockNumber, getEVMChainNameFromInternal } from '@webb-tools/api-providers/utils/index.js';
+import {
+  BridgeConfig,
+  BridgeStorage,
+  bridgeStorageFactory,
+  buildFixedWitness,
+  chainIdToRelayerName,
+  getAnchorDeploymentBlockNumber,
+  getEVMChainNameFromInternal,
+  RelayedWithdrawResult,
+  RelayerCMDBase,
+  WithdrawState
+} from '@webb-tools/api-providers/index.js';
 import { MerkleTree } from '@webb-tools/merkle-tree';
 import { Note } from '@webb-tools/sdk-core/index.js';
 import { toFixedHex } from '@webb-tools/utils';
@@ -92,7 +101,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     const maxEdges = await contract.inner.maxEdges();
     const wasmBuf = await fetchFixedAnchorWasmForEdges(maxEdges);
 
-    const witnessCalculator = await witnessCalculatorFile.builder(wasmBuf, {});
+    const witnessCalculator = await buildFixedWitness(wasmBuf, {});
     const circuitKey = await fetchFixedAnchorKeyForEdges(maxEdges);
 
     // This anchor wrapper from protocol-solidity is used for public inputs generation
@@ -304,7 +313,7 @@ export class Web3AnchorWithdraw extends AnchorWithdraw<WebbWeb3Provider> {
     // Fetch the zero knowledge files required for creating witnesses and verifying.
     const maxEdges = await destAnchor.inner.maxEdges();
     const wasmBuf = await fetchFixedAnchorWasmForEdges(maxEdges);
-    const witnessCalculator = await witnessCalculatorFile.builder(wasmBuf, {});
+    const witnessCalculator = await buildFixedWitness(wasmBuf, {});
     const circuitKey = await fetchFixedAnchorKeyForEdges(maxEdges);
 
     // This anchor wrapper from protocol-solidity is used for public inputs generation

@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { fetchSubstrateAnchorProvingKey } from '@webb-tools/api-providers/ipfs/substrate/anchor.js';
+import { fetchSubstrateAnchorProvingKey } from '@webb-tools/api-providers/index.js';
 import { Note, ProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core/index.js';
 
 import { decodeAddress } from '@polkadot/keyring';

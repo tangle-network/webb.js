@@ -17,7 +17,7 @@ export function depositFromAnchorNote (note: DepositNote): IAnchorDepositInfo {
 
   const deposit: IAnchorDepositInfo = {
     chainID: BigInt(chainId),
-    commitment: `0x${commitment}`,
+    commitment,
     nullifier: BigInt(toFixedHex(nullifier)),
     nullifierHash,
     secret: BigInt(toFixedHex(secret))

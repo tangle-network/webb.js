@@ -12,6 +12,11 @@
       "require": "./cjs/index.js",
       "default": "./index.js"
     },
+    "./augmentDerives.js": {
+      "types": "./augmentDerives.d.ts",
+      "require": "./cjs/augmentDerives.js",
+      "default": "./augmentDerives.js"
+    },
     "./index.js": {
       "types": "./index.d.ts",
       "require": "./cjs/index.js",

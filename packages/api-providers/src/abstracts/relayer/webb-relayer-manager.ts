@@ -24,11 +24,16 @@ export abstract class WebbRelayerManager {
     this.listUpdated = this._listUpdated.asObservable();
   }
 
-  async setActiveRelayer (relayer: WebbRelayer, internalChainId: InternalChainId): Promise<void> {
+  async setActiveRelayer (relayer: WebbRelayer | null, internalChainId: InternalChainId): Promise<void> {
     const active = await this.mapRelayerIntoActive(relayer, internalChainId);
 
     this.activeRelayer = active;
     this.activeRelayerSubject.next(active);
+  }
+
+  addRelayer (relayer: WebbRelayer): void {
+    this.relayers.push(relayer);
+    this._listUpdated.next();
   }
 
   abstract mapRelayerIntoActive (relayer: OptionalRelayer, internalChainId: InternalChainId): Promise<OptionalActiveRelayer>;

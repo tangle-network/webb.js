@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
-import { RelayedWithdrawResult, WithdrawState } from '@webb-tools/api-providers/index.js';
-import { fetchSubstrateTornadoProvingKey } from '@webb-tools/api-providers/ipfs/substrate/tornado.js';
+import { fetchSubstrateTornadoProvingKey, RelayedWithdrawResult, WithdrawState } from '@webb-tools/api-providers/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note, ProvingManager } from '@webb-tools/sdk-core/index.js';
 import { ProvingManagerSetupInput } from '@webb-tools/sdk-core/proving/proving-manager-thread.js';

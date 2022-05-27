@@ -82,6 +82,8 @@ export class WebbRelayerManagerFactory {
     );
   }
 
+  // This function will add the relayer to the factory's store of capabilities.
+  // When new RelayerManagers are created, any added entries will be passed.
   public async addRelayer (endpoint: string) {
     const c = await this.fetchCapabilitiesAndInsert({ endpoint });
 
