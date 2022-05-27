@@ -1,18 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  AppConfig,
-  ChainType,
-  CurrencyRole,
-  CurrencyType,
-  EVMChainId,
-  InternalChainId,
-  SubstrateChainId,
-  WebbCurrencyId,
-  ZERO,
-  zeroAddress
-} from '@webb-tools/api-providers/index.js';
+import { AppConfig, ChainType, CurrencyRole, CurrencyType, EVMChainId, InternalChainId, SubstrateChainId, WebbCurrencyId, ZERO, zeroAddress } from '@webb-tools/api-providers/index.js';
 
 const anchorsConfig: AppConfig['anchors'] = {
   [WebbCurrencyId.WEBB]: [

@@ -4,18 +4,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 
 import { Anchor } from '@webb-tools/anchors';
-import {
-  BridgeConfig,
-  BridgeStorage,
-  bridgeStorageFactory,
-  buildFixedWitness,
-  chainIdToRelayerName,
-  getAnchorDeploymentBlockNumber,
-  getEVMChainNameFromInternal,
-  RelayedWithdrawResult,
-  RelayerCMDBase,
-  WithdrawState
-} from '@webb-tools/api-providers/index.js';
+import { BridgeConfig, BridgeStorage, bridgeStorageFactory, buildFixedWitness, chainIdToRelayerName, getAnchorDeploymentBlockNumber, getEVMChainNameFromInternal, RelayedWithdrawResult, RelayerCMDBase, WithdrawState } from '@webb-tools/api-providers/index.js';
 import { MerkleTree } from '@webb-tools/merkle-tree';
 import { Note } from '@webb-tools/sdk-core/index.js';
 import { toFixedHex } from '@webb-tools/utils';

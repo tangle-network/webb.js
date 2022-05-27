@@ -1,19 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 // eslint-disable-next-line header/header
-import {
-  Account,
-  AccountsAdapter,
-  InteractiveFeedback,
-  NotificationPayload,
-  PolkadotProvider,
-  PromiseOrT,
-  RelayerConfig,
-  relayerNameToChainId,
-  relayerSubstrateNameToChainId,
-  WebbPolkadot,
-  WebbRelayerManagerFactory
-} from '@webb-tools/api-providers/index.js';
+import { Account, AccountsAdapter, InteractiveFeedback, NotificationPayload, PolkadotProvider, PromiseOrT, RelayerConfig, relayerNameToChainId, relayerSubstrateNameToChainId, WebbPolkadot, WebbRelayerManagerFactory } from '@webb-tools/api-providers/index.js';
 
 import { InjectedAccount, InjectedExtension } from '@polkadot/extension-inject/types';
 
