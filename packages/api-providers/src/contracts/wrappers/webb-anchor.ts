@@ -5,7 +5,7 @@
 
 import { Log } from '@ethersproject/abstract-provider';
 import { Anchor } from '@webb-tools/anchors';
-import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise.js';
+import { retryPromise } from '@webb-tools/api-providers/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { ERC20, ERC20__factory as ERC20Factory, FixedDepositAnchor, FixedDepositAnchor__factory } from '@webb-tools/contracts';
 import { IAnchorDepositInfo } from '@webb-tools/interfaces';
@@ -18,7 +18,7 @@ import { ZKPWebbAnchorInputWithMerkle } from './types.js';
 
 const logger = LoggerService.get('AnchorContract');
 
-export interface IPublicInputs {
+export interface IFixedPublicInputs {
   _roots: string;
   _nullifierHash: string;
   _refreshCommitment: string;

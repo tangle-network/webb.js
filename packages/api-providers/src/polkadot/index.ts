@@ -11,3 +11,5 @@ export * from './transaction.js';
 export * from './anchor-api.js';
 export * from './anchor-deposit.js';
 export * from './anchor-withdraw.js';
+export * from './vanchor-deposit.js';
+export * from './vanchor-withdraw.js';

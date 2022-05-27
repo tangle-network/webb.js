@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Anchor } from '@webb-tools/anchors';
-import * as witnessCalculatorFile from '@webb-tools/api-providers/contracts/utils/fixed-witness-calculator.js';
-import { BridgeStorage, bridgeStorageFactory, depositFromAnchorNote } from '@webb-tools/api-providers/index.js';
+import { BridgeStorage, bridgeStorageFactory, buildFixedWitness, depositFromAnchorNote } from '@webb-tools/api-providers/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { Note } from '@webb-tools/sdk-core/index.js';
 
@@ -87,7 +86,7 @@ export class Web3MixerWithdraw extends Web3AnchorWithdraw {
     // Fetch the zero knowledge files required for creating witnesses and verifying.
     const maxEdges = await contract.inner.maxEdges();
     const wasmBuf = await fetchFixedAnchorWasmForEdges(maxEdges);
-    const witnessCalculator = await witnessCalculatorFile.builder(wasmBuf, {});
+    const witnessCalculator = await buildFixedWitness(wasmBuf, {});
     const circuitKey = await fetchFixedAnchorKeyForEdges(maxEdges);
 
     // This anchor wrapper from protocol-solidity is used for public inputs generation

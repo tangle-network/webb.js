@@ -5,9 +5,7 @@
 
 import { Log } from '@ethersproject/abstract-provider';
 import { VAnchor as VAnchorWrapper } from '@webb-tools/anchors';
-import * as witnessCalculatorFile from '@webb-tools/api-providers/contracts/utils/variable-witness-calculator.js';
-import { fetchVariableAnchorKeyForEdges, fetchVariableAnchorWasmForEdges } from '@webb-tools/api-providers/ipfs/index.js';
-import { retryPromise } from '@webb-tools/api-providers/utils/retry-promise.js';
+import { buildVariableWitness, fetchVariableAnchorKeyForEdges, fetchVariableAnchorWasmForEdges, retryPromise } from '@webb-tools/api-providers/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 import { ERC20, ERC20__factory as ERC20Factory, VAnchor, VAnchor__factory } from '@webb-tools/contracts';
 import { IAnchorDepositInfo } from '@webb-tools/interfaces';
@@ -20,7 +18,7 @@ import { ZKPWebbAnchorInputWithMerkle } from './types.js';
 
 const logger = LoggerService.get('AnchorContract');
 
-export interface IPublicInputs {
+export interface IVariablePublicInputs {
   _roots: string;
   _nullifierHash: string;
   _refreshCommitment: string;
@@ -32,7 +30,7 @@ export interface IPublicInputs {
 
 // The AnchorContract defines useful functions over an anchor that do not depend on zero knowledge.
 export class VAnchorContract {
-  private wrapper: VAnchorWrapper | null = null;
+  public wrapper: VAnchorWrapper | null = null;
   private _contract: VAnchor;
   private readonly signer: Signer;
 
@@ -64,11 +62,11 @@ export class VAnchorContract {
 
       const smallKey = await fetchVariableAnchorKeyForEdges(maxEdges, true);
       const smallWasm = await fetchVariableAnchorWasmForEdges(maxEdges, true);
-      const smallWitnessCalc = await witnessCalculatorFile.builder(smallWasm, {});
+      const smallWitnessCalc = await buildVariableWitness(smallWasm, {});
 
       const largeKey = await fetchVariableAnchorKeyForEdges(maxEdges, false);
       const largeWasm = await fetchVariableAnchorWasmForEdges(maxEdges, false);
-      const largeWitnessCalc = await witnessCalculatorFile.builder(largeWasm, {});
+      const largeWitnessCalc = await buildVariableWitness(largeWasm, {});
 
       // Get the necessary fixtures for populating the VAnchor wrapper instance.
       this.wrapper = await VAnchorWrapper.connect(

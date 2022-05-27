@@ -7,7 +7,7 @@ import { MixerWithdraw } from '../mixer/index.js';
 import { WebbApiProvider } from '../webb-provider.interface.js';
 import { Bridge } from './bridge.js';
 
-export abstract class AnchorWithdraw<T extends WebbApiProvider<any>> extends MixerWithdraw<T> {
+export abstract class VAnchorWithdraw<T extends WebbApiProvider<any>> extends MixerWithdraw<T> {
   get tokens () {
     return Bridge.getTokens(this.inner.config.currencies);
   }
