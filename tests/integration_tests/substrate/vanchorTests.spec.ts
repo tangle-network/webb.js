@@ -299,7 +299,7 @@ describe('VAnchor tests', function() {
     const chainId = BigInt(notes[0].targetChainId); // both two notes have the same chain id
 
     const withdrawAmount = notes.reduce((acc, note) => acc + Number(note.amount), 0);
-    const extAmount = withdrawAmount;
+    const extAmount = -withdrawAmount;
 
     const publicAmount = -withdrawAmount;
 
@@ -312,10 +312,12 @@ describe('VAnchor tests', function() {
     const leaf2Index = Number(notes[1].index);
     const maxLeafIndex = Math.max(leaf1Index, leaf2Index);
     const leaves = await apiPromise!.derive.merkleTreeBn254.getLeavesForTree(treeId, 0, maxLeafIndex);
+    const neighborRoots :string[]= await (apiPromise!.rpc as any).lt.getNeighborRoots(treeId).then((roots:any) => roots.toHuman());
+
     leavesMap[chainId.toString()] = leaves;
     const tree = await apiPromise!.query.merkleTreeBn254.trees(treeId);
-    const root = tree.unwrap().root.toHex();
-    const rootsSet = [hexToU8a(root), hexToU8a(root)];
+    const root = tree.unwrap().root.toHex()
+    const rootsSet = [hexToU8a(root), hexToU8a(neighborRoots[0])];
     const decodedAddress = decodeAddress(address);
 
     const setup: ProvingManagerSetupInput<'vanchor'> = {
