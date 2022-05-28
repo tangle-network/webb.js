@@ -1,5 +1,4 @@
 import {
-  ExtData,
   JsNoteBuilder,
   OutputUtxoConfig,
   verify_js_proof
@@ -138,37 +137,31 @@ describe('VAnchor tests', function() {
     const tree = await apiPromise!.query.merkleTreeBn254.trees(treeId);
     const root = tree.unwrap().root.toHex();
     const rootsSet = [hexToU8a(root), hexToU8a(root)];
-    let extdata: any = null;
-    let hash :any= null
+    const decodedAddress = decodeAddress(address);
+
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: outputChainId.toString(),
-      calcExtHash([o1, o2]): string {
-        let deocdedAddress = decodeAddress(address);
-        extdata = {
-          relayer:address,
-          recipient:address,
-          fee,
-          ext_amount: extAmount,
-          encrypted_output1: o1.commitment,
-          encrypted_output2: o2.commitment
-        }
-        const extData2 = new ExtData(deocdedAddress,deocdedAddress,extAmount.toString(),fee.toString(),
-          o1.commitment,
-          o2.commitment
-          )
-       hash = u8aToHex(extData2.get_encode());
-
-        return hash.replace('0x', '');
-      },
       indices: [0, 0],
       inputNotes: notes.map((note) => note.serialize()),
       leavesMap: leavesMap,
       outputConfigs: [outputConfig1, outputConfig2],
       provingKey: pk,
       publicAmount: String(publicAmount),
-      roots: rootsSet
+      roots: rootsSet,
+      relayer:decodedAddress,
+      recipient:decodedAddress,
+      extAmount:extAmount.toString(),
+      fee:fee.toString(),
     };
     const data = await provingManager.proof('vanchor', setup);
+    const extData =         {
+      relayer:address,
+      recipient:address,
+      fee,
+      ext_amount: extAmount,
+      encrypted_output1: data.outputNotes[0].getLeafCommitment(),
+      encrypted_output2: data.outputNotes[1].getLeafCommitment()
+    }
     const validProof = verify_js_proof(
       data.proof,
       data.publicInputs,
@@ -182,16 +175,16 @@ describe('VAnchor tests', function() {
       roots: rootsSet,
       inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
       outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeafCommitment())),
-      extDataHash: hash
+      extDataHash: data.extDataHash
     };
-    console.log([treeId, vanchorProofData, extdata]);
+    console.log([treeId, vanchorProofData, extData]);
     try{
 
 
     await polkadotTx(apiPromise!, {
       section: 'vAnchorBn254',
       method: 'transact'
-    }, [treeId, vanchorProofData,extdata], bob);
+    }, [treeId, vanchorProofData,extData], bob);
 
     }catch (e) {
       console.log(e);

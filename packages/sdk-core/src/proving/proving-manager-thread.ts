@@ -86,7 +86,6 @@ export type VAnchorPMSetupInput = {
   outputConfigs: [OutputUtxoConfig, OutputUtxoConfig];
   publicAmount: string;
   provingKey: Uint8Array;
-  calcExtHash(output: [JsUtxo, JsUtxo]): string;
   relayer: Uint8Array;
   recipient: Uint8Array;
   extAmount: string;
@@ -265,8 +264,9 @@ export class ProvingManagerWrapper {
         o2.commitment
       );
       const dataHash = extData.get_encode();
+      const dataHashhex = u8aToHex(dataHash).replace('0x', '');
 
-      pm.setExtDatahash(u8aToHex(dataHash).replace('0x', ''));
+      pm.setExtDatahash(dataHashhex);
 
       const leavesMap = new wasm.LeavesMapInput();
 
@@ -280,6 +280,7 @@ export class ProvingManagerWrapper {
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.vanchorProof;
       const anchorProof: ProofI<'vanchor'> = {
+        extDataHash: dataHash,
         inputUtxos: proof.inputUtxos,
         outputNotes: proof.outputNotes,
         proof: proof.proof,
