@@ -19,7 +19,6 @@ use wasm_bindgen::convert::FromWasmAbi;
 use wasm_bindgen::prelude::*;
 
 use crate::note::JsNote;
-use crate::proof::vanchor::setup_output_utxos;
 use crate::types::{
 	Backend, Curve, Indices, Leaves, NoteProtocol, OpStatusCode, OperationError, Protocol, Uint8Arrayx32, WasmCurve,
 };
@@ -635,7 +634,7 @@ impl VAnchorProofInput {
 pub enum ProofInput {
 	Mixer(MixerProofPayload),
 	Anchor(AnchorProofPayload),
-	VAnchor(VAnchorProofPayload),
+	VAnchor(Box<VAnchorProofPayload>),
 }
 
 impl ProofInput {
@@ -667,7 +666,7 @@ impl ProofInput {
 
 	pub fn vanchor_input(&self) -> Result<VAnchorProofPayload, OperationError> {
 		match self {
-			ProofInput::VAnchor(vanchor) => Ok(vanchor.clone()),
+			ProofInput::VAnchor(vanchor) => Ok(*vanchor.clone()),
 			_ => {
 				let message = "Can't cant construct proof input for VAnchorProofInput".to_string();
 				Err(OperationError::new_with_message(
@@ -696,7 +695,7 @@ pub struct JsProofInput {
 pub enum ProofInputBuilder {
 	Mixer(MixerProofInput),
 	Anchor(AnchorProofInput),
-	VAnchor(VAnchorProofInput),
+	VAnchor(Box<VAnchorProofInput>),
 }
 impl ProofInputBuilder {
 	pub fn set_input_utxos(&mut self, utxo_list: Vec<JsUtxo>) -> Result<(), OperationError> {
@@ -1079,7 +1078,7 @@ impl JsProofInputBuilder {
 		utxo2: OutputUtxoConfig,
 	) -> Result<Array, JsValue> {
 		let output = self.inner.set_output_config([utxo1, utxo2])?;
-		let output: Array = output.clone().into_iter().map(JsValue::from).collect();
+		let output: Array = output.into_iter().map(JsValue::from).collect();
 		Ok(output)
 	}
 
@@ -1244,7 +1243,7 @@ impl JsProofInputBuilder {
 			}
 			ProofInputBuilder::VAnchor(vanchor_proof_input) => {
 				let vanchor_payload = vanchor_proof_input.build()?;
-				ProofInput::VAnchor(vanchor_payload)
+				ProofInput::VAnchor(Box::new(vanchor_payload))
 			}
 		};
 		Ok(proof_input)
@@ -1434,7 +1433,7 @@ pub fn generate_proof_js(proof_input: JsProofInput) -> Result<JsProofOutput, JsV
 			})
 		}
 		ProofInput::VAnchor(vanchor_proof_input) => {
-			vanchor::create_proof(vanchor_proof_input, &mut rng).map(|v| JsProofOutput {
+			vanchor::create_proof(*vanchor_proof_input, &mut rng).map(|v| JsProofOutput {
 				inner: ProofOutput::VAnchor(v),
 			})
 		}

@@ -130,7 +130,7 @@ async function createVAnchorWithDeposit(
     extAmount: extAmount.toString(),
     fee: fee.toString()
   };
-  const data = await provingManager.proof('vanchor', setup);
+  const data = await provingManager.prove('vanchor', setup);
   const extData = {
     relayer: address,
     recipient: address,
@@ -257,7 +257,7 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString()
     };
-    const data = await provingManager.proof('vanchor', setup);
+    const data = await provingManager.prove('vanchor', setup);
     const extData = {
       relayer: address,
       recipient: address,
@@ -334,7 +334,7 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString()
     };
-    const data = await provingManager.proof('vanchor', setup);
+    const data = await provingManager.prove('vanchor', setup);
     const extData = {
       relayer: address,
       recipient: address,
