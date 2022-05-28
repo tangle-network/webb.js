@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiInitHandler, AppConfig, NotificationHandler, ProvideCapabilities, WasmFactory, WebbApiProvider, WebbMethods, WebbProviderEvents, WebbRelayerBuilder } from '@webb-tools/api-providers/index.js';
+import { ApiInitHandler, AppConfig, NotificationHandler, ProvideCapabilities, WasmFactory, WebbApiProvider, WebbMethods, WebbProviderEvents } from '@webb-tools/api-providers/index.js';
 import { EventBus } from '@webb-tools/app-util/index.js';
 
 import { ApiPromise } from '@polkadot/api';
@@ -16,6 +16,7 @@ import { PolkadotAnchorWithdraw } from './anchor-withdraw.js';
 import { PolkadotChainQuery } from './chain-query.js';
 import { PolkadotMixerDeposit } from './mixer-deposit.js';
 import { PolkadotMixerWithdraw } from './mixer-withdraw.js';
+import { PolkadotRelayerManager } from './relayer-manager.js';
 import { PolkaTXBuilder } from './transaction.js';
 import { PolkadotVAnchorDeposit } from './vanchor-deposit.js';
 import { PolkadotWrapUnwrap } from './wrap-unwrap.js';
@@ -28,7 +29,7 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
   private constructor (
     apiPromise: ApiPromise,
     injectedExtension: InjectedExtension,
-    readonly relayingManager: WebbRelayerBuilder,
+    readonly relayerManager: PolkadotRelayerManager,
     public readonly config: AppConfig,
     readonly notificationHandler: NotificationHandler,
     private readonly provider: PolkadotProvider,
@@ -136,7 +137,7 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
     appName: string, // App name Arbitrary name
     endpoints: string[], // Endpoints of the substrate node
     errorHandler: ApiInitHandler, // Error handler that will be used to catch errors while initializing the provider
-    relayerBuilder: WebbRelayerBuilder, // Webb Relayer builder for relaying withdraw
+    relayerBuilder: PolkadotRelayerManager, // Webb Relayer builder for relaying withdraw
     appConfig: AppConfig, // The whole and current app configuration
     notification: NotificationHandler, // Notification handler that will be used for the provider
     wasmFactory: WasmFactory // A Factory Fn that wil return wasm worker that would be supplied eventually to the `sdk-core`
@@ -167,7 +168,7 @@ export class WebbPolkadot extends EventBus<WebbProviderEvents> implements WebbAp
     appName: string, // App name Arbitrary name
     endpoints: string[], // Endpoints of the substrate node
     errorHandler: ApiInitHandler, // Error handler that will be used to catch errors while initializing the provider
-    relayerBuilder: WebbRelayerBuilder, // Webb Relayer builder for relaying withdraw
+    relayerBuilder: PolkadotRelayerManager, // Webb Relayer builder for relaying withdraw
     appConfig: AppConfig, // The whole and current app configuration
     notification: NotificationHandler, // Notification handler that will be used for the provider
     accounts: AccountsAdapter<InjectedExtension, InjectedAccount>,

@@ -1,4 +1,4 @@
-import '../../packages/types/build/index.js';
+import '../../packages/types/build/cjs/index.js';
 import { options } from '@webb-tools/api/index.js';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';

@@ -57,6 +57,57 @@ const CPX = ['css', 'gif', 'hbs', 'jpg', 'js', 'json', 'png', 'svg', 'd.ts']
   .map((ext) => `src/**/*.${ext}`)
   .concat('package.json');
 
+function copyMiscFiles(dir, module = 'esm') {
+  if (module === 'esm') {
+    [...CPX]
+      .concat(`../../build/${dir}/src/**/*.d.ts`, `../../build/packages/${dir}/src/**/*.d.ts`)
+      .forEach((src) => copySync(src, 'build'));
+  } else {
+    // Extra logic for copying over other files (package.json for cjs modules)
+    [...CPX]
+      .concat(`../../build/${dir}/src/**/*.d.ts`, `../../build/packages/${dir}/src/**/*.d.ts`)
+      .forEach((src) => copySync(src, 'build/cjs'));
+  }
+
+  // The types package is a special case - it should only ever be cjs.
+  // So the root directory package.json should exist as commonjs.
+  if (dir === 'types') {
+    copySync('./package.json', 'build')
+  }
+}
+
+// For the given directory, modify the source code to be CJS compliant.
+// Specific examples would include updating the import path for require() statements
+//   of proving-manager-thread.js from proving-manager.js
+function postProcessingForCjs(dir) {
+
+  // loop through each js file in the directory and update paths if required
+  glob(dir + '/**/*.js', function(err, res) {
+    if (err) {
+      console.log('error when postProcessingForCjs');
+    } else {
+      res.map((filePath) => {
+        const rawFileText = fs.readFileSync(filePath, 'ascii');
+
+        // If a string contains '@webb-tools/<x>/' (where x != wasm-utils),
+        // then this is a path which should be accommodated for cjs
+        const rexexp = new RegExp('((@webb-tools\/)((?!wasm-utils).)[^/s]*\/)', 'g');
+        const modifiedFileText = rawFileText.replaceAll(rexexp, "$1cjs/");
+
+        fs.writeFileSync(filePath, modifiedFileText);
+      })
+    }
+  })
+
+  // Change the package type from 'module' to 'commonjs'
+  const raw = fs.readFileSync('./build/cjs/package.json');
+  const pkg = JSON.parse(raw);
+  pkg.type = 'commonjs';
+  pkg.main = './index.js';
+  pkg.module = undefined;
+  pkg.exports = undefined;
+  fs.writeFileSync('./build/cjs/package.json', JSON.stringify(pkg));
+}
 
 function buildWebpack() {
   executeSync('yarn polkadot-exec-webpack --config webpack.config.cjs --mode production');
@@ -76,6 +127,7 @@ async function buildBabel(dir, module = 'esm') {
   // Prefer to use local config over the root one.
   const conf = fs.existsSync(potentialLocalConfig) ? potentialLocalConfig : rootConfig;
 
+  // Commonjs builds will exist in a '/cjs' directory for the package.
   await babel({
     babelOptions: {
       configFile: conf
@@ -84,14 +136,15 @@ async function buildBabel(dir, module = 'esm') {
       extensions: ['.ts'],
       filenames: ['src'],
       ignore: '**/*.d.ts',
-      outDir: path.join(process.cwd(), 'build'),
+      outDir: module === 'esm' ? path.join(process.cwd(), 'build') : path.join(process.cwd(), 'build/cjs'),
       outFileExtension: '.js'
     }
   });
 
-  [...CPX]
-    .concat(`../../build/${dir}/src/**/*.d.ts`, `../../build/packages/${dir}/src/**/*.d.ts`)
-    .forEach((src) => copySync(src, 'build'));
+  copyMiscFiles(dir, module);
+  if (module != 'esm') {
+    postProcessingForCjs(path.join(process.cwd(), 'build/cjs'));
+  }
 }
 
 async function buildJs(dir) {
@@ -105,9 +158,10 @@ async function buildJs(dir) {
     if (fs.existsSync(path.join(process.cwd(), 'public'))) {
       buildWebpack(dir);
     } else {
-      if (dir === 'types') {
-        await buildBabel(dir, 'cjs');
-      } else {
+      await buildBabel(dir, 'cjs');
+      
+      // The types package should only be built for commonjs.
+      if (dir != 'types') {
         await buildBabel(dir, 'esm');
       }
     }

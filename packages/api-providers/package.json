@@ -1,11 +1,29 @@
 {
   "name": "@webb-tools/api-providers",
-  "version": "0.1.4-64",
+  "version": "0.1.4-67",
   "description": "dApp provider to work with Webb",
   "author": "Webb Developers <drew@webb.tools>",
-  "main": "index.cjs",
-  "module": "index.js",
   "type": "module",
+  "main": "./cjs/index.js",
+  "module": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "require": "./cjs/index.js",
+      "default": "./index.js"
+    },
+    "./index.js": {
+      "types": "./index.d.ts",
+      "require": "./cjs/index.js",
+      "default": "./index.js"
+    },
+    "./src/index.js": {
+      "types": "./src/index.d.ts",
+      "require": "./src/cjs/index.js",
+      "default": "./src/index.js"
+    }
+  },
   "license": "Apache-2.0",
   "publishConfig": {
     "access": "public",
@@ -16,10 +34,10 @@
     "@babel/runtime": "^7.10.2",
     "@polkadot/extension-dapp": "^0.35.0-beta.35",
     "@walletconnect/web3-provider": "^1.7.5",
-    "@webb-tools/anchors": "0.1.15",
-    "@webb-tools/contracts": "0.1.11",
-    "@webb-tools/interfaces": "0.1.12",
-    "@webb-tools/utils": "0.1.8",
+    "@webb-tools/anchors": "0.1.16",
+    "@webb-tools/contracts": "0.1.12",
+    "@webb-tools/interfaces": "0.1.13",
+    "@webb-tools/utils": "0.1.9",
     "bignumber.js": "^9.0.0",
     "snarkjs": "0.4.16"
   },

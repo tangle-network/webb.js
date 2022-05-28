@@ -3,6 +3,8 @@
 
 import { InternalChainId } from '../../chains/index.js';
 
+export type RelayerManagerType = 'evm' | 'substrate';
+
 /**
  * Relayer configuration for a chain
  * @param account - Relayer account that is going to be used to sign the transaction
@@ -69,6 +71,46 @@ export interface EventsWatcher {
 export type RelayerConfig = {
   endpoint: string;
 };
+
+// An object which contains the fields necessary for generating
+// A withdraw request
+export type RelayedChainInput = {
+  endpoint: string;
+  name: string;
+  baseOn: RelayerCMDBase;
+  contractAddress: string;
+};
+
+// An object to represent a token / amount pair which will be used
+// for querying relayer support.
+export type FixedSizeQuery = {
+  amount: number;
+  tokenSymbol: string;
+};
+
+/**
+ * Relayer query object all the values are optional
+ *
+ * @param baseOn - Whether relayer supports evm or substrate.
+ * @param ipService - Whether relayer supports the IP service
+ * @param chainId - Relayer supportedChains has a chainId
+ * @param contractAddress - Relayer supports the contract address
+ * @param bridgeSupport - Relayer has support a contract with the amount and symbol `FixedAnchorQuery`
+ **/
+export type RelayerQuery = {
+  baseOn?: 'evm' | 'substrate';
+  ipService?: true;
+  chainId?: InternalChainId;
+  contractAddress?: string;
+  bridgeSupport?: FixedSizeQuery;
+};
+
+export type ChainNameIntoChainId = (name: string, basedOn: 'evm' | 'substrate') => InternalChainId | null;
+
+export interface RelayerInfo {
+  substrate: Record<string, RelayedChainConfig | null>;
+  evm: Record<string, RelayedChainConfig | null>;
+}
 
 /**
  * Relayer withdraw status

@@ -1,12 +1,30 @@
 {
   "name": "@webb-tools/api",
-  "version": "0.1.4-64",
+  "version": "0.1.4-67",
   "description": "Webb JS API",
-  "main": "index.cjs",
-  "module": "index.js",
   "type": "module",
   "author": "Webb Developers <drew@webb.tools>",
   "license": "Apache-2.0",
+  "main": "./cjs/index.js",
+  "module": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "require": "./cjs/index.js",
+      "default": "./index.js"
+    },
+    "./index.js": {
+      "types": "./index.d.ts",
+      "require": "./cjs/index.js",
+      "default": "./index.js"
+    },
+    "./src/index.js": {
+      "types": "./src/index.d.ts",
+      "require": "./src/cjs/index.js",
+      "default": "./src/index.js"
+    }
+  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
@@ -20,6 +38,6 @@
     "@babel/runtime": "^7.10.2",
     "@polkadot/api": "8.1.1",
     "@polkadot/rpc-core": "8.1.1",
-    "@webb-tools/api-derive": "0.1.4-64"
+    "@webb-tools/api-derive": "0.1.4-67"
   }
 }

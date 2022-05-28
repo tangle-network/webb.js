@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { getEVMChainName, getEVMChainNameFromInternal } from '@webb-tools/api-providers/utils/index.js';
+import { getEVMChainName, getEVMChainNameFromInternal } from '@webb-tools/api-providers/index.js';
 import { ERC20__factory as ERC20Factory } from '@webb-tools/contracts';
 import { IAnchorDepositInfo } from '@webb-tools/interfaces';
 import { Note } from '@webb-tools/sdk-core/index.js';

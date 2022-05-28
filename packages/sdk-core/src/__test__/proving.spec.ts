@@ -79,7 +79,7 @@ describe('Proving manager VAnchor', function () {
       relayer: address,
       roots: rootsSet
     };
-    const data = await provingManager.proof('vanchor', setup);
+    const data = await provingManager.prove('vanchor', setup);
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
 
     expect(isValidProof).to.deep.equal(true);
@@ -123,7 +123,7 @@ describe('Proving manager VAnchor', function () {
       relayer: address,
       roots: rootsSet
     };
-    const data = await provingManager.proof('vanchor', setup);
+    const data = await provingManager.prove('vanchor', setup);
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
 
     expect(isValidProof).to.deep.equal(true);
@@ -168,7 +168,7 @@ describe('Proving manager VAnchor', function () {
       roots: rootsSet
     };
 
-    const data = await provingManager.proof('vanchor', setup);
+    const data = await provingManager.prove('vanchor', setup);
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
 
     expect(isValidProof).to.deep.equal(true);
@@ -213,7 +213,7 @@ describe('Proving manager VAnchor', function () {
       roots: rootsSet
     };
 
-    const data = await provingManager.proof('vanchor', setup);
+    const data = await provingManager.prove('vanchor', setup);
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
 
     expect(isValidProof).to.deep.equal(true);
@@ -260,7 +260,7 @@ describe('Proving manager VAnchor', function () {
         roots: rootsSet
       };
 
-      await provingManager.proof('vanchor', setup);
+      await provingManager.prove('vanchor', setup);
     } catch (e: any) {
       message = e.message;
     }

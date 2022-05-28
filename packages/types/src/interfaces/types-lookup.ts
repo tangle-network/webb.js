@@ -1,6 +1,6 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
-
+// @ts-nocheck
 declare module '@polkadot/types/lookup' {
   import type {
     BTreeMap,
@@ -1048,8 +1048,11 @@ declare module '@polkadot/types/lookup' {
       | 'SetTreasuryHandlerProposal'
       | 'FeeRecipientUpdateProposal';
   }
-
   /** @name PalletHasherEvent (75) */
+  /**
+ * @ignore
+ * @hidden
+ */
   export type PalletHasherEvent = Null;
 
   /** @name PalletAssetRegistryEvent (76) */

@@ -1,7 +1,8 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { Web3Provider, WebbCurrencyId, WebbRelayerBuilder, WebbWeb3Provider } from '@webb-tools/api-providers/index.js';
+import { Web3Provider, WebbCurrencyId, WebbWeb3Provider } from '@webb-tools/api-providers/index.js';
+import { WebbRelayerManagerFactory } from '@webb-tools/api-providers/relayer/relayer-manager-factory.js';
 import { startGanacheServer } from '@webb-tools/test-utils/startGanacheServer.js';
 import { getChainIdType } from '@webb-tools/utils';
 import { expect } from 'chai';
@@ -40,7 +41,7 @@ describe.skip('Note provider interactions', () => {
 
     const web3Provider = Web3Provider.fromUri('http://localhost:9999');
 
-    const builder = await WebbRelayerBuilder.initBuilder(
+    const relayerFactory = await WebbRelayerManagerFactory.init(
       [{
         endpoint: 'http://localhost:9955'
       }],
@@ -52,7 +53,9 @@ describe.skip('Note provider interactions', () => {
       mockAppConfig
     );
 
-    provider = await WebbWeb3Provider.init(web3Provider, 9999, builder, mockAppConfig, mockNotificationHandler);
+    const relayerManager = await relayerFactory.getRelayerManager('evm');
+
+    provider = await WebbWeb3Provider.init(web3Provider, 9999, relayerManager, mockAppConfig, mockNotificationHandler);
     // set an active bridge (which will set active currency) on the provider
     provider.methods.anchorApi.setActiveBridge(mockAppConfig.bridgeByAsset[WebbCurrencyId.webbDEV]);
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Anchor } from '@webb-tools/anchors';
-import { getEVMChainNameFromInternal } from '@webb-tools/api-providers/utils/index.js';
+import { getEVMChainNameFromInternal } from '@webb-tools/api-providers/index.js';
 import { LoggerService } from '@webb-tools/app-util/index.js';
 // eslint-disable-next-line camelcase
 import { ERC20__factory as ERC20Factory } from '@webb-tools/contracts';

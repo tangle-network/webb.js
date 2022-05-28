@@ -1,10 +1,33 @@
 {
   "name": "@webb-tools/api-derive",
-  "version": "0.1.4-64",
+  "version": "0.1.4-67",
   "description": "Webb JS API derived methods",
-  "main": "index.cjs",
-  "module": "index.js",
   "type": "module",
+  "main": "./cjs/index.js",
+  "module": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "require": "./cjs/index.js",
+      "default": "./index.js"
+    },
+    "./augmentDerives.js": {
+      "types": "./augmentDerives.d.ts",
+      "require": "./cjs/augmentDerives.js",
+      "default": "./augmentDerives.js"
+    },
+    "./index.js": {
+      "types": "./index.d.ts",
+      "require": "./cjs/index.js",
+      "default": "./index.js"
+    },
+    "./src/index.js": {
+      "types": "./src/index.d.ts",
+      "require": "./src/cjs/index.js",
+      "default": "./src/index.js"
+    }
+  },
   "author": "Webb Developers <drew@webb.tools>",
   "license": "Apache-2.0",
   "publishConfig": {
@@ -20,7 +43,7 @@
     "@babel/runtime": "^7.10.2",
     "@polkadot/api": "8.1.1",
     "@polkadot/rpc-core": "8.1.1",
-    "@webb-tools/api": "0.1.4-64",
-    "@webb-tools/types": "0.1.4-64"
+    "@webb-tools/api": "0.1.4-67",
+    "@webb-tools/types": "0.1.4-67"
   }
 }
