@@ -87,6 +87,10 @@ export type VAnchorPMSetupInput = {
   publicAmount: string;
   provingKey: Uint8Array;
   calcExtHash(output: [JsUtxo, JsUtxo]): string;
+  relayer: Uint8Array;
+  recipient: Uint8Array;
+  extAmount: string;
+  fee: string;
 };
 
 interface ProvingManagerPayload extends Record<NoteProtocol, any> {
@@ -250,12 +254,20 @@ export class ProvingManagerWrapper {
       pm.setRoots(input.roots);
       pm.chain_id(input.chainId);
       pm.public_amount(input.publicAmount);
-      const utxos = pm.setVanchorOutputConfig(...input.outputConfigs);
-      const dataHash = input.calcExtHash(utxos as any);
-
-      pm.setExtDatahash(dataHash);
-      // leaves insertion
+      const [o1, o2] = pm.setVanchorOutputConfig(...input.outputConfigs) as [JsUtxo, JsUtxo];
       const wasm = await this.wasmBlob;
+      const extData = new wasm.ExtData(
+        input.recipient,
+        input.relayer,
+        input.extAmount,
+        input.fee,
+        o1.commitment,
+        o2.commitment
+      );
+      const dataHash = extData.get_encode();
+
+      pm.setExtDatahash(u8aToHex(dataHash).replace('0x', ''));
+
       const leavesMap = new wasm.LeavesMapInput();
 
       for (const key of Object.keys(input.leavesMap)) {
