@@ -589,15 +589,21 @@ impl VAnchorProofInput {
 		}
 
 		// validate amounts
-		let mut in_amount: u128 = public_amount
-			.try_into()
-			.expect("Failed to convert the public amount to u128");
-		secret.iter().for_each(|utxo| in_amount += utxo.amount_raw());
+		let mut in_amount = public_amount;
+		secret.iter().for_each(|utxo| {
+			let utxo_amount: i128 = utxo
+				.amount_raw()
+				.try_into()
+				.expect("Failed to convert utxo value to i128");
+			in_amount += utxo_amount
+		});
 		let mut out_amount = 0u128;
 		output_utxos
 			.iter()
 			.for_each(|output_config| out_amount += output_config.amount_raw());
-
+		let out_amount: i128 = out_amount
+			.try_into()
+			.expect("Failed to convert accumulated in amounts  value to i128");
 		if out_amount != in_amount {
 			let message = format!(
 				"Output amount and input amount  don't match input({}) != output({})",
