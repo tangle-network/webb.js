@@ -290,7 +290,7 @@ describe('VAnchor tests', function() {
     }
   });
 
-  it.only('VAnchor deposit and withdraw', async function() {
+  it('VAnchor deposit and withdraw', async function() {
     const { bob, alice } = getKeyring();
     const fee = 0;
     const leavesMap: any = {};
