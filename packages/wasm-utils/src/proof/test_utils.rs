@@ -331,7 +331,7 @@ pub fn generate_vanchor_test_setup_2_inputs() -> VAnchorTestSetup {
 		chain_id,
 	};
 
-	let mut proof_builder = ProofInputBuilder::VAnchor(VAnchorProofInput::default());
+	let mut proof_builder = ProofInputBuilder::VAnchor(Box::new(VAnchorProofInput::default()));
 
 	let leaf0 = in_utxo1.commitment.clone();
 	let leaf1 = in_utxo2.commitment.clone();
@@ -429,7 +429,7 @@ pub fn generate_vanchor_test_setup_16_non_default_inputs() -> VAnchorTestSetup {
 		chain_id,
 	};
 
-	let mut proof_builder = ProofInputBuilder::VAnchor(VAnchorProofInput::default());
+	let mut proof_builder = ProofInputBuilder::VAnchor(Box::new(VAnchorProofInput::default()));
 
 	let leaves = inputs.iter().map(|i| i.commitment).collect::<Vec<_>>();
 
@@ -536,7 +536,7 @@ pub fn generate_vanchor_test_setup_16_mixed_inputs() -> VAnchorTestSetup {
 		chain_id,
 	};
 
-	let mut proof_builder = ProofInputBuilder::VAnchor(VAnchorProofInput::default());
+	let mut proof_builder = ProofInputBuilder::VAnchor(Box::new(VAnchorProofInput::default()));
 
 	let leaves = inputs
 		.iter()
