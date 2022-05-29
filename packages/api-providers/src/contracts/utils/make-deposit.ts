@@ -1,8 +1,10 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
+import { keypairStorageFactory } from '@webb-tools/api-providers/index.js';
 import { IAnchorDepositInfo } from '@webb-tools/interfaces';
-import { PoseidonHasher, toFixedHex } from '@webb-tools/utils';
+// TODO: Update after protocol-solidity moves 'poseidonHash' to 'PoseidonHasher'
+import { Keypair, PoseidonHasher, toFixedHex, Utxo } from '@webb-tools/utils';
 import { JsNote as DepositNote } from '@webb-tools/wasm-utils';
 
 export function depositFromAnchorNote (note: DepositNote): IAnchorDepositInfo {
@@ -24,4 +26,22 @@ export function depositFromAnchorNote (note: DepositNote): IAnchorDepositInfo {
   };
 
   return deposit;
+}
+
+export async function utxoFromVAnchorNote (note: DepositNote): Promise<Utxo> {
+  const noteSecretParts = note.secrets.split(':');
+  const chainId = '0x' + noteSecretParts[0];
+  const amount = '0x' + noteSecretParts[1];
+  const blinding = '0x' + noteSecretParts[3];
+
+  const keypairStorage = await keypairStorageFactory();
+  const storedKeypair = await keypairStorage.get('keypair');
+
+  if (!storedKeypair.keypair) {
+    throw new Error('Cannot withdraw without the configured keypair');
+  }
+
+  const keypair = new Keypair(storedKeypair.keypair);
+
+  return new Utxo({ amount, blinding, chainId, keypair });
 }

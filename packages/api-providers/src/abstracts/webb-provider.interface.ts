@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { AnchorApi } from '@webb-tools/api-providers/index.js';
+import { AnchorApi, VAnchorWithdraw } from '@webb-tools/api-providers/index.js';
 import { EventBus } from '@webb-tools/app-util/index.js';
 
 import { AccountsAdapter } from '../account/Accounts.adapter.js';
@@ -57,7 +57,7 @@ export interface WebbVariableAnchor<T extends WebbApiProvider<any>> {
   // deposit
   deposit: WebbMethod<VAnchorDeposit<T, DepositPayload>, MixerDepositEvents>;
   // withdraw
-  // withdraw: WebbMethod<VAnchorWithdraw<T>, WebbWithdrawEvents>;
+  withdraw: WebbMethod<VAnchorWithdraw<T>, WebbWithdrawEvents>;
 }
 
 export interface WrapAndUnwrap<T> {

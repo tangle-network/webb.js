@@ -24,3 +24,21 @@ export const getFixedAnchorAddressForBridge = (
 
   return anchorAddress;
 };
+
+export const getVariableAnchorAddressForBridge = (
+  assetId: WebbCurrencyId,
+  chainId: number,
+  bridgeConfigByAsset: AppConfig['bridgeByAsset']
+): string | undefined => {
+  const linkedAnchorConfig = bridgeConfigByAsset[assetId]?.anchors.find(
+    (anchor) => anchor.type === 'variable'
+  );
+
+  if (!linkedAnchorConfig) {
+    throw new Error('Unsupported configuration for bridge');
+  }
+
+  const anchorAddress = linkedAnchorConfig.anchorAddresses[chainId as InternalChainId];
+
+  return anchorAddress;
+};

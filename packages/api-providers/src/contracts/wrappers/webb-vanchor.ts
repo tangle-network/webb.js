@@ -30,7 +30,7 @@ export interface IVariableAnchorPublicInputs {
 
 // The AnchorContract defines useful functions over an anchor that do not depend on zero knowledge.
 export class VAnchorContract {
-  private wrapper: VAnchorWrapper | null = null;
+  public wrapper: VAnchorWrapper | null = null;
   private _contract: VAnchor;
   private readonly signer: Signer;
 

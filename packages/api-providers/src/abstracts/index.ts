@@ -1,6 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
+export * from './mixer/index.js';
 export * from './anchor/index.js';
 export * from './chain-query/index.js';
 export * from './currency/index.js';

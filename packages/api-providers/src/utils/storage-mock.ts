@@ -5,6 +5,7 @@ import { ChainType, computeChainIdType, EVMChainId } from '../chains/index.js';
 import { Storage } from '../storage/index.js';
 
 export type BridgeStorage = Record<string, { lastQueriedBlock: number; leaves: string[] }>;
+export type KeypairStorage = Record<string, { keypair: string }>;
 
 export const anchorDeploymentBlock: Record<number, Record<string, number>> = {
   [computeChainIdType(ChainType.EVM, EVMChainId.Ropsten)]: {
@@ -47,6 +48,26 @@ export const bridgeStorageFactory = (chainIdType: number) => {
       localStorage.setItem(key, JSON.stringify(data));
     },
     async fetch (key: string): Promise<BridgeStorage> {
+      const storageCached = localStorage.getItem(key);
+
+      if (storageCached) {
+        return {
+          ...JSON.parse(storageCached)
+        };
+      }
+
+      return {};
+    }
+  });
+};
+
+export const keypairStorageFactory = () => {
+  // localStorage will have key: 'keypair', value: privKey.toHexString()
+  return Storage.newFromCache<KeypairStorage>('keypair', {
+    async commit (key: string, data: KeypairStorage): Promise<void> {
+      localStorage.setItem(key, JSON.stringify(data));
+    },
+    async fetch (key: string): Promise<KeypairStorage> {
       const storageCached = localStorage.getItem(key);
 
       if (storageCached) {

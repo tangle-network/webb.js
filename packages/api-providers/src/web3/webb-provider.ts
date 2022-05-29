@@ -18,6 +18,7 @@ import { Web3MixerDeposit } from './mixer-deposit.js';
 import { Web3MixerWithdraw } from './mixer-withdraw.js';
 import { Web3RelayerManager } from './relayer-manager.js';
 import { Web3VAnchorDeposit } from './vanchor-deposit.js';
+import { Web3VAnchorWithdraw } from './vanchor-withdraw.js';
 import { Web3WrapUnwrap } from './wrap-unwrap.js';
 
 export class WebbWeb3Provider
@@ -68,6 +69,10 @@ export class WebbWeb3Provider
         deposit: {
           enabled: true,
           inner: new Web3VAnchorDeposit(this)
+        },
+        withdraw: {
+          enabled: true,
+          inner: new Web3VAnchorWithdraw(this)
         }
       },
       wrapUnwrap: {
@@ -122,7 +127,7 @@ export class WebbWeb3Provider
   }
 
   // VAnchors require zero knowledge proofs on deposit - Fetch the small and large circuits.
-  async getVariableAnchorByAddress (address: string): Promise<VAnchorContract> {
+  getVariableAnchorByAddress (address: string): VAnchorContract {
     return new VAnchorContract(this.ethersProvider, address);
   }
 

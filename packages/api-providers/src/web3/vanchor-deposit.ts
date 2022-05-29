@@ -11,7 +11,7 @@ import { BigNumber, ethers } from 'ethers';
 
 import { DepositPayload as IDepositPayload, MixerSize, VAnchorDeposit } from '../abstracts/index.js';
 import { ChainType, chainTypeIdToInternalId, computeChainIdType, evmIdIntoInternalChainId, parseChainIdType } from '../chains/index.js';
-import { getEVMChainNameFromInternal } from '../index.js';
+import { getEVMChainNameFromInternal, keypairStorageFactory } from '../index.js';
 import { WebbWeb3Provider } from './webb-provider.js';
 
 type DepositPayload = IDepositPayload<Note, [Utxo, number | string, string?]>;
@@ -49,13 +49,28 @@ export class Web3VAnchorDeposit extends VAnchorDeposit<WebbWeb3Provider, Deposit
     const sourceEvmId = await this.inner.getChainId();
     const sourceChainId = computeChainIdType(ChainType.EVM, sourceEvmId);
 
+    // TODO: Find a better way to manage keypair
+    const keypairStorage = await keypairStorageFactory();
+    const storedKeypair = await keypairStorage.get('keypair');
+
+    let keypair: Keypair;
+
+    if (storedKeypair) {
+      // If keypair was already in storage, use it
+      keypair = new Keypair(storedKeypair.keypair);
+    } else {
+      // Otherwise, create a new keypair and store it
+      keypair = new Keypair();
+      await keypairStorage.set('keypair', { keypair: keypair.privkey });
+    }
+
     // Convert the amount to units of wei
     const depositOutputUtxo = VAnchor.generateUTXO({
       amount: BigNumber.from(ethers.utils.parseEther(amount.toString())),
       blinding: randomBN(),
       chainId: BigNumber.from(destination),
       index: 0,
-      keypair: new Keypair()
+      keypair
     });
 
     const srcChainInternal = evmIdIntoInternalChainId(sourceEvmId);
