@@ -1,9 +1,9 @@
-import { JsNote, JsNoteBuilder, JsUtxo } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
+import { JsNote, JsUtxo } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { ApiPromise } from '@polkadot/api';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { currencyToUnitI128, KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
-import { ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/index.js';
+import { ProvingManagerSetupInput, ProvingManagerWrapper ,Note } from '@webb-tools/sdk-core/index.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { polkadotTx } from '@webb-tools/test-utils/index.js';
 import path from 'path';
@@ -37,28 +37,26 @@ function getKeyring() {
   return keyring;
 }
 
-function generateVAnchorNote(amount: number, chainId: number, outputChainId: number, index?: number) {
-  const noteBuilder = new JsNoteBuilder();
+async function generateVAnchorNote(amount: number, chainId: number, outputChainId: number, index?: number) {
 
-  noteBuilder.protocol('vanchor');
-  noteBuilder.version('v2');
-  noteBuilder.backend('Arkworks');
-  noteBuilder.hashFunction('Poseidon');
-  noteBuilder.curve('Bn254');
-
-  noteBuilder.sourceChainId(String(chainId));
-  noteBuilder.targetChainId(String(outputChainId));
-  noteBuilder.width(String(5));
-  noteBuilder.exponentiation(String(5));
-  noteBuilder.denomination(String(18));
-  noteBuilder.amount(String(amount));
-  noteBuilder.tokenSymbol('WEBB');
-  noteBuilder.targetIdentifyingData('');
-  noteBuilder.sourceIdentifyingData('');
-  const note = noteBuilder.build();
-
+const note = await  Note.generateNote({
+    protocol:'vanchor',
+    version:'v2',
+    backend:'Arkworks',
+    hashFunction:'Poseidon',
+    curve:'Bn254',
+    width:String(5),
+    exponentiation:String(5),
+    denomination:String(18),
+    amount:String(amount),
+    tokenSymbol:'WEBB',
+    targetChain:String(outputChainId),
+    sourceChain:String(chainId),
+    sourceIdentifyingData:'',
+    targetIdentifyingData:'',
+  })
   if (index !== undefined) {
-    note.mutateIndex(String(index));
+    note.mutateIndex(String(index))
   }
 
   return note;
@@ -97,8 +95,8 @@ async function createVAnchorWithDeposit(
   const pk = hexToU8a(pk_hex);
 
   // Creating two empty vanchor notes
-  const note1 = generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0).defaultUtxoNote();
-  const note2 = note1.defaultUtxoNote();
+  const note1 = await generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0);
+  const note2 = note1.getDefaultUtxoNote();
   const publicAmount = currencyToUnitI128(10);
   const notes = [note1, note2];
   // Output UTXOs configs
@@ -233,8 +231,9 @@ describe.only('VAnchor tests', function() {
     const treeId = await createVAnchor(apiPromise!, alice);
 
     // Creating two empty vanchor notes
-    const note1 = generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0).defaultUtxoNote();
-    const note2 = note1.defaultUtxoNote();
+    const note1 = await generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0);
+    const note2 = note1.getDefaultUtxoNote();
+
     const publicAmount = currencyToUnitI128(10);
     const notes = [note1, note2];
     // Output UTXOs configs

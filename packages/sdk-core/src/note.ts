@@ -108,6 +108,15 @@ export class Note {
    *
    * @returns The `JsNote` struct.
    */
+  async mutateIndex (index: string) {
+    this.note.mutateIndex(index);
+  }
+
+  /**
+   * Turns a `Note` into a WebAssembly compatible `JsNote`.
+   *
+   * @returns The `JsNote` struct.
+   */
   async toDepositNote (): Promise<JsNote> {
     const wasm = await Note.wasm;
 
