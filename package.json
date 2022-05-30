@@ -30,7 +30,6 @@
     "test": "yarn test:unit && yarn test:integration && yarn wasm:test",
     "test:unit": "mocha 'packages/**/*.spec.ts' --exit",
     "test:wasm": "mocha 'packages/**/*.spec.ts' --exit",
-    "test:providers": "mocha 'packages/api-providers/**/*.spec.ts' --exit",
     "test:integration": "mocha 'tests/integration_tests/**/*.ts' --exit",
     "test:perf": "cross-env NODE_OPTIONS=--experimental-wasm-modules jest --config ./jest.perf.config.js",
     "check-deps": "./node_modules/@open-web3/util/scripts/check-deps.js yarn.lock @polkadot/ @open-web3/",
