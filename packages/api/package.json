@@ -23,7 +23,8 @@
       "types": "./src/index.d.ts",
       "require": "./src/cjs/index.js",
       "default": "./src/index.js"
-    }
+    },
+    "./cjs/index.js": "./cjs/index.js"
   },
   "publishConfig": {
     "access": "public",

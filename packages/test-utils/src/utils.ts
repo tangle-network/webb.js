@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { options } from '@webb-tools/api/src/index.js';
+import { options } from '@webb-tools/api/index.js';
 import { BigNumber } from 'ethers';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
