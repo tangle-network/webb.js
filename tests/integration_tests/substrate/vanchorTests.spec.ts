@@ -56,7 +56,7 @@ const note = await  Note.generateNote({
     targetIdentifyingData:'',
   })
   if (index !== undefined) {
-    note.mutateIndex(String(index))
+   await note.mutateIndex(String(index))
   }
 
   return note;

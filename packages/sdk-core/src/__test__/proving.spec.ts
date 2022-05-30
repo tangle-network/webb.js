@@ -4,7 +4,8 @@
 /* eslint-disable camelcase */
 
 // eslint-disable-next-line camelcase
-import { JsNoteBuilder, JsUtxo, MTBn254X5, setupKeys, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
+import { Note } from '@webb-tools/sdk-core';
+import { JsUtxo, MTBn254X5, setupKeys, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { expect } from 'chai';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
@@ -12,28 +13,26 @@ import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
 
 import { ProvingManagerSetupInput, ProvingManagerWrapper } from '../proving/index.js';
 
-function generateVAnchorNote (amount: number, chainId: number, outputChainId: number, index?: number) {
-  const noteBuilder = new JsNoteBuilder();
-
-  noteBuilder.protocol('vanchor');
-  noteBuilder.version('v2');
-  noteBuilder.backend('Arkworks');
-  noteBuilder.hashFunction('Poseidon');
-  noteBuilder.curve('Bn254');
-
-  noteBuilder.sourceChainId(String(chainId));
-  noteBuilder.targetChainId(String(outputChainId));
-  noteBuilder.width(String(5));
-  noteBuilder.exponentiation(String(5));
-  noteBuilder.denomination(String(18));
-  noteBuilder.amount(String(amount));
-  noteBuilder.tokenSymbol('WEBB');
-  noteBuilder.targetIdentifyingData('');
-  noteBuilder.sourceIdentifyingData('');
-  const note = noteBuilder.build();
+async function generateVAnchorNote (amount: number, chainId: number, outputChainId: number, index?: number) {
+  const note = await Note.generateNote({
+    amount: String(amount),
+    backend: 'Arkworks',
+    curve: 'Bn254',
+    denomination: String(18),
+    exponentiation: String(5),
+    hashFunction: 'Poseidon',
+    protocol: 'vanchor',
+    sourceChain: String(chainId),
+    sourceIdentifyingData: '',
+    targetChain: String(outputChainId),
+    targetIdentifyingData: '',
+    tokenSymbol: 'WEBB',
+    version: 'v2',
+    width: String(5)
+  });
 
   if (index !== undefined) {
-    note.mutateIndex(String(index));
+    await note.mutateIndex(String(index));
   }
 
   return note;
@@ -48,13 +47,13 @@ describe.only('Proving manager VAnchor', function () {
   it('should  prove using WASM API for VAnchor with one input note and one index', async () => {
     const keys = vanchorBn2542_2_2;
 
-    const vanchorNote1 = generateVAnchorNote(20, 0, 0, 0);
+    const vanchorNote1 = await generateVAnchorNote(20, 0, 0, 0);
 
     const publicAmount = 10;
     const outputAmount = String(15);
     const outputChainId = '0';
 
-    const leaf1 = vanchorNote1.getLeafCommitment();
+    const leaf1 = vanchorNote1.getLeaf();
     const tree = new MTBn254X5([leaf1], '0');
     const root = `0x${tree.root}`;
     const rootsSet = [hexToU8a(root), hexToU8a(root)];
@@ -93,15 +92,15 @@ describe.only('Proving manager VAnchor', function () {
   it('should prove using WASM API for VAnchor with two inputs and two indices', async () => {
     const keys = vanchorBn2542_2_2;
 
-    const vanchorNote1 = generateVAnchorNote(10, 0, 0, 0);
-    const vanchorNote2 = generateVAnchorNote(10, 0, 0, 1);
+    const vanchorNote1 = await generateVAnchorNote(10, 0, 0, 0);
+    const vanchorNote2 = await generateVAnchorNote(10, 0, 0, 1);
 
     const publicAmount = 10;
     const outputAmount = String(15);
     const outputChainId = String(0);
 
-    const leaf1 = vanchorNote1.getLeafCommitment();
-    const leaf2 = vanchorNote2.getLeafCommitment();
+    const leaf1 = vanchorNote1.getLeaf();
+    const leaf2 = vanchorNote2.getLeaf();
     const tree = new MTBn254X5([leaf1, leaf2], '0');
     const root = `0x${tree.root}`;
     const rootsSet = [hexToU8a(root), hexToU8a(root)];
@@ -142,14 +141,14 @@ describe.only('Proving manager VAnchor', function () {
   it('should prove using WASM API for VAnchor with three inputs amd three indices', async () => {
     const keys = vanchorBn2542_16_2;
 
-    const notes = Array(3)
+    const notes = await Promise.all(Array(3)
       .fill(0)
-      .map((_, index) => generateVAnchorNote(10, 0, 0, index));
+      .map((_, index) => generateVAnchorNote(10, 0, 0, index)));
 
     const publicAmount = 10;
     const outputAmount = String(10 * 1.5 + 5);
     const outputChainId = String(0);
-    const leaves = notes.map((note) => note.getLeafCommitment());
+    const leaves = notes.map((note) => note.getLeaf());
 
     const tree = new MTBn254X5(leaves, '0');
     const root = `0x${tree.root}`;
@@ -192,14 +191,14 @@ describe.only('Proving manager VAnchor', function () {
   it('should prove using WASM API for VAnchor with 16 inputs and 16 indices', async () => {
     const keys = vanchorBn2542_16_2;
 
-    const notes = Array(16)
+    const notes = await Promise.all(Array(16)
       .fill(0)
-      .map((_, index) => generateVAnchorNote(10, 0, 0, index));
+      .map((_, index) => generateVAnchorNote(10, 0, 0, index)));
 
     const publicAmount = 10;
     const outputAmount = String(10 * 8 + 5);
     const outputChainId = String(0);
-    const leaves = notes.map((note) => note.getLeafCommitment());
+    const leaves = notes.map((note) => note.getLeaf());
 
     const tree = new MTBn254X5(leaves, '0');
     const root = `0x${tree.root}`;
@@ -247,14 +246,14 @@ describe.only('Proving manager VAnchor', function () {
     try {
       const keys = vanchorBn2542_16_2;
 
-      const notes = Array(16)
+      const notes = await Promise.all(Array(16)
         .fill(0)
-        .map((_, index) => generateVAnchorNote(10, 0, 0, index));
+        .map((_, index) => generateVAnchorNote(10, 0, 0, index)));
 
       const publicAmount = 10;
       const outputAmount = String(10 * 80 + 5);
       const outputChainId = String(0);
-      const leaves = notes.map((note) => note.getLeafCommitment());
+      const leaves = notes.map((note) => note.getLeaf());
       const tree = new MTBn254X5(leaves, '0');
       const root = `0x${tree.root}`;
       const rootsSet = [hexToU8a(root), hexToU8a(root)];
