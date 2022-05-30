@@ -256,7 +256,7 @@ export class ProvingManagerWrapper {
       pm.setRoots(input.roots);
       pm.chain_id(input.chainId);
       pm.public_amount(input.publicAmount);
-      pm.setVanchorOutputConfig(...input.output);
+      pm.setOutputUtxos(...input.output);
       const wasm = await this.wasmBlob;
       const extData = new wasm.ExtData(
         input.recipient,

@@ -1081,6 +1081,12 @@ impl JsProofInputBuilder {
 		Ok(())
 	}
 
+	#[wasm_bindgen(js_name = setOutputUtxos)]
+	pub fn set_output_utxos(&mut self, utxo1: JsUtxo, utxo2: JsUtxo) -> Result<(), JsValue> {
+		self.inner.set_output_utxos([utxo1, utxo2])?;
+		Ok(())
+	}
+
 	#[wasm_bindgen(js_name = setVanchorOutputConfig)]
 	pub fn set_vanchor_output_config(
 		&mut self,

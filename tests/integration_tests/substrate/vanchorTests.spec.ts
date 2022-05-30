@@ -9,10 +9,7 @@ import { polkadotTx } from '@webb-tools/test-utils/index.js';
 import path from 'path';
 import fs from 'fs';
 
-const {
-  naclEncrypt,
-  randomAsU8a
-} = require('@polkadot/util-crypto');
+import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
 
 let apiPromise: ApiPromise | null = null;
 let keyring: {
@@ -143,8 +140,8 @@ async function createVAnchorWithDeposit(
     recipient: address,
     fee,
     ext_amount: extAmount,
-    encrypted_output1: data.outputNotes[0].getLeafCommitment(),
-    encrypted_output2: data.outputNotes[1].getLeafCommitment()
+    encrypted_output1: comEnc1,
+    encrypted_output2: comEnc2
   };
 
   let vanchorProofData = {
@@ -152,7 +149,7 @@ async function createVAnchorWithDeposit(
     publicAmount: data.publicAmount,
     roots: rootsSet,
     inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-    outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeafCommitment())),
+    outputCommitments: [comEnc1, comEnc2],
     extDataHash: data.extDataHash
   };
   const leafsCount = await apiPromise.derive.merkleTreeBn254.getLeafCountForTree(Number(treeId));
@@ -196,7 +193,7 @@ async function getleafIndex(
   return indexBeforeInsertion + shiftedIndex;
 }
 
-describe('VAnchor tests', function() {
+describe.only('VAnchor tests', function() {
   this.timeout(120_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
@@ -251,8 +248,14 @@ describe('VAnchor tests', function() {
     const root = tree.unwrap().root.toHex();
     const rootsSet = [hexToU8a(root), hexToU8a(root)];
     const decodedAddress = decodeAddress(address);
-    const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
-    const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+    console.log(output1.commitment);
+    console.log(output2.commitment);
+    let { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+    let { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+
+    comEnc1  = comEnc1.slice(0,32);
+    comEnc2  = comEnc2.slice(0,32);
+
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: outputChainId.toString(),
       indices: [0, 0],
@@ -274,8 +277,8 @@ describe('VAnchor tests', function() {
       recipient: address,
       fee,
       ext_amount: extAmount,
-      encrypted_output1: data.outputNotes[0].getLeafCommitment(),
-      encrypted_output2: data.outputNotes[1].getLeafCommitment()
+      encrypted_output1: comEnc1,
+      encrypted_output2: comEnc2
     };
 
     let vanchorProofData = {
@@ -331,8 +334,11 @@ describe('VAnchor tests', function() {
     const rootsSet = [hexToU8a(root), hexToU8a(neighborRoots[0])];
     const decodedAddress = decodeAddress(address);
 
-    const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
-    const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+    let { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+    let { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+
+    comEnc1  = comEnc1.slice(0,32);
+    comEnc2  = comEnc2.slice(0,32);
 
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: chainId.toString(),
@@ -355,8 +361,8 @@ describe('VAnchor tests', function() {
       recipient: address,
       fee,
       ext_amount: extAmount,
-      encrypted_output1: data.outputNotes[0].getLeafCommitment(),
-      encrypted_output2: data.outputNotes[1].getLeafCommitment()
+      encrypted_output1: comEnc1,
+      encrypted_output2: comEnc2
     };
 
     let vanchorProofData = {
@@ -364,7 +370,7 @@ describe('VAnchor tests', function() {
       publicAmount: data.publicAmount,
       roots: rootsSet,
       inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-      outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeafCommitment())),
+      outputCommitments: [comEnc1, comEnc2],
       extDataHash: data.extDataHash
     };
 

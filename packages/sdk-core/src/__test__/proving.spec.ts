@@ -42,7 +42,7 @@ function generateVAnchorNote (amount: number, chainId: number, outputChainId: nu
 const vanchorBn2542_2_2 = setupKeys('vanchor', 'Bn254', 2, 2, 2);
 const vanchorBn2542_16_2 = setupKeys('vanchor', 'Bn254', 2, 16, 2);
 
-describe('Proving manager VAnchor', function () {
+describe.only('Proving manager VAnchor', function () {
   this.timeout(120_1000);
 
   it('should  prove using WASM API for VAnchor with one input note and one index', async () => {
