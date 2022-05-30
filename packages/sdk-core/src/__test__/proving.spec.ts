@@ -4,14 +4,12 @@
 /* eslint-disable camelcase */
 
 // eslint-disable-next-line camelcase
-import { Note } from '@webb-tools/sdk-core';
+import { Note, ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/index.js';
 import { JsUtxo, MTBn254X5, setupKeys, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { expect } from 'chai';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
-
-import { ProvingManagerSetupInput, ProvingManagerWrapper } from '../proving/index.js';
 
 async function generateVAnchorNote (amount: number, chainId: number, outputChainId: number, index?: number) {
   const note = await Note.generateNote({
