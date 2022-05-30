@@ -26,7 +26,9 @@
       "types": "./src/index.d.ts",
       "require": "./src/cjs/index.js",
       "default": "./src/index.js"
-    }
+    },
+    "./cjs/augmentDerives.js": "./cjs/augmentDerives.js",
+    "./cjs/index.js": "./cjs/index.js"
   },
   "author": "Webb Developers <drew@webb.tools>",
   "license": "Apache-2.0",
