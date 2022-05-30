@@ -117,8 +117,13 @@ async function createVAnchorWithDeposit(
   const root = tree.unwrap().root.toHex();
   const rootsSet = [hexToU8a(root), hexToU8a(root)];
   const decodedAddress = decodeAddress(address);
-  const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
-  const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+  let { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+  let { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+
+  comEnc1 = comEnc1.slice(0,32);
+  comEnc2 = comEnc2.slice(0,32);
+
+
   const setup: ProvingManagerSetupInput<'vanchor'> = {
     chainId: outputChainId.toString(),
     indices: [0, 0],
@@ -149,11 +154,13 @@ async function createVAnchorWithDeposit(
     publicAmount: data.publicAmount,
     roots: rootsSet,
     inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-    outputCommitments: [comEnc1, comEnc2],
+    outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeafCommitment())),
     extDataHash: data.extDataHash
   };
   const leafsCount = await apiPromise.derive.merkleTreeBn254.getLeafCountForTree(Number(treeId));
   const indexBeforeInsetion = Math.max(leafsCount - 1, 0);
+
+  console.log([treeId, vanchorProofData, extData]);
 
   await polkadotTx(apiPromise!, {
     section: 'vAnchorBn254',
@@ -248,8 +255,6 @@ describe.only('VAnchor tests', function() {
     const root = tree.unwrap().root.toHex();
     const rootsSet = [hexToU8a(root), hexToU8a(root)];
     const decodedAddress = decodeAddress(address);
-    console.log(output1.commitment);
-    console.log(output2.commitment);
     let { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
     let { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
 
@@ -289,7 +294,6 @@ describe.only('VAnchor tests', function() {
       outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeafCommitment())),
       extDataHash: data.extDataHash
     };
-    console.log([treeId, vanchorProofData, extData]);
     try {
 
 
@@ -310,6 +314,7 @@ describe.only('VAnchor tests', function() {
     const leavesMap: any = {};
 
     const [treeId, notes, pk ,secret] = await createVAnchorWithDeposit(apiPromise!, alice, bob);
+    console.log('Did deposit');
     const chainId = BigInt(notes[0].targetChainId); // both two notes have the same chain id
 
     const withdrawAmount = notes.reduce((acc, note) => acc + Number(note.amount), 0);
@@ -370,7 +375,7 @@ describe.only('VAnchor tests', function() {
       publicAmount: data.publicAmount,
       roots: rootsSet,
       inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-      outputCommitments: [comEnc1, comEnc2],
+      outputCommitments: data.outputNotes.map(note => note.getLeafCommitment()),
       extDataHash: data.extDataHash
     };
 
