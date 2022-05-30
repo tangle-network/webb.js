@@ -46,7 +46,6 @@ For additional information, please refer to the [Webb Tools API reference docs](
 ```
 packages/
   |____api/                 # Contains necessary options to create a polkadot.js API instance
-  |____api-providers/       # API providers for webb protocol, this package facilitates building apps on top of Webb.
   |____app-util/            # Utilities to work with Webb Network.
   |____sdk-core/            # The package provides a cleaner API to the underlying `wasm-utils`.
   |____types/               # Polkadot.js type definitions for Webb Network.

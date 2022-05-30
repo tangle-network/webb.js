@@ -64,12 +64,6 @@
       "@webb-tools/wasm-utils/*": [
         "packages/wasm-utils/build/*"
       ],
-      "@webb-tools/api-providers": [
-        "packages/api-providers/src"
-      ],
-      "@webb-tools/api-providers/*": [
-        "packages/api-providers/src/*"
-      ],
       "@webb-tools/api-derive": [
         "packages/api-derive/src"
       ],
