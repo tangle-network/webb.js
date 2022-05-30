@@ -34,7 +34,7 @@
     "test:perf": "cross-env NODE_OPTIONS=--experimental-wasm-modules jest --config ./jest.perf.config.js",
     "check-deps": "./node_modules/@open-web3/util/scripts/check-deps.js yarn.lock @polkadot/ @open-web3/",
     "update-metadata": "NODE_OPTIONS='--loader ./loader.js' node --experimental-specifier-resolution=node packages/types/scripts/updateMetadata.ts",
-    "example:mixer": "ts-node -r tsconfig-paths/register examples/mixer.ts",
+    "example:mixer": "NODE_OPTIONS=\"--loader ./loader.js\" node ./examples/node/substrate/mixer.ts",
     "script": "NODE_OPTIONS=\"--loader ./loader.js\" node",
     "format": "prettier --write \"{packages,examples,tests}/**/*.{ts,js,jsx,tsx}\" && cargo fmt --manifest-path packages/wasm-utils/Cargo.toml",
     "doc": "npx typedoc --name \"Webb Tools API\" --includeVersion --options ./typedoc.json"

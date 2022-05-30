@@ -103,6 +103,12 @@ yarn install
 yarn build
 ```
 
+**To update fixtures:**
+
+```bash
+git submodule update --init --recursive
+```
+
 <h1 id="usage"> Usage </h1>
 
 <h2 style="border-bottom:none"> Quick Start ⚡ </h2>
@@ -146,7 +152,13 @@ console.log(data.toHuman());
 
 We have included implementation examples for using this API to interact with an [Anchor](./examples/node/substrate/anchor.ts) and [Mixer](./examples/node/substrate/mixer.ts). 
 
-To run the above mentioned usage examples you will need to use the experimental module loader and start a [local substrate chain](https://github.com/webb-tools/protocol-substrate#standalone-local-testnet). Once started you may run the following command from root:
+To run the above mentioned usage examples you will need to use the experimental module loader and start a [local substrate chain](https://github.com/webb-tools/protocol-substrate#standalone-local-testnet). In addition please ensure you have updated the fixtures by running:
+
+```bash
+git submodule update --init --recursive
+```
+
+Once started you may run the following command from root:
 
 ```bash
 # Runs the Anchor usage example script
