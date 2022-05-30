@@ -169,7 +169,7 @@ impl JsUtxo {
 				_ => return Err(OpStatusCode::InvalidNoteProtocol.into()),
 			}
 			.map_err(|_| OpStatusCode::InvalidOutputUtxoConfig)
-			.map(|u| JsUtxo::new_from_bn254_utxo(u)),
+			.map(JsUtxo::new_from_bn254_utxo),
 			_ => Err(OpStatusCode::InvalidNoteProtocol),
 		}?;
 

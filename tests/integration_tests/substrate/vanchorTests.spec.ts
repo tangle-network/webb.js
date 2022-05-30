@@ -117,11 +117,9 @@ async function createVAnchorWithDeposit(
   const root = tree.unwrap().root.toHex();
   const rootsSet = [hexToU8a(root), hexToU8a(root)];
   const decodedAddress = decodeAddress(address);
-  let { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
-  let { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+  const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+  const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
 
-  comEnc1 = comEnc1.slice(0,32);
-  comEnc2 = comEnc2.slice(0,32);
 
 
   const setup: ProvingManagerSetupInput<'vanchor'> = {
@@ -255,11 +253,9 @@ describe.only('VAnchor tests', function() {
     const root = tree.unwrap().root.toHex();
     const rootsSet = [hexToU8a(root), hexToU8a(root)];
     const decodedAddress = decodeAddress(address);
-    let { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
-    let { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+    const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+    const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
 
-    comEnc1  = comEnc1.slice(0,32);
-    comEnc2  = comEnc2.slice(0,32);
 
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: outputChainId.toString(),
@@ -339,11 +335,9 @@ describe.only('VAnchor tests', function() {
     const rootsSet = [hexToU8a(root), hexToU8a(neighborRoots[0])];
     const decodedAddress = decodeAddress(address);
 
-    let { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
-    let { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+    const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+    const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
 
-    comEnc1  = comEnc1.slice(0,32);
-    comEnc2  = comEnc2.slice(0,32);
 
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: chainId.toString(),
