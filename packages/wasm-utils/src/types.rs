@@ -385,6 +385,7 @@ extern "C" {
 	pub type Protocol;
 
 	#[wasm_bindgen(typescript_type = "Curve")]
+	#[derive(Clone)]
 	pub type WasmCurve;
 
 	#[wasm_bindgen(typescript_type = "HashFunction")]
@@ -394,6 +395,7 @@ extern "C" {
 	pub type Version;
 
 	#[wasm_bindgen(typescript_type = "Backend")]
+	#[derive(Clone)]
 	pub type BE;
 
 	#[wasm_bindgen(typescript_type = "Leaves")]

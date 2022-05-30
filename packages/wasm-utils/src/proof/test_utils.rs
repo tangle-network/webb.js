@@ -5,13 +5,13 @@ use ark_bn254::{Bn254, Fr as Bn254Fr};
 use ark_ff::{BigInteger, PrimeField, Zero};
 use arkworks_native_gadgets::poseidon::Poseidon;
 use arkworks_setups::common::{setup_keys_unchecked, setup_params, setup_tree_and_create_path};
-use arkworks_setups::Curve as ArkCurve;
+use arkworks_setups::{Curve as ArkCurve, VAnchorProver};
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
 use crate::note::{JsNote, JsNoteBuilder};
-use crate::proof::{JsProofInputBuilder, LeavesMapInput, OutputUtxoConfig, ProofInputBuilder, VAnchorProofInput};
+use crate::proof::{JsProofInputBuilder, LeavesMapInput, ProofInputBuilder, VAnchorProofInput};
 use crate::types::{
 	Backend, Curve, HashFunction, Indices, Leaves, NoteProtocol, NoteVersion, Protocol, Version, WasmCurve, BE, HF,
 };
@@ -213,8 +213,29 @@ pub fn generate_vanchor_test_js_setup() -> VAnchorTestSetup {
 	let note1 = generate_vanchor_note(5, chain_id, chain_id, Some(0));
 	let note2 = generate_vanchor_note(5, chain_id, chain_id, Some(0));
 	// output configs
-	let output_1 = OutputUtxoConfig::new(JsString::from("10"), None, chain_id).unwrap();
-	let output_2 = OutputUtxoConfig::new(JsString::from("0"), None, chain_id).unwrap();
+	let backend: BE = JsValue::from(note1.backend.unwrap().to_string()).into();
+	let wasm_curve: WasmCurve = JsValue::from(note1.curve.unwrap().to_string()).into();
+
+	let output_1 = JsUtxo::new(
+		wasm_curve.clone(),
+		backend.clone(),
+		2,
+		2,
+		JsString::from("10"),
+		JsString::from(chain_id.to_string()),
+		None,
+	)
+	.unwrap();
+	let output_2 = JsUtxo::new(
+		wasm_curve,
+		backend,
+		2,
+		2,
+		JsString::from("0"),
+		JsString::from(chain_id.to_string()),
+		None,
+	)
+	.unwrap();
 	let index = 0;
 
 	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
@@ -279,7 +300,7 @@ pub fn generate_vanchor_test_js_setup() -> VAnchorTestSetup {
 		.iter()
 		.collect();
 	js_builder.set_notes(notes).unwrap();
-	js_builder.set_vanchor_output_config(output_1, output_2);
+	js_builder.set_output_utxos(output_1, output_2);
 	// Assert the utxo chain id
 	let note_1_chain_id = note1.get_js_utxo().unwrap().chain_id_raw();
 	let note_2_chain_id = note2.get_js_utxo().unwrap().chain_id_raw();
@@ -320,16 +341,8 @@ pub fn generate_vanchor_test_setup_2_inputs() -> VAnchorTestSetup {
 			.unwrap();
 	in_utxo2.set_index(1, &nullifier_hasher).unwrap();
 
-	let output_1 = OutputUtxoConfig {
-		amount: 10,
-		index: None,
-		chain_id,
-	};
-	let output_2 = OutputUtxoConfig {
-		amount: 10,
-		index: None,
-		chain_id,
-	};
+	let output_1 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(curve, chain_id, 10, None, &mut rng).unwrap();
+	let output_2 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(curve, chain_id, 10, None, &mut rng).unwrap();
 
 	let mut proof_builder = ProofInputBuilder::VAnchor(Box::new(VAnchorProofInput::default()));
 
@@ -368,7 +381,12 @@ pub fn generate_vanchor_test_setup_2_inputs() -> VAnchorTestSetup {
 	proof_builder.backend(Backend::Arkworks).unwrap();
 	proof_builder.curve(Curve::Bn254).unwrap();
 	proof_builder.roots(in_root_set).unwrap();
-	proof_builder.set_output_config([output_1, output_2]).unwrap();
+	proof_builder
+		.set_output_utxos([
+			JsUtxo::new_from_bn254_utxo(output_1),
+			JsUtxo::new_from_bn254_utxo(output_2),
+		])
+		.unwrap();
 	proof_builder.pk(pk).unwrap();
 
 	VAnchorTestSetup {
@@ -418,16 +436,8 @@ pub fn generate_vanchor_test_setup_16_non_default_inputs() -> VAnchorTestSetup {
 		next_utxo_index += 1;
 	}
 
-	let output_1 = OutputUtxoConfig {
-		amount: 160,
-		index: None,
-		chain_id,
-	};
-	let output_2 = OutputUtxoConfig {
-		amount: 10,
-		index: None,
-		chain_id,
-	};
+	let output_1 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(curve, chain_id, 160, None, &mut rng).unwrap();
+	let output_2 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(curve, chain_id, 10, None, &mut rng).unwrap();
 
 	let mut proof_builder = ProofInputBuilder::VAnchor(Box::new(VAnchorProofInput::default()));
 
@@ -465,7 +475,12 @@ pub fn generate_vanchor_test_setup_16_non_default_inputs() -> VAnchorTestSetup {
 	proof_builder.backend(Backend::Arkworks).unwrap();
 	proof_builder.curve(Curve::Bn254).unwrap();
 	proof_builder.roots(in_root_set).unwrap();
-	proof_builder.set_output_config([output_1, output_2]).unwrap();
+	proof_builder
+		.set_output_utxos([
+			JsUtxo::new_from_bn254_utxo(output_1),
+			JsUtxo::new_from_bn254_utxo(output_2),
+		])
+		.unwrap();
 	proof_builder.pk(pk).unwrap();
 
 	VAnchorTestSetup {
@@ -525,16 +540,9 @@ pub fn generate_vanchor_test_setup_16_mixed_inputs() -> VAnchorTestSetup {
 		next_utxo_index += 1;
 	}
 
-	let output_1 = OutputUtxoConfig {
-		amount: 80,
-		index: None,
-		chain_id,
-	};
-	let output_2 = OutputUtxoConfig {
-		amount: 10,
-		index: None,
-		chain_id,
-	};
+	let output_1 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(curve, chain_id, 80, None, &mut rng).unwrap();
+
+	let output_2 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(curve, chain_id, 10, None, &mut rng).unwrap();
 
 	let mut proof_builder = ProofInputBuilder::VAnchor(Box::new(VAnchorProofInput::default()));
 
@@ -577,7 +585,12 @@ pub fn generate_vanchor_test_setup_16_mixed_inputs() -> VAnchorTestSetup {
 	proof_builder.curve(Curve::Bn254).unwrap();
 	proof_builder.roots(in_root_set).unwrap();
 	proof_builder.pk(pk).unwrap();
-	proof_builder.set_output_config([output_1, output_2]).unwrap();
+	proof_builder
+		.set_output_utxos([
+			JsUtxo::new_from_bn254_utxo(output_1),
+			JsUtxo::new_from_bn254_utxo(output_2),
+		])
+		.unwrap();
 
 	VAnchorTestSetup {
 		proof_input_builder: JsProofInputBuilder { inner: proof_builder },

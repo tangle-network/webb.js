@@ -16,8 +16,9 @@ mod test {
 		generate_vanchor_test_setup_2_inputs, AnchorTestSetup, MixerTestSetup, VAnchorTestSetup, ANCHOR_NOTE_V1_X5_4,
 		ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V2_X5_4,
 	};
-	use crate::proof::{generate_proof_js, truncate_and_pad, JsProofInputBuilder, LeavesMapInput, OutputUtxoConfig};
-	use crate::types::{Indices, Leaves};
+	use crate::proof::{generate_proof_js, truncate_and_pad, JsProofInputBuilder, LeavesMapInput};
+	use crate::types::{Indices, Leaves, WasmCurve, BE};
+	use crate::utxo::JsUtxo;
 	use crate::{VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF};
 
 	use super::*;
@@ -183,23 +184,25 @@ mod test {
 		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
 
 		let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
-		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
-		// `note::JsNote`
+
+		let backend: BE = JsValue::from(note.backend.clone().unwrap().to_string()).into();
+
+		let curve: WasmCurve = JsValue::from(note.curve.unwrap().to_string()).into();
+
+		let output_1 = JsUtxo::new(
+			curve.clone(),
+			backend.clone(),
+			2,
+			2,
+			JsString::from("10"),
+			JsString::from("0"),
+			None,
+		)
+		.unwrap();
+		let output_2 = JsUtxo::new(curve, backend, 2, 2, JsString::from("10"), JsString::from("3"), None).unwrap();
+
 		proof_input_builder.set_notes(notes).unwrap();
-		proof_input_builder
-			.set_vanchor_output_config(
-				OutputUtxoConfig {
-					index: None,
-					amount: 10,
-					chain_id: 0,
-				},
-				OutputUtxoConfig {
-					index: None,
-					amount: 10,
-					chain_id: 3,
-				},
-			)
-			.unwrap();
+		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
 		let proof_builder = proof_input_builder.build_js().unwrap();
 		let vanchor_proof_input_payload = proof_builder.inner.vanchor_input().unwrap();
 		assert_eq!(vanchor_proof_input_payload.public_amount, 10);
@@ -260,22 +263,25 @@ mod test {
 		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
 
 		let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
+		let backend: BE = JsValue::from(note.backend.clone().unwrap().to_string()).into();
+
+		let curve: WasmCurve = JsValue::from(note.curve.unwrap().to_string()).into();
+
+		let output_1 = JsUtxo::new(
+			curve.clone(),
+			backend.clone(),
+			2,
+			2,
+			JsString::from("10"),
+			JsString::from("0"),
+			None,
+		)
+		.unwrap();
+		let output_2 = JsUtxo::new(curve, backend, 2, 2, JsString::from("10"), JsString::from("3"), None).unwrap();
 
 		proof_input_builder.set_notes(notes).unwrap();
-		proof_input_builder
-			.set_vanchor_output_config(
-				OutputUtxoConfig {
-					index: None,
-					amount: 10,
-					chain_id: 0,
-				},
-				OutputUtxoConfig {
-					index: None,
-					amount: 10,
-					chain_id: 3,
-				},
-			)
-			.unwrap();
+		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
+
 		let proof_builder = proof_input_builder.build();
 		let mut message = "".to_string();
 		if let Err(e) = proof_builder {
@@ -325,20 +331,25 @@ mod test {
 		let notes: Array = vec![JsValue::from(note.clone()), JsValue::from(note2.clone())]
 			.into_iter()
 			.collect();
-		proof_input_builder
-			.set_vanchor_output_config(
-				OutputUtxoConfig {
-					index: None,
-					amount: 20,
-					chain_id: 0,
-				},
-				OutputUtxoConfig {
-					index: None,
-					amount: 20,
-					chain_id: 0,
-				},
-			)
-			.unwrap();
+
+		let backend: BE = JsValue::from(note.backend.clone().unwrap().to_string()).into();
+
+		let curve: WasmCurve = JsValue::from(note.curve.unwrap().to_string()).into();
+
+		let output_1 = JsUtxo::new(
+			curve.clone(),
+			backend.clone(),
+			2,
+			2,
+			JsString::from("10"),
+			JsString::from("0"),
+			None,
+		)
+		.unwrap();
+		let output_2 = JsUtxo::new(curve, backend, 2, 2, JsString::from("10"), JsString::from("3"), None).unwrap();
+
+		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
+
 		proof_input_builder.set_notes(notes).unwrap();
 		let proof_builder = proof_input_builder.build();
 		let mut message = "".to_string();
@@ -391,21 +402,26 @@ mod test {
 		let notes: Array = vec![JsValue::from(note.clone()), JsValue::from(note2.clone())]
 			.into_iter()
 			.collect();
+
+		let backend: BE = JsValue::from(note.backend.clone().unwrap().to_string()).into();
+
+		let curve: WasmCurve = JsValue::from(note.curve.unwrap().to_string()).into();
+
+		let output_1 = JsUtxo::new(
+			curve.clone(),
+			backend.clone(),
+			2,
+			2,
+			JsString::from("20"),
+			JsString::from("0"),
+			None,
+		)
+		.unwrap();
+		let output_2 = JsUtxo::new(curve, backend, 2, 2, JsString::from("20"), JsString::from("3"), None).unwrap();
+
 		proof_input_builder.set_notes(notes).unwrap();
-		proof_input_builder
-			.set_vanchor_output_config(
-				OutputUtxoConfig {
-					index: None,
-					amount: 20,
-					chain_id: 0,
-				},
-				OutputUtxoConfig {
-					index: None,
-					amount: 20,
-					chain_id: 0,
-				},
-			)
-			.unwrap();
+		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
+
 		let proof_builder = proof_input_builder.build();
 		let mut message = "".to_string();
 		if let Err(e) = proof_builder {
@@ -453,23 +469,25 @@ mod test {
 		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
 
 		let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
-		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
-		// `note::JsNote`
+
+		let backend: BE = JsValue::from(note.backend.clone().unwrap().to_string()).into();
+		let curve: WasmCurve = JsValue::from(note.curve.unwrap().to_string()).into();
+
+		let output_1 = JsUtxo::new(
+			curve.clone(),
+			backend.clone(),
+			2,
+			2,
+			JsString::from("20"),
+			JsString::from("0"),
+			None,
+		)
+		.unwrap();
+		let output_2 = JsUtxo::new(curve, backend, 2, 2, JsString::from("20"), JsString::from("3"), None).unwrap();
+
 		proof_input_builder.set_notes(notes).unwrap();
-		proof_input_builder
-			.set_vanchor_output_config(
-				OutputUtxoConfig {
-					index: None,
-					amount: 20,
-					chain_id: 0,
-				},
-				OutputUtxoConfig {
-					index: None,
-					amount: 20,
-					chain_id: 0,
-				},
-			)
-			.unwrap();
+		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
+
 		let proof_input = proof_input_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_input);
 		let mut message = "".to_string();
@@ -528,21 +546,25 @@ mod test {
 		]
 		.into_iter()
 		.collect();
+
+		let backend: BE = JsValue::from(note.backend.clone().unwrap().to_string()).into();
+		let curve: WasmCurve = JsValue::from(note.curve.unwrap().to_string()).into();
+
+		let output_1 = JsUtxo::new(
+			curve.clone(),
+			backend.clone(),
+			2,
+			2,
+			JsString::from("10"),
+			JsString::from("0"),
+			None,
+		)
+		.unwrap();
+		let output_2 = JsUtxo::new(curve, backend, 2, 2, JsString::from("10"), JsString::from("3"), None).unwrap();
+
 		proof_input_builder.set_notes(notes).unwrap();
-		proof_input_builder
-			.set_vanchor_output_config(
-				OutputUtxoConfig {
-					index: None,
-					amount: 20,
-					chain_id: 0,
-				},
-				OutputUtxoConfig {
-					index: None,
-					amount: 20,
-					chain_id: 0,
-				},
-			)
-			.unwrap();
+		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
+
 		let proof_builder = proof_input_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_builder);
 		let mut message = "".to_string();

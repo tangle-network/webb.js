@@ -8,7 +8,7 @@ use arkworks_setups::{Curve as ArkCurve, VAnchorProver};
 use rand::rngs::OsRng;
 
 use crate::note::JsNote;
-use crate::proof::{OutputUtxoConfig, VAnchorProof, VAnchorProofPayload};
+use crate::proof::{VAnchorProof, VAnchorProofPayload};
 use crate::types::{Backend, Curve, HashFunction, NoteProtocol, NoteVersion, OpStatusCode, OperationError};
 use crate::utxo::JsUtxo;
 use crate::{VAnchorR1CSProverBn254_30_2_16_2, VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF};
@@ -54,69 +54,6 @@ fn get_output_notes(
 		})
 }
 
-pub fn setup_output_utxos(
-	output_config: [OutputUtxoConfig; 2],
-	backend: Backend,
-	curve: Curve,
-	input_size: usize,
-	anchor_size: usize,
-	rng: &mut OsRng,
-) -> Result<[JsUtxo; 2], OperationError> {
-	match (backend, curve, input_size, anchor_size) {
-		(Backend::Arkworks, Curve::Bn254, 2, 2) => {
-			let utxo_o_1 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
-				ArkCurve::Bn254,
-				output_config[0].chain_id,
-				output_config[0].amount,
-				None,
-				rng,
-			)
-			.unwrap();
-			let utxo_o_2 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
-				ArkCurve::Bn254,
-				output_config[1].chain_id,
-				output_config[1].amount,
-				None,
-				rng,
-			)
-			.unwrap();
-			Ok([
-				JsUtxo::new_from_bn254_utxo(utxo_o_1),
-				JsUtxo::new_from_bn254_utxo(utxo_o_2),
-			])
-		}
-		(Backend::Arkworks, Curve::Bn254, 16, 2) => {
-			let utxo_o_1 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
-				ArkCurve::Bn254,
-				output_config[0].chain_id,
-				output_config[0].amount,
-				None,
-				rng,
-			)
-			.unwrap();
-			let utxo_o_2 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
-				ArkCurve::Bn254,
-				output_config[1].chain_id,
-				output_config[1].amount,
-				None,
-				rng,
-			)
-			.unwrap();
-			Ok([
-				JsUtxo::new_from_bn254_utxo(utxo_o_1),
-				JsUtxo::new_from_bn254_utxo(utxo_o_2),
-			])
-		}
-		_ => {
-			let message = format!(
-				"(backend {}, curve {}, input_size {}, anchor_size {})",
-				backend, curve, input_size, anchor_size
-			);
-			let oe = OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message);
-			Err(oe)
-		}
-	}
-}
 pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -> Result<VAnchorProof, OperationError> {
 	let VAnchorProofPayload {
 		public_amount,

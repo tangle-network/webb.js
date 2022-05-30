@@ -420,32 +420,7 @@ pub struct VAnchorProofPayload {
 	// utxo config
 	pub output_utxos: [JsUtxo; 2],
 }
-#[wasm_bindgen]
-#[derive(Clone, Debug)]
-pub struct OutputUtxoConfig {
-	#[wasm_bindgen(skip)]
-	pub amount: u128,
-	#[wasm_bindgen(skip)]
-	pub index: Option<u64>,
-	#[wasm_bindgen(skip)]
-	pub chain_id: u64,
-}
 
-#[wasm_bindgen]
-impl OutputUtxoConfig {
-	#[wasm_bindgen(constructor)]
-	pub fn new(amount: JsString, index: Option<u64>, chain_id: u64) -> Result<OutputUtxoConfig, JsValue> {
-		let amount: String = amount.into();
-
-		let amount = amount.parse().map_err(|_| OpStatusCode::InvalidAmount)?;
-
-		Ok(OutputUtxoConfig {
-			amount,
-			index,
-			chain_id,
-		})
-	}
-}
 #[derive(Debug, Clone, Default)]
 pub struct VAnchorProofInput {
 	pub exponentiation: Option<i8>,
@@ -708,23 +683,7 @@ impl ProofInputBuilder {
 		}
 	}
 
-	// Should be called after setting backend curve roots secret
-	pub fn set_output_config(&mut self, output_config: [OutputUtxoConfig; 2]) -> Result<[JsUtxo; 2], OperationError> {
-		match self {
-			Self::VAnchor(input) => {
-				let backend = input.backend.ok_or(OpStatusCode::InvalidBackend)?;
-				let curve = input.curve.ok_or(OpStatusCode::InvalidCurve)?;
-				let roots = input.roots.as_ref().ok_or(OpStatusCode::InvalidRoots)?.len();
-				let secret = input.secret.as_ref().ok_or(OpStatusCode::InvalidNoteSecrets)?.len();
-				let output_utxo =
-					vanchor::setup_output_utxos(output_config, backend, curve, secret, roots, &mut OsRng)?;
-				input.output_utxos = Some(output_utxo.clone());
-				Ok(output_utxo)
-			}
-			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
-		}
-	}
-
+	/// Directly set the output Utxos in the proving payload
 	pub fn set_output_utxos(&mut self, output_utxos: [JsUtxo; 2]) -> Result<(), OperationError> {
 		match self {
 			Self::VAnchor(input) => {
@@ -1085,17 +1044,6 @@ impl JsProofInputBuilder {
 	pub fn set_output_utxos(&mut self, utxo1: JsUtxo, utxo2: JsUtxo) -> Result<(), JsValue> {
 		self.inner.set_output_utxos([utxo1, utxo2])?;
 		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setVanchorOutputConfig)]
-	pub fn set_vanchor_output_config(
-		&mut self,
-		utxo1: OutputUtxoConfig,
-		utxo2: OutputUtxoConfig,
-	) -> Result<Array, JsValue> {
-		let output = self.inner.set_output_config([utxo1, utxo2])?;
-		let output: Array = output.into_iter().map(JsValue::from).collect();
-		Ok(output)
 	}
 
 	#[wasm_bindgen(js_name = setLeavesMap)]
