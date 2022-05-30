@@ -467,7 +467,7 @@ pub struct VAnchorProofInput {
 	// Public amount
 	pub public_amount: Option<i128>,
 	// ouput utxos
-	pub output_config: Option<[JsUtxo; 2]>,
+	pub output_utxos: Option<[JsUtxo; 2]>,
 }
 
 pub fn generic_of_jsval<T: FromWasmAbi<Abi = u32>>(js: JsValue, classname: &str) -> Result<T, JsValue> {
@@ -537,7 +537,7 @@ impl VAnchorProofInput {
 		let chain_id = self.chain_id.ok_or(OpStatusCode::InvalidChainId)?;
 		let indices = self.indices.ok_or(OpStatusCode::InvalidIndices)?;
 		let public_amount = self.public_amount.ok_or(OpStatusCode::InvalidPublicAmount)?;
-		let output_utxos = self.output_config.ok_or(OpStatusCode::InvalidPublicAmount)?;
+		let output_utxos = self.output_utxos.ok_or(OpStatusCode::InvalidPublicAmount)?;
 
 		let exponentiation = self.exponentiation.unwrap_or(5);
 		let width = self.width.unwrap_or(3);
@@ -718,8 +718,18 @@ impl ProofInputBuilder {
 				let secret = input.secret.as_ref().ok_or(OpStatusCode::InvalidNoteSecrets)?.len();
 				let output_utxo =
 					vanchor::setup_output_utxos(output_config, backend, curve, secret, roots, &mut OsRng)?;
-				input.output_config = Some(output_utxo.clone());
+				input.output_utxos = Some(output_utxo.clone());
 				Ok(output_utxo)
+			}
+			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
+		}
+	}
+
+	pub fn set_output_utxos(&mut self, output_utxos: [JsUtxo; 2]) -> Result<(), OperationError> {
+		match self {
+			Self::VAnchor(input) => {
+				input.output_utxos = Some(output_utxos);
+				Ok(())
 			}
 			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
 		}

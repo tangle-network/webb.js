@@ -4,10 +4,11 @@
 /* eslint-disable camelcase */
 
 // eslint-disable-next-line camelcase
-import { JsNoteBuilder, MTBn254X5, OutputUtxoConfig, setupKeys, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
+import { JsNoteBuilder, JsUtxo, MTBn254X5, setupKeys, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { expect } from 'chai';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
+import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
 
 import { ProvingManagerSetupInput, ProvingManagerWrapper } from '../proving/index.js';
 
@@ -51,7 +52,7 @@ describe('Proving manager VAnchor', function () {
 
     const publicAmount = 10;
     const outputAmount = String(15);
-    const outputChainId = BigInt(0);
+    const outputChainId = '0';
 
     const leaf1 = vanchorNote1.getLeafCommitment();
     const tree = new MTBn254X5([leaf1], '0');
@@ -61,18 +62,22 @@ describe('Proving manager VAnchor', function () {
 
     leavesMap[0] = [leaf1];
 
-    const outputConfig1 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
-    const outputConfig2 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
+    const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
     const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
     const provingManager = new ProvingManagerWrapper('direct-call');
+    const secret = randomAsU8a();
+    const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+    const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: '0',
+      encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
       indices: [0],
       inputNotes: [vanchorNote1.serialize()],
       leavesMap: leavesMap,
-      outputConfigs: [outputConfig1, outputConfig2],
+      output: [output1, output2],
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
       recipient: address,
@@ -93,7 +98,7 @@ describe('Proving manager VAnchor', function () {
 
     const publicAmount = 10;
     const outputAmount = String(15);
-    const outputChainId = BigInt(0);
+    const outputChainId = String(0);
 
     const leaf1 = vanchorNote1.getLeafCommitment();
     const leaf2 = vanchorNote2.getLeafCommitment();
@@ -104,19 +109,24 @@ describe('Proving manager VAnchor', function () {
 
     leavesMap[0] = [leaf1, leaf2];
 
-    const outputConfig1 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
-    const outputConfig2 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
+    const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
     const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
 
     const provingManager = new ProvingManagerWrapper('direct-call');
+    const secret = randomAsU8a();
+    const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+    const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: '0',
+      encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
       indices: [0, 1],
       inputNotes: [vanchorNote1.serialize(), vanchorNote2.serialize()],
       leavesMap: leavesMap,
-      outputConfigs: [outputConfig1, outputConfig2],
+      output: [output1, output2],
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
       recipient: address,
@@ -138,7 +148,7 @@ describe('Proving manager VAnchor', function () {
 
     const publicAmount = 10;
     const outputAmount = String(10 * 1.5 + 5);
-    const outputChainId = BigInt(0);
+    const outputChainId = String(0);
     const leaves = notes.map((note) => note.getLeafCommitment());
 
     const tree = new MTBn254X5(leaves, '0');
@@ -148,19 +158,24 @@ describe('Proving manager VAnchor', function () {
 
     leavesMap[0] = leaves;
 
-    const outputConfig1 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
-    const outputConfig2 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
+    const output1 = new JsUtxo('Bn254', 'Arkworks', 16, 2, outputAmount, outputChainId, undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', 16, 2, outputAmount, outputChainId, undefined);
     const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
 
     const provingManager = new ProvingManagerWrapper('direct-call');
+    const secret = randomAsU8a();
+    const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+    const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: '0',
+      encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
       indices: notes.map((_, index) => index),
       inputNotes: notes.map((note) => note.serialize()),
       leavesMap: leavesMap,
-      outputConfigs: [outputConfig1, outputConfig2],
+      output: [output1, output2],
+
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
       recipient: address,
@@ -183,7 +198,7 @@ describe('Proving manager VAnchor', function () {
 
     const publicAmount = 10;
     const outputAmount = String(10 * 8 + 5);
-    const outputChainId = BigInt(0);
+    const outputChainId = String(0);
     const leaves = notes.map((note) => note.getLeafCommitment());
 
     const tree = new MTBn254X5(leaves, '0');
@@ -193,19 +208,26 @@ describe('Proving manager VAnchor', function () {
 
     leavesMap[0] = leaves;
 
-    const outputConfig1 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
-    const outputConfig2 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
+    const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
     const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
 
     const provingManager = new ProvingManagerWrapper('direct-call');
+
+    const secret = randomAsU8a();
+    const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+    const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: '0',
+      encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
       indices: notes.map((_, index) => index),
       inputNotes: notes.map((note) => note.serialize()),
       leavesMap: leavesMap,
-      outputConfigs: [outputConfig1, outputConfig2],
+      output: [output1, output2],
+
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
       recipient: address,
@@ -231,7 +253,7 @@ describe('Proving manager VAnchor', function () {
 
       const publicAmount = 10;
       const outputAmount = String(10 * 80 + 5);
-      const outputChainId = BigInt(0);
+      const outputChainId = String(0);
       const leaves = notes.map((note) => note.getLeafCommitment());
       const tree = new MTBn254X5(leaves, '0');
       const root = `0x${tree.root}`;
@@ -240,19 +262,26 @@ describe('Proving manager VAnchor', function () {
 
       leavesMap[0] = leaves;
 
-      const outputConfig1 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
-      const outputConfig2 = new OutputUtxoConfig(outputAmount, undefined, outputChainId);
+      const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
+      const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
       const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
 
       const provingManager = new ProvingManagerWrapper('direct-call');
+
+      const secret = randomAsU8a();
+      const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+      const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+
       const setup: ProvingManagerSetupInput<'vanchor'> = {
         chainId: '0',
+        encryptedCommitments: [comEnc1, comEnc2],
         extAmount: '0',
         fee: '0',
         indices: notes.map((_, index) => index),
         inputNotes: notes.map((note) => note.serialize()),
         leavesMap: leavesMap,
-        outputConfigs: [outputConfig1, outputConfig2],
+        output: [output1, output2],
+
         provingKey: keys.pk,
         publicAmount: String(publicAmount),
         recipient: address,

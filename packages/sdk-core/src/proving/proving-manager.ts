@@ -3,7 +3,7 @@
 
 import type { JsNote, JsUtxo, NoteProtocol } from '@webb-tools/wasm-utils';
 
-import { ProvingManagerSetupInput, ProvingManagerThreadEvent, ProvingManagerWrapper } from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
+import { ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
 
 type VAnchorProof = {
   readonly inputUtxos: Array<JsUtxo>;
@@ -35,8 +35,7 @@ export type ProofI<T extends NoteProtocol> = T extends 'vanchor'
 export class ProvingManager {
   constructor (
     private readonly worker: Worker | null | undefined // Optional WebWorker
-  ) {
-  }
+  ) {}
 
   /**
    * Checks the current `ProvingManager` status wither it is proving with a Worker(browser) or directly(Nodejs),
@@ -68,31 +67,10 @@ export class ProvingManager {
   ): Promise<ProofI<T>> {
     return new Promise<ProofI<T>>((resolve, reject) => {
       try {
-        worker.addEventListener('message', async (e: ProvingManagerThreadEvent) => {
-          const event = e.data.name;
+        worker.addEventListener('message', (e) => {
+          const payload = e.data.data as ProofI<T>;
 
-          switch (event) {
-            case 'proof':
-              resolve(e.data.data as ProofI<T>);
-              break;
-
-            case 'encrypt': {
-              if ('encrypt' in input[1]) {
-                const enc = input[1].encrypt;
-                const data = await enc(e.data.data as Uint8Array);
-
-                worker.postMessage({
-                  data: data,
-                  name: 'encrypt'
-                });
-              } else {
-                throw new Error('Encrypt function isn\'t implemented for the input supplied ');
-              }
-            }
-
-            case 'destroy':
-              break;
-          }
+          resolve(payload);
         });
         worker.postMessage({
           proof: input

@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Leaves, NoteProtocol, OutputUtxoConfig } from '@webb-tools/wasm-utils';
+import type { Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
 
 import { ProofI } from '@webb-tools/sdk-core/proving/proving-manager.js';
 import { JsProofInput, JsProofOutput, JsUtxo } from '@webb-tools/wasm-utils';
@@ -36,21 +36,11 @@ export type MixerPMSetupInput = {
 
 export type ProvingManagerSetupInput<T extends NoteProtocol> = ProvingManagerPayload[T];
 
-type CrossThreadsEvents = 'encrypt';
 type PMEvents<T extends NoteProtocol = 'mixer'> = {
   proof: [T, ProvingManagerSetupInput<T>];
   destroy: undefined;
-  encrypt: Uint8Array;
 };
-type PMResults = {
-  proof: ProofI<any>;
-  destroy: undefined;
-  encrypt: Uint8Array
-}
-export type ProvingManagerThreadEvent = MessageEvent<{
-  data: PMResults[keyof PMResults ],
-  name: keyof PMResults
-}>
+
 /**
  * Proving Manager setup input for anchor API proving manager over sdk-core
  * @param note - Serialized note representation
@@ -76,7 +66,7 @@ export type AnchorPMSetupInput = {
   roots: Leaves;
   refreshCommitment: string;
 };
-export type EncryptCB = (input: Uint8Array) => Promise<Uint8Array>;
+
 /**
  * Proving Manager setup input for anchor API proving manager over sdk-core
  * @param inputNotes - VAnchor notes representing input UTXOs for proving
@@ -95,14 +85,14 @@ export type VAnchorPMSetupInput = {
   indices: number[];
   roots: Leaves;
   chainId: string;
-  outputConfigs: [OutputUtxoConfig, OutputUtxoConfig];
+  output: [JsUtxo, JsUtxo];
+  encryptedCommitments: [Uint8Array, Uint8Array],
   publicAmount: string;
   provingKey: Uint8Array;
   relayer: Uint8Array;
   recipient: Uint8Array;
   extAmount: string;
   fee: string;
-  encrypt: EncryptCB
 };
 
 interface ProvingManagerPayload extends Record<NoteProtocol, any> {
@@ -110,41 +100,13 @@ interface ProvingManagerPayload extends Record<NoteProtocol, any> {
   anchor: AnchorPMSetupInput;
   vanchor: VAnchorPMSetupInput;
 }
-type EncryptionProvider<T extends NoteProtocol> = T extends 'vanchor'? EncryptCB:void;
 
 export class ProvingManagerWrapper {
-  private awaitEvent<T extends CrossThreadsEvents> (eventName: T, eventData: PMEvents[T]): Promise<PMResults[T]> {
-    return new Promise<PMResults[T]>((resolve, reject) => {
-      try {
-        self.postMessage({
-          data: {
-            data: eventData,
-            name: eventName
-          }
-        });
-
-        const resultHandler = (event: MessageEvent) => {
-          const name = event.data.name as CrossThreadsEvents;
-
-          if (name === eventName) {
-            resolve(event.data.data);
-            self.removeEventListener('message', resultHandler);
-          }
-        };
-
-        self.addEventListener('message', resultHandler);
-      } catch (e) {
-        reject(e);
-      }
-    });
-  }
-
   /**
    * @param ctx  - Context of the Proving manager
    * Defaults to worker mode assuming that the Proving manager is running in the browser
    * if it's set to direct-call which is done in nodejs then this is running without worker
    **/
-
   constructor (private ctx: 'worker' | 'direct-call' = 'worker') {
     // if the Manager is running in side worker it registers an event listener
     if (ctx === 'worker') {
@@ -153,15 +115,16 @@ export class ProvingManagerWrapper {
         const key = Object.keys(message)[0] as keyof PMEvents;
 
         switch (key) {
-          case 'proof': {
-            const [protocol, input] = message.proof!;
-            const proof = await this.prove(protocol, input);
+          case 'proof':
+            {
+              const [protocol, input] = message.proof!;
+              const proof = await this.prove(protocol, input);
 
-            (self as unknown as Worker).postMessage({
-              data: proof,
-              name: key
-            });
-          }
+              (self as unknown as Worker).postMessage({
+                data: proof,
+                name: key
+              });
+            }
 
             break;
           case 'destroy':
@@ -197,7 +160,7 @@ export class ProvingManagerWrapper {
   /**
    * Generate the Zero-knowledge proof from the proof input
    **/
-  async prove<T extends NoteProtocol> (protocol: T, pmSetupInput: ProvingManagerSetupInput<T>, encryptionProvider: EncryptionProvider<T>): Promise<ProofI<T>> {
+  async prove<T extends NoteProtocol> (protocol: T, pmSetupInput: ProvingManagerSetupInput<T>): Promise<ProofI<T>> {
     const Manager = await this.proofBuilder;
     const pm = new Manager(protocol);
 
@@ -252,11 +215,6 @@ export class ProvingManagerWrapper {
 
       return anchorProof as any;
     } else if (protocol === 'vanchor') {
-      if (!encryptionProvider) {
-        // sanity check the value is included in the VAnchor Setup input
-        throw new Error('encryptionProvider is required for the VAnchor');
-      }
-
       const input = pmSetupInput as VAnchorPMSetupInput;
       const metaDataNote = input.inputNotes[0];
       const { note } = await Note.deserialize(metaDataNote);
@@ -298,17 +256,16 @@ export class ProvingManagerWrapper {
       pm.setRoots(input.roots);
       pm.chain_id(input.chainId);
       pm.public_amount(input.publicAmount);
-      const [o1, o2] = pm.setVanchorOutputConfig(...input.outputConfigs) as [JsUtxo, JsUtxo];
+      pm.setVanchorOutputConfig(...input.output);
       const wasm = await this.wasmBlob;
-      const encCom1 = await encryptionProvider(o1.commitment);
-      const encCom2 = await encryptionProvider(o2.commitment);
       const extData = new wasm.ExtData(
         input.recipient,
         input.relayer,
         input.extAmount,
         input.fee,
-        encCom1,
-        encCom2);
+        input.encryptedCommitments[0],
+        input.encryptedCommitments[1]
+      );
       const dataHash = extData.get_encode();
       const dataHashhex = u8aToHex(dataHash).replace('0x', '');
 
