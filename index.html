@@ -71,6 +71,9 @@
 <p><strong>To build:</strong></p>
 <pre><code class="language-bash"><span class="hl-1">yarn build</span>
 </code></pre>
+<p><strong>To update fixtures:</strong></p>
+<pre><code class="language-bash"><span class="hl-1">git submodule update --init --recursive</span>
+</code></pre>
 <h1 id="usage"> Usage </h1>
 
 <h2 style="border-bottom:none"> Quick Start ⚡ </h2>
@@ -99,7 +102,10 @@
   <h3>Usage examples</h3>
 </a>
 <p>We have included implementation examples for using this API to interact with an <a href="./examples/node/substrate/anchor.ts">Anchor</a> and <a href="./examples/node/substrate/mixer.ts">Mixer</a>. </p>
-<p>To run the above mentioned usage examples you will need to use the experimental module loader and start a <a href="https://github.com/webb-tools/protocol-substrate#standalone-local-testnet">local substrate chain</a>. Once started you may run the following command from root:</p>
+<p>To run the above mentioned usage examples you will need to use the experimental module loader and start a <a href="https://github.com/webb-tools/protocol-substrate#standalone-local-testnet">local substrate chain</a>. In addition please ensure you have updated the fixtures by running:</p>
+<pre><code class="language-bash"><span class="hl-1">git submodule update --init --recursive</span>
+</code></pre>
+<p>Once started you may run the following command from root:</p>
 <pre><code class="language-bash"><span class="hl-7"># Runs the Anchor usage example script</span><br/><span class="hl-1">NODE_OPTIONS=</span><span class="hl-4">&quot;--loader ./loader.js&quot;</span><span class="hl-1"> node ./examples/node/substrate/anchor.ts</span><br/><br/><span class="hl-7"># Runs the Mixer usage example script</span><br/><span class="hl-1">NODE_OPTIONS=</span><span class="hl-4">&quot;--loader ./loader.js&quot;</span><span class="hl-1"> node ./examples/node/substrate/mixer.ts</span>
 </code></pre>
 <h2 id="test"> Testing 🧪 </h2>
