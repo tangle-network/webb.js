@@ -367,8 +367,8 @@ pub fn generate_vanchor_test_setup_2_inputs() -> VAnchorTestSetup {
 
 	proof_builder.backend(Backend::Arkworks).unwrap();
 	proof_builder.curve(Curve::Bn254).unwrap();
-	proof_builder.set_output_config([output_1, output_2]).unwrap();
 	proof_builder.roots(in_root_set).unwrap();
+	proof_builder.set_output_config([output_1, output_2]).unwrap();
 	proof_builder.pk(pk).unwrap();
 
 	VAnchorTestSetup {
@@ -464,8 +464,8 @@ pub fn generate_vanchor_test_setup_16_non_default_inputs() -> VAnchorTestSetup {
 
 	proof_builder.backend(Backend::Arkworks).unwrap();
 	proof_builder.curve(Curve::Bn254).unwrap();
-	proof_builder.set_output_config([output_1, output_2]).unwrap();
 	proof_builder.roots(in_root_set).unwrap();
+	proof_builder.set_output_config([output_1, output_2]).unwrap();
 	proof_builder.pk(pk).unwrap();
 
 	VAnchorTestSetup {
@@ -576,8 +576,8 @@ pub fn generate_vanchor_test_setup_16_mixed_inputs() -> VAnchorTestSetup {
 	proof_builder.backend(Backend::Arkworks).unwrap();
 	proof_builder.curve(Curve::Bn254).unwrap();
 	proof_builder.roots(in_root_set).unwrap();
-	proof_builder.set_output_config([output_1, output_2]).unwrap();
 	proof_builder.pk(pk).unwrap();
+	proof_builder.set_output_config([output_1, output_2]).unwrap();
 
 	VAnchorTestSetup {
 		proof_input_builder: JsProofInputBuilder { inner: proof_builder },

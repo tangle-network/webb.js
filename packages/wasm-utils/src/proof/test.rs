@@ -181,6 +181,11 @@ mod test {
 		proof_input_builder.public_amount(JsString::from("10")).unwrap();
 		proof_input_builder.chain_id(JsString::from("0")).unwrap();
 		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
+
+		let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
+		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
+		// `note::JsNote`
+		proof_input_builder.set_notes(notes).unwrap();
 		proof_input_builder
 			.set_vanchor_output_config(
 				OutputUtxoConfig {
@@ -195,10 +200,6 @@ mod test {
 				},
 			)
 			.unwrap();
-		let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
-		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
-		// `note::JsNote`
-		proof_input_builder.set_notes(notes).unwrap();
 		let proof_builder = proof_input_builder.build_js().unwrap();
 		let vanchor_proof_input_payload = proof_builder.inner.vanchor_input().unwrap();
 		assert_eq!(vanchor_proof_input_payload.public_amount, 10);
@@ -257,6 +258,10 @@ mod test {
 		proof_input_builder.public_amount(JsString::from("10")).unwrap();
 		proof_input_builder.chain_id(JsString::from("0")).unwrap();
 		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
+
+		let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
+
+		proof_input_builder.set_notes(notes).unwrap();
 		proof_input_builder
 			.set_vanchor_output_config(
 				OutputUtxoConfig {
@@ -271,10 +276,6 @@ mod test {
 				},
 			)
 			.unwrap();
-		let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
-		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
-		// `note::JsNote`
-		proof_input_builder.set_notes(notes).unwrap();
 		let proof_builder = proof_input_builder.build();
 		let mut message = "".to_string();
 		if let Err(e) = proof_builder {
@@ -320,6 +321,10 @@ mod test {
 		proof_input_builder.public_amount(JsString::from("10")).unwrap();
 		proof_input_builder.chain_id(JsString::from("0")).unwrap();
 		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
+
+		let notes: Array = vec![JsValue::from(note.clone()), JsValue::from(note2.clone())]
+			.into_iter()
+			.collect();
 		proof_input_builder
 			.set_vanchor_output_config(
 				OutputUtxoConfig {
@@ -334,11 +339,6 @@ mod test {
 				},
 			)
 			.unwrap();
-		let notes: Array = vec![JsValue::from(note.clone()), JsValue::from(note2.clone())]
-			.into_iter()
-			.collect();
-		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
-		// `note::JsNote`
 		proof_input_builder.set_notes(notes).unwrap();
 		let proof_builder = proof_input_builder.build();
 		let mut message = "".to_string();
@@ -387,6 +387,11 @@ mod test {
 		proof_input_builder.public_amount(JsString::from("10")).unwrap();
 		proof_input_builder.chain_id(JsString::from("0")).unwrap();
 		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
+
+		let notes: Array = vec![JsValue::from(note.clone()), JsValue::from(note2.clone())]
+			.into_iter()
+			.collect();
+		proof_input_builder.set_notes(notes).unwrap();
 		proof_input_builder
 			.set_vanchor_output_config(
 				OutputUtxoConfig {
@@ -401,12 +406,6 @@ mod test {
 				},
 			)
 			.unwrap();
-		let notes: Array = vec![JsValue::from(note.clone()), JsValue::from(note2.clone())]
-			.into_iter()
-			.collect();
-		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
-		// `note::JsNote`
-		proof_input_builder.set_notes(notes).unwrap();
 		let proof_builder = proof_input_builder.build();
 		let mut message = "".to_string();
 		if let Err(e) = proof_builder {
@@ -452,6 +451,11 @@ mod test {
 		proof_input_builder.public_amount(JsString::from("10")).unwrap();
 		proof_input_builder.chain_id(JsString::from("0")).unwrap();
 		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
+
+		let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
+		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
+		// `note::JsNote`
+		proof_input_builder.set_notes(notes).unwrap();
 		proof_input_builder
 			.set_vanchor_output_config(
 				OutputUtxoConfig {
@@ -466,10 +470,6 @@ mod test {
 				},
 			)
 			.unwrap();
-		let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
-		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
-		// `note::JsNote`
-		proof_input_builder.set_notes(notes).unwrap();
 		let proof_input = proof_input_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_input);
 		let mut message = "".to_string();
@@ -520,6 +520,15 @@ mod test {
 		proof_input_builder.public_amount(JsString::from("10")).unwrap();
 		proof_input_builder.chain_id(JsString::from("0")).unwrap();
 		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
+
+		let notes: Array = vec![
+			JsValue::from(note.clone()),
+			JsValue::from(note2.clone()),
+			JsValue::from(note3.clone()),
+		]
+		.into_iter()
+		.collect();
+		proof_input_builder.set_notes(notes).unwrap();
 		proof_input_builder
 			.set_vanchor_output_config(
 				OutputUtxoConfig {
@@ -534,16 +543,6 @@ mod test {
 				},
 			)
 			.unwrap();
-		let notes: Array = vec![
-			JsValue::from(note.clone()),
-			JsValue::from(note2.clone()),
-			JsValue::from(note3.clone()),
-		]
-		.into_iter()
-		.collect();
-		// TODO Fix  `AsRef<wasm_bindgen::JsValue>` is not implemented for
-		// `note::JsNote`
-		proof_input_builder.set_notes(notes).unwrap();
 		let proof_builder = proof_input_builder.build_js().unwrap();
 		let proof = generate_proof_js(proof_builder);
 		let mut message = "".to_string();
