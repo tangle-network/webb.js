@@ -60,7 +60,7 @@ export function startWebbNode(): KillTask {
   return async () => {
     node1Task.kill('SIGINT');
     node2task.kill('SIGINT');
-    await sleep(2000);
+    await sleep(5000);
     try {
       execSync(`docker network rm ${DOCKER_NETWORK_NAME}`);
     } catch (e) {

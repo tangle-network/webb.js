@@ -2,10 +2,10 @@
 // Copyright 2017-2020 @polkadot/dev authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-const os = require('os');
 const path = require('path');
 const rimraf = require('rimraf');
-const { execSync } = require('child_process');
+const { execSync: _execSync } = require('child_process');
+
 const fs = require('fs-extra');
 const glob = require('glob');
 const glob2base = require('glob2base');
@@ -45,13 +45,8 @@ const copySync = (src, dst) => {
       }
     });
 }
-const executeSync = (cmd) => {
-  try {
-    execSync(cmd, { stdio: 'inherit' });
-  } catch (error) {
-    process.exit(-1);
-  }
-}
+
+const execSync = (cmd) => _execSync(cmd, { stdio: 'inherit' });
 
 const argv = require('yargs')
   .options({
@@ -62,30 +57,23 @@ const argv = require('yargs')
   })
   .strict().argv;
 
-const repo = `https://${process.env.GH_PAT}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
-
 console.log('$ polkadot-ci-ghact-build', process.argv.slice(2).join(' '));
 
 function runClean() {
-  executeSync('yarn polkadot-dev-clean-build');
+  execSync('yarn polkadot-dev-clean-build');
 }
 
 function runCheck() {
-  executeSync('yarn lint');
-}
-
-function runTest() {
-  executeSync('yarn test');
-
-  // if [ -f "coverage/lcov.info" ] && [ -n "$COVERALLS_REPO_TOKEN" ]; then
-  //   console.log('*** Submitting to coveralls.io');
-
-  //   (cat coverage/lcov.info | yarn run coveralls) || true
-  // fi
+  execSync('yarn lint');
 }
 
 function runBuild() {
-  executeSync('yarn build');
+  execSync('yarn build');
+}
+
+function runTest() {
+  execSync('git submodule update --init --recursive')
+  execSync('yarn test');
 }
 
 function npmGetVersion() {
@@ -108,7 +96,7 @@ function npmPublish() {
 
   while (true) {
     try {
-      executeSync(`npm publish --access public ${tag}`);
+      execSync(`npm publish --access public ${tag}`);
 
       break;
     } catch (error) {
@@ -133,25 +121,25 @@ function gitBump() {
   const currentVersion = npmGetVersion();
   const [version, tag] = currentVersion.split('-');
   const [,, patch] = version.split('.');
-  console.log(`currentVersion ${currentVersion}  -<<>>-,version ${version}, tag ${tag}, patch ${patch}`);
+
   if (tag) {
     // if we have a beta version, just continue the stream of betas
-    executeSync(`${path.join(__dirname, 'update-version.js')} prerelease`);
+    execSync(`${path.join(__dirname, 'update-version.cjs')} prerelease`);
   } else if (argv['skip-beta']) {
     // don't allow beta versions
-    executeSync(`${path.join(__dirname, 'update-version.js')} patch`);
+    execSync(`${path.join(__dirname, 'update-version.cjs')} patch`);
   } else if (patch === '0') {
     // patch is .0, so publish this as an actual release (surely we did our job on beta)
-    executeSync(`${path.join(__dirname, 'update-version.js')} patch`);
+    execSync(`${path.join(__dirname, 'update-version.cjs')} patch`);
   } else if (patch === '1') {
     // continue with first new minor as beta
-    executeSync(`${path.join(__dirname, 'update-version.js')} prerelease`);
+    execSync(`${path.join(__dirname, 'update-version.cjs')} prerelease`);
   } else {
     // manual setting of version, make some changes so we can commit
     fs.appendFileSync(path.join(process.cwd(), '.123trigger'), currentVersion);
   }
 
-  executeSync('git add --all .');
+  execSync('git add --all .');
 }
 
 function loopFunc(fn) {
@@ -180,9 +168,7 @@ gitBump();
 
 runClean();
 runCheck();
-runTest();
 runBuild();
+runTest();
 
-// gitPush();
-execSync("node ./generate-docs")
 loopFunc(npmPublish);

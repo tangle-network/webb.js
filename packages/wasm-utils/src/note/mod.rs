@@ -1004,7 +1004,6 @@ mod test {
 		note_builder.curve(curve).unwrap();
 		note_builder.hash_function(hash_function).unwrap();
 		note_builder.backend(backend);
-		note_builder.index(JsString::from("10"));
 
 		let vanchor_note = note_builder.build().unwrap();
 		let note_string = vanchor_note.to_string();
@@ -1015,7 +1014,7 @@ mod test {
 		let js_note_2_string = js_note_2.to_string();
 
 		let leaf_2 = js_note_2.get_leaf_commitment().unwrap();
-		let leaf_2_vec = leaf.to_vec();
+		let leaf_2_vec = leaf_2.to_vec();
 
 		// Asserting that with serialization and deserialization lead to the same note
 		assert_eq!(note_string, js_note_2_string);
