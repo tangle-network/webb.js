@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/api-providers",
-  "version": "0.1.4-60",
+  "version": "0.1.7",
   "description": "dApp provider to work with Webb",
   "author": "Webb Developers <drew@webb.tools>",
   "main": "index.cjs",
@@ -20,6 +20,12 @@
     "@webb-tools/contracts": "0.1.10",
     "@webb-tools/interfaces": "0.1.11",
     "@webb-tools/utils": "0.1.7",
+    "@webb-tools/api": "0.1.7",
+    "@webb-tools/api-derive": "0.1.7",
+    "@webb-tools/app-util": "0.1.7",
+    "@webb-tools/sdk-core": "0.1.7",
+    "@webb-tools/types": "0.1.7",
+    "@webb-tools/wasm-utils": "0.1.7",
     "bignumber.js": "^9.0.0",
     "snarkjs": "0.4.16"
   },
