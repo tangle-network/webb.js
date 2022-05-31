@@ -1,5 +1,9 @@
-// Copyright 2022 @webb-tools/
+// Copyright (C) 2020-2022 Acala Foundation.
 // SPDX-License-Identifier: Apache-2.0
+
+// Copyright 2022 Webb Technologies Inc.
+// SPDX-License-Identifier: Apache-2.0
+// This file has been modified by Webb Technologies Inc.
 
 import { ApiPromise, ApiRx } from '@polkadot/api';
 import { U32 } from '@polkadot/types';

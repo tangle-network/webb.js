@@ -30,7 +30,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'prettier/prettier': "error",
     'header/header': [2, 'line', [
-      {pattern: ' Copyright 2022 @webb-tools/'},
+      {pattern: ' Copyright 2022 Webb Technologies Inc.'},
       ' SPDX-License-Identifier: Apache-2.0'
     ], 2],
     // disable some rules brought in by polkadot/dev
