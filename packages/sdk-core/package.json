@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/sdk-core",
-  "version": "0.1.4-60",
+  "version": "0.1.6",
   "description": "the core of webb tools sdk",
   "author": "Webb Developers <drew@webb.tools>",
   "license": "Apache-2.0",
