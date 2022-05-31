@@ -137,9 +137,9 @@ async function createVAnchorWithDeposit(
     relayer: address,
     recipient: address,
     fee,
-    ext_amount: extAmount,
-    encrypted_output1: comEnc1,
-    encrypted_output2: comEnc2
+    extAmount: extAmount,
+    encryptedOutput1: u8aToHex(comEnc1),
+    encryptedOutput2: u8aToHex(comEnc2)
   };
 
   let vanchorProofData = {
@@ -152,8 +152,6 @@ async function createVAnchorWithDeposit(
   };
   const leafsCount = await apiPromise.derive.merkleTreeBn254.getLeafCountForTree(Number(treeId));
   const indexBeforeInsetion = Math.max(leafsCount - 1, 0);
-
-  console.log([treeId, vanchorProofData, extData]);
 
   await polkadotTx(apiPromise!, {
     section: 'vAnchorBn254',
@@ -193,7 +191,7 @@ async function getleafIndex(
   return indexBeforeInsertion + shiftedIndex;
 }
 
-describe.only('VAnchor tests', function() {
+describe('VAnchor tests', function() {
   this.timeout(120_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
@@ -273,9 +271,9 @@ describe.only('VAnchor tests', function() {
       relayer: address,
       recipient: address,
       fee,
-      ext_amount: extAmount,
-      encrypted_output1: comEnc1,
-      encrypted_output2: comEnc2
+      extAmount: extAmount,
+      encryptedOutput1: u8aToHex(comEnc1),
+      encryptedOutput2: u8aToHex(comEnc2)
     };
 
     let vanchorProofData = {
@@ -287,8 +285,6 @@ describe.only('VAnchor tests', function() {
       extDataHash: data.extDataHash
     };
     try {
-
-
       await polkadotTx(apiPromise!, {
         section: 'vAnchorBn254',
         method: 'transact'
@@ -355,9 +351,9 @@ describe.only('VAnchor tests', function() {
       relayer: address,
       recipient: address,
       fee,
-      ext_amount: extAmount,
-      encrypted_output1: comEnc1,
-      encrypted_output2: comEnc2
+      extAmount: extAmount,
+      encryptedOutput1: u8aToHex(comEnc1),
+      encryptedOutput2: u8aToHex(comEnc2)
     };
 
     let vanchorProofData = {
