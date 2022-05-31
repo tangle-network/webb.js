@@ -302,7 +302,6 @@ describe('VAnchor tests', function() {
     const leavesMap: any = {};
 
     const [treeId, notes, pk, secret] = await createVAnchorWithDeposit(apiPromise!, alice, bob);
-    console.log('Did deposit');
     const chainId = BigInt(notes[0].targetChainId); // both two notes have the same chain id
 
     const withdrawAmount = notes.reduce((acc, note) => acc + Number(note.amount), 0);
