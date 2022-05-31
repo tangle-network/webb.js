@@ -29,6 +29,7 @@ module.exports = {
     ...base.rules,
     '@typescript-eslint/no-explicit-any': 'off',
     'prettier/prettier': "error",
+    'header/header': 0,
     // disable some rules brought in by polkadot/dev
     'no-useless-constructor': 0,
     '@typescript-eslint/no-unsafe-member-access': 0,
