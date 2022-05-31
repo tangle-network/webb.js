@@ -108,6 +108,15 @@ export class Note {
    *
    * @returns The `JsNote` struct.
    */
+  async mutateIndex (index: string) {
+    this.note.mutateIndex(index);
+  }
+
+  /**
+   * Turns a `Note` into a WebAssembly compatible `JsNote`.
+   *
+   * @returns The `JsNote` struct.
+   */
   async toDepositNote (): Promise<JsNote> {
     const wasm = await Note.wasm;
 
@@ -179,19 +188,19 @@ export class Note {
       noteBuilderInput.width(noteGenInput.width);
       noteBuilderInput.exponentiation(noteGenInput.exponentiation);
 
-      if (noteGenInput.secrets) {
+      if (noteGenInput.secrets !== undefined) {
         noteBuilderInput.setSecrets(noteGenInput.secrets);
       }
 
-      if (noteGenInput.targetIdentifyingData) {
+      if (noteGenInput.targetIdentifyingData !== undefined) {
         noteBuilderInput.targetIdentifyingData(noteGenInput.targetIdentifyingData);
       }
 
-      if (noteGenInput.sourceIdentifyingData) {
+      if (noteGenInput.sourceIdentifyingData !== undefined) {
         noteBuilderInput.sourceIdentifyingData(noteGenInput.sourceIdentifyingData);
       }
 
-      if (noteGenInput.index) {
+      if (noteGenInput.index !== undefined) {
         noteBuilderInput.index(String(noteGenInput.index));
       }
 

@@ -1,13 +1,15 @@
-use crate::types::OpStatusCode;
-use crate::VAnchorR1CSProverBn254_30_2_2_2;
+use core::fmt;
+
 use ark_bn254::Fr as Bn254Fr;
 use ark_ff::{BigInteger, PrimeField};
 use arkworks_setups::utxo::Utxo;
 use arkworks_setups::{Curve as ArkCurve, VAnchorProver};
-use core::fmt;
 use js_sys::{JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
+
+use crate::types::{Backend, Curve, OpStatusCode, WasmCurve, BE};
+use crate::{VAnchorR1CSProverBn254_30_2_16_2, VAnchorR1CSProverBn254_30_2_2_2};
 
 #[derive(Clone)]
 pub enum JsUtxoInner {
@@ -115,6 +117,65 @@ impl JsUtxo {
 }
 #[wasm_bindgen]
 impl JsUtxo {
+	#[wasm_bindgen(constructor)]
+	pub fn new(
+		curve: WasmCurve,
+		backend: BE,
+		input_size: u8,
+		anchor_size: u8,
+		amount: JsString,
+		chain_id: JsString,
+		index: Option<JsString>,
+	) -> Result<JsUtxo, JsValue> {
+		let curve: Curve = JsValue::from(curve)
+			.as_string()
+			.unwrap()
+			.parse()
+			.map_err(|_| OpStatusCode::InvalidCurve)?;
+		let backend: Backend = JsValue::from(backend)
+			.as_string()
+			.unwrap()
+			.parse()
+			.map_err(|_| OpStatusCode::InvalidBackend)?;
+		let chain_id: String = chain_id.into();
+		let chain_id = chain_id.parse().map_err(|_| OpStatusCode::InvalidChainId)?;
+		let amount: String = amount.into();
+		let amount: u128 = amount.parse().map_err(|_| OpStatusCode::InvalidAmount)?;
+		let index = match index {
+			None => None,
+			Some(index) => {
+				let index: String = index.into();
+				let index: u64 = index.parse().map_err(|_| OpStatusCode::InvalidUTXOIndex)?;
+				Some(index)
+			}
+		};
+		let mut rng = OsRng;
+		let utxo = match (curve, backend) {
+			(Curve::Bn254, Backend::Arkworks) => match (input_size, anchor_size) {
+				(2, 2) => VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
+					ArkCurve::Bn254,
+					chain_id,
+					amount,
+					index,
+					&mut rng,
+				),
+				(16, 2) => VAnchorR1CSProverBn254_30_2_16_2::create_random_utxo(
+					ArkCurve::Bn254,
+					chain_id,
+					amount,
+					index,
+					&mut rng,
+				),
+				_ => return Err(OpStatusCode::InvalidNoteProtocol.into()),
+			}
+			.map_err(|_| OpStatusCode::InvalidOutputUtxoConfig)
+			.map(JsUtxo::new_from_bn254_utxo),
+			_ => Err(OpStatusCode::InvalidNoteProtocol),
+		}?;
+
+		Ok(utxo)
+	}
+
 	#[wasm_bindgen(getter)]
 	#[wasm_bindgen(js_name = chainIdRaw)]
 	pub fn chain_id_raw(&self) -> u64 {

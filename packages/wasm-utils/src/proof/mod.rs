@@ -30,6 +30,7 @@ use crate::{
 };
 
 mod anchor;
+pub mod ext_data;
 mod mixer;
 mod test;
 #[cfg(test)]
@@ -53,6 +54,8 @@ pub struct VAnchorProof {
 	pub output_notes: Vec<JsNote>,
 	#[wasm_bindgen(skip)]
 	pub input_utxos: Vec<JsUtxo>,
+	#[wasm_bindgen(skip)]
+	pub public_amount: [u8; 32],
 }
 #[wasm_bindgen]
 impl VAnchorProof {
@@ -84,6 +87,12 @@ impl VAnchorProof {
 	#[wasm_bindgen(getter)]
 	pub fn proof(&self) -> JsString {
 		JsString::from(hex::encode(&self.proof))
+	}
+
+	#[wasm_bindgen(js_name = publicAmount)]
+	#[wasm_bindgen(getter)]
+	pub fn public_amount(&self) -> Uint8Array {
+		Uint8Array::from(self.public_amount.to_vec().as_slice())
 	}
 }
 
@@ -409,34 +418,9 @@ pub struct VAnchorProofPayload {
 	// Public amount
 	pub public_amount: i128,
 	// utxo config
-	pub output_config: [OutputUtxoConfig; 2],
-}
-#[wasm_bindgen]
-#[derive(Clone, Debug)]
-pub struct OutputUtxoConfig {
-	#[wasm_bindgen(skip)]
-	pub amount: u128,
-	#[wasm_bindgen(skip)]
-	pub index: Option<u64>,
-	#[wasm_bindgen(skip)]
-	pub chain_id: u64,
+	pub output_utxos: [JsUtxo; 2],
 }
 
-#[wasm_bindgen]
-impl OutputUtxoConfig {
-	#[wasm_bindgen(constructor)]
-	pub fn new(amount: JsString, index: Option<u64>, chain_id: u64) -> Result<OutputUtxoConfig, JsValue> {
-		let amount: String = amount.into();
-
-		let amount = amount.parse().map_err(|_| OpStatusCode::InvalidAmount)?;
-
-		Ok(OutputUtxoConfig {
-			amount,
-			index,
-			chain_id,
-		})
-	}
-}
 #[derive(Debug, Clone, Default)]
 pub struct VAnchorProofInput {
 	pub exponentiation: Option<i8>,
@@ -458,7 +442,7 @@ pub struct VAnchorProofInput {
 	// Public amount
 	pub public_amount: Option<i128>,
 	// ouput utxos
-	pub output_config: Option<[OutputUtxoConfig; 2]>,
+	pub output_utxos: Option<[JsUtxo; 2]>,
 }
 
 pub fn generic_of_jsval<T: FromWasmAbi<Abi = u32>>(js: JsValue, classname: &str) -> Result<T, JsValue> {
@@ -528,7 +512,7 @@ impl VAnchorProofInput {
 		let chain_id = self.chain_id.ok_or(OpStatusCode::InvalidChainId)?;
 		let indices = self.indices.ok_or(OpStatusCode::InvalidIndices)?;
 		let public_amount = self.public_amount.ok_or(OpStatusCode::InvalidPublicAmount)?;
-		let output_config = self.output_config.ok_or(OpStatusCode::InvalidPublicAmount)?;
+		let output_utxos = self.output_utxos.ok_or(OpStatusCode::InvalidPublicAmount)?;
 
 		let exponentiation = self.exponentiation.unwrap_or(5);
 		let width = self.width.unwrap_or(3);
@@ -579,15 +563,21 @@ impl VAnchorProofInput {
 		}
 
 		// validate amounts
-		let mut in_amount: u128 = public_amount
-			.try_into()
-			.expect("Failed to convert the public amount to u128");
-		secret.iter().for_each(|utxo| in_amount += utxo.amount_raw());
+		let mut in_amount = public_amount;
+		secret.iter().for_each(|utxo| {
+			let utxo_amount: i128 = utxo
+				.amount_raw()
+				.try_into()
+				.expect("Failed to convert utxo value to i128");
+			in_amount += utxo_amount
+		});
 		let mut out_amount = 0u128;
-		output_config
+		output_utxos
 			.iter()
-			.for_each(|output_config| out_amount += output_config.amount);
-
+			.for_each(|output_config| out_amount += output_config.amount_raw());
+		let out_amount: i128 = out_amount
+			.try_into()
+			.expect("Failed to convert accumulated in amounts  value to i128");
 		if out_amount != in_amount {
 			let message = format!(
 				"Output amount and input amount  don't match input({}) != output({})",
@@ -597,7 +587,6 @@ impl VAnchorProofInput {
 			oe.data = Some(format!("{{ inputAmount:{} ,outputAmount:{}}}", in_amount, out_amount));
 			return Err(oe);
 		}
-
 		Ok(VAnchorProofPayload {
 			exponentiation,
 			width,
@@ -611,7 +600,7 @@ impl VAnchorProofInput {
 			indices,
 			chain_id: chain_id.try_into().unwrap(),
 			public_amount,
-			output_config,
+			output_utxos,
 		})
 	}
 }
@@ -620,7 +609,7 @@ impl VAnchorProofInput {
 pub enum ProofInput {
 	Mixer(MixerProofPayload),
 	Anchor(AnchorProofPayload),
-	VAnchor(VAnchorProofPayload),
+	VAnchor(Box<VAnchorProofPayload>),
 }
 
 impl ProofInput {
@@ -652,7 +641,7 @@ impl ProofInput {
 
 	pub fn vanchor_input(&self) -> Result<VAnchorProofPayload, OperationError> {
 		match self {
-			ProofInput::VAnchor(vanchor) => Ok(vanchor.clone()),
+			ProofInput::VAnchor(vanchor) => Ok(*vanchor.clone()),
 			_ => {
 				let message = "Can't cant construct proof input for VAnchorProofInput".to_string();
 				Err(OperationError::new_with_message(
@@ -681,7 +670,7 @@ pub struct JsProofInput {
 pub enum ProofInputBuilder {
 	Mixer(MixerProofInput),
 	Anchor(AnchorProofInput),
-	VAnchor(VAnchorProofInput),
+	VAnchor(Box<VAnchorProofInput>),
 }
 impl ProofInputBuilder {
 	pub fn set_input_utxos(&mut self, utxo_list: Vec<JsUtxo>) -> Result<(), OperationError> {
@@ -694,10 +683,11 @@ impl ProofInputBuilder {
 		}
 	}
 
-	pub fn set_output_config(&mut self, output_config: [OutputUtxoConfig; 2]) -> Result<(), OperationError> {
+	/// Directly set the output Utxos in the proving payload
+	pub fn set_output_utxos(&mut self, output_utxos: [JsUtxo; 2]) -> Result<(), OperationError> {
 		match self {
 			Self::VAnchor(input) => {
-				input.output_config = Some(output_config);
+				input.output_utxos = Some(output_utxos);
 				Ok(())
 			}
 			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
@@ -1050,13 +1040,9 @@ impl JsProofInputBuilder {
 		Ok(())
 	}
 
-	#[wasm_bindgen(js_name = setVanchorOutputConfig)]
-	pub fn set_vanchor_output_config(
-		&mut self,
-		utxo1: OutputUtxoConfig,
-		utxo2: OutputUtxoConfig,
-	) -> Result<(), JsValue> {
-		self.inner.set_output_config([utxo1, utxo2])?;
+	#[wasm_bindgen(js_name = setOutputUtxos)]
+	pub fn set_output_utxos(&mut self, utxo1: JsUtxo, utxo2: JsUtxo) -> Result<(), JsValue> {
+		self.inner.set_output_utxos([utxo1, utxo2])?;
 		Ok(())
 	}
 
@@ -1221,7 +1207,7 @@ impl JsProofInputBuilder {
 			}
 			ProofInputBuilder::VAnchor(vanchor_proof_input) => {
 				let vanchor_payload = vanchor_proof_input.build()?;
-				ProofInput::VAnchor(vanchor_payload)
+				ProofInput::VAnchor(Box::new(vanchor_payload))
 			}
 		};
 		Ok(proof_input)
@@ -1411,7 +1397,7 @@ pub fn generate_proof_js(proof_input: JsProofInput) -> Result<JsProofOutput, JsV
 			})
 		}
 		ProofInput::VAnchor(vanchor_proof_input) => {
-			vanchor::create_proof(vanchor_proof_input, &mut rng).map(|v| JsProofOutput {
+			vanchor::create_proof(*vanchor_proof_input, &mut rng).map(|v| JsProofOutput {
 				inner: ProofOutput::VAnchor(v),
 			})
 		}

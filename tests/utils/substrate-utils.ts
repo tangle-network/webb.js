@@ -104,6 +104,22 @@ export async function preparePolkadotApi() {
           },
         },
         lt: {
+          getNeighborEdges: {
+            description: 'Query for the neighbor edges',
+            params: [
+              {
+                name: 'tree_id',
+                type: 'u32',
+                isOptional: false,
+              },
+              {
+                name: 'at',
+                type: 'Hash',
+                isOptional: true,
+              },
+            ],
+            type: 'Vec<PalletLinkableTreeEdgeMetadata>',
+          },
           getNeighborRoots: {
             description: 'Query for the neighbor roots',
             params: [

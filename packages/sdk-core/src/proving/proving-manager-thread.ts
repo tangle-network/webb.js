@@ -1,10 +1,10 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Leaves, NoteProtocol, OutputUtxoConfig } from '@webb-tools/wasm-utils';
+import type { Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
 
 import { ProofI } from '@webb-tools/sdk-core/proving/proving-manager.js';
-import { JsProofInput, JsProofOutput } from '@webb-tools/wasm-utils';
+import { JsProofInput, JsProofOutput, JsUtxo } from '@webb-tools/wasm-utils';
 import { JsNote } from '@webb-tools/wasm-utils/njs';
 
 import { u8aToHex } from '@polkadot/util';
@@ -85,10 +85,14 @@ export type VAnchorPMSetupInput = {
   indices: number[];
   roots: Leaves;
   chainId: string;
-  outputConfigs: [OutputUtxoConfig, OutputUtxoConfig];
+  output: [JsUtxo, JsUtxo];
+  encryptedCommitments: [Uint8Array, Uint8Array],
   publicAmount: string;
-  externalDataHash: string;
   provingKey: Uint8Array;
+  relayer: Uint8Array;
+  recipient: Uint8Array;
+  extAmount: string;
+  fee: string;
 };
 
 interface ProvingManagerPayload extends Record<NoteProtocol, any> {
@@ -252,10 +256,21 @@ export class ProvingManagerWrapper {
       pm.setRoots(input.roots);
       pm.chain_id(input.chainId);
       pm.public_amount(input.publicAmount);
-      pm.setVanchorOutputConfig(...input.outputConfigs);
-      pm.setExtDatahash(input.externalDataHash);
-      // leaves insertion
+      pm.setOutputUtxos(...input.output);
       const wasm = await this.wasmBlob;
+      const extData = new wasm.ExtData(
+        input.recipient,
+        input.relayer,
+        input.extAmount,
+        input.fee,
+        input.encryptedCommitments[0],
+        input.encryptedCommitments[1]
+      );
+      const dataHash = extData.get_encode();
+      const dataHashhex = u8aToHex(dataHash).replace('0x', '');
+
+      pm.setExtDatahash(dataHashhex);
+
       const leavesMap = new wasm.LeavesMapInput();
 
       for (const key of Object.keys(input.leavesMap)) {
@@ -268,9 +283,11 @@ export class ProvingManagerWrapper {
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.vanchorProof;
       const anchorProof: ProofI<'vanchor'> = {
+        extDataHash: dataHash,
         inputUtxos: proof.inputUtxos,
         outputNotes: proof.outputNotes,
         proof: proof.proof,
+        publicAmount: proof.publicAmount,
         publicInputs: proof.publicInputs
       };
 

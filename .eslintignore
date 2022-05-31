@@ -7,3 +7,4 @@ packages/types/src/metadata/static-latest.ts
 /tests/*
 babel.config.js
 /doc/*
+node_modules/*

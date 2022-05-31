@@ -2,6 +2,7 @@ use core::convert::TryInto;
 
 use ark_bn254::Fr as Bn254Fr;
 use ark_crypto_primitives::Error;
+use ark_ff::{BigInteger, PrimeField};
 use arkworks_setups::utxo::Utxo;
 use arkworks_setups::{Curve as ArkCurve, VAnchorProver};
 use rand::rngs::OsRng;
@@ -52,6 +53,7 @@ fn get_output_notes(
 			OperationError::new_with_message(OpStatusCode::Unknown, "Failed to generate the notes".to_string())
 		})
 }
+
 pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -> Result<VAnchorProof, OperationError> {
 	let VAnchorProofPayload {
 		public_amount,
@@ -65,10 +67,14 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		roots,
 		pk,
 		chain_id,
-		output_config,
+		output_utxos,
 		ext_data_hash,
 	} = vanchor_proof_input.clone();
-
+	let public_amount_bytes = Bn254Fr::from(public_amount)
+		.into_repr()
+		.to_bytes_le()
+		.try_into()
+		.expect("Failed to wrap public amount to bytes");
 	// Insure UTXO set has the required/supported input count
 	let in_utxos: Vec<JsUtxo> = if SUPPORTED_INPUT_COUNT.contains(&secret.len()) {
 		secret
@@ -108,31 +114,15 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		));
 	};
 	// Initialize the output notes vec
-	let mut output_notes = vec![];
+	let output_notes = get_output_notes(&vanchor_proof_input, output_utxos.clone())?.to_vec();
 	let proof = match (backend, curve, roots.len()) {
 		(Backend::Arkworks, Curve::Bn254, 2) => {
-			let utxo_o_1 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
-				ArkCurve::Bn254,
-				output_config[0].chain_id,
-				output_config[0].amount,
-				None,
-				rng,
-			)
-			.unwrap();
-			let utxo_o_2 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
-				ArkCurve::Bn254,
-				output_config[1].chain_id,
-				output_config[1].amount,
-				None,
-				rng,
-			)
-			.unwrap();
-			let utxos_out = [utxo_o_1.clone(), utxo_o_2.clone()];
-			output_notes = get_output_notes(&vanchor_proof_input, [
-				JsUtxo::new_from_bn254_utxo(utxo_o_1),
-				JsUtxo::new_from_bn254_utxo(utxo_o_2),
-			])?
-			.to_vec();
+			let utxos_out = output_utxos
+				.iter()
+				.map(|js_utx| js_utx.get_bn254_utxo())
+				.collect::<Result<Vec<_>, OpStatusCode>>()?
+				.try_into()
+				.map_err(|_| OpStatusCode::InvalidProofParameters)?;
 			match (exponentiation, width, in_utxos.len()) {
 				(5, 5, 2) => {
 					let utxos_in: [Utxo<Bn254Fr>; 2] = [in_utxos[0].get_bn254_utxo()?, in_utxos[1].get_bn254_utxo()?];
@@ -211,5 +201,6 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		public_inputs: proof.public_inputs_raw,
 		output_notes: output_notes.to_vec(),
 		input_utxos: in_utxos,
+		public_amount: public_amount_bytes,
 	})
 }
