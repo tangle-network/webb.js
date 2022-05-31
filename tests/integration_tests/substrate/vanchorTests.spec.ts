@@ -3,7 +3,7 @@ import { ApiPromise } from '@polkadot/api';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { currencyToUnitI128, KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
-import { ProvingManagerSetupInput, ProvingManagerWrapper ,Note } from '@webb-tools/sdk-core/index.js';
+import { Note, ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/index.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { polkadotTx } from '@webb-tools/test-utils/index.js';
 import path from 'path';
@@ -38,26 +38,24 @@ function getKeyring() {
 }
 
 async function generateVAnchorNote(amount: number, chainId: number, outputChainId: number, index?: number) {
+  const note = await Note.generateNote({
+    amount: String(amount),
+    backend: 'Arkworks',
+    curve: 'Bn254',
+    denomination: String(18),
+    exponentiation: String(5),
+    hashFunction: 'Poseidon',
+    index,
+    protocol: 'vanchor',
+    sourceChain: String(chainId),
+    sourceIdentifyingData: '1',
+    targetChain: String(outputChainId),
+    targetIdentifyingData: '1',
+    tokenSymbol: 'WEBB',
+    version: 'v2',
+    width: String(5)
 
-const note = await  Note.generateNote({
-    protocol:'vanchor',
-    version:'v2',
-    backend:'Arkworks',
-    hashFunction:'Poseidon',
-    curve:'Bn254',
-    width:String(5),
-    exponentiation:String(5),
-    denomination:String(18),
-    amount:String(amount),
-    tokenSymbol:'WEBB',
-    targetChain:String(outputChainId),
-    sourceChain:String(chainId),
-    sourceIdentifyingData:'',
-    targetIdentifyingData:'',
-  })
-  if (index !== undefined) {
-   await note.mutateIndex(String(index))
-  }
+  });
 
   return note;
 }
@@ -76,7 +74,7 @@ async function createVAnchorWithDeposit(
   apiPromise: ApiPromise,
   sudo: KeyringPair,
   depositer: KeyringPair
-): Promise<[number, [JsNote, JsNote], Uint8Array ,Uint8Array]> {
+): Promise<[number, [JsNote, JsNote], Uint8Array, Uint8Array]> {
   const treeId = await createVAnchor(apiPromise, sudo);
   const outputChainId = BigInt(chainId);
   const secret = randomAsU8a();
@@ -117,7 +115,6 @@ async function createVAnchorWithDeposit(
   const decodedAddress = decodeAddress(address);
   const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
   const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
-
 
 
   const setup: ProvingManagerSetupInput<'vanchor'> = {
@@ -171,7 +168,7 @@ async function createVAnchorWithDeposit(
   const note2WithIndex = data.outputNotes[1];
   note2WithIndex.mutateIndex(String(indexOfLeaf2));
 
-  return [treeId, [note1WithIndex, note2WithIndex], pk,secret];
+  return [treeId, [note1WithIndex, note2WithIndex], pk, secret];
 }
 
 async function getleafIndex(
@@ -308,7 +305,7 @@ describe.only('VAnchor tests', function() {
     const fee = 0;
     const leavesMap: any = {};
 
-    const [treeId, notes, pk ,secret] = await createVAnchorWithDeposit(apiPromise!, alice, bob);
+    const [treeId, notes, pk, secret] = await createVAnchorWithDeposit(apiPromise!, alice, bob);
     console.log('Did deposit');
     const chainId = BigInt(notes[0].targetChainId); // both two notes have the same chain id
 

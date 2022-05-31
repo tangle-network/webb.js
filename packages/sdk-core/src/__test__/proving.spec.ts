@@ -4,12 +4,14 @@
 /* eslint-disable camelcase */
 
 // eslint-disable-next-line camelcase
-import { Note, ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/index.js';
 import { JsUtxo, MTBn254X5, setupKeys, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { expect } from 'chai';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
+
+import { Note } from '../note.js';
+import { ProvingManagerSetupInput, ProvingManagerWrapper } from '../proving/index.js';
 
 async function generateVAnchorNote (amount: number, chainId: number, outputChainId: number, index?: number) {
   const note = await Note.generateNote({
@@ -19,19 +21,17 @@ async function generateVAnchorNote (amount: number, chainId: number, outputChain
     denomination: String(18),
     exponentiation: String(5),
     hashFunction: 'Poseidon',
+    index,
     protocol: 'vanchor',
     sourceChain: String(chainId),
-    sourceIdentifyingData: '',
+    sourceIdentifyingData: '1',
     targetChain: String(outputChainId),
-    targetIdentifyingData: '',
+    targetIdentifyingData: '1',
     tokenSymbol: 'WEBB',
     version: 'v2',
     width: String(5)
-  });
 
-  if (index !== undefined) {
-    await note.mutateIndex(String(index));
-  }
+  });
 
   return note;
 }
@@ -39,7 +39,7 @@ async function generateVAnchorNote (amount: number, chainId: number, outputChain
 const vanchorBn2542_2_2 = setupKeys('vanchor', 'Bn254', 2, 2, 2);
 const vanchorBn2542_16_2 = setupKeys('vanchor', 'Bn254', 2, 16, 2);
 
-describe.only('Proving manager VAnchor', function () {
+describe('Proving manager VAnchor', function () {
   this.timeout(120_1000);
 
   it('should  prove using WASM API for VAnchor with one input note and one index', async () => {
