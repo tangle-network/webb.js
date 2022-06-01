@@ -1,3 +1,6 @@
+use ark_bn254::Fr as Bn254Fr;
+use ark_ff::{BigInteger, PrimeField};
+use ark_std::UniformRand;
 use arkworks_setups::{Curve as ArkCurve, VAnchorProver};
 use rand::rngs::OsRng;
 
@@ -36,22 +39,26 @@ pub fn get_leaf_with_private_raw(
 	curve: Curve,
 	width: usize,
 	exponentiation: i8,
-	private_key: &[u8],
-	blinding: &[u8],
+	private_key: Option<Vec<u8>>,
+	blinding: Option<Vec<u8>>,
 	chain_id: u64,
 	amount: u128,
 	index: Option<u64>,
 ) -> Result<JsUtxo, OperationError> {
 	let utxo: JsUtxo = match (curve, exponentiation, width) {
-		(Curve::Bn254, 5, 5) => VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
-			ArkCurve::Bn254,
-			chain_id,
-			amount,
-			index,
-			private_key.to_vec(),
-			blinding.to_vec(),
-		)
-		.map(JsUtxo::new_from_bn254_utxo),
+		(Curve::Bn254, 5, 5) => {
+			let private_key = private_key.unwrap_or(Bn254Fr::rand(&mut OsRng).into_repr().to_bytes_le());
+			let blinding = blinding.unwrap_or(Bn254Fr::rand(&mut OsRng).into_repr().to_bytes_le());
+			VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
+				ArkCurve::Bn254,
+				chain_id,
+				amount,
+				index,
+				private_key.to_vec(),
+				blinding.to_vec(),
+			)
+			.map(JsUtxo::new_from_bn254_utxo)
+		}
 		_ => {
 			let message = format!(
 				"No VAnchor leaf setup for curve {}, exponentiation {}, and width {}",

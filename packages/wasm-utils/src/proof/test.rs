@@ -197,9 +197,22 @@ mod test {
 			JsString::from("10"),
 			JsString::from("0"),
 			None,
+			None,
+			None,
 		)
 		.unwrap();
-		let output_2 = JsUtxo::new(curve, backend, 2, 2, JsString::from("10"), JsString::from("3"), None).unwrap();
+		let output_2 = JsUtxo::new(
+			curve,
+			backend,
+			2,
+			2,
+			JsString::from("10"),
+			JsString::from("3"),
+			None,
+			None,
+			NOne,
+		)
+		.unwrap();
 
 		proof_input_builder.set_notes(notes).unwrap();
 		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
@@ -277,7 +290,18 @@ mod test {
 			None,
 		)
 		.unwrap();
-		let output_2 = JsUtxo::new(curve, backend, 2, 2, JsString::from("10"), JsString::from("3"), None).unwrap();
+		let output_2 = JsUtxo::new(
+			curve,
+			backend,
+			2,
+			2,
+			JsString::from("10"),
+			JsString::from("3"),
+			None,
+			None,
+			None,
+		)
+		.unwrap();
 
 		proof_input_builder.set_notes(notes).unwrap();
 		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
@@ -346,7 +370,18 @@ mod test {
 			None,
 		)
 		.unwrap();
-		let output_2 = JsUtxo::new(curve, backend, 2, 2, JsString::from("10"), JsString::from("3"), None).unwrap();
+		let output_2 = JsUtxo::new(
+			curve,
+			backend,
+			2,
+			2,
+			JsString::from("10"),
+			JsString::from("3"),
+			None,
+			None,
+			None,
+		)
+		.unwrap();
 
 		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
 
@@ -417,7 +452,18 @@ mod test {
 			None,
 		)
 		.unwrap();
-		let output_2 = JsUtxo::new(curve, backend, 2, 2, JsString::from("20"), JsString::from("3"), None).unwrap();
+		let output_2 = JsUtxo::new(
+			curve,
+			backend,
+			2,
+			2,
+			JsString::from("20"),
+			JsString::from("3"),
+			None,
+			None,
+			None,
+		)
+		.unwrap();
 
 		proof_input_builder.set_notes(notes).unwrap();
 		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
@@ -481,9 +527,22 @@ mod test {
 			JsString::from("20"),
 			JsString::from("0"),
 			None,
+			None,
+			None,
 		)
 		.unwrap();
-		let output_2 = JsUtxo::new(curve, backend, 2, 2, JsString::from("20"), JsString::from("3"), None).unwrap();
+		let output_2 = JsUtxo::new(
+			curve,
+			backend,
+			2,
+			2,
+			JsString::from("20"),
+			JsString::from("3"),
+			None,
+			None,
+			None,
+		)
+		.unwrap();
 
 		proof_input_builder.set_notes(notes).unwrap();
 		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
@@ -560,7 +619,18 @@ mod test {
 			None,
 		)
 		.unwrap();
-		let output_2 = JsUtxo::new(curve, backend, 2, 2, JsString::from("20"), JsString::from("3"), None).unwrap();
+		let output_2 = JsUtxo::new(
+			curve,
+			backend,
+			2,
+			2,
+			JsString::from("20"),
+			JsString::from("3"),
+			None,
+			None,
+			None,
+		)
+		.unwrap();
 
 		proof_input_builder.set_notes(notes).unwrap();
 		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();

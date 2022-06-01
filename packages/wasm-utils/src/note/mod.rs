@@ -226,8 +226,8 @@ impl JsNote {
 							curve,
 							width,
 							exponentiation,
-							secret_key.as_slice(),
-							blinding.as_slice(),
+							Some(secret_key.clone()),
+							Some(blinding.clone()),
 							chain_id,
 							amount,
 							index,
@@ -435,6 +435,10 @@ pub struct JsNoteBuilder {
 	// Utxo index
 	#[wasm_bindgen(skip)]
 	pub index: Option<u64>,
+	#[wasm_bindgen(skip)]
+	pub private_key: Option<Vec<u8>>,
+	#[wasm_bindgen(skip)]
+	pub blinding: Option<Vec<u8>>,
 }
 
 #[allow(clippy::unused_unit)]
@@ -558,6 +562,18 @@ impl JsNoteBuilder {
 		Ok(())
 	}
 
+	#[wasm_bindgen(js_name = setPrivateKey)]
+	pub fn set_private_key(&mut self, private_key: Uint8Array) -> Result<(), JsValue> {
+		self.private_key = Some(private_key.to_vec());
+		Ok(())
+	}
+
+	#[wasm_bindgen(js_name = setBlinding)]
+	pub fn set_blinding(&mut self, blinding: Uint8Array) -> Result<(), JsValue> {
+		self.blinding = Some(blinding.to_vec());
+		Ok(())
+	}
+
 	pub fn build(self) -> Result<JsNote, JsValue> {
 		// Authority
 		let version = self.version.ok_or(OpStatusCode::InvalidNoteVersion)?;
@@ -611,14 +627,17 @@ impl JsNoteBuilder {
 					secrets.to_vec()
 				}
 				NoteProtocol::VAnchor => {
-					let utxo = vanchor::generate_secrets(
-						amount.unwrap_or_else(|| "0".to_string()).parse().unwrap(),
-						exponentiation.unwrap_or(5),
-						width.unwrap_or(5),
+					let blinding = self.blinding;
+					let private_key = self.private_key;
+					let utxo = vanchor::get_leaf_with_private_raw(
 						curve.unwrap_or(Curve::Bn254),
+						width.unwrap_or(5),
+						exponentiation.unwrap_or(5),
+						private_key,
+						blinding,
 						chain_id,
+						amount.unwrap_or_else(|| "0".to_string()).parse().unwrap(),
 						index,
-						&mut OsRng,
 					)?;
 
 					let chain_id = utxo.get_chain_id_bytes();
