@@ -40,10 +40,11 @@
     "doc": "npx typedoc --name \"Webb Tools API\" --includeVersion --options ./typedoc.json"
   },
   "devDependencies": {
-    "@babel/core": "^7.17.5",
-    "@babel/plugin-syntax-import-assertions": "^7.16.7",
-    "@babel/register": "^7.17.0",
-    "@babel/runtime": "^7.17.2",
+    "@babel/core": "7.18.2",
+    "@babel/cli": "7.17.10",
+    "@babel/plugin-syntax-import-assertions": "7.17.12",
+    "@babel/register": "7.17.7",
+    "@babel/runtime": "7.18.3",
     "@ethersproject/experimental": "^5.5.0",
     "@open-web3/util": "^1.0.1",
     "@openzeppelin/contracts": "^4.2.0",

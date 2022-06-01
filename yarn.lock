@@ -9,7 +9,7 @@
   dependencies:
     "@jridgewell/trace-mapping" "^0.3.0"
 
-"@babel/cli@^7.17.10":
+"@babel/cli@7.17.10", "@babel/cli@^7.17.10":
   version "7.17.10"
   resolved "https://registry.yarnpkg.com/@babel/cli/-/cli-7.17.10.tgz#5ea0bf6298bb78f3b59c7c06954f9bd1c79d5943"
   integrity sha512-OygVO1M2J4yPMNOW9pb+I6kFGpQK77HmG44Oz3hg8xQIl5L/2zq+ZohwAdSaqYgVwM0SfmPHZHphH4wR8qzVYw==
@@ -42,28 +42,7 @@
   resolved "https://registry.yarnpkg.com/@babel/compat-data/-/compat-data-7.17.10.tgz#711dc726a492dfc8be8220028b1b92482362baab"
   integrity sha512-GZt/TCsG70Ms19gfZO1tM4CVnXsPgEPBCpJu+Qz3L0LUDsY5nZqFZglIoPC1kIYOtNBZlrnFT+klg12vFGZXrw==
 
-"@babel/core@^7.1.0", "@babel/core@^7.12.3", "@babel/core@^7.17.5", "@babel/core@^7.7.5":
-  version "7.17.9"
-  resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.17.9.tgz#6bae81a06d95f4d0dec5bb9d74bbc1f58babdcfe"
-  integrity sha512-5ug+SfZCpDAkVp9SFIZAzlW18rlzsOcJGaetCjkySnrXXDUw9AR8cDUm1iByTmdWM6yxX6/zycaV76w3YTF2gw==
-  dependencies:
-    "@ampproject/remapping" "^2.1.0"
-    "@babel/code-frame" "^7.16.7"
-    "@babel/generator" "^7.17.9"
-    "@babel/helper-compilation-targets" "^7.17.7"
-    "@babel/helper-module-transforms" "^7.17.7"
-    "@babel/helpers" "^7.17.9"
-    "@babel/parser" "^7.17.9"
-    "@babel/template" "^7.16.7"
-    "@babel/traverse" "^7.17.9"
-    "@babel/types" "^7.17.0"
-    convert-source-map "^1.7.0"
-    debug "^4.1.0"
-    gensync "^1.0.0-beta.2"
-    json5 "^2.2.1"
-    semver "^6.3.0"
-
-"@babel/core@^7.11.6", "@babel/core@^7.18.2":
+"@babel/core@7.18.2", "@babel/core@^7.11.6", "@babel/core@^7.18.2":
   version "7.18.2"
   resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.18.2.tgz#87b2fcd7cce9becaa7f5acebdc4f09f3dd19d876"
   integrity sha512-A8pri1YJiC5UnkdrWcmfZTJTV85b4UXTAfImGmCfYmax4TR9Cw8sDS0MOk++Gp2mE/BefVJ5nwy5yzqNJbP/DQ==
@@ -78,6 +57,27 @@
     "@babel/template" "^7.16.7"
     "@babel/traverse" "^7.18.2"
     "@babel/types" "^7.18.2"
+    convert-source-map "^1.7.0"
+    debug "^4.1.0"
+    gensync "^1.0.0-beta.2"
+    json5 "^2.2.1"
+    semver "^6.3.0"
+
+"@babel/core@^7.1.0", "@babel/core@^7.12.3", "@babel/core@^7.7.5":
+  version "7.17.9"
+  resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.17.9.tgz#6bae81a06d95f4d0dec5bb9d74bbc1f58babdcfe"
+  integrity sha512-5ug+SfZCpDAkVp9SFIZAzlW18rlzsOcJGaetCjkySnrXXDUw9AR8cDUm1iByTmdWM6yxX6/zycaV76w3YTF2gw==
+  dependencies:
+    "@ampproject/remapping" "^2.1.0"
+    "@babel/code-frame" "^7.16.7"
+    "@babel/generator" "^7.17.9"
+    "@babel/helper-compilation-targets" "^7.17.7"
+    "@babel/helper-module-transforms" "^7.17.7"
+    "@babel/helpers" "^7.17.9"
+    "@babel/parser" "^7.17.9"
+    "@babel/template" "^7.16.7"
+    "@babel/traverse" "^7.17.9"
+    "@babel/types" "^7.17.0"
     convert-source-map "^1.7.0"
     debug "^4.1.0"
     gensync "^1.0.0-beta.2"
@@ -583,14 +583,7 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.8.3"
 
-"@babel/plugin-syntax-import-assertions@^7.16.7":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-import-assertions/-/plugin-syntax-import-assertions-7.16.7.tgz#78288980e36f1614a4024d45937f4c8ca7185ac3"
-  integrity sha512-DoM/wsaMaDXpM2fa+QkZeqqfYs340WTY+boLRiZ7ckqt3PAFt1CdGmMXVniFCcN8RuStim2Z4Co3bIKdWjTXIQ==
-  dependencies:
-    "@babel/helper-plugin-utils" "^7.16.7"
-
-"@babel/plugin-syntax-import-assertions@^7.17.12":
+"@babel/plugin-syntax-import-assertions@7.17.12", "@babel/plugin-syntax-import-assertions@^7.17.12":
   version "7.17.12"
   resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-import-assertions/-/plugin-syntax-import-assertions-7.17.12.tgz#58096a92b11b2e4e54b24c6a0cc0e5e607abcedd"
   integrity sha512-n/loy2zkq9ZEM8tEOwON9wTQSTNDTDEz6NujPtJGLU7qObzT1N4c4YZZf8E6ATB2AjNQg/Ib2AIpO03EZaCehw==
@@ -1137,7 +1130,7 @@
     "@babel/helper-validator-option" "^7.16.7"
     "@babel/plugin-transform-typescript" "^7.17.12"
 
-"@babel/register@^7.17.0", "@babel/register@^7.17.7":
+"@babel/register@7.17.7", "@babel/register@^7.17.7":
   version "7.17.7"
   resolved "https://registry.yarnpkg.com/@babel/register/-/register-7.17.7.tgz#5eef3e0f4afc07e25e847720e7b987ae33f08d0b"
   integrity sha512-fg56SwvXRifootQEDQAu1mKdjh5uthPzdO0N6t358FktfL4XjAVXuH58ULoiW8mesxiOgNIrxiImqEwv0+hRRA==
@@ -1148,17 +1141,17 @@
     pirates "^4.0.5"
     source-map-support "^0.5.16"
 
-"@babel/runtime@^7.10.2", "@babel/runtime@^7.17.2", "@babel/runtime@^7.17.9", "@babel/runtime@^7.5.5", "@babel/runtime@^7.8.4":
-  version "7.17.9"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.17.9.tgz#d19fbf802d01a8cb6cf053a64e472d42c434ba72"
-  integrity sha512-lSiBBvodq29uShpWGNbgFdKYNiFDo5/HIYsaCEY9ff4sb10x9jizo2+pRrSyF4jKZCXqgzuqBOQKbUm90gQwJg==
-  dependencies:
-    regenerator-runtime "^0.13.4"
-
-"@babel/runtime@^7.18.3":
+"@babel/runtime@7.18.3", "@babel/runtime@^7.18.3":
   version "7.18.3"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.18.3.tgz#c7b654b57f6f63cf7f8b418ac9ca04408c4579f4"
   integrity sha512-38Y8f7YUhce/K7RMwTp7m0uCumpv9hZkitCbBClqQIow1qSbCvGkcegKOXpEWCQLfWmevgRiWokZ1GkpfhbZug==
+  dependencies:
+    regenerator-runtime "^0.13.4"
+
+"@babel/runtime@^7.10.2", "@babel/runtime@^7.17.9", "@babel/runtime@^7.5.5", "@babel/runtime@^7.8.4":
+  version "7.17.9"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.17.9.tgz#d19fbf802d01a8cb6cf053a64e472d42c434ba72"
+  integrity sha512-lSiBBvodq29uShpWGNbgFdKYNiFDo5/HIYsaCEY9ff4sb10x9jizo2+pRrSyF4jKZCXqgzuqBOQKbUm90gQwJg==
   dependencies:
     regenerator-runtime "^0.13.4"
 
