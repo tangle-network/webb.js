@@ -1,4 +1,4 @@
-import { Note, NoteGenInput, ProvingManager } from '@webb-tools/sdk-core';
+import { Note, NoteGenInput, ArkworksProvingManager } from '@webb-tools/sdk-core';
 import { fetchRPCTreeLeaves, polkadotTx, preparePolkadotApi, transferBalance } from '../utils.js';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
@@ -52,7 +52,7 @@ async function mixerBn254() {
   const leaves = await fetchRPCTreeLeaves(apiPromise, 0);
   console.log(`[ mixerBn254 ]  leaves ${leaves.length}`);
   // Proving Manager
-  const pm = new ProvingManager(undefined);
+  const pm = new ArkworksProvingManager(undefined);
   const pkPath = path.join(
     // tests path
     process.cwd(),

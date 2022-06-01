@@ -3,36 +3,16 @@
 
 import type { JsNote, JsUtxo, NoteProtocol } from '@webb-tools/wasm-utils';
 
-import { ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
+import { WasmProvingManagerWrapper, ProvingManagerSetupInput } from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
+import { AnchorProof, MixerProof, WasmVAnchorProof } from './types';
 
-type VAnchorProof = {
-  readonly inputUtxos: Array<JsUtxo>;
-  readonly outputNotes: Array<JsNote>;
-  readonly proof: string;
-  readonly publicInputs: Array<string>;
-  readonly publicAmount: Uint8Array
-  readonly extDataHash: Uint8Array
-};
-type AnchorProof = {
-  readonly nullifierHash: string;
-  readonly proof: string;
-  readonly root: string;
-  readonly roots: Array<string>;
-};
-
-type MixerProof = {
-  readonly nullifierHash: string;
-  readonly proof: string;
-  readonly root: string;
-};
-
-export type ProofI<T extends NoteProtocol> = T extends 'vanchor'
-  ? VAnchorProof
+export type WasmProofInterface<T extends NoteProtocol> = T extends 'vanchor'
+  ? WasmVAnchorProof
   : T extends 'mixer'
     ? MixerProof
     : AnchorProof;
 
-export class ProvingManager {
+export class ArkworksProvingManager {
   constructor (
     private readonly worker: Worker | null | undefined // Optional WebWorker
   ) {}
@@ -48,15 +28,15 @@ export class ProvingManager {
     const worker = this.worker;
 
     if (worker) {
-      return ProvingManager.proveWithWorker([protocol, input], worker);
+      return ArkworksProvingManager.proveWithWorker([protocol, input], worker);
     }
 
-    return ProvingManager.proveWithoutWorker(protocol, input);
+    return ArkworksProvingManager.proveWithoutWorker(protocol, input);
   }
 
   private static proveWithoutWorker<T extends NoteProtocol> (protocol: T, input: ProvingManagerSetupInput<T>) {
     // If the worker CTX is direct-call
-    const pm = new ProvingManagerWrapper('direct-call');
+    const pm = new WasmProvingManagerWrapper('direct-call');
 
     return pm.prove(protocol, input);
   }
@@ -64,11 +44,11 @@ export class ProvingManager {
   private static proveWithWorker<T extends NoteProtocol> (
     input: [T, ProvingManagerSetupInput<T>],
     worker: Worker
-  ): Promise<ProofI<T>> {
-    return new Promise<ProofI<T>>((resolve, reject) => {
+  ): Promise<WasmProofInterface<T>> {
+    return new Promise<WasmProofInterface<T>>((resolve, reject) => {
       try {
         worker.addEventListener('message', (e) => {
-          const payload = e.data.data as ProofI<T>;
+          const payload = e.data.data as WasmProofInterface<T>;
 
           resolve(payload);
         });

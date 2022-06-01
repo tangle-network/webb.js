@@ -3,105 +3,16 @@
 
 import type { Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
 
-import { ProofI } from '@webb-tools/sdk-core/proving/proving-manager.js';
+import { WasmProofInterface } from '@webb-tools/sdk-core/proving/proving-manager.js';
 import { JsProofInput, JsProofOutput, JsUtxo } from '@webb-tools/wasm-utils';
 import { JsNote } from '@webb-tools/wasm-utils/njs';
 
 import { u8aToHex } from '@polkadot/util';
 
 import { Note } from '../note.js';
+import { AnchorPMSetupInput, MixerPMSetupInput, PMEvents, ProvingManagerSetupInput } from './types.js';
 
-/**
- *
- * Proving Manager setup input for the proving manager over sdk-core
- * @param note - Serialized note representation
- * @param relayer - Relayer account id converted to hex string (Without a `0x` prefix)
- * @param recipient - Recipient account id converted to hex string (Without a `0x` prefix)
- * @param leaves - Leaves for generating the merkle path
- * @param leafIndex - The index of  the Leaf commitment
- * @param fee - The fee for the transaction
- * @param refund - The refund for the transaction
- * @param provingKey - Proving key bytes to pass in to the Zero-knowledge proof generation
- **/
-export type MixerPMSetupInput = {
-  note: string;
-  relayer: string;
-  recipient: string;
-  leaves: Leaves;
-  leafIndex: number;
-  fee: number;
-  refund: number;
-  provingKey: Uint8Array;
-};
-
-export type ProvingManagerSetupInput<T extends NoteProtocol> = ProvingManagerPayload[T];
-
-type PMEvents<T extends NoteProtocol = 'mixer'> = {
-  proof: [T, ProvingManagerSetupInput<T>];
-  destroy: undefined;
-};
-
-/**
- * Proving Manager setup input for anchor API proving manager over sdk-core
- * @param note - Serialized note representation
- * @param relayer - Relayer account id converted to hex string (Without a `0x` prefix)
- * @param recipient - Recipient account id converted to hex string (Without a `0x` prefix)
- * @param leaves - Leaves for generating the merkle path
- * @param leafIndex - The index of  the Leaf commitment
- * @param fee - The fee for the transaction
- * @param refund - The refund for the transaction
- * @param provingKey - Proving key bytes to pass in to the Zero-knowledge proof generation
- * @param roots - Roots for anchor API
- * @param refreshCommitment - Refresh commitment in hex representation ( without prefix `0x` ) Required for anchor, ignored for the mixer
- * */
-export type AnchorPMSetupInput = {
-  note: string;
-  relayer: string;
-  recipient: string;
-  leaves: Leaves;
-  leafIndex: number;
-  fee: number;
-  refund: number;
-  provingKey: Uint8Array;
-  roots: Leaves;
-  refreshCommitment: string;
-};
-
-/**
- * Proving Manager setup input for anchor API proving manager over sdk-core
- * @param inputNotes - VAnchor notes representing input UTXOs for proving
- * @param leavesMap - Leaves for generating the merkle path, it's indexed by the chain_id and for each entry the values are list of leaves for this chain
- * @param indices -  Leaf indices for input UTXOs leaves
- * @param roots - Roots set for every anchor
- * @param chainId - The chain id where the input UTXOs being spent
- * @param outputConfigs - Configuration to shape the output UTXOs
- * @param publicAmount - Amount the is used to tell the transaction type : Sum. of inputs + public amount = Sum. of outputs
- * @param externalDataHash - The hash of external data which contains other values (EX fees,relayer ,..etc)
- * @param provingKey - Proving key bytes to pass in to the Zero-knowledge proof generation
- * */
-export type VAnchorPMSetupInput = {
-  inputNotes: string[];
-  leavesMap: Record<string, Leaves>;
-  indices: number[];
-  roots: Leaves;
-  chainId: string;
-  output: [JsUtxo, JsUtxo];
-  encryptedCommitments: [Uint8Array, Uint8Array],
-  publicAmount: string;
-  provingKey: Uint8Array;
-  relayer: Uint8Array;
-  recipient: Uint8Array;
-  extAmount: string;
-  fee: string;
-};
-
-interface ProvingManagerPayload extends Record<NoteProtocol, any> {
-  mixer: MixerPMSetupInput;
-  anchor: AnchorPMSetupInput;
-  vanchor: VAnchorPMSetupInput;
-}
-
-export class ProvingManagerWrapper {
+export class WasmProvingManagerWrapper {
   /**
    * @param ctx  - Context of the Proving manager
    * Defaults to worker mode assuming that the Proving manager is running in the browser
@@ -160,7 +71,7 @@ export class ProvingManagerWrapper {
   /**
    * Generate the Zero-knowledge proof from the proof input
    **/
-  async prove<T extends NoteProtocol> (protocol: T, pmSetupInput: ProvingManagerSetupInput<T>): Promise<ProofI<T>> {
+  async prove<T extends NoteProtocol> (protocol: T, pmSetupInput: ProvingManagerSetupInput<T>): Promise<WasmProofInterface<T>> {
     const Manager = await this.proofBuilder;
     const pm = new Manager(protocol);
 
@@ -181,7 +92,7 @@ export class ProvingManagerWrapper {
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.mixerProof;
 
-      const mixerProof: ProofI<'mixer'> = {
+      const mixerProof: WasmProofInterface<'mixer'> = {
         nullifierHash: proof.nullifierHash,
         proof: proof.proof,
         root: proof.root
@@ -206,7 +117,7 @@ export class ProvingManagerWrapper {
       const proofInput = pm.build_js();
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.anchorProof;
-      const anchorProof: ProofI<'anchor'> = {
+      const anchorProof: WasmProofInterface<'anchor'> = {
         nullifierHash: proof.nullifierHash,
         proof: proof.proof,
         root: proof.root,
@@ -215,7 +126,7 @@ export class ProvingManagerWrapper {
 
       return anchorProof as any;
     } else if (protocol === 'vanchor') {
-      const input = pmSetupInput as VAnchorPMSetupInput;
+      const input = pmSetupInput as WasmVAnchorPMSetupInput;
       const metaDataNote = input.inputNotes[0];
       const { note } = await Note.deserialize(metaDataNote);
       const rawNotes = await Promise.all(input.inputNotes.map((note) => Note.deserialize(note)));
@@ -282,7 +193,7 @@ export class ProvingManagerWrapper {
       const proofInput = pm.build_js();
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.vanchorProof;
-      const anchorProof: ProofI<'vanchor'> = {
+      const anchorProof: WasmProofInterface<'vanchor'> = {
         extDataHash: dataHash,
         inputUtxos: proof.inputUtxos,
         outputNotes: proof.outputNotes,

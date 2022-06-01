@@ -3,7 +3,7 @@ import { ApiPromise } from '@polkadot/api';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { currencyToUnitI128, KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
-import { Note, ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/index.js';
+import { Note, ProvingManagerSetupInput, WasmProvingManagerWrapper } from '@webb-tools/sdk-core/index.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { polkadotTx } from '@webb-tools/test-utils/index.js';
 import path from 'path';
@@ -101,7 +101,7 @@ async function createVAnchorWithDeposit(
   const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, publicAmount.toString(), chainId, undefined);
   const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, '0', chainId, undefined);
   // Configure a new proving manager with direct call
-  const provingManager = new ProvingManagerWrapper('direct-call');
+  const provingManager = new WasmProvingManagerWrapper('direct-call');
   const leavesMap: any = {};
 
   const address = depositer.address;
@@ -235,7 +235,7 @@ describe('VAnchor tests', function() {
     const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, publicAmount.toString(), chainId, undefined);
     const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, '0', chainId, undefined);
     // Configure a new proving manager with direct call
-    const provingManager = new ProvingManagerWrapper('direct-call');
+    const provingManager = new WasmProvingManagerWrapper('direct-call');
     const leavesMap: any = {};
 
     const address = alice.address;
@@ -312,7 +312,7 @@ describe('VAnchor tests', function() {
     const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, '0', chainId.toString(), undefined);
     const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, '0', chainId.toString(), undefined);
 
-    const provingManager = new ProvingManagerWrapper('direct-call');
+    const provingManager = new WasmProvingManagerWrapper('direct-call');
     const address = bob.address;
     const leaf1Index = Number(notes[0].index);
     const leaf2Index = Number(notes[1].index);

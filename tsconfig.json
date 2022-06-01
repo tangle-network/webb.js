@@ -9,7 +9,8 @@
   "include": [
     "packages/**/*",
     "examples/**/*",
-    "tests/**/*"
+    "tests/**/*",
+    "typedefs.d.ts"
   ],
   "compilerOptions": {
     "types": ["mocha", "node"],
@@ -75,7 +76,7 @@
       ],
       "@webb-tools/test-utils/*": [
         "packages/test-utils/src/*"
-      ]
+      ],
     },
     "typeRoots": [
       "./node_modules/@polkadot/ts",

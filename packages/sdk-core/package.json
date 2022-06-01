@@ -70,6 +70,10 @@
     "@webb-tools/api": "0.1.4-73",
     "@webb-tools/wasm-utils": "0.1.4-73",
     "bignumber.js": "^9.0.0",
+    "circomlibjs": "^0.0.8",
+    "eth-sig-util": "^3.0.1",
+    "ethers": "5.5.1",
+    "ffjavascript": "^0.2.43",
     "events": "^3.2.0",
     "lodash": "^4.17.20"
   },
