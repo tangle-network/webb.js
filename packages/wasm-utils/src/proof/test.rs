@@ -210,7 +210,7 @@ mod test {
 			JsString::from("3"),
 			None,
 			None,
-			NOne,
+			None,
 		)
 		.unwrap();
 
