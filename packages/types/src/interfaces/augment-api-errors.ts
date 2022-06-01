@@ -21,7 +21,7 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InvalidWithdrawProof: AugmentedError<ApiType>;
       /**
-       * Mixer not found.
+       * Anchor not found.
        **/
       NoAnchorFound: AugmentedError<ApiType>;
       /**
@@ -103,6 +103,74 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
+    assets: {
+      /**
+       * The asset-account already exists.
+       **/
+      AlreadyExists: AugmentedError<ApiType>;
+      /**
+       * Invalid metadata given.
+       **/
+      BadMetadata: AugmentedError<ApiType>;
+      /**
+       * Invalid witness data given.
+       **/
+      BadWitness: AugmentedError<ApiType>;
+      /**
+       * Account balance must be greater than or equal to the transfer amount.
+       **/
+      BalanceLow: AugmentedError<ApiType>;
+      /**
+       * The origin account is frozen.
+       **/
+      Frozen: AugmentedError<ApiType>;
+      /**
+       * The asset ID is already taken.
+       **/
+      InUse: AugmentedError<ApiType>;
+      /**
+       * Minimum balance should be non-zero.
+       **/
+      MinBalanceZero: AugmentedError<ApiType>;
+      /**
+       * The account to alter does not exist.
+       **/
+      NoAccount: AugmentedError<ApiType>;
+      /**
+       * The asset-account doesn't have an associated deposit.
+       **/
+      NoDeposit: AugmentedError<ApiType>;
+      /**
+       * The signing account has no permission to do the operation.
+       **/
+      NoPermission: AugmentedError<ApiType>;
+      /**
+       * Unable to increment the consumer reference counters on the account. Either no provider
+       * reference exists to allow a non-zero balance of a non-self-sufficient asset, or the
+       * maximum number of consumers has been reached.
+       **/
+      NoProvider: AugmentedError<ApiType>;
+      /**
+       * No approval exists that would allow the transfer.
+       **/
+      Unapproved: AugmentedError<ApiType>;
+      /**
+       * The given asset ID is unknown.
+       **/
+      Unknown: AugmentedError<ApiType>;
+      /**
+       * The operation would result in funds being burned.
+       **/
+      WouldBurn: AugmentedError<ApiType>;
+      /**
+       * The source account would not survive the transfer and it needs to stay alive.
+       **/
+      WouldDie: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     authorship: {
       /**
        * The uncle is genesis.
@@ -137,19 +205,33 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
+    babe: {
+      /**
+       * A given equivocation report is valid but already previously reported.
+       **/
+      DuplicateOffenceReport: AugmentedError<ApiType>;
+      /**
+       * Submitted configuration is invalid.
+       **/
+      InvalidConfiguration: AugmentedError<ApiType>;
+      /**
+       * An equivocation proof provided as part of an equivocation report is invalid.
+       **/
+      InvalidEquivocationProof: AugmentedError<ApiType>;
+      /**
+       * A key ownership proof provided as part of an equivocation report is invalid.
+       **/
+      InvalidKeyOwnershipProof: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     bagsList: {
       /**
-       * Id not found in list.
+       * A error in the list interface implementation.
        **/
-      IdNotFound: AugmentedError<ApiType>;
-      /**
-       * An Id does not have a greater vote weight than another Id.
-       **/
-      NotHeavier: AugmentedError<ApiType>;
-      /**
-       * Attempted to place node in front of a node in another bag.
-       **/
-      NotInSameBag: AugmentedError<ApiType>;
+      List: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -195,7 +277,7 @@ declare module '@polkadot/api-base/types/errors' {
     };
     bounties: {
       /**
-       * The bounty cannot be closed because it has active child-bounties.
+       * The bounty cannot be closed because it has active child bounties.
        **/
       HasActiveChildBounty: AugmentedError<ApiType>;
       /**
@@ -246,14 +328,6 @@ declare module '@polkadot/api-base/types/errors' {
     };
     bridge: {
       /**
-       * Call does not match resource id according to resources mapping
-       **/
-      CallDoesNotMatchResourceId: AugmentedError<ApiType>;
-      /**
-       * Call does not match parsed call from proposal data
-       **/
-      CallNotConsistentWithProposalData: AugmentedError<ApiType>;
-      /**
        * Chain has already been enabled
        **/
       ChainAlreadyWhitelisted: AugmentedError<ApiType>;
@@ -262,37 +336,61 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       ChainNotWhitelisted: AugmentedError<ApiType>;
       /**
-       * Chain Id Type from the r_id does not match this chain
-       **/
-      IncorrectExecutionChainIdType: AugmentedError<ApiType>;
-      /**
        * Provided chain Id is not valid
        **/
       InvalidChainId: AugmentedError<ApiType>;
-      /**
-       * Invalid nonce
-       **/
-      InvalidNonce: AugmentedError<ApiType>;
       /**
        * Account does not have correct permissions
        **/
       InvalidPermissions: AugmentedError<ApiType>;
       /**
+       * Relayer threshold cannot be 0
+       **/
+      InvalidThreshold: AugmentedError<ApiType>;
+      /**
        * Protected operation, must be performed by relayer
        **/
-      MustBeMaintainer: AugmentedError<ApiType>;
+      MustBeRelayer: AugmentedError<ApiType>;
+      /**
+       * Proposal has either failed or succeeded
+       **/
+      ProposalAlreadyComplete: AugmentedError<ApiType>;
       /**
        * A proposal with these parameters has already been submitted
        **/
       ProposalAlreadyExists: AugmentedError<ApiType>;
       /**
+       * No proposal with the ID was found
+       **/
+      ProposalDoesNotExist: AugmentedError<ApiType>;
+      /**
+       * Lifetime of proposal has been exceeded
+       **/
+      ProposalExpired: AugmentedError<ApiType>;
+      /**
+       * Cannot complete proposal, needs more votes
+       **/
+      ProposalNotComplete: AugmentedError<ApiType>;
+      /**
+       * Relayer already in set
+       **/
+      RelayerAlreadyExists: AugmentedError<ApiType>;
+      /**
+       * Relayer has already submitted some vote for this proposal
+       **/
+      RelayerAlreadyVoted: AugmentedError<ApiType>;
+      /**
+       * Provided accountId is not a relayer
+       **/
+      RelayerInvalid: AugmentedError<ApiType>;
+      /**
        * Resource ID provided isn't mapped to anything
        **/
       ResourceDoesNotExist: AugmentedError<ApiType>;
       /**
-       * Provided signature is not from the active maintainer
+       * Relayer threshold not set
        **/
-      SignatureInvalid: AugmentedError<ApiType>;
+      ThresholdNotSet: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -308,7 +406,7 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       ParentBountyNotActive: AugmentedError<ApiType>;
       /**
-       * Number of child-bounties exceeds limit `MaxActiveChildBountyCount`.
+       * Number of child bounties exceeds limit `MaxActiveChildBountyCount`.
        **/
       TooManyChildBounties: AugmentedError<ApiType>;
       /**
@@ -499,184 +597,6 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
-    dkg: {
-      /**
-       * Already submitted a public key
-       **/
-      AlreadySubmittedPublicKey: AugmentedError<ApiType>;
-      /**
-       * Already submitted a public key signature
-       **/
-      AlreadySubmittedSignature: AugmentedError<ApiType>;
-      /**
-       * Must be calling from the controller account
-       **/
-      InvalidControllerAccount: AugmentedError<ApiType>;
-      /**
-       * Invalid misbehaviour reports
-       **/
-      InvalidMisbehaviourReports: AugmentedError<ApiType>;
-      /**
-       * Invalid public key submission
-       **/
-      InvalidPublicKeys: AugmentedError<ApiType>;
-      /**
-       * Refresh delay should be in the range of 0% - 100%
-       **/
-      InvalidRefreshDelay: AugmentedError<ApiType>;
-      /**
-       * Invalid public key signature submission
-       **/
-      InvalidSignature: AugmentedError<ApiType>;
-      /**
-       * Invalid threshold
-       **/
-      InvalidThreshold: AugmentedError<ApiType>;
-      /**
-       * Manual DKG Refresh failed to progress.
-       **/
-      ManualRefreshFailed: AugmentedError<ApiType>;
-      /**
-       * Must be an an authority
-       **/
-      MustBeAnActiveAuthority: AugmentedError<ApiType>;
-      /**
-       * Must be queued  to become an authority
-       **/
-      MustBeAQueuedAuthority: AugmentedError<ApiType>;
-      /**
-       * No mapped account to authority
-       **/
-      NoMappedAccount: AugmentedError<ApiType>;
-      /**
-       * No NextPublicKey stored on-chain.
-       **/
-      NoNextPublicKey: AugmentedError<ApiType>;
-      /**
-       * DKG Refresh is already in progress.
-       **/
-      RefreshInProgress: AugmentedError<ApiType>;
-      /**
-       * Used signature from past sessions
-       **/
-      UsedSignature: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
-    dkgProposalHandler: {
-      /**
-       * Chain id is invalid
-       **/
-      ChainIdInvalid: AugmentedError<ApiType>;
-      /**
-       * Error names should be descriptive.
-       **/
-      NoneValue: AugmentedError<ApiType>;
-      /**
-       * Proposal with the ID has already been submitted
-       **/
-      ProposalAlreadyExists: AugmentedError<ApiType>;
-      /**
-       * No proposal with the ID was found
-       **/
-      ProposalDoesNotExists: AugmentedError<ApiType>;
-      /**
-       * Proposal format is invalid
-       **/
-      ProposalFormatInvalid: AugmentedError<ApiType>;
-      /**
-       * Proposal signature is invalid
-       **/
-      ProposalSignatureInvalid: AugmentedError<ApiType>;
-      /**
-       * Proposal length exceeds max allowed per batch
-       **/
-      ProposalsLengthOverflow: AugmentedError<ApiType>;
-      /**
-       * Errors should have helpful documentation associated with them.
-       **/
-      StorageOverflow: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
-    dkgProposals: {
-      /**
-       * Chain has already been enabled
-       **/
-      ChainAlreadyWhitelisted: AugmentedError<ApiType>;
-      /**
-       * Interactions with this chain is not permitted
-       **/
-      ChainNotWhitelisted: AugmentedError<ApiType>;
-      /**
-       * Provided chain Id is not valid
-       **/
-      InvalidChainId: AugmentedError<ApiType>;
-      /**
-       * Account does not have correct permissions
-       **/
-      InvalidPermissions: AugmentedError<ApiType>;
-      /**
-       * Proposer threshold cannot be 0
-       **/
-      InvalidThreshold: AugmentedError<ApiType>;
-      /**
-       * Protected operation, must be performed by proposer
-       **/
-      MustBeProposer: AugmentedError<ApiType>;
-      /**
-       * Proposal has either failed or succeeded
-       **/
-      ProposalAlreadyComplete: AugmentedError<ApiType>;
-      /**
-       * A proposal with these parameters has already been submitted
-       **/
-      ProposalAlreadyExists: AugmentedError<ApiType>;
-      /**
-       * No proposal with the ID was found
-       **/
-      ProposalDoesNotExist: AugmentedError<ApiType>;
-      /**
-       * Lifetime of proposal has been exceeded
-       **/
-      ProposalExpired: AugmentedError<ApiType>;
-      /**
-       * Cannot complete proposal, needs more votes
-       **/
-      ProposalNotComplete: AugmentedError<ApiType>;
-      /**
-       * Proposer already in set
-       **/
-      ProposerAlreadyExists: AugmentedError<ApiType>;
-      /**
-       * Proposer has already submitted some vote for this proposal
-       **/
-      ProposerAlreadyVoted: AugmentedError<ApiType>;
-      /**
-       * Proposer Count is Zero
-       **/
-      ProposerCountIsZero: AugmentedError<ApiType>;
-      /**
-       * Provided accountId is not a proposer
-       **/
-      ProposerInvalid: AugmentedError<ApiType>;
-      /**
-       * Resource ID provided isn't mapped to anything
-       **/
-      ResourceDoesNotExist: AugmentedError<ApiType>;
-      /**
-       * Proposer threshold not set
-       **/
-      ThresholdNotSet: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
     electionProviderMultiPhase: {
       /**
        * The call is not allowed at this point.
@@ -855,6 +775,46 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
+    imOnline: {
+      /**
+       * Duplicated heartbeat.
+       **/
+      DuplicatedHeartbeat: AugmentedError<ApiType>;
+      /**
+       * Non existent public key.
+       **/
+      InvalidKey: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    indices: {
+      /**
+       * The index was not available.
+       **/
+      InUse: AugmentedError<ApiType>;
+      /**
+       * The index was not already assigned.
+       **/
+      NotAssigned: AugmentedError<ApiType>;
+      /**
+       * The index is assigned to another account.
+       **/
+      NotOwner: AugmentedError<ApiType>;
+      /**
+       * The source and destination accounts are identical.
+       **/
+      NotTransfer: AugmentedError<ApiType>;
+      /**
+       * The index is permanent and may not be freed/changed.
+       **/
+      Permanent: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     linkableTreeBn254: {
       /**
        * Edge already exists
@@ -955,6 +915,179 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
+    multisig: {
+      /**
+       * Call is already approved by this signatory.
+       **/
+      AlreadyApproved: AugmentedError<ApiType>;
+      /**
+       * The data to be stored is already stored.
+       **/
+      AlreadyStored: AugmentedError<ApiType>;
+      /**
+       * The maximum weight information provided was too low.
+       **/
+      MaxWeightTooLow: AugmentedError<ApiType>;
+      /**
+       * Threshold must be 2 or greater.
+       **/
+      MinimumThreshold: AugmentedError<ApiType>;
+      /**
+       * Call doesn't need any (more) approvals.
+       **/
+      NoApprovalsNeeded: AugmentedError<ApiType>;
+      /**
+       * Multisig operation not found when attempting to cancel.
+       **/
+      NotFound: AugmentedError<ApiType>;
+      /**
+       * No timepoint was given, yet the multisig operation is already underway.
+       **/
+      NoTimepoint: AugmentedError<ApiType>;
+      /**
+       * Only the account that originally created the multisig is able to cancel it.
+       **/
+      NotOwner: AugmentedError<ApiType>;
+      /**
+       * The sender was contained in the other signatories; it shouldn't be.
+       **/
+      SenderInSignatories: AugmentedError<ApiType>;
+      /**
+       * The signatories were provided out of order; they should be ordered.
+       **/
+      SignatoriesOutOfOrder: AugmentedError<ApiType>;
+      /**
+       * There are too few signatories in the list.
+       **/
+      TooFewSignatories: AugmentedError<ApiType>;
+      /**
+       * There are too many signatories in the list.
+       **/
+      TooManySignatories: AugmentedError<ApiType>;
+      /**
+       * A timepoint was given, yet no multisig operation is underway.
+       **/
+      UnexpectedTimepoint: AugmentedError<ApiType>;
+      /**
+       * A different timepoint was given to the multisig operation that is underway.
+       **/
+      WrongTimepoint: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    nominationPools: {
+      /**
+       * An account is already delegating in another pool. An account may only belong to one
+       * pool at a time.
+       **/
+      AccountBelongsToOtherPool: AugmentedError<ApiType>;
+      /**
+       * The member is already unbonding in this era.
+       **/
+      AlreadyUnbonding: AugmentedError<ApiType>;
+      /**
+       * The pools state cannot be changed.
+       **/
+      CanNotChangeState: AugmentedError<ApiType>;
+      /**
+       * None of the funds can be withdrawn yet because the bonding duration has not passed.
+       **/
+      CannotWithdrawAny: AugmentedError<ApiType>;
+      /**
+       * Some error occurred that should never happen. This should be reported to the
+       * maintainers.
+       **/
+      DefensiveError: AugmentedError<ApiType>;
+      /**
+       * The caller does not have adequate permissions.
+       **/
+      DoesNotHavePermission: AugmentedError<ApiType>;
+      /**
+       * The member is fully unbonded (and thus cannot access the bonded and reward pool
+       * anymore to, for example, collect rewards).
+       **/
+      FullyUnbonding: AugmentedError<ApiType>;
+      /**
+       * The pool has insufficient balance to bond as a nominator.
+       **/
+      InsufficientBond: AugmentedError<ApiType>;
+      /**
+       * Too many members in the pool or system.
+       **/
+      MaxPoolMembers: AugmentedError<ApiType>;
+      /**
+       * The system is maxed out on pools.
+       **/
+      MaxPools: AugmentedError<ApiType>;
+      /**
+       * The member cannot unbond further chunks due to reaching the limit.
+       **/
+      MaxUnbondingLimit: AugmentedError<ApiType>;
+      /**
+       * Metadata exceeds [`Config::MaxMetadataLen`]
+       **/
+      MetadataExceedsMaxLen: AugmentedError<ApiType>;
+      /**
+       * The amount does not meet the minimum bond to either join or create a pool.
+       **/
+      MinimumBondNotMet: AugmentedError<ApiType>;
+      /**
+       * A pool must be in [`PoolState::Destroying`] in order for the depositor to unbond or for
+       * other members to be permissionlessly unbonded.
+       **/
+      NotDestroying: AugmentedError<ApiType>;
+      /**
+       * Not enough points. Ty unbonding less.
+       **/
+      NotEnoughPointsToUnbond: AugmentedError<ApiType>;
+      /**
+       * Either a) the caller cannot make a valid kick or b) the pool is not destroying.
+       **/
+      NotKickerOrDestroying: AugmentedError<ApiType>;
+      /**
+       * The caller does not have nominating permissions for the pool.
+       **/
+      NotNominator: AugmentedError<ApiType>;
+      /**
+       * The depositor must be the only member in the bonded pool in order to unbond. And the
+       * depositor must be the only member in the sub pools in order to withdraw unbonded.
+       **/
+      NotOnlyPoolMember: AugmentedError<ApiType>;
+      /**
+       * The pool is not open to join
+       **/
+      NotOpen: AugmentedError<ApiType>;
+      /**
+       * The transaction could not be executed due to overflow risk for the pool.
+       **/
+      OverflowRisk: AugmentedError<ApiType>;
+      /**
+       * Partial unbonding now allowed permissionlessly.
+       **/
+      PartialUnbondNotAllowedPermissionlessly: AugmentedError<ApiType>;
+      /**
+       * An account is not a member.
+       **/
+      PoolMemberNotFound: AugmentedError<ApiType>;
+      /**
+       * A (bonded) pool id does not exist.
+       **/
+      PoolNotFound: AugmentedError<ApiType>;
+      /**
+       * A reward pool does not exist. In all cases this is a system logic error.
+       **/
+      RewardPoolNotFound: AugmentedError<ApiType>;
+      /**
+       * A sub pool does not exist.
+       **/
+      SubPoolsNotFound: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     preimage: {
       /**
        * Preimage has already been noted on-chain.
@@ -980,6 +1113,44 @@ declare module '@polkadot/api-base/types/errors' {
        * Preimage is too large to store on-chain.
        **/
       TooLarge: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    proxy: {
+      /**
+       * Account is already a proxy.
+       **/
+      Duplicate: AugmentedError<ApiType>;
+      /**
+       * Call may not be made by proxy because it may escalate its privileges.
+       **/
+      NoPermission: AugmentedError<ApiType>;
+      /**
+       * Cannot add self as proxy.
+       **/
+      NoSelfProxy: AugmentedError<ApiType>;
+      /**
+       * Proxy registration not found.
+       **/
+      NotFound: AugmentedError<ApiType>;
+      /**
+       * Sender is not a proxy of the account to be proxied.
+       **/
+      NotProxy: AugmentedError<ApiType>;
+      /**
+       * There are too many proxies registered or too many announcements pending.
+       **/
+      TooMany: AugmentedError<ApiType>;
+      /**
+       * Announcement, if made at all, was made too recently.
+       **/
+      Unannounced: AugmentedError<ApiType>;
+      /**
+       * A call which is incompatible with the proxy type's filter was attempted.
+       **/
+      Unproxyable: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -1028,6 +1199,64 @@ declare module '@polkadot/api-base/types/errors' {
        * No keys are associated with this account.
        **/
       NoKeys: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    signatureBridge: {
+      /**
+       * Call does not match resource id according to resources mapping
+       **/
+      CallDoesNotMatchResourceId: AugmentedError<ApiType>;
+      /**
+       * Call does not match parsed call from proposal data
+       **/
+      CallNotConsistentWithProposalData: AugmentedError<ApiType>;
+      /**
+       * Chain has already been enabled
+       **/
+      ChainAlreadyWhitelisted: AugmentedError<ApiType>;
+      /**
+       * Interactions with this chain is not permitted
+       **/
+      ChainNotWhitelisted: AugmentedError<ApiType>;
+      /**
+       * Chain Id Type from the r_id does not match this chain
+       **/
+      IncorrectExecutionChainIdType: AugmentedError<ApiType>;
+      /**
+       * Provided chain Id is not valid
+       **/
+      InvalidChainId: AugmentedError<ApiType>;
+      /**
+       * Invalid nonce
+       **/
+      InvalidNonce: AugmentedError<ApiType>;
+      /**
+       * Account does not have correct permissions
+       **/
+      InvalidPermissions: AugmentedError<ApiType>;
+      /**
+       * Invalid proposal data
+       **/
+      InvalidProposalData: AugmentedError<ApiType>;
+      /**
+       * Protected operation, must be performed by relayer
+       **/
+      MustBeMaintainer: AugmentedError<ApiType>;
+      /**
+       * A proposal with these parameters has already been submitted
+       **/
+      ProposalAlreadyExists: AugmentedError<ApiType>;
+      /**
+       * Resource ID provided isn't mapped to anything
+       **/
+      ResourceDoesNotExist: AugmentedError<ApiType>;
+      /**
+       * Provided signature is not from the active maintainer
+       **/
+      SignatureInvalid: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -1156,7 +1385,7 @@ declare module '@polkadot/api-base/types/errors' {
       CallFiltered: AugmentedError<ApiType>;
       /**
        * Failed to extract the runtime version from the new runtime.
-       *
+       * 
        * Either calling `Core_version` or decoding `RuntimeVersion` failed.
        **/
       FailedToExtractRuntimeVersion: AugmentedError<ApiType>;
@@ -1212,6 +1441,7 @@ declare module '@polkadot/api-base/types/errors' {
        * Failed because the maximum locks was exceeded
        **/
       MaxLocksExceeded: AugmentedError<ApiType>;
+      TooManyReserves: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -1250,9 +1480,63 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InvalidIndex: AugmentedError<ApiType>;
       /**
+       * Proposal has not been approved.
+       **/
+      ProposalNotApproved: AugmentedError<ApiType>;
+      /**
        * Too many approvals in the queue.
        **/
       TooManyApprovals: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    utility: {
+      /**
+       * Too many calls batched.
+       **/
+      TooManyCalls: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    vAnchorBn254: {
+      /**
+       * Invalid nullifier that is already used
+       * (this error is returned when a nullifier is used twice)
+       **/
+      AlreadyRevealedNullifier: AugmentedError<ApiType>;
+      InvalidDepositAmount: AugmentedError<ApiType>;
+      InvalidExtAmount: AugmentedError<ApiType>;
+      InvalidExtData: AugmentedError<ApiType>;
+      InvalidFee: AugmentedError<ApiType>;
+      InvalidInputNullifiers: AugmentedError<ApiType>;
+      InvalidPublicAmount: AugmentedError<ApiType>;
+      /**
+       * Invalid transaction proof
+       **/
+      InvalidTransactionProof: AugmentedError<ApiType>;
+      InvalidWithdrawAmount: AugmentedError<ApiType>;
+      /**
+       * Variable Anchor not found.
+       **/
+      NoVAnchorFound: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    vAnchorVerifier2x2Bn254: {
+      /**
+       * Parameters haven't been initialized
+       **/
+      ParametersNotInitialized: AugmentedError<ApiType>;
+      /**
+       * Error during verification
+       **/
+      VerifyError: AugmentedError<ApiType>;
       /**
        * Generic error
        **/

@@ -2,26 +2,10 @@
 /* eslint-disable */
 
 import type { ApiTypes } from '@polkadot/api-base/types';
-import type { Bytes, Null, Option, Result, U8aFixed, Vec, bool, i128, u128, u32, u64, u8 } from '@polkadot/types-codec';
+import type { Bytes, Null, Option, Result, U8aFixed, Vec, bool, i128, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H256 } from '@polkadot/types/interfaces/runtime';
-import type {
-  DkgRuntimePrimitivesCryptoPublic,
-  DkgRuntimePrimitivesMisbehaviourType,
-  DkgRuntimePrimitivesProposalDkgPayloadKey,
-  DkgRuntimePrimitivesProposalProposalKind,
-  EggStandaloneRuntimeProtocolSubstrateConfigElement,
-  FrameSupportScheduleLookupError,
-  FrameSupportTokensMiscBalanceStatus,
-  FrameSupportWeightsDispatchInfo,
-  PalletAssetRegistryAssetType,
-  PalletDemocracyVoteAccountVote,
-  PalletDemocracyVoteThreshold,
-  PalletElectionProviderMultiPhaseElectionCompute,
-  SpFinalityGrandpaAppPublic,
-  SpRuntimeDispatchError,
-  WebbProposalsHeaderTypedChainId,
-} from '@polkadot/types/lookup';
+import type { FrameSupportScheduleLookupError, FrameSupportTokensMiscBalanceStatus, FrameSupportWeightsDispatchInfo, PalletAssetRegistryAssetType, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletImOnlineSr25519AppSr25519Public, PalletMultisigTimepoint, PalletNominationPoolsPoolState, PalletStakingExposure, PalletStakingValidatorPrefs, SpFinalityGrandpaAppPublic, SpRuntimeDispatchError, WebbStandaloneRuntimeElement, WebbStandaloneRuntimeProxyType } from '@polkadot/types/lookup';
 
 declare module '@polkadot/api-base/types/events' {
   export interface AugmentedEvents<ApiType extends ApiTypes> {
@@ -33,15 +17,15 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * Amount has been deposited into the anchor
        **/
-      Deposit: AugmentedEvent<ApiType, [AccountId32, u32, EggStandaloneRuntimeProtocolSubstrateConfigElement, u128]>;
+      Deposit: AugmentedEvent<ApiType, [AccountId32, u32, WebbStandaloneRuntimeElement, u128]>;
       /**
        * Post deposit hook has executed successfully
        **/
-      PostDeposit: AugmentedEvent<ApiType, [AccountId32, u32, EggStandaloneRuntimeProtocolSubstrateConfigElement]>;
+      PostDeposit: AugmentedEvent<ApiType, [AccountId32, u32, WebbStandaloneRuntimeElement]>;
       /**
        * A transaction has been refreshed (one spent, another inserted)
        **/
-      Refresh: AugmentedEvent<ApiType, [u32, EggStandaloneRuntimeProtocolSubstrateConfigElement]>;
+      Refresh: AugmentedEvent<ApiType, [u32, WebbStandaloneRuntimeElement]>;
       /**
        * Amount has been withdrawn from the anchor
        **/
@@ -70,7 +54,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * Native location set for an asset.
        **/
-      LocationSet: AugmentedEvent<ApiType, [u32, Null]>;
+      LocationSet: AugmentedEvent<ApiType, [u32, u32]>;
       /**
        * Metadata set for an asset.
        **/
@@ -83,6 +67,85 @@ declare module '@polkadot/api-base/types/events' {
        * Asset was updated.
        **/
       Updated: AugmentedEvent<ApiType, [u32, Bytes, PalletAssetRegistryAssetType]>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    assets: {
+      /**
+       * An approval for account `delegate` was cancelled by `owner`.
+       **/
+      ApprovalCancelled: AugmentedEvent<ApiType, [u32, AccountId32, AccountId32]>;
+      /**
+       * (Additional) funds have been approved for transfer to a destination account.
+       **/
+      ApprovedTransfer: AugmentedEvent<ApiType, [u32, AccountId32, AccountId32, u128]>;
+      /**
+       * Some asset `asset_id` was frozen.
+       **/
+      AssetFrozen: AugmentedEvent<ApiType, [u32]>;
+      /**
+       * An asset has had its attributes changed by the `Force` origin.
+       **/
+      AssetStatusChanged: AugmentedEvent<ApiType, [u32]>;
+      /**
+       * Some asset `asset_id` was thawed.
+       **/
+      AssetThawed: AugmentedEvent<ApiType, [u32]>;
+      /**
+       * Some assets were destroyed.
+       **/
+      Burned: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
+      /**
+       * Some asset class was created.
+       **/
+      Created: AugmentedEvent<ApiType, [u32, AccountId32, AccountId32]>;
+      /**
+       * An asset class was destroyed.
+       **/
+      Destroyed: AugmentedEvent<ApiType, [u32]>;
+      /**
+       * Some asset class was force-created.
+       **/
+      ForceCreated: AugmentedEvent<ApiType, [u32, AccountId32]>;
+      /**
+       * Some account `who` was frozen.
+       **/
+      Frozen: AugmentedEvent<ApiType, [u32, AccountId32]>;
+      /**
+       * Some assets were issued.
+       **/
+      Issued: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
+      /**
+       * Metadata has been cleared for an asset.
+       **/
+      MetadataCleared: AugmentedEvent<ApiType, [u32]>;
+      /**
+       * New metadata has been set for an asset.
+       **/
+      MetadataSet: AugmentedEvent<ApiType, [u32, Bytes, Bytes, u8, bool]>;
+      /**
+       * The owner changed.
+       **/
+      OwnerChanged: AugmentedEvent<ApiType, [u32, AccountId32]>;
+      /**
+       * The management team changed.
+       **/
+      TeamChanged: AugmentedEvent<ApiType, [u32, AccountId32, AccountId32, AccountId32]>;
+      /**
+       * Some account `who` was thawed.
+       **/
+      Thawed: AugmentedEvent<ApiType, [u32, AccountId32]>;
+      /**
+       * Some assets were transferred.
+       **/
+      Transferred: AugmentedEvent<ApiType, [u32, AccountId32, AccountId32, u128]>;
+      /**
+       * An `amount` was transferred in its entirety from `owner` to `destination` by
+       * the approved `delegate`.
+       **/
+      TransferredApproved: AugmentedEvent<ApiType, [u32, AccountId32, AccountId32, AccountId32, u128]>;
       /**
        * Generic event
        **/
@@ -124,10 +187,7 @@ declare module '@polkadot/api-base/types/events' {
        * Some balance was moved from the reserve of the first account to the second account.
        * Final argument indicates the destination balance type.
        **/
-      ReserveRepatriated: AugmentedEvent<
-        ApiType,
-        [AccountId32, AccountId32, u128, FrameSupportTokensMiscBalanceStatus]
-      >;
+      ReserveRepatriated: AugmentedEvent<ApiType, [AccountId32, AccountId32, u128, FrameSupportTokensMiscBalanceStatus]>;
       /**
        * Some amount was removed from the account (e.g. for misbehavior).
        **/
@@ -189,21 +249,41 @@ declare module '@polkadot/api-base/types/events' {
        **/
       ChainWhitelisted: AugmentedEvent<ApiType, [u64]>;
       /**
-       * Maintainer is set
+       * Voting successful for a proposal
        **/
-      MaintainerSet: AugmentedEvent<ApiType, [Bytes, Bytes]>;
-      /**
-       * Proposal has been approved
-       **/
-      ProposalApproved: AugmentedEvent<ApiType, [u64, u32]>;
+      ProposalApproved: AugmentedEvent<ApiType, [u64, u64]>;
       /**
        * Execution of call failed
        **/
-      ProposalFailed: AugmentedEvent<ApiType, [u64, u32]>;
+      ProposalFailed: AugmentedEvent<ApiType, [u64, u64]>;
+      /**
+       * Voting rejected a proposal
+       **/
+      ProposalRejected: AugmentedEvent<ApiType, [u64, u64]>;
       /**
        * Execution of call succeeded
        **/
-      ProposalSucceeded: AugmentedEvent<ApiType, [u64, u32]>;
+      ProposalSucceeded: AugmentedEvent<ApiType, [u64, u64]>;
+      /**
+       * Relayer added to set
+       **/
+      RelayerAdded: AugmentedEvent<ApiType, [AccountId32]>;
+      /**
+       * Relayer removed from set
+       **/
+      RelayerRemoved: AugmentedEvent<ApiType, [AccountId32]>;
+      /**
+       * Vote threshold has changed (new_threshold)
+       **/
+      RelayerThresholdChanged: AugmentedEvent<ApiType, [u32]>;
+      /**
+       * Vot submitted against proposal
+       **/
+      VoteAgainst: AugmentedEvent<ApiType, [u64, u64, AccountId32]>;
+      /**
+       * Vote submitted in favour of proposal
+       **/
+      VoteFor: AugmentedEvent<ApiType, [u64, u64, AccountId32]>;
       /**
        * Generic event
        **/
@@ -262,28 +342,6 @@ declare module '@polkadot/api-base/types/events' {
        * a tally (yes votes and no votes given respectively as `MemberCount`).
        **/
       Voted: AugmentedEvent<ApiType, [AccountId32, H256, bool, u32, u32]>;
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
-    currencies: {
-      /**
-       * Update balance success.
-       **/
-      BalanceUpdated: AugmentedEvent<ApiType, [u32, AccountId32, i128]>;
-      /**
-       * Deposit success.
-       **/
-      Deposited: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
-      /**
-       * Currency transfer success.
-       **/
-      Transferred: AugmentedEvent<ApiType, [u32, AccountId32, AccountId32, u128]>;
-      /**
-       * Withdraw success.
-       **/
-      Withdrawn: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
       /**
        * Generic event
        **/
@@ -361,115 +419,11 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * An external proposal has been vetoed.
        **/
-      Vetoed: AugmentedEvent<ApiType, [AccountId32, H256, u32]>;
+      Vetoed: AugmentedEvent<ApiType, [AccountId32, H256, u64]>;
       /**
        * An account has voted in a referendum
        **/
       Voted: AugmentedEvent<ApiType, [AccountId32, u32, PalletDemocracyVoteAccountVote]>;
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
-    dkg: {
-      /**
-       * Misbehaviour reports submitted
-       **/
-      MisbehaviourReportsSubmitted: AugmentedEvent<
-        ApiType,
-        [DkgRuntimePrimitivesMisbehaviourType, Vec<DkgRuntimePrimitivesCryptoPublic>]
-      >;
-      /**
-       * Next public key signature submitted
-       **/
-      NextPublicKeySignatureSubmitted: AugmentedEvent<ApiType, [Bytes]>;
-      /**
-       * Next public key submitted
-       **/
-      NextPublicKeySubmitted: AugmentedEvent<ApiType, [Bytes, Bytes]>;
-      /**
-       * Current Public Key Changed.
-       **/
-      PublicKeyChanged: AugmentedEvent<ApiType, [Bytes, Bytes]>;
-      /**
-       * Current Public Key Signature Changed.
-       **/
-      PublicKeySignatureChanged: AugmentedEvent<ApiType, [Bytes]>;
-      /**
-       * Current public key submitted
-       **/
-      PublicKeySubmitted: AugmentedEvent<ApiType, [Bytes, Bytes]>;
-      /**
-       * Refresh DKG Keys Finished (forcefully).
-       **/
-      RefreshKeysFinished: AugmentedEvent<ApiType, [u64]>;
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
-    dkgProposalHandler: {
-      /**
-       * Event Emitted when we encounter a Proposal with invalid Signature.
-       **/
-      InvalidProposalSignature: AugmentedEvent<ApiType, [DkgRuntimePrimitivesProposalProposalKind, Bytes, Bytes]>;
-      /**
-       * Event When a Proposal Gets Signed by DKG.
-       **/
-      ProposalSigned: AugmentedEvent<
-        ApiType,
-        [DkgRuntimePrimitivesProposalDkgPayloadKey, WebbProposalsHeaderTypedChainId, Bytes, Bytes]
-      >;
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
-    dkgProposals: {
-      /**
-       * Proposers have been reset
-       **/
-      AuthorityProposersReset: AugmentedEvent<ApiType, [Vec<AccountId32>]>;
-      /**
-       * Chain now available for transfers (chain_id)
-       **/
-      ChainWhitelisted: AugmentedEvent<ApiType, [WebbProposalsHeaderTypedChainId]>;
-      /**
-       * Voting successful for a proposal
-       **/
-      ProposalApproved: AugmentedEvent<ApiType, [WebbProposalsHeaderTypedChainId, u32]>;
-      /**
-       * Execution of call failed
-       **/
-      ProposalFailed: AugmentedEvent<ApiType, [WebbProposalsHeaderTypedChainId, u32]>;
-      /**
-       * Voting rejected a proposal
-       **/
-      ProposalRejected: AugmentedEvent<ApiType, [WebbProposalsHeaderTypedChainId, u32]>;
-      /**
-       * Execution of call succeeded
-       **/
-      ProposalSucceeded: AugmentedEvent<ApiType, [WebbProposalsHeaderTypedChainId, u32]>;
-      /**
-       * Proposer added to set
-       **/
-      ProposerAdded: AugmentedEvent<ApiType, [AccountId32]>;
-      /**
-       * Proposer removed from set
-       **/
-      ProposerRemoved: AugmentedEvent<ApiType, [AccountId32]>;
-      /**
-       * Vote threshold has changed (new_threshold)
-       **/
-      ProposerThresholdChanged: AugmentedEvent<ApiType, [u32]>;
-      /**
-       * Vot submitted against proposal
-       **/
-      VoteAgainst: AugmentedEvent<ApiType, [WebbProposalsHeaderTypedChainId, u32, AccountId32]>;
-      /**
-       * Vote submitted in favour of proposal
-       **/
-      VoteFor: AugmentedEvent<ApiType, [WebbProposalsHeaderTypedChainId, u32, AccountId32]>;
       /**
        * Generic event
        **/
@@ -495,10 +449,10 @@ declare module '@polkadot/api-base/types/events' {
       Slashed: AugmentedEvent<ApiType, [AccountId32, u128]>;
       /**
        * A solution was stored with the given compute.
-       *
+       * 
        * If the solution is signed, this means that it hasn't yet been processed. If the
        * solution is unsigned, this means that it has also been processed.
-       *
+       * 
        * The `bool` is `true` when a previous solution was ejected to make room for this one.
        **/
       SolutionStored: AugmentedEvent<ApiType, [PalletElectionProviderMultiPhaseElectionCompute, bool]>;
@@ -515,7 +469,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * A candidate was slashed by amount due to failing to obtain a seat as member or
        * runner-up.
-       *
+       * 
        * Note that old members and runners-up are also candidates.
        **/
       CandidateSlashed: AugmentedEvent<ApiType, [AccountId32, u128]>;
@@ -578,6 +532,42 @@ declare module '@polkadot/api-base/types/events' {
        **/
       [key: string]: AugmentedEvent<ApiType>;
     };
+    imOnline: {
+      /**
+       * At the end of the session, no offence was committed.
+       **/
+      AllGood: AugmentedEvent<ApiType, []>;
+      /**
+       * A new heartbeat was received from `AuthorityId`.
+       **/
+      HeartbeatReceived: AugmentedEvent<ApiType, [PalletImOnlineSr25519AppSr25519Public]>;
+      /**
+       * At the end of the session, at least one validator was found to be offline.
+       **/
+      SomeOffline: AugmentedEvent<ApiType, [Vec<ITuple<[AccountId32, PalletStakingExposure]>>]>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    indices: {
+      /**
+       * A account index was assigned.
+       **/
+      IndexAssigned: AugmentedEvent<ApiType, [AccountId32, u32]>;
+      /**
+       * A account index has been freed up (unassigned).
+       **/
+      IndexFreed: AugmentedEvent<ApiType, [u32]>;
+      /**
+       * A account index has been frozen to its current account ID.
+       **/
+      IndexFrozen: AugmentedEvent<ApiType, [u32, AccountId32]>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
     linkableTreeBn254: {
       /**
        * New tree created
@@ -592,7 +582,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * New leaf inserted
        **/
-      LeafInsertion: AugmentedEvent<ApiType, [u32, u32, EggStandaloneRuntimeProtocolSubstrateConfigElement]>;
+      LeafInsertion: AugmentedEvent<ApiType, [u32, u32, WebbStandaloneRuntimeElement]>;
       /**
        * New tree created
        **/
@@ -603,7 +593,7 @@ declare module '@polkadot/api-base/types/events' {
       [key: string]: AugmentedEvent<ApiType>;
     };
     mixerBn254: {
-      Deposit: AugmentedEvent<ApiType, [u32, EggStandaloneRuntimeProtocolSubstrateConfigElement]>;
+      Deposit: AugmentedEvent<ApiType, [u32, WebbStandaloneRuntimeElement]>;
       /**
        * New tree created
        **/
@@ -615,6 +605,72 @@ declare module '@polkadot/api-base/types/events' {
       [key: string]: AugmentedEvent<ApiType>;
     };
     mixerVerifierBn254: {
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    multisig: {
+      /**
+       * A multisig operation has been approved by someone.
+       **/
+      MultisigApproval: AugmentedEvent<ApiType, [AccountId32, PalletMultisigTimepoint, AccountId32, U8aFixed]>;
+      /**
+       * A multisig operation has been cancelled.
+       **/
+      MultisigCancelled: AugmentedEvent<ApiType, [AccountId32, PalletMultisigTimepoint, AccountId32, U8aFixed]>;
+      /**
+       * A multisig operation has been executed.
+       **/
+      MultisigExecuted: AugmentedEvent<ApiType, [AccountId32, PalletMultisigTimepoint, AccountId32, U8aFixed, Result<Null, SpRuntimeDispatchError>]>;
+      /**
+       * A new multisig operation has begun.
+       **/
+      NewMultisig: AugmentedEvent<ApiType, [AccountId32, AccountId32, U8aFixed]>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    nominationPools: {
+      /**
+       * A member has became bonded in a pool.
+       **/
+      Bonded: AugmentedEvent<ApiType, [AccountId32, u32, u128, bool]>;
+      /**
+       * A pool has been created.
+       **/
+      Created: AugmentedEvent<ApiType, [AccountId32, u32]>;
+      /**
+       * A pool has been destroyed.
+       **/
+      Destroyed: AugmentedEvent<ApiType, [u32]>;
+      /**
+       * A member has been removed from a pool.
+       * 
+       * The removal can be voluntary (withdrawn all unbonded funds) or involuntary (kicked).
+       **/
+      MemberRemoved: AugmentedEvent<ApiType, [u32, AccountId32]>;
+      /**
+       * A payout has been made to a member.
+       **/
+      PaidOut: AugmentedEvent<ApiType, [AccountId32, u32, u128]>;
+      /**
+       * The roles of a pool have been updated to the given new roles.
+       **/
+      RolesUpdated: AugmentedEvent<ApiType, [AccountId32, AccountId32, AccountId32]>;
+      /**
+       * The state of a pool has changed
+       **/
+      StateChanged: AugmentedEvent<ApiType, [u32, PalletNominationPoolsPoolState]>;
+      /**
+       * A member has unbonded from their pool.
+       **/
+      Unbonded: AugmentedEvent<ApiType, [AccountId32, u32, u128]>;
+      /**
+       * A member has withdrawn from their pool.
+       **/
+      Withdrawn: AugmentedEvent<ApiType, [AccountId32, u32, u128]>;
       /**
        * Generic event
        **/
@@ -650,23 +706,50 @@ declare module '@polkadot/api-base/types/events' {
        **/
       [key: string]: AugmentedEvent<ApiType>;
     };
+    proxy: {
+      /**
+       * An announcement was placed to make a call in the future.
+       **/
+      Announced: AugmentedEvent<ApiType, [AccountId32, AccountId32, H256]>;
+      /**
+       * Anonymous account has been created by new proxy with given
+       * disambiguation index and proxy type.
+       **/
+      AnonymousCreated: AugmentedEvent<ApiType, [AccountId32, AccountId32, WebbStandaloneRuntimeProxyType, u16]>;
+      /**
+       * A proxy was added.
+       **/
+      ProxyAdded: AugmentedEvent<ApiType, [AccountId32, AccountId32, WebbStandaloneRuntimeProxyType, u64]>;
+      /**
+       * A proxy was executed correctly, with the given.
+       **/
+      ProxyExecuted: AugmentedEvent<ApiType, [Result<Null, SpRuntimeDispatchError>]>;
+      /**
+       * A proxy was removed.
+       **/
+      ProxyRemoved: AugmentedEvent<ApiType, [AccountId32, AccountId32, WebbStandaloneRuntimeProxyType, u64]>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
     scheduler: {
       /**
        * The call for the provided hash was not found so the task has been aborted.
        **/
-      CallLookupFailed: AugmentedEvent<ApiType, [ITuple<[u32, u32]>, Option<Bytes>, FrameSupportScheduleLookupError]>;
+      CallLookupFailed: AugmentedEvent<ApiType, [ITuple<[u64, u32]>, Option<Bytes>, FrameSupportScheduleLookupError]>;
       /**
        * Canceled some task.
        **/
-      Canceled: AugmentedEvent<ApiType, [u32, u32]>;
+      Canceled: AugmentedEvent<ApiType, [u64, u32]>;
       /**
        * Dispatched some task.
        **/
-      Dispatched: AugmentedEvent<ApiType, [ITuple<[u32, u32]>, Option<Bytes>, Result<Null, SpRuntimeDispatchError>]>;
+      Dispatched: AugmentedEvent<ApiType, [ITuple<[u64, u32]>, Option<Bytes>, Result<Null, SpRuntimeDispatchError>]>;
       /**
        * Scheduled some task.
        **/
-      Scheduled: AugmentedEvent<ApiType, [u32, u32]>;
+      Scheduled: AugmentedEvent<ApiType, [u64, u32]>;
       /**
        * Generic event
        **/
@@ -683,10 +766,36 @@ declare module '@polkadot/api-base/types/events' {
        **/
       [key: string]: AugmentedEvent<ApiType>;
     };
+    signatureBridge: {
+      /**
+       * Chain now available for transfers (chain_id)
+       **/
+      ChainWhitelisted: AugmentedEvent<ApiType, [u64]>;
+      /**
+       * Maintainer is set
+       **/
+      MaintainerSet: AugmentedEvent<ApiType, [Bytes, Bytes]>;
+      /**
+       * Proposal has been approved
+       **/
+      ProposalApproved: AugmentedEvent<ApiType, [u64, u32]>;
+      /**
+       * Execution of call failed
+       **/
+      ProposalFailed: AugmentedEvent<ApiType, [u64, u32]>;
+      /**
+       * Execution of call succeeded
+       **/
+      ProposalSucceeded: AugmentedEvent<ApiType, [u64, u32]>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
     staking: {
       /**
        * An account has bonded this amount. \[stash, amount\]
-       *
+       * 
        * NOTE: This event is only emitted when funds are bonded via a dispatchable. Notably,
        * it will not be emitted for staking rewards when they are added to stake.
        **/
@@ -736,6 +845,10 @@ declare module '@polkadot/api-base/types/events' {
        * An account has unbonded this amount. \[stash, amount\]
        **/
       Unbonded: AugmentedEvent<ApiType, [AccountId32, u128]>;
+      /**
+       * A validator has set their preferences.
+       **/
+      ValidatorPrefsSet: AugmentedEvent<ApiType, [AccountId32, PalletStakingValidatorPrefs]>;
       /**
        * An account has called `withdraw_unbonded` and removed unbonding chunks worth `Balance`
        * from the unlocking queue. \[stash, amount\]
@@ -800,6 +913,10 @@ declare module '@polkadot/api-base/types/events' {
        **/
       BalanceSet: AugmentedEvent<ApiType, [u32, AccountId32, u128, u128]>;
       /**
+       * Deposited some balance into an account
+       **/
+      Deposited: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
+      /**
        * An account was removed whose balance was non-zero but below
        * ExistentialDeposit, resulting in an outright loss.
        **/
@@ -809,17 +926,30 @@ declare module '@polkadot/api-base/types/events' {
        **/
       Endowed: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
       /**
-       * Some reserved balance was repatriated (moved from reserved to
-       * another account).
+       * Some locked funds were unlocked
        **/
-      RepatriatedReserve: AugmentedEvent<
-        ApiType,
-        [u32, AccountId32, AccountId32, u128, FrameSupportTokensMiscBalanceStatus]
-      >;
+      LockRemoved: AugmentedEvent<ApiType, [U8aFixed, u32, AccountId32]>;
+      /**
+       * Some funds are locked
+       **/
+      LockSet: AugmentedEvent<ApiType, [U8aFixed, u32, AccountId32, u128]>;
       /**
        * Some balance was reserved (moved from free to reserved).
        **/
       Reserved: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
+      /**
+       * Some reserved balance was repatriated (moved from reserved to
+       * another account).
+       **/
+      ReserveRepatriated: AugmentedEvent<ApiType, [u32, AccountId32, AccountId32, u128, FrameSupportTokensMiscBalanceStatus]>;
+      /**
+       * Some balances were slashed (e.g. due to mis-behavior)
+       **/
+      Slashed: AugmentedEvent<ApiType, [u32, AccountId32, u128, u128]>;
+      /**
+       * The total issuance of an currency has been set
+       **/
+      TotalIssuanceSet: AugmentedEvent<ApiType, [u32, u128]>;
       /**
        * Transfer succeeded.
        **/
@@ -828,6 +958,10 @@ declare module '@polkadot/api-base/types/events' {
        * Some balance was unreserved (moved from reserved to free).
        **/
       Unreserved: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
+      /**
+       * Some balances were withdrawn (e.g. pay for transaction fee)
+       **/
+      Withdrawn: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
       /**
        * Generic event
        **/
@@ -871,6 +1005,63 @@ declare module '@polkadot/api-base/types/events' {
        * We have ended a spend period and will now allocate funds.
        **/
       Spending: AugmentedEvent<ApiType, [u128]>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    utility: {
+      /**
+       * Batch of dispatches completed fully with no error.
+       **/
+      BatchCompleted: AugmentedEvent<ApiType, []>;
+      /**
+       * Batch of dispatches completed but has errors.
+       **/
+      BatchCompletedWithErrors: AugmentedEvent<ApiType, []>;
+      /**
+       * Batch of dispatches did not complete fully. Index of first failing dispatch given, as
+       * well as the error.
+       **/
+      BatchInterrupted: AugmentedEvent<ApiType, [u32, SpRuntimeDispatchError]>;
+      /**
+       * A call was dispatched.
+       **/
+      DispatchedAs: AugmentedEvent<ApiType, [Result<Null, SpRuntimeDispatchError>]>;
+      /**
+       * A single item within a Batch of dispatches has completed with no error.
+       **/
+      ItemCompleted: AugmentedEvent<ApiType, []>;
+      /**
+       * A single item within a Batch of dispatches has completed with error.
+       **/
+      ItemFailed: AugmentedEvent<ApiType, [SpRuntimeDispatchError]>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    vAnchorBn254: {
+      /**
+       * Deposit hook has executed successfully
+       **/
+      Deposit: AugmentedEvent<ApiType, [AccountId32, u32, WebbStandaloneRuntimeElement]>;
+      MaxDepositAmountChanged: AugmentedEvent<ApiType, [u128]>;
+      MinWithdrawAmountChanged: AugmentedEvent<ApiType, [u128]>;
+      /**
+       * Transaction has been made
+       **/
+      Transaction: AugmentedEvent<ApiType, [AccountId32, u32, Vec<WebbStandaloneRuntimeElement>, i128]>;
+      /**
+       * New tree created
+       **/
+      VAnchorCreation: AugmentedEvent<ApiType, [u32]>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    vAnchorVerifier2x2Bn254: {
       /**
        * Generic event
        **/
