@@ -2,6 +2,7 @@ use core::fmt;
 
 use ark_bn254::Fr as Bn254Fr;
 use ark_ff::{BigInteger, PrimeField};
+use ark_std::UniformRand;
 use arkworks_setups::utxo::Utxo;
 use arkworks_setups::{Curve as ArkCurve, VAnchorProver};
 use js_sys::{JsString, Uint8Array};
@@ -126,6 +127,8 @@ impl JsUtxo {
 		amount: JsString,
 		chain_id: JsString,
 		index: Option<JsString>,
+		private_key: Option<Uint8Array>,
+		blinding: Option<Uint8Array>,
 	) -> Result<JsUtxo, JsValue> {
 		let curve: Curve = JsValue::from(curve)
 			.as_string()
@@ -151,22 +154,32 @@ impl JsUtxo {
 		};
 		let mut rng = OsRng;
 		let utxo = match (curve, backend) {
-			(Curve::Bn254, Backend::Arkworks) => match (input_size, anchor_size) {
-				(2, 2) => VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
-					ArkCurve::Bn254,
-					chain_id,
-					amount,
-					index,
-					&mut rng,
-				),
-				(16, 2) => VAnchorR1CSProverBn254_30_2_16_2::create_random_utxo(
-					ArkCurve::Bn254,
-					chain_id,
-					amount,
-					index,
-					&mut rng,
-				),
-				_ => return Err(OpStatusCode::InvalidNoteProtocol.into()),
+			(Curve::Bn254, Backend::Arkworks) => {
+				let pk = private_key
+					.map(|p| p.to_vec())
+					.unwrap_or(Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
+				let blinding = blinding
+					.map(|b| b.to_vec())
+					.unwrap_or(Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
+				match (input_size, anchor_size) {
+					(2, 2) => VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
+						ArkCurve::Bn254,
+						chain_id,
+						amount,
+						index,
+						pk,
+						blinding,
+					),
+					(16, 2) => VAnchorR1CSProverBn254_30_2_16_2::create_leaf_with_privates(
+						ArkCurve::Bn254,
+						chain_id,
+						amount,
+						index,
+						pk,
+						blinding,
+					),
+					_ => return Err(OpStatusCode::InvalidNoteProtocol.into()),
+				}
 			}
 			.map_err(|_| OpStatusCode::InvalidOutputUtxoConfig)
 			.map(JsUtxo::new_from_bn254_utxo),
