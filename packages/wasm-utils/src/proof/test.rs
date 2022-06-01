@@ -288,6 +288,8 @@ mod test {
 			JsString::from("10"),
 			JsString::from("0"),
 			None,
+			None,
+			None,
 		)
 		.unwrap();
 		let output_2 = JsUtxo::new(
@@ -367,6 +369,8 @@ mod test {
 			2,
 			JsString::from("10"),
 			JsString::from("0"),
+			None,
+			None,
 			None,
 		)
 		.unwrap();
@@ -449,6 +453,8 @@ mod test {
 			2,
 			JsString::from("20"),
 			JsString::from("0"),
+			None,
+			None,
 			None,
 		)
 		.unwrap();
@@ -616,6 +622,8 @@ mod test {
 			2,
 			JsString::from("20"),
 			JsString::from("0"),
+			None,
+			None,
 			None,
 		)
 		.unwrap();
