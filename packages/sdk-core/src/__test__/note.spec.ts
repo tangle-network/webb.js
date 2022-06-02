@@ -404,7 +404,7 @@ describe('Note class', () => {
     try {
       await Note.generateNote(noteInput);
     } catch (e: any) {
-      expect(e.code).to.equal(17);
+      expect(e.code).to.equal(32);
       expect(e.message).to.equal('No VAnchor leaf setup for curve Bls381, exponentiation 5, and width 5');
     }
   });
