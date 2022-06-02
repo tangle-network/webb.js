@@ -1,4 +1,4 @@
-// Copyright 2022 @webb-tools/
+// Copyright 2022 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 export * from './fixed-point-number.js';

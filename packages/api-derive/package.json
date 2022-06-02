@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/api-derive",
-  "version": "0.1.4-73",
+  "version": "0.1.4-75",
   "description": "Webb JS API derived methods",
   "type": "module",
   "main": "./cjs/index.js",
@@ -43,9 +43,9 @@
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
     "@babel/runtime": "^7.10.2",
-    "@polkadot/api": "8.1.1",
-    "@polkadot/rpc-core": "8.1.1",
-    "@webb-tools/api": "0.1.4-73",
-    "@webb-tools/types": "0.1.4-73"
+    "@polkadot/api": "8.6.2",
+    "@polkadot/rpc-core": "8.6.2",
+    "@webb-tools/api": "0.1.4-75",
+    "@webb-tools/types": "0.1.4-75"
   }
 }

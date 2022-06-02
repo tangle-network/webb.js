@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/api",
-  "version": "0.1.4-73",
+  "version": "0.1.4-75",
   "description": "Webb JS API",
   "type": "module",
   "author": "Webb Developers <drew@webb.tools>",
@@ -37,8 +37,8 @@
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
     "@babel/runtime": "^7.10.2",
-    "@polkadot/api": "8.1.1",
-    "@polkadot/rpc-core": "8.1.1",
-    "@webb-tools/api-derive": "0.1.4-73"
+    "@polkadot/api": "8.6.2",
+    "@polkadot/rpc-core": "8.6.2",
+    "@webb-tools/api-derive": "0.1.4-75"
   }
 }

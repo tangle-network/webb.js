@@ -1,4 +1,4 @@
-// Copyright 2022 @webb-tools/
+// Copyright 2022 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 import { LoggerService } from '../logger';
@@ -35,12 +35,12 @@ export abstract class WorkerWithEvents<
   protected on (event: RxPayload): void {
     const name = Object.keys(event)[0] as keyof RxPayload;
 
-    this.Logger.trace(`Got message  ${name} `, event);
+    this.Logger.trace(`Got message  ${String(name)} `, event);
     this.eventHandler(name, event[name]);
   }
 
   protected emit<Name extends keyof TxPayload> (name: Name, value: TxPayload[Name], error = false): void {
-    this.Logger.trace(`Got message ${name}`, value);
+    this.Logger.trace(`Got message ${String(name)}`, value);
     const worker = self as unknown as Worker;
     const message: TX<TxPayload> = {
       error,

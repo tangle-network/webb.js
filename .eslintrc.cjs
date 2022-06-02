@@ -29,10 +29,7 @@ module.exports = {
     ...base.rules,
     '@typescript-eslint/no-explicit-any': 'off',
     'prettier/prettier': "error",
-    'header/header': [2, 'line', [
-      {pattern: ' Copyright 2022 @webb-tools/'},
-      ' SPDX-License-Identifier: Apache-2.0'
-    ], 2],
+    'header/header': 0,
     // disable some rules brought in by polkadot/dev
     'no-useless-constructor': 0,
     '@typescript-eslint/no-unsafe-member-access': 0,
