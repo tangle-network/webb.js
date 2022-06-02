@@ -13,8 +13,8 @@ mod test {
 	use crate::proof::test_utils::{
 		generate_anchor_test_setup, generate_mixer_test_setup, generate_vanchor_note,
 		generate_vanchor_test_setup_16_mixed_inputs, generate_vanchor_test_setup_16_non_default_inputs,
-		generate_vanchor_test_setup_2_inputs, AnchorTestSetup, MixerTestSetup, VAnchorTestSetup, ANCHOR_NOTE_V1_X5_4,
-		ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V2_X5_4,
+		generate_vanchor_test_setup_2_inputs, new_utxobn_2_2, AnchorTestSetup, MixerTestSetup, VAnchorTestSetup,
+		ANCHOR_NOTE_V1_X5_4, ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V2_X5_4,
 	};
 	use crate::proof::{generate_proof_js, truncate_and_pad, JsProofInputBuilder, LeavesMapInput};
 	use crate::types::{Indices, Leaves, WasmCurve, BE};
@@ -189,30 +189,8 @@ mod test {
 
 		let curve: WasmCurve = JsValue::from(note.curve.unwrap().to_string()).into();
 
-		let output_1 = JsUtxo::new(
-			curve.clone(),
-			backend.clone(),
-			2,
-			2,
-			JsString::from("10"),
-			JsString::from("0"),
-			None,
-			None,
-			None,
-		)
-		.unwrap();
-		let output_2 = JsUtxo::new(
-			curve,
-			backend,
-			2,
-			2,
-			JsString::from("10"),
-			JsString::from("3"),
-			None,
-			None,
-			None,
-		)
-		.unwrap();
+		let output_1 = new_utxobn_2_2(note.curve.unwrap(), 10, 0);
+		let output_2 = new_utxobn_2_2(note.curve.unwrap(), 10, 3);
 
 		proof_input_builder.set_notes(notes).unwrap();
 		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
@@ -276,34 +254,9 @@ mod test {
 		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
 
 		let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
-		let backend: BE = JsValue::from(note.backend.clone().unwrap().to_string()).into();
 
-		let curve: WasmCurve = JsValue::from(note.curve.unwrap().to_string()).into();
-
-		let output_1 = JsUtxo::new(
-			curve.clone(),
-			backend.clone(),
-			2,
-			2,
-			JsString::from("10"),
-			JsString::from("0"),
-			None,
-			None,
-			None,
-		)
-		.unwrap();
-		let output_2 = JsUtxo::new(
-			curve,
-			backend,
-			2,
-			2,
-			JsString::from("10"),
-			JsString::from("3"),
-			None,
-			None,
-			None,
-		)
-		.unwrap();
+		let output_1 = new_utxobn_2_2(note.curve.unwrap(), 10, 0);
+		let output_2 = new_utxobn_2_2(note.curve.unwrap(), 10, 0);
 
 		proof_input_builder.set_notes(notes).unwrap();
 		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
@@ -362,30 +315,8 @@ mod test {
 
 		let curve: WasmCurve = JsValue::from(note.curve.unwrap().to_string()).into();
 
-		let output_1 = JsUtxo::new(
-			curve.clone(),
-			backend.clone(),
-			2,
-			2,
-			JsString::from("10"),
-			JsString::from("0"),
-			None,
-			None,
-			None,
-		)
-		.unwrap();
-		let output_2 = JsUtxo::new(
-			curve,
-			backend,
-			2,
-			2,
-			JsString::from("10"),
-			JsString::from("3"),
-			None,
-			None,
-			None,
-		)
-		.unwrap();
+		let output_1 = new_utxobn_2_2(note.curve.unwrap(), 10, 0);
+		let output_2 = new_utxobn_2_2(note.curve.unwrap(), 10, 3);
 
 		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
 
@@ -446,30 +377,8 @@ mod test {
 
 		let curve: WasmCurve = JsValue::from(note.curve.unwrap().to_string()).into();
 
-		let output_1 = JsUtxo::new(
-			curve.clone(),
-			backend.clone(),
-			2,
-			2,
-			JsString::from("20"),
-			JsString::from("0"),
-			None,
-			None,
-			None,
-		)
-		.unwrap();
-		let output_2 = JsUtxo::new(
-			curve,
-			backend,
-			2,
-			2,
-			JsString::from("20"),
-			JsString::from("3"),
-			None,
-			None,
-			None,
-		)
-		.unwrap();
+		let output_1 = new_utxobn_2_2(note.curve.unwrap(), 20, 0);
+		let output_2 = new_utxobn_2_2(note.curve.unwrap(), 20, 3);
 
 		proof_input_builder.set_notes(notes).unwrap();
 		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
@@ -525,30 +434,8 @@ mod test {
 		let backend: BE = JsValue::from(note.backend.clone().unwrap().to_string()).into();
 		let curve: WasmCurve = JsValue::from(note.curve.unwrap().to_string()).into();
 
-		let output_1 = JsUtxo::new(
-			curve.clone(),
-			backend.clone(),
-			2,
-			2,
-			JsString::from("20"),
-			JsString::from("0"),
-			None,
-			None,
-			None,
-		)
-		.unwrap();
-		let output_2 = JsUtxo::new(
-			curve,
-			backend,
-			2,
-			2,
-			JsString::from("20"),
-			JsString::from("3"),
-			None,
-			None,
-			None,
-		)
-		.unwrap();
+		let output_1 = new_utxobn_2_2(note.curve.unwrap(), 20, 0);
+		let output_2 = new_utxobn_2_2(note.curve.unwrap(), 20, 3);
 
 		proof_input_builder.set_notes(notes).unwrap();
 		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
@@ -615,30 +502,8 @@ mod test {
 		let backend: BE = JsValue::from(note.backend.clone().unwrap().to_string()).into();
 		let curve: WasmCurve = JsValue::from(note.curve.unwrap().to_string()).into();
 
-		let output_1 = JsUtxo::new(
-			curve.clone(),
-			backend.clone(),
-			2,
-			2,
-			JsString::from("20"),
-			JsString::from("0"),
-			None,
-			None,
-			None,
-		)
-		.unwrap();
-		let output_2 = JsUtxo::new(
-			curve,
-			backend,
-			2,
-			2,
-			JsString::from("20"),
-			JsString::from("3"),
-			None,
-			None,
-			None,
-		)
-		.unwrap();
+		let output_1 = new_utxobn_2_2(note.curve.unwrap(), 20, 0);
+		let output_2 = new_utxobn_2_2(note.curve.unwrap(), 20, 3);
 
 		proof_input_builder.set_notes(notes).unwrap();
 		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
