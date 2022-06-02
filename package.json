@@ -1,5 +1,5 @@
 {
-  "version": "0.1.4-74",
+  "version": "0.1.4-75",
   "private": true,
   "type": "module",
   "engines": {
@@ -40,8 +40,8 @@
     "doc": "npx typedoc --name \"Webb Tools API\" --includeVersion --options ./typedoc.json"
   },
   "devDependencies": {
-    "@babel/core": "7.18.2",
     "@babel/cli": "7.17.10",
+    "@babel/core": "7.18.2",
     "@babel/plugin-syntax-import-assertions": "7.17.12",
     "@babel/register": "7.17.7",
     "@babel/runtime": "7.18.3",
