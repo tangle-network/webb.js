@@ -224,6 +224,8 @@ pub fn generate_vanchor_test_js_setup() -> VAnchorTestSetup {
 		JsString::from("10"),
 		JsString::from(chain_id.to_string()),
 		None,
+		None,
+		None,
 	)
 	.unwrap();
 	let output_2 = JsUtxo::new(
@@ -233,6 +235,8 @@ pub fn generate_vanchor_test_js_setup() -> VAnchorTestSetup {
 		2,
 		JsString::from("0"),
 		JsString::from(chain_id.to_string()),
+		None,
+		None,
 		None,
 	)
 	.unwrap();

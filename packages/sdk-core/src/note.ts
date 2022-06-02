@@ -27,6 +27,8 @@ import type { Backend, Curve, HashFunction, JsNote, NoteProtocol, Version } from
  * @param secrets - Optional secrets to use. When passed, secret generation is skipped for the resulting note instance.
  * @param exponentiation - The exponentiation to use. This is the exponentiation of the SBOX hash function component (for Poseidon)
  * @param index - UTXO index. Useful identifying information for deposits in merkle trees.
+ * @param privateKey - Utxo private key used for generation VAnchor notes
+ * @param blinding - Utxo blinding value used for generation VAnchor notes
  */
 export type NoteGenInput = {
   protocol: NoteProtocol;
@@ -45,6 +47,8 @@ export type NoteGenInput = {
   width: string;
   exponentiation: string;
   index?: number;
+  privateKey?: Uint8Array,
+  blinding?: Uint8Array
 };
 
 /**
@@ -202,6 +206,14 @@ export class Note {
 
       if (noteGenInput.index !== undefined) {
         noteBuilderInput.index(String(noteGenInput.index));
+      }
+
+      if (noteGenInput.blinding !== undefined) {
+        noteBuilderInput.setBlinding(noteGenInput.blinding);
+      }
+
+      if (noteGenInput.privateKey !== undefined) {
+        noteBuilderInput.setPrivateKey(noteGenInput.privateKey);
       }
 
       const depositNote = noteBuilderInput.build();
