@@ -47,8 +47,8 @@ pub fn get_leaf_with_private_raw(
 ) -> Result<JsUtxo, OperationError> {
 	let utxo: JsUtxo = match (curve, exponentiation, width) {
 		(Curve::Bn254, 5, 5) => {
-			let private_key = private_key.unwrap_or(Bn254Fr::rand(&mut OsRng).into_repr().to_bytes_le());
-			let blinding = blinding.unwrap_or(Bn254Fr::rand(&mut OsRng).into_repr().to_bytes_le());
+			let private_key = private_key.unwrap_or_else(|| Bn254Fr::rand(&mut OsRng).into_repr().to_bytes_le());
+			let blinding = blinding.unwrap_or_else(|| Bn254Fr::rand(&mut OsRng).into_repr().to_bytes_le());
 			VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
 				ArkCurve::Bn254,
 				chain_id,

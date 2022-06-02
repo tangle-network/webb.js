@@ -119,6 +119,7 @@ impl JsUtxo {
 #[wasm_bindgen]
 impl JsUtxo {
 	#[wasm_bindgen(constructor)]
+	#[allow(clippy::too_many_arguments)]
 	pub fn new(
 		curve: WasmCurve,
 		backend: BE,
@@ -157,10 +158,10 @@ impl JsUtxo {
 			(Curve::Bn254, Backend::Arkworks) => {
 				let pk = private_key
 					.map(|p| p.to_vec())
-					.unwrap_or(Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
+					.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
 				let blinding = blinding
 					.map(|b| b.to_vec())
-					.unwrap_or(Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
+					.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
 				match (input_size, anchor_size) {
 					(2, 2) => VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
 						ArkCurve::Bn254,
