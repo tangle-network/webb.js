@@ -2,26 +2,10 @@
 /* eslint-disable */
 
 import type { ApiTypes } from '@polkadot/api-base/types';
-import type { Bytes, Null, Option, Result, U8aFixed, Vec, bool, i128, u128, u32, u64, u8 } from '@polkadot/types-codec';
+import type { Bytes, Null, Option, Result, U8aFixed, Vec, bool, u128, u32, u64, u8 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H256 } from '@polkadot/types/interfaces/runtime';
-import type {
-  DkgRuntimePrimitivesCryptoPublic,
-  DkgRuntimePrimitivesMisbehaviourType,
-  DkgRuntimePrimitivesProposalDkgPayloadKey,
-  DkgRuntimePrimitivesProposalProposalKind,
-  EggStandaloneRuntimeProtocolSubstrateConfigElement,
-  FrameSupportScheduleLookupError,
-  FrameSupportTokensMiscBalanceStatus,
-  FrameSupportWeightsDispatchInfo,
-  PalletAssetRegistryAssetType,
-  PalletDemocracyVoteAccountVote,
-  PalletDemocracyVoteThreshold,
-  PalletElectionProviderMultiPhaseElectionCompute,
-  SpFinalityGrandpaAppPublic,
-  SpRuntimeDispatchError,
-  WebbProposalsHeaderTypedChainId,
-} from '@polkadot/types/lookup';
+import type { DkgRuntimePrimitivesCryptoPublic, DkgRuntimePrimitivesMisbehaviourType, DkgRuntimePrimitivesProposalDkgPayloadKey, DkgRuntimePrimitivesProposalProposalKind, EggStandaloneRuntimeProtocolSubstrateConfigElement, FrameSupportScheduleLookupError, FrameSupportTokensMiscBalanceStatus, FrameSupportWeightsDispatchInfo, PalletAssetRegistryAssetType, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletNominationPoolsPoolState, PalletStakingValidatorPrefs, SpFinalityGrandpaAppPublic, SpRuntimeDispatchError, WebbProposalsHeaderTypedChainId } from '@polkadot/types/lookup';
 
 declare module '@polkadot/api-base/types/events' {
   export interface AugmentedEvents<ApiType extends ApiTypes> {
@@ -70,7 +54,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * Native location set for an asset.
        **/
-      LocationSet: AugmentedEvent<ApiType, [u32, Null]>;
+      LocationSet: AugmentedEvent<ApiType, [u32, u32]>;
       /**
        * Metadata set for an asset.
        **/
@@ -124,10 +108,7 @@ declare module '@polkadot/api-base/types/events' {
        * Some balance was moved from the reserve of the first account to the second account.
        * Final argument indicates the destination balance type.
        **/
-      ReserveRepatriated: AugmentedEvent<
-        ApiType,
-        [AccountId32, AccountId32, u128, FrameSupportTokensMiscBalanceStatus]
-      >;
+      ReserveRepatriated: AugmentedEvent<ApiType, [AccountId32, AccountId32, u128, FrameSupportTokensMiscBalanceStatus]>;
       /**
        * Some amount was removed from the account (e.g. for misbehavior).
        **/
@@ -267,28 +248,6 @@ declare module '@polkadot/api-base/types/events' {
        **/
       [key: string]: AugmentedEvent<ApiType>;
     };
-    currencies: {
-      /**
-       * Update balance success.
-       **/
-      BalanceUpdated: AugmentedEvent<ApiType, [u32, AccountId32, i128]>;
-      /**
-       * Deposit success.
-       **/
-      Deposited: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
-      /**
-       * Currency transfer success.
-       **/
-      Transferred: AugmentedEvent<ApiType, [u32, AccountId32, AccountId32, u128]>;
-      /**
-       * Withdraw success.
-       **/
-      Withdrawn: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
     democracy: {
       /**
        * A proposal_hash has been blacklisted permanently.
@@ -375,10 +334,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * Misbehaviour reports submitted
        **/
-      MisbehaviourReportsSubmitted: AugmentedEvent<
-        ApiType,
-        [DkgRuntimePrimitivesMisbehaviourType, Vec<DkgRuntimePrimitivesCryptoPublic>]
-      >;
+      MisbehaviourReportsSubmitted: AugmentedEvent<ApiType, [DkgRuntimePrimitivesMisbehaviourType, Vec<DkgRuntimePrimitivesCryptoPublic>]>;
       /**
        * Next public key signature submitted
        **/
@@ -416,10 +372,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * Event When a Proposal Gets Signed by DKG.
        **/
-      ProposalSigned: AugmentedEvent<
-        ApiType,
-        [DkgRuntimePrimitivesProposalDkgPayloadKey, WebbProposalsHeaderTypedChainId, Bytes, Bytes]
-      >;
+      ProposalSigned: AugmentedEvent<ApiType, [DkgRuntimePrimitivesProposalDkgPayloadKey, WebbProposalsHeaderTypedChainId, Bytes, Bytes]>;
       /**
        * Generic event
        **/
@@ -495,10 +448,10 @@ declare module '@polkadot/api-base/types/events' {
       Slashed: AugmentedEvent<ApiType, [AccountId32, u128]>;
       /**
        * A solution was stored with the given compute.
-       *
+       * 
        * If the solution is signed, this means that it hasn't yet been processed. If the
        * solution is unsigned, this means that it has also been processed.
-       *
+       * 
        * The `bool` is `true` when a previous solution was ejected to make room for this one.
        **/
       SolutionStored: AugmentedEvent<ApiType, [PalletElectionProviderMultiPhaseElectionCompute, bool]>;
@@ -515,7 +468,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * A candidate was slashed by amount due to failing to obtain a seat as member or
        * runner-up.
-       *
+       * 
        * Note that old members and runners-up are also candidates.
        **/
       CandidateSlashed: AugmentedEvent<ApiType, [AccountId32, u128]>;
@@ -578,6 +531,24 @@ declare module '@polkadot/api-base/types/events' {
        **/
       [key: string]: AugmentedEvent<ApiType>;
     };
+    indices: {
+      /**
+       * A account index was assigned.
+       **/
+      IndexAssigned: AugmentedEvent<ApiType, [AccountId32, u32]>;
+      /**
+       * A account index has been freed up (unassigned).
+       **/
+      IndexFreed: AugmentedEvent<ApiType, [u32]>;
+      /**
+       * A account index has been frozen to its current account ID.
+       **/
+      IndexFrozen: AugmentedEvent<ApiType, [u32, AccountId32]>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
     linkableTreeBn254: {
       /**
        * New tree created
@@ -615,6 +586,50 @@ declare module '@polkadot/api-base/types/events' {
       [key: string]: AugmentedEvent<ApiType>;
     };
     mixerVerifierBn254: {
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    nominationPools: {
+      /**
+       * A member has became bonded in a pool.
+       **/
+      Bonded: AugmentedEvent<ApiType, [AccountId32, u32, u128, bool]>;
+      /**
+       * A pool has been created.
+       **/
+      Created: AugmentedEvent<ApiType, [AccountId32, u32]>;
+      /**
+       * A pool has been destroyed.
+       **/
+      Destroyed: AugmentedEvent<ApiType, [u32]>;
+      /**
+       * A member has been removed from a pool.
+       * 
+       * The removal can be voluntary (withdrawn all unbonded funds) or involuntary (kicked).
+       **/
+      MemberRemoved: AugmentedEvent<ApiType, [u32, AccountId32]>;
+      /**
+       * A payout has been made to a member.
+       **/
+      PaidOut: AugmentedEvent<ApiType, [AccountId32, u32, u128]>;
+      /**
+       * The roles of a pool have been updated to the given new roles.
+       **/
+      RolesUpdated: AugmentedEvent<ApiType, [AccountId32, AccountId32, AccountId32]>;
+      /**
+       * The state of a pool has changed
+       **/
+      StateChanged: AugmentedEvent<ApiType, [u32, PalletNominationPoolsPoolState]>;
+      /**
+       * A member has unbonded from their pool.
+       **/
+      Unbonded: AugmentedEvent<ApiType, [AccountId32, u32, u128]>;
+      /**
+       * A member has withdrawn from their pool.
+       **/
+      Withdrawn: AugmentedEvent<ApiType, [AccountId32, u32, u128]>;
       /**
        * Generic event
        **/
@@ -686,7 +701,7 @@ declare module '@polkadot/api-base/types/events' {
     staking: {
       /**
        * An account has bonded this amount. \[stash, amount\]
-       *
+       * 
        * NOTE: This event is only emitted when funds are bonded via a dispatchable. Notably,
        * it will not be emitted for staking rewards when they are added to stake.
        **/
@@ -736,6 +751,10 @@ declare module '@polkadot/api-base/types/events' {
        * An account has unbonded this amount. \[stash, amount\]
        **/
       Unbonded: AugmentedEvent<ApiType, [AccountId32, u128]>;
+      /**
+       * A validator has set their preferences.
+       **/
+      ValidatorPrefsSet: AugmentedEvent<ApiType, [AccountId32, PalletStakingValidatorPrefs]>;
       /**
        * An account has called `withdraw_unbonded` and removed unbonding chunks worth `Balance`
        * from the unlocking queue. \[stash, amount\]
@@ -800,6 +819,10 @@ declare module '@polkadot/api-base/types/events' {
        **/
       BalanceSet: AugmentedEvent<ApiType, [u32, AccountId32, u128, u128]>;
       /**
+       * Deposited some balance into an account
+       **/
+      Deposited: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
+      /**
        * An account was removed whose balance was non-zero but below
        * ExistentialDeposit, resulting in an outright loss.
        **/
@@ -809,17 +832,30 @@ declare module '@polkadot/api-base/types/events' {
        **/
       Endowed: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
       /**
-       * Some reserved balance was repatriated (moved from reserved to
-       * another account).
+       * Some locked funds were unlocked
        **/
-      RepatriatedReserve: AugmentedEvent<
-        ApiType,
-        [u32, AccountId32, AccountId32, u128, FrameSupportTokensMiscBalanceStatus]
-      >;
+      LockRemoved: AugmentedEvent<ApiType, [U8aFixed, u32, AccountId32]>;
+      /**
+       * Some funds are locked
+       **/
+      LockSet: AugmentedEvent<ApiType, [U8aFixed, u32, AccountId32, u128]>;
       /**
        * Some balance was reserved (moved from free to reserved).
        **/
       Reserved: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
+      /**
+       * Some reserved balance was repatriated (moved from reserved to
+       * another account).
+       **/
+      ReserveRepatriated: AugmentedEvent<ApiType, [u32, AccountId32, AccountId32, u128, FrameSupportTokensMiscBalanceStatus]>;
+      /**
+       * Some balances were slashed (e.g. due to mis-behavior)
+       **/
+      Slashed: AugmentedEvent<ApiType, [u32, AccountId32, u128, u128]>;
+      /**
+       * The total issuance of an currency has been set
+       **/
+      TotalIssuanceSet: AugmentedEvent<ApiType, [u32, u128]>;
       /**
        * Transfer succeeded.
        **/
@@ -828,6 +864,10 @@ declare module '@polkadot/api-base/types/events' {
        * Some balance was unreserved (moved from reserved to free).
        **/
       Unreserved: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
+      /**
+       * Some balances were withdrawn (e.g. pay for transaction fee)
+       **/
+      Withdrawn: AugmentedEvent<ApiType, [u32, AccountId32, u128]>;
       /**
        * Generic event
        **/

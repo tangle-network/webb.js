@@ -65,7 +65,7 @@
   },
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
-    "@polkadot/util": "9.0.1",
+    "@polkadot/util": "9.3.1",
     "@types/events": "^3.0.0",
     "@webb-tools/api": "0.1.4-74",
     "@webb-tools/wasm-utils": "0.1.4-74",

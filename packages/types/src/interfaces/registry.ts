@@ -1,245 +1,7 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import type {
-  DkgRuntimePrimitivesAggregatedMisbehaviourReports,
-  DkgRuntimePrimitivesAggregatedPublicKeys,
-  DkgRuntimePrimitivesCryptoPublic,
-  DkgRuntimePrimitivesMisbehaviourType,
-  DkgRuntimePrimitivesProposal,
-  DkgRuntimePrimitivesProposalDkgPayloadKey,
-  DkgRuntimePrimitivesProposalProposalKind,
-  DkgRuntimePrimitivesProposalRefreshProposalSigned,
-  EggStandaloneRuntimeNposSolution16,
-  EggStandaloneRuntimeOpaqueSessionKeys,
-  EggStandaloneRuntimeOriginCaller,
-  EggStandaloneRuntimeProtocolSubstrateConfigElement,
-  EggStandaloneRuntimeRuntime,
-  FinalityGrandpaEquivocationPrecommit,
-  FinalityGrandpaEquivocationPrevote,
-  FinalityGrandpaPrecommit,
-  FinalityGrandpaPrevote,
-  FrameSupportDispatchRawOrigin,
-  FrameSupportPalletId,
-  FrameSupportScheduleLookupError,
-  FrameSupportScheduleMaybeHashed,
-  FrameSupportTokensMiscBalanceStatus,
-  FrameSupportWeightsDispatchClass,
-  FrameSupportWeightsDispatchInfo,
-  FrameSupportWeightsPays,
-  FrameSupportWeightsPerDispatchClassU32,
-  FrameSupportWeightsPerDispatchClassU64,
-  FrameSupportWeightsPerDispatchClassWeightsPerClass,
-  FrameSupportWeightsRuntimeDbWeight,
-  FrameSupportWeightsWeightToFeeCoefficient,
-  FrameSystemAccountInfo,
-  FrameSystemCall,
-  FrameSystemError,
-  FrameSystemEvent,
-  FrameSystemEventRecord,
-  FrameSystemExtensionsCheckGenesis,
-  FrameSystemExtensionsCheckNonce,
-  FrameSystemExtensionsCheckSpecVersion,
-  FrameSystemExtensionsCheckTxVersion,
-  FrameSystemExtensionsCheckWeight,
-  FrameSystemLastRuntimeUpgradeInfo,
-  FrameSystemLimitsBlockLength,
-  FrameSystemLimitsBlockWeights,
-  FrameSystemLimitsWeightsPerClass,
-  FrameSystemPhase,
-  OrmlCurrenciesModuleCall,
-  OrmlCurrenciesModuleError,
-  OrmlCurrenciesModuleEvent,
-  OrmlTokensAccountData,
-  OrmlTokensBalanceLock,
-  OrmlTokensModuleCall,
-  OrmlTokensModuleError,
-  OrmlTokensModuleEvent,
-  PalletAnchorAnchorMetadata,
-  PalletAnchorCall,
-  PalletAnchorError,
-  PalletAnchorEvent,
-  PalletAnchorHandlerCall,
-  PalletAnchorHandlerError,
-  PalletAnchorHandlerEvent,
-  PalletAnchorHandlerUpdateRecord,
-  PalletAssetRegistryAssetDetails,
-  PalletAssetRegistryAssetMetadata,
-  PalletAssetRegistryAssetType,
-  PalletAssetRegistryCall,
-  PalletAssetRegistryError,
-  PalletAssetRegistryEvent,
-  PalletAuthorshipCall,
-  PalletAuthorshipError,
-  PalletAuthorshipUncleEntryItem,
-  PalletBagsListCall,
-  PalletBagsListError,
-  PalletBagsListEvent,
-  PalletBagsListListBag,
-  PalletBagsListListNode,
-  PalletBalancesAccountData,
-  PalletBalancesBalanceLock,
-  PalletBalancesCall,
-  PalletBalancesError,
-  PalletBalancesEvent,
-  PalletBalancesReasons,
-  PalletBalancesReleases,
-  PalletBalancesReserveData,
-  PalletBountiesBounty,
-  PalletBountiesBountyStatus,
-  PalletBountiesCall,
-  PalletBountiesError,
-  PalletBountiesEvent,
-  PalletChildBountiesCall,
-  PalletChildBountiesChildBounty,
-  PalletChildBountiesChildBountyStatus,
-  PalletChildBountiesError,
-  PalletChildBountiesEvent,
-  PalletCollectiveCall,
-  PalletCollectiveError,
-  PalletCollectiveEvent,
-  PalletCollectiveRawOrigin,
-  PalletCollectiveVotes,
-  PalletDemocracyCall,
-  PalletDemocracyConviction,
-  PalletDemocracyDelegations,
-  PalletDemocracyError,
-  PalletDemocracyEvent,
-  PalletDemocracyPreimageStatus,
-  PalletDemocracyReferendumInfo,
-  PalletDemocracyReferendumStatus,
-  PalletDemocracyReleases,
-  PalletDemocracyTally,
-  PalletDemocracyVoteAccountVote,
-  PalletDemocracyVotePriorLock,
-  PalletDemocracyVoteThreshold,
-  PalletDemocracyVoteVoting,
-  PalletDkgMetadataCall,
-  PalletDkgMetadataError,
-  PalletDkgMetadataEvent,
-  PalletDkgMetadataRoundMetadata,
-  PalletDkgProposalHandlerCall,
-  PalletDkgProposalHandlerError,
-  PalletDkgProposalHandlerEvent,
-  PalletDkgProposalsCall,
-  PalletDkgProposalsError,
-  PalletDkgProposalsEvent,
-  PalletDkgProposalsProposalStatus,
-  PalletDkgProposalsProposalVotes,
-  PalletElectionProviderMultiPhaseCall,
-  PalletElectionProviderMultiPhaseElectionCompute,
-  PalletElectionProviderMultiPhaseError,
-  PalletElectionProviderMultiPhaseEvent,
-  PalletElectionProviderMultiPhasePhase,
-  PalletElectionProviderMultiPhaseRawSolution,
-  PalletElectionProviderMultiPhaseReadySolution,
-  PalletElectionProviderMultiPhaseRoundSnapshot,
-  PalletElectionProviderMultiPhaseSignedSignedSubmission,
-  PalletElectionProviderMultiPhaseSolutionOrSnapshotSize,
-  PalletElectionsPhragmenCall,
-  PalletElectionsPhragmenError,
-  PalletElectionsPhragmenEvent,
-  PalletElectionsPhragmenRenouncing,
-  PalletElectionsPhragmenSeatHolder,
-  PalletElectionsPhragmenVoter,
-  PalletGrandpaCall,
-  PalletGrandpaError,
-  PalletGrandpaEvent,
-  PalletGrandpaStoredPendingChange,
-  PalletGrandpaStoredState,
-  PalletHasherCall,
-  PalletHasherError,
-  PalletHasherEvent,
-  PalletLinkableTreeCall,
-  PalletLinkableTreeEdgeMetadata,
-  PalletLinkableTreeError,
-  PalletLinkableTreeEvent,
-  PalletMixerCall,
-  PalletMixerError,
-  PalletMixerEvent,
-  PalletMixerMixerMetadata,
-  PalletMtCall,
-  PalletMtError,
-  PalletMtEvent,
-  PalletMtTreeMetadata,
-  PalletOffencesEvent,
-  PalletPreimageCall,
-  PalletPreimageError,
-  PalletPreimageEvent,
-  PalletPreimageRequestStatus,
-  PalletSchedulerCall,
-  PalletSchedulerError,
-  PalletSchedulerEvent,
-  PalletSchedulerScheduledV3,
-  PalletSessionCall,
-  PalletSessionError,
-  PalletSessionEvent,
-  PalletSignatureBridgeCall,
-  PalletSignatureBridgeError,
-  PalletSignatureBridgeEvent,
-  PalletStakingActiveEraInfo,
-  PalletStakingEraRewardPoints,
-  PalletStakingExposure,
-  PalletStakingForcing,
-  PalletStakingIndividualExposure,
-  PalletStakingNominations,
-  PalletStakingPalletCall,
-  PalletStakingPalletError,
-  PalletStakingPalletEvent,
-  PalletStakingReleases,
-  PalletStakingRewardDestination,
-  PalletStakingSlashingSlashingSpans,
-  PalletStakingSlashingSpanRecord,
-  PalletStakingStakingLedger,
-  PalletStakingUnappliedSlash,
-  PalletStakingUnlockChunk,
-  PalletStakingValidatorPrefs,
-  PalletSudoCall,
-  PalletSudoError,
-  PalletSudoEvent,
-  PalletTimestampCall,
-  PalletTokenWrapperCall,
-  PalletTokenWrapperError,
-  PalletTokenWrapperEvent,
-  PalletTransactionPaymentChargeTransactionPayment,
-  PalletTransactionPaymentReleases,
-  PalletTreasuryCall,
-  PalletTreasuryError,
-  PalletTreasuryEvent,
-  PalletTreasuryProposal,
-  PalletVerifierCall,
-  PalletVerifierError,
-  PalletVerifierEvent,
-  SpConsensusAuraSr25519AppSr25519Public,
-  SpCoreCryptoKeyTypeId,
-  SpCoreEcdsaPublic,
-  SpCoreEcdsaSignature,
-  SpCoreEd25519Public,
-  SpCoreEd25519Signature,
-  SpCoreSr25519Public,
-  SpCoreSr25519Signature,
-  SpCoreVoid,
-  SpFinalityGrandpaAppPublic,
-  SpFinalityGrandpaAppSignature,
-  SpFinalityGrandpaEquivocation,
-  SpFinalityGrandpaEquivocationProof,
-  SpNposElectionsSupport,
-  SpRuntimeArithmeticError,
-  SpRuntimeBlakeTwo256,
-  SpRuntimeDigest,
-  SpRuntimeDigestDigestItem,
-  SpRuntimeDispatchError,
-  SpRuntimeHeader,
-  SpRuntimeModuleError,
-  SpRuntimeMultiSignature,
-  SpRuntimeTokenError,
-  SpSessionMembershipProof,
-  SpStakingOffenceOffenceDetails,
-  SpVersionRuntimeVersion,
-  WebbPrimitivesDepositDetails,
-  WebbProposalsHeaderResourceId,
-  WebbProposalsHeaderTypedChainId,
-} from '@polkadot/types/lookup';
+import type { DkgRuntimePrimitivesAggregatedMisbehaviourReports, DkgRuntimePrimitivesAggregatedPublicKeys, DkgRuntimePrimitivesCryptoPublic, DkgRuntimePrimitivesMisbehaviourType, DkgRuntimePrimitivesProposal, DkgRuntimePrimitivesProposalDkgPayloadKey, DkgRuntimePrimitivesProposalProposalKind, DkgRuntimePrimitivesProposalRefreshProposalSigned, EggStandaloneRuntimeNposSolution16, EggStandaloneRuntimeOpaqueSessionKeys, EggStandaloneRuntimeOriginCaller, EggStandaloneRuntimeProtocolSubstrateConfigElement, EggStandaloneRuntimeRuntime, FinalityGrandpaEquivocationPrecommit, FinalityGrandpaEquivocationPrevote, FinalityGrandpaPrecommit, FinalityGrandpaPrevote, FrameSupportDispatchRawOrigin, FrameSupportPalletId, FrameSupportScheduleLookupError, FrameSupportScheduleMaybeHashed, FrameSupportTokensMiscBalanceStatus, FrameSupportWeightsDispatchClass, FrameSupportWeightsDispatchInfo, FrameSupportWeightsPays, FrameSupportWeightsPerDispatchClassU32, FrameSupportWeightsPerDispatchClassU64, FrameSupportWeightsPerDispatchClassWeightsPerClass, FrameSupportWeightsRuntimeDbWeight, FrameSupportWeightsWeightToFeeCoefficient, FrameSystemAccountInfo, FrameSystemCall, FrameSystemError, FrameSystemEvent, FrameSystemEventRecord, FrameSystemExtensionsCheckGenesis, FrameSystemExtensionsCheckNonZeroSender, FrameSystemExtensionsCheckNonce, FrameSystemExtensionsCheckSpecVersion, FrameSystemExtensionsCheckTxVersion, FrameSystemExtensionsCheckWeight, FrameSystemLastRuntimeUpgradeInfo, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, FrameSystemLimitsWeightsPerClass, FrameSystemPhase, OrmlCurrenciesModuleCall, OrmlCurrenciesModuleError, OrmlTokensAccountData, OrmlTokensBalanceLock, OrmlTokensModuleCall, OrmlTokensModuleError, OrmlTokensModuleEvent, OrmlTokensReserveData, PalletAnchorAnchorMetadata, PalletAnchorCall, PalletAnchorError, PalletAnchorEvent, PalletAnchorHandlerCall, PalletAnchorHandlerError, PalletAnchorHandlerEvent, PalletAnchorHandlerUpdateRecord, PalletAssetRegistryAssetDetails, PalletAssetRegistryAssetMetadata, PalletAssetRegistryAssetType, PalletAssetRegistryCall, PalletAssetRegistryError, PalletAssetRegistryEvent, PalletAuthorshipCall, PalletAuthorshipError, PalletAuthorshipUncleEntryItem, PalletBagsListCall, PalletBagsListError, PalletBagsListEvent, PalletBagsListListBag, PalletBagsListListListError, PalletBagsListListNode, PalletBalancesAccountData, PalletBalancesBalanceLock, PalletBalancesCall, PalletBalancesError, PalletBalancesEvent, PalletBalancesReasons, PalletBalancesReleases, PalletBalancesReserveData, PalletBountiesBounty, PalletBountiesBountyStatus, PalletBountiesCall, PalletBountiesError, PalletBountiesEvent, PalletChildBountiesCall, PalletChildBountiesChildBounty, PalletChildBountiesChildBountyStatus, PalletChildBountiesError, PalletChildBountiesEvent, PalletCollectiveCall, PalletCollectiveError, PalletCollectiveEvent, PalletCollectiveRawOrigin, PalletCollectiveVotes, PalletDemocracyCall, PalletDemocracyConviction, PalletDemocracyDelegations, PalletDemocracyError, PalletDemocracyEvent, PalletDemocracyPreimageStatus, PalletDemocracyReferendumInfo, PalletDemocracyReferendumStatus, PalletDemocracyReleases, PalletDemocracyTally, PalletDemocracyVoteAccountVote, PalletDemocracyVotePriorLock, PalletDemocracyVoteThreshold, PalletDemocracyVoteVoting, PalletDkgMetadataCall, PalletDkgMetadataError, PalletDkgMetadataEvent, PalletDkgMetadataRoundMetadata, PalletDkgProposalHandlerCall, PalletDkgProposalHandlerError, PalletDkgProposalHandlerEvent, PalletDkgProposalsCall, PalletDkgProposalsError, PalletDkgProposalsEvent, PalletDkgProposalsProposalStatus, PalletDkgProposalsProposalVotes, PalletElectionProviderMultiPhaseCall, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhaseError, PalletElectionProviderMultiPhaseEvent, PalletElectionProviderMultiPhasePhase, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseReadySolution, PalletElectionProviderMultiPhaseRoundSnapshot, PalletElectionProviderMultiPhaseSignedSignedSubmission, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenCall, PalletElectionsPhragmenError, PalletElectionsPhragmenEvent, PalletElectionsPhragmenRenouncing, PalletElectionsPhragmenSeatHolder, PalletElectionsPhragmenVoter, PalletGrandpaCall, PalletGrandpaError, PalletGrandpaEvent, PalletGrandpaStoredPendingChange, PalletGrandpaStoredState, PalletHasherCall, PalletHasherError, PalletHasherEvent, PalletIndicesCall, PalletIndicesError, PalletIndicesEvent, PalletLinkableTreeCall, PalletLinkableTreeEdgeMetadata, PalletLinkableTreeError, PalletLinkableTreeEvent, PalletMixerCall, PalletMixerError, PalletMixerEvent, PalletMixerMixerMetadata, PalletMtCall, PalletMtError, PalletMtEvent, PalletMtTreeMetadata, PalletNominationPoolsBondExtra, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsCall, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsError, PalletNominationPoolsEvent, PalletNominationPoolsPoolMember, PalletNominationPoolsPoolRoles, PalletNominationPoolsPoolState, PalletNominationPoolsRewardPool, PalletNominationPoolsSubPools, PalletNominationPoolsUnbondPool, PalletOffencesEvent, PalletPreimageCall, PalletPreimageError, PalletPreimageEvent, PalletPreimageRequestStatus, PalletSchedulerCall, PalletSchedulerError, PalletSchedulerEvent, PalletSchedulerScheduledV3, PalletSessionCall, PalletSessionError, PalletSessionEvent, PalletSignatureBridgeCall, PalletSignatureBridgeError, PalletSignatureBridgeEvent, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletStakingExposure, PalletStakingForcing, PalletStakingIndividualExposure, PalletStakingNominations, PalletStakingPalletCall, PalletStakingPalletConfigOpPerbill, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingPalletError, PalletStakingPalletEvent, PalletStakingReleases, PalletStakingRewardDestination, PalletStakingSlashingSlashingSpans, PalletStakingSlashingSpanRecord, PalletStakingStakingLedger, PalletStakingUnappliedSlash, PalletStakingUnlockChunk, PalletStakingValidatorPrefs, PalletSudoCall, PalletSudoError, PalletSudoEvent, PalletTimestampCall, PalletTokenWrapperCall, PalletTokenWrapperError, PalletTokenWrapperEvent, PalletTransactionPaymentChargeTransactionPayment, PalletTransactionPaymentReleases, PalletTreasuryCall, PalletTreasuryError, PalletTreasuryEvent, PalletTreasuryProposal, PalletVerifierCall, PalletVerifierError, PalletVerifierEvent, SpConsensusAuraSr25519AppSr25519Public, SpCoreCryptoKeyTypeId, SpCoreEcdsaPublic, SpCoreEcdsaSignature, SpCoreEd25519Public, SpCoreEd25519Signature, SpCoreSr25519Public, SpCoreSr25519Signature, SpCoreVoid, SpFinalityGrandpaAppPublic, SpFinalityGrandpaAppSignature, SpFinalityGrandpaEquivocation, SpFinalityGrandpaEquivocationProof, SpNposElectionsElectionScore, SpNposElectionsSupport, SpRuntimeArithmeticError, SpRuntimeBlakeTwo256, SpRuntimeDigest, SpRuntimeDigestDigestItem, SpRuntimeDispatchError, SpRuntimeHeader, SpRuntimeModuleError, SpRuntimeMultiSignature, SpRuntimeTokenError, SpRuntimeTransactionalError, SpSessionMembershipProof, SpStakingOffenceOffenceDetails, SpVersionRuntimeVersion, WebbPrimitivesDepositDetails, WebbProposalsHeaderResourceId, WebbProposalsHeaderTypedChainId } from '@polkadot/types/lookup';
 
 declare module '@polkadot/types/types/registry' {
   export interface InterfaceTypes {
@@ -279,6 +41,7 @@ declare module '@polkadot/types/types/registry' {
     FrameSystemEvent: FrameSystemEvent;
     FrameSystemEventRecord: FrameSystemEventRecord;
     FrameSystemExtensionsCheckGenesis: FrameSystemExtensionsCheckGenesis;
+    FrameSystemExtensionsCheckNonZeroSender: FrameSystemExtensionsCheckNonZeroSender;
     FrameSystemExtensionsCheckNonce: FrameSystemExtensionsCheckNonce;
     FrameSystemExtensionsCheckSpecVersion: FrameSystemExtensionsCheckSpecVersion;
     FrameSystemExtensionsCheckTxVersion: FrameSystemExtensionsCheckTxVersion;
@@ -290,12 +53,12 @@ declare module '@polkadot/types/types/registry' {
     FrameSystemPhase: FrameSystemPhase;
     OrmlCurrenciesModuleCall: OrmlCurrenciesModuleCall;
     OrmlCurrenciesModuleError: OrmlCurrenciesModuleError;
-    OrmlCurrenciesModuleEvent: OrmlCurrenciesModuleEvent;
     OrmlTokensAccountData: OrmlTokensAccountData;
     OrmlTokensBalanceLock: OrmlTokensBalanceLock;
     OrmlTokensModuleCall: OrmlTokensModuleCall;
     OrmlTokensModuleError: OrmlTokensModuleError;
     OrmlTokensModuleEvent: OrmlTokensModuleEvent;
+    OrmlTokensReserveData: OrmlTokensReserveData;
     PalletAnchorAnchorMetadata: PalletAnchorAnchorMetadata;
     PalletAnchorCall: PalletAnchorCall;
     PalletAnchorError: PalletAnchorError;
@@ -317,6 +80,7 @@ declare module '@polkadot/types/types/registry' {
     PalletBagsListError: PalletBagsListError;
     PalletBagsListEvent: PalletBagsListEvent;
     PalletBagsListListBag: PalletBagsListListBag;
+    PalletBagsListListListError: PalletBagsListListListError;
     PalletBagsListListNode: PalletBagsListListNode;
     PalletBalancesAccountData: PalletBalancesAccountData;
     PalletBalancesBalanceLock: PalletBalancesBalanceLock;
@@ -391,6 +155,9 @@ declare module '@polkadot/types/types/registry' {
     PalletHasherCall: PalletHasherCall;
     PalletHasherError: PalletHasherError;
     PalletHasherEvent: PalletHasherEvent;
+    PalletIndicesCall: PalletIndicesCall;
+    PalletIndicesError: PalletIndicesError;
+    PalletIndicesEvent: PalletIndicesEvent;
     PalletLinkableTreeCall: PalletLinkableTreeCall;
     PalletLinkableTreeEdgeMetadata: PalletLinkableTreeEdgeMetadata;
     PalletLinkableTreeError: PalletLinkableTreeError;
@@ -403,6 +170,19 @@ declare module '@polkadot/types/types/registry' {
     PalletMtError: PalletMtError;
     PalletMtEvent: PalletMtEvent;
     PalletMtTreeMetadata: PalletMtTreeMetadata;
+    PalletNominationPoolsBondExtra: PalletNominationPoolsBondExtra;
+    PalletNominationPoolsBondedPoolInner: PalletNominationPoolsBondedPoolInner;
+    PalletNominationPoolsCall: PalletNominationPoolsCall;
+    PalletNominationPoolsConfigOpU128: PalletNominationPoolsConfigOpU128;
+    PalletNominationPoolsConfigOpU32: PalletNominationPoolsConfigOpU32;
+    PalletNominationPoolsError: PalletNominationPoolsError;
+    PalletNominationPoolsEvent: PalletNominationPoolsEvent;
+    PalletNominationPoolsPoolMember: PalletNominationPoolsPoolMember;
+    PalletNominationPoolsPoolRoles: PalletNominationPoolsPoolRoles;
+    PalletNominationPoolsPoolState: PalletNominationPoolsPoolState;
+    PalletNominationPoolsRewardPool: PalletNominationPoolsRewardPool;
+    PalletNominationPoolsSubPools: PalletNominationPoolsSubPools;
+    PalletNominationPoolsUnbondPool: PalletNominationPoolsUnbondPool;
     PalletOffencesEvent: PalletOffencesEvent;
     PalletPreimageCall: PalletPreimageCall;
     PalletPreimageError: PalletPreimageError;
@@ -425,6 +205,10 @@ declare module '@polkadot/types/types/registry' {
     PalletStakingIndividualExposure: PalletStakingIndividualExposure;
     PalletStakingNominations: PalletStakingNominations;
     PalletStakingPalletCall: PalletStakingPalletCall;
+    PalletStakingPalletConfigOpPerbill: PalletStakingPalletConfigOpPerbill;
+    PalletStakingPalletConfigOpPercent: PalletStakingPalletConfigOpPercent;
+    PalletStakingPalletConfigOpU128: PalletStakingPalletConfigOpU128;
+    PalletStakingPalletConfigOpU32: PalletStakingPalletConfigOpU32;
     PalletStakingPalletError: PalletStakingPalletError;
     PalletStakingPalletEvent: PalletStakingPalletEvent;
     PalletStakingReleases: PalletStakingReleases;
@@ -464,6 +248,7 @@ declare module '@polkadot/types/types/registry' {
     SpFinalityGrandpaAppSignature: SpFinalityGrandpaAppSignature;
     SpFinalityGrandpaEquivocation: SpFinalityGrandpaEquivocation;
     SpFinalityGrandpaEquivocationProof: SpFinalityGrandpaEquivocationProof;
+    SpNposElectionsElectionScore: SpNposElectionsElectionScore;
     SpNposElectionsSupport: SpNposElectionsSupport;
     SpRuntimeArithmeticError: SpRuntimeArithmeticError;
     SpRuntimeBlakeTwo256: SpRuntimeBlakeTwo256;
@@ -474,6 +259,7 @@ declare module '@polkadot/types/types/registry' {
     SpRuntimeModuleError: SpRuntimeModuleError;
     SpRuntimeMultiSignature: SpRuntimeMultiSignature;
     SpRuntimeTokenError: SpRuntimeTokenError;
+    SpRuntimeTransactionalError: SpRuntimeTransactionalError;
     SpSessionMembershipProof: SpSessionMembershipProof;
     SpStakingOffenceOffenceDetails: SpStakingOffenceOffenceDetails;
     SpVersionRuntimeVersion: SpVersionRuntimeVersion;
