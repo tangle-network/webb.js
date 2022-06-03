@@ -159,7 +159,7 @@ async function buildJs(dir) {
       buildWebpack(dir);
     } else {
       await buildBabel(dir, 'cjs');
-      
+
       // The types package should only be built for commonjs.
       if (dir != 'types') {
         await buildBabel(dir, 'esm');
