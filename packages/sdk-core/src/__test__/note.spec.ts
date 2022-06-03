@@ -382,7 +382,7 @@ describe('Note class', () => {
     expect(note.protocol).to.equal('vanchor');
   });
 
-  it.only('vanchor note generation should Fail for Bls381', async () => {
+  it('vanchor note generation should Fail for Bls381', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
       backend: 'Arkworks',
