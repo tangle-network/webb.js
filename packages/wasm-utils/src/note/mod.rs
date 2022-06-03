@@ -855,6 +855,17 @@ impl JsNote {
 		Ok(new_note)
 	}
 
+	#[wasm_bindgen(js_name = getUtxo)]
+	pub fn get_utxo(&self) -> Result<JsUtxo, OperationError> {
+		match self.protocol {
+			NoteProtocol::VAnchor => {
+				let leaf = self.get_leaf_and_nullifier()?;
+				leaf.vanchor_leaf()
+			}
+			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),
+		}
+	}
+
 	// for test and internal usage
 	pub fn update_vanchor_utxo(&mut self, utxo: JsUtxo) -> Result<(), OperationError> {
 		let chain_id = utxo.get_chain_id_bytes();
