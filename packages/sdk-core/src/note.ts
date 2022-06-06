@@ -128,6 +128,15 @@ export class Note {
   }
 
   /**
+   * Turns a `Note` into a WebAssembly compatible `JsNote`.
+   *
+   * @returns The `JsNote` struct.
+   */
+  public static fromDepositNote (depositNote: JsNote): Note {
+    return new Note(depositNote);
+  }
+
+  /**
    * Serializes the note to a string.
    *
    * @returns The serialized note.

@@ -1,9 +1,21 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { JsNote, JsUtxo, Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
+import { JsUtxo, Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
 
-import { Utxo } from '../utxo';
+import { Note } from '../note.js';
+
+export type ProvingManagerSetupInput<T extends NoteProtocol> = ProvingManagerPayload[T];
+
+export type PMEvents<T extends NoteProtocol = 'mixer'> = {
+  proof: [T, ProvingManagerSetupInput<T>];
+  destroy: undefined;
+};
+export interface ProvingManagerPayload extends Record<NoteProtocol, any> {
+  mixer: MixerPMSetupInput;
+  anchor: AnchorPMSetupInput;
+  vanchor: VAnchorPMSetupInput;
+}
 
 /**
  * Proving Manager setup input for the proving manager over sdk-core
@@ -25,13 +37,6 @@ export type MixerPMSetupInput = {
   fee: number;
   refund: number;
   provingKey: Uint8Array;
-};
-
-export type WasmProvingManagerSetupInput<T extends NoteProtocol> = WasmProvingManagerPayload[T];
-
-export type PMEvents<T extends NoteProtocol = 'mixer'> = {
-  proof: [T, WasmProvingManagerSetupInput<T>];
-  destroy: undefined;
 };
 
 /**
@@ -72,7 +77,7 @@ export type AnchorPMSetupInput = {
  * @param externalDataHash - The hash of external data which contains other values (EX fees,relayer ,..etc)
  * @param provingKey - Proving key bytes to pass in to the Zero-knowledge proof generation
  * */
-export type WasmVAnchorPMSetupInput = {
+export type VAnchorPMSetupInput = {
   inputNotes: string[];
   leavesMap: Record<string, Leaves>;
   indices: number[];
@@ -88,29 +93,20 @@ export type WasmVAnchorPMSetupInput = {
   fee: string;
 };
 
-interface WasmProvingManagerPayload extends Record<NoteProtocol, any> {
-  mixer: MixerPMSetupInput;
-  anchor: AnchorPMSetupInput;
-  vanchor: WasmVAnchorPMSetupInput;
-}
+export type ProofInterface<T extends NoteProtocol> = T extends 'vanchor'
+  ? VAnchorProof
+  : T extends 'mixer'
+    ? MixerProof
+    : AnchorProof;
 
-export type WasmVAnchorProof = {
+export type VAnchorProof = {
   readonly inputUtxos: Array<JsUtxo>;
-  readonly outputNotes: Array<JsNote>;
+  readonly outputNotes: Array<Note>;
   readonly proof: string;
   readonly publicInputs: Array<string>;
   readonly publicAmount: Uint8Array
   readonly extDataHash: Uint8Array
 };
-
-export type JsVAnchorProof = {
-  readonly inputUtxos: Array<Utxo>;
-  readonly outputNotes: Array<JsNote>;
-  readonly proof: string;
-  readonly publicInputs: Array<string>;
-  readonly publicAmount: Uint8Array
-  readonly extDataHash: Uint8Array
-}
 
 export type AnchorProof = {
   readonly nullifierHash: string;

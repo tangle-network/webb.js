@@ -45,11 +45,11 @@ export class Utxo {
   /**
    * Returns commitment for this UTXO
    *
-   * @returns poseidonHash
+   * @returns the poseidon hash of the [chainId, amount, pubKey, blinding]
    */
   getCommitment () {
     if (!this._commitment) {
-      this._commitment = poseidon([this.chainId, this.amount, this.keypair.pubkey, this.blinding]);
+      this._commitment = BigNumber.from(poseidon([this.chainId, this.amount, this.keypair.pubkey, this.blinding]));
     }
 
     return this._commitment;
@@ -72,7 +72,7 @@ export class Utxo {
 
       const signature = this.keypair.privkey ? this.keypair.sign(BigNumber.from(this.getCommitment()), this.index || 0) : 0;
 
-      this._nullifier = poseidon([this.getCommitment(), this.index || 0, signature]);
+      this._nullifier = BigNumber.from(poseidon([this.getCommitment(), this.index || 0, signature]));
     }
 
     return this._nullifier;

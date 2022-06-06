@@ -5,7 +5,7 @@
 
 import crypto from 'crypto';
 import { BigNumber, BigNumberish, ethers } from 'ethers';
-import ffjavascript from 'ffjavascript';
+import * as ffjavascript from 'ffjavascript';
 
 const { leBuff2int } = ffjavascript.utils;
 
@@ -63,11 +63,22 @@ export function p256 (n: bigint) {
 }
 
 /** Convert value into buffer of specified byte length */
-export const toBuffer = (value: BigNumberish, length: number) =>
-  Buffer.from(
+export const toBuffer = (value: BigNumberish, length: number) => {
+  return Buffer.from(
     BigNumber.from(value)
       .toHexString()
       .slice(2)
       .padStart(length * 2, '0'),
     'hex'
   );
+};
+
+export function createRootsBytes (rootArray: string[] | BigNumberish[]) {
+  let rootsBytes = '0x';
+
+  for (let i = 0; i < rootArray.length; i++) {
+    rootsBytes += toFixedHex(rootArray[i]).substr(2);
+  }
+
+  return rootsBytes; // root byte string (32 * array.length bytes)
+}

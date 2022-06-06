@@ -5,7 +5,7 @@ import { poseidon } from 'circomlibjs';
 import { decrypt, encrypt, getEncryptionPublicKey } from 'eth-sig-util';
 import { BigNumber, ethers } from 'ethers';
 
-import { toFixedHex } from './big-number-utils';
+import { toFixedHex } from './big-number-utils.js';
 
 export function packEncryptedMessage (encryptedMessage: any) {
   const nonceBuf = Buffer.from(encryptedMessage.nonce, 'base64');
@@ -52,7 +52,7 @@ export class Keypair {
    */
   constructor (privkey = ethers.Wallet.createRandom().privateKey) {
     this.privkey = privkey;
-    this.pubkey = poseidon([this.privkey]);
+    this.pubkey = BigNumber.from(poseidon([this.privkey]));
     this.encryptionKey = getEncryptionPublicKey(privkey.slice(2));
   }
 
@@ -123,9 +123,3 @@ export class Keypair {
     return poseidon([this.privkey, commitment, merklePath]);
   }
 }
-
-module.exports = {
-  Keypair,
-  packEncryptedMessage,
-  unpackEncryptedMessage
-};

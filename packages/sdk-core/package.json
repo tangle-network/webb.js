@@ -24,6 +24,26 @@
       "require": "./src/cjs/index.js",
       "default": "./src/index.js"
     },
+    "./merkle-tree": {
+      "types": "./merkle-tree.js",
+      "require": "./cjs/merkle-tree.js",
+      "default": "./merkle-tree.js"
+    },
+    "./cjs/merkle-tree": {
+      "types": "./merkle-tree.js",
+      "require": "./cjs/merkle-tree.js",
+      "default": "./cjs/merkle-tree.js"
+    },
+    "./utxo": {
+      "types": "./utxo.js",
+      "require": "./cjs/utxo.js",
+      "default": "./utxo.js"
+    },
+    "./cjs/utxo": {
+      "types": "./utxo.js",
+      "require": "./cjs/utxo.js",
+      "default": "./cjs/utxo.js"
+    },
     "./proving": {
       "types": "./proving/index.d.ts",
       "require": "./cjs/proving/index.js",
@@ -34,25 +54,45 @@
       "require": "./cjs/proving/index.js",
       "default": "./cjs/proving/index.js"
     },
-    "./proving/proving-manager.js": {
-      "types": "./proving/proving-manager.d.ts",
-      "require": "./cjs/proving/proving-manager.js",
-      "default": "./proving/proving-manager.js"
+    "./proving/arkworks/proving-manager.js": {
+      "types": "./proving/arkworks/proving-manager.d.ts",
+      "require": "./cjs/proving/arkworks/proving-manager.js",
+      "default": "./proving/arkworks/proving-manager.js"
     },
-    "./cjs/proving/proving-manager.js": {
-      "types": "./proving/proving-manager.d.ts",
-      "require": "./cjs/proving/proving-manager.js",
-      "default": "./cjs/proving/proving-manager.js"
+    "./cjs/proving/arkworks/proving-manager.js": {
+      "types": "./proving/arkworks/proving-manager.d.ts",
+      "require": "./cjs/proving/arkworks/proving-manager.js",
+      "default": "./cjs/proving/arkworks/proving-manager.js"
     },
-    "./proving/proving-manager-thread.js": {
-      "types": "./proving/proving-manager-thread.d.ts",
-      "require": "./cjs/proving/proving-manager-thread.js",
-      "default": "./proving/proving-manager-thread.js"
+    "./proving/arkworks/proving-manager-thread.js": {
+      "types": "./proving/arkworks/proving-manager-thread.d.ts",
+      "require": "./cjs/proving/arkworks/proving-manager-thread.js",
+      "default": "./proving/arkworks/proving-manager-thread.js"
     },
-    "./cjs/proving/proving-manager-thread.js": {
-      "types": "./proving/proving-manager-thread.d.ts",
-      "require": "./cjs/proving/proving-manager-thread.js",
-      "default": "./cjs/proving/proving-manager-thread.js"
+    "./cjs/proving/arkworks/proving-manager-thread.js": {
+      "types": "./proving/arkworks/proving-manager-thread.d.ts",
+      "require": "./cjs/proving/arkworks/proving-manager-thread.js",
+      "default": "./cjs/proving/arkworks/proving-manager-thread.js"
+    },
+    "./proving/circom/proving-manager.js": {
+      "types": "./proving/circom/proving-manager.d.ts",
+      "require": "./cjs/proving/circom/proving-manager.js",
+      "default": "./proving/circom/proving-manager.js"
+    },
+    "./cjs/proving/circom/proving-manager.js": {
+      "types": "./proving/circom/proving-manager.d.ts",
+      "require": "./cjs/proving/circom/proving-manager.js",
+      "default": "./cjs/proving/circom/proving-manager.js"
+    },
+    "./proving/circom/proving-manager-thread.js": {
+      "types": "./proving/circom/proving-manager-thread.d.ts",
+      "require": "./cjs/proving/circom/proving-manager-thread.js",
+      "default": "./proving/circom/proving-manager-thread.js"
+    },
+    "./cjs/proving/circom/proving-manager-thread.js": {
+      "types": "./proving/circom/proving-manager-thread.d.ts",
+      "require": "./cjs/proving/circom/proving-manager-thread.js",
+      "default": "./cjs/proving/circom/proving-manager-thread.js"
     }
   },
   "publishConfig": {
@@ -71,11 +111,13 @@
     "@webb-tools/wasm-utils": "0.1.4-75",
     "bignumber.js": "^9.0.0",
     "circomlibjs": "^0.0.8",
+    "elliptic": "6.5.4",
     "eth-sig-util": "^3.0.1",
     "ethers": "5.5.1",
     "ffjavascript": "^0.2.43",
     "events": "^3.2.0",
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.20",
+    "snarkjs": "^0.4.16"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",

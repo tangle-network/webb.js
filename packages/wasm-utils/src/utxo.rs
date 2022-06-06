@@ -123,8 +123,8 @@ impl JsUtxo {
 	pub fn new(
 		curve: WasmCurve,
 		backend: BE,
-		input_size: u8,
-		anchor_size: u8,
+		num_in_utxos: u8,
+		num_out_utxos: u8,
 		amount: JsString,
 		chain_id: JsString,
 		index: Option<JsString>,
@@ -162,7 +162,7 @@ impl JsUtxo {
 				let blinding = blinding
 					.map(|b| b.to_vec())
 					.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
-				match (input_size, anchor_size) {
+				match (num_in_utxos, num_out_utxos) {
 					(2, 2) => VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
 						ArkCurve::Bn254,
 						chain_id,

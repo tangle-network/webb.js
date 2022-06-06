@@ -1,17 +1,23 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-// keccak256("tornado") % BN254_FIELD_SIZE
 import { poseidon } from 'circomlibjs';
 import { BigNumber, BigNumberish } from 'ethers';
 
 import { toFixedHex } from './big-number-utils.js';
 
-const DEFAULT_ZERO = '21663839004416932945382355908790599225266501822907911457504978515578255421292';
+const DEFAULT_ZERO: BigNumberish = '21663839004416932945382355908790599225266501822907911457504978515578255421292';
 
-export function poseidonHash (left: BigNumberish, right: BigNumberish) {
-  return poseidon([left, right]);
+function poseidonHash (left: BigNumberish, right: BigNumberish) {
+  return BigNumber.from(poseidon([BigNumber.from(left), BigNumber.from(right)]));
 }
+
+export type MerkleProof = {
+  element: BigNumber,
+  merkleRoot: BigNumber,
+  pathElements: BigNumber[],
+  pathIndices: number[]
+};
 
 /**
  * Merkle tree
@@ -20,9 +26,9 @@ export class MerkleTree {
   levels: number;
   capacity: number;
   _hash: (left: BigNumberish, right: BigNumberish) => BigNumber;
-  zeroElement: BigNumberish;
-  _zeros: BigNumberish[];
-  _layers: BigNumberish[][];
+  zeroElement: BigNumber;
+  _zeros: BigNumber[];
+  _layers: BigNumber[][];
 
   /**
    * Constructor
@@ -42,16 +48,16 @@ export class MerkleTree {
     }
 
     this._hash = hashFunction;
-    this.zeroElement = zeroElement;
+    this.zeroElement = BigNumber.from(zeroElement);
     this._zeros = [];
-    this._zeros[0] = zeroElement;
+    this._zeros[0] = BigNumber.from(zeroElement);
 
     for (let i = 1; i <= levels; i++) {
       this._zeros[i] = this._hash(this._zeros[i - 1], this._zeros[i - 1]);
     }
 
     this._layers = [];
-    this._layers[0] = elements.slice();
+    this._layers[0] = elements.slice().map((e) => BigNumber.from(e));
     this._rebuild();
   }
 
@@ -74,7 +80,7 @@ export class MerkleTree {
    * Get tree root
    * @returns
    */
-  root (): BigNumberish {
+  root (): BigNumber {
     return this._layers[this.levels].length > 0 ? this._layers[this.levels][0] : this._zeros[this.levels];
   }
 
@@ -87,7 +93,7 @@ export class MerkleTree {
       throw new Error('Tree is full');
     }
 
-    this.update(this._layers[0].length, element);
+    this.update(this._layers[0].length, BigNumber.from(element));
   }
 
   /**
@@ -103,7 +109,7 @@ export class MerkleTree {
     // updating only full subtree hashes (all layers where inserted element has odd index)
     // the last element will update the full path to the root making the tree consistent again
     for (let i = 0; i < elements.length - 1; i++) {
-      this._layers[0].push(elements[i]);
+      this._layers[0].push(BigNumber.from(elements[i]));
       let level = 0;
       let index = this._layers[0].length - 1;
 
@@ -130,7 +136,7 @@ export class MerkleTree {
       throw new Error('Insert index out of bounds: ' + index);
     }
 
-    this._layers[0][index] = element;
+    this._layers[0][index] = BigNumber.from(element);
 
     for (let level = 1; level <= this.levels; level++) {
       index >>= 1;
@@ -148,7 +154,7 @@ export class MerkleTree {
    * @param index - Leaf index to generate path for
    * @returns pathElements: Object[], pathIndex: number[] - An object containing adjacent elements and left-right index
    */
-  path (index: number) {
+  path (index: number): MerkleProof {
     if (isNaN(Number(index)) || index < 0 || index >= this._layers[0].length) {
       throw new Error('Index out of bounds: ' + index);
     }
@@ -174,15 +180,10 @@ export class MerkleTree {
   /**
    * Find an element in the tree
    * @param element - An element to find
-   * @param comparator - A function that checks leaf value equality
    * @returns number - Index if element is found, otherwise -1
    */
-  indexOf (element: BigNumberish, comparator?: any): number {
-    if (comparator) {
-      return this._layers[0].findIndex((el) => comparator(element, el));
-    } else {
-      return this._layers[0].indexOf(element);
-    }
+  indexOf (element: BigNumberish): number {
+    return this._layers[0].findIndex((el) => el.eq(BigNumber.from(element)));
   }
 
   /**
@@ -264,5 +265,24 @@ export class MerkleTree {
     }
 
     return undefined;
+  }
+
+  /**
+   * This function calculates the desired index given the pathIndices
+   *
+   * @param pathIndices - an array of (0, 1) values representing (left, right) selection
+   * of nodes for each level in the merkle tree. The leaves level of the tree is at index 0
+   * and the root of the tree is at index 'levels'
+   */
+  static calculateIndexFromPathIndices (pathIndices: number[]) {
+    return pathIndices.reduce((value, isRight, level) => {
+      let addedValue = value;
+
+      if (isRight) {
+        addedValue = value + (2 ** level);
+      }
+
+      return addedValue;
+    });
   }
 }

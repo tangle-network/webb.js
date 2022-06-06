@@ -10,7 +10,7 @@
     "packages/**/*",
     "examples/**/*",
     "tests/**/*",
-    "typedefs.d.ts"
+    "typings/**/*"
   ],
   "compilerOptions": {
     "types": ["mocha", "node"],
@@ -80,7 +80,16 @@
     },
     "typeRoots": [
       "./node_modules/@polkadot/ts",
-      "./node_modules/@types"
+      "./node_modules/@types",
+      "./typings"
     ]
-  }
+  },
+  "ts-node": {
+    "files": true
+  },
+  "files": [
+    "./typings/circomlibjs/index.d.ts",
+    "./typings/ffjavascript/index.d.ts",
+    "./typings/snarkjs/index.d.ts"
+  ]
 }

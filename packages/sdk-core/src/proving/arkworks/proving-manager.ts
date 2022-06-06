@@ -1,16 +1,11 @@
 // Copyright 2022 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import type { JsNote, JsUtxo, NoteProtocol } from '@webb-tools/wasm-utils';
+import type { NoteProtocol } from '@webb-tools/wasm-utils';
 
-import { WasmProvingManagerWrapper, ProvingManagerSetupInput } from '@webb-tools/sdk-core/proving/proving-manager-thread.js';
-import { AnchorProof, MixerProof, WasmVAnchorProof } from './types';
+import { ArkworksProvingManagerWrapper } from '@webb-tools/sdk-core/proving/arkworks/proving-manager-thread.js';
 
-export type WasmProofInterface<T extends NoteProtocol> = T extends 'vanchor'
-  ? WasmVAnchorProof
-  : T extends 'mixer'
-    ? MixerProof
-    : AnchorProof;
+import { ProofInterface, ProvingManagerSetupInput } from '../types';
 
 export class ArkworksProvingManager {
   constructor (
@@ -36,7 +31,7 @@ export class ArkworksProvingManager {
 
   private static proveWithoutWorker<T extends NoteProtocol> (protocol: T, input: ProvingManagerSetupInput<T>) {
     // If the worker CTX is direct-call
-    const pm = new WasmProvingManagerWrapper('direct-call');
+    const pm = new ArkworksProvingManagerWrapper('direct-call');
 
     return pm.prove(protocol, input);
   }
@@ -44,11 +39,11 @@ export class ArkworksProvingManager {
   private static proveWithWorker<T extends NoteProtocol> (
     input: [T, ProvingManagerSetupInput<T>],
     worker: Worker
-  ): Promise<WasmProofInterface<T>> {
-    return new Promise<WasmProofInterface<T>>((resolve, reject) => {
+  ): Promise<ProofInterface<T>> {
+    return new Promise<ProofInterface<T>>((resolve, reject) => {
       try {
         worker.addEventListener('message', (e) => {
-          const payload = e.data.data as WasmProofInterface<T>;
+          const payload = e.data.data as ProofInterface<T>;
 
           resolve(payload);
         });

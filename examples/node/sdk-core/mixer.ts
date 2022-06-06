@@ -1,8 +1,7 @@
-import { Note, NoteGenInput, ArkworksProvingManager } from '@webb-tools/sdk-core';
+import { Note, NoteGenInput, ArkworksProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core/index.js';
 import { fetchRPCTreeLeaves, polkadotTx, preparePolkadotApi, transferBalance } from '../utils.js';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
-import { ProvingManagerSetupInput } from '@webb-tools/sdk-core/src';
 import path from 'path';
 import fs from 'fs';
 import { hexToU8a, u8aToHex } from '@polkadot/util';

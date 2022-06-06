@@ -1,18 +1,14 @@
 // Copyright 2022 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
-
-import { WasmProofInterface } from '@webb-tools/sdk-core/proving/proving-manager.js';
-import { JsProofInput, JsProofOutput, JsUtxo } from '@webb-tools/wasm-utils';
-import { JsNote } from '@webb-tools/wasm-utils/njs';
+import { JsNote, JsProofInput, JsProofOutput, NoteProtocol } from '@webb-tools/wasm-utils';
 
 import { u8aToHex } from '@polkadot/util';
 
-import { Note } from '../note.js';
-import { AnchorPMSetupInput, MixerPMSetupInput, PMEvents, ProvingManagerSetupInput } from './types.js';
+import { Note } from '../../note.js';
+import { AnchorPMSetupInput, MixerPMSetupInput, PMEvents, ProofInterface, ProvingManagerSetupInput, VAnchorPMSetupInput } from '../types.js';
 
-export class WasmProvingManagerWrapper {
+export class ArkworksProvingManagerWrapper {
   /**
    * @param ctx  - Context of the Proving manager
    * Defaults to worker mode assuming that the Proving manager is running in the browser
@@ -71,7 +67,7 @@ export class WasmProvingManagerWrapper {
   /**
    * Generate the Zero-knowledge proof from the proof input
    **/
-  async prove<T extends NoteProtocol> (protocol: T, pmSetupInput: ProvingManagerSetupInput<T>): Promise<WasmProofInterface<T>> {
+  async prove<T extends NoteProtocol> (protocol: T, pmSetupInput: ProvingManagerSetupInput<T>): Promise<ProofInterface<T>> {
     const Manager = await this.proofBuilder;
     const pm = new Manager(protocol);
 
@@ -92,7 +88,7 @@ export class WasmProvingManagerWrapper {
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.mixerProof;
 
-      const mixerProof: WasmProofInterface<'mixer'> = {
+      const mixerProof: ProofInterface<'mixer'> = {
         nullifierHash: proof.nullifierHash,
         proof: proof.proof,
         root: proof.root
@@ -117,7 +113,7 @@ export class WasmProvingManagerWrapper {
       const proofInput = pm.build_js();
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.anchorProof;
-      const anchorProof: WasmProofInterface<'anchor'> = {
+      const anchorProof: ProofInterface<'anchor'> = {
         nullifierHash: proof.nullifierHash,
         proof: proof.proof,
         root: proof.root,
@@ -126,7 +122,7 @@ export class WasmProvingManagerWrapper {
 
       return anchorProof as any;
     } else if (protocol === 'vanchor') {
-      const input = pmSetupInput as WasmVAnchorPMSetupInput;
+      const input = pmSetupInput as VAnchorPMSetupInput;
       const metaDataNote = input.inputNotes[0];
       const { note } = await Note.deserialize(metaDataNote);
       const rawNotes = await Promise.all(input.inputNotes.map((note) => Note.deserialize(note)));
@@ -193,10 +189,10 @@ export class WasmProvingManagerWrapper {
       const proofInput = pm.build_js();
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.vanchorProof;
-      const anchorProof: WasmProofInterface<'vanchor'> = {
+      const anchorProof: ProofInterface<'vanchor'> = {
         extDataHash: dataHash,
         inputUtxos: proof.inputUtxos,
-        outputNotes: proof.outputNotes,
+        outputNotes: proof.outputNotes.map((jsNote) => Note.fromDepositNote(jsNote)),
         proof: proof.proof,
         publicAmount: proof.publicAmount,
         publicInputs: proof.publicInputs
