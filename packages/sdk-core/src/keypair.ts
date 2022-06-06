@@ -117,9 +117,9 @@ export class Keypair {
    *
    * @param commitment - a hex string with commitment
    * @param merklePath - a hex string with merkle path
-   * @returns a hex string with signature
+   * @returns a hex string representing the poseidon hash of [privKey, commitment, merklePath]
    */
-  sign (commitment: string|number|BigNumber, merklePath: string|number|BigNumber) {
-    return poseidon([this.privkey, commitment, merklePath]);
+  sign (commitment: string|number|BigNumber, merklePath: string|number|BigNumber): string {
+    return BigNumber.from(poseidon([this.privkey, commitment, merklePath])).toHexString();
   }
 }

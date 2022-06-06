@@ -128,9 +128,9 @@ export class Note {
   }
 
   /**
-   * Turns a `Note` into a WebAssembly compatible `JsNote`.
+   * Turns a WebAssembly compatible `JsNote` into a `Note`.
    *
-   * @returns The `JsNote` struct.
+   * @returns The `Note` object.
    */
   public static fromDepositNote (depositNote: JsNote): Note {
     return new Note(depositNote);
