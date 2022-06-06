@@ -3,7 +3,7 @@
 
 import '@webb-tools/types/build/cjs/index.js';
 
-import { MerkleTree } from '@webb-tools/merkle-tree';
+import { MerkleTree } from '@webb-tools/sdk-core/index.js';
 import { createLocalPolkadotApi, polkadotTx } from '@webb-tools/test-utils/src/index.js';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';

@@ -9,7 +9,8 @@
   "include": [
     "packages/**/*",
     "examples/**/*",
-    "tests/**/*"
+    "tests/**/*",
+    "typings/**/*"
   ],
   "compilerOptions": {
     "types": ["mocha", "node"],
@@ -75,11 +76,21 @@
       ],
       "@webb-tools/test-utils/*": [
         "packages/test-utils/src/*"
-      ]
+      ],
     },
     "typeRoots": [
       "./node_modules/@polkadot/ts",
-      "./node_modules/@types"
+      "./node_modules/@types",
+      "./typings"
     ]
-  }
+  },
+  "ts-node": {
+    "files": true
+  },
+  "files": [
+    "./typings/circomlibjs/index.d.ts",
+    "./typings/elliptic/index.d.ts",
+    "./typings/ffjavascript/index.d.ts",
+    "./typings/snarkjs/index.d.ts"
+  ]
 }

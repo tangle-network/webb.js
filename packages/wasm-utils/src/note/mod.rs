@@ -1114,7 +1114,7 @@ mod test {
 		note_builder.curve(curve).unwrap();
 		note_builder.hash_function(hash_function).unwrap();
 		note_builder.backend(backend);
-		note_builder.index(JsString::from("10"));
+		note_builder.index(JsString::from("10")).unwrap();
 
 		let vanchor_note = note_builder.build().unwrap();
 		let note_string = vanchor_note.to_string();
@@ -1125,7 +1125,7 @@ mod test {
 		let js_note_2_string = js_note_2.to_string();
 
 		let leaf_2 = js_note_2.get_leaf_commitment().unwrap();
-		let leaf_2_vec = leaf.to_vec();
+		let leaf_2_vec = leaf_2.to_vec();
 
 		// Asserting that with serialization and deserialization lead to the same note
 		assert_eq!(note_string, js_note_2_string);
@@ -1140,6 +1140,6 @@ mod test {
 		let vanchor_note_str = "webb://v2:vanchor/2:3/2:3/0300000000000000000000000000000000000000000000000000000000000000:0a00000000000000000000000000000000000000000000000000000000000000:7798d054444ec463be7d41ad834147b5b2c468182c7cd6a601aec29a273fca05:bf5d780608f5b8a8db1dc87356a225a0324a1db61903540daaedd54ab10a4124/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
 		let note = JsNote::deserialize(vanchor_note_str).unwrap();
 		// Generate leaf to trigger any errors
-		let leaf = note.get_leaf_commitment().unwrap();
+		note.get_leaf_commitment().unwrap();
 	}
 }

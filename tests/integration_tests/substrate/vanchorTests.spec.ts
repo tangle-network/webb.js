@@ -3,7 +3,7 @@ import { ApiPromise } from '@polkadot/api';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { currencyToUnitI128, KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
-import { Note, ProvingManagerSetupInput, ProvingManagerWrapper } from '@webb-tools/sdk-core/index.js';
+import { Note, ProvingManagerSetupInput, ArkworksProvingManagerWrapper } from '@webb-tools/sdk-core/index.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { polkadotTx } from '@webb-tools/test-utils/index.js';
 import path from 'path';
@@ -101,7 +101,7 @@ async function createVAnchorWithDeposit(
   const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, publicAmount.toString(), chainId, undefined);
   const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, '0', chainId, undefined);
   // Configure a new proving manager with direct call
-  const provingManager = new ProvingManagerWrapper('direct-call');
+  const provingManager = new ArkworksProvingManagerWrapper('direct-call');
   const leavesMap: any = {};
 
   const address = depositer.address;
@@ -142,12 +142,17 @@ async function createVAnchorWithDeposit(
     encryptedOutput2: u8aToHex(comEnc2)
   };
 
+  const outputNotes: JsNote[] = [];
+  for (const note of data.outputNotes) {
+    outputNotes.push(await note.toDepositNote());
+  }
+
   let vanchorProofData = {
     proof: `0x${data.proof}`,
     publicAmount: data.publicAmount,
     roots: rootsSet,
     inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-    outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeafCommitment())),
+    outputCommitments: outputNotes.map(note => u8aToHex(note.getLeafCommitment())),
     extDataHash: data.extDataHash
   };
   const leafsCount = await apiPromise.derive.merkleTreeBn254.getLeafCountForTree(Number(treeId));
@@ -157,13 +162,14 @@ async function createVAnchorWithDeposit(
     section: 'vAnchorBn254',
     method: 'transact'
   }, [treeId, vanchorProofData, extData], depositer);
-  const leaf1 = data.outputNotes[0].getLeafCommitment();
-  const leaf2 = data.outputNotes[1].getLeafCommitment();
+
+  const leaf1 = outputNotes[0].getLeafCommitment();
+  const leaf2 = outputNotes[1].getLeafCommitment();
   const indexOfLeaf1 = await getleafIndex(apiPromise, leaf1, indexBeforeInsetion, treeId);
   const indexOfLeaf2 = await getleafIndex(apiPromise, leaf2, indexBeforeInsetion, treeId);
-  const note1WithIndex = data.outputNotes[0];
+  const note1WithIndex = outputNotes[0];
   note1WithIndex.mutateIndex(String(indexOfLeaf1));
-  const note2WithIndex = data.outputNotes[1];
+  const note2WithIndex = outputNotes[1];
   note2WithIndex.mutateIndex(String(indexOfLeaf2));
 
   return [treeId, [note1WithIndex, note2WithIndex], pk, secret];
@@ -235,7 +241,7 @@ describe('VAnchor tests', function() {
     const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, publicAmount.toString(), chainId, undefined);
     const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, '0', chainId, undefined);
     // Configure a new proving manager with direct call
-    const provingManager = new ProvingManagerWrapper('direct-call');
+    const provingManager = new ArkworksProvingManagerWrapper('direct-call');
     const leavesMap: any = {};
 
     const address = alice.address;
@@ -276,12 +282,17 @@ describe('VAnchor tests', function() {
       encryptedOutput2: u8aToHex(comEnc2)
     };
 
+    const outputNotes: JsNote[] = [];
+    for (const note of data.outputNotes) {
+      outputNotes.push(await note.toDepositNote());
+    }
+
     let vanchorProofData = {
       proof: `0x${data.proof}`,
       publicAmount: data.publicAmount,
       roots: rootsSet,
       inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-      outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeafCommitment())),
+      outputCommitments: outputNotes.map(note => u8aToHex(note.getLeafCommitment())),
       extDataHash: data.extDataHash
     };
     try {
@@ -312,7 +323,7 @@ describe('VAnchor tests', function() {
     const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, '0', chainId.toString(), undefined);
     const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, '0', chainId.toString(), undefined);
 
-    const provingManager = new ProvingManagerWrapper('direct-call');
+    const provingManager = new ArkworksProvingManagerWrapper('direct-call');
     const address = bob.address;
     const leaf1Index = Number(notes[0].index);
     const leaf2Index = Number(notes[1].index);
@@ -355,12 +366,17 @@ describe('VAnchor tests', function() {
       encryptedOutput2: u8aToHex(comEnc2)
     };
 
+    const outputNotes: JsNote[] = [];
+    for (const note of data.outputNotes) {
+      outputNotes.push(await note.toDepositNote());
+    }
+
     let vanchorProofData = {
       proof: `0x${data.proof}`,
       publicAmount: data.publicAmount,
       roots: rootsSet,
       inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-      outputCommitments: data.outputNotes.map(note => note.getLeafCommitment()),
+      outputCommitments: outputNotes.map(note => u8aToHex(note.getLeafCommitment())),
       extDataHash: data.extDataHash
     };
 

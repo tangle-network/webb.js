@@ -1,7 +1,7 @@
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { fetchRPCTreeLeaves, polkadotTx, preparePolkadotApi, transferBalance } from '../utils.js';
-import { Note, NoteGenInput, ProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core/index.js';
+import { Note, NoteGenInput, ArkworksProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core/index.js';
 import path from 'path';
 import fs from 'fs';
 import { AnchorWithdrawProof } from '../../../tests/utils/index.js';
@@ -48,7 +48,7 @@ export async function anchorBn254() {
   const leaves = await fetchRPCTreeLeaves(apiPromise, treeId);
   console.log(`[ anchorBn254 ]  leaves ${leaves.length}`);
   // Proving Manager
-  const pm = new ProvingManager(undefined);
+  const pm = new ArkworksProvingManager(undefined);
   const pkPath = path.join(
     // tests path
     process.cwd(),
