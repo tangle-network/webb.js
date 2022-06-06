@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/types",
-  "version": "0.1.4-75",
+  "version": "0.1.4-77",
   "description": "Polkadot.js type definations for Webb Network",
   "main": "./cjs/index.js",
   "author": "Webb Developers <drew@webb.tools>",

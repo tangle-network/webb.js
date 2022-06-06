@@ -27,7 +27,22 @@ pub const ANCHOR_NOTE_V2_X5_4:&str  ="webb://v2:anchor/2199023256632:21990232566
 pub const VANCHOR_NOTE_V2_X5_4:&str  ="webb://v2:vanchor/2:3/2:3/0300000000000000000000000000000000000000000000000000000000000000:0a00000000000000000000000000000000000000000000000000000000000000:7798d054444ec463be7d41ad834147b5b2c468182c7cd6a601aec29a273fca05:bf5d780608f5b8a8db1dc87356a225a0324a1db61903540daaedd54ab10a4124/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
 
 pub const DECODED_SUBSTRATE_ADDRESS: &str = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
-
+pub fn new_utxobn_2_2(curve: Curve, amount: u128, chain_id: u64) -> JsUtxo {
+	let curve: WasmCurve = JsValue::from(curve.to_string()).into();
+	let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
+	JsUtxo::new(
+		curve.clone(),
+		backend.clone(),
+		2,
+		2,
+		JsString::from(amount.to_string()),
+		JsString::from(chain_id.to_string()),
+		None,
+		None,
+		None,
+	)
+	.unwrap()
+}
 pub struct MixerTestSetup {
 	pub(crate) relayer: Vec<u8>,
 	pub(crate) recipient: Vec<u8>,
@@ -213,33 +228,9 @@ pub fn generate_vanchor_test_js_setup() -> VAnchorTestSetup {
 	let note1 = generate_vanchor_note(5, chain_id, chain_id, Some(0));
 	let note2 = generate_vanchor_note(5, chain_id, chain_id, Some(0));
 	// output configs
-	let backend: BE = JsValue::from(note1.backend.unwrap().to_string()).into();
-	let wasm_curve: WasmCurve = JsValue::from(note1.curve.unwrap().to_string()).into();
 
-	let output_1 = JsUtxo::new(
-		wasm_curve.clone(),
-		backend.clone(),
-		2,
-		2,
-		JsString::from("10"),
-		JsString::from(chain_id.to_string()),
-		None,
-		None,
-		None,
-	)
-	.unwrap();
-	let output_2 = JsUtxo::new(
-		wasm_curve,
-		backend,
-		2,
-		2,
-		JsString::from("0"),
-		JsString::from(chain_id.to_string()),
-		None,
-		None,
-		None,
-	)
-	.unwrap();
+	let output_1 = new_utxobn_2_2(note1.curve.unwrap(), 10, chain_id);
+	let output_2 = new_utxobn_2_2(note1.curve.unwrap(), 2, chain_id);
 	let index = 0;
 
 	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
