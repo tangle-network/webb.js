@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { JsUtxo, Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
+import type { Backend, Curve, JsUtxo, Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
 
 import { Note } from '../note.js';
 
@@ -65,6 +65,17 @@ export type AnchorPMSetupInput = {
   refreshCommitment: string;
 };
 
+export interface JSUtxoParams {
+  curve: Curve,
+  backend: Backend,
+  inputSize: number,
+  anchorSize: number,
+  amount: string,
+  chainId: string,
+  index?: string,
+  privateKey: Uint8Array,
+  blinding: Uint8Array
+}
 /**
  * Proving Manager setup input for anchor API proving manager over sdk-core
  * @param inputNotes - VAnchor notes representing input UTXOs for proving
@@ -83,7 +94,8 @@ export type VAnchorPMSetupInput = {
   indices: number[];
   roots: Leaves;
   chainId: string;
-  output: [JsUtxo, JsUtxo];
+  outputParams?: [JSUtxoParams, JSUtxoParams];
+  output?: [JsUtxo, JsUtxo];
   encryptedCommitments: [Uint8Array, Uint8Array],
   publicAmount: string;
   provingKey: Uint8Array;

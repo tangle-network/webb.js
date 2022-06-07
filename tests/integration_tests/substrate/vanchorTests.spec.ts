@@ -209,7 +209,7 @@ describe('VAnchor tests', function() {
   });
 
 
-  it('VAnchor deposit', async function() {
+  it.only('VAnchor deposit', async function() {
     const { bob, alice } = getKeyring();
     const secret = randomAsU8a();
 
@@ -262,7 +262,26 @@ describe('VAnchor tests', function() {
       indices: [0, 0],
       inputNotes: notes.map((note) => note.serialize()),
       leavesMap: leavesMap,
-      output: [output1, output2],
+      outputParams: [        {
+        amount: output1.amountRaw,
+        backend: 'Arkworks',
+        curve: 'Bn254',
+        blinding: hexToU8a(`0x${output1.blinding}`),
+        chainId: String(output1.chainIdRaw),
+        anchorSize: 2,
+        inputSize: 2,
+        privateKey: hexToU8a(`0x${output1.secret_key}`),
+      },
+        {
+          amount: output2.amountRaw,
+          backend: 'Arkworks',
+          curve: 'Bn254',
+          blinding: hexToU8a(`0x${output2.blinding}`),
+          chainId: String(output2.chainIdRaw),
+          anchorSize: 2,
+          inputSize: 2,
+          privateKey: hexToU8a(`0x${output2.secret_key}`),
+        },],
       encryptedCommitments: [comEnc1, comEnc2],
       provingKey: pk,
       publicAmount: String(publicAmount),

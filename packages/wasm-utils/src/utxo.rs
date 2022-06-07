@@ -29,7 +29,7 @@ pub struct JsUtxo {
 }
 
 impl JsUtxo {
-	pub fn amount_raw(&self) -> u128 {
+	pub fn get_amount_raw(&self) -> u128 {
 		let amount_bytes = self.get_amount();
 		let mut amount_slice = [0u8; 16];
 		amount_slice.copy_from_slice(amount_bytes[..16].to_vec().as_slice());
@@ -194,6 +194,12 @@ impl JsUtxo {
 	#[wasm_bindgen(js_name = chainIdRaw)]
 	pub fn chain_id_raw(&self) -> u64 {
 		self.get_chain_id_raw()
+	}
+
+	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name = amountRaw)]
+	pub fn amount_raw(&self) -> JsString {
+		JsString::from(self.get_amount_raw().to_string())
 	}
 
 	#[wasm_bindgen(getter)]

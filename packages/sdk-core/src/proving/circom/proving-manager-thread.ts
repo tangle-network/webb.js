@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // Import wasm-generated types
-import { JsNote, NoteProtocol } from '@webb-tools/wasm-utils';
+import type { JsNote, NoteProtocol } from '@webb-tools/wasm-utils';
+
+import { JsUtxo } from '@webb-tools/wasm-utils/njs';
 import { poseidon } from 'circomlibjs';
 import { BigNumber } from 'ethers';
 import * as snarkjs from 'snarkjs';
@@ -19,7 +21,7 @@ export class CircomProvingManagerWrapper {
    * @param circuitWasm - Circom requires a circuit.
    * @param ctx  - Context of the Proving manager - prove in a worker or on the main thread.
    **/
-  constructor (private circuitWasm: any, ctx: 'worker' | 'direct-call' = 'direct-call') {
+  constructor (private circuitWasm: any, private ctx: 'worker' | 'direct-call' = 'direct-call') {
     // if the Manager is running in side worker it registers an event listener
     if (ctx === 'worker') {
       console.log('yooooo I\'m trying to execute in a worker');
@@ -37,6 +39,13 @@ export class CircomProvingManagerWrapper {
     res = await snarkjs.groth16.verify(vKey, publicSignals, proof);
 
     return generateWithdrawProofCallData(proof, publicSignals);
+  }
+
+  /// TODO: Remove this and remove dependency over the JSUtxo
+  private get wasmBlob () {
+    return this.ctx === 'worker'
+      ? import('@webb-tools/wasm-utils/wasm-utils.js')
+      : import('@webb-tools/wasm-utils/njs/wasm-utils-njs.js');
   }
 
   /**
@@ -175,8 +184,21 @@ export class CircomProvingManagerWrapper {
       // The output UTXO will have its targetChainId = sourceChainId
       // TODO: Investigate if we can modify the above statement to other chains.
       const outputNotes: Note[] = [];
+      // TODO remove wasm dependency
+      const wasm = await this.wasmBlob;
+      const outputUtxos = input.outputParams?.map((params) => new wasm.JsUtxo(
+        params.curve,
+        params.backend,
+        params.inputSize,
+        params.anchorSize,
+        params.amount,
+        params.chainId,
+        params.index,
+        params.privateKey,
+        params.blinding
+      )) ?? input.output as JsUtxo[];
 
-      for (const utxo of input.output) {
+      for (const utxo of outputUtxos) {
         const secrets = [utxo.chainIdBytes, utxo.amount, '', utxo.blinding].join(':');
 
         const note = await Note.generateNote({
@@ -208,7 +230,7 @@ export class CircomProvingManagerWrapper {
         merkleProofs.map((proof) => proof.merkleRoot),
         input.chainId,
         inputUtxos,
-        input.output,
+        outputUtxos,
         input.extAmount,
         input.fee,
         dataHash,

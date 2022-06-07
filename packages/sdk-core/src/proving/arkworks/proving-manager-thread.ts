@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { JsNote, JsProofInput, JsProofOutput, NoteProtocol } from '@webb-tools/wasm-utils';
+import { JsUtxo } from '@webb-tools/wasm-utils/njs';
 
 import { u8aToHex } from '@polkadot/util';
 
@@ -163,8 +164,21 @@ export class ArkworksProvingManagerWrapper {
       pm.setRoots(input.roots);
       pm.chain_id(input.chainId);
       pm.public_amount(input.publicAmount);
-      pm.setOutputUtxos(...input.output);
       const wasm = await this.wasmBlob;
+      const outputUtxos = input.outputParams?.map((params) => new wasm.JsUtxo(
+        params.curve,
+        params.backend,
+        params.inputSize,
+        params.anchorSize,
+        params.amount,
+        params.chainId,
+        params.index,
+        params.privateKey,
+        params.blinding
+      )) ?? input.output as JsUtxo[];
+
+      pm.setOutputUtxos(outputUtxos[0], outputUtxos[1]);
+
       const extData = new wasm.ExtData(
         input.recipient,
         input.relayer,

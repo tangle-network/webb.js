@@ -537,7 +537,7 @@ impl VAnchorProofInput {
 			.enumerate()
 			.filter(|(_, utxo)| {
 				// filter for non-default utxos
-				utxo.amount_raw() != 0 && utxo.get_index().unwrap_or(0) != 0
+				utxo.get_amount_raw() != 0 && utxo.get_index().unwrap_or(0) != 0
 			})
 			.collect::<Vec<_>>();
 		non_default_utxo.iter().for_each(|(index, utxo)| {
@@ -566,7 +566,7 @@ impl VAnchorProofInput {
 		let mut in_amount = public_amount;
 		secret.iter().for_each(|utxo| {
 			let utxo_amount: i128 = utxo
-				.amount_raw()
+				.get_amount_raw()
 				.try_into()
 				.expect("Failed to convert utxo value to i128");
 			in_amount += utxo_amount
@@ -574,7 +574,7 @@ impl VAnchorProofInput {
 		let mut out_amount = 0u128;
 		output_utxos
 			.iter()
-			.for_each(|output_config| out_amount += output_config.amount_raw());
+			.for_each(|output_config| out_amount += output_config.get_amount_raw());
 		let out_amount: i128 = out_amount
 			.try_into()
 			.expect("Failed to convert accumulated in amounts  value to i128");
@@ -1042,6 +1042,15 @@ impl JsProofInputBuilder {
 
 	#[wasm_bindgen(js_name = setOutputUtxos)]
 	pub fn set_output_utxos(&mut self, utxo1: JsUtxo, utxo2: JsUtxo) -> Result<(), JsValue> {
+		self.inner.set_output_utxos([utxo1, utxo2])?;
+		Ok(())
+	}
+
+	#[wasm_bindgen(js_name = setOutputUtxosRef)]
+	pub fn set_output_utxos_ptr(&mut self, utxo1: JsValue, utxo2: JsValue) -> Result<(), JsValue> {
+		let utxo1: JsUtxo = generic_of_jsval(utxo1, "JsNote").map_err(|_| OpStatusCode::Unknown)?;
+		let utxo2: JsUtxo = generic_of_jsval(utxo2, "JsNote").map_err(|_| OpStatusCode::Unknown)?;
+
 		self.inner.set_output_utxos([utxo1, utxo2])?;
 		Ok(())
 	}

@@ -22,7 +22,7 @@ function spawnWithLogger(command: string, options?: SpawnOptionsWithoutStdio, al
 }
 export type KillTask = () => Promise<void>;
 export function startWebbNode(): KillTask {
-  execSync('docker pull ghcr.io/webb-tools/protocol-substrate-standalone-node:edge', { stdio: 'inherit' });
+  // execSync('docker pull ghcr.io/webb-tools/protocol-substrate-standalone-node:edge', { stdio: 'inherit' });
   const DOCKER_NETWORK_NAME = 'webb-network';
   try {
     execSync(`docker network create -d bridge ${DOCKER_NETWORK_NAME}`);
