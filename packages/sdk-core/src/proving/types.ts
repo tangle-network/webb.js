@@ -3,7 +3,8 @@
 
 import type { Backend, Curve, JsUtxo, Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
 
-import { Note } from '../note.js';
+import { Note } from '@webb-tools/sdk-core/note';
+import { WasmUtxo } from '@webb-tools/sdk-core/wasm-utxo';
 
 export type ProvingManagerSetupInput<T extends NoteProtocol> = ProvingManagerPayload[T];
 
@@ -11,6 +12,7 @@ export type PMEvents<T extends NoteProtocol = 'mixer'> = {
   proof: [T, ProvingManagerSetupInput<T>];
   destroy: undefined;
 };
+
 export interface ProvingManagerPayload extends Record<NoteProtocol, any> {
   mixer: MixerPMSetupInput;
   anchor: AnchorPMSetupInput;
@@ -76,6 +78,7 @@ export interface JSUtxoParams {
   privateKey: Uint8Array,
   blinding: Uint8Array
 }
+
 /**
  * Proving Manager setup input for anchor API proving manager over sdk-core
  * @param inputNotes - VAnchor notes representing input UTXOs for proving
@@ -105,15 +108,30 @@ export type VAnchorPMSetupInput = {
   fee: string;
 };
 
-export type ProofInterface<T extends NoteProtocol> = T extends 'vanchor'
+// At worker level
+export type WorkerProof<T extends NoteProtocol> = T extends 'vanchor'
   ? VAnchorProof
+  : T extends 'mixer'
+    ? MixerProof
+    : AnchorProof;
+// At manger level
+export type ProvingManagerProof<T extends NoteProtocol> = T extends 'vanchor'
+  ? DeserializeVAnchorProof
   : T extends 'mixer'
     ? MixerProof
     : AnchorProof;
 
 export type VAnchorProof = {
-  readonly inputUtxos: Array<JsUtxo>;
-  readonly outputNotes: Array<Note>;
+  readonly inputUtxos: Array<string>;
+  readonly outputNotes: Array<string>;
+  readonly proof: string;
+  readonly publicInputs: Array<string>;
+  readonly publicAmount: Uint8Array
+  readonly extDataHash: Uint8Array
+};
+export type DeserializeVAnchorProof = {
+  inputUtxos: Array<WasmUtxo>;
+  outputNotes: Array<Note>;
   readonly proof: string;
   readonly publicInputs: Array<string>;
   readonly publicAmount: Uint8Array

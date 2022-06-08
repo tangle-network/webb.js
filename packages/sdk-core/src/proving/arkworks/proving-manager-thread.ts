@@ -7,7 +7,7 @@ import { JsUtxo } from '@webb-tools/wasm-utils/njs';
 import { u8aToHex } from '@polkadot/util';
 
 import { Note } from '../../note.js';
-import { AnchorPMSetupInput, MixerPMSetupInput, PMEvents, ProofInterface, ProvingManagerSetupInput, VAnchorPMSetupInput } from '../types.js';
+import { AnchorPMSetupInput, MixerPMSetupInput, PMEvents, WorkerProof, ProvingManagerSetupInput, VAnchorPMSetupInput } from '../types.js';
 
 export class ArkworksProvingManagerWrapper {
   /**
@@ -68,7 +68,7 @@ export class ArkworksProvingManagerWrapper {
   /**
    * Generate the Zero-knowledge proof from the proof input
    **/
-  async prove<T extends NoteProtocol> (protocol: T, pmSetupInput: ProvingManagerSetupInput<T>): Promise<ProofInterface<T>> {
+  async prove<T extends NoteProtocol> (protocol: T, pmSetupInput: ProvingManagerSetupInput<T>): Promise<WorkerProof<T>> {
     const Manager = await this.proofBuilder;
     const pm = new Manager(protocol);
 
@@ -89,7 +89,7 @@ export class ArkworksProvingManagerWrapper {
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.mixerProof;
 
-      const mixerProof: ProofInterface<'mixer'> = {
+      const mixerProof: WorkerProof<'mixer'> = {
         nullifierHash: proof.nullifierHash,
         proof: proof.proof,
         root: proof.root
@@ -114,7 +114,7 @@ export class ArkworksProvingManagerWrapper {
       const proofInput = pm.build_js();
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.anchorProof;
-      const anchorProof: ProofInterface<'anchor'> = {
+      const anchorProof: WorkerProof<'anchor'> = {
         nullifierHash: proof.nullifierHash,
         proof: proof.proof,
         root: proof.root,
@@ -203,10 +203,10 @@ export class ArkworksProvingManagerWrapper {
       const proofInput = pm.build_js();
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.vanchorProof;
-      const anchorProof: ProofInterface<'vanchor'> = {
+      const anchorProof: WorkerProof<'vanchor'> = {
         extDataHash: dataHash,
-        inputUtxos: proof.inputUtxos,
-        outputNotes: proof.outputNotes.map((jsNote) => Note.fromDepositNote(jsNote)),
+        inputUtxos: proof.inputUtxos.map((utxo: JsUtxo) => utxo.serialize()),
+        outputNotes: proof.outputNotes.map((jsNote: JsNote) => jsNote.serialize()),
         proof: proof.proof,
         publicAmount: proof.publicAmount,
         publicInputs: proof.publicInputs

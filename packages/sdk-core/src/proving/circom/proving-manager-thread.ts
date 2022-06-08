@@ -14,7 +14,7 @@ import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { MerkleProof, MerkleTree } from '../../merkle-tree.js';
 import { Note } from '../../note.js';
 import { buildFixedWitnessCalculator, buildVariableWitnessCalculator, generateFixedWitnessInput, generateVariableWitnessInput, generateWithdrawProofCallData, getVAnchorExtDataHash } from '../../solidity-utils/index.js';
-import { AnchorPMSetupInput, ProofInterface, ProvingManagerSetupInput, VAnchorPMSetupInput } from '../types.js';
+import { AnchorPMSetupInput, ProvingManagerSetupInput, VAnchorPMSetupInput, WorkerProof } from '../types.js';
 
 export class CircomProvingManagerWrapper {
   /**
@@ -51,7 +51,7 @@ export class CircomProvingManagerWrapper {
   /**
    * Generate the Zero-knowledge proof from the proof input
    **/
-  async prove<T extends NoteProtocol> (protocol: T, pmSetupInput: ProvingManagerSetupInput<T>): Promise<ProofInterface<T>> {
+  async prove<T extends NoteProtocol> (protocol: T, pmSetupInput: ProvingManagerSetupInput<T>): Promise<WorkerProof<T>> {
     if (protocol === 'anchor') {
       const input = pmSetupInput as AnchorPMSetupInput;
       const { note } = await Note.deserialize(input.note);
@@ -90,7 +90,7 @@ export class CircomProvingManagerWrapper {
 
       console.log('proofEncoded: ', proofEncoded);
 
-      const anchorProof: ProofInterface<'anchor'> = {
+      const anchorProof: WorkerProof<'anchor'> = {
         nullifierHash: nullifierHash.toHexString(),
         proof: `0x${proofEncoded}`,
         root: merkleProof.merkleRoot.toHexString(),
@@ -239,10 +239,10 @@ export class CircomProvingManagerWrapper {
       const witness = await witnessCalculator.calculateWTNSBin(witnessInput, 0);
       const proofEncoded = await this.snarkjsProveAndVerify(input.provingKey, witness);
 
-      const anchorProof: ProofInterface<'vanchor'> = {
+      const anchorProof: WorkerProof<'vanchor'> = {
         extDataHash: hexToU8a(dataHash.toHexString()),
-        inputUtxos,
-        outputNotes,
+        inputUtxos: inputUtxos.map((u) => u.serialize()),
+        outputNotes: outputNotes.map((note) => note.serialize()),
         proof: `0x${proofEncoded}`,
         publicAmount: hexToU8a(input.publicAmount),
         // public inputs on ProofInterface not required for verifying in circom
