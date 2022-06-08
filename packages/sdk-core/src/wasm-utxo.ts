@@ -37,7 +37,9 @@ export class WasmUtxo {
   ) {
     const wasm = await WasmUtxo.wasm;
 
-    return new wasm.JsUtxo(curve, backend, inputSize, outputSize, amount, chainId, index, privateKey, blinding);
+    const jsUtxo = new wasm.JsUtxo(curve, backend, inputSize, outputSize, amount, chainId, index, privateKey, blinding);
+
+    return new WasmUtxo(jsUtxo);
   }
 
   get amount (): string {

@@ -305,7 +305,6 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString()
     };
-    const outputCommitments = [output1.commitment, output2.commitment];
 
     const data = await provingManager.prove('vanchor', setup);
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(vk).replace('0x', ''), 'Bn254');
@@ -328,11 +327,8 @@ describe('VAnchor tests', function() {
       proof: `0x${data.proof}`,
       publicAmount: data.publicAmount,
       roots: rootsSet,
-      inputNullifiers:notes.map(({ note }) => {
-        const utxo = note.getUtxo();
-        return `0x${utxo.nullifier}`;
-      }),
-      outputCommitments: outputCommitments.map((c) => u8aToHex(c)),
+      inputNullifiers:data.inputUtxos.map(u => `0x${u.nullifier}`),
+      outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeaf())),
       extDataHash: data.extDataHash
     };
     console.log([treeId, vanchorProofData, extData]);

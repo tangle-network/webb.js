@@ -303,15 +303,15 @@ impl fmt::Display for JsUtxo {
 		let private_key = hex::encode(self.get_secret_key());
 
 		let sec = vec![
-			curve,
-			backend,
-			input_size,
-			output_size,
-			amount,
-			chain_id,
-			index,
-			blinding,
-			private_key,
+			curve,       //0
+			backend,     //1
+			input_size,  //2
+			output_size, //3
+			amount,      //4
+			chain_id,    //5
+			index,       //6
+			blinding,    //7
+			private_key, //8
 		]
 		.join("&");
 
@@ -347,8 +347,8 @@ impl FromStr for JsUtxo {
 			amount,
 			chain_id,
 			index,
-			Some(blinding),
 			Some(private_key),
+			Some(blinding),
 		)
 	}
 }
