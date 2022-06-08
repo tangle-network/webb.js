@@ -161,9 +161,23 @@ impl JsUtxo {
 			JsUtxoInner::Bn254(utxo) => Ok(utxo),
 		}
 	}
+
+	pub fn deserialize(utxo_str: &str) -> Result<JsUtxo, OperationError> {
+		utxo_str.parse().map_err(Into::into)
+	}
 }
 #[wasm_bindgen]
 impl JsUtxo {
+	pub fn serialize(&self) -> JsString {
+		JsString::from(self.to_string())
+	}
+
+	#[wasm_bindgen(js_name = deserialize)]
+	pub fn js_deserialize(utxo_str: JsString) -> Result<JsUtxo, JsValue> {
+		let utxo_str: String = utxo_str.into();
+		Self::deserialize(&utxo_str).map_err(Into::into)
+	}
+
 	#[wasm_bindgen(constructor)]
 	#[allow(clippy::too_many_arguments)]
 	pub fn construct(
