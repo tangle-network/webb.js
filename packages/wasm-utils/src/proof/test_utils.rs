@@ -30,7 +30,7 @@ pub const DECODED_SUBSTRATE_ADDRESS: &str = "644277e80e74baf70c59aeaa038b9e95b40
 pub fn new_utxobn_2_2(curve: Curve, amount: u128, chain_id: u64) -> JsUtxo {
 	let curve: WasmCurve = JsValue::from(curve.to_string()).into();
 	let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
-	JsUtxo::new(
+	JsUtxo::construct(
 		curve.clone(),
 		backend.clone(),
 		2,

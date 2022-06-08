@@ -1,4 +1,4 @@
-import { JsNote, JsUtxo } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
+import { JsNote, JsUtxo, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { ApiPromise } from '@polkadot/api';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -228,15 +228,28 @@ describe('VAnchor tests', function() {
     );
     const pk_hex = fs.readFileSync(pkPath).toString('hex');
     const pk = hexToU8a(pk_hex);
+    const vkPath = path.join(
+      // tests path
+      process.cwd(),
+      'tests',
+      'protocol-substrate-fixtures',
+      'vanchor',
+      'bn254',
+      'x5',
+      '2-2-2',
+      'verifying_key_uncompressed.bin'
+    );
+
+    const vk_hex = fs.readFileSync(vkPath).toString('hex');
+    const vk = hexToU8a(vk_hex);
 
     const treeId = await createVAnchor(apiPromise!, alice);
 
     // Creating two empty vanchor notes
     const note1 = await generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0);
-    const note2 = note1.getDefaultUtxoNote();
 
     const publicAmount = currencyToUnitI128(10);
-    const notes = [note1, note2];
+    const notes = [note1];
     // Output UTXOs configs
     const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, publicAmount.toString(), chainId, undefined);
     const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, '0', chainId, undefined);
@@ -259,7 +272,7 @@ describe('VAnchor tests', function() {
 
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: outputChainId.toString(),
-      indices: [0, 0],
+      indices: [0],
       inputNotes: notes.map((note) => note.serialize()),
       leavesMap: leavesMap,
       outputParams: [        {
@@ -291,7 +304,11 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString()
     };
+    const outputCommitments = [output1.commitment, output2.commitment];
+
     const data = await provingManager.prove('vanchor', setup);
+    const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(vk).replace('0x', ''), 'Bn254');
+  console.log(`isValidProof :${isValidProof}`);
     const extData = {
       relayer: address,
       recipient: address,
@@ -310,10 +327,14 @@ describe('VAnchor tests', function() {
       proof: `0x${data.proof}`,
       publicAmount: data.publicAmount,
       roots: rootsSet,
-      inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-      outputCommitments: outputNotes.map(note => u8aToHex(note.getLeafCommitment())),
+      inputNullifiers:notes.map(({ note }) => {
+        const utxo = note.getUtxo();
+        return `0x${utxo.nullifier}`;
+      }),
+      outputCommitments: outputCommitments.map((c) => u8aToHex(c)),
       extDataHash: data.extDataHash
     };
+    console.log([treeId, vanchorProofData, extData]);
     try {
       await polkadotTx(apiPromise!, {
         section: 'vAnchorBn254',
