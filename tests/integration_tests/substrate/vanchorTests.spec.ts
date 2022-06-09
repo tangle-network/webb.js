@@ -3,7 +3,7 @@ import { ApiPromise } from '@polkadot/api';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { currencyToUnitI128, KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
-import { Note, ProvingManagerSetupInput, ArkworksProvingManagerWrapper } from '@webb-tools/sdk-core/index.js';
+import { Note, ProvingManagerSetupInput, ArkworksProvingManagerThread, Utxo } from '@webb-tools/sdk-core/index.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { polkadotTx } from '@webb-tools/test-utils/index.js';
 import path from 'path';
@@ -101,7 +101,7 @@ async function createVAnchorWithDeposit(
   const output1 = new JsUtxo('Bn254', 'Arkworks', publicAmount.toString(), chainId, undefined);
   const output2 = new JsUtxo('Bn254', 'Arkworks', '0', chainId, undefined);
   // Configure a new proving manager with direct call
-  const provingManager = new ArkworksProvingManagerWrapper('direct-call');
+  const provingManager = new ArkworksProvingManagerThread('direct-call');
   const leavesMap: any = {};
 
   const address = depositer.address;
@@ -122,7 +122,7 @@ async function createVAnchorWithDeposit(
     indices: [0, 0],
     inputNotes: notes.map((note) => note.serialize()),
     leavesMap: leavesMap,
-    output: [output1, output2],
+    output: [new Utxo(output1), new Utxo(output2)],
     encryptedCommitments: [comEnc1, comEnc2],
     provingKey: pk,
     publicAmount: String(publicAmount),
@@ -241,7 +241,7 @@ describe('VAnchor tests', function() {
     const output1 = new JsUtxo('Bn254', 'Arkworks', publicAmount.toString(), chainId, undefined);
     const output2 = new JsUtxo('Bn254', 'Arkworks', '0', chainId, undefined);
     // Configure a new proving manager with direct call
-    const provingManager = new ArkworksProvingManagerWrapper('direct-call');
+    const provingManager = new ArkworksProvingManagerThread('direct-call');
     const leavesMap: any = {};
 
     const address = alice.address;
@@ -262,7 +262,7 @@ describe('VAnchor tests', function() {
       indices: [0, 0],
       inputNotes: notes.map((note) => note.serialize()),
       leavesMap: leavesMap,
-      output: [output1, output2],
+      output: [new Utxo(output1), new Utxo(output2)],
       encryptedCommitments: [comEnc1, comEnc2],
       provingKey: pk,
       publicAmount: String(publicAmount),
@@ -323,7 +323,7 @@ describe('VAnchor tests', function() {
     const output1 = new JsUtxo('Bn254', 'Arkworks', '0', chainId.toString(), undefined);
     const output2 = new JsUtxo('Bn254', 'Arkworks', '0', chainId.toString(), undefined);
 
-    const provingManager = new ArkworksProvingManagerWrapper('direct-call');
+    const provingManager = new ArkworksProvingManagerThread('direct-call');
     const address = bob.address;
     const leaf1Index = Number(notes[0].index);
     const leaf2Index = Number(notes[1].index);
@@ -346,7 +346,7 @@ describe('VAnchor tests', function() {
       indices: [leaf1Index, leaf2Index],
       inputNotes: notes.map((note) => note.serialize()),
       leavesMap: leavesMap,
-      output: [output1, output2],
+      output: [new Utxo(output1), new Utxo(output2)],
       encryptedCommitments: [comEnc1, comEnc2],
       provingKey: pk,
       publicAmount: String(publicAmount),
@@ -387,6 +387,7 @@ describe('VAnchor tests', function() {
   });
 
   after(async function() {
+    await apiPromise?.disconnect();
     await nodes?.();
   });
 });

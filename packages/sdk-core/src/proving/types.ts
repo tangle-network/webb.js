@@ -1,7 +1,7 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Backend, Curve, JsUtxo, Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
+import type { JsUtxo, Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
 
 import { Note } from '../note.js';
 import { Utxo } from '../utxo.js';

@@ -22,7 +22,7 @@ export class CircomProvingManagerThread {
    **/
   constructor (private circuitWasm: any, private ctx: 'worker' | 'direct-call' = 'direct-call') {
     // if the Manager is running in side worker it registers an event listener
-    if (ctx === 'worker') {
+    if (this.ctx === 'worker') {
       console.log('yooooo I\'m trying to execute in a worker');
     }
   }

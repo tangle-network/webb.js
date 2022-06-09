@@ -163,7 +163,7 @@ export class ArkworksProvingManagerThread {
       pm.setRoots(input.roots);
       pm.chain_id(input.chainId);
       pm.public_amount(input.publicAmount);
-      pm.setOutputUtxos(...input.output);
+      pm.setOutputUtxos(input.output[0].inner, input.output[1].inner);
       const wasm = await this.wasmBlob;
       const extData = new wasm.ExtData(
         input.recipient,

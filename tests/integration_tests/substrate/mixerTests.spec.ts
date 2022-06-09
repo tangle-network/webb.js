@@ -80,6 +80,7 @@ describe('Mixer tests', function () {
   });
 
   after(async function () {
+    await apiPromise?.disconnect();
     await nodes?.();
   });
 });
