@@ -44,6 +44,16 @@
       "require": "./cjs/utxo.js",
       "default": "./cjs/utxo.js"
     },
+    "./wasm-utxo": {
+      "types": "./wasm-utxo.js",
+      "require": "./cjs/wasm-utxo.js",
+      "default": "./wasm-utxo.js"
+    },
+    "./cjs/wasm-utxo": {
+      "types": "./wasm-utxo.js",
+      "require": "./cjs/wasm-utxo.js",
+      "default": "./cjs/wasm-utxo.js"
+    },
     "./proving": {
       "types": "./proving/index.d.ts",
       "require": "./cjs/proving/index.js",
@@ -53,6 +63,16 @@
       "types": "./proving/index.d.ts",
       "require": "./cjs/proving/index.js",
       "default": "./cjs/proving/index.js"
+    },
+    "./proving/thread-proof-to-manger-proof.js": {
+      "types": "./proving/thread-proof-to-manger-proof.d.ts",
+      "require": "./cjs/proving/thread-proof-to-manger-proof.js",
+      "default": "./proving/thread-proof-to-manger-proof.js"
+    },
+    "./cjs/proving/thread-proof-to-manger-proof.js": {
+      "types": "./proving/thread-proof-to-manger-proof.d.ts",
+      "require": "./cjs/proving/thread-proof-to-manger-proof.js",
+      "default": "./cjs/proving/thread-proof-to-manger-proof.js"
     },
     "./proving/arkworks/proving-manager.js": {
       "types": "./proving/arkworks/proving-manager.d.ts",
