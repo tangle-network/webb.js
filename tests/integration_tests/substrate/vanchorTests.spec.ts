@@ -209,7 +209,7 @@ describe('VAnchor tests', function() {
   });
 
 
-  it.only('VAnchor deposit', async function() {
+  it('VAnchor deposit', async function() {
     const { bob, alice } = getKeyring();
     const secret = randomAsU8a();
 

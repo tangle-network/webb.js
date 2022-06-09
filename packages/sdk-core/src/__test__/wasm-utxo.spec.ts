@@ -4,7 +4,7 @@ import { u8aToHex } from '@polkadot/util';
 
 import { WasmUtxo } from '../wasm-utxo.js';
 
-describe.only('WasmUtxo Class', () => {
+describe('WasmUtxo Class', () => {
   it('should construct with params', async function () {
     const wasmutxo = await WasmUtxo.new('Bn254', 'Arkworks', 2, 2, '0', '1', '1');
     const nullifier = wasmutxo.nullifier;

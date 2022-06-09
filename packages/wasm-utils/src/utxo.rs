@@ -31,6 +31,7 @@ pub struct JsUtxo {
 }
 
 impl JsUtxo {
+	#[allow(clippy::too_many_arguments)]
 	pub(crate) fn new(
 		curve: Curve,
 		backend: Backend,
@@ -298,7 +299,10 @@ impl fmt::Display for JsUtxo {
 		let output_size = String::from("2");
 		let amount = self.get_amount_raw().to_string();
 		let chain_id = self.get_chain_id_raw().to_string();
-		let index = self.get_index().map(|v| v.to_string()).unwrap_or("None".to_string());
+		let index = self
+			.get_index()
+			.map(|v| v.to_string())
+			.unwrap_or_else(|| "None".to_string());
 		let blinding = hex::encode(self.get_blinding());
 		let private_key = hex::encode(self.get_secret_key());
 
@@ -323,7 +327,7 @@ impl FromStr for JsUtxo {
 	type Err = OperationError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		let parts: Vec<_> = s.split("&").collect();
+		let parts: Vec<_> = s.split('&').collect();
 		let curve: Curve = parts[0].parse().map_err(|_| OpStatusCode::InvalidCurve)?;
 		let backend: Backend = parts[1].parse().map_err(|_| OpStatusCode::InvalidBackend)?;
 		let input_size = parts[2].parse().map_err(|_| OpStatusCode::Unknown)?;
