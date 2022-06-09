@@ -7,7 +7,7 @@ import { JsUtxo } from '@webb-tools/wasm-utils/njs';
 import { u8aToHex } from '@polkadot/util';
 
 import { Note } from '../../note.js';
-import { AnchorPMSetupInput, MixerPMSetupInput, PMEvents, WorkerProof, ProvingManagerSetupInput, VAnchorPMSetupInput } from '../types.js';
+import { AnchorPMSetupInput, MixerPMSetupInput, PMEvents, ProvingManagerSetupInput, VAnchorPMSetupInput, WorkerProof } from '../types.js';
 
 export class ArkworksProvingManagerWrapper {
   /**
