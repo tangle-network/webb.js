@@ -12,7 +12,7 @@ use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
 use crate::types::{Backend, Curve, OpStatusCode, OperationError, WasmCurve, BE};
-use crate::{VAnchorR1CSProverBn254_30_2_2_2};
+use crate::VAnchorR1CSProverBn254_30_2_2_2;
 
 #[derive(Clone)]
 pub enum JsUtxoInner {
@@ -287,20 +287,14 @@ impl fmt::Display for JsUtxo {
 		let backend = Backend::Arkworks.to_string();
 		let amount = self.get_amount_raw().to_string();
 		let chain_id = self.get_chain_id_raw().to_string();
-		let index = self.get_index().map(|v| v.to_string()).unwrap_or_else(|| "None".to_string());
+		let index = self
+			.get_index()
+			.map(|v| v.to_string())
+			.unwrap_or_else(|| "None".to_string());
 		let blinding = hex::encode(self.get_blinding());
 		let private_key = hex::encode(self.get_secret_key());
 
-		let sec = vec![
-			curve,
-			backend,
-			amount,
-			chain_id,
-			index,
-			blinding,
-			private_key,
-		]
-		.join("&");
+		let sec = vec![curve, backend, amount, chain_id, index, blinding, private_key].join("&");
 
 		write!(f, "{}", sec)
 	}
