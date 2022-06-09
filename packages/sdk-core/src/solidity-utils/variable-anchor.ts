@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable sort-keys */
-import { JsUtxo } from '@webb-tools/wasm-utils/wasm-utils';
+import type { JsUtxo } from '@webb-tools/wasm-utils';
+
 import { BigNumber, BigNumberish, ethers } from 'ethers';
 
 import { u8aToHex } from '@polkadot/util';
@@ -68,7 +69,7 @@ export function generateVariableWitnessInput (
     inPathElements: vanchorMerkleProofs.map((x) => x.pathElements),
 
     // data for 2 transaction outputs
-    outChainID: outputs.map((x) => x.chainIdBytes),
+    outChainID: outputs.map((x) => x.chainId),
     outAmount: outputs.map((x) => x.amount.toString()),
     outPubkey: [keypair1.pubkey.toString(), keypair2.pubkey.toString()],
     outBlinding: outputs.map((x) => x.blinding.toString())

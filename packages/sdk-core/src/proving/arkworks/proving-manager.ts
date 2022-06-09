@@ -3,7 +3,7 @@
 
 import type { NoteProtocol } from '@webb-tools/wasm-utils';
 
-import { ArkworksProvingManagerWrapper } from '@webb-tools/sdk-core/proving/arkworks/proving-manager-thread.js';
+import { ArkworksProvingManagerThread } from '@webb-tools/sdk-core/proving/arkworks/proving-manager-thread.js';
 
 import { ProofInterface, ProvingManagerSetupInput } from '../types';
 
@@ -31,7 +31,7 @@ export class ArkworksProvingManager {
 
   private static proveWithoutWorker<T extends NoteProtocol> (protocol: T, input: ProvingManagerSetupInput<T>) {
     // If the worker CTX is direct-call
-    const pm = new ArkworksProvingManagerWrapper('direct-call');
+    const pm = new ArkworksProvingManagerThread('direct-call');
 
     return pm.prove(protocol, input);
   }

@@ -9,7 +9,8 @@ import { ApiPromise, ApiRx } from '@polkadot/api';
 import { U32 } from '@polkadot/types';
 
 import { FixedPointNumber } from './fixed-point-number.js';
-import { CHAIN } from './type.js';
+
+type CHAIN = 'webb' | 'dev';
 
 export type CurrencyId = U32;
 

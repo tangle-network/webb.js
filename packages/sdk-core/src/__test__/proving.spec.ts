@@ -59,8 +59,8 @@ describe('Proving manager VAnchor', function () {
 
     leavesMap[0] = [leaf1];
 
-    const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
-    const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
+    const output1 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
     const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
     const provingManager = new ArkworksProvingManagerWrapper('direct-call');
     const secret = randomAsU8a();
@@ -106,8 +106,8 @@ describe('Proving manager VAnchor', function () {
 
     leavesMap[0] = [leaf1, leaf2];
 
-    const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
-    const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
+    const output1 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
     const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
 
     const provingManager = new ArkworksProvingManagerWrapper('direct-call');
@@ -155,8 +155,8 @@ describe('Proving manager VAnchor', function () {
 
     leavesMap[0] = leaves;
 
-    const output1 = new JsUtxo('Bn254', 'Arkworks', 16, 2, outputAmount, outputChainId, undefined);
-    const output2 = new JsUtxo('Bn254', 'Arkworks', 16, 2, outputAmount, outputChainId, undefined);
+    const output1 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
     const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
 
     const provingManager = new ArkworksProvingManagerWrapper('direct-call');
@@ -205,8 +205,8 @@ describe('Proving manager VAnchor', function () {
 
     leavesMap[0] = leaves;
 
-    const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
-    const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
+    const output1 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
     const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
 
     const provingManager = new ArkworksProvingManagerWrapper('direct-call');
@@ -259,8 +259,8 @@ describe('Proving manager VAnchor', function () {
 
       leavesMap[0] = leaves;
 
-      const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
-      const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
+      const output1 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
+      const output2 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
       const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
 
       const provingManager = new ArkworksProvingManagerWrapper('direct-call');

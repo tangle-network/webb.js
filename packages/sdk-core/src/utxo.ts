@@ -1,97 +1,91 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-// @ts-ignore
-import { babyjub, poseidon } from 'circomlibjs';
-import { BigNumber, BigNumberish } from 'ethers';
-import { Scalar } from 'ffjavascript';
+import type { Backend, Curve, JsUtxo } from '@webb-tools/wasm-utils';
 
-import { randomBN, toBuffer } from './big-number-utils.js';
+import { toBuffer } from './big-number-utils.js';
 import { Keypair } from './keypair.js';
-import { RootInfo } from './type.js';
+
+export type UtxoGenInput = {
+  curve: Curve,
+  backend: Backend,
+  amount: string,
+  chainId: string,
+  index?: string,
+  privateKey?: Uint8Array,
+  blinding?: Uint8Array
+  keypair?: Keypair,
+  originChainId?: string
+};
 
 export class Utxo {
-  chainId: BigNumber;
-  amount: BigNumber;
-  blinding: BigNumber;
-  keypair: Keypair;
-  originChainId: BigNumber;
-  index: number | null;
-  _commitment?: BigNumber;
-  _nullifier?: BigNumber;
+  keypair: Keypair | undefined;
+  originChainId: string | undefined;
 
   /** Initialize a new UTXO - unspent transaction output or input. Note, a full TX consists of 2/16 inputs and 2 outputs
    *
-   * @param chainId - The destination chain Id
-   * @param amount - UTXO amount
-   * @param blinding - Blinding factor
-   * @param keypair - The keypair used for commitment (pub), nullifier (priv), and encryption / decryption (enc)
-   * @param index - UTXO index in the merkle tree
+   * @param inner - The wasm representation of a utxo
+   * @param options - An object representing parameters that may be configured on a UTXO instance.
+   *                - keypair used for encryption / decryption.
+   *                - originChainId used for identifying the merkle tree where this UTXO exists.
    */
-  constructor ({ amount,
-    blinding,
-    chainId,
-    index,
-    keypair,
-    originChainId }: {chainId: BigNumberish, amount?: BigNumberish, keypair?: Keypair, blinding?: BigNumberish, originChainId?: BigNumberish, index?: number}) {
-    this.chainId = BigNumber.from(chainId);
-    this.amount = amount ? BigNumber.from(amount) : BigNumber.from(0);
-    this.blinding = blinding ? BigNumber.from(blinding) : randomBN();
-    this.keypair = keypair || new Keypair();
-    this.originChainId = originChainId ? BigNumber.from(originChainId) : BigNumber.from(0);
-    this.index = index || null;
+  constructor (readonly inner: JsUtxo) {
+
   }
 
-  /**
-   * Returns commitment for this UTXO
-   *
-   * @returns the poseidon hash of the [chainId, amount, pubKey, blinding]
-   */
-  getCommitment () {
-    if (!this._commitment) {
-      this._commitment = BigNumber.from(poseidon([this.chainId, this.amount, this.keypair.pubkey, this.blinding]));
+  private static get wasm () {
+    if (typeof process !== 'undefined' && process.versions != null && process.versions.node != null) {
+      // If node is running in an esm context, return esm compliant package.
+      return import('@webb-tools/wasm-utils/njs/wasm-utils-njs.js');
+    } else {
+      return import('@webb-tools/wasm-utils/wasm-utils.js');
     }
+  }
 
-    return this._commitment;
+  serialize (): string {
+    return this.inner.serialize();
+  }
+
+  static async deserialize (utxoString: string): Promise<Utxo> {
+    const wasm = await Utxo.wasm;
+    const utxo = wasm.JsUtxo.deserialize(utxoString);
+
+    return new Utxo(utxo);
+  }
+
+  static async generateUtxo (input: UtxoGenInput): Promise<Utxo> {
+    const wasm = await Utxo.wasm;
+
+    const wasmUtxo = new wasm.JsUtxo(
+      input.curve,
+      input.backend,
+      input.amount,
+      input.chainId,
+      input.index,
+      input.privateKey,
+      input.blinding
+    );
+
+    const utxo = new Utxo(wasmUtxo);
+
+    utxo.setKeypair(input.keypair);
+    utxo.setOriginChainId(input.originChainId);
+
+    return utxo;
   }
 
   /**
-   * Returns nullifier for this UTXO
-   */
-  getNullifier () {
-    if (!this._nullifier) {
-      if (
-        this.amount.lt(0) &&
-        (this.index === undefined ||
-          this.index === null ||
-          this.keypair.privkey === undefined ||
-          this.keypair.privkey === null)
-      ) {
-        throw new Error('Can not compute nullifier without utxo index or private key');
-      }
-
-      const signature = this.keypair.privkey ? this.keypair.sign(BigNumber.from(this.getCommitment()), this.index || 0) : 0;
-
-      this._nullifier = BigNumber.from(poseidon([this.getCommitment(), this.index || 0, signature]));
-    }
-
-    return this._nullifier;
-  }
-
-  getDiffs (roots: RootInfo[]): BigNumberish[] {
-    const targetRoot = roots.find((root) => root.chainId.toString() === this.originChainId.toString());
-
-    return roots.map((diff) => {
-      return BigNumber.from(babyjub.F.sub(Scalar.fromString(diff.merkleRoot.toString()), Scalar.fromString(targetRoot?.merkleRoot.toString())).toString());
-    });
-  }
-
-  /**
-   * Encrypt UTXO data using the current keypair
+   * Encrypt UTXO data using the current keypair.
+   * This is used in the externalDataHash calculations so the funds for this deposit
+   * can only be spent by the owner of `this.keypair`.
    *
    * @returns `0x`-prefixed hex string with data
    */
   encrypt () {
+    if (!this.keypair) {
+      throw new Error('Must set a keypair to encrypt the utxo');
+    }
+
     const bytes = Buffer.concat([toBuffer(this.chainId, 16), toBuffer(this.amount, 31), toBuffer(this.blinding, 31)]);
 
     return this.keypair.encrypt(bytes);
@@ -102,20 +96,74 @@ export class Utxo {
    *
    * @param keypair - keypair used to decrypt
    * @param data - hex string with data
-   * @param index - UTXO index in merkle tree
    * @returns a UTXO object
    */
-  static decrypt (keypair: Keypair, data: string, index: number) {
-    const buf = keypair.decrypt(data);
-    const utxo = new Utxo({
-      amount: BigNumber.from('0x' + buf.slice(16, 16 + 31).toString('hex')),
-      blinding: BigNumber.from('0x' + buf.slice(16 + 31, 16 + 62).toString('hex')),
-      chainId: BigNumber.from('0x' + buf.slice(0, 16).toString('hex')),
-      keypair
-    });
+  static async decrypt (keypair: Keypair, data: string) {
+    const decryptedUtxoString = keypair.decrypt(data).toString();
 
-    utxo.index = index;
+    return Utxo.deserialize(decryptedUtxoString);
+  }
 
-    return utxo;
+  getKeypair () {
+    return this.keypair;
+  }
+
+  setKeypair (keypair: Keypair | undefined) {
+    this.keypair = keypair;
+  }
+
+  getOriginChainId () {
+    return this.originChainId;
+  }
+
+  setOriginChainId (originChainId: string | undefined) {
+    this.originChainId = originChainId;
+  }
+
+  get amount (): string {
+    return this.inner.amount;
+  }
+
+  get blinding (): string {
+    return this.inner.blinding;
+  }
+
+  get chainId (): string {
+    return this.inner.chainId;
+  }
+
+  /**
+   * Returns commitment for this UTXO
+   *
+   * @returns the poseidon hash of [chainId, amount, pubKey, blinding]
+   */
+  get commitment (): Uint8Array {
+    return this.inner.commitment;
+  }
+
+  /**
+   * @returns the index configured on this UTXO. Output UTXOs generated
+   * before they have been inserted in a tree.
+   *
+   * TODO: Return null instead of 0 for the index if it is an output utxo?
+   */
+  get index (): number {
+    return this.inner.index;
+  }
+
+  /**
+   * @returns the nullifier: hash of [commitment, index, signature]
+   * where signature = hash([secret key, commitment, index])
+   */
+  get nullifier (): string {
+    return this.inner.nullifier;
+  }
+
+  /**
+   * @returns the secret_key AKA private_key used in the nullifier.
+   * this value is used to derive the public_key for the commitment.
+   */
+  get secret_key (): string {
+    return this.inner.secret_key;
   }
 }

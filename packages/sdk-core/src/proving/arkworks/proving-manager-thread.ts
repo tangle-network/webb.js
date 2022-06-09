@@ -1,14 +1,14 @@
 // Copyright 2022 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import { JsNote, JsProofInput, JsProofOutput, NoteProtocol } from '@webb-tools/wasm-utils';
+import type { JsNote, JsProofInput, JsProofOutput, NoteProtocol } from '@webb-tools/wasm-utils';
 
 import { u8aToHex } from '@polkadot/util';
 
 import { Note } from '../../note.js';
 import { AnchorPMSetupInput, MixerPMSetupInput, PMEvents, ProofInterface, ProvingManagerSetupInput, VAnchorPMSetupInput } from '../types.js';
 
-export class ArkworksProvingManagerWrapper {
+export class ArkworksProvingManagerThread {
   /**
    * @param ctx  - Context of the Proving manager
    * Defaults to worker mode assuming that the Proving manager is running in the browser

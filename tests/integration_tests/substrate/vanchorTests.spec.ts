@@ -98,8 +98,8 @@ async function createVAnchorWithDeposit(
   const publicAmount = currencyToUnitI128(10);
   const notes = [note1, note2];
   // Output UTXOs configs
-  const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, publicAmount.toString(), chainId, undefined);
-  const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, '0', chainId, undefined);
+  const output1 = new JsUtxo('Bn254', 'Arkworks', publicAmount.toString(), chainId, undefined);
+  const output2 = new JsUtxo('Bn254', 'Arkworks', '0', chainId, undefined);
   // Configure a new proving manager with direct call
   const provingManager = new ArkworksProvingManagerWrapper('direct-call');
   const leavesMap: any = {};
@@ -238,8 +238,8 @@ describe('VAnchor tests', function() {
     const publicAmount = currencyToUnitI128(10);
     const notes = [note1, note2];
     // Output UTXOs configs
-    const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, publicAmount.toString(), chainId, undefined);
-    const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, '0', chainId, undefined);
+    const output1 = new JsUtxo('Bn254', 'Arkworks', publicAmount.toString(), chainId, undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', '0', chainId, undefined);
     // Configure a new proving manager with direct call
     const provingManager = new ArkworksProvingManagerWrapper('direct-call');
     const leavesMap: any = {};
@@ -320,8 +320,8 @@ describe('VAnchor tests', function() {
 
     const publicAmount = -withdrawAmount;
 
-    const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, '0', chainId.toString(), undefined);
-    const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, '0', chainId.toString(), undefined);
+    const output1 = new JsUtxo('Bn254', 'Arkworks', '0', chainId.toString(), undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', '0', chainId.toString(), undefined);
 
     const provingManager = new ArkworksProvingManagerWrapper('direct-call');
     const address = bob.address;

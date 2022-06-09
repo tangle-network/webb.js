@@ -4,7 +4,7 @@
 import type { NoteProtocol } from '@webb-tools/wasm-utils';
 
 import { ProofInterface, ProvingManagerSetupInput } from '../types.js';
-import { CircomProvingManagerWrapper } from './proving-manager-thread.js';
+import { CircomProvingManagerThread } from './proving-manager-thread.js';
 
 // Circom uses snarkjs to generate and verify proofs. It requires a witness calculator.
 export class CircomProvingManager {
@@ -28,7 +28,7 @@ export class CircomProvingManager {
 
   private proveWithoutWorker<T extends NoteProtocol> (protocol: T, input: ProvingManagerSetupInput<T>) {
     // If the worker CTX is direct-call
-    const pm = new CircomProvingManagerWrapper(this.circuitWasm, 'direct-call');
+    const pm = new CircomProvingManagerThread(this.circuitWasm, 'direct-call');
 
     return pm.prove(protocol, input);
   }

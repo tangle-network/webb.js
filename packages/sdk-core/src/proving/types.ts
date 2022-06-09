@@ -1,9 +1,10 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import { JsUtxo, Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
+import type { Backend, Curve, JsUtxo, Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
 
 import { Note } from '../note.js';
+import { Utxo } from '../utxo.js';
 
 export type ProvingManagerSetupInput<T extends NoteProtocol> = ProvingManagerPayload[T];
 
@@ -83,7 +84,7 @@ export type VAnchorPMSetupInput = {
   indices: number[];
   roots: Leaves;
   chainId: string;
-  output: [JsUtxo, JsUtxo];
+  output: [Utxo, Utxo];
   encryptedCommitments: [Uint8Array, Uint8Array],
   publicAmount: string;
   provingKey: Uint8Array;

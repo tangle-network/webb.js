@@ -1,4 +1,6 @@
 use core::fmt;
+use core::fmt::Formatter;
+use core::str::FromStr;
 
 use ark_bn254::Fr as Bn254Fr;
 use ark_ff::{BigInteger, PrimeField};
@@ -9,8 +11,8 @@ use js_sys::{JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
-use crate::types::{Backend, Curve, OpStatusCode, WasmCurve, BE};
-use crate::{VAnchorR1CSProverBn254_30_2_16_2, VAnchorR1CSProverBn254_30_2_2_2};
+use crate::types::{Backend, Curve, OpStatusCode, OperationError, WasmCurve, BE};
+use crate::{VAnchorR1CSProverBn254_30_2_2_2};
 
 #[derive(Clone)]
 pub enum JsUtxoInner {
@@ -29,7 +31,38 @@ pub struct JsUtxo {
 }
 
 impl JsUtxo {
-	pub fn amount_raw(&self) -> u128 {
+	pub(crate) fn new(
+		curve: Curve,
+		backend: Backend,
+		amount: u128,
+		chain_id: u64,
+		index: Option<u64>,
+		private_key: Option<Vec<u8>>,
+		blinding: Option<Vec<u8>>,
+	) -> Result<JsUtxo, OperationError> {
+		let mut rng = OsRng;
+		let utxo = match (curve, backend) {
+			(Curve::Bn254, Backend::Arkworks) => {
+				let pk = private_key.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
+				let blinding = blinding.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
+				VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
+					ArkCurve::Bn254,
+					chain_id,
+					amount,
+					index,
+					pk,
+					blinding,
+				)
+			}
+			.map_err(|_| OpStatusCode::InvalidOutputUtxoConfig)
+			.map(JsUtxo::new_from_bn254_utxo),
+			_ => Err(OpStatusCode::InvalidNoteProtocol),
+		}?;
+
+		Ok(utxo)
+	}
+
+	pub fn get_amount_raw(&self) -> u128 {
 		let amount_bytes = self.get_amount();
 		let mut amount_slice = [0u8; 16];
 		amount_slice.copy_from_slice(amount_bytes[..16].to_vec().as_slice());
@@ -115,16 +148,28 @@ impl JsUtxo {
 			JsUtxoInner::Bn254(utxo) => Ok(utxo),
 		}
 	}
+
+	pub fn deserialize(utxo_str: &str) -> Result<JsUtxo, OperationError> {
+		utxo_str.parse().map_err(Into::into)
+	}
 }
 #[wasm_bindgen]
 impl JsUtxo {
+	pub fn serialize(&self) -> JsString {
+		JsString::from(self.to_string())
+	}
+
+	#[wasm_bindgen(js_name = deserialize)]
+	pub fn js_deserialize(utxo_str: JsString) -> Result<JsUtxo, JsValue> {
+		let utxo_str: String = utxo_str.into();
+		Self::deserialize(&utxo_str).map_err(Into::into)
+	}
+
 	#[wasm_bindgen(constructor)]
 	#[allow(clippy::too_many_arguments)]
-	pub fn new(
+	pub fn construct(
 		curve: WasmCurve,
 		backend: BE,
-		num_in_utxos: u8,
-		num_out_utxos: u8,
 		amount: JsString,
 		chain_id: JsString,
 		index: Option<JsString>,
@@ -162,25 +207,14 @@ impl JsUtxo {
 				let blinding = blinding
 					.map(|b| b.to_vec())
 					.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
-				match (num_in_utxos, num_out_utxos) {
-					(2, 2) => VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
-						ArkCurve::Bn254,
-						chain_id,
-						amount,
-						index,
-						pk,
-						blinding,
-					),
-					(16, 2) => VAnchorR1CSProverBn254_30_2_16_2::create_leaf_with_privates(
-						ArkCurve::Bn254,
-						chain_id,
-						amount,
-						index,
-						pk,
-						blinding,
-					),
-					_ => return Err(OpStatusCode::InvalidNoteProtocol.into()),
-				}
+				VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
+					ArkCurve::Bn254,
+					chain_id,
+					amount,
+					index,
+					pk,
+					blinding,
+				)
 			}
 			.map_err(|_| OpStatusCode::InvalidOutputUtxoConfig)
 			.map(JsUtxo::new_from_bn254_utxo),
@@ -197,8 +231,8 @@ impl JsUtxo {
 	}
 
 	#[wasm_bindgen(getter)]
-	#[wasm_bindgen(js_name = chainIdBytes)]
-	pub fn chain_id_bytes(&self) -> JsString {
+	#[wasm_bindgen(js_name = chainId)]
+	pub fn chain_id(&self) -> JsString {
 		let chain_id_bytes = self.get_chain_id_bytes();
 		hex::encode(chain_id_bytes).into()
 	}
@@ -242,5 +276,62 @@ impl JsUtxo {
 		let commitment = self.get_commitment();
 
 		Uint8Array::from(commitment.as_slice())
+	}
+}
+
+impl fmt::Display for JsUtxo {
+	fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+		let curve = match self.inner {
+			JsUtxoInner::Bn254(_) => Curve::Bn254.to_string(),
+		};
+		let backend = Backend::Arkworks.to_string();
+		let amount = self.get_amount_raw().to_string();
+		let chain_id = self.get_chain_id_raw().to_string();
+		let index = self.get_index().map(|v| v.to_string()).unwrap_or("None".to_string());
+		let blinding = hex::encode(self.get_blinding());
+		let private_key = hex::encode(self.get_secret_key());
+
+		let sec = vec![
+			curve,
+			backend,
+			amount,
+			chain_id,
+			index,
+			blinding,
+			private_key,
+		]
+		.join("&");
+
+		write!(f, "{}", sec)
+	}
+}
+
+impl FromStr for JsUtxo {
+	type Err = OperationError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		let parts: Vec<_> = s.split("&").collect();
+		let curve: Curve = parts[0].parse().map_err(|_| OpStatusCode::InvalidCurve)?;
+		let backend: Backend = parts[1].parse().map_err(|_| OpStatusCode::InvalidBackend)?;
+		let amount = parts[2].parse().map_err(|_| OpStatusCode::InvalidAmount)?;
+		let chain_id = parts[3].parse().map_err(|_| OpStatusCode::InvalidChainId)?;
+		let index = match parts[4] {
+			"None" => None,
+			v => {
+				let index: u64 = v.parse().map_err(|_| OpStatusCode::InvalidUTXOIndex)?;
+				Some(index)
+			}
+		};
+		let blinding = hex::decode(parts[5]).map_err(|_| OpStatusCode::Unknown)?;
+		let private_key = hex::decode(parts[6]).map_err(|_| OpStatusCode::Unknown)?;
+		JsUtxo::new(
+			curve,
+			backend,
+			amount,
+			chain_id,
+			index,
+			Some(private_key),
+			Some(blinding),
+		)
 	}
 }
