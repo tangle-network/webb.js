@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/sdk-core",
-  "version": "0.1.4-78",
+  "version": "0.1.4-79",
   "description": "the core of webb tools sdk",
   "author": "Webb Developers <drew@webb.tools>",
   "license": "Apache-2.0",
@@ -117,8 +117,8 @@
   "dependencies": {
     "@polkadot/util": "9.3.1",
     "@types/events": "^3.0.0",
-    "@webb-tools/api": "0.1.4-78",
-    "@webb-tools/wasm-utils": "0.1.4-78",
+    "@webb-tools/api": "0.1.4-79",
+    "@webb-tools/wasm-utils": "0.1.4-79",
     "bignumber.js": "^9.0.0",
     "circomlibjs": "^0.0.8",
     "elliptic": "6.5.4",
