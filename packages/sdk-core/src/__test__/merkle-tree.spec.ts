@@ -18,8 +18,6 @@ describe('Merkle Tree tests', () => {
         treeThenInsert.insert(element);
       }
 
-      console.log(treeWithElements.path(0));
-
       expect(treeThenInsert.root().toHexString()).to.eq(treeWithElements.root().toHexString());
     });
   });
@@ -34,9 +32,6 @@ describe('Merkle Tree tests', () => {
       for (const el of elements) {
         singleTree.insert(el);
       }
-
-      console.log(bulkTree.path(0));
-      console.log(singleTree.path(0));
 
       for (let i = 0; i < elements.length; i++) {
         const bulkPath = bulkTree.path(i);

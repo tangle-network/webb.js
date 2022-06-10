@@ -52,7 +52,7 @@ describe('Utxo Class', () => {
     expect(serializedInput).to.deep.equal(serializedOutput);
   });
 
-  it.only('should deserialize and serialize a utxo which does not have an index', async function () {
+  it('should deserialize and serialize a utxo which does not have an index', async function () {
     const serializedInput = 'Bn254&Arkworks&10000000000000&2199023256632&None&1b44b30ac48be4b3448dc7ff2c2d4caa7bd43c61e348990717bd879005443e07&1cea7673e0c7c60df3b8ed4fb108bf38f04a00657e6219b1c2709a3d32e2ee00';
 
     const deserialized = await Utxo.deserialize(serializedInput);

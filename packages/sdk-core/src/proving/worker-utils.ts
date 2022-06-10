@@ -70,10 +70,6 @@ export async function workerProofTranslator<T extends NoteProtocol> (
         ...proofData
       } as WorkerVAnchorProof;
 
-      console.log('inputUtxo 1: ', sourceVAnchorProof.inputUtxos[0]);
-
-      console.log('inputUtxo 2: ', sourceVAnchorProof.inputUtxos[1]);
-
       const outputNotes = await Promise.all(sourceVAnchorProof.outputNotes.map((note) => Note.deserialize(note)));
       const inputUtxos = await Promise.all(sourceVAnchorProof.inputUtxos.map((utxo) => Utxo.deserialize(utxo)));
 

@@ -209,7 +209,6 @@ describe('VAnchor tests', function() {
     await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
   });
 
-
   it('VAnchor deposit', async function() {
     const { bob, alice } = getKeyring();
     const secret = randomAsU8a();
@@ -291,8 +290,8 @@ describe('VAnchor tests', function() {
       recipient: address,
       fee,
       extAmount: extAmount,
-      encryptedOutput1: comEnc1,
-      encryptedOutput2: comEnc2
+      encryptedOutput1: u8aToHex(comEnc1),
+      encryptedOutput2: u8aToHex(comEnc2)
     };
 
     let vanchorProofData = {

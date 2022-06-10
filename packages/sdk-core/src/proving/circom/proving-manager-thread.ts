@@ -4,7 +4,6 @@
 // Import wasm-generated types
 import type { JsNote, NoteProtocol } from '@webb-tools/wasm-utils';
 
-import { Utxo } from '@webb-tools/sdk-core/utxo.js';
 import { poseidon } from 'circomlibjs';
 import { BigNumber } from 'ethers';
 import * as snarkjs from 'snarkjs';
@@ -14,6 +13,7 @@ import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { MerkleProof, MerkleTree } from '../../merkle-tree.js';
 import { Note } from '../../note.js';
 import { buildFixedWitnessCalculator, buildVariableWitnessCalculator, generateFixedWitnessInput, generateVariableWitnessInput, generateWithdrawProofCallData, getVAnchorExtDataHash } from '../../solidity-utils/index.js';
+import { Utxo } from '../../utxo.js';
 import { AnchorPMSetupInput } from '../types.js';
 import { WorkerProofInterface, WorkerProvingManagerSetupInput, WorkerVAnchorPMSetupInput } from '../worker-utils.js';
 
