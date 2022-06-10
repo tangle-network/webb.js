@@ -14,9 +14,9 @@ import type { Backend, Curve, HashFunction, JsNote, NoteProtocol, Version } from
  * @param protocol - The shielded pool protocol to use.
  * @param version - The version of the note to use.
  * @param sourceChain - The source chain id.
- * @param sourceIdentifyingData - Optional source identifying data.
+ * @param sourceIdentifyingData - source identifying data.
  * @param targetChain - The target chain id.
- * @param targetIdentifyingData - Optional target identifying data.
+ * @param targetIdentifyingData - target identifying data.
  * @param backend - The backend to use. Different values include 'Arkworks' and 'Circom'
  * @param hashFunction - The hash function to use. Different values include 'Poseidon' and 'Pederson'
  * @param curve - The curve to use. Different values include 'Bn254' and 'Bls381'
@@ -34,9 +34,9 @@ export type NoteGenInput = {
   protocol: NoteProtocol;
   version?: string;
   sourceChain: string;
-  sourceIdentifyingData?: string;
+  sourceIdentifyingData: string;
   targetChain: string;
-  targetIdentifyingData?: string;
+  targetIdentifyingData: string;
   backend: Backend;
   hashFunction: HashFunction;
   curve: Curve;

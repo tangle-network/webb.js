@@ -1,7 +1,10 @@
 // Copyright 2022 @webb-tools/
 // SPDX-License-Identifier: Apache-2.0
 
-import type { JsUtxo, Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
+// This file is meant to host types that are used for proving
+// It exposes the typed inputs and outputs for sdk-core for external use.
+
+import type { Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
 
 import { Note } from '../note.js';
 import { Utxo } from '../utxo.js';
@@ -79,7 +82,7 @@ export type AnchorPMSetupInput = {
  * @param provingKey - Proving key bytes to pass in to the Zero-knowledge proof generation
  * */
 export type VAnchorPMSetupInput = {
-  inputNotes: string[];
+  inputNotes: Note[];
   leavesMap: Record<string, Leaves>;
   indices: number[];
   roots: Leaves;
@@ -94,19 +97,21 @@ export type VAnchorPMSetupInput = {
   fee: string;
 };
 
-export type ProofInterface<T extends NoteProtocol> = T extends 'vanchor'
-  ? VAnchorProof
-  : T extends 'mixer'
-    ? MixerProof
-    : AnchorProof;
+export type ProofInterface<T extends NoteProtocol> = ProofPayload[T]
+
+export interface ProofPayload extends Record<NoteProtocol, any> {
+  mixer: MixerProof,
+  anchor: AnchorProof,
+  VAnchor: VAnchorProof
+}
 
 export type VAnchorProof = {
-  readonly inputUtxos: Array<JsUtxo>;
+  readonly inputUtxos: Array<Utxo>;
   readonly outputNotes: Array<Note>;
   readonly proof: string;
   readonly publicInputs: Array<string>;
-  readonly publicAmount: Uint8Array
-  readonly extDataHash: Uint8Array
+  readonly publicAmount: Uint8Array;
+  readonly extDataHash: Uint8Array;
 };
 
 export type AnchorProof = {

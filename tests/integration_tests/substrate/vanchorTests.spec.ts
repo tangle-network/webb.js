@@ -1,15 +1,13 @@
-import { JsNote, JsUtxo } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 import { ApiPromise } from '@polkadot/api';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { currencyToUnitI128, KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
-import { Note, ProvingManagerSetupInput, ArkworksProvingManagerThread, Utxo } from '@webb-tools/sdk-core/index.js';
+import { Note, ProvingManagerSetupInput, ArkworksProvingManager, Utxo, VAnchorProof, Keypair } from '@webb-tools/sdk-core/index.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { polkadotTx } from '@webb-tools/test-utils/index.js';
 import path from 'path';
 import fs from 'fs';
-
-import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
+import { randomAsU8a, naclEncrypt } from '@polkadot/util-crypto';
 
 let apiPromise: ApiPromise | null = null;
 let keyring: {
@@ -54,7 +52,6 @@ async function generateVAnchorNote(amount: number, chainId: number, outputChainI
     tokenSymbol: 'WEBB',
     version: 'v2',
     width: String(5)
-
   });
 
   return note;
@@ -74,7 +71,7 @@ async function createVAnchorWithDeposit(
   apiPromise: ApiPromise,
   sudo: KeyringPair,
   depositer: KeyringPair
-): Promise<[number, [JsNote, JsNote], Uint8Array, Uint8Array]> {
+): Promise<[number, [Note, Note], Uint8Array, Uint8Array]> {
   const treeId = await createVAnchor(apiPromise, sudo);
   const outputChainId = BigInt(chainId);
   const secret = randomAsU8a();
@@ -98,10 +95,20 @@ async function createVAnchorWithDeposit(
   const publicAmount = currencyToUnitI128(10);
   const notes = [note1, note2];
   // Output UTXOs configs
-  const output1 = new JsUtxo('Bn254', 'Arkworks', publicAmount.toString(), chainId, undefined);
-  const output2 = new JsUtxo('Bn254', 'Arkworks', '0', chainId, undefined);
+  const output1 = await Utxo.generateUtxo({
+    curve: 'Bn254',
+    backend: 'Arkworks',
+    amount: publicAmount.toString(),
+    chainId,
+  });
+  const output2 = await Utxo.generateUtxo({
+    curve: 'Bn254',
+    backend: 'Arkworks',
+    amount: '0',
+    chainId,
+  });
   // Configure a new proving manager with direct call
-  const provingManager = new ArkworksProvingManagerThread('direct-call');
+  const provingManager = new ArkworksProvingManager(null);
   const leavesMap: any = {};
 
   const address = depositer.address;
@@ -116,13 +123,12 @@ async function createVAnchorWithDeposit(
   const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
   const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
 
-
   const setup: ProvingManagerSetupInput<'vanchor'> = {
     chainId: outputChainId.toString(),
     indices: [0, 0],
-    inputNotes: notes.map((note) => note.serialize()),
+    inputNotes: notes,
     leavesMap: leavesMap,
-    output: [new Utxo(output1), new Utxo(output2)],
+    output: [output1, output2],
     encryptedCommitments: [comEnc1, comEnc2],
     provingKey: pk,
     publicAmount: String(publicAmount),
@@ -132,7 +138,7 @@ async function createVAnchorWithDeposit(
     extAmount: extAmount.toString(),
     fee: fee.toString()
   };
-  const data = await provingManager.prove('vanchor', setup);
+  const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
   const extData = {
     relayer: address,
     recipient: address,
@@ -142,17 +148,12 @@ async function createVAnchorWithDeposit(
     encryptedOutput2: u8aToHex(comEnc2)
   };
 
-  const outputNotes: JsNote[] = [];
-  for (const note of data.outputNotes) {
-    outputNotes.push(await note.toDepositNote());
-  }
-
   let vanchorProofData = {
     proof: `0x${data.proof}`,
     publicAmount: data.publicAmount,
     roots: rootsSet,
     inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-    outputCommitments: outputNotes.map(note => u8aToHex(note.getLeafCommitment())),
+    outputCommitments: data.outputNotes.map(note => u8aToHex(note.note.getLeafCommitment())),
     extDataHash: data.extDataHash
   };
   const leafsCount = await apiPromise.derive.merkleTreeBn254.getLeafCountForTree(Number(treeId));
@@ -163,13 +164,13 @@ async function createVAnchorWithDeposit(
     method: 'transact'
   }, [treeId, vanchorProofData, extData], depositer);
 
-  const leaf1 = outputNotes[0].getLeafCommitment();
-  const leaf2 = outputNotes[1].getLeafCommitment();
+  const leaf1 = data.outputNotes[0].getLeaf();
+  const leaf2 = data.outputNotes[1].getLeaf();
   const indexOfLeaf1 = await getleafIndex(apiPromise, leaf1, indexBeforeInsetion, treeId);
   const indexOfLeaf2 = await getleafIndex(apiPromise, leaf2, indexBeforeInsetion, treeId);
-  const note1WithIndex = outputNotes[0];
+  const note1WithIndex = data.outputNotes[0];
   note1WithIndex.mutateIndex(String(indexOfLeaf1));
-  const note2WithIndex = outputNotes[1];
+  const note2WithIndex = data.outputNotes[1];
   note2WithIndex.mutateIndex(String(indexOfLeaf2));
 
   return [treeId, [note1WithIndex, note2WithIndex], pk, secret];
@@ -238,10 +239,22 @@ describe('VAnchor tests', function() {
     const publicAmount = currencyToUnitI128(10);
     const notes = [note1, note2];
     // Output UTXOs configs
-    const output1 = new JsUtxo('Bn254', 'Arkworks', publicAmount.toString(), chainId, undefined);
-    const output2 = new JsUtxo('Bn254', 'Arkworks', '0', chainId, undefined);
+    const output1 = await Utxo.generateUtxo({
+      curve: 'Bn254',
+      backend: 'Arkworks',
+      amount: publicAmount.toString(),
+      chainId,
+      keypair: new Keypair(),
+    });
+    const output2 = await Utxo.generateUtxo({
+      curve: 'Bn254',
+      backend: 'Arkworks',
+      amount: '0',
+      chainId,
+      keypair: new Keypair(),
+    });
     // Configure a new proving manager with direct call
-    const provingManager = new ArkworksProvingManagerThread('direct-call');
+    const provingManager = new ArkworksProvingManager(null);
     const leavesMap: any = {};
 
     const address = alice.address;
@@ -256,13 +269,12 @@ describe('VAnchor tests', function() {
     const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
     const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
 
-
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: outputChainId.toString(),
       indices: [0, 0],
-      inputNotes: notes.map((note) => note.serialize()),
+      inputNotes: notes,
       leavesMap: leavesMap,
-      output: [new Utxo(output1), new Utxo(output2)],
+      output: [output1, output2],
       encryptedCommitments: [comEnc1, comEnc2],
       provingKey: pk,
       publicAmount: String(publicAmount),
@@ -272,27 +284,23 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString()
     };
-    const data = await provingManager.prove('vanchor', setup);
+
+    const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
       relayer: address,
       recipient: address,
       fee,
       extAmount: extAmount,
-      encryptedOutput1: u8aToHex(comEnc1),
-      encryptedOutput2: u8aToHex(comEnc2)
+      encryptedOutput1: comEnc1,
+      encryptedOutput2: comEnc2
     };
-
-    const outputNotes: JsNote[] = [];
-    for (const note of data.outputNotes) {
-      outputNotes.push(await note.toDepositNote());
-    }
 
     let vanchorProofData = {
       proof: `0x${data.proof}`,
       publicAmount: data.publicAmount,
       roots: rootsSet,
       inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-      outputCommitments: outputNotes.map(note => u8aToHex(note.getLeafCommitment())),
+      outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeaf())),
       extDataHash: data.extDataHash
     };
     try {
@@ -313,20 +321,30 @@ describe('VAnchor tests', function() {
     const leavesMap: any = {};
 
     const [treeId, notes, pk, secret] = await createVAnchorWithDeposit(apiPromise!, alice, bob);
-    const chainId = BigInt(notes[0].targetChainId); // both two notes have the same chain id
+    const chainId = notes[0].note.targetChainId; // both two notes have the same chain id
 
-    const withdrawAmount = notes.reduce((acc, note) => acc + Number(note.amount), 0);
+    const withdrawAmount = notes.reduce((acc, note) => acc + Number(note.note.amount), 0);
     const extAmount = -withdrawAmount;
 
     const publicAmount = -withdrawAmount;
 
-    const output1 = new JsUtxo('Bn254', 'Arkworks', '0', chainId.toString(), undefined);
-    const output2 = new JsUtxo('Bn254', 'Arkworks', '0', chainId.toString(), undefined);
+    const output1 = await Utxo.generateUtxo({
+      curve: 'Bn254',
+      backend: 'Arkworks',
+      amount: '0',
+      chainId,
+    });
+    const output2 = await Utxo.generateUtxo({
+      curve: 'Bn254',
+      backend: 'Arkworks',
+      amount: '0',
+      chainId,
+    });
 
-    const provingManager = new ArkworksProvingManagerThread('direct-call');
+    const provingManager = new ArkworksProvingManager(null);
     const address = bob.address;
-    const leaf1Index = Number(notes[0].index);
-    const leaf2Index = Number(notes[1].index);
+    const leaf1Index = Number(notes[0].note.index);
+    const leaf2Index = Number(notes[1].note.index);
     const maxLeafIndex = Math.max(leaf1Index, leaf2Index);
     const leaves = await apiPromise!.derive.merkleTreeBn254.getLeavesForTree(treeId, 0, maxLeafIndex);
     const neighborRoots: string[] = await (apiPromise!.rpc as any).lt.getNeighborRoots(treeId).then((roots: any) => roots.toHuman());
@@ -340,13 +358,12 @@ describe('VAnchor tests', function() {
     const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
     const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
 
-
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: chainId.toString(),
       indices: [leaf1Index, leaf2Index],
-      inputNotes: notes.map((note) => note.serialize()),
+      inputNotes: notes,
       leavesMap: leavesMap,
-      output: [new Utxo(output1), new Utxo(output2)],
+      output: [output1, output2],
       encryptedCommitments: [comEnc1, comEnc2],
       provingKey: pk,
       publicAmount: String(publicAmount),
@@ -356,7 +373,7 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString()
     };
-    const data = await provingManager.prove('vanchor', setup);
+    const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
       relayer: address,
       recipient: address,
@@ -366,17 +383,12 @@ describe('VAnchor tests', function() {
       encryptedOutput2: u8aToHex(comEnc2)
     };
 
-    const outputNotes: JsNote[] = [];
-    for (const note of data.outputNotes) {
-      outputNotes.push(await note.toDepositNote());
-    }
-
     let vanchorProofData = {
       proof: `0x${data.proof}`,
       publicAmount: data.publicAmount,
       roots: rootsSet,
       inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-      outputCommitments: outputNotes.map(note => u8aToHex(note.getLeafCommitment())),
+      outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeaf())),
       extDataHash: data.extDataHash
     };
 

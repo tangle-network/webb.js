@@ -25,9 +25,6 @@ export class Utxo {
   /** Initialize a new UTXO - unspent transaction output or input. Note, a full TX consists of 2/16 inputs and 2 outputs
    *
    * @param inner - The wasm representation of a utxo
-   * @param options - An object representing parameters that may be configured on a UTXO instance.
-   *                - keypair used for encryption / decryption.
-   *                - originChainId used for identifying the merkle tree where this UTXO exists.
    */
   constructor (readonly inner: JsUtxo) {
 
@@ -86,7 +83,11 @@ export class Utxo {
       throw new Error('Must set a keypair to encrypt the utxo');
     }
 
-    const bytes = Buffer.concat([toBuffer(this.chainId, 16), toBuffer(this.amount, 31), toBuffer(this.blinding, 31)]);
+    const bytes = Buffer.concat([
+      toBuffer(`0x${this.chainId}`, 16),
+      toBuffer(`0x${this.amount}`, 31),
+      toBuffer(`0x${this.blinding}`, 31)
+    ]);
 
     return this.keypair.encrypt(bytes);
   }

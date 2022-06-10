@@ -1,13 +1,11 @@
 /* eslint-disable camelcase */
 /* eslint-disable sort-keys */
-import type { JsUtxo } from '@webb-tools/wasm-utils';
-
 import { BigNumber, BigNumberish, ethers } from 'ethers';
 
 import { u8aToHex } from '@polkadot/util';
 
 import { FIELD_SIZE } from '../big-number-utils.js';
-import { MerkleProof, MerkleTree } from '../index.js';
+import { MerkleProof, MerkleTree, Utxo } from '../index.js';
 import { Keypair } from '../keypair.js';
 
 export function getVAnchorExtDataHash (
@@ -38,8 +36,8 @@ export function getVAnchorExtDataHash (
 export function generateVariableWitnessInput (
   roots: BigNumber[],
   chainId: BigNumberish,
-  inputs: JsUtxo[],
-  outputs: JsUtxo[],
+  inputs: Utxo[],
+  outputs: Utxo[],
   extAmount: BigNumberish,
   fee: BigNumberish,
   extDataHash: BigNumber,
