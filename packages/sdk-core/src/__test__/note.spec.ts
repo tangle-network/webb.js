@@ -103,7 +103,7 @@ describe('Note class', () => {
     expect(targetChain.toString()).to.deep.equal('1');
   });
 
-  it('should fail with circom backend', async () => {
+  it('should fail with circom backend without secrets', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
       backend: 'Circom',
@@ -128,7 +128,7 @@ describe('Note class', () => {
       expect(e.message).to.equal('Circom backend is supported when the secret value is supplied');
     }
   });
-  it('should generate a note with circom backend when secrets is passed', async () => {
+  it('should generate a mixer note with circom backend when secrets are passed', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
       backend: 'Circom',
@@ -143,6 +143,30 @@ describe('Note class', () => {
       targetChain: '1',
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
+      version: 'v2',
+      width: '4'
+    };
+
+    const { note } = await Note.generateNote(noteInput);
+
+    expect(note.backend).to.equal('Circom');
+  });
+
+  it('should generate an anchor note with circom backend when secrets are passed', async () => {
+    const noteInput: NoteGenInput = {
+      amount: '1000000000000000000',
+      backend: 'Circom',
+      curve: 'Bn254',
+      denomination: '18',
+      exponentiation: '5',
+      hashFunction: 'Poseidon',
+      protocol: 'anchor',
+      secrets: '0000010000007a69:002b977c06e55a6b1fb0552373c9001a2d0601d2c739607954c1c291278b07ca:0033b53cd0cb680239a7b1a671282f30cbcaa9e6fa05c6b1bfd11ef7a1d1a1fa',
+      sourceChain: '1099511659113',
+      sourceIdentifyingData: '1',
+      targetChain: '1099511659113',
+      targetIdentifyingData: '1',
+      tokenSymbol: 'DAIM',
       version: 'v2',
       width: '4'
     };

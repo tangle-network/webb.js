@@ -24,23 +24,33 @@
       "require": "./src/cjs/index.js",
       "default": "./src/index.js"
     },
+    "./note": {
+      "types": "./note.d.ts",
+      "require": "./cjs/note.js",
+      "default": "./note.js"
+    },
+    "./cjs/note": {
+      "types": "./note.d.ts",
+      "require": "./cjs/note.js",
+      "default": "./cjs/note.js"
+    },
     "./merkle-tree": {
-      "types": "./merkle-tree.js",
+      "types": "./merkle-tree.d.ts",
       "require": "./cjs/merkle-tree.js",
       "default": "./merkle-tree.js"
     },
     "./cjs/merkle-tree": {
-      "types": "./merkle-tree.js",
+      "types": "./merkle-tree.d.ts",
       "require": "./cjs/merkle-tree.js",
       "default": "./cjs/merkle-tree.js"
     },
     "./utxo": {
-      "types": "./utxo.js",
+      "types": "./utxo.d.ts",
       "require": "./cjs/utxo.js",
       "default": "./utxo.js"
     },
     "./cjs/utxo": {
-      "types": "./utxo.js",
+      "types": "./utxo.d.ts",
       "require": "./cjs/utxo.js",
       "default": "./cjs/utxo.js"
     },

@@ -1,12 +1,11 @@
 /* eslint-disable camelcase */
 /* eslint-disable sort-keys */
-import { JsUtxo } from '@webb-tools/wasm-utils/wasm-utils';
 import { BigNumber, BigNumberish, ethers } from 'ethers';
 
 import { u8aToHex } from '@polkadot/util';
 
 import { FIELD_SIZE } from '../big-number-utils.js';
-import { MerkleProof, MerkleTree } from '../index.js';
+import { MerkleProof, MerkleTree, Utxo } from '../index.js';
 import { Keypair } from '../keypair.js';
 
 export function getVAnchorExtDataHash (
@@ -37,8 +36,8 @@ export function getVAnchorExtDataHash (
 export function generateVariableWitnessInput (
   roots: BigNumber[],
   chainId: BigNumberish,
-  inputs: JsUtxo[],
-  outputs: JsUtxo[],
+  inputs: Utxo[],
+  outputs: Utxo[],
   extAmount: BigNumberish,
   fee: BigNumberish,
   extDataHash: BigNumber,
@@ -68,7 +67,7 @@ export function generateVariableWitnessInput (
     inPathElements: vanchorMerkleProofs.map((x) => x.pathElements),
 
     // data for 2 transaction outputs
-    outChainID: outputs.map((x) => x.chainIdBytes),
+    outChainID: outputs.map((x) => x.chainId),
     outAmount: outputs.map((x) => x.amount.toString()),
     outPubkey: [keypair1.pubkey.toString(), keypair2.pubkey.toString()],
     outBlinding: outputs.map((x) => x.blinding.toString())

@@ -3,9 +3,10 @@
 
 import type { NoteProtocol } from '@webb-tools/wasm-utils';
 
-import { ArkworksProvingManagerWrapper } from '@webb-tools/sdk-core/proving/arkworks/proving-manager-thread.js';
+import { ArkworksProvingManagerThread } from '@webb-tools/sdk-core/proving/arkworks/proving-manager-thread.js';
 
-import { ProofInterface, ProvingManagerSetupInput } from '../types';
+import { ProofInterface, ProvingManagerSetupInput } from '../types.js';
+import { workerInputMapper, WorkerProofInterface, workerProofTranslator, WorkerProvingManagerSetupInput } from '../worker-utils.js';
 
 export class ArkworksProvingManager {
   constructor (
@@ -19,31 +20,33 @@ export class ArkworksProvingManager {
    *
    * @param  input - input for the manager
    **/
-  public prove<T extends NoteProtocol> (protocol: T, input: ProvingManagerSetupInput<T>) {
+  public async prove<T extends NoteProtocol> (protocol: T, input: ProvingManagerSetupInput<T>): Promise<ProofInterface<T>> {
     const worker = this.worker;
 
-    if (worker) {
-      return ArkworksProvingManager.proveWithWorker([protocol, input], worker);
-    }
+    const workerThreadInput = workerInputMapper(protocol, input);
 
-    return ArkworksProvingManager.proveWithoutWorker(protocol, input);
+    const workerProof = worker
+      ? await ArkworksProvingManager.proveWithWorker([protocol, workerThreadInput], worker)
+      : await ArkworksProvingManager.proveWithoutWorker(protocol, workerThreadInput);
+
+    return workerProofTranslator(protocol, workerProof);
   }
 
-  private static proveWithoutWorker<T extends NoteProtocol> (protocol: T, input: ProvingManagerSetupInput<T>) {
+  private static proveWithoutWorker<T extends NoteProtocol> (protocol: T, input: WorkerProvingManagerSetupInput<T>): Promise<WorkerProofInterface<T>> {
     // If the worker CTX is direct-call
-    const pm = new ArkworksProvingManagerWrapper('direct-call');
+    const pm = new ArkworksProvingManagerThread('direct-call');
 
     return pm.prove(protocol, input);
   }
 
   private static proveWithWorker<T extends NoteProtocol> (
-    input: [T, ProvingManagerSetupInput<T>],
+    input: [T, WorkerProvingManagerSetupInput<T>],
     worker: Worker
-  ): Promise<ProofInterface<T>> {
-    return new Promise<ProofInterface<T>>((resolve, reject) => {
+  ): Promise<WorkerProofInterface<T>> {
+    return new Promise<WorkerProofInterface<T>>((resolve, reject) => {
       try {
         worker.addEventListener('message', (e) => {
-          const payload = e.data.data as ProofInterface<T>;
+          const payload = e.data.data as WorkerProofInterface<T>;
 
           resolve(payload);
         });

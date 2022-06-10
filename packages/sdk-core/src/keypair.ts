@@ -90,6 +90,14 @@ export class Keypair {
     });
   }
 
+  // This static method supports encrypting a base64-encoded data,
+  // with the provided encryption key
+  static encryptWithKey (encryptionKey: string, data: string) {
+    return packEncryptedMessage(
+      encrypt(encryptionKey, { data }, 'x25519-xsalsa20-poly1305')
+    );
+  }
+
   /**
    * Encrypt data using keypair encryption key
    *

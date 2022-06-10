@@ -11,7 +11,8 @@ import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
 
 import { Note } from '../note.js';
-import { ArkworksProvingManagerWrapper, ProvingManagerSetupInput } from '../proving/index.js';
+import { ArkworksProvingManagerThread } from '../proving/index.js';
+import { WorkerProvingManagerSetupInput } from '../proving/worker-utils.js';
 
 async function generateVAnchorNote (amount: number, chainId: number, outputChainId: number, index?: number) {
   const note = await Note.generateNote({
@@ -30,7 +31,6 @@ async function generateVAnchorNote (amount: number, chainId: number, outputChain
     tokenSymbol: 'WEBB',
     version: 'v2',
     width: String(5)
-
   });
 
   return note;
@@ -59,14 +59,14 @@ describe('Proving manager VAnchor', function () {
 
     leavesMap[0] = [leaf1];
 
-    const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
-    const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
+    const output1 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
     const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
-    const provingManager = new ArkworksProvingManagerWrapper('direct-call');
+    const provingManager = new ArkworksProvingManagerThread('direct-call');
     const secret = randomAsU8a();
     const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
     const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
-    const setup: ProvingManagerSetupInput<'vanchor'> = {
+    const setup: WorkerProvingManagerSetupInput<'vanchor'> = {
       chainId: '0',
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
@@ -74,7 +74,7 @@ describe('Proving manager VAnchor', function () {
       indices: [0],
       inputNotes: [vanchorNote1.serialize()],
       leavesMap,
-      output: [output1, output2],
+      output: [output1.serialize(), output2.serialize()],
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
       recipient: address,
@@ -106,16 +106,16 @@ describe('Proving manager VAnchor', function () {
 
     leavesMap[0] = [leaf1, leaf2];
 
-    const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
-    const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
+    const output1 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
     const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
 
-    const provingManager = new ArkworksProvingManagerWrapper('direct-call');
+    const provingManager = new ArkworksProvingManagerThread('direct-call');
     const secret = randomAsU8a();
     const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
     const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
 
-    const setup: ProvingManagerSetupInput<'vanchor'> = {
+    const setup: WorkerProvingManagerSetupInput<'vanchor'> = {
       chainId: '0',
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
@@ -123,7 +123,7 @@ describe('Proving manager VAnchor', function () {
       indices: [0, 1],
       inputNotes: [vanchorNote1.serialize(), vanchorNote2.serialize()],
       leavesMap,
-      output: [output1, output2],
+      output: [output1.serialize(), output2.serialize()],
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
       recipient: address,
@@ -155,15 +155,15 @@ describe('Proving manager VAnchor', function () {
 
     leavesMap[0] = leaves;
 
-    const output1 = new JsUtxo('Bn254', 'Arkworks', 16, 2, outputAmount, outputChainId, undefined);
-    const output2 = new JsUtxo('Bn254', 'Arkworks', 16, 2, outputAmount, outputChainId, undefined);
+    const output1 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
     const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
 
-    const provingManager = new ArkworksProvingManagerWrapper('direct-call');
+    const provingManager = new ArkworksProvingManagerThread('direct-call');
     const secret = randomAsU8a();
     const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
     const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
-    const setup: ProvingManagerSetupInput<'vanchor'> = {
+    const setup: WorkerProvingManagerSetupInput<'vanchor'> = {
       chainId: '0',
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
@@ -171,7 +171,7 @@ describe('Proving manager VAnchor', function () {
       indices: notes.map((_, index) => index),
       inputNotes: notes.map((note) => note.serialize()),
       leavesMap,
-      output: [output1, output2],
+      output: [output1.serialize(), output2.serialize()],
 
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
@@ -205,17 +205,17 @@ describe('Proving manager VAnchor', function () {
 
     leavesMap[0] = leaves;
 
-    const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
-    const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
+    const output1 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
     const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
 
-    const provingManager = new ArkworksProvingManagerWrapper('direct-call');
+    const provingManager = new ArkworksProvingManagerThread('direct-call');
 
     const secret = randomAsU8a();
     const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
     const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
 
-    const setup: ProvingManagerSetupInput<'vanchor'> = {
+    const setup: WorkerProvingManagerSetupInput<'vanchor'> = {
       chainId: '0',
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
@@ -223,7 +223,7 @@ describe('Proving manager VAnchor', function () {
       indices: notes.map((_, index) => index),
       inputNotes: notes.map((note) => note.serialize()),
       leavesMap,
-      output: [output1, output2],
+      output: [output1.serialize(), output2.serialize()],
 
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
@@ -259,17 +259,17 @@ describe('Proving manager VAnchor', function () {
 
       leavesMap[0] = leaves;
 
-      const output1 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
-      const output2 = new JsUtxo('Bn254', 'Arkworks', 2, 2, outputAmount, outputChainId, undefined);
+      const output1 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
+      const output2 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
       const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
 
-      const provingManager = new ArkworksProvingManagerWrapper('direct-call');
+      const provingManager = new ArkworksProvingManagerThread('direct-call');
 
       const secret = randomAsU8a();
       const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
       const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
 
-      const setup: ProvingManagerSetupInput<'vanchor'> = {
+      const setup: WorkerProvingManagerSetupInput<'vanchor'> = {
         chainId: '0',
         encryptedCommitments: [comEnc1, comEnc2],
         extAmount: '0',
@@ -277,7 +277,7 @@ describe('Proving manager VAnchor', function () {
         indices: notes.map((_, index) => index),
         inputNotes: notes.map((note) => note.serialize()),
         leavesMap,
-        output: [output1, output2],
+        output: [output1.serialize(), output2.serialize()],
 
         provingKey: keys.pk,
         publicAmount: String(publicAmount),

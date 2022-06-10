@@ -38,7 +38,7 @@ fn get_output_notes(
 				width: Some(anchor_proof_input.width),
 				// TODO : fix the token_symbol
 				token_symbol: Some("ANY".to_string()),
-				amount: Some(c.amount_raw().to_string()),
+				amount: Some(c.get_amount_raw().to_string()),
 				denomination: None,
 				backend: Some(anchor_proof_input.backend),
 				hash_function: Some(HashFunction::Poseidon),

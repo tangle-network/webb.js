@@ -1,14 +1,16 @@
 // Copyright 2022 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import { JsNote, JsProofInput, JsProofOutput, NoteProtocol } from '@webb-tools/wasm-utils';
+import type { JsNote, JsProofInput, JsProofOutput, NoteProtocol } from '@webb-tools/wasm-utils';
 
 import { u8aToHex } from '@polkadot/util';
 
 import { Note } from '../../note.js';
-import { AnchorPMSetupInput, MixerPMSetupInput, PMEvents, ProofInterface, ProvingManagerSetupInput, VAnchorPMSetupInput } from '../types.js';
+import { Utxo } from '../../utxo.js';
+import { AnchorPMSetupInput, MixerPMSetupInput, PMEvents } from '../types.js';
+import { WorkerProofInterface, WorkerProvingManagerSetupInput, WorkerVAnchorPMSetupInput } from '../worker-utils.js';
 
-export class ArkworksProvingManagerWrapper {
+export class ArkworksProvingManagerThread {
   /**
    * @param ctx  - Context of the Proving manager
    * Defaults to worker mode assuming that the Proving manager is running in the browser
@@ -67,7 +69,7 @@ export class ArkworksProvingManagerWrapper {
   /**
    * Generate the Zero-knowledge proof from the proof input
    **/
-  async prove<T extends NoteProtocol> (protocol: T, pmSetupInput: ProvingManagerSetupInput<T>): Promise<ProofInterface<T>> {
+  async prove<T extends NoteProtocol> (protocol: T, pmSetupInput: WorkerProvingManagerSetupInput<T>): Promise<WorkerProofInterface<T>> {
     const Manager = await this.proofBuilder;
     const pm = new Manager(protocol);
 
@@ -88,7 +90,7 @@ export class ArkworksProvingManagerWrapper {
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.mixerProof;
 
-      const mixerProof: ProofInterface<'mixer'> = {
+      const mixerProof: WorkerProofInterface<'mixer'> = {
         nullifierHash: proof.nullifierHash,
         proof: proof.proof,
         root: proof.root
@@ -113,7 +115,7 @@ export class ArkworksProvingManagerWrapper {
       const proofInput = pm.build_js();
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.anchorProof;
-      const anchorProof: ProofInterface<'anchor'> = {
+      const anchorProof: WorkerProofInterface<'anchor'> = {
         nullifierHash: proof.nullifierHash,
         proof: proof.proof,
         root: proof.root,
@@ -122,7 +124,7 @@ export class ArkworksProvingManagerWrapper {
 
       return anchorProof as any;
     } else if (protocol === 'vanchor') {
-      const input = pmSetupInput as VAnchorPMSetupInput;
+      const input = pmSetupInput as WorkerVAnchorPMSetupInput;
       const metaDataNote = input.inputNotes[0];
       const { note } = await Note.deserialize(metaDataNote);
       const rawNotes = await Promise.all(input.inputNotes.map((note) => Note.deserialize(note)));
@@ -157,14 +159,17 @@ export class ArkworksProvingManagerWrapper {
         throw new Error('The maximum support input count is 16');
       }
 
+      // get the wasm blob for generating JsUtxos
+      const wasm = await this.wasmBlob;
+      const outputUtxos = await Promise.all(input.output.map((utxoString) => Utxo.deserialize(utxoString)));
+
       pm.setNotes(jsNotes);
       pm.setIndices(indices.map((i) => i.toString()) as any);
       pm.setPk(u8aToHex(input.provingKey).replace('0x', ''));
       pm.setRoots(input.roots);
       pm.chain_id(input.chainId);
       pm.public_amount(input.publicAmount);
-      pm.setOutputUtxos(...input.output);
-      const wasm = await this.wasmBlob;
+      pm.setOutputUtxos(outputUtxos[0].inner, outputUtxos[1].inner);
       const extData = new wasm.ExtData(
         input.recipient,
         input.relayer,
@@ -189,16 +194,16 @@ export class ArkworksProvingManagerWrapper {
       const proofInput = pm.build_js();
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.vanchorProof;
-      const anchorProof: ProofInterface<'vanchor'> = {
+      const anchorProof: WorkerProofInterface<'vanchor'> = {
         extDataHash: dataHash,
-        inputUtxos: proof.inputUtxos,
-        outputNotes: proof.outputNotes.map((jsNote) => Note.fromDepositNote(jsNote)),
+        inputUtxos: proof.inputUtxos.map((jsUtxo) => new Utxo(jsUtxo).serialize()),
+        outputNotes: proof.outputNotes.map((jsNote) => Note.fromDepositNote(jsNote).serialize()),
         proof: proof.proof,
         publicAmount: proof.publicAmount,
         publicInputs: proof.publicInputs
       };
 
-      return anchorProof as any;
+      return anchorProof;
     } else {
       throw new Error('invalid protocol');
     }

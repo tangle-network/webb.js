@@ -586,8 +586,8 @@ impl JsNoteBuilder {
 		let chain_id: u64 = target_chain_id.parse().map_err(|_| OpStatusCode::InvalidTargetChain)?;
 
 		// Chain identifying data
-		let source_identifying_data = self.source_identifying_data.ok_or_else(|| source_chain_id.clone())?;
-		let target_identifying_data = self.target_identifying_data.ok_or_else(|| target_chain_id.clone())?;
+		let source_identifying_data = self.source_identifying_data.ok_or_else(|| "".to_string())?;
+		let target_identifying_data = self.target_identifying_data.ok_or_else(|| "".to_string())?;
 
 		// Misc
 		let exponentiation = self.exponentiation;
