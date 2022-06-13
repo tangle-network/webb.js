@@ -112,7 +112,7 @@ export class Note {
    *
    * @returns The `JsNote` struct.
    */
-  async mutateIndex (index: string) {
+  mutateIndex (index: string) {
     this.note.mutateIndex(index);
   }
 

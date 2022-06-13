@@ -84,7 +84,7 @@ export class Utxo {
     }
 
     const bytes = Buffer.concat([
-      toBuffer(`0x${this.chainId}`, 16),
+      toBuffer(`0x${this.chainId}`, 8),
       toBuffer(`0x${this.amount}`, 31),
       toBuffer(`0x${this.blinding}`, 31)
     ]);

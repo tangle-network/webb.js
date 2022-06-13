@@ -19,10 +19,20 @@
       "require": "./cjs/index.js",
       "default": "./index.js"
     },
-    "./src/index.js": {
-      "types": "./src/index.d.ts",
-      "require": "./src/cjs/index.js",
-      "default": "./src/index.js"
+    "./cjs/index.js": {
+      "types": "./index.d.ts",
+      "require": "./cjs/index.js",
+      "default": "./cjs/index.js"
+    },
+    "./note": {
+      "types": "./note.d.ts",
+      "require": "./cjs/note.js",
+      "default": "./note.js"
+    },
+    "./cjs/note": {
+      "types": "./note.d.ts",
+      "require": "./cjs/note.js",
+      "default": "./cjs/note.js"
     },
     "./note": {
       "types": "./note.d.ts",

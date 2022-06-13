@@ -1,5 +1,9 @@
-// Copyright 2022 @webb-tools/
+// Copyright (C) 2022 Tornado Cash.
 // SPDX-License-Identifier: Apache-2.0
+
+// Copyright 2022 Webb Technologies Inc.
+// SPDX-License-Identifier: Apache-2.0
+// This file has been modified by Webb Technologies Inc.
 
 import { poseidon } from 'circomlibjs';
 import { BigNumber, BigNumberish } from 'ethers';

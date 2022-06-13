@@ -3,9 +3,10 @@
 
 import type { NoteProtocol } from '@webb-tools/wasm-utils';
 
+import { CircomProvingManagerThread } from '@webb-tools/sdk-core/proving/circom/proving-manager-thread.js';
+
 import { ProofInterface, ProvingManagerSetupInput } from '../types.js';
 import { workerInputMapper, WorkerProofInterface, workerProofTranslator, WorkerProvingManagerSetupInput } from '../worker-utils.js';
-import { CircomProvingManagerThread } from './proving-manager-thread.js';
 
 // Circom uses snarkjs to generate and verify proofs. It requires a witness calculator.
 export class CircomProvingManager {
@@ -22,13 +23,9 @@ export class CircomProvingManager {
 
     const workerThreadInput = workerInputMapper(protocol, input);
 
-    let workerProof: WorkerProofInterface<T>;
-
-    if (worker) {
-      workerProof = await this.proveWithWorker([protocol, workerThreadInput], worker);
-    } else {
-      workerProof = await this.proveWithoutWorker(protocol, workerThreadInput);
-    }
+    const workerProof = worker
+      ? await this.proveWithWorker([protocol, workerThreadInput], worker)
+      : await this.proveWithoutWorker(protocol, workerThreadInput);
 
     return workerProofTranslator(protocol, workerProof);
   }

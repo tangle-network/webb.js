@@ -2,6 +2,8 @@ import { expect } from 'chai';
 
 import { u8aToHex } from '@polkadot/util';
 
+import { CircomUtxo } from '../index.js';
+import { Keypair } from '../keypair.js';
 import { Utxo } from '../utxo.js';
 
 describe('Utxo Class', () => {
@@ -59,5 +61,64 @@ describe('Utxo Class', () => {
     const serializedOutput = deserialized.serialize();
 
     expect(serializedInput).to.deep.equal(serializedOutput);
+  });
+
+  it('should generate a utxo with circom backend', async function () {
+    const utxo = await CircomUtxo.generateUtxo({
+      amount: '1',
+      backend: 'Circom',
+      chainId: '1',
+      curve: 'Bn254',
+      index: '0'
+    });
+
+    expect(utxo.amount).to.deep.equal('1');
+  });
+
+  it('should serialize and deserialize a CircomUtxo with the same values', async function () {
+    const keypair = new Keypair();
+
+    const utxo = await CircomUtxo.generateUtxo({
+      amount: '1',
+      backend: 'Circom',
+      chainId: '1',
+      curve: 'Bn254',
+      index: '0',
+      keypair
+    });
+
+    console.log(`original params:
+      blinding - ${utxo.blinding},
+      secret - ${utxo.secret_key},
+      amount: ${utxo.amount},
+      chainId: ${utxo.chainId},
+      index: ${utxo.index},
+      keypair: ${utxo.keypair?.toString()}
+    `);
+
+    const utxoEncryption = utxo.encrypt();
+    const utxoStringDecrypted = await CircomUtxo.decrypt(keypair, utxoEncryption);
+
+    const utxoString = utxo.serialize();
+
+    console.log('utxoString: ', utxoString);
+    const recreatedUtxo = await CircomUtxo.deserialize(utxoString);
+
+    console.log(`new params: 
+      blinding - ${recreatedUtxo.blinding},
+      secret - ${recreatedUtxo.secret_key},
+      amount: ${recreatedUtxo.amount},
+      chainId: ${recreatedUtxo.chainId},
+      index: ${recreatedUtxo.index},
+      keypair: ${recreatedUtxo.keypair?.toString()}
+    `);
+
+    const recreatedUtxoString = recreatedUtxo.serialize();
+
+    const recreatedUtxoEncryption = recreatedUtxo.encrypt();
+    const recreatedStringDecrypted = await CircomUtxo.decrypt(keypair, recreatedUtxoEncryption);
+
+    expect(utxoString).to.deep.equal(recreatedUtxoString);
+    expect(utxoStringDecrypted).to.deep.equal(recreatedStringDecrypted);
   });
 });
