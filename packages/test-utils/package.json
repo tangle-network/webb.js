@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/test-utils",
-  "version": "0.1.4-79",
+  "version": "0.1.4-80",
   "description": "Utilities to work with Webb in test environments",
   "author": "Webb Developers <drew@webb.tools>",
   "type": "module",
@@ -34,7 +34,7 @@
     "@babel/runtime": "^7.10.2",
     "@polkadot/api": "8.6.2",
     "@polkadot/keyring": "9.3.1",
-    "@webb-tools/api": "0.1.4-79",
+    "@webb-tools/api": "0.1.4-80",
     "bignumber.js": "^9.0.0",
     "ethers": "5.5.1",
     "ganache": "7.1.0"
