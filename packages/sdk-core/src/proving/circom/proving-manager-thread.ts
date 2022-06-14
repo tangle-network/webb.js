@@ -113,8 +113,6 @@ export class CircomProvingManagerThread {
         : []);
       const merkleProofs: MerkleProof[] = [];
 
-      merkleProofs.push(mt.path(Number(notes[0].note.index)));
-
       // loop through the jsNotes and generate merkle proofs
       for (let i = 0; i < notes.length; i++) {
         // generate the merkle proof for this note. If it is a dummy utxo, return zeros
