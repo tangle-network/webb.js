@@ -415,7 +415,7 @@ describe('VAnchor tests', function() {
       method: 'transact'
     }, [treeId, vanchorProofData, extData], bob);
   });
-  it.only('VAnchor deposit and withdraw with only one note', async function() {
+  it('VAnchor deposit and withdraw with only one note', async function() {
     const { bob, alice } = getKeyring();
     const fee = 0;
     const leavesMap: any = {};
