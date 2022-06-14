@@ -872,6 +872,7 @@ impl JsNote {
 		let amount = utxo.get_amount();
 		let blinding = utxo.get_blinding();
 		let secret_key = utxo.get_secret_key();
+		self.amount = Some(utxo.get_amount_raw().to_string());
 		self.secrets = vec![chain_id, amount, blinding, secret_key];
 		Ok(())
 	}
