@@ -12,6 +12,7 @@ import { workerInputMapper, WorkerProofInterface, workerProofTranslator, WorkerP
 export class CircomProvingManager {
   constructor (
     private circuitWasm: Uint8Array,
+    private treeDepth: number,
     private readonly worker: Worker | null | undefined // Optional WebWorker
   ) {}
 
@@ -32,7 +33,7 @@ export class CircomProvingManager {
 
   private proveWithoutWorker<T extends NoteProtocol> (protocol: T, input: WorkerProvingManagerSetupInput<T>): Promise<WorkerProofInterface<T>> {
     // If the worker CTX is direct-call
-    const pm = new CircomProvingManagerThread(this.circuitWasm, 'direct-call');
+    const pm = new CircomProvingManagerThread(this.circuitWasm, this.treeDepth, 'direct-call');
 
     return pm.prove(protocol, input);
   }

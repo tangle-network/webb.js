@@ -87,38 +87,27 @@ describe('Utxo Class', () => {
       keypair
     });
 
-    console.log(`original params:
-      blinding - ${utxo.blinding},
-      secret - ${utxo.secret_key},
-      amount: ${utxo.amount},
-      chainId: ${utxo.chainId},
-      index: ${utxo.index},
-      keypair: ${utxo.keypair?.toString()}
-    `);
-
     const utxoEncryption = utxo.encrypt();
     const utxoStringDecrypted = await CircomUtxo.decrypt(keypair, utxoEncryption);
-
     const utxoString = utxo.serialize();
-
-    console.log('utxoString: ', utxoString);
     const recreatedUtxo = await CircomUtxo.deserialize(utxoString);
-
-    console.log(`new params: 
-      blinding - ${recreatedUtxo.blinding},
-      secret - ${recreatedUtxo.secret_key},
-      amount: ${recreatedUtxo.amount},
-      chainId: ${recreatedUtxo.chainId},
-      index: ${recreatedUtxo.index},
-      keypair: ${recreatedUtxo.keypair?.toString()}
-    `);
-
     const recreatedUtxoString = recreatedUtxo.serialize();
-
     const recreatedUtxoEncryption = recreatedUtxo.encrypt();
     const recreatedStringDecrypted = await CircomUtxo.decrypt(keypair, recreatedUtxoEncryption);
 
     expect(utxoString).to.deep.equal(recreatedUtxoString);
     expect(utxoStringDecrypted).to.deep.equal(recreatedStringDecrypted);
+  });
+
+  it('Check valid encryption length', async function () {
+    const kp = new Keypair();
+
+    const enc = Keypair.encryptWithKey(kp.encryptionKey, 'jumbo');
+
+    try {
+      await CircomUtxo.decrypt(kp, enc);
+    } catch (ex: any) {
+      expect(ex.message).to.contain('malformed utxo encryption');
+    }
   });
 });

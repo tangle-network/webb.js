@@ -102,6 +102,10 @@ export class Utxo {
   static async decrypt (keypair: Keypair, data: string) {
     const decryptedUtxoString = keypair.decrypt(data).toString();
 
+    if (decryptedUtxoString.length !== 70) {
+      throw new Error('Attempted to decrypt malformed data');
+    }
+
     return Utxo.deserialize(decryptedUtxoString);
   }
 

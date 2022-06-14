@@ -108,11 +108,15 @@ export class CircomUtxo extends Utxo {
   static async decrypt (keypair: Keypair, data: string) {
     const buf = keypair.decrypt(data);
 
+    if (buf.length !== 70) {
+      throw new Error('malformed utxo encryption');
+    }
+
     const utxo = await CircomUtxo.generateUtxo({
-      amount: BigNumber.from('0x' + buf.slice(16, 16 + 31).toString('hex')).toString(),
+      amount: BigNumber.from('0x' + buf.slice(8, 8 + 31).toString('hex')).toString(),
       backend: 'Circom',
-      blinding: hexToU8a('0x' + buf.slice(16 + 31, 16 + 62).toString('hex')),
-      chainId: BigNumber.from('0x' + buf.slice(0, 16).toString('hex')).toString(),
+      blinding: hexToU8a('0x' + buf.slice(8 + 31, 8 + 62).toString('hex')),
+      chainId: BigNumber.from('0x' + buf.slice(0, 8).toString('hex')).toString(),
       curve: 'Bn254',
       keypair,
       privateKey: hexToU8a(keypair.privkey)

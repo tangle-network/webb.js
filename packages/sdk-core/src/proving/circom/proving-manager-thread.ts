@@ -22,7 +22,7 @@ export class CircomProvingManagerThread {
    * @param circuitWasm - Circom requires a circuit.
    * @param ctx  - Context of the Proving manager - prove in a worker or on the main thread.
    **/
-  constructor (private circuitWasm: any, private ctx: 'worker' | 'direct-call' = 'direct-call') {
+  constructor (private circuitWasm: any, private treeDepth: number, private ctx: 'worker' | 'direct-call' = 'direct-call') {
     // if the Manager is running in side worker it registers an event listener
     if (this.ctx === 'worker') {
       console.log('yooooo I\'m trying to execute in a worker');
@@ -56,7 +56,7 @@ export class CircomProvingManagerThread {
       const nullifierHash = BigNumber.from(poseidon([nullifier, nullifier]));
 
       // Generate the merkle proof from the passed leaves
-      const mt = new MerkleTree(30, input.leaves.map((u8a) => u8aToHex(u8a)));
+      const mt = new MerkleTree(this.treeDepth, input.leaves.map((u8a) => u8aToHex(u8a)));
       const merkleProof = mt.path(input.leafIndex);
 
       // Build the appropriate witnessCalculator for this circuit
@@ -108,7 +108,7 @@ export class CircomProvingManagerThread {
       notes.sort((a, b) => Number(a.note.sourceChainId) - Number(b.note.sourceChainId));
 
       // Account for empty leaves set on the merkle tree
-      let mt: MerkleTree = new MerkleTree(5, input.leavesMap[notes[0].note.sourceChainId]
+      let mt: MerkleTree = new MerkleTree(this.treeDepth, input.leavesMap[notes[0].note.sourceChainId]
         ? input.leavesMap[(notes[0].note.sourceChainId)].map((u8a) => u8aToHex(u8a))
         : []);
       const merkleProofs: MerkleProof[] = [];
@@ -122,11 +122,11 @@ export class CircomProvingManagerThread {
           merkleProofs.push({
             element: BigNumber.from(0),
             merkleRoot: BigNumber.from(u8aToHex(input.roots[i])),
-            pathElements: new Array(5).fill(0),
-            pathIndices: new Array(5).fill(0)
+            pathElements: new Array(this.treeDepth).fill(0),
+            pathIndices: new Array(this.treeDepth).fill(0)
           });
         } else {
-          mt = new MerkleTree(5, input.leavesMap[(notes[i].note.sourceChainId)].map((u8a) => u8aToHex(u8a)));
+          mt = new MerkleTree(this.treeDepth, input.leavesMap[(notes[i].note.sourceChainId)].map((u8a) => u8aToHex(u8a)));
 
           merkleProofs.push(mt.path(Number(notes[i].note.index)));
         }
