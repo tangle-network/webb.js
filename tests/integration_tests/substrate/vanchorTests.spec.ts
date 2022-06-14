@@ -2,12 +2,20 @@ import { ApiPromise } from '@polkadot/api';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { currencyToUnitI128, KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
-import { Note, ProvingManagerSetupInput, ArkworksProvingManager, Utxo, VAnchorProof, Keypair } from '@webb-tools/sdk-core/index.js';
+import {
+  ArkworksProvingManager,
+  Keypair,
+  Note,
+  ProvingManagerSetupInput,
+  Utxo,
+  VAnchorProof
+} from '@webb-tools/sdk-core/index.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { polkadotTx } from '@webb-tools/test-utils/index.js';
 import path from 'path';
 import fs from 'fs';
-import { randomAsU8a, naclEncrypt } from '@polkadot/util-crypto';
+import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
+import { MTBn254X5, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 
 let apiPromise: ApiPromise | null = null;
 let keyring: {
@@ -18,6 +26,40 @@ let keyring: {
 let nodes: KillTask | undefined;
 
 const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
+
+function getKeys() {
+  const pkPath = path.join(
+    // tests path
+    process.cwd(),
+    'tests',
+    'protocol-substrate-fixtures',
+    'vanchor',
+    'bn254',
+    'x5',
+    '2-2-2',
+    'proving_key_uncompressed.bin'
+  );
+
+  const vkPath = path.join(
+    // tests path
+    process.cwd(),
+    'tests',
+    'protocol-substrate-fixtures',
+    'vanchor',
+    'bn254',
+    'x5',
+    '2-2-2',
+    'verifying_key_uncompressed.bin'
+  );
+  const pk_hex = fs.readFileSync(pkPath).toString('hex');
+  const pk = hexToU8a(pk_hex);
+  const vk_hex = fs.readFileSync(vkPath).toString('hex');
+  const vk = hexToU8a(vk_hex);
+  return {
+    pk,
+    vk
+  };
+}
 
 function getKeyring() {
   if (keyring) {
@@ -71,23 +113,11 @@ async function createVAnchorWithDeposit(
   apiPromise: ApiPromise,
   sudo: KeyringPair,
   depositer: KeyringPair
-): Promise<[number, [Note, Note], Uint8Array, Uint8Array]> {
+): Promise<[number, [Note, Note], [Uint8Array, Uint8Array], Uint8Array]> {
   const treeId = await createVAnchor(apiPromise, sudo);
   const outputChainId = BigInt(chainId);
   const secret = randomAsU8a();
-  const pkPath = path.join(
-    // tests path
-    process.cwd(),
-    'tests',
-    'protocol-substrate-fixtures',
-    'vanchor',
-    'bn254',
-    'x5',
-    '2-2-2',
-    'proving_key_uncompressed.bin'
-  );
-  const pk_hex = fs.readFileSync(pkPath).toString('hex');
-  const pk = hexToU8a(pk_hex);
+  const { pk, vk } = getKeys();
 
   // Creating two empty vanchor notes
   const note1 = await generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0);
@@ -99,13 +129,13 @@ async function createVAnchorWithDeposit(
     curve: 'Bn254',
     backend: 'Arkworks',
     amount: publicAmount.toString(),
-    chainId,
+    chainId
   });
   const output2 = await Utxo.generateUtxo({
     curve: 'Bn254',
     backend: 'Arkworks',
     amount: '0',
-    chainId,
+    chainId
   });
   // Configure a new proving manager with direct call
   const provingManager = new ArkworksProvingManager(null);
@@ -173,7 +203,7 @@ async function createVAnchorWithDeposit(
   const note2WithIndex = data.outputNotes[1];
   note2WithIndex.mutateIndex(String(indexOfLeaf2));
 
-  return [treeId, [note1WithIndex, note2WithIndex], pk, secret];
+  return [treeId, [note1WithIndex, note2WithIndex], [pk, vk], secret];
 }
 
 async function getleafIndex(
@@ -215,19 +245,8 @@ describe('VAnchor tests', function() {
 
     // ChainId
     const outputChainId = BigInt('2199023256632');
-    const pkPath = path.join(
-      // tests path
-      process.cwd(),
-      'tests',
-      'protocol-substrate-fixtures',
-      'vanchor',
-      'bn254',
-      'x5',
-      '2-2-2',
-      'proving_key_uncompressed.bin'
-    );
-    const pk_hex = fs.readFileSync(pkPath).toString('hex');
-    const pk = hexToU8a(pk_hex);
+    const { pk } = getKeys();
+
 
     const treeId = await createVAnchor(apiPromise!, alice);
 
@@ -243,14 +262,14 @@ describe('VAnchor tests', function() {
       backend: 'Arkworks',
       amount: publicAmount.toString(),
       chainId,
-      keypair: new Keypair(),
+      keypair: new Keypair()
     });
     const output2 = await Utxo.generateUtxo({
       curve: 'Bn254',
       backend: 'Arkworks',
       amount: '0',
       chainId,
-      keypair: new Keypair(),
+      keypair: new Keypair()
     });
     // Configure a new proving manager with direct call
     const provingManager = new ArkworksProvingManager(null);
@@ -319,7 +338,7 @@ describe('VAnchor tests', function() {
     const fee = 0;
     const leavesMap: any = {};
 
-    const [treeId, notes, pk, secret] = await createVAnchorWithDeposit(apiPromise!, alice, bob);
+    const [treeId, notes, [pk], secret] = await createVAnchorWithDeposit(apiPromise!, alice, bob);
     const chainId = notes[0].note.targetChainId; // both two notes have the same chain id
 
     const withdrawAmount = notes.reduce((acc, note) => acc + Number(note.note.amount), 0);
@@ -331,13 +350,13 @@ describe('VAnchor tests', function() {
       curve: 'Bn254',
       backend: 'Arkworks',
       amount: '0',
-      chainId,
+      chainId
     });
     const output2 = await Utxo.generateUtxo({
       curve: 'Bn254',
       backend: 'Arkworks',
       amount: '0',
-      chainId,
+      chainId
     });
 
     const provingManager = new ArkworksProvingManager(null);
@@ -391,6 +410,89 @@ describe('VAnchor tests', function() {
       extDataHash: data.extDataHash
     };
 
+    await polkadotTx(apiPromise!, {
+      section: 'vAnchorBn254',
+      method: 'transact'
+    }, [treeId, vanchorProofData, extData], bob);
+  });
+  it.only('VAnchor deposit and withdraw with only one note', async function() {
+    const { bob, alice } = getKeyring();
+    const fee = 0;
+    const leavesMap: any = {};
+
+    const [treeId, notesRaw, [pk, vk], secret] = await createVAnchorWithDeposit(apiPromise!, alice, bob);
+    // Ignoring the second note which is for a default UTXO
+    const notes = [notesRaw[0]];
+    const chainId = notes[0].note.targetChainId;
+
+    const withdrawAmount = notes.reduce((acc, note) => acc + Number(note.note.amount), 0);
+    const extAmount = -withdrawAmount;
+
+    const publicAmount = -withdrawAmount;
+
+    const output1 = await Utxo.generateUtxo({
+      curve: 'Bn254',
+      backend: 'Arkworks',
+      amount: '0',
+      chainId
+    });
+    const output2 = await Utxo.generateUtxo({
+      curve: 'Bn254',
+      backend: 'Arkworks',
+      amount: '0',
+      chainId
+    });
+
+    const provingManager = new ArkworksProvingManager(null);
+    const address = bob.address;
+    const maxLeafIndex = Number(notes[0].note.index);
+    const leaves = await apiPromise!.derive.merkleTreeBn254.getLeavesForTree(treeId, 0, maxLeafIndex);
+    const neighborRoots: string[] = await (apiPromise!.rpc as any).lt.getNeighborRoots(treeId).then((roots: any) => roots.toHuman());
+
+    leavesMap[chainId.toString()] = leaves;
+    const tree = new MTBn254X5(leaves, '0');
+    const root = `0x${tree.root}`;
+    const rootsSet = [hexToU8a(root), hexToU8a(neighborRoots[0])];
+    const decodedAddress = decodeAddress(address);
+
+    const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+    const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+
+    const setup: ProvingManagerSetupInput<'vanchor'> = {
+      chainId: chainId.toString(),
+      indices: notes.map(({ note }) => Number(note.index)),
+      inputNotes: notes,
+      leavesMap: leavesMap,
+      output: [output1, output2],
+      encryptedCommitments: [comEnc1, comEnc2],
+      provingKey: pk,
+      publicAmount: String(publicAmount),
+      roots: rootsSet,
+      relayer: decodedAddress,
+      recipient: decodedAddress,
+      extAmount: extAmount.toString(),
+      fee: fee.toString()
+    };
+    const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
+    const extData = {
+      relayer: address,
+      recipient: address,
+      fee,
+      extAmount: extAmount,
+      encryptedOutput1: u8aToHex(comEnc1),
+      encryptedOutput2: u8aToHex(comEnc2)
+    };
+
+    let vanchorProofData = {
+      proof: `0x${data.proof}`,
+      publicAmount: data.publicAmount,
+      roots: rootsSet,
+      inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
+      outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeaf())),
+      extDataHash: data.extDataHash
+    };
+    const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(vk).replace('0x', ''), 'Bn254');
+    console.log(`isValidProof ${isValidProof}`);
     await polkadotTx(apiPromise!, {
       section: 'vAnchorBn254',
       method: 'transact'
