@@ -17,7 +17,8 @@ import type { Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
 
 import { Note, Utxo } from '@webb-tools/sdk-core/index.js';
 
-import { AnchorPMSetupInput, AnchorProof, MixerPMSetupInput, MixerProof, ProofInterface, ProvingManagerSetupInput, VAnchorPMSetupInput } from './types';
+import { CircomUtxo } from '../solidity-utils/index.js';
+import { AnchorPMSetupInput, AnchorProof, MixerPMSetupInput, MixerProof, ProofInterface, ProvingManagerSetupInput, VAnchorPMSetupInput } from './types.js';
 
 export type WorkerProvingManagerSetupInput<T extends NoteProtocol> = WorkerProvingManagerPayload[T];
 
@@ -71,7 +72,10 @@ export async function workerProofTranslator<T extends NoteProtocol> (
       } as WorkerVAnchorProof;
 
       const outputNotes = await Promise.all(sourceVAnchorProof.outputNotes.map((note) => Note.deserialize(note)));
-      const inputUtxos = await Promise.all(sourceVAnchorProof.inputUtxos.map((utxo) => Utxo.deserialize(utxo)));
+      const isCircom = outputNotes[0].note.backend === 'Circom';
+      const inputUtxos = isCircom
+        ? await Promise.all(sourceVAnchorProof.inputUtxos.map((utxo) => CircomUtxo.deserialize(utxo)))
+        : await Promise.all(sourceVAnchorProof.inputUtxos.map((utxo) => Utxo.deserialize(utxo)));
 
       return {
         extDataHash: sourceVAnchorProof.extDataHash,

@@ -3,14 +3,16 @@
 
 import type { NoteProtocol } from '@webb-tools/wasm-utils';
 
+import { CircomProvingManagerThread } from '@webb-tools/sdk-core/proving/circom/proving-manager-thread.js';
+
 import { ProofInterface, ProvingManagerSetupInput } from '../types.js';
 import { workerInputMapper, WorkerProofInterface, workerProofTranslator, WorkerProvingManagerSetupInput } from '../worker-utils.js';
-import { CircomProvingManagerThread } from './proving-manager-thread.js';
 
 // Circom uses snarkjs to generate and verify proofs. It requires a witness calculator.
 export class CircomProvingManager {
   constructor (
     private circuitWasm: Uint8Array,
+    private treeDepth: number,
     private readonly worker: Worker | null | undefined // Optional WebWorker
   ) {}
 
@@ -22,20 +24,16 @@ export class CircomProvingManager {
 
     const workerThreadInput = workerInputMapper(protocol, input);
 
-    let workerProof: WorkerProofInterface<T>;
-
-    if (worker) {
-      workerProof = await this.proveWithWorker([protocol, workerThreadInput], worker);
-    } else {
-      workerProof = await this.proveWithoutWorker(protocol, workerThreadInput);
-    }
+    const workerProof = worker
+      ? await this.proveWithWorker([protocol, workerThreadInput], worker)
+      : await this.proveWithoutWorker(protocol, workerThreadInput);
 
     return workerProofTranslator(protocol, workerProof);
   }
 
   private proveWithoutWorker<T extends NoteProtocol> (protocol: T, input: WorkerProvingManagerSetupInput<T>): Promise<WorkerProofInterface<T>> {
     // If the worker CTX is direct-call
-    const pm = new CircomProvingManagerThread(this.circuitWasm, 'direct-call');
+    const pm = new CircomProvingManagerThread(this.circuitWasm, this.treeDepth, 'direct-call');
 
     return pm.prove(protocol, input);
   }

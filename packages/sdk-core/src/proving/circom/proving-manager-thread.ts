@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // Import wasm-generated types
-import type { JsNote, NoteProtocol } from '@webb-tools/wasm-utils';
+import type { NoteProtocol } from '@webb-tools/wasm-utils';
 
 import { poseidon } from 'circomlibjs';
 import { BigNumber } from 'ethers';
@@ -10,10 +10,10 @@ import * as snarkjs from 'snarkjs';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
+import { Keypair } from '../../keypair.js';
 import { MerkleProof, MerkleTree } from '../../merkle-tree.js';
 import { Note } from '../../note.js';
-import { buildFixedWitnessCalculator, buildVariableWitnessCalculator, generateFixedWitnessInput, generateVariableWitnessInput, generateWithdrawProofCallData, getVAnchorExtDataHash } from '../../solidity-utils/index.js';
-import { Utxo } from '../../utxo.js';
+import { buildFixedWitnessCalculator, buildVariableWitnessCalculator, CircomUtxo, generateFixedWitnessInput, generateVariableWitnessInput, generateWithdrawProofCallData, getVAnchorExtDataHash } from '../../solidity-utils/index.js';
 import { AnchorPMSetupInput } from '../types.js';
 import { WorkerProofInterface, WorkerProvingManagerSetupInput, WorkerVAnchorPMSetupInput } from '../worker-utils.js';
 
@@ -22,7 +22,7 @@ export class CircomProvingManagerThread {
    * @param circuitWasm - Circom requires a circuit.
    * @param ctx  - Context of the Proving manager - prove in a worker or on the main thread.
    **/
-  constructor (private circuitWasm: any, private ctx: 'worker' | 'direct-call' = 'direct-call') {
+  constructor (private circuitWasm: any, private treeDepth: number, private ctx: 'worker' | 'direct-call' = 'direct-call') {
     // if the Manager is running in side worker it registers an event listener
     if (this.ctx === 'worker') {
       console.log('yooooo I\'m trying to execute in a worker');
@@ -56,7 +56,7 @@ export class CircomProvingManagerThread {
       const nullifierHash = BigNumber.from(poseidon([nullifier, nullifier]));
 
       // Generate the merkle proof from the passed leaves
-      const mt = new MerkleTree(30, input.leaves.map((u8a) => u8aToHex(u8a)));
+      const mt = new MerkleTree(this.treeDepth, input.leaves.map((u8a) => u8aToHex(u8a)));
       const merkleProof = mt.path(input.leafIndex);
 
       // Build the appropriate witnessCalculator for this circuit
@@ -76,13 +76,9 @@ export class CircomProvingManagerThread {
         merkleProof.pathIndices
       );
 
-      console.log('witnessInput: ', witnessInput);
-
       const witness = await witnessCalculator.calculateWTNSBin(witnessInput, 0);
 
       const proofEncoded = await this.snarkjsProveAndVerify(input.provingKey, witness);
-
-      console.log('proofEncoded: ', proofEncoded);
 
       const anchorProof: WorkerProofInterface<'anchor'> = {
         nullifierHash: nullifierHash.toHexString(),
@@ -94,67 +90,49 @@ export class CircomProvingManagerThread {
       return anchorProof as any;
     } else if (protocol === 'vanchor') {
       const input = pmSetupInput as WorkerVAnchorPMSetupInput;
-      const rawNotes = await Promise.all(input.inputNotes.map((note) => Note.deserialize(note)));
-      const jsNotes: JsNote[] = rawNotes.map((n) => n.note);
+      const notes = await Promise.all(input.inputNotes.map((note) => Note.deserialize(note)));
       const indices = [...input.indices];
 
-      if (rawNotes.length !== indices.length) {
+      if (notes.length !== indices.length) {
         throw new Error(
-          `Input notes and indices size don't match notes count (${rawNotes.length}) indices count (${indices.length})`
+          `Input notes and indices size don't match notes count (${notes.length}) indices count (${indices.length})`
         );
       }
 
       // Set the leaf index on the jsNotes
-      for (let i = 0; i < jsNotes.length; i++) {
-        jsNotes[i].mutateIndex(indices[i].toString());
+      for (let i = 0; i < notes.length; i++) {
+        notes[i].mutateIndex(indices[i].toString());
       }
 
       // sort input utxos
-      jsNotes.sort((a, b) => Number(a.sourceChainId) - Number(b.sourceChainId));
+      notes.sort((a, b) => Number(a.note.sourceChainId) - Number(b.note.sourceChainId));
 
-      let mt: MerkleTree = new MerkleTree(30, input.leavesMap[(jsNotes[0].sourceChainId)].map((u8a) => u8aToHex(u8a)));
+      // Account for empty leaves set on the merkle tree
+      let mt: MerkleTree = new MerkleTree(this.treeDepth, input.leavesMap[notes[0].note.sourceChainId]
+        ? input.leavesMap[(notes[0].note.sourceChainId)].map((u8a) => u8aToHex(u8a))
+        : []);
       const merkleProofs: MerkleProof[] = [];
 
-      merkleProofs.push(mt.path(Number(jsNotes[0].index)));
+      merkleProofs.push(mt.path(Number(notes[0].note.index)));
 
       // loop through the jsNotes and generate merkle proofs
-      for (let i = 1; i < jsNotes.length; i++) {
-        mt = new MerkleTree(30, input.leavesMap[(jsNotes[i].sourceChainId)].map((u8a) => u8aToHex(u8a)));
+      for (let i = 0; i < notes.length; i++) {
+        // generate the merkle proof for this note. If it is a dummy utxo, return zeros
+        if (notes[i].note.amount === '0') {
+          merkleProofs.push({
+            element: BigNumber.from(0),
+            merkleRoot: BigNumber.from(u8aToHex(input.roots[i])),
+            pathElements: new Array(this.treeDepth).fill(0),
+            pathIndices: new Array(this.treeDepth).fill(0)
+          });
+        } else {
+          mt = new MerkleTree(this.treeDepth, input.leavesMap[(notes[i].note.sourceChainId)].map((u8a) => u8aToHex(u8a)));
 
-        // generate the merkle proof for this note
-        merkleProofs.push(mt.path(Number(jsNotes[i].index)));
+          merkleProofs.push(mt.path(Number(notes[i].note.index)));
+        }
       }
 
-      // Add extra dummy utxos to fit the circuit
-      if (rawNotes.length === 1) {
-        jsNotes.push(jsNotes[0].defaultUtxoNote());
-        indices.push(0);
-        merkleProofs.push({
-          element: BigNumber.from(0),
-          merkleRoot: BigNumber.from(mt.root()),
-          pathElements: new Array(30).fill(0),
-          pathIndices: new Array(30).fill(0)
-        });
-      }
-
-      if (rawNotes.length > 2 && rawNotes.length < 16) {
-        const inputGap = 16 - rawNotes.length;
-
-        jsNotes.push(
-          ...Array(inputGap)
-            .fill(0)
-            .map(() => jsNotes[0].defaultUtxoNote())
-        );
-        indices.push(...Array(inputGap).fill(0));
-        merkleProofs.push({
-          element: BigNumber.from(0),
-          merkleRoot: BigNumber.from(mt.root()),
-          pathElements: new Array(30).fill(0),
-          pathIndices: new Array(30).fill(0)
-        });
-      }
-
-      if (rawNotes.length > 16) {
+      if (notes.length > 16) {
         throw new Error('The maximum support input count is 16');
       }
 
@@ -167,8 +145,21 @@ export class CircomProvingManagerThread {
         u8aToHex(input.relayer)
       );
 
-      // create JsUTXOs for the inputs
-      const inputUtxos = jsNotes.map((note) => note.getUtxo());
+      // create utxos for the inputs
+      const inputUtxos = await Promise.all(notes.map((note) => {
+        const secrets = note.note.secrets.split(':');
+
+        return CircomUtxo.generateUtxo({
+          amount: note.note.amount,
+          backend: note.note.backend,
+          blinding: hexToU8a(`0x${secrets[3]}`),
+          chainId: note.note.targetChainId,
+          curve: note.note.curve,
+          index: note.note.index,
+          keypair: new Keypair(`0x${secrets[2]}`),
+          privateKey: hexToU8a(secrets[2])
+        });
+      }));
 
       // create JsNotes for the outputs
       // The output UTXO will have its sourceChainId as the targetChainId of the input UTXOs
@@ -177,7 +168,7 @@ export class CircomProvingManagerThread {
       const outputNotes: Note[] = [];
 
       for (const utxoString of input.output) {
-        const utxo = await Utxo.deserialize(utxoString);
+        const utxo = await CircomUtxo.deserialize(utxoString);
         const secrets = [utxo.chainId, utxo.amount, utxo.secret_key, utxo.blinding].join(':');
 
         const note = await Note.generateNote({
@@ -192,10 +183,10 @@ export class CircomProvingManagerThread {
           protocol: 'vanchor',
           secrets,
           sourceChain: utxo.chainId,
-          sourceIdentifyingData: jsNotes[0].targetIdentifyingData,
+          sourceIdentifyingData: notes[0].note.targetIdentifyingData,
           targetChain: utxo.chainId,
-          targetIdentifyingData: jsNotes[0].targetIdentifyingData,
-          tokenSymbol: jsNotes[0].tokenSymbol,
+          targetIdentifyingData: notes[0].note.targetIdentifyingData,
+          tokenSymbol: notes[0].note.tokenSymbol,
           version: 'v2',
           width: '5'
         });
@@ -203,20 +194,21 @@ export class CircomProvingManagerThread {
         outputNotes.push(note);
       }
 
-      const outputUtxos = await Promise.all(input.output.map((utxoString) => Utxo.deserialize(utxoString)));
+      const outputUtxos = await Promise.all(input.output.map((utxoString) => CircomUtxo.deserialize(utxoString)));
 
       // Build the appropriate witnessCalculator for this circuit
       const witnessCalculator = await buildVariableWitnessCalculator(this.circuitWasm, 0);
       const witnessInput = generateVariableWitnessInput(
         merkleProofs.map((proof) => proof.merkleRoot),
         input.chainId,
-        inputUtxos.map((jsUtxo) => new Utxo(jsUtxo)),
+        inputUtxos,
         outputUtxos,
         input.extAmount,
         input.fee,
         dataHash,
         merkleProofs
       );
+
       const witness = await witnessCalculator.calculateWTNSBin(witnessInput, 0);
       const proofEncoded = await this.snarkjsProveAndVerify(input.provingKey, witness);
 
@@ -224,7 +216,7 @@ export class CircomProvingManagerThread {
         extDataHash: hexToU8a(dataHash.toHexString()),
         inputUtxos: inputUtxos.map((utxo) => utxo.serialize()),
         outputNotes: outputNotes.map((note) => note.serialize()),
-        proof: `0x${proofEncoded}`,
+        proof: proofEncoded,
         publicAmount: hexToU8a(input.publicAmount),
         // public inputs on ProofInterface not required for verifying in circom
         publicInputs: []

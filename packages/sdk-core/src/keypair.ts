@@ -1,5 +1,9 @@
-// Copyright 2022 @webb-tools/
+// Copyright (C) 2022 Tornado Cash.
 // SPDX-License-Identifier: Apache-2.0
+
+// Copyright 2022 Webb Technologies Inc.
+// SPDX-License-Identifier: Apache-2.0
+// This file has been modified by Webb Technologies Inc.
 
 import { poseidon } from 'circomlibjs';
 import { decrypt, encrypt, getEncryptionPublicKey } from 'eth-sig-util';
@@ -123,11 +127,11 @@ export class Keypair {
   /**
    * Sign a message using keypair private key
    *
-   * @param commitment - a hex string with commitment
-   * @param merklePath - a hex string with merkle path
-   * @returns a hex string representing the poseidon hash of [privKey, commitment, merklePath]
+   * @param commitment - a decimal string of the commitment
+   * @param merkleIndex - a number for the merkle index.
+   * @returns a decimal string representing the poseidon hash of [privKey, commitment, merkleIndex]
    */
-  sign (commitment: string|number|BigNumber, merklePath: string|number|BigNumber): string {
-    return BigNumber.from(poseidon([this.privkey, commitment, merklePath])).toHexString();
+  sign (commitment: string, merkleIndex: number): string {
+    return BigNumber.from(poseidon([this.privkey, commitment, merkleIndex])).toString();
   }
 }

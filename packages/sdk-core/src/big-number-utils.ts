@@ -39,7 +39,7 @@ export function toFixedHex (number: BigNumberish, length = 32): string {
     '0x' +
     (number instanceof Buffer
       ? number.toString('hex')
-      : BigNumber.from(number.toString()).toHexString().replace('0x', '')
+      : BigNumber.from(number).toHexString().replace('0x', '')
     ).padStart(length * 2, '0');
 
   if (result.indexOf('-') > -1) {

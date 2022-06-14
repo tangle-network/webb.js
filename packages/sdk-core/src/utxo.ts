@@ -84,7 +84,7 @@ export class Utxo {
     }
 
     const bytes = Buffer.concat([
-      toBuffer(`0x${this.chainId}`, 16),
+      toBuffer(`0x${this.chainId}`, 8),
       toBuffer(`0x${this.amount}`, 31),
       toBuffer(`0x${this.blinding}`, 31)
     ]);
@@ -101,6 +101,10 @@ export class Utxo {
    */
   static async decrypt (keypair: Keypair, data: string) {
     const decryptedUtxoString = keypair.decrypt(data).toString();
+
+    if (decryptedUtxoString.length !== 70) {
+      throw new Error('Attempted to decrypt malformed data');
+    }
 
     return Utxo.deserialize(decryptedUtxoString);
   }
