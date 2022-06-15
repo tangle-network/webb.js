@@ -119,7 +119,7 @@ export class CircomProvingManagerThread {
         if (notes[i].note.amount === '0') {
           merkleProofs.push({
             element: BigNumber.from(0),
-            merkleRoot: BigNumber.from(u8aToHex(input.roots[i])),
+            merkleRoot: BigNumber.from(u8aToHex(input.roots[0])),
             pathElements: new Array(this.treeDepth).fill(0),
             pathIndices: new Array(this.treeDepth).fill(0)
           });
@@ -197,7 +197,7 @@ export class CircomProvingManagerThread {
       // Build the appropriate witnessCalculator for this circuit
       const witnessCalculator = await buildVariableWitnessCalculator(this.circuitWasm, 0);
       const witnessInput = generateVariableWitnessInput(
-        merkleProofs.map((proof) => proof.merkleRoot),
+        input.roots.map((root) => BigNumber.from(root)),
         input.chainId,
         inputUtxos,
         outputUtxos,

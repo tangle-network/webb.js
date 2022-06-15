@@ -32,8 +32,8 @@
   "repository": "https://github.com/webb-tools/webb.js.git",
   "dependencies": {
     "@babel/runtime": "^7.10.2",
-    "@polkadot/api": "8.6.2",
-    "@polkadot/keyring": "9.3.1",
+    "@polkadot/api": "8.7.1",
+    "@polkadot/keyring": "9.4.1",
     "@webb-tools/api": "0.1.4-80",
     "bignumber.js": "^9.0.0",
     "ethers": "5.5.1",

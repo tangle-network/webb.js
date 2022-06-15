@@ -11,8 +11,8 @@
     "tests/*"
   ],
   "resolutions": {
-    "@polkadot/api": "8.6.2",
-    "@polkadot/types": "8.6.2",
+    "@polkadot/api": "8.7.1",
+    "@polkadot/types": "8.7.1",
     "@webb-tools/protocol-solidity": "0.1.17"
   },
   "scripts": {
@@ -47,10 +47,10 @@
     "@ethersproject/experimental": "^5.5.0",
     "@open-web3/util": "^1.0.1",
     "@openzeppelin/contracts": "^4.2.0",
-    "@polkadot/api": "8.6.2",
-    "@polkadot/api-derive": "8.6.2",
-    "@polkadot/dev": "0.66.32",
-    "@polkadot/types": "8.6.2",
+    "@polkadot/api": "8.7.1",
+    "@polkadot/api-derive": "8.7.1",
+    "@polkadot/dev": "0.67.3",
+    "@polkadot/types": "8.7.1",
     "@truffle/hdwallet-provider": "^1.4.1",
     "@types/jest": "^26.0.24",
     "@types/mocha": "^9.1.0",
