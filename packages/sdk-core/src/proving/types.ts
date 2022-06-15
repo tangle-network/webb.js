@@ -119,10 +119,14 @@ export type AnchorProof = {
   readonly proof: string;
   readonly root: string;
   readonly roots: Array<string>;
+  readonly publicInputs: Array<string>;
+  readonly leaf: Uint8Array
 };
 
 export type MixerProof = {
   readonly nullifierHash: string;
   readonly proof: string;
   readonly root: string;
+  readonly publicInputs: Array<string>;
+  readonly leaf: Uint8Array
 };

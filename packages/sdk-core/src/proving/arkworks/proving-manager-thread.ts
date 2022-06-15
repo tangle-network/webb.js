@@ -91,8 +91,10 @@ export class ArkworksProvingManagerThread {
       const proof = proofOutput.mixerProof;
 
       const mixerProof: WorkerProofInterface<'mixer'> = {
+        leaf: proof.leaf,
         nullifierHash: proof.nullifierHash,
         proof: proof.proof,
+        publicInputs: proof.publicInputs,
         root: proof.root
       };
 
@@ -116,8 +118,10 @@ export class ArkworksProvingManagerThread {
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.anchorProof;
       const anchorProof: WorkerProofInterface<'anchor'> = {
+        leaf: proof.leaf,
         nullifierHash: proof.nullifierHash,
         proof: proof.proof,
+        publicInputs: proof.publicInputs,
         root: proof.root,
         roots: proof.roots
       };
