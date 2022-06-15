@@ -54,7 +54,7 @@ export class CircomProvingManagerThread {
       const nullifier = '0x' + noteSecretParts[1];
       const secret = '0x' + noteSecretParts[2];
       const nullifierHash = BigNumber.from(poseidon([nullifier, nullifier]));
-
+      const leaf = note.getLeafCommitment();
       // Generate the merkle proof from the passed leaves
       const mt = new MerkleTree(this.treeDepth, input.leaves.map((u8a) => u8aToHex(u8a)));
       const merkleProof = mt.path(input.leafIndex);
@@ -77,12 +77,14 @@ export class CircomProvingManagerThread {
       );
 
       const witness = await witnessCalculator.calculateWTNSBin(witnessInput, 0);
-
+      // TODO: return the public inputs
       const proofEncoded = await this.snarkjsProveAndVerify(input.provingKey, witness);
 
       const anchorProof: WorkerProofInterface<'anchor'> = {
+        leaf,
         nullifierHash: nullifierHash.toHexString(),
         proof: `0x${proofEncoded}`,
+        publicInputs: [],
         root: merkleProof.merkleRoot.toHexString(),
         roots: input.roots.map((root) => u8aToHex(root))
       };

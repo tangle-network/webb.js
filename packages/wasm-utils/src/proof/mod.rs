@@ -187,6 +187,24 @@ impl MixerProof {
 		let root = hex::encode(&self.root);
 		root.into()
 	}
+
+	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name = publicInputs)]
+	pub fn public_inputs_raw(&self) -> Array {
+		let inputs: Array = self
+			.public_inputs
+			.iter()
+			.map(|x| JsString::from(hex::encode(x)))
+			.collect();
+		inputs
+	}
+
+	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name = leaf)]
+	pub fn leaf(&self) -> Uint8Array {
+		let leaf = Uint8Array::from(self.leaf.as_slice());
+		leaf
+	}
 }
 
 #[wasm_bindgen]
@@ -231,6 +249,24 @@ impl AnchorProof {
 	pub fn roots(&self) -> Array {
 		let roots: Array = self.roots.iter().map(|i| JsString::from(hex::encode(i))).collect();
 		roots
+	}
+
+	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name = publicInputs)]
+	pub fn public_inputs_raw(&self) -> Array {
+		let inputs: Array = self
+			.public_inputs
+			.iter()
+			.map(|x| JsString::from(hex::encode(x)))
+			.collect();
+		inputs
+	}
+
+	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name = leaf)]
+	pub fn leaf(&self) -> Uint8Array {
+		let leaf = Uint8Array::from(self.leaf.as_slice());
+		leaf
 	}
 }
 
