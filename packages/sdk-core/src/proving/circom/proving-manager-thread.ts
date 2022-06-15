@@ -113,15 +113,13 @@ export class CircomProvingManagerThread {
         : []);
       const merkleProofs: MerkleProof[] = [];
 
-      merkleProofs.push(mt.path(Number(notes[0].note.index)));
-
       // loop through the jsNotes and generate merkle proofs
       for (let i = 0; i < notes.length; i++) {
         // generate the merkle proof for this note. If it is a dummy utxo, return zeros
         if (notes[i].note.amount === '0') {
           merkleProofs.push({
             element: BigNumber.from(0),
-            merkleRoot: BigNumber.from(u8aToHex(input.roots[i])),
+            merkleRoot: BigNumber.from(u8aToHex(input.roots[0])),
             pathElements: new Array(this.treeDepth).fill(0),
             pathIndices: new Array(this.treeDepth).fill(0)
           });
@@ -199,7 +197,7 @@ export class CircomProvingManagerThread {
       // Build the appropriate witnessCalculator for this circuit
       const witnessCalculator = await buildVariableWitnessCalculator(this.circuitWasm, 0);
       const witnessInput = generateVariableWitnessInput(
-        merkleProofs.map((proof) => proof.merkleRoot),
+        input.roots.map((root) => BigNumber.from(root)),
         input.chainId,
         inputUtxos,
         outputUtxos,
