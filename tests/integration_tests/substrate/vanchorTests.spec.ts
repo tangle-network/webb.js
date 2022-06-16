@@ -230,24 +230,24 @@ async function basicWithdraw(
   const provingManager = new ArkworksProvingManager(null);
   const address = withdrawAccount.address;
   const maxLeafIndex = Number(inputNote.note.index);
-  const leaves = await apiPromise!.derive.merkleTreeBn254.getLeavesForTree(treeId, 0, maxLeafIndex);
+  const leafsCount = await apiPromise!.derive.merkleTreeBn254.getLeafCountForTree(Number(treeId));
+  const leaves = await apiPromise!.derive.merkleTreeBn254.getLeavesForTree(treeId, 0, leafsCount -1);
   const neighborRoots: string[] = await (apiPromise!.rpc as any).lt.getNeighborRoots(treeId).then((roots: any) => roots.toHuman());
 
   leavesMap[chainId.toString()] = leaves;
 
-  const tree0 = new MTBn254X5(leaves, String(maxLeafIndex));
-  const root0 = `0x${tree0.root}`;
+
 
   const tree = new MTBn254X5(leaves, String(maxLeafIndex));
   const root = `0x${tree.root}`;
   const neighborRoot = hexToU8a(neighborRoots[0]);
   console.log({
-    root0,
     neighborRoot: neighborRoots, root,
     leaves:leaves.map(l => u8aToHex(l)),
     index:maxLeafIndex,
     leaf:u8aToHex(leaves[maxLeafIndex]),
-    leafFromNote:u8aToHex(inputNote.getLeaf())
+    leafFromNote:u8aToHex(inputNote.getLeaf()),
+    utxoIndex:inputNote.note.getUtxo().index
   });
   const rootsSet = [hexToU8a(root), neighborRoot];
   const decodedAddress = decodeAddress(address);
