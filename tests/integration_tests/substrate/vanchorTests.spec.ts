@@ -109,6 +109,193 @@ async function createVAnchor(apiPromise: ApiPromise, singer: KeyringPair): Promi
 };
 const chainId = '2199023256632';
 
+async function basicDeposit(
+  apiPromise: ApiPromise,
+  depositer: KeyringPair,
+  treeId: number,
+  output: Note
+): Promise<[Note, Uint8Array]> {
+  const outputChainId = BigInt(output.note.targetChainId);
+  const secret = randomAsU8a();
+  const { pk } = getKeys();
+
+  // Creating two empty vanchor notes
+  const note1 = await generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0);
+  const note2 = note1.getDefaultUtxoNote();
+  const publicAmount = BigInt(output.note.amount);
+  const notes = [note1, note2];
+  // Output UTXOs configs
+  const output1 = new Utxo(output.note.getUtxo());
+  const output2 = await Utxo.generateUtxo({
+    curve: 'Bn254',
+    backend: 'Arkworks',
+    amount: '0',
+    chainId
+  });
+  // Configure a new proving manager with direct call
+  const provingManager = new ArkworksProvingManager(null);
+  const leavesMap: any = {};
+
+  const address = depositer.address;
+  const extAmount = publicAmount;
+  const fee = 0;
+  // Empty leaves
+  leavesMap[outputChainId.toString()] = [];
+  const tree = await apiPromise!.query.merkleTreeBn254.trees(treeId);
+  const root = tree.unwrap().root.toHex();
+  const neighborRoots: string[] = await (apiPromise!.rpc as any).lt.getNeighborRoots(treeId).then((roots: any) => roots.toHuman());
+
+  const rootsSet = [hexToU8a(root), hexToU8a(neighborRoots[0])];
+  const decodedAddress = decodeAddress(address);
+  const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+  const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+
+  const setup: ProvingManagerSetupInput<'vanchor'> = {
+    chainId: outputChainId.toString(),
+    indices: [0, 0],
+    inputNotes: notes,
+    leavesMap: leavesMap,
+    output: [output1, output2],
+    encryptedCommitments: [comEnc1, comEnc2],
+    provingKey: pk,
+    publicAmount: String(publicAmount),
+    roots: rootsSet,
+    relayer: decodedAddress,
+    recipient: decodedAddress,
+    extAmount: extAmount.toString(),
+    fee: fee.toString()
+  };
+  const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
+  const extData = {
+    relayer: address,
+    recipient: address,
+    fee,
+    extAmount: extAmount,
+    encryptedOutput1: u8aToHex(comEnc1),
+    encryptedOutput2: u8aToHex(comEnc2)
+  };
+
+  let vanchorProofData = {
+    proof: `0x${data.proof}`,
+    publicAmount: data.publicAmount,
+    roots: rootsSet,
+    inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
+    outputCommitments: data.outputNotes.map(note => u8aToHex(note.note.getLeafCommitment())),
+    extDataHash: data.extDataHash
+  };
+  const leafsCount = await apiPromise.derive.merkleTreeBn254.getLeafCountForTree(Number(treeId));
+  const predictedIndex = leafsCount;
+
+  await polkadotTx(apiPromise!, {
+    section: 'vAnchorBn254',
+    method: 'transact'
+  }, [treeId, vanchorProofData, extData], depositer);
+
+  const leaf1 = data.outputNotes[0].getLeaf();
+  const indexOfLeaf1 = await getleafIndex(apiPromise, leaf1, predictedIndex, treeId);
+  output.mutateIndex(String(indexOfLeaf1));
+  return [output, secret];
+}
+
+async function basicWithdraw(
+  api: ApiPromise,
+  treeId: number,
+  withdrawAccount: KeyringPair,
+  inputNote: Note,
+  secret: Uint8Array
+) {
+  const leavesMap = {} as any;
+  const chainId = inputNote.note.targetChainId;
+  const fee = 0;
+  const { pk, vk } = getKeys();
+
+  const withdrawAmount = inputNote.note.amount;
+  const extAmount = -withdrawAmount;
+
+  const publicAmount = -withdrawAmount;
+
+  const output1 = await Utxo.generateUtxo({
+    curve: 'Bn254',
+    backend: 'Arkworks',
+    amount: '0',
+    chainId
+  });
+  const output2 = await Utxo.generateUtxo({
+    curve: 'Bn254',
+    backend: 'Arkworks',
+    amount: '0',
+    chainId
+  });
+
+  const provingManager = new ArkworksProvingManager(null);
+  const address = withdrawAccount.address;
+  const maxLeafIndex = Number(inputNote.note.index);
+  const leaves = await apiPromise!.derive.merkleTreeBn254.getLeavesForTree(treeId, 0, maxLeafIndex);
+  const neighborRoots: string[] = await (apiPromise!.rpc as any).lt.getNeighborRoots(treeId).then((roots: any) => roots.toHuman());
+
+  leavesMap[chainId.toString()] = leaves;
+
+  const tree0 = new MTBn254X5(leaves, String(maxLeafIndex));
+  const root0 = `0x${tree0.root}`;
+
+  const tree = new MTBn254X5(leaves, String(maxLeafIndex));
+  const root = `0x${tree.root}`;
+  const neighborRoot = hexToU8a(neighborRoots[0]);
+  console.log({
+    root0,
+    neighborRoot: neighborRoots, root,
+    leaves:leaves.map(l => u8aToHex(l)),
+    index:maxLeafIndex,
+    leaf:u8aToHex(leaves[maxLeafIndex]),
+    leafFromNote:u8aToHex(inputNote.getLeaf())
+  });
+  const rootsSet = [hexToU8a(root), neighborRoot];
+  const decodedAddress = decodeAddress(address);
+
+  const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+  const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+
+  const setup: ProvingManagerSetupInput<'vanchor'> = {
+    chainId: chainId.toString(),
+    indices: [inputNote].map(({ note }) => Number(note.index)),
+    inputNotes: [inputNote],
+    leavesMap: leavesMap,
+    output: [output1, output2],
+    encryptedCommitments: [comEnc1, comEnc2],
+    provingKey: pk,
+    publicAmount: String(publicAmount),
+    roots: rootsSet,
+    relayer: decodedAddress,
+    recipient: decodedAddress,
+    extAmount: extAmount.toString(),
+    fee: fee.toString()
+  };
+  const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
+  const extData = {
+    relayer: address,
+    recipient: address,
+    fee,
+    extAmount: extAmount,
+    encryptedOutput1: u8aToHex(comEnc1),
+    encryptedOutput2: u8aToHex(comEnc2)
+  };
+
+  let vanchorProofData = {
+    proof: `0x${data.proof}`,
+    publicAmount: data.publicAmount,
+    roots: rootsSet,
+    inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
+    outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeaf())),
+    extDataHash: data.extDataHash
+  };
+  const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(vk).replace('0x', ''), 'Bn254');
+  console.log(`isValidProof ${isValidProof}`);
+  await polkadotTx(apiPromise!, {
+    section: 'vAnchorBn254',
+    method: 'transact'
+  }, [treeId, vanchorProofData, extData], withdrawAccount);
+}
+
 async function createVAnchorWithDeposit(
   apiPromise: ApiPromise,
   sudo: KeyringPair,
@@ -187,7 +374,7 @@ async function createVAnchorWithDeposit(
     extDataHash: data.extDataHash
   };
   const leafsCount = await apiPromise.derive.merkleTreeBn254.getLeafCountForTree(Number(treeId));
-  const indexBeforeInsetion = Math.max(leafsCount - 1, 0);
+  const predictedIndex = leafsCount;
 
   await polkadotTx(apiPromise!, {
     section: 'vAnchorBn254',
@@ -196,8 +383,8 @@ async function createVAnchorWithDeposit(
 
   const leaf1 = data.outputNotes[0].getLeaf();
   const leaf2 = data.outputNotes[1].getLeaf();
-  const indexOfLeaf1 = await getleafIndex(apiPromise, leaf1, indexBeforeInsetion, treeId);
-  const indexOfLeaf2 = await getleafIndex(apiPromise, leaf2, indexBeforeInsetion, treeId);
+  const indexOfLeaf1 = await getleafIndex(apiPromise, leaf1, predictedIndex, treeId);
+  const indexOfLeaf2 = await getleafIndex(apiPromise, leaf2, predictedIndex, treeId);
   const note1WithIndex = data.outputNotes[0];
   note1WithIndex.mutateIndex(String(indexOfLeaf1));
   const note2WithIndex = data.outputNotes[1];
@@ -218,14 +405,15 @@ async function getleafIndex(
    * The leaf index will be index499 +  the index of the slice
    * */
   const leafCount = await api.derive.merkleTreeBn254.getLeafCountForTree(Number(treeId));
-  const leaves = await api.derive.merkleTreeBn254.getLeavesForTree(Number(treeId), indexBeforeInsertion, leafCount - 1);
+  const leaves = await api.derive.merkleTreeBn254.getLeavesForTree(Number(treeId), 0, leafCount - 1);
   const leafHex = u8aToHex(leaf);
   const shiftedIndex = leaves.findIndex(leaf => u8aToHex(leaf) === leafHex);
 
   if (shiftedIndex === -1) {
     throw new Error(`Leaf isn't in the tree`);
   }
-  return indexBeforeInsertion + shiftedIndex;
+  // return indexBeforeInsertion + shiftedIndex;
+  return shiftedIndex;
 }
 
 describe('VAnchor tests', function() {
@@ -498,7 +686,55 @@ describe('VAnchor tests', function() {
       method: 'transact'
     }, [treeId, vanchorProofData, extData], bob);
   });
+  it('VAnchor multi deposits single execution', async function() {
+    this.timeout(300_000);
 
+    const numberOfDepoisits = 10;
+    const { bob, alice } = getKeyring();
+    const treeId = await createVAnchor(apiPromise!, alice);
+    for (let i = 0; i < numberOfDepoisits; i++) {
+      console.log(`Deposit #${i + 1}`);
+      const note = await generateVAnchorNote(Number(currencyToUnitI128(100).toString()), Number(chainId), Number(chainId));
+      await basicDeposit(apiPromise!, bob, treeId, note);
+    }
+
+
+  });
+
+  it.skip('VAnchor multi deposits parallel', async function() {
+    this.timeout(300_000);
+
+    const numberOfDepoisits = 10;
+    const { bob, alice } = getKeyring();
+    const treeId = await createVAnchor(apiPromise!, alice);
+    const depoists: Array<() => Promise<void>> = [];
+    for (let i = 0; i < numberOfDepoisits; i++) {
+      const message = `Deposit #${i + 1}  `;
+      depoists.push(async () => {
+        console.log(`${message} progressing`);
+        const note = await generateVAnchorNote(Number(currencyToUnitI128(100).toString()), Number(chainId), Number(chainId));
+        await basicDeposit(apiPromise!, bob, treeId, note);
+        console.log(`${message} Done`);
+      });
+    }
+    await Promise.all(depoists.map(d => d()));
+
+  });
+
+  it.only('VAnchor multi deposits and withdraw', async function() {
+    const numberOfDepoisits = 5;
+    this.timeout(300_000);
+    const { bob, alice } = getKeyring();
+    const treeId = await createVAnchor(apiPromise!, alice);
+    for (let i = 0; i < numberOfDepoisits; i++) {
+      console.log(`Deposit #${i + 1}`);
+      const note = await generateVAnchorNote(Number(currencyToUnitI128(100).toString()), Number(chainId), Number(chainId));
+      const [outputNote, secret] = await basicDeposit(apiPromise!, bob, treeId, note);
+      await basicWithdraw(apiPromise!, treeId, bob, outputNote, secret);
+    }
+
+
+  });
   after(async function() {
     await apiPromise?.disconnect();
     await nodes?.();
