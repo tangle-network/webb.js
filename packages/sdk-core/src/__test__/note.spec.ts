@@ -562,4 +562,26 @@ describe('Note class', () => {
     expect(deserializedNote.note.protocol).to.deep.equal('vanchor');
     expect(deserializedNote.note.index).to.deep.equal('512');
   });
+
+  it.only('should generate vanchor note from dapp', async () => {
+    const noteInput: NoteGenInput = {
+      amount: '0',
+      backend: 'Circom',
+      curve: 'Bn254',
+      denomination: '18',
+      exponentiation: '5',
+      hashFunction: 'Poseidon',
+      index: 0,
+      protocol: 'vanchor',
+      secrets: '0000010000001389:0000000000000000000000000000000000000000000000000000000000000000:ac84f880516c07b4c9ca692c33e2276c4ae312500a5be99f192dbaac811a217c:0096255443dadbb0ad3480ec2019477ffaf4039563c2bb631677a00e9d4ef799',
+      sourceChain: '1099511632777',
+      sourceIdentifyingData: '0',
+      targetChain: '1099511632777',
+      targetIdentifyingData: '0xb824C5F99339C7E486a1b452B635886BE82bc8b7',
+      tokenSymbol: '0x510C6297cC30A058F41eb4AF1BFC9953EaD8b577',
+      width: '5'
+    };
+
+    await Note.generateNote(noteInput);
+  });
 });
