@@ -2036,6 +2036,14 @@
     fastfile "0.0.19"
     ffjavascript "^0.2.48"
 
+"@iden3/binfileutils@0.0.11":
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/@iden3/binfileutils/-/binfileutils-0.0.11.tgz#9ffbbcc1279f2b2182bb6dcff4eee8a5b2167911"
+  integrity sha512-LylnJoZ0CTdgErnKY8OxohvW4K+p6UHD3sxt+3P9AmMyBQjYR4IpoqoYZZ+9aMj89cmCQ21UvdhndAx04er3NA==
+  dependencies:
+    fastfile "0.0.20"
+    ffjavascript "^0.2.48"
+
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@istanbuljs/load-nyc-config/-/load-nyc-config-1.1.0.tgz#fd3db1d59ecf7cf121e80650bb86712f9b55eced"
@@ -5421,7 +5429,14 @@ circom_runtime@0.1.17:
   dependencies:
     ffjavascript "0.2.48"
 
-circomlibjs@^0.0.8:
+circom_runtime@0.1.18:
+  version "0.1.18"
+  resolved "https://registry.yarnpkg.com/circom_runtime/-/circom_runtime-0.1.18.tgz#6b4d7b4b869dc67750be55e16ca506b708dcacb0"
+  integrity sha512-j6k+Jg1DXCYFVgjDRbJDmkAJ9E17js8h1iR7F1UX0IUr5v8NXeOXkfRh9+/73JqSgXb3Eo166a4JHdA/CeoEeA==
+  dependencies:
+    ffjavascript "0.2.55"
+
+circomlibjs@0.0.8, circomlibjs@^0.0.8:
   version "0.0.8"
   resolved "https://registry.yarnpkg.com/circomlibjs/-/circomlibjs-0.0.8.tgz#c2d1130d2d99fbb22f3d40ac19f347d768eace76"
   integrity sha512-oZFYapLO0mfiA+i2GU/V7bRNEEPjVcwV4M444nU5lNsdSJpqLwD57m9zxTD5m/KeY7WQ3lEAC9NNKEPQHu7s1w==
@@ -7548,7 +7563,7 @@ extend-shallow@^3.0.0, extend-shallow@^3.0.2:
     assign-symbols "^1.0.0"
     is-extendable "^1.0.1"
 
-extend@^3.0.2, extend@~3.0.2:
+extend@~3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/extend/-/extend-3.0.2.tgz#f8b1136b4071fbd8eb140aff858b1019ec2915fa"
   integrity sha512-fjquC59cD7CyW6urNXK0FBufkZcoiGG80wTuPujX590cB5Ttln20E2UB4S/WARVqhXffZl2LNgS+gQdPIIim/g==
@@ -7634,6 +7649,11 @@ fastfile@0.0.19:
   resolved "https://registry.yarnpkg.com/fastfile/-/fastfile-0.0.19.tgz#02cef9ade123b0a74adb794f4a1abcfa5719fd46"
   integrity sha512-tz9nWR5KYb6eR2odFQ7oxqEkx8F3YQZ6NBJoJR92YEG3DqYOqyxMck8PKvTVNKx3uwvOqGnLXNScnqpdHRdHGQ==
 
+fastfile@0.0.20:
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/fastfile/-/fastfile-0.0.20.tgz#794a143d58cfda2e24c298e5ef619c748c8a1879"
+  integrity sha512-r5ZDbgImvVWCP0lA/cGNgQcZqR+aYdFx3u+CtJqUE510pBUVGMn4ulL/iRTI4tACTYsNJ736uzFxEBXesPAktA==
+
 fastq@^1.6.0:
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/fastq/-/fastq-1.13.0.tgz#616760f88a7526bdfc596b7cab8c18938c36b98c"
@@ -7672,10 +7692,10 @@ ffjavascript@0.2.48:
     wasmcurves "0.1.0"
     web-worker "^1.2.0"
 
-ffjavascript@0.2.54:
-  version "0.2.54"
-  resolved "https://registry.yarnpkg.com/ffjavascript/-/ffjavascript-0.2.54.tgz#b81a3a84dc140566dd2bca832a78d8be29e9e4ce"
-  integrity sha512-VeQmR805zaDxLALu/0FlO0OfmE3MOHvPEmEPUdlinRk7kBydgdthSQSSaHZ/OlZ1DwiiGvfiKmNgNpUq4zr+XQ==
+ffjavascript@0.2.55:
+  version "0.2.55"
+  resolved "https://registry.yarnpkg.com/ffjavascript/-/ffjavascript-0.2.55.tgz#fb4bc53265501526a2916d6a20bbbc06d113d7be"
+  integrity sha512-8X0FCIPOWiK6DTWh3pnE3O6D6nIQsirStAXpWMzRDnoDX7SEnDX4I28aVhwjL7L35XS1vy2AU7zc0UCGYxdLjw==
   dependencies:
     big-integer "^1.6.48"
     wasmbuilder "^0.0.12"
@@ -11182,11 +11202,6 @@ mississippi@^3.0.0:
     stream-each "^1.1.0"
     through2 "^2.0.0"
 
-mitt@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/mitt/-/mitt-2.1.0.tgz#f740577c23176c6205b121b2973514eade1b2230"
-  integrity sha512-ILj2TpLiysu2wkBbWjAmww7TkZb65aiQO+DkVdUTBpBXq+MHYiETENkKFMtsJZX1Lf4pe4QOrTSjIfUwN5lRdg==
-
 mixin-deep@^1.2.0:
   version "1.3.2"
   resolved "https://registry.yarnpkg.com/mixin-deep/-/mixin-deep-1.3.2.tgz#1120b43dc359a785dce65b55b82e257ccf479566"
@@ -11778,13 +11793,6 @@ opn@^5.5.0:
   integrity sha512-PqHpggC9bLV0VeWcdKhkpxY+3JTzetLSqTCWL/z/tFIbI6G8JCjondXklT1JinczLz2Xib62sSp0T/gKT4KksA==
   dependencies:
     is-wsl "^1.1.0"
-
-opsgenie-sdk@^0.5.0:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/opsgenie-sdk/-/opsgenie-sdk-0.5.1.tgz#8c65840b6755ec20cc3645ca3214fcf6cc957718"
-  integrity sha512-iQfACqnhPGAJPxbghGnNKNEEmAUGxn33SI1x7+kgIkbkYx0t/7zFZ6Xye62/OgZPLO6jVB7/0b8QZiNJiSrSvQ==
-  dependencies:
-    requestretry "^7.0.0"
 
 optionator@^0.8.1:
   version "0.8.3"
@@ -12576,6 +12584,16 @@ r1csfile@0.0.35:
     fastfile "0.0.19"
     ffjavascript "0.2.48"
 
+r1csfile@0.0.36:
+  version "0.0.36"
+  resolved "https://registry.yarnpkg.com/r1csfile/-/r1csfile-0.0.36.tgz#978453e00066b0726c48e848ee6c308a6df7b2a4"
+  integrity sha512-xC4ZGiFUGFhHonLutKsKEhxmR5janViiSvevpkZukpQNor3kFan8byKcvXNU9jkm49ffQxj5IvU8SDluOI0IQQ==
+  dependencies:
+    "@iden3/bigarray" "0.0.2"
+    "@iden3/binfileutils" "0.0.11"
+    fastfile "0.0.20"
+    ffjavascript "0.2.55"
+
 ramda@^0.27.1:
   version "0.27.2"
   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.2.tgz#84463226f7f36dc33592f6f4ed6374c48306c3f1"
@@ -12871,14 +12889,6 @@ request@^2.79.0, request@^2.85.0, request@^2.88.2:
     tough-cookie "~2.5.0"
     tunnel-agent "^0.6.0"
     uuid "^3.3.2"
-
-requestretry@^7.0.0:
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/requestretry/-/requestretry-7.0.2.tgz#22a169e5d3aaadd95d00401d7347511f3695faf4"
-  integrity sha512-Zz8z7G2OuVs4F0wR0shKMEMm7lNvPNHM0UIHNns9qfyuBDKSExoTsZGtSjKst6nPEwlMrbA9G+m/yC0AbGj+8w==
-  dependencies:
-    extend "^3.0.2"
-    lodash "^4.17.15"
 
 require-directory@^2.1.1:
   version "2.1.1"
@@ -13538,20 +13548,20 @@ snarkjs@0.4.16:
     r1csfile "0.0.35"
     readline "^1.3.0"
 
-snarkjs@^0.4.16:
-  version "0.4.19"
-  resolved "https://registry.yarnpkg.com/snarkjs/-/snarkjs-0.4.19.tgz#536a969e9ed606c66a4706bec49db1c53326e206"
-  integrity sha512-QNEcPevBG5zB8U+PtmZ7EmH7Dr0b9kuuy8NjraT/o9ute15k34VAh/aCRAbRMtUSIoqwxS5WYKjk8vEbHzqFJw==
+snarkjs@0.4.22:
+  version "0.4.22"
+  resolved "https://registry.yarnpkg.com/snarkjs/-/snarkjs-0.4.22.tgz#0a519fe989794111b6f9a755ba4e86a31b6617fb"
+  integrity sha512-7dCpiywU9RGfiymZYq4nMCwj6/jfWabw3z/F7FTWuzB4qDrbxAl9j73anDEVh0kzfSV1j+2B+y30fd0SXOGhDg==
   dependencies:
-    "@iden3/binfileutils" "0.0.10"
+    "@iden3/binfileutils" "0.0.11"
     blake2b-wasm "^2.4.0"
-    circom_runtime "0.1.17"
+    circom_runtime "0.1.18"
     ejs "^3.1.6"
-    fastfile "0.0.19"
-    ffjavascript "0.2.54"
+    fastfile "0.0.20"
+    ffjavascript "0.2.55"
     js-sha3 "^0.8.0"
     logplease "^1.2.15"
-    r1csfile "0.0.35"
+    r1csfile "0.0.36"
     readline "^1.3.0"
 
 sockjs-client@^1.5.0:
@@ -15439,13 +15449,6 @@ worker-loader@^3.0.7:
   dependencies:
     loader-utils "^2.0.0"
     schema-utils "^3.0.0"
-
-workerloader-jest-transformer@^0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/workerloader-jest-transformer/-/workerloader-jest-transformer-0.0.2.tgz#4cb2ec05c9c2bb602193cccd2f872f4b694898a9"
-  integrity sha512-rA0taE/NT5orrJH3mfscU/q+Vk+UlPAZWQVfZfeZt8HrrieB6zQ7YFHQLoR82VZJ62OVTVK0pco5Kta46xgEgQ==
-  dependencies:
-    mitt "^2.1.0"
 
 workerpool@6.2.0:
   version "6.2.0"

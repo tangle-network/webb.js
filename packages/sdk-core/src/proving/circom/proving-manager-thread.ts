@@ -10,6 +10,7 @@ import * as snarkjs from 'snarkjs';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
+import { toFixedHex } from '../../big-number-utils.js';
 import { Keypair } from '../../keypair.js';
 import { MerkleProof, MerkleTree } from '../../merkle-tree.js';
 import { Note } from '../../note.js';
@@ -101,13 +102,10 @@ export class CircomProvingManagerThread {
         );
       }
 
-      // Set the leaf index on the jsNotes
+      // Set the leaf index on the notes
       for (let i = 0; i < notes.length; i++) {
         notes[i].mutateIndex(indices[i].toString());
       }
-
-      // sort input utxos
-      notes.sort((a, b) => Number(a.note.sourceChainId) - Number(b.note.sourceChainId));
 
       // Account for empty leaves set on the merkle tree
       let mt: MerkleTree = new MerkleTree(this.treeDepth, input.leavesMap[notes[0].note.sourceChainId]
@@ -150,7 +148,7 @@ export class CircomProvingManagerThread {
         const secrets = note.note.secrets.split(':');
 
         return CircomUtxo.generateUtxo({
-          amount: note.note.amount,
+          amount: BigNumber.from(`0x${secrets[1]}`).toString(),
           backend: note.note.backend,
           blinding: hexToU8a(`0x${secrets[3]}`),
           chainId: note.note.targetChainId,
@@ -169,7 +167,7 @@ export class CircomProvingManagerThread {
 
       for (const utxoString of input.output) {
         const utxo = await CircomUtxo.deserialize(utxoString);
-        const secrets = [utxo.chainId, utxo.amount, utxo.secret_key, utxo.blinding].join(':');
+        const secrets = [toFixedHex(utxo.chainId, 8), toFixedHex(utxo.amount), utxo.secret_key, utxo.blinding].join(':');
 
         const note = await Note.generateNote({
           amount: utxo.amount,
