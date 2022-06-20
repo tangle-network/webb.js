@@ -128,7 +128,7 @@ const vanchorBn2542_16_2 = getKeys_16_2();
 describe('Arkworks Proving manager VAnchor', function () {
   this.timeout(120_1000);
 
-  it('should  prove using WASM API for VAnchor with one input note and one index', async () => {
+  it('should prove using WASM API for VAnchor with one input note and one index', async () => {
     const keys = vanchorBn2542_2_2;
 
     const vanchorNote1 = await generateVAnchorNote(20, 0, 0, 0);
@@ -380,7 +380,7 @@ describe('Arkworks Proving manager VAnchor', function () {
     expect(message).to.deep.equal('Output amount and input amount  don\'t match input(170) != output(1610)');
   });
 
-  it('should proof a single utxo commitment is in a tree', async () => {
+  it('should prove a single utxo commitment is in a tree', async () => {
     const keys = vanchorBn2542_2_2;
     // Previous commitment
     const OlderNotes = await Promise.all(Array(16)
@@ -394,7 +394,7 @@ describe('Arkworks Proving manager VAnchor', function () {
     const leaves = OlderNotes.map((note) => note.getLeaf());
     const depositedNote = await generateVAnchorNote(depositAmount, 0, 0, OlderNotes.length);
 
-    // inset the leaf
+    // insert the leaf
     leaves.push(depositedNote.getLeaf());
     const tree = new MTBn254X5(leaves, '0');
     const root = `0x${tree.root}`;
@@ -436,7 +436,7 @@ describe('Arkworks Proving manager VAnchor', function () {
     expect(isValidProof).to.equal(true);
   });
 
-  it('should proof with pre existing leaves', async () => {
+  it('should prove with pre existing leaves', async () => {
     const keys = vanchorBn2542_16_2;
     const preExistingNotes = await Promise.all(Array(16)
       .fill(0)
@@ -492,7 +492,7 @@ describe('Arkworks Proving manager VAnchor', function () {
 
     expect(isValidProof).to.deep.equal(true);
   });
-  it('should proof with older deposit', async () => {
+  it('should prove with older deposit', async () => {
     const keys = vanchorBn2542_16_2;
     const notesAfterDeposit = await Promise.all(Array(16)
       .fill(0)
