@@ -130,7 +130,8 @@ export class ArkworksProvingManagerThread {
     } else if (protocol === 'vanchor') {
       const input = pmSetupInput as WorkerVAnchorPMSetupInput;
       const metaDataNote = input.inputNotes[0];
-      const { note } = await Note.deserialize(metaDataNote);
+      const rawNote = await Note.deserialize(metaDataNote);
+      const { note } = rawNote;
       const rawNotes = await Promise.all(input.inputNotes.map((note) => Note.deserialize(note)));
       const jsNotes: JsNote[] = rawNotes.map((n) => n.note);
       const rawIndices = [...input.indices];
@@ -144,17 +145,26 @@ export class ArkworksProvingManagerThread {
 
       // Pad the 1 note to make 2 inputs
       if (rawNotes.length === 1) {
-        jsNotes.push(note.defaultUtxoNote());
+        const defaultNote = await rawNote.getDefaultUtxoNote();
+
+        jsNotes.push(defaultNote.note);
         indices.push(0);
       }
 
       if (rawNotes.length > 2 && rawNotes.length < 16) {
         const inputGap = 16 - rawNotes.length;
+        const gap = await Promise.all(Array(inputGap)
+          .fill(0)
+          .map(async () => {
+            const newNote = new Note(note);
+
+            const defNote = await newNote.getDefaultUtxoNote();
+
+            return defNote.note;
+          }));
 
         jsNotes.push(
-          ...Array(inputGap)
-            .fill(0)
-            .map(() => note.defaultUtxoNote())
+          ...gap
         );
         indices.push(...Array(inputGap).fill(0));
       }

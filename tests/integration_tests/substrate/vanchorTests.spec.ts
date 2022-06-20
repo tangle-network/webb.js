@@ -115,15 +115,16 @@ async function basicDeposit(
   treeId: number,
   output: Note
 ): Promise<[Note, Uint8Array]> {
+  // Chain id from the note
   const outputChainId = BigInt(output.note.targetChainId);
   const secret = randomAsU8a();
   const { pk } = getKeys();
 
   // Creating two empty vanchor notes
-  const note1 = await generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0);
-  const note2 = note1.getDefaultUtxoNote();
+  const input1 = await generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0);
+  const input2 = await input1.getDefaultUtxoNote();
   const publicAmount = BigInt(output.note.amount);
-  const notes = [note1, note2];
+  const notes = [input1, input2];
   // Output UTXOs configs
   const output1 = new Utxo(output.note.getUtxo());
   const output2 = await Utxo.generateUtxo({
@@ -308,7 +309,7 @@ async function createVAnchorWithDeposit(
 
   // Creating two empty vanchor notes
   const note1 = await generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0);
-  const note2 = note1.getDefaultUtxoNote();
+  const note2 = await note1.getDefaultUtxoNote();
   const publicAmount = currencyToUnitI128(10);
   const notes = [note1, note2];
   // Output UTXOs configs
@@ -440,7 +441,7 @@ describe('VAnchor tests', function() {
 
     // Creating two empty vanchor notes
     const note1 = await generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0);
-    const note2 = note1.getDefaultUtxoNote();
+    const note2 =await note1.getDefaultUtxoNote();
 
     const publicAmount = currencyToUnitI128(10);
     const notes = [note1, note2];
