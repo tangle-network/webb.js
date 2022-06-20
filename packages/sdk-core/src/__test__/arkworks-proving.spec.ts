@@ -380,7 +380,7 @@ describe('Arkworks Proving manager VAnchor', function () {
     expect(message).to.deep.equal('Output amount and input amount  don\'t match input(170) != output(1610)');
   });
 
-  it.only('should prove a single utxo commitment is in a tree', async () => {
+  it('should prove a single utxo commitment is in a tree', async () => {
     const keys = vanchorBn2542_2_2;
     // Previous commitment
     const OlderNotes = await Promise.all(Array(16)

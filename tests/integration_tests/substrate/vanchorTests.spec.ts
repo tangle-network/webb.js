@@ -722,7 +722,7 @@ describe('VAnchor tests', function() {
 
   });
 
-  it.only('VAnchor multi deposits and withdraw', async function() {
+  it('VAnchor multi deposits and withdraw', async function() {
     const numberOfDepoisits = 5;
     this.timeout(300_000);
     const { bob, alice } = getKeyring();
