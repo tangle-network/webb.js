@@ -152,8 +152,12 @@ export class Utxo {
    *
    * TODO: Return null instead of 0 for the index if it is an output utxo?
    */
-  get index (): number {
-    return this.inner.index;
+  get index (): number|undefined {
+    if (this.inner.index !== undefined) {
+      return Number(this.inner.index);
+    }
+
+    return undefined;
   }
 
   /**
