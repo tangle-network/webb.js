@@ -1,11 +1,14 @@
 #[cfg(test)]
 mod test {
 	use ark_bn254::Bn254;
+	use ark_ff::{BigInteger, PrimeField};
 	use ark_std::UniformRand;
 	use arkworks_setups::common::{
 		prove, prove_unchecked, setup_keys, setup_keys_unchecked, verify, verify_unchecked_raw,
 	};
+	use arkworks_setups::Curve;
 	use js_sys::{Array, JsString, Uint8Array};
+	use rand::rngs::OsRng;
 	use wasm_bindgen::JsValue;
 	use wasm_bindgen_test::*;
 
@@ -16,7 +19,7 @@ mod test {
 		generate_vanchor_test_setup_2_inputs, new_utxobn_2_2, AnchorTestSetup, MixerTestSetup, VAnchorTestSetup,
 		ANCHOR_NOTE_V1_X5_4, ANCHOR_NOTE_V2_X5_4, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V2_X5_4,
 	};
-	use crate::proof::{generate_proof_js, truncate_and_pad, JsProofInputBuilder, LeavesMapInput};
+	use crate::proof::{generate_proof_js, truncate_and_pad, JsProofInputBuilder, LeavesMapInput, MTBn254X5};
 	use crate::types::{Indices, Leaves, WasmCurve, BE};
 	use crate::utxo::JsUtxo;
 	use crate::{VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF};
@@ -157,8 +160,8 @@ mod test {
 		let leaf = note.get_leaf_commitment().unwrap();
 		let leaves: Array = vec![leaf].into_iter().collect();
 
-		let mut tree_leaves = LeavesMapInput::new();
-		tree_leaves
+		let mut leaves_map = LeavesMapInput::new();
+		leaves_map
 			.set_chain_leaves(0, Leaves::from(JsValue::from(leaves.clone())))
 			.unwrap();
 
@@ -169,7 +172,7 @@ mod test {
 		]
 		.into_iter()
 		.collect();
-		proof_input_builder.set_leaves_map(tree_leaves).unwrap();
+		proof_input_builder.set_leaves_map(leaves_map).unwrap();
 
 		proof_input_builder
 			.set_indices(Indices::from(JsValue::from(indices)))
@@ -227,8 +230,8 @@ mod test {
 		let leaf = note.get_leaf_commitment().unwrap();
 		let leaves: Array = vec![leaf].into_iter().collect();
 
-		let mut tree_leaves = LeavesMapInput::new();
-		tree_leaves
+		let mut leaves_map = LeavesMapInput::new();
+		leaves_map
 			.set_chain_leaves(0, Leaves::from(JsValue::from(leaves.clone())))
 			.unwrap();
 
@@ -239,7 +242,7 @@ mod test {
 		]
 		.into_iter()
 		.collect();
-		proof_input_builder.set_leaves_map(tree_leaves).unwrap();
+		proof_input_builder.set_leaves_map(leaves_map).unwrap();
 
 		proof_input_builder
 			.set_indices(Indices::from(JsValue::from(indices)))
@@ -281,8 +284,8 @@ mod test {
 		let leaf2 = note2.get_leaf_commitment().unwrap();
 		let leaves: Array = vec![leaf, leaf2].into_iter().collect();
 
-		let mut tree_leaves = LeavesMapInput::new();
-		tree_leaves
+		let mut leaves_map = LeavesMapInput::new();
+		leaves_map
 			.set_chain_leaves(0, Leaves::from(JsValue::from(leaves.clone())))
 			.unwrap();
 
@@ -293,7 +296,7 @@ mod test {
 		]
 		.into_iter()
 		.collect();
-		proof_input_builder.set_leaves_map(tree_leaves).unwrap();
+		proof_input_builder.set_leaves_map(leaves_map).unwrap();
 
 		proof_input_builder
 			.set_indices(Indices::from(JsValue::from(indices)))
@@ -343,8 +346,8 @@ mod test {
 		let leaf2 = note2.get_leaf_commitment().unwrap();
 		let leaves: Array = vec![leaf, leaf2].into_iter().collect();
 
-		let mut tree_leaves = LeavesMapInput::new();
-		tree_leaves
+		let mut leaves_map = LeavesMapInput::new();
+		leaves_map
 			.set_chain_leaves(0, Leaves::from(JsValue::from(leaves.clone())))
 			.unwrap();
 
@@ -355,7 +358,7 @@ mod test {
 		]
 		.into_iter()
 		.collect();
-		proof_input_builder.set_leaves_map(tree_leaves).unwrap();
+		proof_input_builder.set_leaves_map(leaves_map).unwrap();
 
 		proof_input_builder
 			.set_indices(Indices::from(JsValue::from(indices)))
@@ -403,8 +406,8 @@ mod test {
 		let leaf = note.get_leaf_commitment().unwrap();
 		let leaves: Array = vec![leaf].into_iter().collect();
 
-		let mut tree_leaves = LeavesMapInput::new();
-		tree_leaves
+		let mut leaves_map = LeavesMapInput::new();
+		leaves_map
 			.set_chain_leaves(0, Leaves::from(JsValue::from(leaves.clone())))
 			.unwrap();
 
@@ -415,7 +418,7 @@ mod test {
 		]
 		.into_iter()
 		.collect();
-		proof_input_builder.set_leaves_map(tree_leaves).unwrap();
+		proof_input_builder.set_leaves_map(leaves_map).unwrap();
 
 		proof_input_builder
 			.set_indices(Indices::from(JsValue::from(indices)))
@@ -465,8 +468,8 @@ mod test {
 		let leaf3 = note2.get_leaf_commitment().unwrap();
 		let leaves: Array = vec![leaf, leaf2, leaf3].into_iter().collect();
 
-		let mut tree_leaves = LeavesMapInput::new();
-		tree_leaves
+		let mut leaves_map = LeavesMapInput::new();
+		leaves_map
 			.set_chain_leaves(0, Leaves::from(JsValue::from(leaves.clone())))
 			.unwrap();
 
@@ -477,7 +480,7 @@ mod test {
 		]
 		.into_iter()
 		.collect();
-		proof_input_builder.set_leaves_map(tree_leaves).unwrap();
+		proof_input_builder.set_leaves_map(leaves_map).unwrap();
 
 		proof_input_builder
 			.set_indices(Indices::from(JsValue::from(indices)))
@@ -560,6 +563,74 @@ mod test {
 			vk,
 		} = generate_vanchor_test_setup_16_mixed_inputs();
 		let proof_input = proof_input_builder.build_js().unwrap();
+		let proof = generate_proof_js(proof_input).unwrap().vanchor_proof().unwrap();
+		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
+
+		assert!(is_valid_proof);
+	}
+
+	#[wasm_bindgen_test]
+	fn should_generate_a_valid_proof_for_already_used_merkle_tree() {
+		let dummy_note = generate_vanchor_note(0, 0, 0, Some(0));
+		// Create 16 previously inserted UTXOs
+		let mut older_notes = vec![];
+		for i in 0..16 {
+			let note = generate_vanchor_note(10, 0, 0, Some(i));
+			older_notes.push(note);
+		}
+		let mut leaves: Array = older_notes.iter().map(|n| n.get_leaf_commitment().unwrap()).collect();
+		// Create a new input note to be spent
+		let deposited_note = generate_vanchor_note(10, 0, 0, Some(16));
+		let protocol = JsValue::from("vanchor").into();
+		let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
+
+		let leaf = deposited_note.get_leaf_commitment().unwrap();
+		leaves.push(&leaf);
+
+		let mut leaves_map = LeavesMapInput::new();
+		leaves_map
+			.set_chain_leaves(0, Leaves::from(JsValue::from(leaves.clone())))
+			.unwrap();
+		// Create the tree
+		let tree = MTBn254X5::new(Leaves::from(JsValue::from(leaves.clone())), JsString::from("0")).unwrap();
+		let indices: Array = vec![JsValue::from("16"), JsValue::from("0")].into_iter().collect();
+		let roots: Array = vec![
+			Uint8Array::from(tree.inner.root().into_repr().to_bytes_le().as_slice()),
+			Uint8Array::from([0u8; 32].to_vec().as_slice()),
+		]
+		.into_iter()
+		.collect();
+		proof_input_builder.set_leaves_map(leaves_map).unwrap();
+
+		proof_input_builder
+			.set_indices(Indices::from(JsValue::from(indices)))
+			.unwrap();
+		proof_input_builder
+			.set_roots(Leaves::from(JsValue::from(roots)))
+			.unwrap();
+
+		proof_input_builder.set_pk(JsString::from("0000")).unwrap();
+		proof_input_builder.public_amount(JsString::from("10")).unwrap();
+		proof_input_builder.chain_id(JsString::from("0")).unwrap();
+		proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
+
+		let notes: Array = vec![JsValue::from(deposited_note.clone()), JsValue::from(dummy_note)]
+			.into_iter()
+			.collect();
+
+		let output_1 = new_utxobn_2_2(deposited_note.curve.unwrap(), 10, 0);
+		let output_2 = new_utxobn_2_2(deposited_note.curve.unwrap(), 10, 3);
+
+		proof_input_builder.set_notes(notes).unwrap();
+		proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
+
+		let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(Curve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
+		let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
+
+		proof_input_builder.set_pk(JsString::from(hex::encode(pk))).unwrap();
+
+		let proof_input = proof_input_builder.build_js().unwrap();
+
 		let proof = generate_proof_js(proof_input).unwrap().vanchor_proof().unwrap();
 		let is_valid_proof = verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof).unwrap();
 

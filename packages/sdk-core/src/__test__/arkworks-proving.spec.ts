@@ -380,7 +380,7 @@ describe('Arkworks Proving manager VAnchor', function () {
     expect(message).to.deep.equal('Output amount and input amount  don\'t match input(170) != output(1610)');
   });
 
-  it('should prove a single utxo commitment is in a tree', async () => {
+  it.only('should prove a single utxo commitment is in a tree', async () => {
     const keys = vanchorBn2542_2_2;
     // Previous commitment
     const OlderNotes = await Promise.all(Array(16)
@@ -394,17 +394,19 @@ describe('Arkworks Proving manager VAnchor', function () {
     const leaves = OlderNotes.map((note) => note.getLeaf());
     const depositedNote = await generateVAnchorNote(depositAmount, 0, 0, OlderNotes.length);
 
+    console.log(OlderNotes.length);
     // insert the leaf
     leaves.push(depositedNote.getLeaf());
     const tree = new MTBn254X5(leaves, '0');
     const root = `0x${tree.root}`;
-    const rootsSet = [hexToU8a(root), hexToU8a(root)];
+    // TODO: Use default root for other place holders
+    const rootsSet = [hexToU8a(root), hexToU8a('0x0000000000000000000000000000000000000000000000000000000000000000')];
     const leavesMap: any = {};
 
     leavesMap[0] = leaves;
 
-    const output1 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
-    const output2 = new JsUtxo('Bn254', 'Arkworks', '0', outputChainId, undefined);
+    const output1 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', '0', outputChainId);
     const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
 
     const provingManager = new ArkworksProvingManager(null);
