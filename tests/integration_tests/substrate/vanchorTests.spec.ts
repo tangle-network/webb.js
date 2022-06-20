@@ -701,7 +701,6 @@ describe('VAnchor tests', function() {
     const treeId = await createVAnchor(apiPromise!, alice);
     const depoists: Array<() => Promise<void>> = [];
     for (let i = 0; i < numberOfDepoisits; i++) {
-      const message = `Deposit #${i + 1}  `;
       depoists.push(async () => {
         const note = await generateVAnchorNote(Number(currencyToUnitI128(100).toString()), Number(chainId), Number(chainId));
         await basicDeposit(apiPromise!, bob, treeId, note);
