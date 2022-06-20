@@ -381,7 +381,7 @@ describe('Arkworks Proving manager VAnchor', function () {
   });
 
   it.only('should prove a single utxo commitment is in a tree', async () => {
-    const dummy_note = await generateVAnchorNote(0, 0, 0, 0);
+    const dummyNote = await generateVAnchorNote(0, 0, 0, 0);
     const keys = vanchorBn2542_2_2;
     // Previous commitment
     const OlderNotes = await Promise.all(Array(16)
@@ -400,7 +400,7 @@ describe('Arkworks Proving manager VAnchor', function () {
     const tree = new MTBn254X5(leaves, '0');
     const root = `0x${tree.root}`;
     // TODO: Use default root for other place holders
-    const rootsSet = [hexToU8a(root), hexToU8a('0x0000000000000000000000000000000000000000000000000000000000000000')];
+    const rootsSet = [hexToU8a(root), hexToU8a('0x1f15585f8947e378bcf8bd918716799da909acdb944c57150b1eb4565fda8aa0')];
     const leavesMap: any = {};
 
     leavesMap[0] = leaves;
@@ -421,7 +421,7 @@ describe('Arkworks Proving manager VAnchor', function () {
       extAmount: '0',
       fee: '0',
       indices: [Number(depositedNote.note.index), 0],
-      inputNotes: [depositedNote, dummy_note],
+      inputNotes: [depositedNote, dummyNote],
       leavesMap,
       output: [new Utxo(output1), new Utxo(output2)],
 

@@ -845,7 +845,7 @@ impl JsNote {
 		let utxo = vanchor::generate_secrets(
 			0,
 			self.exponentiation.unwrap_or(5),
-			self.width.unwrap_or(4),
+			self.width.unwrap_or(5),
 			self.curve.unwrap_or(Curve::Bn254),
 			chain_id,
 			Some(0),
