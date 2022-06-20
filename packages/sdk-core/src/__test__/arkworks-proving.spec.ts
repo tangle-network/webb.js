@@ -16,6 +16,20 @@ import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
 import { Note } from '../note.js';
 import { ArkworksProvingManager } from '../proving/index.js';
 
+async function ensureIndecies (notes: Note[], leaves: Uint8Array[]) {
+  const leavesHex = leaves.map((l) => u8aToHex(l));
+
+  for (const note of notes) {
+    const leaf = u8aToHex(note.getLeaf());
+    const index = Number(note.note.index);
+    const leafOfTree = leavesHex[index];
+
+    if (leafOfTree !== leaf) {
+      throw new Error(`${index} leaf=${leaf} don't match tree leaf ${leafOfTree}`);
+    }
+  }
+}
+
 async function generateVAnchorNote (amount: number, chainId: number, outputChainId: number, index?: number) {
   const note = await Note.generateNote({
     amount: String(amount),
@@ -111,7 +125,7 @@ function getKeys_16_2 () {
 const vanchorBn2542_2_2 = getKeys_2_2();
 const vanchorBn2542_16_2 = getKeys_16_2();
 
-describe.only('Arkworks Proving manager VAnchor', function () {
+describe('Arkworks Proving manager VAnchor', function () {
   this.timeout(120_1000);
 
   it('should  prove using WASM API for VAnchor with one input note and one index', async () => {
@@ -366,7 +380,7 @@ describe.only('Arkworks Proving manager VAnchor', function () {
     expect(message).to.deep.equal('Output amount and input amount  don\'t match input(170) != output(1610)');
   });
 
-  it.only('should proof a single utxo commitment is in a tree', async () => {
+  it('should proof a single utxo commitment is in a tree', async () => {
     const keys = vanchorBn2542_2_2;
     // Previous commitment
     const OlderNotes = await Promise.all(Array(16)
@@ -399,7 +413,6 @@ describe.only('Arkworks Proving manager VAnchor', function () {
     const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
     const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
 
-    console.log(leaves.map((leave) => u8aToHex(leave)));
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: '0',
       encryptedCommitments: [comEnc1, comEnc2],
@@ -421,5 +434,118 @@ describe.only('Arkworks Proving manager VAnchor', function () {
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
 
     expect(isValidProof).to.equal(true);
+  });
+
+  it('should proof with pre existing leaves', async () => {
+    const keys = vanchorBn2542_16_2;
+    const preExistingNotes = await Promise.all(Array(16)
+      .fill(0)
+      .map((_, index) => generateVAnchorNote(10, 0, 0, index + 0)));
+
+    const notes = await Promise.all(Array(16)
+      .fill(0)
+      .map((_, index) => generateVAnchorNote(10, 0, 0, index + 16)));
+
+    const publicAmount = 10;
+    const outputAmount = String(10 * 8 + 5);
+    const outputChainId = String(0);
+    const leaves = [...preExistingNotes, ...notes].map((note) => note.getLeaf());
+
+    const tree = new MTBn254X5(leaves, '0');
+    const root = `0x${tree.root}`;
+    const rootsSet = [hexToU8a(root), hexToU8a(root)];
+    const leavesMap: any = {};
+
+    leavesMap[0] = leaves;
+
+    const output1 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
+    const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
+
+    const provingManager = new ArkworksProvingManager(null);
+
+    const secret = randomAsU8a();
+    const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+    const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+
+    await ensureIndecies(notes, leaves);
+
+    const setup: ProvingManagerSetupInput<'vanchor'> = {
+      chainId: '0',
+      encryptedCommitments: [comEnc1, comEnc2],
+      extAmount: '0',
+      fee: '0',
+      indices: notes.map((_, index) => index),
+      inputNotes: notes,
+      leavesMap,
+      output: [new Utxo(output1), new Utxo(output2)],
+
+      provingKey: keys.pk,
+      publicAmount: String(publicAmount),
+      recipient: address,
+      relayer: address,
+      roots: rootsSet
+    };
+
+    const data = await provingManager.prove('vanchor', setup);
+    const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
+
+    expect(isValidProof).to.deep.equal(true);
+  });
+  it('should proof with older deposit', async () => {
+    const keys = vanchorBn2542_16_2;
+    const notesAfterDeposit = await Promise.all(Array(16)
+      .fill(0)
+      .map((_, index) => generateVAnchorNote(10, 0, 0, index + 16)));
+
+    const notes = await Promise.all(Array(16)
+      .fill(0)
+      .map((_, index) => generateVAnchorNote(10, 0, 0, index + 0)));
+
+    const publicAmount = 10;
+    const outputAmount = String(10 * 8 + 5);
+    const outputChainId = String(0);
+    const leaves = [...notes, ...notesAfterDeposit].map((note) => note.getLeaf());
+
+    const tree = new MTBn254X5(leaves, '0');
+    const root = `0x${tree.root}`;
+    const rootsSet = [hexToU8a(root), hexToU8a(root)];
+    const leavesMap: any = {};
+
+    leavesMap[0] = leaves;
+
+    const output1 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
+    const output2 = new JsUtxo('Bn254', 'Arkworks', outputAmount, outputChainId, undefined);
+    const address = hexToU8a('0x644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129');
+
+    const provingManager = new ArkworksProvingManager(null);
+
+    const secret = randomAsU8a();
+    const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
+    const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+
+    await ensureIndecies(notes, leaves);
+
+    const setup: ProvingManagerSetupInput<'vanchor'> = {
+      chainId: '0',
+      encryptedCommitments: [comEnc1, comEnc2],
+      extAmount: '0',
+      fee: '0',
+      indices: notes.map((_, index) => index),
+      inputNotes: notes,
+      leavesMap,
+      output: [new Utxo(output1), new Utxo(output2)],
+
+      provingKey: keys.pk,
+      publicAmount: String(publicAmount),
+      recipient: address,
+      relayer: address,
+      roots: rootsSet
+    };
+
+    const data = await provingManager.prove('vanchor', setup);
+    const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
+
+    expect(isValidProof).to.deep.equal(true);
   });
 });
