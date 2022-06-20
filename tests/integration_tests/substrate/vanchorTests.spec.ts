@@ -242,14 +242,6 @@ async function basicWithdraw(
   const tree = new MTBn254X5(leaves, String(maxLeafIndex));
   const root = `0x${tree.root}`;
   const neighborRoot = hexToU8a(neighborRoots[0]);
-  console.log({
-    neighborRoot: neighborRoots, root,
-    leaves:leaves.map(l => u8aToHex(l)),
-    index:maxLeafIndex,
-    leaf:u8aToHex(leaves[maxLeafIndex]),
-    leafFromNote:u8aToHex(inputNote.getLeaf()),
-    utxoIndex:inputNote.note.getUtxo().index
-  });
   const rootsSet = [hexToU8a(root), neighborRoot];
   const decodedAddress = decodeAddress(address);
 
@@ -688,13 +680,12 @@ describe('VAnchor tests', function() {
     }, [treeId, vanchorProofData, extData], bob);
   });
   it('VAnchor multi deposits single execution', async function() {
-    this.timeout(300_000);
+    this.timeout(350_000);
 
     const numberOfDepoisits = 10;
     const { bob, alice } = getKeyring();
     const treeId = await createVAnchor(apiPromise!, alice);
     for (let i = 0; i < numberOfDepoisits; i++) {
-      console.log(`Deposit #${i + 1}`);
       const note = await generateVAnchorNote(Number(currencyToUnitI128(100).toString()), Number(chainId), Number(chainId));
       await basicDeposit(apiPromise!, bob, treeId, note);
     }
@@ -703,19 +694,17 @@ describe('VAnchor tests', function() {
   });
 
   it.skip('VAnchor multi deposits parallel', async function() {
-    this.timeout(300_000);
+    this.timeout(350_000);
 
-    const numberOfDepoisits = 10;
+    const numberOfDepoisits = 5;
     const { bob, alice } = getKeyring();
     const treeId = await createVAnchor(apiPromise!, alice);
     const depoists: Array<() => Promise<void>> = [];
     for (let i = 0; i < numberOfDepoisits; i++) {
       const message = `Deposit #${i + 1}  `;
       depoists.push(async () => {
-        console.log(`${message} progressing`);
         const note = await generateVAnchorNote(Number(currencyToUnitI128(100).toString()), Number(chainId), Number(chainId));
         await basicDeposit(apiPromise!, bob, treeId, note);
-        console.log(`${message} Done`);
       });
     }
     await Promise.all(depoists.map(d => d()));
@@ -724,11 +713,10 @@ describe('VAnchor tests', function() {
 
   it('VAnchor multi deposits and withdraw', async function() {
     const numberOfDepoisits = 5;
-    this.timeout(300_000);
+    this.timeout(350_000);
     const { bob, alice } = getKeyring();
     const treeId = await createVAnchor(apiPromise!, alice);
     for (let i = 0; i < numberOfDepoisits; i++) {
-      console.log(`Deposit #${i + 1}`);
       const note = await generateVAnchorNote(Number(currencyToUnitI128(100).toString()), Number(chainId), Number(chainId));
       const [outputNote, secret] = await basicDeposit(apiPromise!, bob, treeId, note);
       await basicWithdraw(apiPromise!, treeId, bob, outputNote, secret);
