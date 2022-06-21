@@ -835,18 +835,36 @@ impl JsNote {
 	}
 
 	#[wasm_bindgen(js_name = defaultUtxoNote)]
-	pub fn default_utxo_note(&self) -> Result<JsNote, OperationError> {
-		let mut new_note = self.clone();
-		let chain_id: u64 = self
+	pub fn default_utxo_note(note: &JsNote) -> Result<JsNote, OperationError> {
+		let mut new_note = JsNote {
+			scheme: note.scheme.clone(),
+			protocol: note.protocol,
+			version: note.version,
+			source_chain_id: note.source_chain_id.clone(),
+			target_chain_id: note.target_chain_id.clone(),
+			source_identifying_data: note.source_identifying_data.clone(),
+			target_identifying_data: note.target_identifying_data.clone(),
+			secrets: note.secrets.clone(),
+			curve: note.curve,
+			exponentiation: note.exponentiation,
+			width: note.width,
+			token_symbol: note.token_symbol.clone(),
+			amount: Some("0".to_string()),
+			denomination: note.denomination,
+			backend: note.backend,
+			hash_function: note.hash_function,
+			index: Some(0),
+		};
+		let chain_id: u64 = new_note
 			.target_chain_id
 			.parse()
 			.map_err(|_| OpStatusCode::InvalidTargetChain)?;
 
 		let utxo = vanchor::generate_secrets(
 			0,
-			self.exponentiation.unwrap_or(5),
-			self.width.unwrap_or(4),
-			self.curve.unwrap_or(Curve::Bn254),
+			new_note.exponentiation.unwrap_or(5),
+			new_note.width.unwrap_or(5),
+			new_note.curve.unwrap_or(Curve::Bn254),
 			chain_id,
 			Some(0),
 			&mut OsRng,

@@ -61,7 +61,7 @@ export class Note {
   static CURRENT_VERSION: Version = 'v2';
 
   // Default constructor
-  private constructor (readonly note: JsNote) {}
+  constructor (readonly note: JsNote) {}
 
   /**
    * Gets the WebAssembly module for the target environment.
@@ -80,10 +80,11 @@ export class Note {
    * Generate a default JsUtxo which will have both index,amount = 0
    * @returns A note class instance.
    */
-  public getDefaultUtxoNote (): Note {
-    const note = this.note.defaultUtxoNote();
+  public async getDefaultUtxoNote (): Promise<Note> {
+    const wasm = await Note.wasm;
+    const newNote = wasm.JsNote.defaultUtxoNote(this.note);
 
-    return new Note(note);
+    return new Note(newNote);
   }
 
   /**
