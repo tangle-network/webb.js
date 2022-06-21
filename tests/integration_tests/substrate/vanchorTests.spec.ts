@@ -696,7 +696,7 @@ describe('VAnchor tests', function() {
   it.skip('VAnchor multi deposits parallel', async function() {
     this.timeout(350_000);
 
-    const numberOfDepoisits = 5;
+    const numberOfDepoisits = 3;
     const { bob, alice } = getKeyring();
     const treeId = await createVAnchor(apiPromise!, alice);
     const depoists: Array<() => Promise<void>> = [];
@@ -711,7 +711,7 @@ describe('VAnchor tests', function() {
   });
 
   it('VAnchor multi deposits and withdraw', async function() {
-    const numberOfDepoisits = 5;
+    const numberOfDepoisits = 3;
     this.timeout(350_000);
     const { bob, alice } = getKeyring();
     const treeId = await createVAnchor(apiPromise!, alice);
