@@ -1,6 +1,7 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
+// @ts-nocheck
 declare module '@polkadot/types/lookup' {
   import type { BTreeMap, Bytes, Compact, Enum, Null, Option, Result, Struct, Text, U256, U8aFixed, Vec, bool, i128, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
   import type { ITuple } from '@polkadot/types-codec/types';
