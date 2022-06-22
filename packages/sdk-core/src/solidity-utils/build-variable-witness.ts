@@ -8,7 +8,15 @@
 export async function buildVariableWitnessCalculator (code, options) {
   options = options || {};
 
-  const wasmModule = await WebAssembly.compile(code);
+  let wasmModule;
+
+  try {
+    wasmModule = await WebAssembly.compile(code);
+  } catch (err) {
+    console.log(err);
+    console.log('\nTry to run circom --c in order to generate c++ code instead\n');
+    throw new Error(err);
+  }
 
   const instance = await WebAssembly.instantiate(wasmModule, {
     runtime: {
@@ -25,6 +33,8 @@ export async function buildVariableWitnessCalculator (code, options) {
           errStr = 'Assert Failed. ';
         } else if (code === 5) {
           errStr = 'Not enough memory. ';
+        } else if (code === 6) {
+          errStr = 'Input signal array access exceeds the size';
         } else {
           errStr = 'Unknown error\n';
         }
@@ -36,6 +46,7 @@ export async function buildVariableWitnessCalculator (code, options) {
       showSharedRWMemory: function () {
         printSharedRWMemory();
       }
+
     }
   });
 
@@ -102,7 +113,7 @@ class WitnessCalculator {
 
   async _doCalculateWitness (input, sanityCheck) {
     // input is assumed to be a map from signals to arrays of bigints
-    this.instance.exports.init(this.sanityCheck || sanityCheck ? 1 : 0);
+    this.instance.exports.init((this.sanityCheck || sanityCheck) ? 1 : 0);
     const keys = Object.keys(input);
     let input_counter = 0;
 
@@ -111,6 +122,19 @@ class WitnessCalculator {
       const hMSB = parseInt(h.slice(0, 8), 16);
       const hLSB = parseInt(h.slice(8, 16), 16);
       const fArr = flatArray(input[k]);
+      const signalSize = this.instance.exports.getInputSignalSize(hMSB, hLSB);
+
+      if (signalSize < 0) {
+        throw new Error(`Signal ${k} not found\n`);
+      }
+
+      if (fArr.length < signalSize) {
+        throw new Error(`Not enough values for input signal ${k}\n`);
+      }
+
+      if (fArr.length > signalSize) {
+        throw new Error(`Too many values for input signal ${k}\n`);
+      }
 
       for (let i = 0; i < fArr.length; i++) {
         const arrFr = toArray32(fArr[i], this.n32);
@@ -123,15 +147,14 @@ class WitnessCalculator {
           this.instance.exports.setInputSignal(hMSB, hLSB, i);
           input_counter++;
         } catch (err) {
+          // console.log(`After adding signal ${i} of ${k}`)
           throw new Error(err);
         }
       }
     });
 
     if (input_counter < this.instance.exports.getInputSize()) {
-      throw new Error(
-        `Not all inputs have been set. Only ${input_counter} out of ${this.instance.exports.getInputSize()}`
-      );
+      throw new Error(`Not all inputs have been set. Only ${input_counter} out of ${this.instance.exports.getInputSize()}`);
     }
   }
 
@@ -268,8 +291,7 @@ function toArray32 (s, size) {
   return res;
 }
 
-function fromArray32 (arr) {
-  // returns a BigInt
+function fromArray32 (arr) { // returns a BigInt
   let res = BigInt(0);
   const radix = BigInt(0x100000000);
 
@@ -304,7 +326,7 @@ function fnvHash (str) {
 
   for (let i = 0; i < str.length; i++) {
     hash ^= BigInt(str[i].charCodeAt());
-    hash *= BigInt(0x100000001b3);
+    hash *= BigInt(0x100000001B3);
     hash %= uint64_max;
   }
 
