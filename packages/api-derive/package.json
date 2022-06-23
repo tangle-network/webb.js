@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/api-derive",
-  "version": "0.1.4-86",
+  "version": "0.1.4-87",
   "description": "Webb JS API derived methods",
   "type": "module",
   "main": "./cjs/index.js",
@@ -45,7 +45,7 @@
     "@babel/runtime": "^7.10.2",
     "@polkadot/api": "8.7.1",
     "@polkadot/rpc-core": "8.7.1",
-    "@webb-tools/api": "0.1.4-86",
-    "@webb-tools/types": "0.1.4-86"
+    "@webb-tools/api": "0.1.4-87",
+    "@webb-tools/types": "0.1.4-87"
   }
 }
