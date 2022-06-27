@@ -244,5 +244,5 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 
 <br />
 <p align="center">
- <img src="/.github/assets/w3f.jpeg">
+ <img src=".github/assets/w3f.jpeg" width="50%" height="70%" >
 </p>
