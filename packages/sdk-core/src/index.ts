@@ -10,3 +10,4 @@ export * from './big-number-utils.js';
 export * from './keypair.js';
 export * from './solidity-utils/index.js';
 export * from './utxo.js';
+export * from './typed-chain-id.js';
