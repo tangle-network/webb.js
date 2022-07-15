@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { byteArrayToNum, calculateTypedChainId, ChainType, numToByteArray, parseTypedChainId, TypedChainId } from '../typed-chain-id';
+import { byteArrayToNum, calculateTypedChainId, ChainType, numToByteArray, parseTypedChainId, TypedChainId } from '../typed-chain-id.js';
 
 describe('test various conversion functions', () => {
   it('byte array to num converts correctly', () => {
