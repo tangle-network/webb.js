@@ -340,7 +340,6 @@ export async function createAnchor(
     api,
     { method: 'sudo', section: 'sudo' },
     [
-      // @ts-ignore
       api.tx.anchorBn254.create(currencyToUnitI128(size).toString(), maxEdges, depth, assetId),
     ],
     sudoPair
