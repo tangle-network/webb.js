@@ -1,25 +1,20 @@
 // Auto-generated via `yarn polkadot-types-from-chain`, do not edit
 /* eslint-disable */
 
-import type { ApiTypes } from '@polkadot/api-base/types';
+// import type lookup before we augment - in some environments
+// this is required to allow for ambient/previous definitions
+import '@polkadot/api-base/types/consts';
+
+import type { ApiTypes, AugmentedConst } from '@polkadot/api-base/types';
 import type { Option, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { Codec } from '@polkadot/types-codec/types';
 import type { Perbill, Permill } from '@polkadot/types/interfaces/runtime';
-import type { FrameSupportPalletId, FrameSupportWeightsRuntimeDbWeight, FrameSupportWeightsWeightToFeeCoefficient, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpVersionRuntimeVersion, WebbProposalsHeaderTypedChainId } from '@polkadot/types/lookup';
+import type { FrameSupportPalletId, FrameSupportWeightsRuntimeDbWeight, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpVersionRuntimeVersion, WebbProposalsHeaderTypedChainId } from '@polkadot/types/lookup';
+
+export type __AugmentedConst<ApiType extends ApiTypes> = AugmentedConst<ApiType>;
 
 declare module '@polkadot/api-base/types/consts' {
-  export interface AugmentedConsts<ApiType extends ApiTypes> {
-    anchorBn254: {
-      /**
-       * Native currency id
-       **/
-      nativeCurrencyId: u32 & AugmentedConst<ApiType>;
-      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
+  interface AugmentedConsts<ApiType extends ApiTypes> {
     assetRegistry: {
       /**
        * Native Asset Id
@@ -278,6 +273,10 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       maxSubmissionsPerBatch: u16 & AugmentedConst<ApiType>;
       /**
+       * Max blocks to store an unsigned proposal
+       **/
+      unsignedProposalExpiry: u32 & AugmentedConst<ApiType>;
+      /**
        * Generic const
        **/
       [key: string]: Codec;
@@ -321,20 +320,6 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       maxElectingVoters: u32 & AugmentedConst<ApiType>;
       /**
-       * Maximum length (bytes) that the mined solution should consume.
-       * 
-       * The miner will ensure that the total length of the unsigned solution will not exceed
-       * this value.
-       **/
-      minerMaxLength: u32 & AugmentedConst<ApiType>;
-      /**
-       * Maximum weight that the miner should consume.
-       * 
-       * The miner will ensure that the total weight of the unsigned solution will not exceed
-       * this value, based on [`WeightInfo::submit_unsigned`].
-       **/
-      minerMaxWeight: u64 & AugmentedConst<ApiType>;
-      /**
        * The priority of the unsigned transaction submitted in the unsigned-phase
        **/
       minerTxPriority: u64 & AugmentedConst<ApiType>;
@@ -374,7 +359,9 @@ declare module '@polkadot/api-base/types/consts' {
       /**
        * Maximum weight of a signed solution.
        * 
-       * This should probably be similar to [`Config::MinerMaxWeight`].
+       * If [`Config::MinerConfig`] is being implemented to submit signed solutions (outside of
+       * this pallet), then [`MinerConfig::solution_weight`] is used to compare against
+       * this value.
        **/
       signedMaxWeight: u64 & AugmentedConst<ApiType>;
       /**
@@ -481,6 +468,14 @@ declare module '@polkadot/api-base/types/consts' {
     };
     nominationPools: {
       /**
+       * The minimum pool points-to-balance ratio that must be maintained for it to be `open`.
+       * This is important in the event slashing takes place and the pool's points-to-balance
+       * ratio becomes disproportional.
+       * For a value of 10, the threshold would be a pool points-to-balance ratio of 10:1.
+       * Such a scenario would also be the equivalent of the pool being 90% slashed.
+       **/
+      minPointsToBalance: u32 & AugmentedConst<ApiType>;
+      /**
        * The nomination pool's pallet id.
        **/
       palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
@@ -500,6 +495,25 @@ declare module '@polkadot/api-base/types/consts' {
        * Not strictly enforced, but used for weight estimation.
        **/
       maxScheduledPerBlock: u32 & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    signatureBridge: {
+      bridgeAccountId: FrameSupportPalletId & AugmentedConst<ApiType>;
+      /**
+       * The identifier for this chain.
+       * This must be unique and must not collide with existing IDs within a
+       * set of bridged chains.
+       **/
+      chainIdentifier: u64 & AugmentedConst<ApiType>;
+      /**
+       * The chain type for this chain.
+       * This is either a standalone Substrate chain, relay chain, or parachain
+       **/
+      chainType: U8aFixed & AugmentedConst<ApiType>;
+      proposalLifetime: u32 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
@@ -611,10 +625,6 @@ declare module '@polkadot/api-base/types/consts' {
     };
     transactionPayment: {
       /**
-       * The polynomial that is applied in order to derive fee from length.
-       **/
-      lengthToFee: Vec<FrameSupportWeightsWeightToFeeCoefficient> & AugmentedConst<ApiType>;
-      /**
        * A fee mulitplier for `Operational` extrinsics to compute "virtual tip" to boost their
        * `priority`
        * 
@@ -638,10 +648,6 @@ declare module '@polkadot/api-base/types/consts' {
        * transactions.
        **/
       operationalFeeMultiplier: u8 & AugmentedConst<ApiType>;
-      /**
-       * The polynomial that is applied in order to derive fee from weight.
-       **/
-      weightToFee: Vec<FrameSupportWeightsWeightToFeeCoefficient> & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
@@ -679,6 +685,17 @@ declare module '@polkadot/api-base/types/consts' {
        * Period between successive spends.
        **/
       spendPeriod: u32 & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    vAnchorBn254: {
+      /**
+       * Native currency id
+       **/
+      nativeCurrencyId: u32 & AugmentedConst<ApiType>;
+      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/

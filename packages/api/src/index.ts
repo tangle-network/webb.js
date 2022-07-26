@@ -12,7 +12,6 @@ import { ApiOptions } from '@polkadot/api/types';
  * @returns Returns the `ApiOptions` for a Webb `protocol-substrate` node.
  */
 export const options = ({ types = {},
-  rpc = {},
   typesAlias = {},
   typesBundle = {},
   derives = {},
@@ -22,7 +21,40 @@ export const options = ({ types = {},
     ...derives
   },
   rpc: {
-    // TODO: Remove the mt_getLeaves rpc in favor of api derives.
+    lt: {
+      getNeighborEdges: {
+        description: 'Query for the neighbor edges',
+        params: [
+          {
+            isOptional: false,
+            name: 'tree_id',
+            type: 'u32'
+          },
+          {
+            isOptional: true,
+            name: 'at',
+            type: 'Hash'
+          }
+        ],
+        type: 'Vec<PalletLinkableTreeEdgeMetadata>'
+      },
+      getNeighborRoots: {
+        description: 'Query for the neighbor roots',
+        params: [
+          {
+            isOptional: false,
+            name: 'tree_id',
+            type: 'u32'
+          },
+          {
+            isOptional: true,
+            name: 'at',
+            type: 'Hash'
+          }
+        ],
+        type: 'Vec<[u8; 32]>'
+      }
+    },
     mt: {
       getLeaves: {
         description: 'Query for the tree leaves',
@@ -50,8 +82,7 @@ export const options = ({ types = {},
         ],
         type: 'Vec<[u8; 32]>'
       }
-    },
-    ...rpc
+    }
   },
   types: {
     ...types
