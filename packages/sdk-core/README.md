@@ -17,14 +17,14 @@ const noteInput: NoteGenInput = {
   denomination: '18',
   exponentiation: '5',
   hashFunction: 'Poseidon',
-  protocol: 'anchor',
+  protocol: 'vanchor',
   sourceChain: '1',
   sourceIdentifyingData: '1',
   targetChain: '1',
   targetIdentifyingData: '1',
   tokenSymbol: 'WEBB',
   version: 'v2',
-  width: '4'
+  width: '5'
 };
 
 // Note GenInput
@@ -38,7 +38,7 @@ Proving manager uses `wasm-utils`, it runs in a Worker, or directly in the brows
 const provingInput: ProvingManagerSetupInput = {
   leafIndex: 0,
   provingKey: Uint8Array.from([]),
-  note: `webb://v2:anchor/1:1/1:1/0000000000000001:649798e6cb21ad4464294ef150085838217909d2438b06cbc0d52268033d901f:da82797e42c49c00d642a02ca9ef89db3b723c17c59d3a9e07b6a7cd8e356719/?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Arkworks&token=WEBB&denom=18&amount=1`,
+  note: `webb://v2:vanchor/1:1/1:1/0000000000000001:0100000000000000000000000000000000000000000000000000000000000000:f5e1c9dc56e1032b09b88aaf81fa1aab9c3cb1c734d038814ef0bd987ec72103:13bcea7c5003590db4210351146232350067d59be059c6052d806b608d348300/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=WEBB&denom=18&amount=1`,
   fee: 0,
   refund: 0,
   leaves: [],

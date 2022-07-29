@@ -100,6 +100,7 @@ export class ArkworksProvingManagerThread {
 
       return mixerProof as any;
     } else if (protocol === 'anchor') {
+      // @deprecated
       const input = pmSetupInput as AnchorPMSetupInput;
       const { note } = await Note.deserialize(input.note);
 

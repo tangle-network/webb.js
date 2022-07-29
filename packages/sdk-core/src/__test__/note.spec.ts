@@ -6,7 +6,7 @@ import { expect } from 'chai';
 
 import { Note, NoteGenInput } from '../note.js';
 
-describe('Note class', () => {
+describe.only('Note class', () => {
   it('should test constructor from `NoteGenInput`', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
@@ -15,21 +15,21 @@ describe('Note class', () => {
       denomination: '18',
       exponentiation: '5',
       hashFunction: 'Poseidon',
-      protocol: 'anchor',
+      protocol: 'vanchor',
       sourceChain: '1',
       sourceIdentifyingData: '1',
       targetChain: '1',
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '4'
+      width: '5'
     };
 
     const note = await Note.generateNote(noteInput);
 
     expect(note.note.amount).to.deep.equal('1');
     expect(note.note.denomination).to.deep.equal('18');
-    expect(note.note.width).to.deep.equal('4');
+    expect(note.note.width).to.deep.equal('5');
     expect(note.note.exponentiation).to.deep.equal('5');
     expect(note.note.targetChainId).to.deep.equal('1');
     expect(note.note.targetIdentifyingData).to.deep.equal('1');
@@ -49,14 +49,14 @@ describe('Note class', () => {
       denomination: '18',
       exponentiation: '5',
       hashFunction: 'Poseidon',
-      protocol: 'anchor',
+      protocol: 'vanchor',
       sourceChain: '1',
       sourceIdentifyingData: '1',
       targetChain: '1',
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '4'
+      width: '5'
     };
 
     const note = await Note.generateNote(noteInput);
@@ -73,11 +73,11 @@ describe('Note class', () => {
     expect(deserializedNote.note.tokenSymbol).to.deep.equal('WEBB');
     expect(deserializedNote.note.amount).to.deep.equal('1');
     expect(deserializedNote.note.denomination).to.deep.equal('18');
-    expect(deserializedNote.note.width).to.deep.equal('4');
+    expect(deserializedNote.note.width).to.deep.equal('5');
     expect(deserializedNote.note.exponentiation).to.deep.equal('5');
   });
 
-  it('should test anchor secrets chain', async () => {
+  it('should test vanchor secret destination chain', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
       backend: 'Arkworks',
@@ -85,14 +85,14 @@ describe('Note class', () => {
       denomination: '18',
       exponentiation: '5',
       hashFunction: 'Poseidon',
-      protocol: 'anchor',
+      protocol: 'vanchor',
       sourceChain: '1',
       sourceIdentifyingData: '1',
       targetChain: '1',
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '4'
+      width: '5'
     };
 
     const note = await Note.generateNote(noteInput);
@@ -111,14 +111,14 @@ describe('Note class', () => {
       denomination: '18',
       exponentiation: '5',
       hashFunction: 'Poseidon',
-      protocol: 'anchor',
+      protocol: 'vanchor',
       sourceChain: '1',
       sourceIdentifyingData: '1',
       targetChain: '1',
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '4'
+      width: '5'
     };
 
     try {
@@ -144,7 +144,7 @@ describe('Note class', () => {
       targetIdentifyingData: '1',
       tokenSymbol: 'WEBB',
       version: 'v2',
-      width: '4'
+      width: '5'
     };
 
     const { note } = await Note.generateNote(noteInput);
@@ -152,7 +152,7 @@ describe('Note class', () => {
     expect(note.backend).to.equal('Circom');
   });
 
-  it('should generate an anchor note with circom backend when secrets are passed', async () => {
+  it('should generate an vanchor note with circom backend when secrets are passed', async () => {
     const noteInput: NoteGenInput = {
       amount: '1000000000000000000',
       backend: 'Circom',
@@ -160,15 +160,15 @@ describe('Note class', () => {
       denomination: '18',
       exponentiation: '5',
       hashFunction: 'Poseidon',
-      protocol: 'anchor',
-      secrets: '0000010000007a69:002b977c06e55a6b1fb0552373c9001a2d0601d2c739607954c1c291278b07ca:0033b53cd0cb680239a7b1a671282f30cbcaa9e6fa05c6b1bfd11ef7a1d1a1fa',
+      protocol: 'vanchor',
+      secrets: '0000010000007a69:002b977c06e55a6b1fb0552373c9001a2d0601d2c739607954c1c291278b07ca:0033b53cd0cb680239a7b1a671282f30cbcaa9e6fa05c6b1bfd11ef7a1d1a1fa:002b977c06e55a6b1fb0552373c9001a2d0601d2c739607954c1c291278b07ca',
       sourceChain: '1099511659113',
       sourceIdentifyingData: '1',
       targetChain: '1099511659113',
       targetIdentifyingData: '1',
-      tokenSymbol: 'DAIM',
+      tokenSymbol: 'DAI',
       version: 'v2',
-      width: '4'
+      width: '5'
     };
 
     const { note } = await Note.generateNote(noteInput);
@@ -196,10 +196,10 @@ describe('Note class', () => {
   it('should fail to deserialize invalid version', async () => {
     const serialized =
       'webb://' +
-      'v3:anchor/' +
+      'v3:vanchor/' +
       '1:1/' +
       '1:1/' +
-      '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/' +
+      '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/' +
       '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
 
     try {
@@ -213,10 +213,10 @@ describe('Note class', () => {
   it('should fail to deserialize invalid source chain id', async () => {
     const serialized =
       'webb://' +
-      'v2:anchor/' +
+      'v2:vanchor/' +
       'invalid_source_chain_id:1/' +
       '1:1/' +
-      '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/' +
+      '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/' +
       '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
 
     try {
@@ -230,10 +230,10 @@ describe('Note class', () => {
   it('should fail to deserialize invalid target chain id', async () => {
     const serialized =
       'webb://' +
-      'v2:anchor/' +
+      'v2:vanchor/' +
       '1:invalid_target_chain_id/' +
       '1:1/' +
-      '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/' +
+      '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/' +
       '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
 
     try {
@@ -247,10 +247,10 @@ describe('Note class', () => {
   it('should fail to deserialize invalid note length', async () => {
     const serialized =
       'webb://' +
-      'v2:anchor/' +
+      'v2:vanchor/' +
       '1:1/' +
       // + '1:1/' Nullify the source identify data
-      '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/' +
+      '0000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/' +
       '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
 
     try {
@@ -264,10 +264,10 @@ describe('Note class', () => {
   it('should fail to deserialize anchor invalid secrets (invalid chain id item - too large)', async () => {
     const serialized =
       'webb://' +
-      'v2:anchor/' +
+      'v2:vanchor/' +
       '1:1/' +
       '1:1/' +
-      // Get rid of target chain ID from secrets portion
+      // Get rid of target chain ID from :from secrets portion
       '11010101010101100000000000000001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/' +
       '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
 
@@ -282,10 +282,10 @@ describe('Note class', () => {
   it('should fail to deserialize anchor invalid secrets (invalid chain id item - too small)', async () => {
     const serialized =
       'webb://' +
-      'v2:anchor/' +
+      'v2:vanchor/' +
       '1:1/' +
       '1:1/' +
-      // Get rid of target chain ID from secrets portion
+      // Get rid of target chain ID from :from secrets portion
       '0001:ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/' +
       '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
 
@@ -300,10 +300,10 @@ describe('Note class', () => {
   it('should fail to deserialize anchor invalid secrets (missing chain id item)', async () => {
     const serialized =
       'webb://' +
-      'v2:anchor/' +
+      'v2:vanchor/' +
       '1:1/' +
       '1:1/' +
-      // Get rid of target chain ID from secrets portion
+      // Get rid of target chain ID from :from secrets portion
       'ae6c3f92db70334231435b03ca139970e2eeff43860171b9f20a0de4b423741e:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/' +
       '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
 
@@ -318,10 +318,10 @@ describe('Note class', () => {
   it('should fail to deserialize anchor invalid secrets (nullifier item)', async () => {
     const serialized =
       'webb://' +
-      'v2:anchor/' +
+      'v2:vanchor/' +
       '1:1/' +
       '1:1/' +
-      // Get rid of target chain ID from secrets portion
+      // Get rid of target chain ID from :from secrets portion
       '0000000000000001:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/' +
       '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
 
@@ -336,10 +336,10 @@ describe('Note class', () => {
   it('should fail to deserialize anchor invalid secrets (multiple colons)', async () => {
     const serialized =
       'webb://' +
-      'v2:anchor/' +
+      'v2:vanchor/' +
       '1:1/' +
       '1:1/' +
-      // Remove a secret item and leave colon
+      // Remove a secret item and :and leave colon
       '0000000000000001::339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/' +
       '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
 
@@ -354,10 +354,10 @@ describe('Note class', () => {
   it('should fail to deserialize anchor invalid secrets (1 colon)', async () => {
     const serialized =
       'webb://' +
-      'v2:anchor/' +
+      'v2:vanchor/' +
       '1:1/' +
       '1:1/' +
-      // Remove a secret item and also remove colon
+      // Remove a secret item and also :also remove colon
       '0000000000000001:339e6c9b0a571e612dbcf60e2c20fc58b4e037f00e9384f0f2c872feea91802b/' +
       '?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Circom&token=WEBB&denom=18&amount=1';
 

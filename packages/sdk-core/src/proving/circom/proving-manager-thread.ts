@@ -47,6 +47,7 @@ export class CircomProvingManagerThread {
    * Generate the Zero-knowledge proof from the proof input
    **/
   async prove<T extends NoteProtocol> (protocol: T, pmSetupInput: WorkerProvingManagerSetupInput<T>): Promise<WorkerProofInterface<T>> {
+    // @deprecated
     if (protocol === 'anchor') {
       const input = pmSetupInput as AnchorPMSetupInput;
       const { note } = await Note.deserialize(input.note);
