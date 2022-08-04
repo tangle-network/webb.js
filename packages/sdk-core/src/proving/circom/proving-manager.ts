@@ -42,6 +42,19 @@ export class CircomProvingManager {
     input: [T, WorkerProvingManagerSetupInput<T>],
     worker: Worker
   ): Promise<WorkerProofInterface<T>> {
-    throw new Error('proveWithWorker unimplemented for CircomProvingManager');
+    return new Promise<WorkerProofInterface<T>>((resolve, reject) => {
+      try {
+        worker.addEventListener('message', (e) => {
+          const payload = e.data.data as WorkerProofInterface<T>;
+
+          resolve(payload);
+        });
+        worker.postMessage({
+          proof: input
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
   }
 }

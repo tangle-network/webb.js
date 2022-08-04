@@ -15,7 +15,7 @@ import { Keypair } from '../../keypair.js';
 import { MerkleProof, MerkleTree } from '../../merkle-tree.js';
 import { Note } from '../../note.js';
 import { buildFixedWitnessCalculator, buildVariableWitnessCalculator, CircomUtxo, generateFixedWitnessInput, generateVariableWitnessInput, generateWithdrawProofCallData, getVAnchorExtDataHash } from '../../solidity-utils/index.js';
-import { AnchorPMSetupInput } from '../types.js';
+import { AnchorPMSetupInput, PMEvents } from '../types.js';
 import { WorkerProofInterface, WorkerProvingManagerSetupInput, WorkerVAnchorPMSetupInput } from '../worker-utils.js';
 
 export class CircomProvingManagerThread {
@@ -27,6 +27,28 @@ export class CircomProvingManagerThread {
     // if the Manager is running in side worker it registers an event listener
     if (this.ctx === 'worker') {
       console.log('yooooo I\'m trying to execute in a worker');
+      self.addEventListener('message', async (event) => {
+        const message = event.data as Partial<PMEvents>;
+        const key = Object.keys(message)[0] as keyof PMEvents;
+
+        switch (key) {
+          case 'proof':
+            {
+              const [protocol, input] = message.proof!;
+              const proof = await this.prove(protocol, input);
+
+              (self as unknown as Worker).postMessage({
+                data: proof,
+                name: key
+              });
+            }
+
+            break;
+          case 'destroy':
+            (self as unknown as Worker).terminate();
+            break;
+        }
+      });
     }
   }
 
