@@ -40,7 +40,7 @@ function getKeyring() {
   return keyring;
 }
 
-describe('Anchor tests', function () {
+describe.skip('Anchor tests', function () {
   this.timeout(120_000);
 
   before(async function () {
