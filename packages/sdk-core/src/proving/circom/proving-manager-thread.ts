@@ -47,7 +47,10 @@ export class CircomProvingManagerThread {
           case 'setup':
             this.circuitWasm = message.setup.circuitWasm;
             this.treeDepth = message.setup?.treeDepth;
-
+            (self as unknown as Worker).postMessage({
+              data: null,
+              name: 'setup'
+            });
             break;
           case 'destroy':
             (self as unknown as Worker).terminate();
