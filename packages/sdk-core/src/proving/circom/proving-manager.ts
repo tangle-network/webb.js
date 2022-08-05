@@ -38,6 +38,17 @@ export class CircomProvingManager {
     return pm.prove(protocol, input);
   }
 
+  public setupWorker () {
+    if (this.worker) {
+      this.worker.postMessage({
+        setup: {
+          circuitWasm: this.circuitWasm,
+          treeDepth: this.treeDepth
+        }
+      });
+    }
+  }
+
   private proveWithWorker<T extends NoteProtocol> (
     input: [T, WorkerProvingManagerSetupInput<T>],
     worker: Worker

@@ -28,20 +28,25 @@ export class CircomProvingManagerThread {
     if (this.ctx === 'worker') {
       console.log('yooooo I\'m trying to execute in a worker');
       self.addEventListener('message', async (event) => {
-        const message = event.data as Partial<PMEvents>;
-        const key = Object.keys(message)[0] as keyof PMEvents;
+        type IPMEvents = PMEvents & { setup: { circuitWasm: any, treeDepth: number } };
+        const message = event.data as IPMEvents;
+        const key = Object.keys(message)[0] as keyof IPMEvents;
 
         switch (key) {
-          case 'proof':
-            {
-              const [protocol, input] = message.proof!;
-              const proof = await this.prove(protocol, input);
+          case 'proof': {
+            const [protocol, input] = message.proof;
+            const proof = await this.prove(protocol, input);
 
-              (self as unknown as Worker).postMessage({
-                data: proof,
-                name: key
-              });
-            }
+            (self as unknown as Worker).postMessage({
+              data: proof,
+              name: key
+            });
+          }
+
+            break;
+          case 'setup':
+            this.circuitWasm = message.setup.circuitWasm;
+            this.treeDepth = message.setup?.treeDepth;
 
             break;
           case 'destroy':
