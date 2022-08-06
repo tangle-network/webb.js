@@ -15,7 +15,7 @@ import { Keypair } from '../../keypair.js';
 import { MerkleProof, MerkleTree } from '../../merkle-tree.js';
 import { Note } from '../../note.js';
 import { buildFixedWitnessCalculator, buildVariableWitnessCalculator, CircomUtxo, generateFixedWitnessInput, generateVariableWitnessInput, generateWithdrawProofCallData, getVAnchorExtDataHash } from '../../solidity-utils/index.js';
-import { AnchorPMSetupInput } from '../types.js';
+import { AnchorPMSetupInput, PMEvents } from '../types.js';
 import { WorkerProofInterface, WorkerProvingManagerSetupInput, WorkerVAnchorPMSetupInput } from '../worker-utils.js';
 
 export class CircomProvingManagerThread {
@@ -27,6 +27,36 @@ export class CircomProvingManagerThread {
     // if the Manager is running in side worker it registers an event listener
     if (this.ctx === 'worker') {
       console.log('yooooo I\'m trying to execute in a worker');
+      self.addEventListener('message', async (event) => {
+        type IPMEvents = PMEvents & { setup: { circuitWasm: any, treeDepth: number } };
+        const message = event.data as IPMEvents;
+        const key = Object.keys(message)[0] as keyof IPMEvents;
+
+        switch (key) {
+          case 'proof': {
+            const [protocol, input] = message.proof;
+            const proof = await this.prove(protocol, input);
+
+            (self as unknown as Worker).postMessage({
+              data: proof,
+              name: key
+            });
+          }
+
+            break;
+          case 'setup':
+            this.circuitWasm = message.setup.circuitWasm;
+            this.treeDepth = message.setup?.treeDepth;
+            (self as unknown as Worker).postMessage({
+              data: null,
+              name: 'setup'
+            });
+            break;
+          case 'destroy':
+            (self as unknown as Worker).terminate();
+            break;
+        }
+      });
     }
   }
 
