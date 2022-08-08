@@ -26,7 +26,6 @@ export class CircomProvingManagerThread {
   constructor (private circuitWasm: any, private treeDepth: number, private ctx: 'worker' | 'direct-call' = 'direct-call') {
     // if the Manager is running in side worker it registers an event listener
     if (this.ctx === 'worker') {
-      console.log('yooooo I\'m trying to execute in a worker');
       self.addEventListener('message', async (event) => {
         type IPMEvents = PMEvents & { setup: { circuitWasm: any, treeDepth: number } };
         const message = event.data as IPMEvents;
