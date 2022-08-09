@@ -92,7 +92,9 @@ impl JsUtxo {
 	}
 
 	pub fn get_chain_id_bytes(&self) -> Vec<u8> {
-		self.get_chain_id_raw().to_be_bytes().to_vec()
+		match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.chain_id.into_repr().to_bytes_le(),
+		}
 	}
 
 	pub fn get_amount(&self) -> Vec<u8> {
