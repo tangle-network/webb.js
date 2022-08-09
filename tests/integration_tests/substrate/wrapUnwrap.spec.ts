@@ -71,18 +71,39 @@ function getKeyring() {
 async function createPoolShare(
   apiPromise: ApiPromise,
   name: string,
-  singer:KeyringPair,
+  singer: KeyringPair,
   existentialDeposit: number = 0
 ) {
   await polkadotTx(apiPromise, {
-    section: 'assetRegistry',
-    method: 'register'
-  }, [name, {
-      PoolShare:[0]
-  }, existentialDeposit],singer);
-  const nextTreeId = await apiPromise.query.assetRegistry.nextTreeId();
+      section: 'sudo',
+      method: 'sudo'
+    },
+    [apiPromise.tx.assetRegistry.register(name, {
+      PoolShare: [0]
+    }, existentialDeposit)], singer);
+  const nextAssetId = await apiPromise.query.assetRegistry.nextAssetId();
   // @ts-ignore
-  return nextTreeId.toNumber() - 1;
+  const id = nextAssetId.toNumber() - 1;
+  await polkadotTx(apiPromise, {
+      section: 'sudo',
+      method: 'sudo'
+    },
+    [apiPromise.tx.tokenWrapper.setWrappingFee( 1,id)], singer);
+  return id;
+}
+
+async function addAssetToPool(
+  apiPromise: ApiPromise,
+  assetId:string,
+  poolAssetId:string,
+  singer: KeyringPair,
+
+){
+  await polkadotTx(apiPromise, {
+      section: 'sudo',
+      method: 'sudo'
+    },
+    [apiPromise.tx.assetRegistry.addAssetToPool(poolAssetId,Number(assetId))], singer);
 }
 
 describe.only('Wrap/unwrap tests', function() {
@@ -93,14 +114,23 @@ describe.only('Wrap/unwrap tests', function() {
     apiPromise = await preparePolkadotApi();
     const { bob, charlie, alice } = getKeyring();
     console.log(`Transferring 10,000 balance to Alice and Bob`);
-    await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
+    await transferBalance(apiPromise!, charlie, [alice, bob], 1000_000);
   });
 
 
   it('should wrap and unwrap', async function() {
+    const name = 'WEBB^2';
     // Create the PoolShare asset
-    const webSqu  =  await createPoolShare(apiPromise!, 'WEBB^2', getKeyring().alice, 0);
-    console.log(webSqu);
+    const webSqu = await createPoolShare(apiPromise!, name, getKeyring().alice, 0);
+    console.log('WEBB^2 asset created');
+    await addAssetToPool(apiPromise! ,"0" , name, getKeyring().alice);
+    console.log('Added Asset 0 to Pool WEBB^2');
+    const wrap = await polkadotTx(apiPromise!, {
+      section: 'tokenWrapper',
+      method:"wrap"
+    } ,["0" , webSqu , 1000_000_000 , getKeyring().bob.address], getKeyring().bob)
+    console.log(wrap);
+
   });
 
   after(async function() {
