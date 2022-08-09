@@ -421,8 +421,7 @@ describe('VAnchor tests', function() {
     console.log(`Transferring 10,000 balance to Alice and Bob`);
     await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
     const chainIdentifier = apiPromise.consts.linkableTreeBn254.chainIdentifier.toString();
-    console.log(chainIdentifier);
-    console.log(`typedChaindId ${calculateTypedChainId(ChainType.Substrate, Number(chainIdentifier))}`);
+    chainId = String(calculateTypedChainId(ChainType.Substrate, Number(chainIdentifier)));
   });
 
   it('VAnchor deposit', async function() {
@@ -601,7 +600,7 @@ describe('VAnchor tests', function() {
       method: 'transact'
     }, [treeId, vanchorProofData, extData], bob);
   });
-  it('VAnchor deposit and withdraw with only one note', async function() {
+  it.only('VAnchor deposit and withdraw with only one note', async function() {
     const { bob, alice } = getKeyring();
     const fee = 0;
     const leavesMap: any = {};
