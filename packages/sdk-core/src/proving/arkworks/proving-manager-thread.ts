@@ -100,6 +100,7 @@ export class ArkworksProvingManagerThread {
 
       return mixerProof as any;
     } else if (protocol === 'anchor') {
+      // @deprecated
       const input = pmSetupInput as AnchorPMSetupInput;
       const { note } = await Note.deserialize(input.note);
 
@@ -184,6 +185,7 @@ export class ArkworksProvingManagerThread {
       pm.chain_id(input.chainId);
       pm.public_amount(input.publicAmount);
       pm.setOutputUtxos(outputUtxos[0].inner, outputUtxos[1].inner);
+
       const extData = new wasm.ExtData(
         input.recipient,
         input.relayer,
@@ -196,7 +198,6 @@ export class ArkworksProvingManagerThread {
       const dataHashhex = u8aToHex(dataHash).replace('0x', '');
 
       pm.setExtDatahash(dataHashhex);
-
       const leavesMap = new wasm.LeavesMapInput();
 
       for (const key of Object.keys(input.leavesMap)) {

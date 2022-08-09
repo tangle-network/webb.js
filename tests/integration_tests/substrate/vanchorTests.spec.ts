@@ -4,6 +4,8 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { currencyToUnitI128, KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
 import {
   ArkworksProvingManager,
+  calculateTypedChainId,
+  ChainType,
   Keypair,
   Note,
   ProvingManagerSetupInput,
@@ -107,7 +109,7 @@ async function createVAnchor(apiPromise: ApiPromise, singer: KeyringPair): Promi
   const nextTreeId = await apiPromise?.query.merkleTreeBn254.nextTreeId();
   return nextTreeId.toNumber() - 1;
 };
-const chainId = '2199023256632';
+let chainId = '2199023256632';
 
 async function basicDeposit(
   apiPromise: ApiPromise,
@@ -418,9 +420,12 @@ describe('VAnchor tests', function() {
     const { bob, charlie, alice } = getKeyring();
     console.log(`Transferring 10,000 balance to Alice and Bob`);
     await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
+    const chainIdentifier = apiPromise.consts.linkableTreeBn254.chainIdentifier.toString();
+    chainId = String(calculateTypedChainId(ChainType.Substrate, Number(chainIdentifier)));
   });
 
   it('VAnchor deposit', async function() {
+    console.log('keyring');
     const { bob, alice } = getKeyring();
     const secret = randomAsU8a();
 
@@ -434,7 +439,7 @@ describe('VAnchor tests', function() {
     // Creating two empty vanchor notes
     const note1 = await generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0);
     const note2 =await note1.getDefaultUtxoNote();
-
+    console.log('notes ready')
     const publicAmount = currencyToUnitI128(10);
     const notes = [note1, note2];
     // Output UTXOs configs
@@ -483,8 +488,7 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString()
     };
-
-    const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
+  const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
       relayer: address,
       recipient: address,
@@ -498,8 +502,8 @@ describe('VAnchor tests', function() {
       proof: `0x${data.proof}`,
       publicAmount: data.publicAmount,
       roots: rootsSet,
-      inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-      outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeaf())),
+      inputNullifiers: data.inputUtxos.map((input) => `0x${input.nullifier}`),
+      outputCommitments: data.outputNotes.map((note) => u8aToHex(note.getLeaf())),
       extDataHash: data.extDataHash
     };
     try {
