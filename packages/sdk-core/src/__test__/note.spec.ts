@@ -6,7 +6,7 @@ import { expect } from 'chai';
 
 import { Note, NoteGenInput } from '../note.js';
 
-describe.only('Note class', () => {
+describe('Note class', () => {
   it('should test constructor from `NoteGenInput`', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
@@ -77,7 +77,7 @@ describe.only('Note class', () => {
     expect(deserializedNote.note.exponentiation).to.deep.equal('5');
   });
 
-  it.only('should test vanchor secret destination chain', async () => {
+  it('should test vanchor secret destination chain', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
       backend: 'Arkworks',
@@ -96,9 +96,12 @@ describe.only('Note class', () => {
     };
 
     const note = await Note.generateNote(noteInput);
-    const targetChainFromSecrets = note.note.secrets.split(':')[0];
+    const targetChainFromSecretsBytes = note.note.secrets.split(':')[0];
+    // Slice off the first extra bytes
+    // readBigUInt64BE :Must satisfy: 0 <= offset <= buf.length - 8
+    const targetChainFromSecrets = targetChainFromSecretsBytes.slice(targetChainFromSecretsBytes.length - 16);
     const targetChainBuffer = Buffer.from(targetChainFromSecrets, 'hex');
-    const targetChain = targetChainBuffer.readBigUInt64LE();
+    const targetChain = targetChainBuffer.readBigUInt64BE();
 
     expect(targetChain.toString()).to.deep.equal('1');
   });

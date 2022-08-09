@@ -215,7 +215,7 @@ impl JsNote {
 						let amount = u128::from_le_bytes(amount_slice);
 
 						let mut chain_id_slice = [0u8; 8];
-						chain_id_slice.copy_from_slice(chain_id[8..].to_vec().as_slice());
+						chain_id_slice.copy_from_slice(chain_id[chain_id.len() - 8..].to_vec().as_slice());
 						let chain_id = u64::from_be_bytes(chain_id_slice);
 
 						let curve = self.curve.unwrap_or(Curve::Bn254);
