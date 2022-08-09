@@ -77,7 +77,7 @@ describe('Note class', () => {
     expect(deserializedNote.note.exponentiation).to.deep.equal('5');
   });
 
-  it('should test vanchor secret destination chain', async () => {
+  it.only('should test vanchor secret destination chain', async () => {
     const noteInput: NoteGenInput = {
       amount: '1',
       backend: 'Arkworks',
@@ -96,10 +96,7 @@ describe('Note class', () => {
     };
 
     const note = await Note.generateNote(noteInput);
-    const targetChainFromSecretsBytes = note.note.secrets.split(':')[0];
-    // Slice off the first extra bytes
-    // readBigUInt64BE :Must satisfy: 0 <= offset <= buf.length - 8
-    const targetChainFromSecrets = targetChainFromSecretsBytes.slice(targetChainFromSecretsBytes.length - 16);
+    const targetChainFromSecrets = note.note.secrets.split(':')[0];
     const targetChainBuffer = Buffer.from(targetChainFromSecrets, 'hex');
     const targetChain = targetChainBuffer.readBigUInt64BE();
 
