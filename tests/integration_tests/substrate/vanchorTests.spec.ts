@@ -4,6 +4,8 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { currencyToUnitI128, KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
 import {
   ArkworksProvingManager,
+  calculateTypedChainId,
+  ChainType,
   Keypair,
   Note,
   ProvingManagerSetupInput,
@@ -107,7 +109,7 @@ async function createVAnchor(apiPromise: ApiPromise, singer: KeyringPair): Promi
   const nextTreeId = await apiPromise?.query.merkleTreeBn254.nextTreeId();
   return nextTreeId.toNumber() - 1;
 };
-const chainId = '2199023256632';
+let chainId = '2199023256632';
 
 async function basicDeposit(
   apiPromise: ApiPromise,
@@ -409,7 +411,7 @@ async function getleafIndex(
   return shiftedIndex;
 }
 
-describe('VAnchor tests', function() {
+describe.only('VAnchor tests', function() {
   this.timeout(120_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
@@ -418,9 +420,13 @@ describe('VAnchor tests', function() {
     const { bob, charlie, alice } = getKeyring();
     console.log(`Transferring 10,000 balance to Alice and Bob`);
     await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
+    const chainIdentifier = apiPromise.consts.linkableTreeBn254.chainIdentifier.toString();
+    console.log(chainIdentifier);
+    console.log(`typedChaindId ${calculateTypedChainId(ChainType.Substrate, Number(chainIdentifier))}`);
   });
 
-  it('VAnchor deposit', async function() {
+  it.only('VAnchor deposit', async function() {
+    console.log('keyring');
     const { bob, alice } = getKeyring();
     const secret = randomAsU8a();
 
@@ -434,7 +440,7 @@ describe('VAnchor tests', function() {
     // Creating two empty vanchor notes
     const note1 = await generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0);
     const note2 =await note1.getDefaultUtxoNote();
-
+    console.log('notes ready')
     const publicAmount = currencyToUnitI128(10);
     const notes = [note1, note2];
     // Output UTXOs configs
@@ -452,6 +458,7 @@ describe('VAnchor tests', function() {
       chainId,
       keypair: new Keypair()
     });
+    console.log('start the proving manager');
     // Configure a new proving manager with direct call
     const provingManager = new ArkworksProvingManager(null);
     const leavesMap: any = {};
@@ -461,7 +468,9 @@ describe('VAnchor tests', function() {
     const fee = 0;
     // Empty leaves
     leavesMap[outputChainId.toString()] = [];
+    console.log('query the merkle tree');
     const tree = await apiPromise!.query.merkleTreeBn254.trees(treeId);
+    console.log(`queried the merkle tree`);
     const root = tree.unwrap().root.toHex();
     const rootsSet = [hexToU8a(root), hexToU8a(root)];
     const decodedAddress = decodeAddress(address);
@@ -483,8 +492,18 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString()
     };
+  console.log('start the proving manager' ,setup);
+  let data :any;
+  try{
+     data = await provingManager.prove('vanchor', setup) as VAnchorProof;
 
-    const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
+  }catch(e:any){
+    console.log(e.message);
+    console.log(e.code);
+    console.log(e.data);
+    console.log(e.error_message);
+  }
+    console.log(`proof is done`);
     const extData = {
       relayer: address,
       recipient: address,
@@ -498,11 +517,12 @@ describe('VAnchor tests', function() {
       proof: `0x${data.proof}`,
       publicAmount: data.publicAmount,
       roots: rootsSet,
-      inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-      outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeaf())),
+      inputNullifiers: data.inputUtxos.map((input:any) => `0x${input.nullifier}`),
+      outputCommitments: data.outputNotes.map((note:any) => u8aToHex(note.getLeaf())),
       extDataHash: data.extDataHash
     };
     try {
+      console.log('submitting the tx');
       await polkadotTx(apiPromise!, {
         section: 'vAnchorBn254',
         method: 'transact'

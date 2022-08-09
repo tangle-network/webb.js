@@ -63,6 +63,8 @@ export class ArkworksProvingManagerThread {
   private async generateProof (proofInput: JsProofInput): Promise<JsProofOutput> {
     const wasm = await this.wasmBlob;
 
+    console.log('generating the proof');
+
     return wasm.generate_proof_js(proofInput);
   }
 
@@ -178,13 +180,16 @@ export class ArkworksProvingManagerThread {
       const wasm = await this.wasmBlob;
       const outputUtxos = await Promise.all(input.output.map((utxoString) => Utxo.deserialize(utxoString)));
 
+      console.log('notes set');
       pm.setNotes(jsNotes);
       pm.setIndices(indices.map((i) => i.toString()) as any);
       pm.setPk(u8aToHex(input.provingKey).replace('0x', ''));
       pm.setRoots(input.roots);
+      console.log(`setChainedId ${input.chainId}`);
       pm.chain_id(input.chainId);
       pm.public_amount(input.publicAmount);
       pm.setOutputUtxos(outputUtxos[0].inner, outputUtxos[1].inner);
+
       const extData = new wasm.ExtData(
         input.recipient,
         input.relayer,
@@ -197,7 +202,7 @@ export class ArkworksProvingManagerThread {
       const dataHashhex = u8aToHex(dataHash).replace('0x', '');
 
       pm.setExtDatahash(dataHashhex);
-
+      console.log('setting leaves');
       const leavesMap = new wasm.LeavesMapInput();
 
       for (const key of Object.keys(input.leavesMap)) {
@@ -207,7 +212,11 @@ export class ArkworksProvingManagerThread {
       pm.setLeavesMap(leavesMap);
 
       const proofInput = pm.build_js();
+
+      console.log('built the proof input');
       const proofOutput = await this.generateProof(proofInput);
+
+      console.log('proof done');
       const proof = proofOutput.vanchorProof;
       const anchorProof: WorkerProofInterface<'vanchor'> = {
         extDataHash: dataHash,
