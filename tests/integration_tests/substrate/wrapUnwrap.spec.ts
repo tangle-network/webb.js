@@ -6,6 +6,7 @@ import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
 import { polkadotTx } from '@webb-tools/test-utils/index.js';
+import { expect } from 'chai';
 
 let apiPromise: ApiPromise | null = null;
 let keyring: {
@@ -125,11 +126,33 @@ describe.only('Wrap/unwrap tests', function() {
     console.log('WEBB^2 asset created');
     await addAssetToPool(apiPromise! ,"0" , name, getKeyring().alice);
     console.log('Added Asset 0 to Pool WEBB^2');
-    const wrap = await polkadotTx(apiPromise!, {
+
+    const balanceBeforeWrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,webSqu);
+    const wrappedTokenBalanceBeforeWrapping  = balanceBeforeWrapping.toJSON().free as number;
+    expect(wrappedTokenBalanceBeforeWrapping).to.equal(0);
+
+
+    await polkadotTx(apiPromise!, {
       section: 'tokenWrapper',
       method:"wrap"
     } ,["0" , webSqu , 1000_000_000 , getKeyring().bob.address], getKeyring().bob)
-    console.log(wrap);
+
+    const balanceAfterWrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,webSqu);
+    const wrappedTokenBalanceAfterWrapping  = balanceAfterWrapping.toJSON().free as number;
+    expect(wrappedTokenBalanceAfterWrapping).to.equal(1000_000_000);
+
+    await polkadotTx(apiPromise!, {
+      section: 'tokenWrapper',
+      method:"unwrap"
+    } ,[webSqu  ,"0" , 1000_000_000 /2 , getKeyring().bob.address], getKeyring().bob)
+
+
+    const balanceAfterUnwrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,webSqu);
+    const wrappedTokenBalanceAfterUnwrapping  = balanceAfterUnwrapping.toJSON().free as number;
+    expect(wrappedTokenBalanceAfterUnwrapping).to.equal(1000_000_000/2);
+
+
+
 
   });
 
