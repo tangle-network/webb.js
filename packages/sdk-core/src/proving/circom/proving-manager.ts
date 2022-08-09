@@ -14,7 +14,8 @@ export class CircomProvingManager {
     private circuitWasm: Uint8Array,
     private treeDepth: number,
     private readonly worker: Worker | null | undefined // Optional WebWorker
-  ) {}
+  ) {
+  }
 
   /**
    * @param  input - input to prove
@@ -38,10 +39,53 @@ export class CircomProvingManager {
     return pm.prove(protocol, input);
   }
 
-  private proveWithWorker<T extends NoteProtocol> (
+  public setupWorker () {
+    return new Promise((resolve, reject) => {
+      const worker = this.worker;
+
+      if (worker) {
+        worker.postMessage({
+          setup: {
+            circuitWasm: this.circuitWasm,
+            treeDepth: this.treeDepth
+          }
+        });
+
+        const handler = (event: MessageEvent<any>) => {
+          const eventName = event.data.name;
+
+          if (eventName === 'setup') {
+            worker.removeEventListener('message', handler);
+            resolve(undefined);
+          }
+        };
+
+        worker.addEventListener('message', handler);
+      } else {
+        reject(new Error('No worker attached to the proving manager'));
+      }
+    });
+  }
+
+  private async proveWithWorker<T extends NoteProtocol> (
     input: [T, WorkerProvingManagerSetupInput<T>],
     worker: Worker
   ): Promise<WorkerProofInterface<T>> {
-    throw new Error('proveWithWorker unimplemented for CircomProvingManager');
+    await this.setupWorker();
+
+    return new Promise<WorkerProofInterface<T>>((resolve, reject) => {
+      try {
+        worker.addEventListener('message', (e) => {
+          const payload = e.data.data as WorkerProofInterface<T>;
+
+          resolve(payload);
+        });
+        worker.postMessage({
+          proof: input
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
   }
 }
