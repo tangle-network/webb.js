@@ -52,20 +52,6 @@ jobs:
           yarn install --immutable | grep -v 'YN0013'
           yarn ${{ matrix.step }}
 
-  check-tests:
-    name: for .only
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 16.x
-      - name: install dependencies
-        run: yarn install
-      - name: Run stop-only check cmd
-        run: |
-          yarn stop-only --folder tests --skip node_modules
-          
   dummy:
     runs-on: ubuntu-latest
     steps:
