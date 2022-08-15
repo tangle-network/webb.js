@@ -79,6 +79,7 @@
     "prettier": "^2.2.1",
     "snarkjs": "0.4.22",
     "source-map-support": "^0.5.19",
+    "stop-only": "^3.1.2",
     "ts-jest": "^26.5.2",
     "ts-node": "10.8.0",
     "tsconfig-paths": "^3.14.1",
