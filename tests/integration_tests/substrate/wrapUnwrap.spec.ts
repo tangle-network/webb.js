@@ -118,7 +118,6 @@ describe.only('Wrap/unwrap tests', function() {
     await transferBalance(apiPromise!, charlie, [alice, bob], 1000_000);
   });
 
-
   it('should wrap and unwrap', async function() {
     const name = 'WEBB^2';
     // Create the PoolShare asset
@@ -135,25 +134,21 @@ describe.only('Wrap/unwrap tests', function() {
     await polkadotTx(apiPromise!, {
       section: 'tokenWrapper',
       method:"wrap"
-    } ,["0" , webSqu , 1000_000_000 , getKeyring().bob.address], getKeyring().bob)
+    } ,["0" , webSqu , 1_000_000_000 , getKeyring().bob.address], getKeyring().bob)
 
     const balanceAfterWrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,webSqu);
     const wrappedTokenBalanceAfterWrapping  = balanceAfterWrapping.toJSON().free as number;
-    expect(wrappedTokenBalanceAfterWrapping).to.equal(1000_000_000);
+    expect(wrappedTokenBalanceAfterWrapping).to.equal(1_000_000_000);
 
     await polkadotTx(apiPromise!, {
       section: 'tokenWrapper',
       method:"unwrap"
-    } ,[webSqu  ,"0" , 1000_000_000 /2 , getKeyring().bob.address], getKeyring().bob)
+    } ,[webSqu  ,"0" , 1_000_000_000 /2 , getKeyring().bob.address], getKeyring().bob)
 
 
     const balanceAfterUnwrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,webSqu);
     const wrappedTokenBalanceAfterUnwrapping  = balanceAfterUnwrapping.toJSON().free as number;
-    expect(wrappedTokenBalanceAfterUnwrapping).to.equal(1000_000_000/2);
-
-
-
-
+    expect(wrappedTokenBalanceAfterUnwrapping).to.equal(1_000_000_000/2);
   });
 
   after(async function() {
