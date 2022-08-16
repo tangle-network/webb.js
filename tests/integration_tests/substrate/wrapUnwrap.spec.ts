@@ -69,7 +69,7 @@ async function addAssetToPool(
     [apiPromise.tx.assetRegistry.addAssetToPool(poolAssetId,Number(assetId))], singer);
 }
 
-describe('Wrap/unwrap tests', function() {
+describe.only('Wrap/unwrap tests', function() {
   this.timeout(120_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
@@ -84,27 +84,32 @@ describe('Wrap/unwrap tests', function() {
     const name = 'WEBB^2';
     // Create the PoolShare asset
     const webSqu = await createPoolShare(apiPromise!, name, getKeyring().alice, 0);
-    console.log('WEBB^2 asset created');
+    console.log(`${name} asset created`);
     await addAssetToPool(apiPromise! ,"0" , name, getKeyring().alice);
-    console.log('Added Asset 0 to Pool WEBB^2');
+    console.log(`Added Asset 0 to Pool ${name}`);
 
     const balanceBeforeWrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,webSqu);
     const wrappedTokenBalanceBeforeWrapping  = balanceBeforeWrapping.toJSON().free as number;
     expect(wrappedTokenBalanceBeforeWrapping).to.equal(0);
 
+    console.log(`Wrapping 1_000_000_000 ${name} tokens `);
     await polkadotTx(apiPromise!, {
       section: 'tokenWrapper',
       method:"wrap"
     } ,["0" , webSqu , 1_000_000_000 , getKeyring().bob.address], getKeyring().bob)
+    console.log(`Wrapped 1_000_000_000 ${name} tokens `);
 
     const balanceAfterWrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,webSqu);
     const wrappedTokenBalanceAfterWrapping  = balanceAfterWrapping.toJSON().free as number;
     expect(wrappedTokenBalanceAfterWrapping).to.equal(1_000_000_000);
 
+
+    console.log(`Unwrapping ${1_000_000_000 /2} ${name} tokens `);
     await polkadotTx(apiPromise!, {
       section: 'tokenWrapper',
       method:"unwrap"
     } ,[webSqu  ,"0" , 1_000_000_000 /2 , getKeyring().bob.address], getKeyring().bob)
+    console.log(`Unwrapped ${1_000_000_000 /2} ${name} tokens `);
 
     const balanceAfterUnwrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,webSqu);
     const wrappedTokenBalanceAfterUnwrapping  = balanceAfterUnwrapping.toJSON().free as number;
