@@ -1,6 +1,3 @@
-import path from 'path';
-import fs from 'fs';
-import { hexToU8a } from '@polkadot/util';
 import { Keyring } from '@polkadot/keyring';
 import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -17,41 +14,6 @@ let keyring: {
 let nodes: KillTask | undefined;
 
 const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
-
-// @ts-ignore
-function getKeys() {
-  const pkPath = path.join(
-    // tests path
-    process.cwd(),
-    'tests',
-    'protocol-substrate-fixtures',
-    'vanchor',
-    'bn254',
-    'x5',
-    '2-2-2',
-    'proving_key_uncompressed.bin'
-  );
-
-  const vkPath = path.join(
-    // tests path
-    process.cwd(),
-    'tests',
-    'protocol-substrate-fixtures',
-    'vanchor',
-    'bn254',
-    'x5',
-    '2-2-2',
-    'verifying_key_uncompressed.bin'
-  );
-  const pk_hex = fs.readFileSync(pkPath).toString('hex');
-  const pk = hexToU8a(pk_hex);
-  const vk_hex = fs.readFileSync(vkPath).toString('hex');
-  const vk = hexToU8a(vk_hex);
-  return {
-    pk,
-    vk
-  };
-}
 
 function getKeyring() {
   if (keyring) {
@@ -107,8 +69,8 @@ async function addAssetToPool(
     [apiPromise.tx.assetRegistry.addAssetToPool(poolAssetId,Number(assetId))], singer);
 }
 
-describe.only('Wrap/unwrap tests', function() {
-  this.timeout(120_000);
+describe('Wrap/unwrap substrate tests', function() {
+  this.timeout(220_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
     nodes = startWebbNode();
@@ -118,35 +80,41 @@ describe.only('Wrap/unwrap tests', function() {
     await transferBalance(apiPromise!, charlie, [alice, bob], 1000_000);
   });
 
-  it('should wrap and unwrap', async function() {
+  it('should wrap and unwrap for substrate', async function() {
     const name = 'WEBB^2';
     // Create the PoolShare asset
     const webSqu = await createPoolShare(apiPromise!, name, getKeyring().alice, 0);
-    console.log('WEBB^2 asset created');
+    console.log(`${name} asset created`);
     await addAssetToPool(apiPromise! ,"0" , name, getKeyring().alice);
-    console.log('Added Asset 0 to Pool WEBB^2');
+    console.log(`Added Asset 0 to Pool ${name}`);
 
     const balanceBeforeWrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,webSqu);
     const wrappedTokenBalanceBeforeWrapping  = balanceBeforeWrapping.toJSON().free as number;
     expect(wrappedTokenBalanceBeforeWrapping).to.equal(0);
 
+    console.log(`Wrapping 1_000_000_000 ${name} tokens `);
     await polkadotTx(apiPromise!, {
       section: 'tokenWrapper',
       method:"wrap"
     } ,["0" , webSqu , 1_000_000_000 , getKeyring().bob.address], getKeyring().bob)
+    console.log(`Wrapped 1_000_000_000 ${name} tokens `);
 
     const balanceAfterWrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,webSqu);
     const wrappedTokenBalanceAfterWrapping  = balanceAfterWrapping.toJSON().free as number;
     expect(wrappedTokenBalanceAfterWrapping).to.equal(1_000_000_000);
 
+
+    console.log(`Unwrapping ${1_000_000_000 /2} ${name} tokens `);
     await polkadotTx(apiPromise!, {
       section: 'tokenWrapper',
       method:"unwrap"
     } ,[webSqu  ,"0" , 1_000_000_000 /2 , getKeyring().bob.address], getKeyring().bob)
+    console.log(`Unwrapped ${1_000_000_000 /2} ${name} tokens `);
 
     const balanceAfterUnwrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,webSqu);
     const wrappedTokenBalanceAfterUnwrapping  = balanceAfterUnwrapping.toJSON().free as number;
     expect(wrappedTokenBalanceAfterUnwrapping).to.equal(1_000_000_000/2);
+    console.log('DONE TESTING');
   });
 
   after(async function() {
