@@ -1,6 +1,3 @@
-import path from 'path';
-import fs from 'fs';
-import { hexToU8a } from '@polkadot/util';
 import { Keyring } from '@polkadot/keyring';
 import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -17,41 +14,6 @@ let keyring: {
 let nodes: KillTask | undefined;
 
 const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
-
-// @ts-ignore
-function getKeys() {
-  const pkPath = path.join(
-    // tests path
-    process.cwd(),
-    'tests',
-    'protocol-substrate-fixtures',
-    'vanchor',
-    'bn254',
-    'x5',
-    '2-2-2',
-    'proving_key_uncompressed.bin'
-  );
-
-  const vkPath = path.join(
-    // tests path
-    process.cwd(),
-    'tests',
-    'protocol-substrate-fixtures',
-    'vanchor',
-    'bn254',
-    'x5',
-    '2-2-2',
-    'verifying_key_uncompressed.bin'
-  );
-  const pk_hex = fs.readFileSync(pkPath).toString('hex');
-  const pk = hexToU8a(pk_hex);
-  const vk_hex = fs.readFileSync(vkPath).toString('hex');
-  const vk = hexToU8a(vk_hex);
-  return {
-    pk,
-    vk
-  };
-}
 
 function getKeyring() {
   if (keyring) {
@@ -147,6 +109,7 @@ describe('Wrap/unwrap tests', function() {
     const balanceAfterUnwrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,webSqu);
     const wrappedTokenBalanceAfterUnwrapping  = balanceAfterUnwrapping.toJSON().free as number;
     expect(wrappedTokenBalanceAfterUnwrapping).to.equal(1_000_000_000/2);
+    console.log('DONE TESTING');
   });
 
   after(async function() {
