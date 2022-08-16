@@ -69,7 +69,7 @@ async function addAssetToPool(
     [apiPromise.tx.assetRegistry.addAssetToPool(poolAssetId,Number(assetId))], singer);
 }
 
-describe.only('Wrap/unwrap tests', function() {
+describe('Wrap/unwrap substrate tests', function() {
   this.timeout(120_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
@@ -80,7 +80,7 @@ describe.only('Wrap/unwrap tests', function() {
     await transferBalance(apiPromise!, charlie, [alice, bob], 1000_000);
   });
 
-  it('should wrap and unwrap', async function() {
+  it('should wrap and unwrap for substrate', async function() {
     const name = 'WEBB^2';
     // Create the PoolShare asset
     const webSqu = await createPoolShare(apiPromise!, name, getKeyring().alice, 0);
