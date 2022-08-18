@@ -38,7 +38,8 @@
     "example:mixer": "NODE_OPTIONS=\"--loader ./loader.js\" node ./examples/node/substrate/mixer.ts",
     "script": "NODE_OPTIONS=\"--loader ./loader.js\" node",
     "format": "prettier --write \"{packages,examples,tests}/**/*.{ts,js,jsx,tsx}\" && cargo fmt --manifest-path packages/wasm-utils/Cargo.toml",
-    "doc": "npx typedoc --name \"Webb Tools API\" --includeVersion --options ./typedoc.json"
+    "doc": "npx typedoc --name \"Webb Tools API\" --includeVersion --options ./typedoc.json",
+    "deploy-ps-vanchor": "NODE_OPTIONS='--loader ./loader.js' node --experimental-specifier-resolution=node ./scripts/init-vanchor-pool-share.ts"
   },
   "devDependencies": {
     "@babel/cli": "7.18.9",
