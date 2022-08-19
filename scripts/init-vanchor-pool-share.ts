@@ -86,7 +86,6 @@ async function main() {
   await transferBalance(apiPromise!, charlie, [alice, bob], 1000_000);
   try {
     const name = 'WEBB^2';
-
     // Create the PoolShare asset
     const webSqu = await createPoolShare(apiPromise!, name, getKeyring().alice, 0);
     console.log('WEBB^2 asset created');
@@ -96,7 +95,6 @@ async function main() {
     const balanceBeforeWrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address, webSqu);
     const wrappedTokenBalanceBeforeWrapping = balanceBeforeWrapping.toJSON().free as number;
     expect(wrappedTokenBalanceBeforeWrapping).to.equal(0);
-
 
     await polkadotTx(apiPromise!, {
       section: 'tokenWrapper',
@@ -111,7 +109,6 @@ async function main() {
       section: 'tokenWrapper',
       method: 'unwrap'
     }, [webSqu, '0', 1000_000_000 / 2, getKeyring().bob.address], getKeyring().bob);
-
 
     const balanceAfterUnwrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address, webSqu);
     const wrappedTokenBalanceAfterUnwrapping = balanceAfterUnwrapping.toJSON().free as number;
