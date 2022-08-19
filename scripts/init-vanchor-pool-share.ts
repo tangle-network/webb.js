@@ -57,7 +57,8 @@ async function createPoolShare(
       section: 'sudo',
       method: 'sudo'
     },
-    [apiPromise.tx.tokenWrapper.setWrappingFee( 1,id)], singer);
+    // @ts-ignore
+    [apiPromise.tx.tokenWrapper.setWrappingFee( 1,id , 1)], singer);
   return id;
 }
 
