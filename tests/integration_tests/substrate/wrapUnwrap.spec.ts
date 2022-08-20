@@ -49,8 +49,8 @@ async function createPoolShare(
   const nextAssetId = await apiPromise.query.assetRegistry.nextAssetId();
 
   const id = nextAssetId.toNumber() - 1;
-  const tokenWraperNonce = await apiPromise.query.tokenWrapper.proposalNonce<Option<U32>>();
-  const nonce  = tokenWraperNonce.unwrapOr(new BN(0)).toNumber() + 1;
+  const tokenWrapperNonce = await apiPromise.query.tokenWrapper.proposalNonce<Option<U32>>(name);
+  const nonce  = tokenWrapperNonce.unwrapOr(new BN(0)).toNumber() + 1;
   console.log(nonce);
   await polkadotTx(apiPromise, {
       section: 'sudo',

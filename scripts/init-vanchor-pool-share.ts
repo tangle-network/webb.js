@@ -5,7 +5,6 @@ import { Keyring } from '@polkadot/keyring';
 import { preparePolkadotApi, startWebbNode, transferBalance } from '../tests/utils/index.js';
 import { expect } from 'chai';
 import { Option, U32 } from '@polkadot/types-codec';
-import "@webb-tools/types"
 import { BN } from '@polkadot/util/bn/bn';
 let keyring: {
   bob: KeyringPair;
@@ -56,7 +55,7 @@ async function createPoolShare(
     }, existentialDeposit)], singer);
   const nextAssetId = await apiPromise.query.assetRegistry.nextAssetId<U32>();
   const id = nextAssetId.toNumber() - 1;
-  const tokenWrapperNonce = await apiPromise.query.tokenWrapper.proposalNonce<Option<U32>>();
+  const tokenWrapperNonce = await apiPromise.query.tokenWrapper.proposalNonce<Option<U32>>(name);
   const nonce = tokenWrapperNonce.unwrapOr(new BN(0)).toNumber() + 1  ;
   console.log(`Create pool share ${name} with nonce ${nonce}`);
   await polkadotTx(apiPromise, {
