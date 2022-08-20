@@ -7,16 +7,17 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import * as fs from 'fs';
-import * as pkg from 'websocket';
+const pkg = require('websocket');
 
-const { w3cwebsocket: WebSocket } = pkg;
+const fs = require('fs');
+
+const { w3cwebsocket: WS } = pkg;
 
 const main = (): void => {
   const endpoint = 'ws://localhost:9944';
 
   console.log('Connecting to ', endpoint);
-  const ws = new WebSocket(endpoint);
+  const ws = new WS(endpoint);
 
   ws.onopen = (): void => {
     ws.send('{"id":"1","jsonrpc":"2.0","method":"state_getMetadata","params":[]}');
