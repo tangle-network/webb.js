@@ -4,7 +4,9 @@ import { polkadotTx } from '@webb-tools/test-utils/src/index.js';
 import { Keyring } from '@polkadot/keyring';
 import { preparePolkadotApi, startWebbNode, transferBalance } from '../tests/utils/index.js';
 import { expect } from 'chai';
-
+import { Option, U32 } from '@polkadot/types-codec';
+import "@webb-tools/types"
+import { BN } from '@polkadot/util/bn/bn';
 let keyring: {
   bob: KeyringPair;
   alice: KeyringPair;
@@ -52,16 +54,16 @@ async function createPoolShare(
     [apiPromise.tx.assetRegistry.register(name, {
       PoolShare: [0]
     }, existentialDeposit)], singer);
-  const nextAssetId = await apiPromise.query.assetRegistry.nextAssetId();
+  const nextAssetId = await apiPromise.query.assetRegistry.nextAssetId<U32>();
   const id = nextAssetId.toNumber() - 1;
+  const tokenWrapperNonce = await apiPromise.query.tokenWrapper.proposalNonce<Option<U32>>();
+  const nonce = tokenWrapperNonce.unwrapOr(new BN(0)).toNumber() + 1  ;
+  console.log(`Create pool share ${name} with nonce ${nonce}`);
   await polkadotTx(apiPromise, {
       section: 'sudo',
       method: 'sudo'
     },
-
-    // TODO remove this after types update to
-    // @ts-ignore
-    [apiPromise.tx.tokenWrapper.setWrappingFee(1, id, 1)], singer);
+    [apiPromise.tx.tokenWrapper.setWrappingFee(1, id, nonce)], singer);
   return id;
 }
 
