@@ -8,7 +8,7 @@ import { ProposalHeader } from '../proposals/ProposalHeader';
 import { ChainIdType } from '../proposals/ResourceId';
 
 describe('test various conversion functions', () => {
-  it.only('should encode and decode primitive proposal types correctly', () => {
+  it('should encode and decode primitive proposal types correctly', () => {
     const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
     const chainId = 0xcafe;
     const chainIdType = ChainIdType.EVM;
