@@ -19,4 +19,4 @@ export const BE = false;
 
 export * from './ProposalHeader.js';
 export * from './ResourceId.js';
-export * from './proposals.js';
+export * from './ProposalKinds.js';

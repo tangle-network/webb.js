@@ -4,7 +4,7 @@
 import { assert } from 'chai';
 
 import { ProposalHeader } from '../proposals/ProposalHeader.js';
-import { AnchorUpdateProposal } from '../proposals/proposals.js';
+import { AnchorUpdateProposal } from '../proposals/ProposalKinds.js';
 import { ChainIdType, ResourceId } from '../proposals/ResourceId.js';
 
 describe('test various conversion functions', () => {
