@@ -19,4 +19,4 @@ export const BE = false;
 
 export * from './ProposalHeader';
 export * from './ResourceId';
-export * from './Proposals';
+export * from './proposals';

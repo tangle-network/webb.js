@@ -3,7 +3,7 @@
 
 import { assert } from 'chai';
 
-import { AnchorUpdateProposal, ResourceId } from '../Proposals';
+import { AnchorUpdateProposal, ResourceId } from '../proposals';
 import { ProposalHeader } from '../proposals/ProposalHeader';
 import { ChainIdType } from '../proposals/ResourceId';
 
