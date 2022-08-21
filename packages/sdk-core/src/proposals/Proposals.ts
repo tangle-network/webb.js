@@ -3,17 +3,9 @@ import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { ProposalHeader } from './ProposalHeader.js';
 import { ResourceId } from './ResourceId.js';
 
-/**
- * Anchor Update Proposal is the next 42 bytes (after the header) and it contains the following information:
- * - src chain type (2 bytes) just before the src chain id.
- * - src chain id (4 bytes) encoded as the 4 bytes.
- * - last leaf index (4 bytes).
- * - merkle root (32 bytes).
- */
 export interface IAnchorUpdateProposal {
   /**
    * The Anchor Proposal Header.
-   * This is the first 40 bytes of the proposal.
    */
   readonly header: ProposalHeader;
   /**
@@ -63,7 +55,7 @@ export class AnchorUpdateProposal implements IAnchorUpdateProposal {
 export interface ITokenAddProposal {
   /**
      * The Token Add Proposal Header.
-     * This is the first 40 bytes of the proposal.
+
      */
   readonly header: ProposalHeader;
   /**
@@ -102,7 +94,6 @@ export class TokenAddProposal implements ITokenAddProposal {
 export interface ITokenRemoveProposal {
   /**
    * The Token Remove Proposal Header.
-   * This is the first 40 bytes of the proposal.
    */
   readonly header: ProposalHeader;
   /**
@@ -141,7 +132,6 @@ export class TokenRemoveProposal implements ITokenRemoveProposal {
 export interface IWrappingFeeUpdateProposal {
   /**
    * The Wrapping Fee Update Proposal Header.
-   * This is the first 40 bytes of the proposal.
    */
   readonly header: ProposalHeader;
   /**
@@ -180,7 +170,6 @@ export class WrappingFeeUpdateProposal implements IWrappingFeeUpdateProposal {
 export interface IMinWithdrawalLimitProposal {
   /**
    * The Wrapping Fee Update Proposal Header.
-   * This is the first 40 bytes of the proposal.
    */
   readonly header: ProposalHeader;
   /**
@@ -219,7 +208,6 @@ export class MinWithdrawalLimitProposal implements IMinWithdrawalLimitProposal {
 export interface IMaxDepositLimitProposal {
   /**
    * The Wrapping Fee Update Proposal Header.
-   * This is the first 40 bytes of the proposal.
    */
   readonly header: ProposalHeader;
   /**
@@ -258,7 +246,6 @@ export class MaxDepositLimitProposal implements IMaxDepositLimitProposal {
 export interface IResourceIdUpdateProposal {
   /**
    * The ResourceIdUpdateProposal Header.
-   * This is the first 40 bytes of the proposal.
    */
   readonly header: ProposalHeader;
   /**
@@ -305,7 +292,6 @@ export class ResourceIdUpdateProposal implements IResourceIdUpdateProposal {
 export interface ISetTreasuryHandlerProposal {
   /**
    * The Token Add Proposal Header.
-   * This is the first 40 bytes of the proposal.
    */
   readonly header: ProposalHeader;
   /**
@@ -344,7 +330,6 @@ export class SetTreasuryHandlerProposal implements ISetTreasuryHandlerProposal {
 export interface ISetVerifierProposal {
   /**
    * The Token Add Proposal Header.
-   * This is the first 40 bytes of the proposal.
    */
   readonly header: ProposalHeader;
   /**
@@ -383,7 +368,6 @@ export class SetVerifierProposal implements ISetVerifierProposal {
 export interface IFeeRecipientUpdateProposal {
   /**
    * The Token Add Proposal Header.
-   * This is the first 40 bytes of the proposal.
    */
   readonly header: ProposalHeader;
   /**
