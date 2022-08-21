@@ -2,7 +2,7 @@ import { assert } from 'chai';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
-import { IResourceId, ResourceId } from './ResourceId';
+import { IResourceId, ResourceId } from './ResourceId.js';
 import { BE } from '.';
 
 /**

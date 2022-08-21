@@ -3,9 +3,9 @@
 
 import { assert } from 'chai';
 
-import { AnchorUpdateProposal, ResourceId } from '../proposals';
-import { ProposalHeader } from '../proposals/ProposalHeader';
-import { ChainIdType } from '../proposals/ResourceId';
+import { ProposalHeader } from '../proposals/ProposalHeader.js';
+import { AnchorUpdateProposal } from '../proposals/proposals.js';
+import { ChainIdType, ResourceId } from '../proposals/ResourceId.js';
 
 describe('test various conversion functions', () => {
   it('should encode and decode primitive proposal types correctly', () => {

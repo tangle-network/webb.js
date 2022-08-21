@@ -1,7 +1,7 @@
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
-import { ProposalHeader } from './ProposalHeader';
-import { ResourceId } from './ResourceId';
+import { ProposalHeader } from './ProposalHeader.js';
+import { ResourceId } from './ResourceId.js';
 
 /**
  * Anchor Update Proposal is the next 42 bytes (after the header) and it contains the following information:

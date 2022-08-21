@@ -17,6 +17,6 @@
 export const LE = true;
 export const BE = false;
 
-export * from './ProposalHeader';
-export * from './ResourceId';
-export * from './proposals';
+export * from './ProposalHeader.js';
+export * from './ResourceId.js';
+export * from './proposals.js';
