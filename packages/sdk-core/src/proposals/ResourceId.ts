@@ -2,36 +2,8 @@ import type { WebbProposalsHeaderResourceId } from '@polkadot/types/lookup';
 
 import { assert, hexToU8a, u8aToHex } from '@polkadot/util';
 
+import { castToChainType, ChainType } from '../typed-chain-id.js';
 import { BE } from './index.js';
-
-export const enum ChainIdType {
-  UNKNOWN = 0x0000,
-  EVM = 0x0100,
-  SUBSTRATE = 0x0200,
-  POLKADOT_RELAYCHAIN = 0x0301,
-  KUSAMA_RELAYCHAIN = 0x0302,
-  COSMOS = 0x0400,
-  SOLANA = 0x0500,
-}
-
-export function castToChainIdType (v: number): ChainIdType {
-  switch (v) {
-    case 0x0100:
-      return ChainIdType.EVM;
-    case 0x0200:
-      return ChainIdType.SUBSTRATE;
-    case 0x0301:
-      return ChainIdType.POLKADOT_RELAYCHAIN;
-    case 0x0302:
-      return ChainIdType.KUSAMA_RELAYCHAIN;
-    case 0x0400:
-      return ChainIdType.COSMOS;
-    case 0x0500:
-      return ChainIdType.SOLANA;
-    default:
-      return ChainIdType.UNKNOWN;
-  }
-}
 
 /**
  * Resource ID is an identifier of a resource in the Webb system.
@@ -56,7 +28,7 @@ export interface IResourceId {
    * **Note**: this value is optional here since we can read it from the `ResourceID`, but would be provided for you if
    * you want to decode the proposal header from bytes.
    */
-  readonly chainIdType: ChainIdType;
+  readonly chainType: ChainType;
 
   /**
     * 4 bytes number (u32) of the `chainId` this also encoded in the last 4 bytes of the `ResourceID`.
@@ -72,10 +44,10 @@ export interface IResourceId {
 
 export class ResourceId implements IResourceId {
   targetSystem: Uint8Array;
-  chainIdType: ChainIdType;
+  chainType: ChainType;
   chainId: number;
 
-  constructor (targetSystem: string | Uint8Array, chainIdType: ChainIdType, chainId: number) {
+  constructor (targetSystem: string | Uint8Array, chainType: ChainType, chainId: number) {
     if (typeof targetSystem === 'string') {
       const temp = hexToU8a(targetSystem);
 
@@ -90,7 +62,7 @@ export class ResourceId implements IResourceId {
     }
 
     assert(this.targetSystem.length === 26, 'targetSystem must be 26 bytes');
-    this.chainIdType = chainIdType;
+    this.chainType = chainType;
     this.chainId = chainId;
   }
 
@@ -102,18 +74,18 @@ export class ResourceId implements IResourceId {
 
     const targetSystem = bytes.slice(0, 26);
 
-    const chainIdTypeInt = new DataView(bytes.buffer).getUint16(32 - 6, BE);
-    const chainIdType = castToChainIdType(chainIdTypeInt);
+    const chainTypeInt = new DataView(bytes.buffer).getUint16(32 - 6, BE);
+    const chainType = castToChainType(chainTypeInt);
     const chainId = new DataView(bytes.buffer).getUint32(32 - 4, BE);
 
-    return new ResourceId(targetSystem, chainIdType, chainId);
+    return new ResourceId(targetSystem, chainType, chainId);
   }
 
   static fromWebbProposalsHeaderResourceId (bytes: WebbProposalsHeaderResourceId): ResourceId {
     return ResourceId.fromBytes(bytes.toU8a());
   }
 
-  static newFromContractAddress (contractAddress: string, chainIdType: ChainIdType, chainId: number): ResourceId {
+  static newFromContractAddress (contractAddress: string, chainType: ChainType, chainId: number): ResourceId {
     assert(
       (contractAddress.length === 42 && contractAddress.includes('0x')) ||
       (contractAddress.length === 40 && !contractAddress.includes('0x')),
@@ -125,7 +97,7 @@ export class ResourceId implements IResourceId {
     // 6 -> 26
     targetSystem.set(hexToU8a(contractAddress), 6);
 
-    return new ResourceId(targetSystem, chainIdType, chainId);
+    return new ResourceId(targetSystem, chainType, chainId);
   }
 
   /**
@@ -138,7 +110,7 @@ export class ResourceId implements IResourceId {
     const view = new DataView(resourceId.buffer);
 
     // 26 -> 28
-    view.setUint16(26, this.chainIdType, BE);
+    view.setUint16(26, this.chainType, BE);
     // 28 -> 32
     view.setUint32(28, this.chainId, BE);
 

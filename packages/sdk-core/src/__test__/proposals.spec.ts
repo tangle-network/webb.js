@@ -5,16 +5,17 @@ import { assert } from 'chai';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
+import { ChainType } from '../index.js';
 import { ProposalHeader } from '../proposals/ProposalHeader.js';
 import { AnchorUpdateProposal } from '../proposals/ProposalKinds.js';
-import { ChainIdType, ResourceId } from '../proposals/ResourceId.js';
+import { ResourceId } from '../proposals/ResourceId.js';
 
 describe('test various conversion functions', () => {
   it('should encode and decode primitive proposal types correctly', () => {
     const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
     const chainId = 0xcafe;
-    const chainIdType = ChainIdType.EVM;
-    const resourceId = new ResourceId(anchorAddress, chainIdType, chainId);
+    const chainType = ChainType.EVM;
+    const resourceId = new ResourceId(anchorAddress, chainType, chainId);
     const functionSignature = hexToU8a('0xdeadbeef');
     const lastLeafIndex = 0x0000feed;
     const header = new ProposalHeader(
@@ -25,7 +26,7 @@ describe('test various conversion functions', () => {
     const srcChainId = 0xbabe;
     const merkleRoot = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
     const otherAnchorAddress = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
-    const srcResourceId = new ResourceId(otherAnchorAddress, chainIdType, srcChainId);
+    const srcResourceId = new ResourceId(otherAnchorAddress, chainType, srcChainId);
     const updateProposal = new AnchorUpdateProposal(
       header,
       merkleRoot,
