@@ -2,8 +2,8 @@ import { assert } from 'chai';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
+import { BE } from './index.js';
 import { IResourceId, ResourceId } from './ResourceId.js';
-import { BE } from '.';
 
 /**
  * Proposal Header is the first 40 bytes of any proposal and it contains the following information:

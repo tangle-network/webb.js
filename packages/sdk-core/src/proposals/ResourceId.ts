@@ -1,7 +1,8 @@
-import { WebbProposalsHeaderResourceId } from '@polkadot/types/lookup';
+import type { WebbProposalsHeaderResourceId } from '@polkadot/types/lookup';
+
 import { assert, hexToU8a, u8aToHex } from '@polkadot/util';
 
-import { BE } from '.';
+import { BE } from './index.js';
 
 export const enum ChainIdType {
   UNKNOWN = 0x0000,

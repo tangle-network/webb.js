@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { options } from '@webb-tools/api/index.js';
-import { ResourceId } from '@webb-tools/sdk-core/proposals';
+import { ResourceId } from '@webb-tools/sdk-core/proposals/index.js';
 import { BigNumber } from 'ethers';
 
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
