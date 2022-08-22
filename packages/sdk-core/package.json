@@ -103,6 +103,46 @@
       "types": "./proving/circom/proving-manager-thread.d.ts",
       "require": "./cjs/proving/circom/proving-manager-thread.js",
       "default": "./cjs/proving/circom/proving-manager-thread.js"
+    },
+    "./proposals/index.js": {
+      "types": "./proposals/index.d.ts",
+      "require": "./cjs/proposals/index.js",
+      "default": "./proposals/index.js"
+    },
+    "./cjs/proposals/index.js": {
+      "types": "./proposals/index.d.ts",
+      "require": "./cjs/proposals/index.js",
+      "default": "./cjs/proposals/index.js"
+    },
+    "./proposals/ProposalHeader.js": {
+      "types": "./proposals/ProposalHeader.d.ts",
+      "require": "./cjs/proposals/ProposalHeader.js",
+      "default": "./proposals/ProposalHeader.js"
+    },
+    "./cjs/proposals/ProposalHeader.js": {
+      "types": "./proposals/ProposalHeader.d.ts",
+      "require": "./cjs/proposals/ProposalHeader.js",
+      "default": "./cjs/proposals/ProposalHeader.js"
+    },
+    "./proposals/ProposalKinds.js": {
+      "types": "./proposals/ProposalKinds.d.ts",
+      "require": "./cjs/proposals/ProposalKinds.js",
+      "default": "./proposals/ProposalKinds.js"
+    },
+    "./cjs/proposals/ProposalKinds.js": {
+      "types": "./proposals/ProposalKinds.d.ts",
+      "require": "./cjs/proposals/ProposalKinds.js",
+      "default": "./cjs/proposals/ProposalKinds.js"
+    },
+    "./proposals/ResourceId.js": {
+      "types": "./proposals/ResourceId.d.ts",
+      "require": "./cjs/proposals/ResourceId.js",
+      "default": "./proposals/ResourceId.js"
+    },
+    "./cjs/proposals/ResourceId.js": {
+      "types": "./proposals/ResourceId.d.ts",
+      "require": "./cjs/proposals/ResourceId.js",
+      "default": "./cjs/proposals/ResourceId.js"
     }
   },
   "publishConfig": {
