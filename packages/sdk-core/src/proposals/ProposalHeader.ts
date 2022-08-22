@@ -8,7 +8,6 @@ import { IResourceId, ResourceId } from './ResourceId.js';
 /**
  * Proposal Header is the first 40 bytes of any proposal and it contains the following information:
  * - resource id (32 bytes)
- * - target chain id (4 bytes) encoded as the last 4 bytes of the resource id.
  * - target function signature (4 bytes)
  * - nonce (4 bytes).
  */
