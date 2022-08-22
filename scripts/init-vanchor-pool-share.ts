@@ -30,11 +30,11 @@ function getKeyring() {
   return keyring;
 }
 
-async function createVAnchor(apiPromise: ApiPromise, currencyId: number, singer: KeyringPair): Promise<number> {
+async function createVAnchor(apiPromise: ApiPromise, currencyId: number, signer: KeyringPair): Promise<number> {
   await polkadotTx(apiPromise, {
     section: 'sudo',
     method: 'sudo'
-  }, [apiPromise.tx.vAnchorBn254.create(1, 30, currencyId)], singer);
+  }, [apiPromise.tx.vAnchorBn254.create(1, 30, currencyId)], signer);
   const nextTreeId = await apiPromise?.query.merkleTreeBn254.nextTreeId();
   // @ts-ignore
   return nextTreeId.toNumber() - 1;
@@ -43,7 +43,7 @@ async function createVAnchor(apiPromise: ApiPromise, currencyId: number, singer:
 async function createPoolShare(
   apiPromise: ApiPromise,
   name: string,
-  singer: KeyringPair,
+  signer: KeyringPair,
   existentialDeposit: number = 0
 ) {
   await polkadotTx(apiPromise, {
@@ -52,7 +52,7 @@ async function createPoolShare(
     },
     [apiPromise.tx.assetRegistry.register(name, {
       PoolShare: [0]
-    }, existentialDeposit)], singer);
+    }, existentialDeposit)], signer);
   const nextAssetId = await apiPromise.query.assetRegistry.nextAssetId<U32>();
   const id = nextAssetId.toNumber() - 1;
   const tokenWrapperNonce = await apiPromise.query.tokenWrapper.proposalNonce<Option<U32>>(name);
@@ -62,7 +62,8 @@ async function createPoolShare(
       section: 'sudo',
       method: 'sudo'
     },
-    [apiPromise.tx.tokenWrapper.setWrappingFee(1, id, nonce)], singer);
+    // @ts-ignore
+    [apiPromise.tx.tokenWrapper.setWrappingFee(1, id, nonce)], signer);
   return id;
 }
 
@@ -70,13 +71,13 @@ async function addAssetToPool(
   apiPromise: ApiPromise,
   assetId: string,
   poolAssetId: string,
-  singer: KeyringPair
+  signer: KeyringPair
 ) {
   await polkadotTx(apiPromise, {
       section: 'sudo',
       method: 'sudo'
     },
-    [apiPromise.tx.assetRegistry.addAssetToPool(poolAssetId, Number(assetId))], singer);
+    [apiPromise.tx.assetRegistry.addAssetToPool(poolAssetId, Number(assetId))], signer);
 }
 
 async function main() {
