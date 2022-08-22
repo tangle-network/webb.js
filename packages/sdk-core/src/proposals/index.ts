@@ -14,6 +14,11 @@
  * limitations under the License.
  *
  */
+
+// Flags used to indicate the type of encoding to be used
+// in various encoding functions.
+//
+// For example: `const nonce = new DataView(bytes.buffer).getUint32(36, BE);`
 export const LE = true;
 export const BE = false;
 
