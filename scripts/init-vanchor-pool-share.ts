@@ -118,10 +118,10 @@ async function main() {
 
     const anchorId = await createVAnchor(apiPromise!, webSqu, getKeyring().alice);
     console.log(`Create anchorId ${anchorId}`);
+
   } finally {
       await apiPromise?.disconnect();
       console.log(nodes);
-
   }
 
 }
