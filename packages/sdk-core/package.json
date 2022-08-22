@@ -156,22 +156,17 @@
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
     "@polkadot/util": "10.1.1",
-    "@types/events": "^3.0.0",
-    "@webb-tools/api": "0.1.4-95",
     "@webb-tools/wasm-utils": "0.1.4-95",
     "bignumber.js": "^9.0.0",
     "circomlibjs": "0.0.8",
     "elliptic": "6.5.4",
     "eth-sig-util": "^3.0.1",
     "ethers": "5.5.1",
-    "events": "^3.2.0",
     "ffjavascript": "0.2.55",
-    "lodash": "^4.17.20",
     "snarkjs": "0.4.22"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",
-    "@types/lodash": "^4.14.161",
     "chai": "^4.3.6"
   }
 }

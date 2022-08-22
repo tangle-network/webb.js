@@ -36,9 +36,7 @@
   },
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
-    "@babel/runtime": "^7.10.2",
     "@polkadot/api": "8.14.1",
-    "@polkadot/rpc-core": "8.14.1",
     "@webb-tools/api-derive": "0.1.4-95"
   }
 }
