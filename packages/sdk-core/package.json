@@ -104,12 +104,12 @@
       "require": "./cjs/proving/circom/proving-manager-thread.js",
       "default": "./cjs/proving/circom/proving-manager-thread.js"
     },
-    "./proposals/index.js": {
+    "./proposals": {
       "types": "./proposals/index.d.ts",
       "require": "./cjs/proposals/index.js",
       "default": "./proposals/index.js"
     },
-    "./cjs/proposals/index.js": {
+    "./cjs/proposals": {
       "types": "./proposals/index.d.ts",
       "require": "./cjs/proposals/index.js",
       "default": "./cjs/proposals/index.js"

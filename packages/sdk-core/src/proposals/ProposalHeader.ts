@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 
-import { hexToU8a, u8aToHex } from '@polkadot/util';
+import { u8aToHex } from '@polkadot/util';
 
 import { BE } from './index.js';
 import { IResourceId, ResourceId } from './ResourceId.js';
@@ -14,13 +14,13 @@ import { IResourceId, ResourceId } from './ResourceId.js';
  */
 export interface IProposalHeader {
   /**
-   * 32 bytes Hex-encoded string of the `ResourceID` for this proposal.
+   * 32 bytes ResourceId
    */
   readonly resourceId: IResourceId;
   /**
-   * 4 bytes Hex-encoded string of the `functionSig` for this proposal.
+   * 4 bytes function signature / function identifier
    */
-  readonly functionSignature: string;
+  readonly functionSignature: Uint8Array;
   /**
    * 4 bytes Hex-encoded string of the `nonce` for this proposal.
    */
@@ -32,10 +32,10 @@ export interface IProposalHeader {
  */
 export class ProposalHeader implements IProposalHeader {
   resourceId: IResourceId;
-  functionSignature: string;
+  functionSignature: Uint8Array;
   nonce: number;
 
-  constructor (resourceId: IResourceId, functionSignature: string, nonce: number) {
+  constructor (resourceId: IResourceId, functionSignature: Uint8Array, nonce: number) {
     this.resourceId = resourceId;
     this.functionSignature = functionSignature;
     this.nonce = nonce;
@@ -48,8 +48,8 @@ export class ProposalHeader implements IProposalHeader {
     assert(bytes.length === 40, 'bytes must be 40 bytes');
 
     const resourceId = ResourceId.fromBytes(bytes.slice(0, 32));
-    const functionSignature = bytes.slice(32, 36).toString();
-    const nonce = new DataView(bytes).getUint32(36, BE);
+    const functionSignature = bytes.slice(32, 36);
+    const nonce = new DataView(bytes.buffer).getUint32(36, BE);
 
     return new ProposalHeader(resourceId, functionSignature, nonce);
   }
@@ -61,8 +61,12 @@ export class ProposalHeader implements IProposalHeader {
     const proposalHeader = new Uint8Array(40);
 
     proposalHeader.set(this.resourceId.toU8a(), 0);
-    proposalHeader.set(hexToU8a(this.functionSignature), 32);
-    proposalHeader.set(hexToU8a(this.nonce.toString(16)), 36);
+    proposalHeader.set(this.functionSignature, 32);
+    const buf = Buffer.allocUnsafe(4);
+
+    buf.writeUInt32BE(this.nonce, 0);
+
+    proposalHeader.set(buf, 36);
 
     return proposalHeader;
   }

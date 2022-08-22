@@ -77,7 +77,14 @@ export class ResourceId implements IResourceId {
 
   constructor (targetSystem: string | Uint8Array, chainIdType: ChainIdType, chainId: number) {
     if (typeof targetSystem === 'string') {
-      this.targetSystem = hexToU8a(targetSystem);
+      const temp = hexToU8a(targetSystem);
+
+      if (temp.length < 26) {
+        this.targetSystem = new Uint8Array(26);
+        this.targetSystem.set(temp, 6);
+      } else {
+        this.targetSystem = temp;
+      }
     } else {
       this.targetSystem = targetSystem;
     }
@@ -93,10 +100,11 @@ export class ResourceId implements IResourceId {
   static fromBytes (bytes: Uint8Array): ResourceId {
     assert(bytes.length === 32, 'bytes must be 32 bytes');
 
-    const targetSystem = bytes.slice(0, 26).toString();
-    const chainIdTypeInt = new DataView(bytes).getUint16(32 - 6, BE);
+    const targetSystem = bytes.slice(0, 26);
+
+    const chainIdTypeInt = new DataView(bytes.buffer).getUint16(32 - 6, BE);
     const chainIdType = castToChainIdType(chainIdTypeInt);
-    const chainId = new DataView(bytes).getUint32(32 - 4, BE);
+    const chainId = new DataView(bytes.buffer).getUint32(32 - 4, BE);
 
     return new ResourceId(targetSystem, chainIdType, chainId);
   }
