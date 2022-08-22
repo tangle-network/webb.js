@@ -36,6 +36,10 @@
     "@polkadot/keyring": "10.1.1",
     "@webb-tools/api": "0.1.4-96",
     "@webb-tools/sdk-core": "0.1.4-96",
+    "@webb-tools/anchors": "0.2.5",
+    "@webb-tools/vbridge": "0.2.5",
+    "@webb-tools/utils": "0.2.5",
+    "@webb-tools/tokens": "0.2.5",
     "bignumber.js": "^9.0.0",
     "ethers": "5.5.1",
     "ganache": "7.4.1"

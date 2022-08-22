@@ -3,3 +3,4 @@
 
 export * from './utils.js';
 export * from './startGanacheServer.js';
+export * from './localEvmChain.js';
