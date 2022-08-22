@@ -4,7 +4,8 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
 import { polkadotTx } from '@webb-tools/test-utils/index.js';
 import { expect } from 'chai';
-
+import { Option, U32 } from '@polkadot/types-codec';
+import { BN } from '@polkadot/util';
 let apiPromise: ApiPromise | null = null;
 let keyring: {
   bob: KeyringPair;
@@ -45,13 +46,16 @@ async function createPoolShare(
       PoolShare: [0]
     }, existentialDeposit)], singer);
   const nextAssetId = await apiPromise.query.assetRegistry.nextAssetId();
-  // @ts-ignore
+
   const id = nextAssetId.toNumber() - 1;
+  const tokenWrapperNonce = await apiPromise.query.tokenWrapper.proposalNonce<Option<U32>>(name);
+  const nonce  = tokenWrapperNonce.unwrapOr(new BN(0)).toNumber() + 1;
   await polkadotTx(apiPromise, {
       section: 'sudo',
       method: 'sudo'
     },
-    [apiPromise.tx.tokenWrapper.setWrappingFee( 1,id)], singer);
+    // @ts-ignore
+    [apiPromise.tx.tokenWrapper.setWrappingFee( 1,id ,nonce)], singer);
   return id;
 }
 
