@@ -11,6 +11,31 @@ export enum ChainType {
   KusamaRelayChain = 0x0302,
   PolkadotParachain = 0x0310,
   KusamaParachain = 0x0311,
+  Cosmos = 0x0400,
+  Solana = 0x0500,
+}
+
+export function castToChainType (v: number): ChainType {
+  switch (v) {
+    case 0x0100:
+      return ChainType.EVM;
+    case 0x0200:
+      return ChainType.Substrate;
+    case 0x0301:
+      return ChainType.PolkadotRelayChain;
+    case 0x0302:
+      return ChainType.KusamaRelayChain;
+    case 0x0310:
+      return ChainType.PolkadotParachain;
+    case 0x0311:
+      return ChainType.KusamaParachain;
+    case 0x0400:
+      return ChainType.Cosmos;
+    case 0x0500:
+      return ChainType.Solana;
+    default:
+      return ChainType.None;
+  }
 }
 
 export type TypedChainId = {

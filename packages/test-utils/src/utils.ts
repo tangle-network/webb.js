@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { options } from '@webb-tools/api/index.js';
+import { ResourceId } from '@webb-tools/sdk-core/proposals/index.js';
 import { BigNumber } from 'ethers';
 
-import { ApiPromise, WsProvider } from '@polkadot/api';
+import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { Bytes, Option } from '@polkadot/types';
 
 type MethodPath = {
   section: string;
@@ -107,4 +109,38 @@ export async function fetchRPCTreeLeaves (api: ApiPromise, treeId: string | numb
   }
 
   return leaves;
+}
+
+export async function registerResourceId (api: ApiPromise, resourceId: ResourceId) {
+  // quick check if the resourceId is already registered
+  const res = await api.query.dKGProposals.resources(resourceId);
+  const val = new Option(api.registry, Bytes, res);
+
+  if (val.isSome) {
+    console.log(`Resource id ${resourceId} is already registered, skipping`);
+
+    return;
+  }
+
+  const keyring = new Keyring({ type: 'sr25519' });
+  const alice = keyring.addFromUri('//Alice');
+
+  const call = api.tx.dKGProposals.setResource(resourceId, '0x00');
+
+  console.log('Registering resource id');
+  const unsub = await api.tx.sudo
+    .sudo(call)
+    .signAndSend(alice, ({ events = [], status }) => {
+      console.log(`Current status is: ${status.type}`);
+
+      if (status.isFinalized) {
+        console.log(`Transaction included at blockHash ${status.asFinalized}`);
+
+        events.forEach(({ event: { data, method, section }, phase }) => {
+          console.log(`\t' ${phase}: ${section}.${method}:: ${data}`);
+        });
+
+        unsub();
+      }
+    });
 }
