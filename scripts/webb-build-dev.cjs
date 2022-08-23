@@ -53,20 +53,34 @@ const executeSync = (cmd) => {
   }
 }
 
-const CPX = ['css', 'gif', 'hbs', 'jpg', 'js', 'json', 'png', 'svg', 'd.ts']
+const CPX = ['css', 'gif', 'hbs', 'jpg', 'js', 'png', 'svg', 'd.ts']
   .map((ext) => `src/**/*.${ext}`)
-  .concat('package.json');
 
 function copyMiscFiles(dir, module = 'esm') {
+  // take the package.json defined in the module and strip out the '/build/'
+  // in the export paths before copying to the output 'build' folder for publishing.
+  // The 'build/' in the path exists for packages to resolve properly in builds.
+  //    e.g. the '@webb-tools/test-utils' package needs this to properly resolve
+  //         methods in '@webb-tools/sdk-core' because it imports '@webb-tools/utils'
+  //         which uses '@webb-tools/sdk-core' in its dependencies. 
+  const raw = fs.readFileSync('./package.json');
+  const pkg = JSON.parse(raw);
+  const pkgString = JSON.stringify(pkg);
+  const newPkgString = pkgString.replaceAll('/build/', '/');
+
   if (module === 'esm') {
     [...CPX]
       .concat(`../../build/${dir}/src/**/*.d.ts`, `../../build/packages/${dir}/src/**/*.d.ts`)
       .forEach((src) => copySync(src, 'build'));
+
+    fs.writeFileSync('build/package.json', newPkgString);
   } else {
     // Extra logic for copying over other files (package.json for cjs modules)
     [...CPX]
       .concat(`../../build/${dir}/src/**/*.d.ts`, `../../build/packages/${dir}/src/**/*.d.ts`)
       .forEach((src) => copySync(src, 'build/cjs'));
+
+    fs.writeFileSync('build/cjs/package.json', newPkgString);
   }
 
   // The types package is a special case - it should only ever be cjs.
