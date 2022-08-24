@@ -113,7 +113,7 @@ export async function fetchRPCTreeLeaves (api: ApiPromise, treeId: string | numb
 
 export async function registerResourceId (api: ApiPromise, resourceId: ResourceId) {
   // quick check if the resourceId is already registered
-  const res = await api.query.dKGProposals.resources(resourceId);
+  const res = await api.query.dkgProposals.resources(resourceId);
   const val = new Option(api.registry, Bytes, res);
 
   if (val.isSome) {
@@ -125,7 +125,7 @@ export async function registerResourceId (api: ApiPromise, resourceId: ResourceI
   const keyring = new Keyring({ type: 'sr25519' });
   const alice = keyring.addFromUri('//Alice');
 
-  const call = api.tx.dKGProposals.setResource(resourceId, '0x00');
+  const call = api.tx.dkgProposals.setResource(resourceId.toU8a(), '0x00');
 
   console.log('Registering resource id');
   const unsub = await api.tx.sudo
