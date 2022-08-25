@@ -38,12 +38,14 @@ export class AnchorUpdateProposal implements IAnchorUpdateProposal {
   }
 
   toU8a (): Uint8Array {
+    const merkleRootBytesLength = 32;
+    const rIdBytesLength = 32;
     const header = this.header.toU8a();
-    const updateProposal = new Uint8Array(40 + 32 + 32);
+    const updateProposal = new Uint8Array(header.length + merkleRootBytesLength + rIdBytesLength);
 
     updateProposal.set(header, 0); // 0 -> 40
 
-    const merkleRoot = hexToU8a(this.merkleRoot, 256);
+    const merkleRoot = hexToU8a(this.merkleRoot, merkleRootBytesLength * 8);
 
     updateProposal.set(merkleRoot, 40); // 40 -> 72
     updateProposal.set(this.srcResourceId.toU8a(), 72); // 72 -> 104
