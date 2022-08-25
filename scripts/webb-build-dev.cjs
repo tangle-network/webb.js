@@ -86,7 +86,7 @@ function copyMiscFiles(dir, module = 'esm') {
   // The types package is a special case - it should only ever be cjs.
   // So the root directory package.json should exist as commonjs.
   if (dir === 'types') {
-    copySync('./package.json', 'build')
+    fs.writeFileSync('./build/package.json', newPkgString);
   }
 }
 

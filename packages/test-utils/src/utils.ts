@@ -22,7 +22,6 @@ export function currencyToUnitI128 (currencyAmount: number) {
 }
 
 export function polkadotTx (api: ApiPromise, path: MethodPath, params: any[], signer: KeyringPair) {
-  // @ts-ignore
   const tx = api.tx[path.section][path.method](...params);
 
   return new Promise<string>((resolve, reject) => {
@@ -112,9 +111,9 @@ export async function fetchRPCTreeLeaves (api: ApiPromise, treeId: string | numb
   return leaves;
 }
 
-export async function registerResourceId (api: ApiPromise, resourceId: ResourceId) {
+export async function registerResourceId (api: ApiPromise, resourceId: ResourceId): Promise<void> {
   // quick check if the resourceId is already registered
-  const res = await api.query.dkgProposals.resources(resourceId);
+  const res = await api.query.dkgProposals.resources(resourceId.toU8a());
   const val = new Option(api.registry, Bytes, res);
 
   if (val.isSome) {
@@ -128,20 +127,23 @@ export async function registerResourceId (api: ApiPromise, resourceId: ResourceI
 
   const call = api.tx.dkgProposals.setResource(resourceId.toU8a(), '0x00');
 
-  console.log('Registering resource id');
-  const unsub = await api.tx.sudo
-    .sudo(call)
-    .signAndSend(alice, ({ events = [], status }) => {
-      console.log(`Current status is: ${status.type}`);
+  // eslint-disable-next-line no-async-promise-executor
+  return new Promise(async (resolve, reject) => {
+    const unsub = await api.tx.sudo
+      .sudo(call)
+      .signAndSend(alice, ({ events, status }) => {
+        if (status.isFinalized) {
+          unsub();
+          const success = events.find(({ event }) => {
+            return api.events.system.ExtrinsicSuccess.is(event);
+          });
 
-      if (status.isFinalized) {
-        console.log(`Transaction included at blockHash ${status.asFinalized}`);
-
-        events.forEach(({ event: { data, method, section }, phase }) => {
-          console.log(`\t' ${phase}: ${section}.${method}:: ${data}`);
-        });
-
-        unsub();
-      }
-    });
+          if (success) {
+            resolve();
+          } else {
+            reject(new Error('Failed to register resourceId'));
+          }
+        }
+      });
+  });
 }
