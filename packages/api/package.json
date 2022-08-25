@@ -34,11 +34,9 @@
   "bugs":{
      "url":"https://github.com/webb-tools/webb.js/issues"
   },
-  "homepage":"https://github.com/webb-tools/webb.js",
-  "dependencies":{
-     "@babel/runtime":"^7.10.2",
-     "@polkadot/api":"9.2.3",
-     "@polkadot/rpc-core":"9.2.3",
-     "@webb-tools/api-derive":"0.1.4-96"
+  "homepage": "https://github.com/webb-tools/webb.js",
+  "dependencies": {
+    "@polkadot/api":"9.2.3",
+    "@webb-tools/api-derive": "0.1.4-96"
   }
 }
