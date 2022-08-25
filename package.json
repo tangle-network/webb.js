@@ -11,11 +11,11 @@
     "tests/*"
   ],
   "resolutions": {
-    "@polkadot/api": "8.14.1",
-    "@polkadot/keyring": "10.1.1",
-    "@polkadot/types": "8.14.1",
-    "@polkadot/util": "10.1.1",
-    "@polkadot/util-crypto": "10.1.1"
+    "@polkadot/api": "9.2.3",
+    "@polkadot/keyring": "10.1.5",
+    "@polkadot/types": "9.2.3",
+    "@polkadot/util": "10.1.5",
+    "@polkadot/util-crypto": "10.1.5"
   },
   "scripts": {
     "pumbp": "./scripts/update-version.js prerelease",
@@ -42,12 +42,12 @@
     "deploy-ps-vanchor": "NODE_OPTIONS='--loader ./loader.js' node --experimental-specifier-resolution=node ./scripts/init-vanchor-pool-share.ts"
   },
   "devDependencies": {
-    "@polkadot/api": "8.14.1",
+    "@polkadot/api": "9.2.3",
     "@polkadot/dev": "^0.67.86",
-    "@polkadot/keyring": "10.1.1",
-    "@polkadot/types": "8.14.1",
-    "@polkadot/util": "10.1.1",
-    "@polkadot/util-crypto": "10.1.1",
+    "@polkadot/keyring": "10.1.5",
+    "@polkadot/types": "9.2.3",
+    "@polkadot/util": "10.1.5",
+    "@polkadot/util-crypto": "10.1.5",
     "cross-env": "^7.0.3",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-tsdoc": "^0.2.14",

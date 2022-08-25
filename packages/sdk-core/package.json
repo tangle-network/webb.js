@@ -5,144 +5,144 @@
   "author": "Webb Developers <drew@webb.tools>",
   "license": "Apache-2.0",
   "type": "module",
-  "main": "./cjs/index.js",
-  "module": "./index.js",
-  "types": "./index.d.ts",
+  "main": "./build/cjs/index.js",
+  "module": "./build/index.js",
+  "types": "./build/index.d.ts",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "require": "./cjs/index.js",
-      "default": "./index.js"
+      "types": "./build/index.d.ts",
+      "require": "./build/cjs/index.js",
+      "default": "./build/index.js"
     },
     "./index.js": {
-      "types": "./index.d.ts",
-      "require": "./cjs/index.js",
-      "default": "./index.js"
+      "types": "./build/index.d.ts",
+      "require": "./build/cjs/index.js",
+      "default": "./build/index.js"
     },
     "./cjs/index.js": {
-      "types": "./index.d.ts",
-      "require": "./cjs/index.js",
-      "default": "./cjs/index.js"
+      "types": "./build/index.d.ts",
+      "require": "./build/cjs/index.js",
+      "default": "./build/cjs/index.js"
     },
     "./note": {
-      "types": "./note.d.ts",
-      "require": "./cjs/note.js",
-      "default": "./note.js"
+      "types": "./build/note.d.ts",
+      "require": "./build/cjs/note.js",
+      "default": "./build/note.js"
     },
     "./cjs/note": {
-      "types": "./note.d.ts",
-      "require": "./cjs/note.js",
-      "default": "./cjs/note.js"
+      "types": "./build/note.d.ts",
+      "require": "./build/cjs/note.js",
+      "default": "./build/cjs/note.js"
     },
     "./merkle-tree": {
-      "types": "./merkle-tree.d.ts",
-      "require": "./cjs/merkle-tree.js",
-      "default": "./merkle-tree.js"
+      "types": "./build/merkle-tree.d.ts",
+      "require": "./build/cjs/merkle-tree.js",
+      "default": "./build/merkle-tree.js"
     },
     "./cjs/merkle-tree": {
-      "types": "./merkle-tree.d.ts",
-      "require": "./cjs/merkle-tree.js",
-      "default": "./cjs/merkle-tree.js"
+      "types": "./build/merkle-tree.d.ts",
+      "require": "./build/cjs/merkle-tree.js",
+      "default": "./build/cjs/merkle-tree.js"
     },
     "./utxo": {
-      "types": "./utxo.d.ts",
-      "require": "./cjs/utxo.js",
-      "default": "./utxo.js"
+      "types": "./build/utxo.d.ts",
+      "require": "./build/cjs/utxo.js",
+      "default": "./build/utxo.js"
     },
     "./cjs/utxo": {
-      "types": "./utxo.d.ts",
-      "require": "./cjs/utxo.js",
-      "default": "./cjs/utxo.js"
+      "types": "./build/utxo.d.ts",
+      "require": "./build/cjs/utxo.js",
+      "default": "./build/cjs/utxo.js"
     },
     "./proving": {
-      "types": "./proving/index.d.ts",
-      "require": "./cjs/proving/index.js",
-      "default": "./proving/index.js"
+      "types": "./build/proving/index.d.ts",
+      "require": "./build/cjs/proving/index.js",
+      "default": "./build/proving/index.js"
     },
     "./cjs/proving": {
-      "types": "./proving/index.d.ts",
-      "require": "./cjs/proving/index.js",
-      "default": "./cjs/proving/index.js"
+      "types": "./build/proving/index.d.ts",
+      "require": "./build/cjs/proving/index.js",
+      "default": "./build/cjs/proving/index.js"
     },
     "./proving/arkworks/proving-manager.js": {
-      "types": "./proving/arkworks/proving-manager.d.ts",
-      "require": "./cjs/proving/arkworks/proving-manager.js",
-      "default": "./proving/arkworks/proving-manager.js"
+      "types": "./build/proving/arkworks/proving-manager.d.ts",
+      "require": "./build/cjs/proving/arkworks/proving-manager.js",
+      "default": "./build/proving/arkworks/proving-manager.js"
     },
     "./cjs/proving/arkworks/proving-manager.js": {
-      "types": "./proving/arkworks/proving-manager.d.ts",
-      "require": "./cjs/proving/arkworks/proving-manager.js",
-      "default": "./cjs/proving/arkworks/proving-manager.js"
+      "types": "./build/proving/arkworks/proving-manager.d.ts",
+      "require": "./build/cjs/proving/arkworks/proving-manager.js",
+      "default": "./build/cjs/proving/arkworks/proving-manager.js"
     },
     "./proving/arkworks/proving-manager-thread.js": {
-      "types": "./proving/arkworks/proving-manager-thread.d.ts",
-      "require": "./cjs/proving/arkworks/proving-manager-thread.js",
-      "default": "./proving/arkworks/proving-manager-thread.js"
+      "types": "./build/proving/arkworks/proving-manager-thread.d.ts",
+      "require": "./build/cjs/proving/arkworks/proving-manager-thread.js",
+      "default": "./build/proving/arkworks/proving-manager-thread.js"
     },
     "./cjs/proving/arkworks/proving-manager-thread.js": {
-      "types": "./proving/arkworks/proving-manager-thread.d.ts",
-      "require": "./cjs/proving/arkworks/proving-manager-thread.js",
-      "default": "./cjs/proving/arkworks/proving-manager-thread.js"
+      "types": "./build/proving/arkworks/proving-manager-thread.d.ts",
+      "require": "./build/cjs/proving/arkworks/proving-manager-thread.js",
+      "default": "./build/cjs/proving/arkworks/proving-manager-thread.js"
     },
     "./proving/circom/proving-manager.js": {
-      "types": "./proving/circom/proving-manager.d.ts",
-      "require": "./cjs/proving/circom/proving-manager.js",
-      "default": "./proving/circom/proving-manager.js"
+      "types": "./build/proving/circom/proving-manager.d.ts",
+      "require": "./build/cjs/proving/circom/proving-manager.js",
+      "default": "./build/proving/circom/proving-manager.js"
     },
     "./cjs/proving/circom/proving-manager.js": {
-      "types": "./proving/circom/proving-manager.d.ts",
-      "require": "./cjs/proving/circom/proving-manager.js",
-      "default": "./cjs/proving/circom/proving-manager.js"
+      "types": "./build/proving/circom/proving-manager.d.ts",
+      "require": "./build/cjs/proving/circom/proving-manager.js",
+      "default": "./build/cjs/proving/circom/proving-manager.js"
     },
     "./proving/circom/proving-manager-thread.js": {
-      "types": "./proving/circom/proving-manager-thread.d.ts",
-      "require": "./cjs/proving/circom/proving-manager-thread.js",
-      "default": "./proving/circom/proving-manager-thread.js"
+      "types": "./build/proving/circom/proving-manager-thread.d.ts",
+      "require": "./build/cjs/proving/circom/proving-manager-thread.js",
+      "default": "./build/proving/circom/proving-manager-thread.js"
     },
     "./cjs/proving/circom/proving-manager-thread.js": {
-      "types": "./proving/circom/proving-manager-thread.d.ts",
-      "require": "./cjs/proving/circom/proving-manager-thread.js",
-      "default": "./cjs/proving/circom/proving-manager-thread.js"
+      "types": "./build/proving/circom/proving-manager-thread.d.ts",
+      "require": "./build/cjs/proving/circom/proving-manager-thread.js",
+      "default": "./build/cjs/proving/circom/proving-manager-thread.js"
     },
     "./proposals": {
-      "types": "./proposals/index.d.ts",
-      "require": "./cjs/proposals/index.js",
-      "default": "./proposals/index.js"
+      "types": "./build/proposals/index.d.ts",
+      "require": "./build/cjs/proposals/index.js",
+      "default": "./build/proposals/index.js"
     },
     "./cjs/proposals": {
-      "types": "./proposals/index.d.ts",
-      "require": "./cjs/proposals/index.js",
-      "default": "./cjs/proposals/index.js"
+      "types": "./build/proposals/index.d.ts",
+      "require": "./build/cjs/proposals/index.js",
+      "default": "./build/cjs/proposals/index.js"
     },
     "./proposals/ProposalHeader.js": {
-      "types": "./proposals/ProposalHeader.d.ts",
-      "require": "./cjs/proposals/ProposalHeader.js",
-      "default": "./proposals/ProposalHeader.js"
+      "types": "./build/proposals/ProposalHeader.d.ts",
+      "require": "./build/cjs/proposals/ProposalHeader.js",
+      "default": "./build/proposals/ProposalHeader.js"
     },
     "./cjs/proposals/ProposalHeader.js": {
-      "types": "./proposals/ProposalHeader.d.ts",
-      "require": "./cjs/proposals/ProposalHeader.js",
-      "default": "./cjs/proposals/ProposalHeader.js"
+      "types": "./build/proposals/ProposalHeader.d.ts",
+      "require": "./build/cjs/proposals/ProposalHeader.js",
+      "default": "./build/cjs/proposals/ProposalHeader.js"
     },
     "./proposals/ProposalKinds.js": {
-      "types": "./proposals/ProposalKinds.d.ts",
-      "require": "./cjs/proposals/ProposalKinds.js",
-      "default": "./proposals/ProposalKinds.js"
+      "types": "./build/proposals/ProposalKinds.d.ts",
+      "require": "./build/cjs/proposals/ProposalKinds.js",
+      "default": "./build/proposals/ProposalKinds.js"
     },
     "./cjs/proposals/ProposalKinds.js": {
-      "types": "./proposals/ProposalKinds.d.ts",
-      "require": "./cjs/proposals/ProposalKinds.js",
-      "default": "./cjs/proposals/ProposalKinds.js"
+      "types": "./build/proposals/ProposalKinds.d.ts",
+      "require": "./build/cjs/proposals/ProposalKinds.js",
+      "default": "./build/cjs/proposals/ProposalKinds.js"
     },
     "./proposals/ResourceId.js": {
-      "types": "./proposals/ResourceId.d.ts",
-      "require": "./cjs/proposals/ResourceId.js",
-      "default": "./proposals/ResourceId.js"
+      "types": "./build/proposals/ResourceId.d.ts",
+      "require": "./build/cjs/proposals/ResourceId.js",
+      "default": "./build/proposals/ResourceId.js"
     },
     "./cjs/proposals/ResourceId.js": {
-      "types": "./proposals/ResourceId.d.ts",
-      "require": "./cjs/proposals/ResourceId.js",
-      "default": "./cjs/proposals/ResourceId.js"
+      "types": "./build/proposals/ResourceId.d.ts",
+      "require": "./build/cjs/proposals/ResourceId.js",
+      "default": "./build/cjs/proposals/ResourceId.js"
     }
   },
   "publishConfig": {
@@ -155,7 +155,7 @@
   },
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
-    "@polkadot/util": "10.1.1",
+    "@polkadot/util": "10.1.5",
     "@webb-tools/wasm-utils": "0.1.4-96",
     "bignumber.js": "^9.0.0",
     "circomlibjs": "0.0.8",

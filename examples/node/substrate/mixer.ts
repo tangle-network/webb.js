@@ -1,7 +1,7 @@
 import { fetchRPCTreeLeaves, polkadotTx, preparePolkadotApi, transferBalance } from '../utils.js';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
-import { Note, NoteGenInput, ArkworksProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core/src/index.js';
+import { Note, NoteGenInput, ArkworksProvingManager, ProvingManagerSetupInput } from '@webb-tools/sdk-core/index.js';
 import path from 'path';
 import fs from 'fs';
 import { hexToU8a, u8aToHex } from '@polkadot/util';

@@ -31,10 +31,13 @@
   },
   "repository": "https://github.com/webb-tools/webb.js.git",
   "dependencies": {
-    "@polkadot/api": "8.14.1",
-    "@polkadot/keyring": "10.1.1",
+    "@polkadot/api": "9.2.3",
+    "@polkadot/keyring": "10.1.5",
     "@webb-tools/api": "0.1.4-96",
     "@webb-tools/sdk-core": "0.1.4-96",
+    "@webb-tools/vbridge": "0.2.5",
+    "@webb-tools/utils": "0.2.5",
+    "@webb-tools/tokens": "0.2.5",
     "ethers": "5.5.1",
     "ganache": "7.4.1"
   }

@@ -42,8 +42,8 @@
   },
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
-    "@polkadot/api": "8.14.1",
-    "@polkadot/rpc-core": "8.14.1",
+    "@polkadot/api": "9.2.3",
+    "@polkadot/rpc-core": "9.2.3",
     "@webb-tools/types": "0.1.4-96"
   }
 }

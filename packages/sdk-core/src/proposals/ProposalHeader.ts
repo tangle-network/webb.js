@@ -60,7 +60,7 @@ export class ProposalHeader implements IProposalHeader {
     const proposalHeader = new Uint8Array(40);
 
     proposalHeader.set(this.resourceId.toU8a(), 0);
-    proposalHeader.set(this.functionSignature, 32);
+    proposalHeader.set(this.functionSignature.slice(0, 4), 32);
     const buf = Buffer.allocUnsafe(4);
 
     buf.writeUInt32BE(this.nonce, 0);

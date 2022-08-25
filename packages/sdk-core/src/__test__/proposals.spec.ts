@@ -11,7 +11,7 @@ import { AnchorUpdateProposal } from '../proposals/ProposalKinds.js';
 import { ResourceId } from '../proposals/ResourceId.js';
 
 describe('test various conversion functions', () => {
-  it('should encode and decode primitive proposal types correctly', () => {
+  it('should encode and decode anchor update proposal types correctly', () => {
     const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
     const chainId = 0xcafe;
     const chainType = ChainType.EVM;

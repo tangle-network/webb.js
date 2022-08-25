@@ -38,12 +38,14 @@ export class AnchorUpdateProposal implements IAnchorUpdateProposal {
   }
 
   toU8a (): Uint8Array {
+    const merkleRootBytesLength = 32;
+    const rIdBytesLength = 32;
     const header = this.header.toU8a();
-    const updateProposal = new Uint8Array(40 + 32 + 32);
+    const updateProposal = new Uint8Array(header.length + merkleRootBytesLength + rIdBytesLength);
 
     updateProposal.set(header, 0); // 0 -> 40
 
-    const merkleRoot = hexToU8a(this.merkleRoot).slice(0, 32);
+    const merkleRoot = hexToU8a(this.merkleRoot, merkleRootBytesLength * 8);
 
     updateProposal.set(merkleRoot, 40); // 40 -> 72
     updateProposal.set(this.srcResourceId.toU8a(), 72); // 72 -> 104
@@ -82,10 +84,11 @@ export class TokenAddProposal implements ITokenAddProposal {
 
   toU8a (): Uint8Array {
     const header = this.header.toU8a();
-    const tokenAddProposal = new Uint8Array(40 + 20);
+    const addressBytesLength = 20;
+    const tokenAddProposal = new Uint8Array(header.length + 20);
 
     tokenAddProposal.set(header, 0); // 0 -> 40
-    tokenAddProposal.set(hexToU8a(this.newTokenAddress).slice(0, 20), 40); // 40 -> 60
+    tokenAddProposal.set(hexToU8a(this.newTokenAddress, addressBytesLength * 8), 40); // 40 -> 60
 
     return tokenAddProposal;
   }
@@ -120,10 +123,11 @@ export class TokenRemoveProposal implements ITokenRemoveProposal {
 
   toU8a (): Uint8Array {
     const header = this.header.toU8a();
-    const tokenRemoveProposal = new Uint8Array(40 + 20);
+    const addressBytesLength = 20;
+    const tokenRemoveProposal = new Uint8Array(header.length + addressBytesLength);
 
     tokenRemoveProposal.set(header, 0); // 0 -> 40
-    tokenRemoveProposal.set(hexToU8a(this.removeTokenAddress).slice(0, 20), 40); // 40 -> 60
+    tokenRemoveProposal.set(hexToU8a(this.removeTokenAddress, addressBytesLength * 8), 40); // 40 -> 60
 
     return tokenRemoveProposal;
   }
@@ -157,11 +161,12 @@ export class WrappingFeeUpdateProposal implements IWrappingFeeUpdateProposal {
   }
 
   toU8a (): Uint8Array {
+    const newFeeBytesLength = 2;
     const header = this.header.toU8a();
-    const wrappingFeeUpdateProposal = new Uint8Array(40 + 2);
+    const wrappingFeeUpdateProposal = new Uint8Array(header.length + newFeeBytesLength);
 
     wrappingFeeUpdateProposal.set(header, 0); // 0 -> 40
-    wrappingFeeUpdateProposal.set(hexToU8a(this.newFee).slice(0, 2), 40); // 40 -> 42
+    wrappingFeeUpdateProposal.set(hexToU8a(this.newFee, newFeeBytesLength * 8), 40); // 40 -> 42
 
     return wrappingFeeUpdateProposal;
   }
@@ -195,11 +200,12 @@ export class MinWithdrawalLimitProposal implements IMinWithdrawalLimitProposal {
   }
 
   toU8a (): Uint8Array {
+    const limitBytesLength = 32;
     const header = this.header.toU8a();
-    const minWithdrawalLimitProposal = new Uint8Array(40 + 32);
+    const minWithdrawalLimitProposal = new Uint8Array(header.length + limitBytesLength);
 
     minWithdrawalLimitProposal.set(header, 0); // 0 -> 40
-    minWithdrawalLimitProposal.set(hexToU8a(this.minWithdrawalLimitBytes).slice(0, 32), 40); // 40 -> 72
+    minWithdrawalLimitProposal.set(hexToU8a(this.minWithdrawalLimitBytes, limitBytesLength * 8), 40); // 40 -> 72
 
     return minWithdrawalLimitProposal;
   }
@@ -233,11 +239,12 @@ export class MaxDepositLimitProposal implements IMaxDepositLimitProposal {
   }
 
   toU8a (): Uint8Array {
+    const limitBytesLength = 32;
     const header = this.header.toU8a();
-    const maxDepositLimitProposal = new Uint8Array(40 + 32);
+    const maxDepositLimitProposal = new Uint8Array(header.length + limitBytesLength);
 
     maxDepositLimitProposal.set(header, 0); // 0 -> 40
-    maxDepositLimitProposal.set(hexToU8a(this.maxDepositLimitBytes).slice(0, 32), 40); // 40 -> 72
+    maxDepositLimitProposal.set(hexToU8a(this.maxDepositLimitBytes, limitBytesLength * 8), 40); // 40 -> 72
 
     return maxDepositLimitProposal;
   }
@@ -278,12 +285,14 @@ export class ResourceIdUpdateProposal implements IResourceIdUpdateProposal {
   }
 
   toU8a (): Uint8Array {
+    const rIdBytesLength = 32;
+    const addressBytesLength = 20;
     const header = this.header.toU8a();
-    const resourceIdUpdateProposal = new Uint8Array(40 + 32 + 20);
+    const resourceIdUpdateProposal = new Uint8Array(header.length + rIdBytesLength + addressBytesLength);
 
     resourceIdUpdateProposal.set(header, 0); // 0 -> 40
-    resourceIdUpdateProposal.set(hexToU8a(this.newResourceId).slice(0, 32), 40); // 40 -> 72
-    resourceIdUpdateProposal.set(hexToU8a(this.handlerAddress).slice(0, 20), 72); // 72 -> 92
+    resourceIdUpdateProposal.set(hexToU8a(this.newResourceId, rIdBytesLength * 8), 40); // 40 -> 72
+    resourceIdUpdateProposal.set(hexToU8a(this.handlerAddress, addressBytesLength * 8), 72); // 72 -> 92
 
     return resourceIdUpdateProposal;
   }
@@ -317,11 +326,12 @@ export class SetTreasuryHandlerProposal implements ISetTreasuryHandlerProposal {
   }
 
   toU8a (): Uint8Array {
+    const addressBytesLength = 20;
     const header = this.header.toU8a();
-    const setTreasuryHandlerProposal = new Uint8Array(40 + 20);
+    const setTreasuryHandlerProposal = new Uint8Array(header.length + addressBytesLength);
 
     setTreasuryHandlerProposal.set(header, 0); // 0 -> 40
-    setTreasuryHandlerProposal.set(hexToU8a(this.newTreasuryHandler).slice(0, 20), 40); // 40 -> 60
+    setTreasuryHandlerProposal.set(hexToU8a(this.newTreasuryHandler, addressBytesLength * 8), 40); // 40 -> 60
 
     return setTreasuryHandlerProposal;
   }
@@ -355,11 +365,12 @@ export class SetVerifierProposal implements ISetVerifierProposal {
   }
 
   toU8a (): Uint8Array {
+    const addressBytesLength = 20;
     const header = this.header.toU8a();
-    const setVerifierProposal = new Uint8Array(40 + 20);
+    const setVerifierProposal = new Uint8Array(header.length + addressBytesLength);
 
     setVerifierProposal.set(header, 0); // 0 -> 40
-    setVerifierProposal.set(hexToU8a(this.newVerifier).slice(0, 20), 40); // 40 -> 60
+    setVerifierProposal.set(hexToU8a(this.newVerifier, addressBytesLength * 8), 40); // 40 -> 60
 
     return setVerifierProposal;
   }
@@ -393,11 +404,12 @@ export class FeeRecipientUpdateProposal implements IFeeRecipientUpdateProposal {
   }
 
   toU8a (): Uint8Array {
+    const addressBytesLength = 20;
     const header = this.header.toU8a();
-    const feeRecipientUpdateProposal = new Uint8Array(40 + 20);
+    const feeRecipientUpdateProposal = new Uint8Array(header.length + addressBytesLength);
 
     feeRecipientUpdateProposal.set(header, 0); // 0 -> 40
-    feeRecipientUpdateProposal.set(hexToU8a(this.newFeeRecipient).slice(0, 20), 40); // 40 -> 60
+    feeRecipientUpdateProposal.set(hexToU8a(this.newFeeRecipient, addressBytesLength * 8), 40); // 40 -> 60
 
     return feeRecipientUpdateProposal;
   }
@@ -446,13 +458,15 @@ export class RescueTokensProposal implements IRescueTokensProposal {
   }
 
   toU8a (): Uint8Array {
+    const addressBytesLength = 20;
+    const amountBytesLength = 32;
     const header = this.header.toU8a();
-    const rescueTokensProposal = new Uint8Array(40 + 20 + 20 + 32);
+    const rescueTokensProposal = new Uint8Array(header.length + addressBytesLength + addressBytesLength + amountBytesLength);
 
     rescueTokensProposal.set(header, 0); // 0 -> 40
-    rescueTokensProposal.set(hexToU8a(this.tokenAddress).slice(0, 20), 40); // 40 -> 60
-    rescueTokensProposal.set(hexToU8a(this.toAddress).slice(0, 20), 60); // 60 -> 80
-    rescueTokensProposal.set(hexToU8a(this.amount).slice(0, 32), 80); // 80 -> 112
+    rescueTokensProposal.set(hexToU8a(this.tokenAddress, addressBytesLength * 8), 40); // 40 -> 60
+    rescueTokensProposal.set(hexToU8a(this.toAddress, addressBytesLength * 8), 60); // 60 -> 80
+    rescueTokensProposal.set(hexToU8a(this.amount, amountBytesLength * 8), 80); // 80 -> 112
 
     return rescueTokensProposal;
   }
