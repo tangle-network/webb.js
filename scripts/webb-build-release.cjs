@@ -95,8 +95,24 @@ function npmPublish() {
     return;
   }
 
+  // Before publishing, copy the package.json with updated versions from the root
+  // package folder and into the root of the published ('build') folder
   rimraf.sync('build/package.json');
-  ['LICENSE', 'README.md', 'package.json'].forEach((file) => copySync(file, 'build'));
+
+  // take the package.json defined in the module and strip out the '/build/'
+  // in the export paths before copying to the output 'build' folder for publishing.
+  // The 'build/' in the path exists for packages to resolve properly while using
+  // webb.js locally.
+  //    e.g. the '@webb-tools/test-utils' package needs this to properly resolve
+  //         methods in '@webb-tools/sdk-core' because it imports '@webb-tools/utils'
+  //         which uses '@webb-tools/sdk-core' in its dependencies. 
+  const raw = fs.readFileSync('./package.json');
+  const pkg = JSON.parse(raw);
+  const pkgString = JSON.stringify(pkg);
+  const newPkgString = pkgString.replaceAll('/build/', '/');
+
+  ['LICENSE', 'README.md'].forEach((file) => copySync(file, 'build'));
+  fs.writeFileSync('./build/package.json', newPkgString);
   console.log('args', process.argv);
 
   process.chdir('build');
