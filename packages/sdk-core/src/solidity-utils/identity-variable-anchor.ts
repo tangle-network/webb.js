@@ -61,6 +61,7 @@ export function generateIdentityVAnchorWitnessInput (
   }));
 
   const input = {
+    privateKey: privateKey,
     semaphorePathIndices: idMerkleProofs.map((x) => x.pathIndex),
     semaphorePathElements: idMerkleProofs.map((x) => x.pathElements),
     semaphoreRoots: identityRoots.map((x) => x.toString()),
