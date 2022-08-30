@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/api",
-  "version": "0.1.4-99",
+  "version": "0.1.4-100",
   "description": "Webb JS API",
   "type": "module",
   "author": "Webb Developers <drew@webb.tools>",
@@ -37,6 +37,6 @@
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
     "@polkadot/api": "9.2.3",
-    "@webb-tools/api-derive": "0.1.4-99"
+    "@webb-tools/api-derive": "0.1.4-100"
   }
 }
