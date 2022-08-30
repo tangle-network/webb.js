@@ -20,14 +20,16 @@ export class LocalEvmChain {
   public static async init (
     name: string,
     evmId: number,
-    initalBalances: GanacheAccounts[]
+    initalBalances: GanacheAccounts[],
+    options?: any
   ): Promise<LocalEvmChain> {
     const endpoint = `http://localhost:${evmId}`;
     const server = await startGanacheServer(evmId, evmId, initalBalances, {
       miner: {
         blockTime: 1
       },
-      quiet: true
+      quiet: true,
+      ...options
     });
     const chain = new LocalEvmChain(endpoint, evmId, server);
 
