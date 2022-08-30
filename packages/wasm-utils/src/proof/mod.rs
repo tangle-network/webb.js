@@ -481,6 +481,68 @@ pub struct VAnchorProofInput {
 	pub output_utxos: Option<[JsUtxo; 2]>,
 }
 
+#[derive(Debug, Clone)]
+pub struct IdentityVAnchorProofPayload {
+	pub exponentiation: i8,
+	pub width: usize,
+	pub curve: Curve,
+	pub backend: Backend,
+	pub pk: Vec<u8>,
+
+	// Semaphore inputs
+	pub private_key: Vec<u8>,
+	pub identity_leaves: BTreeMap<u64, Vec<Vec<u8>>>,
+	pub identity_indices: Vec<u64>,
+	pub identity_roots: Vec<Vec<u8>>,
+
+	pub vanchor_leaves: BTreeMap<u64, Vec<Vec<u8>>>,
+	pub ext_data_hash: Vec<u8>,
+	/// get roots for linkable tree
+	/// Available set can be of length 2 , 16 , 32
+	pub vanchor_roots: Vec<Vec<u8>>,
+	// Notes for UTXOs
+	pub secret: Vec<JsUtxo>,
+	// Leaf indices
+	pub vanchor_indices: Vec<u64>,
+	// Chain Id
+	pub chain_id: u64,
+	// Public amount
+	pub public_amount: i128,
+	// ouput utxos
+	pub output_utxos: [JsUtxo; 2],
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct IdentityVAnchorProofInput {
+	pub exponentiation: Option<i8>,
+	pub width: Option<usize>,
+	pub curve: Option<Curve>,
+	pub backend: Option<Backend>,
+	pub pk: Option<Vec<u8>>,
+
+	// Semaphore inputs
+	pub private_key: Option<Vec<u8>>,
+	pub identity_leaves: Option<BTreeMap<u64, Vec<Vec<u8>>>>,
+	pub identity_indices: Option<Vec<u64>>,
+	pub identity_roots: Option<Vec<Vec<u8>>>,
+
+	pub vanchor_leaves: Option<BTreeMap<u64, Vec<Vec<u8>>>>,
+	pub ext_data_hash: Option<Vec<u8>>,
+	/// get roots for linkable tree
+	/// Available set can be of length 2 , 16 , 32
+	pub vanchor_roots: Option<Vec<Vec<u8>>>,
+	// Notes for UTXOs
+	pub secret: Option<Vec<JsUtxo>>,
+	// Leaf indices
+	pub vanchor_indices: Option<Vec<u64>>,
+	// Chain Id
+	pub chain_id: Option<u128>,
+	// Public amount
+	pub public_amount: Option<i128>,
+	// ouput utxos
+	pub output_utxos: Option<[JsUtxo; 2]>,
+}
+
 pub fn generic_of_jsval<T: FromWasmAbi<Abi = u32>>(js: JsValue, classname: &str) -> Result<T, JsValue> {
 	use js_sys::{Object, Reflect};
 	let ctor_name = Object::get_prototype_of(&js).constructor().name();
@@ -641,11 +703,123 @@ impl VAnchorProofInput {
 	}
 }
 
+impl IdentityVAnchorProofInput {
+	pub fn build(self) -> Result<IdentityVAnchorProofPayload, OperationError> {
+		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
+		let private_key = self.private_key.ok_or(OpStatusCode::InvalidProvingKey)?;
+		let secret = self.secret.ok_or(OpStatusCode::InvalidNoteSecrets)?;
+		let vanchor_leaves = self.vanchor_leaves.ok_or(OpStatusCode::InvalidLeaves)?;
+		let identity_leaves = self.identity_leaves.ok_or(OpStatusCode::InvalidLeaves)?;
+		let ext_data_hash = self.ext_data_hash.ok_or(OpStatusCode::InvalidExtDataHash)?;
+		let vanchor_roots = self.vanchor_roots.ok_or(OpStatusCode::InvalidRoots)?;
+		let identity_roots = self.identity_roots.ok_or(OpStatusCode::InvalidRoots)?;
+		let chain_id = self.chain_id.ok_or(OpStatusCode::InvalidChainId)?;
+		let vanchor_indices = self.vanchor_indices.ok_or(OpStatusCode::InvalidIndices)?;
+		let identity_indices = self.identity_indices.ok_or(OpStatusCode::InvalidIndices)?;
+		let public_amount = self.public_amount.ok_or(OpStatusCode::InvalidPublicAmount)?;
+		let output_utxos = self.output_utxos.ok_or(OpStatusCode::InvalidPublicAmount)?;
+
+		let exponentiation = self.exponentiation.unwrap_or(5);
+		let width = self.width.unwrap_or(3);
+		let curve = self.curve.unwrap_or(Curve::Bn254);
+		let backend = self.backend.unwrap_or(Backend::Arkworks);
+
+		// Input UTXO should have the same chain_id
+		// For default UTXOS the amount and the index should be `0`
+		// Duplicate indices is ONLY allowed for the default UTXOs
+		// chain_id of the first item in the list
+		let mut invalid_utxo_chain_id_indices = vec![];
+		let mut invalid_utxo_dublicate_nullifiers = vec![];
+		let utxos_chain_id = secret[0].clone().chain_id_raw();
+		// validate the all inputs share the same chain_id
+		secret.iter().enumerate().for_each(|(index, utxo)| {
+			if utxo.get_chain_id_raw() != utxos_chain_id {
+				invalid_utxo_chain_id_indices.push(index)
+			}
+		});
+		let non_default_utxo = secret
+			.iter()
+			.enumerate()
+			.filter(|(_, utxo)| {
+				// filter for non-default utxos
+				utxo.get_amount_raw() != 0 && utxo.get_index().unwrap_or(0) != 0
+			})
+			.collect::<Vec<_>>();
+		non_default_utxo.iter().for_each(|(index, utxo)| {
+			let has_dublicate = non_default_utxo
+				.iter()
+				.find(|(root_index, root_utxo)| root_index != index && root_utxo.get_index() == utxo.get_index());
+			if has_dublicate.is_some() {
+				invalid_utxo_dublicate_nullifiers.push(index)
+			}
+		});
+		if !invalid_utxo_chain_id_indices.is_empty() || !invalid_utxo_dublicate_nullifiers.is_empty() {
+			let message = format!(
+				"Invalid UTXOs: utxo indices has invalid chain_id {:?} ,non-default utxos with an duplicate index {:?}",
+				invalid_utxo_chain_id_indices, invalid_utxo_dublicate_nullifiers
+			);
+			let mut op: OperationError =
+				OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message);
+			op.data = Some(format!(
+				"{{ duplicateIndices:{:?} , invalidChainId:{:?} }}",
+				invalid_utxo_chain_id_indices, invalid_utxo_dublicate_nullifiers
+			));
+			return Err(op);
+		}
+
+		// validate amounts
+		let mut in_amount = public_amount;
+		secret.iter().for_each(|utxo| {
+			let utxo_amount: i128 = utxo
+				.get_amount_raw()
+				.try_into()
+				.expect("Failed to convert utxo value to i128");
+			in_amount += utxo_amount
+		});
+		let mut out_amount = 0u128;
+		output_utxos
+			.iter()
+			.for_each(|output_config| out_amount += output_config.get_amount_raw());
+		let out_amount: i128 = out_amount
+			.try_into()
+			.expect("Failed to convert accumulated in amounts  value to i128");
+		if out_amount != in_amount {
+			let message = format!(
+				"Output amount and input amount  don't match input({}) != output({})",
+				in_amount, out_amount
+			);
+			let mut oe = OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message);
+			oe.data = Some(format!("{{ inputAmount:{} ,outputAmount:{}}}", in_amount, out_amount));
+			return Err(oe);
+		}
+		Ok(IdentityVAnchorProofPayload {
+			exponentiation,
+			width,
+			curve,
+			backend,
+			pk,
+			private_key,
+			identity_leaves,
+			identity_indices,
+			identity_roots,
+			vanchor_leaves,
+			ext_data_hash,
+			vanchor_roots,
+			secret,
+			vanchor_indices,
+			chain_id: chain_id.try_into().unwrap(),
+			public_amount,
+			output_utxos,
+		})
+	}
+}
+
 #[derive(Debug, Clone)]
 pub enum ProofInput {
 	Mixer(MixerProofPayload),
 	Anchor(AnchorProofPayload),
 	VAnchor(Box<VAnchorProofPayload>),
+	IdentityVAnchor(Box<IdentityVAnchorProofPayload>),
 }
 
 impl ProofInput {
@@ -707,6 +881,7 @@ pub enum ProofInputBuilder {
 	Mixer(MixerProofInput),
 	Anchor(AnchorProofInput),
 	VAnchor(Box<VAnchorProofInput>),
+	IdentityVAnchor(Box<IdentityVAnchorProofInput>),
 }
 impl ProofInputBuilder {
 	pub fn set_input_utxos(&mut self, utxo_list: Vec<JsUtxo>) -> Result<(), OperationError> {
@@ -909,6 +1084,9 @@ impl ProofInputBuilder {
 			ProofInputBuilder::VAnchor(input) => {
 				input.pk = Some(pk);
 			}
+			ProofInputBuilder::IdentityVAnchor(input) => {
+				input.pk = Some(pk);
+			}
 		}
 		Ok(())
 	}
@@ -922,6 +1100,9 @@ impl ProofInputBuilder {
 				input.exponentiation = Some(exponentiation);
 			}
 			ProofInputBuilder::VAnchor(input) => {
+				input.exponentiation = Some(exponentiation);
+			}
+			ProofInputBuilder::IdentityVAnchor(input) => {
 				input.exponentiation = Some(exponentiation);
 			}
 		}
@@ -939,6 +1120,9 @@ impl ProofInputBuilder {
 			ProofInputBuilder::VAnchor(input) => {
 				input.width = Some(width);
 			}
+			ProofInputBuilder::IdentityVAnchor(input) => {
+				input.width = Some(width);
+			}
 		}
 		Ok(())
 	}
@@ -952,6 +1136,9 @@ impl ProofInputBuilder {
 				input.curve = Some(curve);
 			}
 			ProofInputBuilder::VAnchor(input) => {
+				input.curve = Some(curve);
+			}
+			ProofInputBuilder::IdentityVAnchor(input) => {
 				input.curve = Some(curve);
 			}
 		}
@@ -969,6 +1156,9 @@ impl ProofInputBuilder {
 			ProofInputBuilder::VAnchor(input) => {
 				input.backend = Some(backend);
 			}
+			ProofInputBuilder::IdentityVAnchor(input) => {
+				input.backend = Some(backend);
+			}
 		}
 		Ok(())
 	}
@@ -982,6 +1172,9 @@ impl ProofInputBuilder {
 				input.chain_id = Some(chain_id.try_into().map_err(|_| OpStatusCode::InvalidTargetChain)?);
 			}
 			ProofInputBuilder::VAnchor(input) => {
+				input.chain_id = Some(chain_id);
+			}
+			ProofInputBuilder::IdentityVAnchor(input) => {
 				input.chain_id = Some(chain_id);
 			}
 		}
@@ -1010,6 +1203,7 @@ impl JsProofInputBuilder {
 			NoteProtocol::Mixer => ProofInputBuilder::Mixer(Default::default()),
 			NoteProtocol::Anchor => ProofInputBuilder::Anchor(Default::default()),
 			NoteProtocol::VAnchor => ProofInputBuilder::VAnchor(Default::default()),
+			NoteProtocol::IdentityVAnchor => ProofInputBuilder::IdentityVAnchor(Default::default()),
 		};
 
 		Ok(JsProofInputBuilder {
@@ -1242,8 +1436,12 @@ impl JsProofInputBuilder {
 				ProofInput::Anchor(anchor_payload)
 			}
 			ProofInputBuilder::VAnchor(vanchor_proof_input) => {
-				let vanchor_payload = vanchor_proof_input.build()?;
+				let vanchor_payload: VAnchorProofPayload = vanchor_proof_input.build()?;
 				ProofInput::VAnchor(Box::new(vanchor_payload))
+			}
+			ProofInputBuilder::IdentityVAnchor(identity_vanchor_proof_input) => {
+				let identity_vanchor_payload = identity_vanchor_proof_input.build()?;
+				ProofInput::IdentityVAnchor(Box::new(identity_vanchor_payload))
 			}
 		};
 		Ok(proof_input)

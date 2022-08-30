@@ -144,6 +144,7 @@ pub enum NoteProtocol {
 	Mixer,
 	Anchor,
 	VAnchor,
+	IdentityVAnchor,
 }
 
 impl fmt::Display for NoteVersion {

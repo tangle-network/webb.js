@@ -109,6 +109,7 @@ impl JsNote {
 	pub fn mutate_index(&mut self, index: u64) -> Result<(), OperationError> {
 		match self.protocol {
 			NoteProtocol::VAnchor => {}
+			NoteProtocol::IdentityVAnchor => {}
 			_ => {
 				let message = "Index secret can be set only for VAnchor".to_string();
 				let oe = OperationError::new_with_message(OpStatusCode::InvalidNoteProtocol, message);
@@ -236,6 +237,27 @@ impl JsNote {
 						Ok(JsLeaf {
 							inner: JsLeafInner::VAnchor(utxo),
 						})
+					} else {
+						let message = format!("Invalid secret format for protocol {}", self.protocol);
+						Err(OperationError::new_with_message(
+							OpStatusCode::InvalidNoteSecrets,
+							message,
+						))
+					}
+				}
+			},
+			NoteProtocol::IdentityVAnchor => match self.version {
+				NoteVersion::V1 => {
+					let message = "VAnchor protocol isn't supported in note v1".to_string();
+					Err(OperationError::new_with_message(
+						OpStatusCode::FailedToGenerateTheLeaf,
+						message,
+					))
+				}
+				NoteVersion::V2 => {
+					// TODO: secrets.len is prob wrong too
+					if self.secrets.len() == 4 {
+						unimplemented!();
 					} else {
 						let message = format!("Invalid secret format for protocol {}", self.protocol);
 						Err(OperationError::new_with_message(
@@ -648,6 +670,29 @@ impl JsNoteBuilder {
 					// secrets
 					vec![chain_id, amount, blinding, secret_key]
 				}
+				NoteProtocol::IdentityVAnchor => {
+					unimplemented!();
+					let blinding = self.blinding;
+					let private_key = self.private_key;
+					let utxo = vanchor::get_leaf_with_private_raw(
+						curve.unwrap_or(Curve::Bn254),
+						width.unwrap_or(5),
+						exponentiation.unwrap_or(5),
+						private_key,
+						blinding,
+						chain_id,
+						amount.unwrap_or_else(|| "0".to_string()).parse().unwrap(),
+						index,
+					)?;
+
+					let chain_id = utxo.get_chain_id_bytes();
+					let amount = utxo.get_amount();
+					let blinding = utxo.get_blinding();
+					let secret_key = utxo.get_secret_key();
+
+					// secrets
+					vec![chain_id, amount, blinding, secret_key]
+				}
 			},
 			Some(secrets) => {
 				// Skip validation for note V1 , V1 secrets are just of length 1
@@ -671,6 +716,15 @@ impl JsNoteBuilder {
 							}
 						}
 						NoteProtocol::VAnchor => {
+							if secrets.len() != 4 {
+								let message = "VAnchor secrets length should be 4 in length".to_string();
+								let operation_error =
+									OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
+								return Err(operation_error.into());
+							}
+						}
+						NoteProtocol::IdentityVAnchor => {
+							unimplemented!();
 							if secrets.len() != 4 {
 								let message = "VAnchor secrets length should be 4 in length".to_string();
 								let operation_error =
@@ -877,6 +931,10 @@ impl JsNote {
 	pub fn get_utxo(&self) -> Result<JsUtxo, OperationError> {
 		match self.protocol {
 			NoteProtocol::VAnchor => {
+				let leaf = self.get_leaf_and_nullifier()?;
+				leaf.vanchor_leaf()
+			}
+			NoteProtocol::IdentityVAnchor => {
 				let leaf = self.get_leaf_and_nullifier()?;
 				leaf.vanchor_leaf()
 			}
