@@ -1,5 +1,3 @@
-import { assert } from 'chai';
-
 import { u8aToHex } from '@polkadot/util';
 
 import { BE } from './index.js';
@@ -44,7 +42,9 @@ export class ProposalHeader implements IProposalHeader {
    * Converts a 40-byte Uint8Array into a proposal header.
    */
   static fromBytes (bytes: Uint8Array): ProposalHeader {
-    assert(bytes.length === 40, 'bytes must be 40 bytes');
+    if (bytes.length !== 40) {
+      throw new Error('bytes must be 40 bytes');
+    }
 
     const resourceId = ResourceId.fromBytes(bytes.slice(0, 32));
     const functionSignature = bytes.slice(32, 36);
