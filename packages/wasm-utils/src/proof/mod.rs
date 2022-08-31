@@ -1,6 +1,8 @@
 #![allow(clippy::unused_unit)]
 
-use core::convert::{TryFrom, TryInto};
+use crate::proof::mixer::{MixerProof, MixerProofInput, MixerProofPayload};
+use crate::proof::vanchor::{VAnchorProof, VAnchorProofInput, VAnchorProofPayload};
+use core::convert::{TryFrom};
 
 use ark_bls12_381::Bls12_381;
 use ark_bn254::{Bn254, Fr as Bn254Fr};
@@ -24,18 +26,19 @@ use crate::types::{
 };
 use crate::utxo::JsUtxo;
 use crate::{
-	AnchorR1CSProverBn254_30_2, MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_16_16_2,
-	VAnchorR1CSProverBn254_30_16_2_2, VAnchorR1CSProverBn254_30_2_16_2, VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF,
-	TREE_HEIGHT,
+	MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_16_16_2, VAnchorR1CSProverBn254_30_16_2_2,
+	VAnchorR1CSProverBn254_30_2_16_2, VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF, TREE_HEIGHT,
 };
 
-mod anchor;
 pub mod ext_data;
-mod mixer;
+pub mod mixer;
+pub mod vanchor;
+
+#[cfg(test)]
 mod test;
+
 #[cfg(test)]
 mod test_utils;
-mod vanchor;
 
 pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
 	let mut truncated_bytes = t[..20].to_vec();
@@ -43,63 +46,9 @@ pub fn truncate_and_pad(t: &[u8]) -> Vec<u8> {
 	truncated_bytes
 }
 
-#[wasm_bindgen]
-#[derive(Debug, Clone)]
-pub struct VAnchorProof {
-	#[wasm_bindgen(skip)]
-	pub proof: Vec<u8>,
-	#[wasm_bindgen(skip)]
-	pub public_inputs: Vec<Vec<u8>>,
-	#[wasm_bindgen(skip)]
-	pub output_notes: Vec<JsNote>,
-	#[wasm_bindgen(skip)]
-	pub input_utxos: Vec<JsUtxo>,
-	#[wasm_bindgen(skip)]
-	pub public_amount: [u8; 32],
-}
-#[wasm_bindgen]
-impl VAnchorProof {
-	#[wasm_bindgen(getter)]
-	#[wasm_bindgen(js_name = publicInputs)]
-	pub fn public_inputs_raw(&self) -> Array {
-		let inputs: Array = self
-			.public_inputs
-			.iter()
-			.map(|x| JsString::from(hex::encode(x)))
-			.collect();
-		inputs
-	}
-
-	#[wasm_bindgen(getter)]
-	#[wasm_bindgen(js_name = outputNotes)]
-	pub fn output_notes(&self) -> Array {
-		let inputs: Array = self.output_notes.clone().into_iter().map(JsValue::from).collect();
-		inputs
-	}
-
-	#[wasm_bindgen(getter)]
-	#[wasm_bindgen(js_name = inputUtxos)]
-	pub fn inputs_utxos(&self) -> Array {
-		let inputs: Array = self.input_utxos.clone().into_iter().map(JsValue::from).collect();
-		inputs
-	}
-
-	#[wasm_bindgen(getter)]
-	pub fn proof(&self) -> JsString {
-		JsString::from(hex::encode(&self.proof))
-	}
-
-	#[wasm_bindgen(js_name = publicAmount)]
-	#[wasm_bindgen(getter)]
-	pub fn public_amount(&self) -> Uint8Array {
-		Uint8Array::from(self.public_amount.to_vec().as_slice())
-	}
-}
-
 #[derive(Debug, Clone)]
 pub enum ProofOutput {
 	Mixer(MixerProof),
-	Anchor(AnchorProof),
 	VAnchor(VAnchorProof),
 }
 
@@ -117,20 +66,10 @@ impl JsProofOutput {
 	pub fn output_protocol(&self) -> Protocol {
 		let protocol = match self.inner {
 			ProofOutput::Mixer(_) => "mixer",
-			ProofOutput::Anchor(_) => "anchor",
 			ProofOutput::VAnchor(_) => "vanchor",
 		};
 
 		JsValue::from(protocol).into()
-	}
-
-	#[wasm_bindgen(getter)]
-	#[wasm_bindgen(js_name = "anchorProof")]
-	pub fn anchor_proof(&self) -> Result<AnchorProof, OperationError> {
-		match self.inner.clone() {
-			ProofOutput::Anchor(proof) => Ok(proof),
-			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),
-		}
 	}
 
 	#[wasm_bindgen(getter)]
@@ -150,335 +89,6 @@ impl JsProofOutput {
 			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),
 		}
 	}
-}
-
-#[allow(clippy::unused_unit)]
-#[wasm_bindgen]
-#[derive(Debug, Clone)]
-pub struct MixerProof {
-	#[wasm_bindgen(skip)]
-	pub proof: Vec<u8>,
-	#[wasm_bindgen(skip)]
-	pub nullifier_hash: Vec<u8>,
-	#[wasm_bindgen(skip)]
-	pub root: Vec<u8>,
-	#[wasm_bindgen(skip)]
-	pub public_inputs: Vec<Vec<u8>>,
-	#[wasm_bindgen(skip)]
-	pub leaf: Vec<u8>,
-}
-#[wasm_bindgen]
-impl MixerProof {
-	#[wasm_bindgen(getter)]
-	pub fn proof(&self) -> JsString {
-		let proof_bytes = hex::encode(&self.proof);
-		proof_bytes.into()
-	}
-
-	#[wasm_bindgen(js_name = nullifierHash)]
-	#[wasm_bindgen(getter)]
-	pub fn nullifier_hash(&self) -> JsString {
-		let nullifier_bytes = hex::encode(&self.nullifier_hash);
-		nullifier_bytes.into()
-	}
-
-	#[wasm_bindgen(getter)]
-	pub fn root(&self) -> JsString {
-		let root = hex::encode(&self.root);
-		root.into()
-	}
-
-	#[wasm_bindgen(getter)]
-	#[wasm_bindgen(js_name = publicInputs)]
-	pub fn public_inputs_raw(&self) -> Array {
-		let inputs: Array = self
-			.public_inputs
-			.iter()
-			.map(|x| JsString::from(hex::encode(x)))
-			.collect();
-		inputs
-	}
-
-	#[wasm_bindgen(getter)]
-	#[wasm_bindgen(js_name = leaf)]
-	pub fn leaf(&self) -> Uint8Array {
-		let leaf = Uint8Array::from(self.leaf.as_slice());
-		leaf
-	}
-}
-
-#[wasm_bindgen]
-#[derive(Debug, Clone)]
-pub struct AnchorProof {
-	#[wasm_bindgen(skip)]
-	pub proof: Vec<u8>,
-	#[wasm_bindgen(skip)]
-	pub nullifier_hash: Vec<u8>,
-	#[wasm_bindgen(skip)]
-	pub root: Vec<u8>,
-	#[wasm_bindgen(skip)]
-	pub roots: Vec<Vec<u8>>,
-	#[wasm_bindgen(skip)]
-	pub public_inputs: Vec<Vec<u8>>,
-	#[wasm_bindgen(skip)]
-	pub leaf: Vec<u8>,
-}
-
-#[wasm_bindgen]
-impl AnchorProof {
-	#[wasm_bindgen(getter)]
-	pub fn proof(&self) -> JsString {
-		let proof_bytes = hex::encode(&self.proof);
-		proof_bytes.into()
-	}
-
-	#[wasm_bindgen(js_name = nullifierHash)]
-	#[wasm_bindgen(getter)]
-	pub fn nullifier_hash(&self) -> JsString {
-		let nullifier_bytes = hex::encode(&self.nullifier_hash);
-		nullifier_bytes.into()
-	}
-
-	#[wasm_bindgen(getter)]
-	pub fn root(&self) -> JsString {
-		let root = hex::encode(&self.root);
-		root.into()
-	}
-
-	#[wasm_bindgen(getter)]
-	pub fn roots(&self) -> Array {
-		let roots: Array = self.roots.iter().map(|i| JsString::from(hex::encode(i))).collect();
-		roots
-	}
-
-	#[wasm_bindgen(getter)]
-	#[wasm_bindgen(js_name = publicInputs)]
-	pub fn public_inputs_raw(&self) -> Array {
-		let inputs: Array = self
-			.public_inputs
-			.iter()
-			.map(|x| JsString::from(hex::encode(x)))
-			.collect();
-		inputs
-	}
-
-	#[wasm_bindgen(getter)]
-	#[wasm_bindgen(js_name = leaf)]
-	pub fn leaf(&self) -> Uint8Array {
-		let leaf = Uint8Array::from(self.leaf.as_slice());
-		leaf
-	}
-}
-
-#[derive(Debug, Clone)]
-pub struct MixerProofPayload {
-	pub exponentiation: i8,
-	pub width: usize,
-	pub curve: Curve,
-	pub backend: Backend,
-	pub secret: Vec<u8>,
-	pub nullifier: Vec<u8>,
-	pub recipient: Vec<u8>,
-	pub relayer: Vec<u8>,
-	pub pk: Vec<u8>,
-	pub refund: u128,
-	pub fee: u128,
-	pub chain_id: u128,
-	pub leaves: Vec<Vec<u8>>,
-	pub leaf_index: u64,
-}
-
-#[derive(Debug, Clone, Default)]
-pub struct MixerProofInput {
-	pub exponentiation: Option<i8>,
-	pub width: Option<usize>,
-	pub curve: Option<Curve>,
-	pub backend: Option<Backend>,
-	pub secret: Option<Vec<u8>>,
-	pub nullifier: Option<Vec<u8>>,
-	pub recipient: Option<Vec<u8>>,
-	pub relayer: Option<Vec<u8>>,
-	pub pk: Option<Vec<u8>>,
-	pub refund: Option<u128>,
-	pub fee: Option<u128>,
-	pub chain_id: Option<u128>,
-	pub leaves: Option<Vec<Vec<u8>>>,
-	pub leaf_index: Option<u64>,
-}
-
-impl MixerProofInput {
-	pub fn build(self) -> Result<MixerProofPayload, OperationError> {
-		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
-		let recipient = self.recipient.ok_or(OpStatusCode::InvalidRecipient)?;
-		let relayer = self.relayer.ok_or(OpStatusCode::InvalidRelayer)?;
-		let leaf_index = self.leaf_index.ok_or(OpStatusCode::InvalidLeafIndex)?;
-		let secret = self.secret.ok_or(OpStatusCode::InvalidNoteSecrets)?;
-		let nullifier = self.nullifier.ok_or(OpStatusCode::InvalidNoteSecrets)?;
-		let leaves = self.leaves.ok_or(OpStatusCode::InvalidLeaves)?;
-		let fee = self.fee.ok_or(OpStatusCode::InvalidFee)?;
-		let refund = self.refund.ok_or(OpStatusCode::InvalidRefund)?;
-
-		let exponentiation = self.exponentiation.unwrap_or(5);
-		let width = self.width.unwrap_or(3);
-		let curve = self.curve.unwrap_or(Curve::Bn254);
-		let backend = self.backend.unwrap_or(Backend::Arkworks);
-
-		let processed_relayer = truncate_and_pad(&relayer);
-		let processed_recipient = truncate_and_pad(&recipient);
-
-		Ok(MixerProofPayload {
-			exponentiation,
-			width,
-			curve,
-			backend,
-			secret,
-			nullifier,
-			recipient: processed_recipient,
-			relayer: processed_relayer,
-			pk,
-			refund,
-			fee,
-			chain_id: 0,
-			leaves,
-			leaf_index,
-		})
-	}
-}
-#[derive(Debug, Clone)]
-pub struct AnchorProofPayload {
-	pub exponentiation: i8,
-	pub width: usize,
-	pub curve: Curve,
-	pub backend: Backend,
-	pub secret: Vec<u8>,
-	pub nullifier: Vec<u8>,
-	pub recipient: Vec<u8>,
-	pub relayer: Vec<u8>,
-	pub pk: Vec<u8>,
-	pub refund: u128,
-	pub fee: u128,
-	pub chain_id: u64,
-	pub leaves: Vec<Vec<u8>>,
-	pub leaf_index: u64,
-	/// get roots for linkable tree
-	pub roots: Vec<Vec<u8>>,
-	/// EMPTY commitment if withdrawing [0u8;32]
-	/// not EMPTY if refreshing
-	pub refresh_commitment: [u8; 32],
-}
-
-#[derive(Debug, Clone, Default)]
-pub struct AnchorProofInput {
-	pub exponentiation: Option<i8>,
-	pub width: Option<usize>,
-	pub curve: Option<Curve>,
-	pub backend: Option<Backend>,
-	pub secret: Option<Vec<u8>>,
-	pub nullifier: Option<Vec<u8>>,
-	pub recipient: Option<Vec<u8>>,
-	pub relayer: Option<Vec<u8>>,
-	pub pk: Option<Vec<u8>>,
-	pub refund: Option<u128>,
-	pub fee: Option<u128>,
-	pub chain_id: Option<u64>,
-	pub leaves: Option<Vec<Vec<u8>>>,
-	pub leaf_index: Option<u64>,
-	/// get roots for linkable tree
-	pub roots: Option<Vec<Vec<u8>>>,
-	/// EMPTY commitment if withdrawing [0u8;32]
-	/// not EMPTY if refreshing
-	pub refresh_commitment: Option<[u8; 32]>,
-}
-impl AnchorProofInput {
-	pub fn build(self) -> Result<AnchorProofPayload, OperationError> {
-		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
-		let recipient = self.recipient.ok_or(OpStatusCode::InvalidRecipient)?;
-		let relayer = self.relayer.ok_or(OpStatusCode::InvalidRelayer)?;
-		let leaf_index = self.leaf_index.ok_or(OpStatusCode::InvalidLeafIndex)?;
-		let secret = self.secret.ok_or(OpStatusCode::InvalidNoteSecrets)?;
-		let nullifier = self.nullifier.ok_or(OpStatusCode::InvalidNullifer)?;
-		let leaves = self.leaves.ok_or(OpStatusCode::InvalidLeaves)?;
-		let fee = self.fee.ok_or(OpStatusCode::InvalidFee)?;
-		let refund = self.refund.ok_or(OpStatusCode::InvalidRefund)?;
-		let refresh_commitment = self.refresh_commitment.ok_or(OpStatusCode::InvalidLeaves)?;
-		let roots = self.roots.ok_or(OpStatusCode::InvalidLeaves)?;
-		let chain_id = self.chain_id.ok_or(OpStatusCode::InvalidTargetChain)?;
-
-		let exponentiation = self.exponentiation.unwrap_or(5);
-		let width = self.width.unwrap_or(3);
-		let curve = self.curve.unwrap_or(Curve::Bn254);
-		let backend = self.backend.unwrap_or(Backend::Arkworks);
-
-		let processed_relayer = truncate_and_pad(&relayer);
-		let processed_recipient = truncate_and_pad(&recipient);
-
-		Ok(AnchorProofPayload {
-			exponentiation,
-			width,
-			curve,
-			backend,
-			secret,
-			nullifier,
-			recipient: processed_recipient,
-			relayer: processed_relayer,
-			pk,
-			refund,
-			fee,
-			chain_id,
-			leaves,
-			leaf_index,
-			roots,
-			refresh_commitment,
-		})
-	}
-}
-
-#[derive(Debug, Clone)]
-pub struct VAnchorProofPayload {
-	pub exponentiation: i8,
-	pub width: usize,
-	pub curve: Curve,
-	pub backend: Backend,
-	pub pk: Vec<u8>,
-	pub leaves: BTreeMap<u64, Vec<Vec<u8>>>,
-	pub ext_data_hash: Vec<u8>,
-	/// get roots for linkable tree
-	/// Available set can be of length 2 , 16 , 32
-	pub roots: Vec<Vec<u8>>,
-	// Notes for UTXOs
-	pub secret: Vec<JsUtxo>,
-	// Leaf indices
-	pub indices: Vec<u64>,
-	// Chain Id
-	pub chain_id: u64,
-	// Public amount
-	pub public_amount: i128,
-	// utxo config
-	pub output_utxos: [JsUtxo; 2],
-}
-
-#[derive(Debug, Clone, Default)]
-pub struct VAnchorProofInput {
-	pub exponentiation: Option<i8>,
-	pub width: Option<usize>,
-	pub curve: Option<Curve>,
-	pub backend: Option<Backend>,
-	pub pk: Option<Vec<u8>>,
-	pub leaves: Option<BTreeMap<u64, Vec<Vec<u8>>>>,
-	pub ext_data_hash: Option<Vec<u8>>,
-	/// get roots for linkable tree
-	/// Available set can be of length 2 , 16 , 32
-	pub roots: Option<Vec<Vec<u8>>>,
-	// Notes for UTXOs
-	pub secret: Option<Vec<JsUtxo>>,
-	// Leaf indices
-	pub indices: Option<Vec<u64>>,
-	// Chain Id
-	pub chain_id: Option<u128>,
-	// Public amount
-	pub public_amount: Option<i128>,
-	// ouput utxos
-	pub output_utxos: Option<[JsUtxo; 2]>,
 }
 
 pub fn generic_of_jsval<T: FromWasmAbi<Abi = u32>>(js: JsValue, classname: &str) -> Result<T, JsValue> {
@@ -538,113 +148,9 @@ impl LeavesMapInput {
 	}
 }
 
-impl VAnchorProofInput {
-	pub fn build(self) -> Result<VAnchorProofPayload, OperationError> {
-		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
-		let secret = self.secret.ok_or(OpStatusCode::InvalidNoteSecrets)?;
-		let leaves = self.leaves.ok_or(OpStatusCode::InvalidLeaves)?;
-		let ext_data_hash = self.ext_data_hash.ok_or(OpStatusCode::InvalidExtDataHash)?;
-		let roots = self.roots.ok_or(OpStatusCode::InvalidRoots)?;
-		let chain_id = self.chain_id.ok_or(OpStatusCode::InvalidChainId)?;
-		let indices = self.indices.ok_or(OpStatusCode::InvalidIndices)?;
-		let public_amount = self.public_amount.ok_or(OpStatusCode::InvalidPublicAmount)?;
-		let output_utxos = self.output_utxos.ok_or(OpStatusCode::InvalidPublicAmount)?;
-
-		let exponentiation = self.exponentiation.unwrap_or(5);
-		let width = self.width.unwrap_or(3);
-		let curve = self.curve.unwrap_or(Curve::Bn254);
-		let backend = self.backend.unwrap_or(Backend::Arkworks);
-
-		// Input UTXO should have the same chain_id
-		// For default UTXOS the amount and the index should be `0`
-		// Duplicate indices is ONLY allowed for the default UTXOs
-		// chain_id of the first item in the list
-		let mut invalid_utxo_chain_id_indices = vec![];
-		let mut invalid_utxo_dublicate_nullifiers = vec![];
-		let utxos_chain_id = secret[0].clone().chain_id_raw();
-		// validate the all inputs share the same chain_id
-		secret.iter().enumerate().for_each(|(index, utxo)| {
-			if utxo.get_chain_id_raw() != utxos_chain_id {
-				invalid_utxo_chain_id_indices.push(index)
-			}
-		});
-		let non_default_utxo = secret
-			.iter()
-			.enumerate()
-			.filter(|(_, utxo)| {
-				// filter for non-default utxos
-				utxo.get_amount_raw() != 0 && utxo.get_index().unwrap_or(0) != 0
-			})
-			.collect::<Vec<_>>();
-		non_default_utxo.iter().for_each(|(index, utxo)| {
-			let has_dublicate = non_default_utxo
-				.iter()
-				.find(|(root_index, root_utxo)| root_index != index && root_utxo.get_index() == utxo.get_index());
-			if has_dublicate.is_some() {
-				invalid_utxo_dublicate_nullifiers.push(index)
-			}
-		});
-		if !invalid_utxo_chain_id_indices.is_empty() || !invalid_utxo_dublicate_nullifiers.is_empty() {
-			let message = format!(
-				"Invalid UTXOs: utxo indices has invalid chain_id {:?} ,non-default utxos with an duplicate index {:?}",
-				invalid_utxo_chain_id_indices, invalid_utxo_dublicate_nullifiers
-			);
-			let mut op: OperationError =
-				OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message);
-			op.data = Some(format!(
-				"{{ duplicateIndices:{:?} , invalidChainId:{:?} }}",
-				invalid_utxo_chain_id_indices, invalid_utxo_dublicate_nullifiers
-			));
-			return Err(op);
-		}
-
-		// validate amounts
-		let mut in_amount = public_amount;
-		secret.iter().for_each(|utxo| {
-			let utxo_amount: i128 = utxo
-				.get_amount_raw()
-				.try_into()
-				.expect("Failed to convert utxo value to i128");
-			in_amount += utxo_amount
-		});
-		let mut out_amount = 0u128;
-		output_utxos
-			.iter()
-			.for_each(|output_config| out_amount += output_config.get_amount_raw());
-		let out_amount: i128 = out_amount
-			.try_into()
-			.expect("Failed to convert accumulated in amounts  value to i128");
-		if out_amount != in_amount {
-			let message = format!(
-				"Output amount and input amount  don't match input({}) != output({})",
-				in_amount, out_amount
-			);
-			let mut oe = OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message);
-			oe.data = Some(format!("{{ inputAmount:{} ,outputAmount:{}}}", in_amount, out_amount));
-			return Err(oe);
-		}
-		Ok(VAnchorProofPayload {
-			exponentiation,
-			width,
-			curve,
-			backend,
-			pk,
-			leaves,
-			ext_data_hash,
-			roots,
-			secret,
-			indices,
-			chain_id: chain_id.try_into().unwrap(),
-			public_amount,
-			output_utxos,
-		})
-	}
-}
-
 #[derive(Debug, Clone)]
 pub enum ProofInput {
 	Mixer(MixerProofPayload),
-	Anchor(AnchorProofPayload),
 	VAnchor(Box<VAnchorProofPayload>),
 }
 
@@ -654,19 +160,6 @@ impl ProofInput {
 			ProofInput::Mixer(mixer_input) => Ok(mixer_input.clone()),
 			_ => {
 				let message = "Can't construct proof input for AnchorProofInput".to_string();
-				Err(OperationError::new_with_message(
-					OpStatusCode::InvalidNoteProtocol,
-					message,
-				))
-			}
-		}
-	}
-
-	pub fn anchor_input(&self) -> Result<AnchorProofPayload, OperationError> {
-		match self {
-			ProofInput::Anchor(anchor) => Ok(anchor.clone()),
-			_ => {
-				let message = "Can't cant construct proof input for MixerProofInput ".to_string();
 				Err(OperationError::new_with_message(
 					OpStatusCode::InvalidNoteProtocol,
 					message,
@@ -705,7 +198,6 @@ pub struct JsProofInput {
 #[derive(Debug, Clone)]
 pub enum ProofInputBuilder {
 	Mixer(MixerProofInput),
-	Anchor(AnchorProofInput),
 	VAnchor(Box<VAnchorProofInput>),
 }
 impl ProofInputBuilder {
@@ -732,22 +224,8 @@ impl ProofInputBuilder {
 
 	pub fn roots(&mut self, roots: Vec<Vec<u8>>) -> Result<(), OperationError> {
 		match self {
-			ProofInputBuilder::Anchor(value) => {
-				value.roots = Some(roots);
-				Ok(())
-			}
 			ProofInputBuilder::VAnchor(value) => {
 				value.roots = Some(roots);
-				Ok(())
-			}
-			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
-		}
-	}
-
-	pub fn refresh_commitment(&mut self, comittment: [u8; 32]) -> Result<(), OperationError> {
-		match self {
-			ProofInputBuilder::Anchor(input) => {
-				input.refresh_commitment = Some(comittment);
 				Ok(())
 			}
 			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
@@ -767,11 +245,6 @@ impl ProofInputBuilder {
 	pub fn secrets(&mut self, leaf: Leaf) -> Result<(), OperationError> {
 		match self {
 			ProofInputBuilder::Mixer(input) => {
-				input.secret = Some(leaf.secret_bytes);
-				input.nullifier = Some(leaf.nullifier_bytes);
-				Ok(())
-			}
-			ProofInputBuilder::Anchor(input) => {
 				input.secret = Some(leaf.secret_bytes);
 				input.nullifier = Some(leaf.nullifier_bytes);
 				Ok(())
@@ -810,13 +283,8 @@ impl ProofInputBuilder {
 		}
 	}
 
-	/* Shared fields  [Anchor,Mixer] */
 	pub fn recipient(&mut self, recipient: Vec<u8>) -> Result<(), OperationError> {
 		match self {
-			Self::Anchor(input) => {
-				input.recipient = Some(recipient);
-				Ok(())
-			}
 			Self::Mixer(input) => {
 				input.recipient = Some(recipient);
 				Ok(())
@@ -827,10 +295,6 @@ impl ProofInputBuilder {
 
 	pub fn relayer(&mut self, relayer: Vec<u8>) -> Result<(), OperationError> {
 		match self {
-			Self::Anchor(input) => {
-				input.relayer = Some(relayer);
-				Ok(())
-			}
 			Self::Mixer(input) => {
 				input.relayer = Some(relayer);
 				Ok(())
@@ -841,10 +305,6 @@ impl ProofInputBuilder {
 
 	pub fn leaves_list(&mut self, leaves: Vec<Vec<u8>>) -> Result<(), OperationError> {
 		match self {
-			Self::Anchor(input) => {
-				input.leaves = Some(leaves);
-				Ok(())
-			}
 			Self::Mixer(input) => {
 				input.leaves = Some(leaves);
 				Ok(())
@@ -855,10 +315,6 @@ impl ProofInputBuilder {
 
 	pub fn leaf_index(&mut self, leaf_index: u64) -> Result<(), OperationError> {
 		match self {
-			Self::Anchor(input) => {
-				input.leaf_index = Some(leaf_index);
-				Ok(())
-			}
 			Self::Mixer(input) => {
 				input.leaf_index = Some(leaf_index);
 				Ok(())
@@ -869,10 +325,6 @@ impl ProofInputBuilder {
 
 	pub fn fee(&mut self, fee: u128) -> Result<(), OperationError> {
 		match self {
-			Self::Anchor(input) => {
-				input.fee = Some(fee);
-				Ok(())
-			}
 			Self::Mixer(input) => {
 				input.fee = Some(fee);
 				Ok(())
@@ -883,10 +335,6 @@ impl ProofInputBuilder {
 
 	pub fn refund(&mut self, refund: u128) -> Result<(), OperationError> {
 		match self {
-			Self::Anchor(input) => {
-				input.refund = Some(refund);
-				Ok(())
-			}
 			Self::Mixer(input) => {
 				input.refund = Some(refund);
 				Ok(())
@@ -895,15 +343,9 @@ impl ProofInputBuilder {
 		}
 	}
 
-	/* Shared fields  [Anchor,Mixer] */
-
-	/* Shared fields  [VAnchor,Anchor,Mixer] */
 	pub fn pk(&mut self, pk: Vec<u8>) -> Result<(), OperationError> {
 		match self {
 			ProofInputBuilder::Mixer(input) => {
-				input.pk = Some(pk);
-			}
-			ProofInputBuilder::Anchor(input) => {
 				input.pk = Some(pk);
 			}
 			ProofInputBuilder::VAnchor(input) => {
@@ -918,9 +360,6 @@ impl ProofInputBuilder {
 			ProofInputBuilder::Mixer(input) => {
 				input.exponentiation = Some(exponentiation);
 			}
-			ProofInputBuilder::Anchor(input) => {
-				input.exponentiation = Some(exponentiation);
-			}
 			ProofInputBuilder::VAnchor(input) => {
 				input.exponentiation = Some(exponentiation);
 			}
@@ -931,9 +370,6 @@ impl ProofInputBuilder {
 	pub fn width(&mut self, width: usize) -> Result<(), OperationError> {
 		match self {
 			ProofInputBuilder::Mixer(input) => {
-				input.width = Some(width);
-			}
-			ProofInputBuilder::Anchor(input) => {
 				input.width = Some(width);
 			}
 			ProofInputBuilder::VAnchor(input) => {
@@ -948,9 +384,6 @@ impl ProofInputBuilder {
 			ProofInputBuilder::Mixer(input) => {
 				input.curve = Some(curve);
 			}
-			ProofInputBuilder::Anchor(input) => {
-				input.curve = Some(curve);
-			}
 			ProofInputBuilder::VAnchor(input) => {
 				input.curve = Some(curve);
 			}
@@ -961,9 +394,6 @@ impl ProofInputBuilder {
 	pub fn backend(&mut self, backend: Backend) -> Result<(), OperationError> {
 		match self {
 			ProofInputBuilder::Mixer(input) => {
-				input.backend = Some(backend);
-			}
-			ProofInputBuilder::Anchor(input) => {
 				input.backend = Some(backend);
 			}
 			ProofInputBuilder::VAnchor(input) => {
@@ -977,9 +407,6 @@ impl ProofInputBuilder {
 		match self {
 			ProofInputBuilder::Mixer(input) => {
 				input.chain_id = Some(chain_id);
-			}
-			ProofInputBuilder::Anchor(input) => {
-				input.chain_id = Some(chain_id.try_into().map_err(|_| OpStatusCode::InvalidTargetChain)?);
 			}
 			ProofInputBuilder::VAnchor(input) => {
 				input.chain_id = Some(chain_id);
@@ -1008,7 +435,6 @@ impl JsProofInputBuilder {
 			.map_err(|_| OpStatusCode::InvalidNoteProtocol)?;
 		let proof_input_builder = match note_protocol {
 			NoteProtocol::Mixer => ProofInputBuilder::Mixer(Default::default()),
-			NoteProtocol::Anchor => ProofInputBuilder::Anchor(Default::default()),
 			NoteProtocol::VAnchor => ProofInputBuilder::VAnchor(Default::default()),
 		};
 
@@ -1030,17 +456,6 @@ impl JsProofInputBuilder {
 			.map(|v| v.0.to_vec())
 			.collect();
 		self.inner.roots(rs)?;
-		Ok(())
-	}
-
-	#[wasm_bindgen(js_name = setRefreshCommitment)]
-	pub fn set_refresh_commitment(&mut self, refresh_commitment: JsString) -> Result<(), JsValue> {
-		let c: String = refresh_commitment.into();
-		let refresh_commitment = hex::decode(c).map_err(|_| OpStatusCode::CommitmentNotSet)?;
-		let refresh_commitment: [u8; 32] = refresh_commitment
-			.try_into()
-			.map_err(|_| OpStatusCode::CommitmentNotSet)?;
-		self.inner.refresh_commitment(refresh_commitment)?;
 		Ok(())
 	}
 
@@ -1181,7 +596,7 @@ impl JsProofInputBuilder {
 		// For the VAnchor there is a call `set_notes` that will set UTXOs in the
 		// `ProofInput::VAnchor(VAnchorProofInput)`
 		match self.inner {
-			ProofInputBuilder::Mixer(_) | ProofInputBuilder::Anchor(_) => self.set_meta_data(note)?,
+			ProofInputBuilder::Mixer(_) => self.set_meta_data(note)?,
 			_ => return Err(OpStatusCode::InvalidNoteProtocol.into()),
 		}
 
@@ -1190,11 +605,6 @@ impl JsProofInputBuilder {
 				let leaf = note.get_leaf_and_nullifier()?;
 				let mixer_leaf = leaf.mixer_leaf()?;
 				self.inner.secrets(mixer_leaf)?
-			}
-			ProofInputBuilder::Anchor(_) => {
-				let leaf = note.get_leaf_and_nullifier()?;
-				let anchor_leaf = leaf.anchor_leaf()?;
-				self.inner.secrets(anchor_leaf)?
 			}
 			_ => {}
 		}
@@ -1236,10 +646,6 @@ impl JsProofInputBuilder {
 			ProofInputBuilder::Mixer(mixer_proof_input) => {
 				let mixer_payload = mixer_proof_input.build()?;
 				ProofInput::Mixer(mixer_payload)
-			}
-			ProofInputBuilder::Anchor(anchor_proof_input) => {
-				let anchor_payload = anchor_proof_input.build()?;
-				ProofInput::Anchor(anchor_payload)
 			}
 			ProofInputBuilder::VAnchor(vanchor_proof_input) => {
 				let vanchor_payload = vanchor_proof_input.build()?;
@@ -1383,12 +789,6 @@ pub fn setup_keys(
 			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).expect("failed to generate keys");
 			(pk, vk)
 		}
-		(NoteProtocol::Anchor, ..) => {
-			let (c, ..) = AnchorR1CSProverBn254_30_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng)
-				.expect("Failed to create a circuit");
-			let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).expect("failed to generate keys");
-			(pk, vk)
-		}
 		(NoteProtocol::VAnchor, Curve::Bn254, 2, 2, 2) => {
 			let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng)
 				.expect("Failed to create a circuit");
@@ -1427,11 +827,6 @@ pub fn generate_proof_js(proof_input: JsProofInput) -> Result<JsProofOutput, JsV
 				inner: ProofOutput::Mixer(v),
 			})
 		}
-		ProofInput::Anchor(anchor_proof_input) => {
-			anchor::create_proof(anchor_proof_input, &mut rng).map(|v| JsProofOutput {
-				inner: ProofOutput::Anchor(v),
-			})
-		}
 		ProofInput::VAnchor(vanchor_proof_input) => {
 			vanchor::create_proof(*vanchor_proof_input, &mut rng).map(|v| JsProofOutput {
 				inner: ProofOutput::VAnchor(v),
@@ -1439,20 +834,4 @@ pub fn generate_proof_js(proof_input: JsProofInput) -> Result<JsProofOutput, JsV
 		}
 	}
 	.map_err(|e| e.into())
-}
-
-#[wasm_bindgen]
-pub fn validate_proof(proof: &AnchorProof, vk: JsString, curve: WasmCurve) -> Result<bool, JsValue> {
-	let vk_string: String = vk.into();
-	let curve: String = JsValue::from(&curve).as_string().ok_or(OpStatusCode::InvalidCurve)?;
-	let curve: Curve = curve.parse().map_err(|_| OpStatusCode::InvalidCurve)?;
-
-	let vk = hex::decode(vk_string).expect("Field to deserialize");
-	let is_valid = match curve {
-		Curve::Bls381 => verify_unchecked_raw::<Bls12_381>(&proof.public_inputs, &vk, &proof.proof),
-		Curve::Bn254 => verify_unchecked_raw::<Bn254>(&proof.public_inputs, &vk, &proof.proof),
-	}
-	.map_err(|e| OperationError::new_with_message(OpStatusCode::InvalidProof, e.to_string()))?;
-
-	Ok(is_valid)
 }

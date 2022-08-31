@@ -17,17 +17,15 @@ use crate::types::{
 };
 use crate::utxo::JsUtxo;
 use crate::{
-	AnchorR1CSProverBn254_30_2, MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_16_2,
+	MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_16_2,
 	VAnchorR1CSProverBn254_30_2_2_2, ANCHOR_COUNT, DEFAULT_LEAF, TREE_HEIGHT,
 };
 
-pub const MIXER_NOTE_V1_X5_5:&str  = "webb.mixer:v1:16:16:Arkworks:Bn254:Poseidon:WEBB:12:10:5:3:7dc8420a25a15d2e7b712b4df15c6f6f9f5a8bacfa466671eb1f078406b09a2a00b7063c9fc19d488c25a18cb9c40bc4c29c00f822fdecd58d579cafa46ac31f";
-pub const ANCHOR_NOTE_V1_X5_4:&str  ="webb.anchor:v1:2199023256632:2199023256632:Arkworks:Bn254:Poseidon:WEBB:18:10:5:4:fd6518ad0f63d214d0964206105dc67ec9dfe677b18a4626bd522c1d0719920cebea49a028e691673b87921f9792fe9d4d6a374919fe07984df3373b630c2e05";
-pub const ANCHOR_NOTE_V2_X5_4:&str  ="webb://v2:anchor/2199023256632:2199023256632/0:3/3804000000200000:d8b84d776284d1e53884efb08d40f31a78158b67f11474319e284aa71695890e:cadd7ea7ea6a2fd97c787243acc0aa240c599288f5cef562a80efe0a1e368b0d/?curve=Bn254&width=4&exp=5&hf=Poseidon&backend=Arkworks&token=WEBB&denom=18&amount=10";
-pub const VANCHOR_NOTE_V2_X5_4:&str  ="webb://v2:vanchor/2:3/2:3/0300000000000000000000000000000000000000000000000000000000000000:0a00000000000000000000000000000000000000000000000000000000000000:7798d054444ec463be7d41ad834147b5b2c468182c7cd6a601aec29a273fca05:bf5d780608f5b8a8db1dc87356a225a0324a1db61903540daaedd54ab10a4124/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
+pub const MIXER_NOTE_V1_X5_5:&str  = "webb://v1:mixer/2:2/2:2/fd717cfe463b3ffec71ee6b7606bbd0179170510abf41c9f16c1d20ca9923f0e:18b6b080e6a43262f00f6fb3da0d2409c4871b8f26d89d5c8836358e1af5a41c/?curve=Bn254&width=3&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
+pub const VANCHOR_NOTE_V2_X5_4:&str  ="webb://v1:vanchor/2:3/2:3/0300000000000000000000000000000000000000000000000000000000000000:0a00000000000000000000000000000000000000000000000000000000000000:7798d054444ec463be7d41ad834147b5b2c468182c7cd6a601aec29a273fca05:bf5d780608f5b8a8db1dc87356a225a0324a1db61903540daaedd54ab10a4124/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
 
 pub const DECODED_SUBSTRATE_ADDRESS: &str = "644277e80e74baf70c59aeaa038b9e95b400377d1fd09c87a6f8071bce185129";
-pub fn new_utxobn_2_2(curve: Curve, amount: u128, chain_id: u64) -> JsUtxo {
+pub fn new_utxo_bn254_2_2(curve: Curve, amount: u128, chain_id: u64) -> JsUtxo {
 	let curve: WasmCurve = JsValue::from(curve.to_string()).into();
 	let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
 	JsUtxo::construct(
@@ -51,15 +49,6 @@ pub struct MixerTestSetup {
 	pub(crate) vk: Vec<u8>,
 }
 
-pub struct AnchorTestSetup {
-	pub(crate) relayer: Vec<u8>,
-	pub(crate) recipient: Vec<u8>,
-	pub(crate) proof_input_builder: JsProofInputBuilder,
-	pub(crate) roots_raw: [Vec<u8>; 2],
-	pub(crate) leaf_bytes: Vec<u8>,
-	pub(crate) leaf_index: u64,
-	pub(crate) vk: Vec<u8>,
-}
 pub struct VAnchorTestSetup {
 	pub(crate) proof_input_builder: JsProofInputBuilder,
 	pub(crate) roots_raw: Vec<Vec<u8>>,
@@ -109,76 +98,12 @@ pub fn generate_mixer_test_setup(
 	}
 }
 
-pub fn generate_anchor_test_setup(
-	relayer_decoded_ss58: &str,
-	recipient_decoded_ss58: &str,
-	note: &str,
-) -> AnchorTestSetup {
-	let curve = ArkCurve::Bn254;
-	let index = 0;
-
-	let (c, ..) = AnchorR1CSProverBn254_30_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
-	let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
-
-	let note = JsNote::js_deserialize(JsString::from(note)).unwrap();
-
-	let leaf: Uint8Array = note.get_leaf_commitment().unwrap();
-	let leaf_bytes: Vec<u8> = leaf.to_vec();
-	let leaves_ua: Array = vec![leaf].into_iter().collect();
-
-	let params3 = setup_params::<Bn254Fr>(curve, 5, 3);
-
-	let poseidon3 = Poseidon::new(params3);
-
-	let leaves_f = vec![Bn254Fr::from_le_bytes_mod_order(&leaf_bytes)];
-	let (tree, _) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(
-		&poseidon3,
-		&leaves_f,
-		index,
-		&DEFAULT_LEAF,
-	)
-	.unwrap();
-	let roots_f = [tree.root(); ANCHOR_COUNT];
-	let roots_raw = roots_f.map(|x| x.into_repr().to_bytes_le());
-	let roots_array: Array = roots_raw.iter().map(|i| Uint8Array::from(i.as_slice())).collect();
-
-	let mut js_builder = JsProofInputBuilder::new(JsValue::from("anchor").into()).unwrap();
-	js_builder.set_leaf_index(JsString::from(index.to_string())).unwrap();
-	js_builder.set_leaves(Leaves::from(JsValue::from(leaves_ua))).unwrap();
-
-	js_builder.set_fee(JsString::from("5")).unwrap();
-	js_builder.set_refund(JsString::from("1")).unwrap();
-
-	js_builder
-		.set_recipient(JsString::from(recipient_decoded_ss58))
-		.unwrap();
-
-	js_builder.set_relayer(JsString::from(relayer_decoded_ss58)).unwrap();
-
-	js_builder.set_metadata_from_note(&note).unwrap();
-
-	js_builder.set_pk(JsString::from(hex::encode(pk))).unwrap();
-	js_builder
-		.set_refresh_commitment(JsString::from(hex::encode([0u8; 32])))
-		.unwrap();
-	js_builder.set_roots(Leaves::from(JsValue::from(roots_array))).unwrap();
-
-	AnchorTestSetup {
-		relayer: hex::decode(relayer_decoded_ss58).unwrap(),
-		recipient: hex::decode(recipient_decoded_ss58).unwrap(),
-		vk,
-		leaf_index: index,
-		leaf_bytes,
-		proof_input_builder: js_builder,
-		roots_raw,
-	}
-}
 // (output chain id , amount1,amount2)
 type VAnchorOutput = (u64, i128, i128);
 pub fn generate_vanchor_note(amount: i128, in_chain_id: u64, output_chain_id: u64, index: Option<u64>) -> JsNote {
 	let mut note_builder = JsNoteBuilder::new();
 	let protocol: Protocol = JsValue::from(NoteProtocol::VAnchor.to_string()).into();
-	let version: Version = JsValue::from(NoteVersion::V2.to_string()).into();
+	let version: Version = JsValue::from(NoteVersion::V1.to_string()).into();
 	let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
 	let hash_function: HF = JsValue::from(HashFunction::Poseidon.to_string()).into();
 	let curve: WasmCurve = JsValue::from(Curve::Bn254.to_string()).into();
@@ -227,8 +152,8 @@ pub fn generate_vanchor_test_js_setup() -> VAnchorTestSetup {
 	let note2 = generate_vanchor_note(5, chain_id, chain_id, Some(0));
 	// output configs
 
-	let output_1 = new_utxobn_2_2(note1.curve.unwrap(), 10, chain_id);
-	let output_2 = new_utxobn_2_2(note1.curve.unwrap(), 2, chain_id);
+	let output_1 = new_utxo_bn254_2_2(note1.curve.unwrap(), 10, chain_id);
+	let output_2 = new_utxo_bn254_2_2(note1.curve.unwrap(), 2, chain_id);
 	let index = 0;
 
 	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();

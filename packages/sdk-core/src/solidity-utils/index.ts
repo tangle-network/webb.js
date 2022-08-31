@@ -82,8 +82,6 @@ export const signMessage = (wallet: ethers.Wallet, data: BytesLike) => {
   return sig;
 };
 
-export * from './fixed-anchor.js';
-export * from './build-fixed-witness.js';
 export * from './variable-anchor.js';
 export * from './build-variable-witness.js';
 export * from './circom-utxo.js';

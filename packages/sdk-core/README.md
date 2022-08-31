@@ -38,7 +38,7 @@ Proving manager uses `wasm-utils`, it runs in a Worker, or directly in the brows
 const provingInput: ProvingManagerSetupInput = {
   leafIndex: 0,
   provingKey: Uint8Array.from([]),
-  note: `webb://v2:vanchor/1:1/1:1/0000000000000001:0100000000000000000000000000000000000000000000000000000000000000:f5e1c9dc56e1032b09b88aaf81fa1aab9c3cb1c734d038814ef0bd987ec72103:13bcea7c5003590db4210351146232350067d59be059c6052d806b608d348300/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=WEBB&denom=18&amount=1`,
+  note: `webb://v1:vanchor/1:1/1:1/0000000000000001:0100000000000000000000000000000000000000000000000000000000000000:f5e1c9dc56e1032b09b88aaf81fa1aab9c3cb1c734d038814ef0bd987ec72103:13bcea7c5003590db4210351146232350067d59be059c6052d806b608d348300/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=WEBB&denom=18&amount=1`,
   fee: 0,
   refund: 0,
   leaves: [],

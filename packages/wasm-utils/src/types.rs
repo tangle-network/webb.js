@@ -109,7 +109,6 @@ impl OperationError {
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum NoteVersion {
 	V1,
-	V2,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -142,7 +141,6 @@ pub enum HashFunction {
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum NoteProtocol {
 	Mixer,
-	Anchor,
 	VAnchor,
 }
 
@@ -150,7 +148,6 @@ impl fmt::Display for NoteVersion {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
 			NoteVersion::V1 => write!(f, "v1"),
-			NoteVersion::V2 => write!(f, "v2"),
 		}
 	}
 }
@@ -161,7 +158,6 @@ impl FromStr for NoteVersion {
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
 			"v1" => Ok(NoteVersion::V1),
-			"v2" => Ok(NoteVersion::V2),
 			_ => Err(OpStatusCode::InvalidNoteVersion),
 		}
 	}
@@ -224,7 +220,6 @@ impl FromStr for NoteProtocol {
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
 			"mixer" => Ok(NoteProtocol::Mixer),
-			"anchor" | "bridge" => Ok(NoteProtocol::Anchor),
 			"vanchor" => Ok(NoteProtocol::VAnchor),
 			_ => Err(OpStatusCode::InvalidNoteProtocol),
 		}
@@ -235,7 +230,6 @@ impl fmt::Display for NoteProtocol {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
 			NoteProtocol::Mixer => write!(f, "mixer"),
-			NoteProtocol::Anchor => write!(f, "anchor"),
 			NoteProtocol::VAnchor => write!(f, "vanchor"),
 		}
 	}
@@ -371,7 +365,8 @@ pub enum OpStatusCode {
 	InvalidIndices = 53,
 	InvalidPublicAmount = 54,
 	InvalidOutputUtxoConfig = 55,
-	InvalidExtDataHash = 56,
+	InvalidExtData = 56,
+	InvalidExtDataHash = 57,
 }
 
 #[wasm_bindgen]
@@ -407,7 +402,7 @@ extern "C" {
 }
 
 #[wasm_bindgen(typescript_custom_section)]
-const NOTE_PROTOCOL: &str = "type NoteProtocol = 'mixer'|'anchor'|'vanchor' ";
+const NOTE_PROTOCOL: &str = "type NoteProtocol = 'mixer' | 'vanchor' ";
 
 #[wasm_bindgen(typescript_custom_section)]
 const LEAVES: &str = "type Leaves = Array<Uint8Array>;";
@@ -416,16 +411,16 @@ const LEAVES: &str = "type Leaves = Array<Uint8Array>;";
 const INDICES: &str = "type Indices = Array<number>;";
 
 #[wasm_bindgen(typescript_custom_section)]
-const HF: &str = "type HashFunction = 'Poseidon'|'MiMCTornado'";
+const HF: &str = "type HashFunction = 'Poseidon' | 'MiMCTornado'";
 
 #[wasm_bindgen(typescript_custom_section)]
-const CURVE: &str = "type Curve = 'Bls381'|'Bn254' |'Curve25519'";
+const CURVE: &str = "type Curve = 'Bls381' | 'Bn254'";
 
 #[wasm_bindgen(typescript_custom_section)]
 const VERSION: &str = "type Version = 'v1' | 'v2'";
 
 #[wasm_bindgen(typescript_custom_section)]
-const BE: &str = "type Backend = 'Bulletproofs'|'Arkworks'|'Circom'";
+const BE: &str = "type Backend = 'Arkworks' | 'Circom'";
 
 pub struct Uint8Arrayx32(pub [u8; 32]);
 
@@ -509,6 +504,7 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::InvalidIndices => "Invalid indices value",
 			OpStatusCode::InvalidPublicAmount => "Invalid public amount",
 			OpStatusCode::InvalidOutputUtxoConfig => "Invalid output UTXO config",
+			OpStatusCode::InvalidExtData => "Invalid external data",
 			OpStatusCode::InvalidExtDataHash => "Invalid external data hash",
 		}
 		.to_string()

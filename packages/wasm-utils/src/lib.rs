@@ -17,7 +17,6 @@ mod utxo;
 
 use ark_bls12_381::Bls12_381;
 use ark_bn254::Bn254;
-use arkworks_setups::r1cs::anchor::AnchorR1CSProver;
 use arkworks_setups::r1cs::mixer::MixerR1CSProver;
 use arkworks_setups::r1cs::vanchor::VAnchorR1CSProver;
 
@@ -39,9 +38,6 @@ const OUTS_2: usize = 2;
 
 pub type MixerR1CSProverBn254_30 = MixerR1CSProver<Bn254, TREE_HEIGHT>;
 pub type MixerR1CSProverBls381_30 = MixerR1CSProver<Bls12_381, TREE_HEIGHT>;
-
-pub type AnchorR1CSProverBn254_30_2 = AnchorR1CSProver<Bn254, TREE_HEIGHT, ANCHOR_COUNT>;
-pub type AnchorR1CSProverBls381_30_2 = AnchorR1CSProver<Bls12_381, TREE_HEIGHT, ANCHOR_COUNT>;
 
 pub type VAnchorR1CSProverBn254_30_2_2_2 = VAnchorR1CSProver<Bn254, TREE_HEIGHT, ANCHOR_COUNT_2, INS_2, OUTS_2>;
 pub type VAnchorR1CSProverBn254_30_2_16_2 = VAnchorR1CSProver<Bn254, TREE_HEIGHT, ANCHOR_COUNT_2, INS_16, OUTS_2>;

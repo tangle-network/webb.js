@@ -58,7 +58,7 @@ export type NoteGenInput = {
  * that works both in Node.js and in the browser.
  */
 export class Note {
-  static CURRENT_VERSION: Version = 'v2';
+  static CURRENT_VERSION: Version = 'v1';
 
   // Default constructor
   constructor (readonly note: JsNote) {}
