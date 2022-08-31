@@ -167,7 +167,7 @@ describe('Arkworks Proving manager VAnchor', function () {
       refund: '0',
       relayer: address,
       roots: rootsSet,
-      unwrappedToken: address
+      token: address
     };
     const data = await provingManager.prove('vanchor', setup);
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
@@ -218,7 +218,7 @@ describe('Arkworks Proving manager VAnchor', function () {
       refund: '0',
       relayer: address,
       roots: rootsSet,
-      unwrappedToken: address
+      token: address
     };
     const data = await provingManager.prove('vanchor', setup);
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
@@ -269,7 +269,7 @@ describe('Arkworks Proving manager VAnchor', function () {
       refund: '0',
       relayer: address,
       roots: rootsSet,
-      unwrappedToken: address
+      token: address
     };
 
     const data = await provingManager.prove('vanchor', setup);
@@ -323,7 +323,7 @@ describe('Arkworks Proving manager VAnchor', function () {
       refund: '0',
       relayer: address,
       roots: rootsSet,
-      unwrappedToken: address
+      token: address
     };
 
     const data = await provingManager.prove('vanchor', setup);
@@ -378,7 +378,7 @@ describe('Arkworks Proving manager VAnchor', function () {
         refund: '0',
         relayer: address,
         roots: rootsSet,
-        unwrappedToken: address
+        token: address
       };
 
       await provingManager.prove('vanchor', setup);
@@ -439,7 +439,7 @@ describe('Arkworks Proving manager VAnchor', function () {
       refund: '0',
       relayer: address,
       roots: rootsSet,
-      unwrappedToken: address
+      token: address
     };
 
     const data = await provingManager.prove<'vanchor'>('vanchor', setup);
@@ -498,7 +498,7 @@ describe('Arkworks Proving manager VAnchor', function () {
       refund: '0',
       relayer: address,
       roots: rootsSet,
-      unwrappedToken: address
+      token: address
     };
 
     const data = await provingManager.prove('vanchor', setup);
@@ -556,7 +556,7 @@ describe('Arkworks Proving manager VAnchor', function () {
       refund: '0',
       relayer: address,
       roots: rootsSet,
-      unwrappedToken: address
+      token: address
     };
 
     const data = await provingManager.prove('vanchor', setup);

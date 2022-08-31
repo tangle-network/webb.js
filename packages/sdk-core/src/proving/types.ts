@@ -58,7 +58,7 @@ export type MixerPMSetupInput = {
  * @param extAmount - External amount being deposited or withdrawn
  * @param fee - Fee for the transaction
  * @param refund - Refund for the transaction
- * @param unwrappedToken - The optional token to unwrap into upon withdrawal
+ * @param token - The optional token to unwrap into upon withdrawal
  * */
 export type VAnchorPMSetupInput = {
   inputNotes: Note[];
@@ -75,7 +75,7 @@ export type VAnchorPMSetupInput = {
   extAmount: string;
   fee: string;
   refund: string;
-  unwrappedToken: Uint8Array;
+  token: Uint8Array;
 };
 
 export type ProofInterface<T extends NoteProtocol> = ProofPayload[T]

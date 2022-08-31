@@ -16,18 +16,18 @@ export function getVAnchorExtDataHash (
   recipient: string,
   relayer: string,
   refund: string,
-  unwrappedToken: string
+  token: string
 ) {
   const abi = new ethers.utils.AbiCoder();
   const encodedData = abi.encode(
-    ['tuple(address recipient,int256 extAmount,address relayer,uint256 fee,uint256 refund,address unwrappedToken,bytes encryptedOutput1,bytes encryptedOutput2)'],
+    ['tuple(address recipient,int256 extAmount,address relayer,uint256 fee,uint256 refund,address token,bytes encryptedOutput1,bytes encryptedOutput2)'],
     [{
       recipient: toFixedHex(recipient, 20),
       extAmount: toFixedHex(extAmount),
       relayer: toFixedHex(relayer, 20),
       fee: toFixedHex(fee),
       refund: toFixedHex(refund),
-      unwrappedToken: toFixedHex(unwrappedToken, 20),
+      token: toFixedHex(token, 20),
       encryptedOutput1,
       encryptedOutput2
     }]

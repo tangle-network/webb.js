@@ -168,7 +168,7 @@ async function basicDeposit(
     extAmount: extAmount.toString(),
     fee: fee.toString(),
     refund: '0',
-    unwrappedToken: decodedAddress
+    token: decodedAddress
   };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
   const extData = {
@@ -267,7 +267,7 @@ async function basicWithdraw(
     extAmount: extAmount.toString(),
     fee: fee.toString(),
     refund: '0',
-    unwrappedToken: decodedAddress
+    token: decodedAddress
   };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
   const extData = {
@@ -354,7 +354,7 @@ async function createVAnchorWithDeposit(
     extAmount: extAmount.toString(),
     fee: fee.toString(),
     refund: '0',
-    unwrappedToken: decodedAddress
+    token: decodedAddress
   };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
   const extData = {
@@ -494,7 +494,7 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString(),
       refund: '0',
-      unwrappedToken: decodedAddress
+      token: decodedAddress
     };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
@@ -584,7 +584,7 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString(),
       refund: '0',
-      unwrappedToken: decodedAddress
+      token: decodedAddress
     };
     const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
@@ -669,7 +669,7 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString(),
       refund: '0',
-      unwrappedToken: decodedAddress
+      token: decodedAddress
     };
     const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {

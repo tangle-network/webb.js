@@ -17,8 +17,8 @@ use crate::types::{
 };
 use crate::utxo::JsUtxo;
 use crate::{
-	MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_16_2,
-	VAnchorR1CSProverBn254_30_2_2_2, ANCHOR_COUNT, DEFAULT_LEAF, TREE_HEIGHT,
+	MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_16_2, VAnchorR1CSProverBn254_30_2_2_2, ANCHOR_COUNT,
+	DEFAULT_LEAF, TREE_HEIGHT,
 };
 
 pub const MIXER_NOTE_V1_X5_5:&str  = "webb://v1:mixer/2:2/2:2/fd717cfe463b3ffec71ee6b7606bbd0179170510abf41c9f16c1d20ca9923f0e:18b6b080e6a43262f00f6fb3da0d2409c4871b8f26d89d5c8836358e1af5a41c/?curve=Bn254&width=3&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";

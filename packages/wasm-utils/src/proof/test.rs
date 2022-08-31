@@ -1,9 +1,7 @@
 use ark_bn254::Bn254;
 use ark_ff::{BigInteger, PrimeField};
 use ark_std::UniformRand;
-use arkworks_setups::common::{
-	prove, prove_unchecked, setup_keys, setup_keys_unchecked, verify, verify_unchecked_raw,
-};
+use arkworks_setups::common::{prove, prove_unchecked, setup_keys, setup_keys_unchecked, verify, verify_unchecked_raw};
 use arkworks_setups::Curve;
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
@@ -12,10 +10,9 @@ use wasm_bindgen_test::*;
 
 use crate::note::JsNote;
 use crate::proof::test_utils::{
-	generate_mixer_test_setup, generate_vanchor_note,
-	generate_vanchor_test_setup_16_mixed_inputs, generate_vanchor_test_setup_16_non_default_inputs,
-	generate_vanchor_test_setup_2_inputs, new_utxo_bn254_2_2, MixerTestSetup, VAnchorTestSetup,
-	DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V2_X5_4,
+	generate_mixer_test_setup, generate_vanchor_note, generate_vanchor_test_setup_16_mixed_inputs,
+	generate_vanchor_test_setup_16_non_default_inputs, generate_vanchor_test_setup_2_inputs, new_utxo_bn254_2_2,
+	MixerTestSetup, VAnchorTestSetup, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V2_X5_4,
 };
 use crate::proof::{generate_proof_js, truncate_and_pad, JsProofInputBuilder, LeavesMapInput, MTBn254X5};
 use crate::types::{Indices, Leaves, WasmCurve, BE};

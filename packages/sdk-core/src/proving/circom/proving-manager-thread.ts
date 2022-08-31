@@ -126,7 +126,7 @@ export class CircomProvingManagerThread {
         u8aToHex(input.recipient),
         u8aToHex(input.relayer),
         input.refund,
-        u8aToHex(input.unwrappedToken)
+        u8aToHex(input.token)
       );
 
       // create utxos for the inputs

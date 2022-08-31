@@ -2,7 +2,7 @@
 
 use crate::proof::mixer::{MixerProof, MixerProofInput, MixerProofPayload};
 use crate::proof::vanchor::{VAnchorProof, VAnchorProofInput, VAnchorProofPayload};
-use core::convert::{TryFrom};
+use core::convert::TryFrom;
 
 use ark_bls12_381::Bls12_381;
 use ark_bn254::{Bn254, Fr as Bn254Fr};

@@ -42,7 +42,7 @@ export type WorkerVAnchorPMSetupInput = {
   extAmount: string;
   fee: string;
   refund: string;
-  unwrappedToken: Uint8Array;
+  token: Uint8Array;
 };
 
 export type WorkerVAnchorProof = {
@@ -120,7 +120,7 @@ export function workerInputMapper<T extends NoteProtocol> (
         refund: sourceSetupInput.refund,
         relayer: sourceSetupInput.relayer,
         roots: sourceSetupInput.roots,
-        unwrappedToken: sourceSetupInput.unwrappedToken
+        token: sourceSetupInput.token
       } as any;
     }
 

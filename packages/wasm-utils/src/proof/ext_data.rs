@@ -21,7 +21,7 @@ pub struct ExtData {
 	#[wasm_bindgen(skip)]
 	pub refund: u128,
 	#[wasm_bindgen(skip)]
-	pub unwrapped_token: Vec<u8>,
+	pub token: Vec<u8>,
 	#[wasm_bindgen(skip)]
 	pub encrypted_output1: Vec<u8>,
 	#[wasm_bindgen(skip)]
@@ -36,7 +36,7 @@ impl ExtData {
 		ext_amount: JsString,
 		fee: JsString,
 		refund: JsString,
-		unwrapped_token: Uint8Array,
+		token: Uint8Array,
 		encrypted_output1: Uint8Array,
 		encrypted_output2: Uint8Array,
 	) -> ExtData {
@@ -45,7 +45,7 @@ impl ExtData {
 		let recipient = recipient.to_vec();
 		let relayer = relayer.to_vec();
 		let refund: u128 = JsValue::from(refund).as_string().unwrap().parse().unwrap();
-		let unwrapped_token = unwrapped_token.to_vec();
+		let token = token.to_vec();
 		let encrypted_output1 = encrypted_output1.to_vec();
 		let encrypted_output2 = encrypted_output2.to_vec();
 		ExtData {
@@ -54,7 +54,7 @@ impl ExtData {
 			recipient,
 			relayer,
 			refund,
-			unwrapped_token,
+			token,
 			encrypted_output1,
 			encrypted_output2,
 		}
@@ -117,7 +117,7 @@ impl IntoAbiToken for ExtData {
 		let relayer = Token::Bytes(self.relayer.clone());
 		let fee = Token::Bytes(self.fee.encode());
 		let refund = Token::Bytes(self.refund.encode());
-		let unwrapped_token = Token::Bytes(self.unwrapped_token.clone());
+		let token = Token::Bytes(self.token.clone());
 		let encrypted_output1 = Token::Bytes(self.encrypted_output1.clone());
 		let encrypted_output2 = Token::Bytes(self.encrypted_output2.clone());
 		let ext_data_args = vec![
@@ -126,7 +126,7 @@ impl IntoAbiToken for ExtData {
 			ext_amount,
 			fee,
 			refund,
-			unwrapped_token,
+			token,
 			encrypted_output1,
 			encrypted_output2,
 		];

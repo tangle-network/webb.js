@@ -163,7 +163,7 @@ export class ArkworksProvingManagerThread {
         input.extAmount,
         input.fee,
         input.refund,
-        input.unwrappedToken,
+        input.token,
         input.encryptedCommitments[0],
         input.encryptedCommitments[1]
       );
