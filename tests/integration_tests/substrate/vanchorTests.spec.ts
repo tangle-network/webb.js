@@ -94,7 +94,7 @@ async function generateVAnchorNote(amount: number, chainId: number, outputChainI
     targetChain: String(outputChainId),
     targetIdentifyingData: '1',
     tokenSymbol: 'WEBB',
-    version: 'v2',
+    version: 'v1',
     width: String(5)
   });
 

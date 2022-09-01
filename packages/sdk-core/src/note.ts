@@ -163,8 +163,8 @@ export class Note {
    * ```typescript
    * // Generate an anchor note
    * const input: NoteGenInput = {
-   *   protocol: 'anchor',
-   *   version: 'v2',
+   *   protocol: 'vanchor',
+   *   version: 'v1',
    *   targetChain: '1',
    *   targetIdentifyingData: '1',
    *   sourceChain: '1',

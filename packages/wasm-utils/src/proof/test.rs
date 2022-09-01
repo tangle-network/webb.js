@@ -12,7 +12,7 @@ use crate::note::JsNote;
 use crate::proof::test_utils::{
 	generate_mixer_test_setup, generate_vanchor_note, generate_vanchor_test_setup_16_mixed_inputs,
 	generate_vanchor_test_setup_16_non_default_inputs, generate_vanchor_test_setup_2_inputs, new_utxo_bn254_2_2,
-	MixerTestSetup, VAnchorTestSetup, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V2_X5_4,
+	MixerTestSetup, VAnchorTestSetup, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V1_X5_4,
 };
 use crate::proof::{generate_proof_js, truncate_and_pad, JsProofInputBuilder, LeavesMapInput, MTBn254X5};
 use crate::types::{Indices, Leaves, WasmCurve, BE};

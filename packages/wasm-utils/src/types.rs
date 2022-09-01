@@ -416,7 +416,7 @@ const HF: &str = "type HashFunction = 'Poseidon' | 'MiMCTornado'";
 const CURVE: &str = "type Curve = 'Bls381' | 'Bn254'";
 
 #[wasm_bindgen(typescript_custom_section)]
-const VERSION: &str = "type Version = 'v1' | 'v2'";
+const VERSION: &str = "type Version = 'v1'";
 
 #[wasm_bindgen(typescript_custom_section)]
 const BE: &str = "type Backend = 'Arkworks' | 'Circom'";

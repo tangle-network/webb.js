@@ -560,28 +560,24 @@ impl JsNoteBuilder {
 				}
 			},
 			Some(secrets) => {
-				// Skip validation for note V1 , V1 secrets are just of length 1
-				// V2 notes have secrets list the length of the list is validated
-				if version != NoteVersion::V1 {
-					match protocol {
-						NoteProtocol::Mixer => {
-							if secrets.len() != 1 {
-								let message = "Mixer secrets length should be 1 in length".to_string();
-								let operation_error =
-									OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
-								return Err(operation_error.into());
-							}
+				match protocol {
+					NoteProtocol::Mixer => {
+						if secrets.len() != 1 {
+							let message = "Mixer secrets length should be 1 in length".to_string();
+							let operation_error =
+								OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
+							return Err(operation_error.into());
 						}
-						NoteProtocol::VAnchor => {
-							if secrets.len() != 4 {
-								let message = "VAnchor secrets length should be 4 in length".to_string();
-								let operation_error =
-									OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
-								return Err(operation_error.into());
-							}
+					}
+					NoteProtocol::VAnchor => {
+						if secrets.len() != 4 {
+							let message = "VAnchor secrets length should be 4 in length".to_string();
+							let operation_error =
+								OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
+							return Err(operation_error.into());
 						}
-					};
-				}
+					}
+				};
 
 				secrets
 			}

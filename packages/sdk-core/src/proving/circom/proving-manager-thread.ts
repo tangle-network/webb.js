@@ -171,7 +171,7 @@ export class CircomProvingManagerThread {
           targetChain: utxo.chainId,
           targetIdentifyingData: notes[0].note.targetIdentifyingData,
           tokenSymbol: notes[0].note.tokenSymbol,
-          version: 'v2',
+          version: 'v1',
           width: '5'
         });
 

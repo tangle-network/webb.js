@@ -228,7 +228,7 @@ export async function fetchRPCTreeLeaves(api: ApiPromise, treeId: string | numbe
 export async function depositMixerBnX5_3(api: ApiPromise, depositor: KeyringPair) {
   let noteBuilder = new JsNoteBuilder();
   noteBuilder.protocol('mixer');
-  noteBuilder.version('v2');
+  noteBuilder.version('v1');
 
   noteBuilder.sourceChainId('1');
   noteBuilder.targetChainId('1');

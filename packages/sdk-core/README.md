@@ -23,7 +23,7 @@ const noteInput: NoteGenInput = {
   targetChain: '1',
   targetIdentifyingData: '1',
   tokenSymbol: 'WEBB',
-  version: 'v2',
+  version: 'v1',
   width: '5'
 };
 
