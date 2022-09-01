@@ -99,9 +99,12 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+      - name: install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh -s -- -f
       - name: check
         run: |
           yarn install --frozen-lockfile
+          yarn build
           yarn ts-check
 
   check-tests:
