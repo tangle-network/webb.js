@@ -109,7 +109,7 @@ async function mixerBn254() {
     // tests path
     process.cwd(),
     'tests',
-    'protocol-substrate-fixtures',
+    'substrate-fixtures',
     'mixer',
     'bn254',
     'x5',

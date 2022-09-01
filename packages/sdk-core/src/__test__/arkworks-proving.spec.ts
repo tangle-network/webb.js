@@ -57,7 +57,7 @@ function getKeys_2_2 () {
     // tests path
     process.cwd(),
     'tests',
-    'protocol-substrate-fixtures',
+    'substrate-fixtures',
     'vanchor',
     'bn254',
     'x5',
@@ -69,7 +69,7 @@ function getKeys_2_2 () {
     // tests path
     process.cwd(),
     'tests',
-    'protocol-substrate-fixtures',
+    'substrate-fixtures',
     'vanchor',
     'bn254',
     'x5',
@@ -92,7 +92,7 @@ function getKeys_16_2 () {
     // tests path
     process.cwd(),
     'tests',
-    'protocol-substrate-fixtures',
+    'substrate-fixtures',
     'vanchor',
     'bn254',
     'x5',
@@ -104,7 +104,7 @@ function getKeys_16_2 () {
     // tests path
     process.cwd(),
     'tests',
-    'protocol-substrate-fixtures',
+    'substrate-fixtures',
     'vanchor',
     'bn254',
     'x5',

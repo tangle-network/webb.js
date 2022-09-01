@@ -89,6 +89,13 @@ curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
 Great! Now your **Rust** environment is ready! 🦀 🦀
 
+Lastly, install 
+
+  - [DVC](https://dvc.org/) is used for fetching large ZK files and managing them alongside git
+  - [substrate.io](https://docs.substrate.io/main-docs/install/) may require additional dependencies
+
+🚀🚀 Your environment is complete! 🚀🚀
+
 ## Installation 💻
 
 Once the development environment is set up, you may proceed install the required dependencies. 
@@ -103,10 +110,10 @@ yarn install
 yarn build
 ```
 
-**To update fixtures:**
+**To fetch fixtures:**
 
 ```bash
-git submodule update --init --recursive
+dvc pull
 ```
 
 <h1 id="usage"> Usage </h1>
@@ -155,7 +162,7 @@ We have included implementation examples for using this API to interact with an 
 To run the above mentioned usage examples you will need to use the experimental module loader and start a [local substrate chain](https://github.com/webb-tools/protocol-substrate#standalone-local-testnet). In addition please ensure you have updated the fixtures by running:
 
 ```bash
-git submodule update --init --recursive
+dvc pull
 ```
 
 Once started you may run the following command from root:
