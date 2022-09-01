@@ -365,8 +365,7 @@ pub enum OpStatusCode {
 	InvalidIndices = 53,
 	InvalidPublicAmount = 54,
 	InvalidOutputUtxoConfig = 55,
-	InvalidExtData = 56,
-	InvalidExtDataHash = 57,
+	InvalidExtDataHash = 56,
 }
 
 #[wasm_bindgen]
@@ -504,7 +503,6 @@ impl From<OpStatusCode> for String {
 			OpStatusCode::InvalidIndices => "Invalid indices value",
 			OpStatusCode::InvalidPublicAmount => "Invalid public amount",
 			OpStatusCode::InvalidOutputUtxoConfig => "Invalid output UTXO config",
-			OpStatusCode::InvalidExtData => "Invalid external data",
 			OpStatusCode::InvalidExtDataHash => "Invalid external data hash",
 		}
 		.to_string()
