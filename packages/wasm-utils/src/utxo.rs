@@ -151,6 +151,7 @@ impl JsUtxo {
 		utxo_str.parse().map_err(Into::into)
 	}
 }
+
 #[wasm_bindgen]
 impl JsUtxo {
 	pub fn serialize(&self) -> JsString {

@@ -4,7 +4,6 @@
 // Import wasm-generated types
 import type { NoteProtocol } from '@webb-tools/wasm-utils';
 
-import { poseidon } from 'circomlibjs';
 import { BigNumber } from 'ethers';
 import * as snarkjs from 'snarkjs';
 
@@ -14,8 +13,8 @@ import { toFixedHex } from '../../big-number-utils.js';
 import { Keypair } from '../../keypair.js';
 import { MerkleProof, MerkleTree } from '../../merkle-tree.js';
 import { Note } from '../../note.js';
-import { buildFixedWitnessCalculator, buildVariableWitnessCalculator, CircomUtxo, generateFixedWitnessInput, generateVariableWitnessInput, generateWithdrawProofCallData, getVAnchorExtDataHash } from '../../solidity-utils/index.js';
-import { AnchorPMSetupInput, PMEvents } from '../types.js';
+import { buildVariableWitnessCalculator, CircomUtxo, generateVariableWitnessInput, generateWithdrawProofCallData, getVAnchorExtDataHash } from '../../solidity-utils/index.js';
+import { PMEvents } from '../types.js';
 import { WorkerProofInterface, WorkerProvingManagerSetupInput, WorkerVAnchorPMSetupInput } from '../worker-utils.js';
 
 export class CircomProvingManagerThread {
@@ -76,52 +75,7 @@ export class CircomProvingManagerThread {
    * Generate the Zero-knowledge proof from the proof input
    **/
   async prove<T extends NoteProtocol> (protocol: T, pmSetupInput: WorkerProvingManagerSetupInput<T>): Promise<WorkerProofInterface<T>> {
-    // @deprecated
-    if (protocol === 'anchor') {
-      const input = pmSetupInput as AnchorPMSetupInput;
-      const { note } = await Note.deserialize(input.note);
-      const noteSecretParts = note.secrets.split(':');
-      const chainId = '0x' + noteSecretParts[0];
-      const nullifier = '0x' + noteSecretParts[1];
-      const secret = '0x' + noteSecretParts[2];
-      const nullifierHash = BigNumber.from(poseidon([nullifier, nullifier]));
-      const leaf = note.getLeafCommitment();
-      // Generate the merkle proof from the passed leaves
-      const mt = new MerkleTree(this.treeDepth, input.leaves.map((u8a) => u8aToHex(u8a)));
-      const merkleProof = mt.path(input.leafIndex);
-
-      // Build the appropriate witnessCalculator for this circuit
-      const witnessCalculator = await buildFixedWitnessCalculator(this.circuitWasm, 0);
-      const witnessInput = generateFixedWitnessInput(
-        nullifier,
-        nullifierHash.toHexString(),
-        secret,
-        chainId,
-        input.refreshCommitment,
-        input.recipient,
-        input.relayer,
-        BigInt(input.fee),
-        BigInt(input.refund),
-        input.roots.map((root) => u8aToHex(root)),
-        merkleProof.pathElements,
-        merkleProof.pathIndices
-      );
-
-      const witness = await witnessCalculator.calculateWTNSBin(witnessInput, 0);
-      // TODO: return the public inputs
-      const proofEncoded = await this.snarkjsProveAndVerify(input.provingKey, witness);
-
-      const anchorProof: WorkerProofInterface<'anchor'> = {
-        leaf,
-        nullifierHash: nullifierHash.toHexString(),
-        proof: `0x${proofEncoded}`,
-        publicInputs: [],
-        root: merkleProof.merkleRoot.toHexString(),
-        roots: input.roots.map((root) => u8aToHex(root))
-      };
-
-      return anchorProof as any;
-    } else if (protocol === 'vanchor') {
+    if (protocol === 'vanchor') {
       const input = pmSetupInput as WorkerVAnchorPMSetupInput;
       const notes = await Promise.all(input.inputNotes.map((note) => Note.deserialize(note)));
       const indices = [...input.indices];
@@ -170,7 +124,9 @@ export class CircomProvingManagerThread {
         input.extAmount,
         input.fee,
         u8aToHex(input.recipient),
-        u8aToHex(input.relayer)
+        u8aToHex(input.relayer),
+        input.refund,
+        u8aToHex(input.token)
       );
 
       // create utxos for the inputs
@@ -215,7 +171,7 @@ export class CircomProvingManagerThread {
           targetChain: utxo.chainId,
           targetIdentifyingData: notes[0].note.targetIdentifyingData,
           tokenSymbol: notes[0].note.tokenSymbol,
-          version: 'v2',
+          version: 'v1',
           width: '5'
         });
 
@@ -240,7 +196,7 @@ export class CircomProvingManagerThread {
       const witness = await witnessCalculator.calculateWTNSBin(witnessInput, 0);
       const proofEncoded = await this.snarkjsProveAndVerify(input.provingKey, witness);
 
-      const anchorProof: WorkerProofInterface<'vanchor'> = {
+      const vanchorProof: WorkerProofInterface<'vanchor'> = {
         extDataHash: hexToU8a(dataHash.toHexString()),
         inputUtxos: inputUtxos.map((utxo) => utxo.serialize()),
         outputNotes: outputNotes.map((note) => note.serialize()),
@@ -250,7 +206,7 @@ export class CircomProvingManagerThread {
         publicInputs: []
       };
 
-      return anchorProof;
+      return vanchorProof;
     } else {
       throw new Error('invalid protocol');
     }

@@ -45,7 +45,7 @@ async function generateVAnchorNote (amount: number, chainId: number, outputChain
     targetChain: String(outputChainId),
     targetIdentifyingData: '1',
     tokenSymbol: 'WEBB',
-    version: 'v2',
+    version: 'v1',
     width: String(5)
   });
 
@@ -164,8 +164,10 @@ describe('Arkworks Proving manager VAnchor', function () {
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
       recipient: address,
+      refund: '0',
       relayer: address,
-      roots: rootsSet
+      roots: rootsSet,
+      token: address
     };
     const data = await provingManager.prove('vanchor', setup);
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
@@ -213,8 +215,10 @@ describe('Arkworks Proving manager VAnchor', function () {
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
       recipient: address,
+      refund: '0',
       relayer: address,
-      roots: rootsSet
+      roots: rootsSet,
+      token: address
     };
     const data = await provingManager.prove('vanchor', setup);
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(keys.vk).replace('0x', ''), 'Bn254');
@@ -262,8 +266,10 @@ describe('Arkworks Proving manager VAnchor', function () {
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
       recipient: address,
+      refund: '0',
       relayer: address,
-      roots: rootsSet
+      roots: rootsSet,
+      token: address
     };
 
     const data = await provingManager.prove('vanchor', setup);
@@ -314,8 +320,10 @@ describe('Arkworks Proving manager VAnchor', function () {
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
       recipient: address,
+      refund: '0',
       relayer: address,
-      roots: rootsSet
+      roots: rootsSet,
+      token: address
     };
 
     const data = await provingManager.prove('vanchor', setup);
@@ -364,12 +372,13 @@ describe('Arkworks Proving manager VAnchor', function () {
         inputNotes: notes,
         leavesMap,
         output: [new Utxo(output1), new Utxo(output2)],
-
         provingKey: keys.pk,
         publicAmount: String(publicAmount),
         recipient: address,
+        refund: '0',
         relayer: address,
-        roots: rootsSet
+        roots: rootsSet,
+        token: address
       };
 
       await provingManager.prove('vanchor', setup);
@@ -377,7 +386,7 @@ describe('Arkworks Proving manager VAnchor', function () {
       message = e.message;
     }
 
-    expect(message).to.deep.equal('Output amount and input amount  don\'t match input(170) != output(1610)');
+    expect(message).to.deep.equal('Output amount and input amount don\'t match input(170) != output(1610)');
   });
 
   it('should prove a single utxo commitment is in a tree', async () => {
@@ -427,8 +436,10 @@ describe('Arkworks Proving manager VAnchor', function () {
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
       recipient: address,
+      refund: '0',
       relayer: address,
-      roots: rootsSet
+      roots: rootsSet,
+      token: address
     };
 
     const data = await provingManager.prove<'vanchor'>('vanchor', setup);
@@ -484,8 +495,10 @@ describe('Arkworks Proving manager VAnchor', function () {
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
       recipient: address,
+      refund: '0',
       relayer: address,
-      roots: rootsSet
+      roots: rootsSet,
+      token: address
     };
 
     const data = await provingManager.prove('vanchor', setup);
@@ -540,8 +553,10 @@ describe('Arkworks Proving manager VAnchor', function () {
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
       recipient: address,
+      refund: '0',
       relayer: address,
-      roots: rootsSet
+      roots: rootsSet,
+      token: address
     };
 
     const data = await provingManager.prove('vanchor', setup);

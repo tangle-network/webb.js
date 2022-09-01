@@ -62,7 +62,7 @@ async function mixerBn254() {
   //          was created with hash(chainID, nullifier, secret).
   const noteGenInput: NoteGenInput = {
     protocol: 'mixer',
-    version: 'v2',
+    version: 'v1',
     sourceChain: '1',
     targetChain: '1',
     amount: '1',

@@ -58,7 +58,7 @@ export type NoteGenInput = {
  * that works both in Node.js and in the browser.
  */
 export class Note {
-  static CURRENT_VERSION: Version = 'v2';
+  static CURRENT_VERSION: Version = 'v1';
 
   // Default constructor
   constructor (readonly note: JsNote) {}
@@ -163,8 +163,8 @@ export class Note {
    * ```typescript
    * // Generate an anchor note
    * const input: NoteGenInput = {
-   *   protocol: 'anchor',
-   *   version: 'v2',
+   *   protocol: 'vanchor',
+   *   version: 'v1',
    *   targetChain: '1',
    *   targetIdentifyingData: '1',
    *   sourceChain: '1',

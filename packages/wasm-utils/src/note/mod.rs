@@ -13,11 +13,9 @@ use crate::types::{
 };
 use crate::utxo::JsUtxo;
 
-mod anchor;
 pub mod mixer;
-
-mod vanchor;
-mod versioning;
+pub mod vanchor;
+pub mod versioning;
 
 #[allow(unused_macros)]
 macro_rules! console_log {
@@ -27,7 +25,6 @@ macro_rules! console_log {
 }
 pub enum JsLeafInner {
 	Mixer(Leaf),
-	Anchor(Leaf),
 	VAnchor(JsUtxo),
 }
 
@@ -35,13 +32,6 @@ impl Clone for JsLeafInner {
 	fn clone(&self) -> Self {
 		match self {
 			JsLeafInner::Mixer(leaf) => JsLeafInner::Mixer(Leaf {
-				chain_id_bytes: leaf.chain_id_bytes.clone(),
-				secret_bytes: leaf.secret_bytes.clone(),
-				nullifier_bytes: leaf.nullifier_bytes.clone(),
-				leaf_bytes: leaf.leaf_bytes.clone(),
-				nullifier_hash_bytes: leaf.nullifier_hash_bytes.clone(),
-			}),
-			JsLeafInner::Anchor(leaf) => JsLeafInner::Anchor(Leaf {
 				chain_id_bytes: leaf.chain_id_bytes.clone(),
 				secret_bytes: leaf.secret_bytes.clone(),
 				nullifier_bytes: leaf.nullifier_bytes.clone(),
@@ -65,13 +55,6 @@ impl JsLeaf {
 		}
 	}
 
-	pub fn anchor_leaf(&self) -> Result<Leaf, OperationError> {
-		match self.inner.clone() {
-			JsLeafInner::Anchor(leaf) => Ok(leaf),
-			_ => Err(OpStatusCode::InvalidNoteProtocol.into()),
-		}
-	}
-
 	pub fn vanchor_leaf(&self) -> Result<JsUtxo, OperationError> {
 		match self.inner.clone() {
 			JsLeafInner::VAnchor(leaf) => Ok(leaf),
@@ -85,7 +68,6 @@ impl JsLeaf {
 	pub fn protocol(&self) -> Protocol {
 		let protocol = match self.inner {
 			JsLeafInner::Mixer(_) => "mixer",
-			JsLeafInner::Anchor(_) => "anchor",
 			JsLeafInner::VAnchor(_) => "vanchor",
 		};
 
@@ -95,7 +77,7 @@ impl JsLeaf {
 	#[wasm_bindgen(getter)]
 	pub fn commitment(&self) -> Uint8Array {
 		match &self.inner {
-			JsLeafInner::Mixer(leaf) | JsLeafInner::Anchor(leaf) => Uint8Array::from(leaf.leaf_bytes.as_slice()),
+			JsLeafInner::Mixer(leaf) => Uint8Array::from(leaf.leaf_bytes.as_slice()),
 			JsLeafInner::VAnchor(vanchor_leaf) => vanchor_leaf.commitment(),
 		}
 	}
@@ -127,11 +109,6 @@ impl JsNote {
 					NoteVersion::V1 => {
 						let mut raw = Vec::new();
 						raw.extend_from_slice(&self.secrets[0][..]);
-						raw
-					}
-					NoteVersion::V2 => {
-						let mut raw = Vec::new();
-						raw.extend_from_slice(&self.secrets[0][..]);
 						raw.extend_from_slice(&self.secrets[1][..]);
 						raw
 					}
@@ -148,60 +125,8 @@ impl JsNote {
 					inner: JsLeafInner::Mixer(mixer_leaf),
 				})
 			}
-			NoteProtocol::Anchor => {
-				let mut secret_bytes: Vec<u8> = Vec::new();
-				let mut nullifier_bytes: Vec<u8> = Vec::new();
-				let valid_note: bool = match self.version {
-					NoteVersion::V1 => {
-						if self.secrets.len() == 1 && self.secrets[0].len() == 64 {
-							secret_bytes = self.secrets[0][0..32].to_vec();
-							nullifier_bytes = self.secrets[0][32..64].to_vec();
-							true
-						} else {
-							false
-						}
-					}
-					NoteVersion::V2 => {
-						if self.secrets.len() == 3 {
-							nullifier_bytes = self.secrets[1].clone();
-							secret_bytes = self.secrets[2].clone();
-							nullifier_bytes.len() == 32 && secret_bytes.len() == 32
-						} else {
-							false
-						}
-					}
-				};
-
-				if !valid_note {
-					let message = format!("Invalid secret format for protocol {}", self.protocol);
-					return Err(OperationError::new_with_message(
-						OpStatusCode::InvalidNoteSecrets,
-						message,
-					));
-				}
-
-				let anchor_leaf = anchor::get_leaf_with_private_raw(
-					self.curve.unwrap_or(Curve::Bn254),
-					self.width.unwrap_or(5),
-					self.exponentiation.unwrap_or(4),
-					u64::from_str(&self.target_chain_id).unwrap(),
-					nullifier_bytes,
-					secret_bytes,
-				)?;
-
-				Ok(JsLeaf {
-					inner: JsLeafInner::Anchor(anchor_leaf),
-				})
-			}
 			NoteProtocol::VAnchor => match self.version {
 				NoteVersion::V1 => {
-					let message = "VAnchor protocol isn't supported in note v1".to_string();
-					Err(OperationError::new_with_message(
-						OpStatusCode::FailedToGenerateTheLeaf,
-						message,
-					))
-				}
-				NoteVersion::V2 => {
 					if self.secrets.len() == 4 {
 						let chain_id = self.secrets[0].clone();
 
@@ -342,11 +267,7 @@ impl FromStr for JsNote {
 	type Err = OperationError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		if !s.contains("://") {
-			versioning::v1::note_from_str(s)
-		} else {
-			versioning::v2::note_from_str(s)
-		}
+		versioning::v1::note_from_str(s)
 	}
 }
 
@@ -615,17 +536,6 @@ impl JsNoteBuilder {
 
 					secrets.to_vec()
 				}
-				NoteProtocol::Anchor => {
-					let secrets = anchor::generate_secrets(
-						exponentiation.unwrap_or(5),
-						width.unwrap_or(4),
-						curve.unwrap_or(Curve::Bn254),
-						chain_id,
-						&mut OsRng,
-					)?;
-
-					secrets.to_vec()
-				}
 				NoteProtocol::VAnchor => {
 					let blinding = self.blinding;
 					let private_key = self.private_key;
@@ -650,36 +560,24 @@ impl JsNoteBuilder {
 				}
 			},
 			Some(secrets) => {
-				// Skip validation for note V1 , V1 secrets are just of length 1
-				// V2 notes have secrets list the length of the list is validated
-				if version != NoteVersion::V1 {
-					match protocol {
-						NoteProtocol::Mixer => {
-							if secrets.len() != 1 {
-								let message = "Mixer secrets length should be 1 in length".to_string();
-								let operation_error =
-									OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
-								return Err(operation_error.into());
-							}
+				match protocol {
+					NoteProtocol::Mixer => {
+						if secrets.len() != 1 {
+							let message = "Mixer secrets length should be 1 in length".to_string();
+							let operation_error =
+								OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
+							return Err(operation_error.into());
 						}
-						NoteProtocol::Anchor => {
-							if secrets.len() != 3 {
-								let message = "Anchor secrets length should be 3 in length".to_string();
-								let operation_error =
-									OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
-								return Err(operation_error.into());
-							}
+					}
+					NoteProtocol::VAnchor => {
+						if secrets.len() != 4 {
+							let message = "VAnchor secrets length should be 4 in length".to_string();
+							let operation_error =
+								OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
+							return Err(operation_error.into());
 						}
-						NoteProtocol::VAnchor => {
-							if secrets.len() != 4 {
-								let message = "VAnchor secrets length should be 4 in length".to_string();
-								let operation_error =
-									OperationError::new_with_message(OpStatusCode::InvalidNoteSecrets, message);
-								return Err(operation_error.into());
-							}
-						}
-					};
-				}
+					}
+				};
 
 				secrets
 			}
@@ -915,173 +813,10 @@ mod test {
 
 	type Bn254Fr = ark_bn254::Fr;
 
-	#[test]
-	fn deserialize_v1() {
-		let note = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
-		let note = JsNote::deserialize(note).unwrap();
-		assert_eq!(note.protocol, NoteProtocol::Anchor);
-		assert_eq!(note.backend, Some(Backend::Arkworks));
-		assert_eq!(note.curve, Some(Curve::Bn254));
-		assert_eq!(note.hash_function, Some(HashFunction::Poseidon));
-		assert_eq!(note.token_symbol, Some(String::from("EDG")));
-		assert_eq!(note.denomination, Some(18));
-		assert_eq!(note.version, NoteVersion::V1);
-		assert_eq!(note.width, Some(5));
-		assert_eq!(note.exponentiation, Some(5));
-		assert_eq!(note.target_chain_id, "3".to_string());
-		assert_eq!(note.source_chain_id, "2".to_string());
-	}
-
-	#[test]
-	fn generate_note_v1() {
-		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
-		let note_value = hex::decode("7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717").unwrap();
-		let note = JsNote {
-			scheme: "webb://".to_string(),
-			protocol: NoteProtocol::Anchor,
-			version: NoteVersion::V1,
-			source_chain_id: "2".to_string(),
-			target_chain_id: "3".to_string(),
-			source_identifying_data: "2".to_string(),
-			target_identifying_data: "3".to_string(),
-			width: Some(5),
-			exponentiation: Some(5),
-			denomination: Some(18),
-			token_symbol: Some("EDG".to_string()),
-			hash_function: Some(HashFunction::Poseidon),
-			backend: Some(Backend::Arkworks),
-			curve: Some(Curve::Bn254),
-			amount: Some("0".to_string()),
-			secrets: vec![note_value],
-			index: None,
-		};
-		assert_eq!(note.to_string(), JsNote::from_str(note_str).unwrap().to_string());
-	}
-
-	#[test]
-	fn deserialize_v2() {
-		let note = "webb://v2:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
-		let note = JsNote::deserialize(note).unwrap();
-		assert_eq!(note.protocol, NoteProtocol::Anchor);
-		assert_eq!(note.backend, Some(Backend::Arkworks));
-		assert_eq!(note.curve, Some(Curve::Bn254));
-		assert_eq!(note.hash_function, Some(HashFunction::Poseidon));
-		assert_eq!(note.token_symbol, Some(String::from("EDG")));
-		assert_eq!(note.denomination, Some(18));
-		assert_eq!(note.version, NoteVersion::V2);
-		assert_eq!(note.width, Some(5));
-		assert_eq!(note.exponentiation, Some(5));
-		assert_eq!(note.target_chain_id, "3".to_string());
-		assert_eq!(note.source_chain_id, "2".to_string());
-	}
-
-	#[test]
-	fn generate_note_v2() {
-		let note_str = "webb://v2:anchor/2:3/2:3/376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=0";
-		let note_value = "376530663462666132363364386239333835343737326339343835316330346233613961626133386162383038613864303831663666356265393735383131306237313437633339356565396266343935373334653437303362316636323230303963383137313235323064653062626435653761313032333763376438323962663662643664303732396363613737386564396236666231373262626231326230313932373235386163613765306136366664353639313534386638373137";
-		let note_value_decoded = hex::decode(note_value).unwrap();
-		let note = JsNote {
-			scheme: "webb://".to_string(),
-			protocol: NoteProtocol::Anchor,
-			version: NoteVersion::V2,
-			source_chain_id: "2".to_string(),
-			target_chain_id: "3".to_string(),
-			source_identifying_data: "2".to_string(),
-			target_identifying_data: "3".to_string(),
-			width: Some(5),
-			exponentiation: Some(5),
-			denomination: Some(18),
-			token_symbol: Some("EDG".to_string()),
-			hash_function: Some(HashFunction::Poseidon),
-			backend: Some(Backend::Arkworks),
-			curve: Some(Curve::Bn254),
-			amount: Some("0".to_string()),
-			secrets: vec![note_value_decoded],
-			index: None,
-		};
-		assert_eq!(note.to_string(), note_str)
-	}
-	#[test]
-	fn generate_leaf() {}
-
 	#[wasm_bindgen_test]
-	fn deserialize_to_js_note_v2() {
-		let note_str = "webb://v2:anchor/1099511632777:1099511632778/0xD24260C102B5D128cbEFA0F655E5be3c2370677C:0xD30C8839c1145609E564b986F667b273Ddcb8496/01000000138a:00424d778a429c96530df11fc3e87f166109f4bad1cffc58d75577a87ea492c9:0048b277fb5e1d8d5a58079fcbf6036563d7429179681e1f83dae27e4e5c7cef/?curve=Bn254&width=3&exp=5&hf=Poseidon&backend=Circom&token=webbDEV&denom=18&amount=1";
-		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
-
-		assert_eq!(to_rust_string(note.protocol()), NoteProtocol::Anchor.to_string());
-		assert_eq!(to_rust_string(note.version()), NoteVersion::V2.to_string());
-		assert_eq!(note.target_chain_id(), JsString::from("1099511632778"));
-		assert_eq!(note.source_chain_id(), JsString::from("1099511632777"));
-
-		assert_eq!(note.width(), JsString::from("3"));
-		assert_eq!(note.exponentiation(), JsString::from("5"));
-		assert_eq!(note.denomination(), JsString::from("18"));
-		assert_eq!(note.token_symbol(), JsString::from("webbDEV"));
-
-		assert_eq!(to_rust_string(note.backend()), Backend::Circom.to_string());
-		assert_eq!(to_rust_string(note.curve()), Curve::Bn254.to_string());
-		assert_eq!(to_rust_string(note.hash_function()), HashFunction::Poseidon.to_string());
-		assert_eq!(note.secrets(), JsString::from("01000000138a:00424d778a429c96530df11fc3e87f166109f4bad1cffc58d75577a87ea492c9:0048b277fb5e1d8d5a58079fcbf6036563d7429179681e1f83dae27e4e5c7cef"))
-	}
-
-	#[wasm_bindgen_test]
-	fn serialize_js_note_v2() {
-		let note_str = "webb://v2:anchor/1099511632777:1099511632778/0xD24260C102B5D128cbEFA0F655E5be3c2370677C:0xD30C8839c1145609E564b986F667b273Ddcb8496/01000000138a:00424d778a429c96530df11fc3e87f166109f4bad1cffc58d75577a87ea492c9:0048b277fb5e1d8d5a58079fcbf6036563d7429179681e1f83dae27e4e5c7cef/?curve=Bn254&width=3&exp=5&hf=Poseidon&backend=Circom&token=webbDEV&denom=18&amount=1";
-
+	fn generate_mixer_note() {
 		let mut note_builder = JsNoteBuilder::new();
-		let protocol: Protocol = JsValue::from(NoteProtocol::Anchor.to_string()).into();
-		let version: Version = JsValue::from(NoteVersion::V2.to_string()).into();
-		let backend: BE = JsValue::from(Backend::Circom.to_string()).into();
-		let hash_function: HF = JsValue::from(HashFunction::Poseidon.to_string()).into();
-		let curve: WasmCurve = JsValue::from(Curve::Bn254.to_string()).into();
-
-		note_builder.protocol(protocol).unwrap();
-		note_builder.version(version).unwrap();
-		note_builder.target_chain_id(JsString::from("1099511632778"));
-		note_builder.source_chain_id(JsString::from("1099511632777"));
-		note_builder.source_identifying_data(JsString::from("0xD24260C102B5D128cbEFA0F655E5be3c2370677C"));
-		note_builder.target_identifying_data(JsString::from("0xD30C8839c1145609E564b986F667b273Ddcb8496"));
-
-		note_builder.width(JsString::from("3")).unwrap();
-		note_builder.exponentiation(JsString::from("5")).unwrap();
-		note_builder.denomination(JsString::from("18")).unwrap();
-		note_builder.amount(JsString::from("1"));
-		note_builder.token_symbol(JsString::from("webbDEV"));
-		note_builder.curve(curve).unwrap();
-		note_builder.hash_function(hash_function).unwrap();
-		note_builder.backend(backend);
-		note_builder.set_secrets(JsString::from("01000000138a:00424d778a429c96530df11fc3e87f166109f4bad1cffc58d75577a87ea492c9:0048b277fb5e1d8d5a58079fcbf6036563d7429179681e1f83dae27e4e5c7cef")).unwrap();
-		let note = note_builder.build().unwrap();
-		assert_eq!(note.serialize(), JsString::from(note_str));
-	}
-
-	#[wasm_bindgen_test]
-	fn deserialize_to_js_note_v1() {
-		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
-		let note = JsNote::js_deserialize(JsString::from(note_str)).unwrap();
-
-		assert_eq!(to_rust_string(note.protocol()), NoteProtocol::Anchor.to_string());
-		assert_eq!(to_rust_string(note.version()), NoteVersion::V1.to_string());
-		assert_eq!(note.target_chain_id(), JsString::from("3"));
-		assert_eq!(note.source_chain_id(), JsString::from("2"));
-
-		assert_eq!(note.width(), JsString::from("5"));
-		assert_eq!(note.exponentiation(), JsString::from("5"));
-		assert_eq!(note.denomination(), JsString::from("18"));
-		assert_eq!(note.token_symbol(), JsString::from("EDG"));
-
-		assert_eq!(to_rust_string(note.backend()), Backend::Arkworks.to_string());
-		assert_eq!(to_rust_string(note.curve()), Curve::Bn254.to_string());
-		assert_eq!(to_rust_string(note.hash_function()), HashFunction::Poseidon.to_string());
-	}
-
-	#[wasm_bindgen_test]
-	fn serialize_js_note_v1() {
-		let note_str = "webb.bridge:v1:3:2:Arkworks:Bn254:Poseidon:EDG:18:0:5:5:7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717";
-
-		let mut note_builder = JsNoteBuilder::new();
-		let protocol: Protocol = JsValue::from(NoteProtocol::Anchor.to_string()).into();
+		let protocol: Protocol = JsValue::from(NoteProtocol::Mixer.to_string()).into();
 		let version: Version = JsValue::from(NoteVersion::V1.to_string()).into();
 		let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
 		let hash_function: HF = JsValue::from(HashFunction::Poseidon.to_string()).into();
@@ -1090,30 +825,51 @@ mod test {
 		note_builder.protocol(protocol).unwrap();
 		note_builder.version(version).unwrap();
 		note_builder.source_chain_id(JsString::from("2"));
-		note_builder.target_chain_id(JsString::from("3"));
+		note_builder.target_chain_id(JsString::from("2"));
 		note_builder.source_identifying_data(JsString::from("2"));
-		note_builder.target_identifying_data(JsString::from("3"));
+		note_builder.target_identifying_data(JsString::from("2"));
 
-		note_builder.width(JsString::from("5")).unwrap();
+		note_builder.width(JsString::from("3")).unwrap();
 		note_builder.exponentiation(JsString::from("5")).unwrap();
 		note_builder.denomination(JsString::from("18")).unwrap();
-		note_builder.amount(JsString::from("0"));
+		note_builder.amount(JsString::from("10"));
 		note_builder.token_symbol(JsString::from("EDG"));
 		note_builder.curve(curve).unwrap();
 		note_builder.hash_function(hash_function).unwrap();
 		note_builder.backend(backend);
-		note_builder.set_secrets(JsString::from("7e0f4bfa263d8b93854772c94851c04b3a9aba38ab808a8d081f6f5be9758110b7147c395ee9bf495734e4703b1f622009c81712520de0bbd5e7a10237c7d829bf6bd6d0729cca778ed9b6fb172bbb12b01927258aca7e0a66fd5691548f8717")).unwrap();
-		let note = note_builder.build().unwrap();
-		let note_from_str = JsNote::from_str(note_str).unwrap();
-		assert_eq!(note.serialize(), note_from_str.serialize());
+		note_builder.index(JsString::from("10")).unwrap();
+
+		let mixer_note = note_builder.build().unwrap();
+		let note_string = mixer_note.to_string();
+		let leaf = mixer_note.get_leaf_commitment().unwrap();
+		let leaf_vec = leaf.to_vec();
+
+		let js_note_2 = JsNote::deserialize(&note_string).unwrap();
+		let js_note_2_string = js_note_2.to_string();
+
+		let leaf_2 = js_note_2.get_leaf_commitment().unwrap();
+		let leaf_2_vec = leaf_2.to_vec();
+
+		// Asserting that with serialization and deserialization lead to the same note
+		assert_eq!(note_string, js_note_2_string);
+		assert_eq!(mixer_note.secrets.len(), 2);
+		assert_eq!(hex::encode(leaf_vec), hex::encode(leaf_2_vec));
 	}
-	// VAnchor tests
+
+	#[wasm_bindgen_test]
+	fn should_deserialize_mixer_note() {
+		let mixer_note = "webb://v1:mixer/2:2/2:2/fd717cfe463b3ffec71ee6b7606bbd0179170510abf41c9f16c1d20ca9923f0e:18b6b080e6a43262f00f6fb3da0d2409c4871b8f26d89d5c8836358e1af5a41c/?curve=Bn254&width=3&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
+		let note = JsNote::deserialize(mixer_note).unwrap();
+		// Generate leaf to trigger any errors
+		note.get_leaf_commitment().unwrap();
+		assert_eq!(note.serialize(), mixer_note);
+	}
 
 	#[wasm_bindgen_test]
 	fn generate_vanchor_note() {
 		let mut note_builder = JsNoteBuilder::new();
 		let protocol: Protocol = JsValue::from(NoteProtocol::VAnchor.to_string()).into();
-		let version: Version = JsValue::from(NoteVersion::V2.to_string()).into();
+		let version: Version = JsValue::from(NoteVersion::V1.to_string()).into();
 		let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
 		let hash_function: HF = JsValue::from(HashFunction::Poseidon.to_string()).into();
 		let curve: WasmCurve = JsValue::from(Curve::Bn254.to_string()).into();
@@ -1148,17 +904,16 @@ mod test {
 
 		// Asserting that with serialization and deserialization lead to the same note
 		assert_eq!(note_string, js_note_2_string);
-
 		assert_eq!(vanchor_note.secrets.len(), 4);
-
 		assert_eq!(hex::encode(leaf_vec), hex::encode(leaf_2_vec));
 	}
 
 	#[wasm_bindgen_test]
 	fn should_deserialize_vanchor_note() {
-		let vanchor_note_str = "webb://v2:vanchor/2:3/2:3/0300000000000000000000000000000000000000000000000000000000000000:0a00000000000000000000000000000000000000000000000000000000000000:7798d054444ec463be7d41ad834147b5b2c468182c7cd6a601aec29a273fca05:bf5d780608f5b8a8db1dc87356a225a0324a1db61903540daaedd54ab10a4124/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
+		let vanchor_note_str = "webb://v1:vanchor/2:3/2:3/0300000000000000000000000000000000000000000000000000000000000000:0a00000000000000000000000000000000000000000000000000000000000000:7798d054444ec463be7d41ad834147b5b2c468182c7cd6a601aec29a273fca05:bf5d780608f5b8a8db1dc87356a225a0324a1db61903540daaedd54ab10a4124/?curve=Bn254&width=5&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
 		let note = JsNote::deserialize(vanchor_note_str).unwrap();
 		// Generate leaf to trigger any errors
 		note.get_leaf_commitment().unwrap();
+		assert_eq!(note.serialize(), vanchor_note_str);
 	}
 }

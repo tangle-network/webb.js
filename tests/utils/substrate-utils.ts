@@ -3,14 +3,13 @@ import { options } from '@webb-tools/api/index.js';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import {
-  MTBn254X5,
   generate_proof_js,
   JsNote,
   JsNoteBuilder,
   OperationError,
   JsProofInputBuilder,
 } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
-import { hexToU8a, u8aToHex } from '@polkadot/util';
+import { u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/keyring';
 import path from 'path';
 import fs from 'fs';
@@ -199,26 +198,12 @@ export async function setORMLTokenBalance(
   });
 }
 
-// @ts-ignore
-export async function fetchLinkableAnchorBn254(apiPromise: ApiPromise) {
-  // Run the
-}
 export async function fetchCachedRoot(apiPromise: ApiPromise, treeId: string) {
   const storage =
     // @ts-ignore
     await apiPromise.query.merkleTreeBn254.trees(treeId);
   // @ts-ignore
   return storage.toHuman().root;
-}
-
-export async function getAnchors(apiPromise: ApiPromise) {
-  // @ts-ignore
-  const anchors = await apiPromise.query.anchorBn254.anchors.entries();
-  const anc = anchors.map(([key, entry]) => {
-    const treeId = (key.toHuman() as Array<string>)[0];
-    return { treeId, anchor: entry.toHuman() };
-  });
-  return anc;
 }
 
 export async function fetchRPCTreeLeaves(api: ApiPromise, treeId: string | number): Promise<Uint8Array[]> {
@@ -243,7 +228,7 @@ export async function fetchRPCTreeLeaves(api: ApiPromise, treeId: string | numbe
 export async function depositMixerBnX5_3(api: ApiPromise, depositor: KeyringPair) {
   let noteBuilder = new JsNoteBuilder();
   noteBuilder.protocol('mixer');
-  noteBuilder.version('v2');
+  noteBuilder.version('v1');
 
   noteBuilder.sourceChainId('1');
   noteBuilder.targetChainId('1');
@@ -276,9 +261,6 @@ export type WithdrawProof = {
   fee: number;
   refund: number;
 };
-export type AnchorWithdrawProof = WithdrawProof & {
-  commitment: string;
-};
 
 export function catchWasmError<T extends (...args: any) => any>(fn: T): ReturnType<T> {
   try {
@@ -294,144 +276,6 @@ export function catchWasmError<T extends (...args: any) => any>(fn: T): ReturnTy
     console.log(errorMessage);
     throw errorMessage;
   }
-}
-
-function firstAnchorTreeId(apiPromise: ApiPromise) {
-  return getAnchors(apiPromise).then((i) => i[0]!.treeId) as Promise<string>;
-}
-
-export async function depositAnchorBnX5_4(api: ApiPromise, depositor: KeyringPair) {
-  const treeId = await firstAnchorTreeId(api);
-
-  let noteBuilder = new JsNoteBuilder();
-  noteBuilder.protocol('anchor');
-  noteBuilder.version('v2');
-
-  noteBuilder.sourceChainId('2199023256632');
-  noteBuilder.targetChainId('2199023256632');
-  noteBuilder.sourceIdentifyingData(treeId);
-  noteBuilder.targetIdentifyingData(treeId);
-
-  noteBuilder.tokenSymbol('WEBB');
-  noteBuilder.amount('1');
-  noteBuilder.denomination('18');
-
-  noteBuilder.backend('Arkworks');
-  noteBuilder.hashFunction('Poseidon');
-  noteBuilder.curve('Bn254');
-  noteBuilder.width('4');
-  noteBuilder.exponentiation('5');
-  const note = noteBuilder.build();
-  const leaf = note.getLeafCommitment();
-
-  await polkadotTx(api, { method: 'deposit', section: 'anchorBn254' }, [treeId, leaf], depositor);
-  return note;
-}
-
-export async function createAnchor(
-  api: ApiPromise,
-  sudoPair: KeyringPair,
-  size: number /* Size should be more the existential balance*/,
-  assetId: number = 0,
-  maxEdges: number = 2,
-  depth: number = 3
-) {
-  return polkadotTx(
-    api,
-    { method: 'sudo', section: 'sudo' },
-    [
-      api.tx.anchorBn254.create(currencyToUnitI128(size).toString(), maxEdges, depth, assetId),
-    ],
-    sudoPair
-  );
-}
-
-export async function withdrawAnchorBnx5_4(
-  api: ApiPromise,
-  signer: KeyringPair,
-  note: JsNote,
-  relayerAccountId: string
-): Promise<string> {
-  const accountId = signer.address;
-
-  const addressHex = u8aToHex(decodeAddress(accountId));
-  const relayerAddressHex = u8aToHex(decodeAddress(relayerAccountId));
-  const treeId = await firstAnchorTreeId(api);
-
-  // fetch leaves
-  const leafCount = await api.derive.merkleTreeBn254.getLeafCountForTree(Number(treeId));
-  const leaves = await api.derive.merkleTreeBn254.getLeavesForTree(Number(treeId), 0, leafCount - 1);
-  const proofInputBuilder = new JsProofInputBuilder('anchor');
-  const leafHex = u8aToHex(note.getLeafCommitment());
-  proofInputBuilder.setNote(note);
-  proofInputBuilder.setLeaves(leaves);
-  const leafIndex = leaves.findIndex((l) => u8aToHex(l) === leafHex);
-
-  proofInputBuilder.setLeafIndex(String(leafIndex));
-
-  proofInputBuilder.setFee('5');
-  proofInputBuilder.setRefund('1');
-  const merkeTree = new MTBn254X5(leaves, String(leafIndex));
-  const root = `0x${merkeTree.root}`;
-
-  proofInputBuilder.setRefreshCommitment('0000000000000000000000000000000000000000000000000000000000000000');
-
-  // get the neighbor roots
-  // @ts-ignore
-  const neighborRoots = await api.rpc.lt.getNeighborRoots(treeId);
-
-  let neighborRootsU8: Uint8Array[] = new Array(neighborRoots.length);
-  for (let i = 0; i < neighborRootsU8.length; i++) {
-    neighborRootsU8[i] = hexToU8a(neighborRoots[i].toString());
-  }
-
-  proofInputBuilder.setRoots([hexToU8a(root), ...neighborRootsU8]);
-
-  proofInputBuilder.setRecipient(addressHex.replace('0x', ''));
-  proofInputBuilder.setRelayer(relayerAddressHex.replace('0x', ''));
-
-  const pkPath = path.join(
-    // tests path
-    process.cwd(),
-    'tests',
-    'protocol-substrate-fixtures',
-    'fixed-anchor',
-    'bn254',
-    'x5',
-    '2',
-    'proving_key_uncompressed.bin'
-  );
-  const pk = fs.readFileSync(pkPath);
-
-  proofInputBuilder.setPk(pk.toString('hex'));
-
-  const proofInput = proofInputBuilder.build_js();
-
-  const zkProofMetadata = generate_proof_js(proofInput).anchorProof;
-
-  const withdrawProof: AnchorWithdrawProof = {
-    id: treeId,
-    proofBytes: `0x${zkProofMetadata.proof}` as any,
-    root: `0x${zkProofMetadata.root}`,
-    nullifierHash: `0x${zkProofMetadata.nullifierHash}`,
-    recipient: accountId,
-    relayer: relayerAccountId,
-    fee: 5,
-    refund: 1,
-    commitment: `0x0000000000000000000000000000000000000000000000000000000000000000`,
-  };
-  const params = [
-    withdrawProof.id,
-    withdrawProof.proofBytes,
-    zkProofMetadata.roots.map((i: string) => `0x${i}`),
-    withdrawProof.nullifierHash,
-    withdrawProof.recipient,
-    withdrawProof.relayer,
-    withdrawProof.fee,
-    withdrawProof.refund,
-    withdrawProof.commitment,
-  ];
-  return polkadotTx(api, { method: 'withdraw', section: 'anchorBn254' }, params, signer);
 }
 
 export async function withdrawMixerBnX5_3(
@@ -477,20 +321,6 @@ export async function withdrawMixerBnX5_3(
   const proofInput = proofInputBuilder.build_js();
 
   const zkProofMetadata = generate_proof_js(proofInput).mixerProof;
-
-  /*
-  const vkPath = path.join(
-    // tests path
-    process.cwd(),
-    'protocol-substrate-fixtures',
-    'mixer',
-    'bn254',
-    'x5',
-    'verifying_key_uncompressed.bin'
-  );
-  const vk = fs.readFileSync(vkPath);
-  const isValid = validate_proof(zkProofMetadata, vk.toString('hex'), 'Bn254');
-*/
 
   const withdrawProof: WithdrawProof = {
     id: String(0),

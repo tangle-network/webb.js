@@ -94,7 +94,7 @@ async function generateVAnchorNote(amount: number, chainId: number, outputChainI
     targetChain: String(outputChainId),
     targetIdentifyingData: '1',
     tokenSymbol: 'WEBB',
-    version: 'v2',
+    version: 'v1',
     width: String(5)
   });
 
@@ -166,7 +166,9 @@ async function basicDeposit(
     relayer: decodedAddress,
     recipient: decodedAddress,
     extAmount: extAmount.toString(),
-    fee: fee.toString()
+    fee: fee.toString(),
+    refund: '0',
+    token: decodedAddress
   };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
   const extData = {
@@ -263,7 +265,9 @@ async function basicWithdraw(
     relayer: decodedAddress,
     recipient: decodedAddress,
     extAmount: extAmount.toString(),
-    fee: fee.toString()
+    fee: fee.toString(),
+    refund: '0',
+    token: decodedAddress
   };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
   const extData = {
@@ -348,7 +352,9 @@ async function createVAnchorWithDeposit(
     relayer: decodedAddress,
     recipient: decodedAddress,
     extAmount: extAmount.toString(),
-    fee: fee.toString()
+    fee: fee.toString(),
+    refund: '0',
+    token: decodedAddress
   };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
   const extData = {
@@ -486,7 +492,9 @@ describe('VAnchor tests', function() {
       relayer: decodedAddress,
       recipient: decodedAddress,
       extAmount: extAmount.toString(),
-      fee: fee.toString()
+      fee: fee.toString(),
+      refund: '0',
+      token: decodedAddress
     };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
@@ -574,7 +582,9 @@ describe('VAnchor tests', function() {
       relayer: decodedAddress,
       recipient: decodedAddress,
       extAmount: extAmount.toString(),
-      fee: fee.toString()
+      fee: fee.toString(),
+      refund: '0',
+      token: decodedAddress
     };
     const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
@@ -600,6 +610,7 @@ describe('VAnchor tests', function() {
       method: 'transact'
     }, [treeId, vanchorProofData, extData], bob);
   });
+
   it('VAnchor deposit and withdraw with only one note', async function() {
     const { bob, alice } = getKeyring();
     const fee = 0;
@@ -656,7 +667,9 @@ describe('VAnchor tests', function() {
       relayer: decodedAddress,
       recipient: decodedAddress,
       extAmount: extAmount.toString(),
-      fee: fee.toString()
+      fee: fee.toString(),
+      refund: '0',
+      token: decodedAddress
     };
     const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
@@ -683,6 +696,7 @@ describe('VAnchor tests', function() {
       method: 'transact'
     }, [treeId, vanchorProofData, extData], bob);
   });
+
   it('VAnchor multi deposits single execution', async function() {
     this.timeout(350_000);
 
@@ -693,25 +707,6 @@ describe('VAnchor tests', function() {
       const note = await generateVAnchorNote(Number(currencyToUnitI128(100).toString()), Number(chainId), Number(chainId));
       await basicDeposit(apiPromise!, bob, treeId, note);
     }
-
-
-  });
-
-  it.skip('VAnchor multi deposits parallel', async function() {
-    this.timeout(350_000);
-
-    const numberOfDepoisits = 3;
-    const { bob, alice } = getKeyring();
-    const treeId = await createVAnchor(apiPromise!, alice);
-    const depoists: Array<() => Promise<void>> = [];
-    for (let i = 0; i < numberOfDepoisits; i++) {
-      depoists.push(async () => {
-        const note = await generateVAnchorNote(Number(currencyToUnitI128(100).toString()), Number(chainId), Number(chainId));
-        await basicDeposit(apiPromise!, bob, treeId, note);
-      });
-    }
-    await Promise.all(depoists.map(d => d()));
-
   });
 
   it('VAnchor multi deposits and withdraw', async function() {
@@ -724,9 +719,8 @@ describe('VAnchor tests', function() {
       const [outputNote, secret] = await basicDeposit(apiPromise!, bob, treeId, note);
       await basicWithdraw(apiPromise!, treeId, bob, outputNote, secret);
     }
-
-
   });
+
   after(async function() {
     await apiPromise?.disconnect();
     await nodes?.();

@@ -18,13 +18,12 @@ import type { Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
 import { Note, Utxo } from '@webb-tools/sdk-core/index.js';
 
 import { CircomUtxo } from '../solidity-utils/index.js';
-import { AnchorPMSetupInput, AnchorProof, MixerPMSetupInput, MixerProof, ProofInterface, ProvingManagerSetupInput, VAnchorPMSetupInput } from './types.js';
+import { MixerPMSetupInput, MixerProof, ProofInterface, ProvingManagerSetupInput, VAnchorPMSetupInput } from './types.js';
 
 export type WorkerProvingManagerSetupInput<T extends NoteProtocol> = WorkerProvingManagerPayload[T];
 
 export interface WorkerProvingManagerPayload extends Record<NoteProtocol, any> {
   mixer: MixerPMSetupInput;
-  anchor: AnchorPMSetupInput;
   vanchor: WorkerVAnchorPMSetupInput;
 }
 
@@ -42,6 +41,8 @@ export type WorkerVAnchorPMSetupInput = {
   recipient: Uint8Array;
   extAmount: string;
   fee: string;
+  refund: string;
+  token: Uint8Array;
 };
 
 export type WorkerVAnchorProof = {
@@ -57,7 +58,6 @@ export type WorkerProofInterface<T extends NoteProtocol> = WorkerProofPayload[T]
 
 export interface WorkerProofPayload extends Record<NoteProtocol, any> {
   mixer: MixerProof,
-  anchor: AnchorProof,
   VAnchor: WorkerVAnchorProof
 }
 
@@ -117,8 +117,10 @@ export function workerInputMapper<T extends NoteProtocol> (
         provingKey: sourceSetupInput.provingKey,
         publicAmount: sourceSetupInput.publicAmount,
         recipient: sourceSetupInput.recipient,
+        refund: sourceSetupInput.refund,
         relayer: sourceSetupInput.relayer,
-        roots: sourceSetupInput.roots
+        roots: sourceSetupInput.roots,
+        token: sourceSetupInput.token
       } as any;
     }
 

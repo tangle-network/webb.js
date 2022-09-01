@@ -7,7 +7,7 @@ import { u8aToHex } from '@polkadot/util';
 
 import { Note } from '../../note.js';
 import { Utxo } from '../../utxo.js';
-import { AnchorPMSetupInput, MixerPMSetupInput, PMEvents } from '../types.js';
+import { MixerPMSetupInput, PMEvents } from '../types.js';
 import { WorkerProofInterface, WorkerProvingManagerSetupInput, WorkerVAnchorPMSetupInput } from '../worker-utils.js';
 
 export class ArkworksProvingManagerThread {
@@ -99,35 +99,6 @@ export class ArkworksProvingManagerThread {
       };
 
       return mixerProof as any;
-    } else if (protocol === 'anchor') {
-      // @deprecated
-      const input = pmSetupInput as AnchorPMSetupInput;
-      const { note } = await Note.deserialize(input.note);
-
-      pm.setLeaves(input.leaves);
-      pm.setRelayer(input.relayer);
-      pm.setRecipient(input.recipient);
-      pm.setLeafIndex(String(input.leafIndex));
-      pm.setRefund(String(input.refund));
-      pm.setFee(String(input.fee));
-      pm.setPk(u8aToHex(input.provingKey).replace('0x', ''));
-      pm.setNote(note);
-      pm.setRoots(input.roots);
-      pm.setRefreshCommitment(input.refreshCommitment);
-
-      const proofInput = pm.build_js();
-      const proofOutput = await this.generateProof(proofInput);
-      const proof = proofOutput.anchorProof;
-      const anchorProof: WorkerProofInterface<'anchor'> = {
-        leaf: proof.leaf,
-        nullifierHash: proof.nullifierHash,
-        proof: proof.proof,
-        publicInputs: proof.publicInputs,
-        root: proof.root,
-        roots: proof.roots
-      };
-
-      return anchorProof as any;
     } else if (protocol === 'vanchor') {
       const input = pmSetupInput as WorkerVAnchorPMSetupInput;
       const metaDataNote = input.inputNotes[0];
@@ -191,6 +162,8 @@ export class ArkworksProvingManagerThread {
         input.relayer,
         input.extAmount,
         input.fee,
+        input.refund,
+        input.token,
         input.encryptedCommitments[0],
         input.encryptedCommitments[1]
       );
@@ -209,7 +182,7 @@ export class ArkworksProvingManagerThread {
       const proofInput = pm.build_js();
       const proofOutput = await this.generateProof(proofInput);
       const proof = proofOutput.vanchorProof;
-      const anchorProof: WorkerProofInterface<'vanchor'> = {
+      const vanchorProof: WorkerProofInterface<'vanchor'> = {
         extDataHash: dataHash,
         inputUtxos: proof.inputUtxos.map((jsUtxo) => new Utxo(jsUtxo).serialize()),
         outputNotes: proof.outputNotes.map((jsNote) => Note.fromDepositNote(jsNote).serialize()),
@@ -218,7 +191,7 @@ export class ArkworksProvingManagerThread {
         publicInputs: proof.publicInputs
       };
 
-      return anchorProof;
+      return vanchorProof;
     } else {
       throw new Error('invalid protocol');
     }

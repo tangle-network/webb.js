@@ -17,7 +17,6 @@ export type PMEvents<T extends NoteProtocol = 'mixer'> = {
 };
 export interface ProvingManagerPayload extends Record<NoteProtocol, any> {
   mixer: MixerPMSetupInput;
-  anchor: AnchorPMSetupInput;
   vanchor: VAnchorPMSetupInput;
 }
 
@@ -45,41 +44,21 @@ export type MixerPMSetupInput = {
 
 /**
  * Proving Manager setup input for anchor API proving manager over sdk-core
- * @param note - Serialized note representation
- * @param relayer - Relayer account id converted to hex string (Without a `0x` prefix)
- * @param recipient - Recipient account id converted to hex string (Without a `0x` prefix)
- * @param leaves - Leaves for generating the merkle path
- * @param leafIndex - The index of  the Leaf commitment
- * @param fee - The fee for the transaction
- * @param refund - The refund for the transaction
- * @param provingKey - Proving key bytes to pass in to the Zero-knowledge proof generation
- * @param roots - Roots for anchor API
- * @param refreshCommitment - Refresh commitment in hex representation ( without prefix `0x` ) Required for anchor, ignored for the mixer
- * */
-export type AnchorPMSetupInput = {
-  note: string;
-  relayer: string;
-  recipient: string;
-  leaves: Leaves;
-  leafIndex: number;
-  fee: number;
-  refund: number;
-  provingKey: Uint8Array;
-  roots: Leaves;
-  refreshCommitment: string;
-};
-
-/**
- * Proving Manager setup input for anchor API proving manager over sdk-core
  * @param inputNotes - VAnchor notes representing input UTXOs for proving
  * @param leavesMap - Leaves for generating the merkle path, it's indexed by the chain_id and for each entry the values are list of leaves for this chain
  * @param indices -  Leaf indices for input UTXOs leaves
  * @param roots - Roots set for every anchor
  * @param chainId - The chain id where the input UTXOs being spent
- * @param outputConfigs - Configuration to shape the output UTXOs
+ * @param output - Configuration to shape the output UTXOs
+ * @param encryptedCommitments - Encrypted commitments for the output UTXOs
  * @param publicAmount - Amount the is used to tell the transaction type : Sum. of inputs + public amount = Sum. of outputs
- * @param externalDataHash - The hash of external data which contains other values (EX fees,relayer ,..etc)
  * @param provingKey - Proving key bytes to pass in to the Zero-knowledge proof generation
+ * @param relayer - Relayer account ID or address
+ * @param recipient - Recipient account ID or address
+ * @param extAmount - External amount being deposited or withdrawn
+ * @param fee - Fee for the transaction
+ * @param refund - Refund for the transaction
+ * @param token - The optional token to unwrap into upon withdrawal
  * */
 export type VAnchorPMSetupInput = {
   inputNotes: Note[];
@@ -95,16 +74,26 @@ export type VAnchorPMSetupInput = {
   recipient: Uint8Array;
   extAmount: string;
   fee: string;
+  refund: string;
+  token: Uint8Array;
 };
 
 export type ProofInterface<T extends NoteProtocol> = ProofPayload[T]
 
 export interface ProofPayload extends Record<NoteProtocol, any> {
   mixer: MixerProof,
-  anchor: AnchorProof,
   VAnchor: VAnchorProof
 }
 
+/**
+ * Proving Manager proof output for the VAnchor
+ * @param inputUtxos - The input UTXOs for the transaction
+ * @param outputNotes - The output notes for the transaction
+ * @param proof - The proof for the transaction
+ * @param publicInputs - Array of public inputs for the proof
+ * @param publicAmount - The public amount for the transaction
+ * @param extDataHash - The hash of all external data parameters for the transaction
+ */
 export type VAnchorProof = {
   readonly inputUtxos: Array<Utxo>;
   readonly outputNotes: Array<Note>;
@@ -114,15 +103,14 @@ export type VAnchorProof = {
   readonly extDataHash: Uint8Array;
 };
 
-export type AnchorProof = {
-  readonly nullifierHash: string;
-  readonly proof: string;
-  readonly root: string;
-  readonly roots: Array<string>;
-  readonly publicInputs: Array<string>;
-  readonly leaf: Uint8Array
-};
-
+/**
+ * Proving Manager proof output for Mixer
+ * @param nullifierHash - The nullifier hash for the transaction
+ * @param proof - The proof for the transaction
+ * @param root - The merkle root for the transaction
+ * @param publicInputs - Array of public inputs for the proof
+ * @param leaf - The leaf of the deposit being proven
+ */
 export type MixerProof = {
   readonly nullifierHash: string;
   readonly proof: string;
