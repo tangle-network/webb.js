@@ -30,6 +30,7 @@ pub struct ExtData {
 #[wasm_bindgen]
 impl ExtData {
 	#[wasm_bindgen(constructor)]
+	#[allow(clippy::too_many_arguments)]
 	pub fn new(
 		recipient: Uint8Array,
 		relayer: Uint8Array,

@@ -386,7 +386,7 @@ describe('Arkworks Proving manager VAnchor', function () {
       message = e.message;
     }
 
-    expect(message).to.deep.equal('Output amount and input amount  don\'t match input(170) != output(1610)');
+    expect(message).to.deep.equal('Output amount and input amount don\'t match input(170) != output(1610)');
   });
 
   it('should prove a single utxo commitment is in a tree', async () => {

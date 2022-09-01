@@ -150,14 +150,14 @@ impl LeavesMapInput {
 
 #[derive(Debug, Clone)]
 pub enum ProofInput {
-	Mixer(MixerProofPayload),
+	Mixer(Box<MixerProofPayload>),
 	VAnchor(Box<VAnchorProofPayload>),
 }
 
 impl ProofInput {
 	pub fn mixer_input(&self) -> Result<MixerProofPayload, OperationError> {
 		match self {
-			ProofInput::Mixer(mixer_input) => Ok(mixer_input.clone()),
+			ProofInput::Mixer(mixer_input) => Ok(*mixer_input.clone()),
 			_ => {
 				let message = "Can't construct proof input for AnchorProofInput".to_string();
 				Err(OperationError::new_with_message(
@@ -197,7 +197,7 @@ pub struct JsProofInput {
 }
 #[derive(Debug, Clone)]
 pub enum ProofInputBuilder {
-	Mixer(MixerProofInput),
+	Mixer(Box<MixerProofInput>),
 	VAnchor(Box<VAnchorProofInput>),
 }
 impl ProofInputBuilder {
@@ -600,6 +600,7 @@ impl JsProofInputBuilder {
 			_ => return Err(OpStatusCode::InvalidNoteProtocol.into()),
 		}
 
+		#[allow(clippy::single_match)]
 		match self.inner {
 			ProofInputBuilder::Mixer(_) => {
 				let leaf = note.get_leaf_and_nullifier()?;
@@ -645,7 +646,7 @@ impl JsProofInputBuilder {
 		let proof_input = match self.inner {
 			ProofInputBuilder::Mixer(mixer_proof_input) => {
 				let mixer_payload = mixer_proof_input.build()?;
-				ProofInput::Mixer(mixer_payload)
+				ProofInput::Mixer(Box::new(mixer_payload))
 			}
 			ProofInputBuilder::VAnchor(vanchor_proof_input) => {
 				let vanchor_payload = vanchor_proof_input.build()?;
@@ -823,7 +824,7 @@ pub fn generate_proof_js(proof_input: JsProofInput) -> Result<JsProofOutput, JsV
 	let proof_input_value = proof_input.inner;
 	match proof_input_value {
 		ProofInput::Mixer(mixer_proof_input) => {
-			mixer::create_proof(mixer_proof_input, &mut rng).map(|v| JsProofOutput {
+			mixer::create_proof(*mixer_proof_input, &mut rng).map(|v| JsProofOutput {
 				inner: ProofOutput::Mixer(v),
 			})
 		}
