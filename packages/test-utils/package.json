@@ -39,6 +39,7 @@
     "@webb-tools/utils": "0.2.5",
     "@webb-tools/vbridge": "0.2.5",
     "ethers": "5.7.0",
-    "ganache": "7.4.1"
+    "ganache": "7.4.1",
+    "get-port": "6.1.2"
   }
 }
