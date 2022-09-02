@@ -176,6 +176,8 @@ async function basicDeposit(
     recipient: address,
     fee,
     extAmount: extAmount,
+    refund: '0',
+    token: address,
     encryptedOutput1: u8aToHex(comEnc1),
     encryptedOutput2: u8aToHex(comEnc2)
   };
@@ -241,8 +243,6 @@ async function basicWithdraw(
 
   leavesMap[chainId.toString()] = leaves;
 
-
-
   const tree = new MTBn254X5(leaves, String(maxLeafIndex));
   const root = `0x${tree.root}`;
   const neighborRoot = hexToU8a(neighborRoots[0]);
@@ -275,6 +275,8 @@ async function basicWithdraw(
     recipient: address,
     fee,
     extAmount: extAmount,
+    refund: '0',
+    token: address,
     encryptedOutput1: u8aToHex(comEnc1),
     encryptedOutput2: u8aToHex(comEnc2)
   };
@@ -362,6 +364,8 @@ async function createVAnchorWithDeposit(
     recipient: address,
     fee,
     extAmount: extAmount,
+    refund: '0',
+    token: address,
     encryptedOutput1: u8aToHex(comEnc1),
     encryptedOutput2: u8aToHex(comEnc2)
   };
@@ -417,7 +421,7 @@ async function getleafIndex(
   return shiftedIndex;
 }
 
-describe('VAnchor tests', function() {
+describe.only('VAnchor tests', function() {
   this.timeout(120_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
@@ -502,8 +506,10 @@ describe('VAnchor tests', function() {
       recipient: address,
       fee,
       extAmount: extAmount,
+      refund: '0',
+      token: address,
       encryptedOutput1: u8aToHex(comEnc1),
-      encryptedOutput2: u8aToHex(comEnc2)
+      encryptedOutput2: u8aToHex(comEnc2),
     };
 
     let vanchorProofData = {
@@ -592,6 +598,8 @@ describe('VAnchor tests', function() {
       recipient: address,
       fee,
       extAmount: extAmount,
+      refund: '0',
+      token: address,
       encryptedOutput1: u8aToHex(comEnc1),
       encryptedOutput2: u8aToHex(comEnc2)
     };
@@ -677,6 +685,8 @@ describe('VAnchor tests', function() {
       recipient: address,
       fee,
       extAmount: extAmount,
+      refund: '0',
+      token: address,
       encryptedOutput1: u8aToHex(comEnc1),
       encryptedOutput2: u8aToHex(comEnc2)
     };
