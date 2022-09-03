@@ -86,6 +86,26 @@ jobs:
         run: |
           yarn install --immutable | grep -v 'YN0013'
           yarn build
+  
+  ts-check:
+    name: ts-check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh -s -- -f
+      - name: check
+        run: |
+          yarn install --frozen-lockfile
+          yarn build
+          yarn ts-check
 
   check-tests:
     name: for .only
