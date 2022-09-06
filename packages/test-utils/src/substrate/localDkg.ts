@@ -29,9 +29,11 @@ import {
   ExportedConfigOptions,
 } from './substrateNodeBase.js';
 
+/** The image url */
 const DKG_STANDALONE_DOCKER_IMAGE_URL =
   'ghcr.io/webb-tools/dkg-standalone-node:edge';
 
+/** Represents the LocalDkg Node that is to be spawned */
 export class LocalDkg extends SubstrateNodeBase<TypedEvent> {
   public static async start(opts: LocalNodeOpts): Promise<LocalDkg> {
     opts.ports = await SubstrateNodeBase.makePorts(opts);
@@ -102,6 +104,7 @@ export class LocalDkg extends SubstrateNodeBase<TypedEvent> {
     }
   }
 
+  /** Fetches the Dkg public key */
   public async fetchDkgPublicKey(): Promise<`0x${string}` | null> {
     const api = await super.api();
     const res = await api.query.dkg!.dkgPublicKey!();
@@ -119,13 +122,14 @@ export class LocalDkg extends SubstrateNodeBase<TypedEvent> {
       return null;
     }
   }
-  // get chainId
+  /** Gets the DKG Chain id */
   public async getChainId(): Promise<number> {
     const api = await super.api();
     let chainId = (await api.consts.dkgProposals.chainIdentifier).toNumber();
     return chainId;
   }
 
+  /** Exports DKG config */
   public async exportConfig(
     opts: ExportedConfigOptions
   ): Promise<FullNodeInfo> {
@@ -145,6 +149,7 @@ export class LocalDkg extends SubstrateNodeBase<TypedEvent> {
   }
 }
 
+/** Represents the various event types */
 export type TypedEvent =
   | NewSession
   | NextPublicKeySubmitted

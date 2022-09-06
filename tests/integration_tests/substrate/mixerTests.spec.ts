@@ -2,17 +2,20 @@ import { JsNote, OperationError } from '@webb-tools/wasm-utils/njs/wasm-utils-nj
 import { ApiPromise } from '@polkadot/api';
 import { Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
+import isCi from 'is-ci';
 
 import {
   catchWasmError,
   depositMixerBnX5_3,
-  KillTask,
-  preparePolkadotApi,
+  //KillTask,
+  //preparePolkadotApi,
   sleep,
-  startWebbNode,
+  //startWebbNode,
   transferBalance,
   withdrawMixerBnX5_3,
 } from '../../utils/index.js';
+import {LocalProtocolSubstrate, UsageMode} from "@webb-tools/test-utils";
+import path from "path";
 
 let apiPromise: ApiPromise | null = null;
 let keyring: {
@@ -20,7 +23,7 @@ let keyring: {
   alice: KeyringPair;
   charlie: KeyringPair;
 } | null = null;
-let nodes: KillTask | undefined;
+//let nodes: KillTask | undefined;
 
 const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
 
@@ -42,14 +45,39 @@ function getKeyring() {
 
 describe('Mixer tests', function () {
   this.timeout(120_000);
+  const usageMode: UsageMode = isCi
+    ? { mode: 'docker', forcePullImage: false }
+    : {
+      mode: 'host',
+      nodePath: path.resolve(
+        '../../protocol-substrate/target/release/webb-standalone-node'
+      ),
+    };
+
+  let aliceNode: LocalProtocolSubstrate;
+  let bobNode: LocalProtocolSubstrate;
 
   before(async function () {
+    aliceNode = await LocalProtocolSubstrate.start({
+      name: 'substrate-alice',
+      authority: 'alice',
+      usageMode,
+      ports: 'auto',
+    });
+
+    bobNode = await LocalProtocolSubstrate.start({
+      name: 'substrate-bob',
+      authority: 'bob',
+      usageMode,
+      ports: 'auto',
+    });
     // If LOCAL_NODE is set the tests will continue  to use the already running node
-    nodes = startWebbNode();
-    apiPromise = await preparePolkadotApi();
+    //nodes = startWebbNode();
+    //apiPromise = await preparePolkadotApi();
+    apiPromise = await aliceNode.api();
   });
 
-  it('Mixer should work', async function () {
+  it.only('Mixer should work', async function () {
     try {
       const { bob, charlie, alice } = getKeyring();
       // transfer some funds to sudo & test account
@@ -80,7 +108,9 @@ describe('Mixer tests', function () {
   });
 
   after(async function () {
-    await apiPromise?.disconnect();
-    await nodes?.();
+    await aliceNode?.stop();
+    await bobNode?.stop();
+    //await apiPromise?.disconnect();
+    //await nodes?.();
   });
 });

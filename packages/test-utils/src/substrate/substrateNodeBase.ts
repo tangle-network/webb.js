@@ -310,7 +310,6 @@ export interface Pallet {
   linkedAnchors?: SubstrateLinkedAnchor[];
 }
 
-
 type RuntimeKind = 'DKG' | 'WebbProtocol';
 
 export interface NodeInfo {

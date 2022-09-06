@@ -43,7 +43,8 @@
     "ganache": "7.4.1",
     "get-port": "6.1.2",
     "is-ci": "^3.0.1",
-    "tiny-secp256k1": "^2.2.1"
+    "tiny-secp256k1": "^2.2.1",
+    "prettier": "^2.2.1"
   },
   "devDependencies": {
     "@types/is-ci": "^3.0.0"
