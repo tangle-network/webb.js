@@ -424,7 +424,7 @@ async function getleafIndex(
   return shiftedIndex;
 }
 
-describe.skip('VAnchor tests', function() {
+describe('VAnchor tests', function() {
   this.timeout(120_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
