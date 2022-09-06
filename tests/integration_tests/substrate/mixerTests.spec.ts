@@ -17,7 +17,6 @@ let keyring: {
   alice: KeyringPair;
   charlie: KeyringPair;
 } | null = null;
-//let nodes: KillTask | undefined;
 
 const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
 
@@ -39,7 +38,6 @@ function getKeyring() {
 
 describe('Mixer tests', function () {
   this.timeout(120_000);
-
 
   before(async function () {
     apiPromise = await startWebbNodeV2();

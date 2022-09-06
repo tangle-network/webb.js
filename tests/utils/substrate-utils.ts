@@ -289,7 +289,15 @@ export async function withdrawMixerBnX5_3(
   const addressHex = u8aToHex(decodeAddress(accountId));
   const relayerAddressHex = u8aToHex(decodeAddress(relayerAccountId));
   // Fetch leaves
-  const leaves = await fetchRPCTreeLeaves(api, 0);
+  const treeId = 0;
+  const leafCount: number =
+    await api.derive.merkleTreeBn254.getLeafCountForTree(treeId);
+  const leaves: Uint8Array[] =
+    await api.derive.merkleTreeBn254.getLeavesForTree(
+      treeId,
+      0,
+      leafCount - 1
+    );
   const proofInputBuilder = new JsProofInputBuilder('mixer');
   const leafHex = u8aToHex(note.getLeafCommitment());
   proofInputBuilder.setNote(note);
