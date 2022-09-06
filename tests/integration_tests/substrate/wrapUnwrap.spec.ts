@@ -73,7 +73,7 @@ async function addAssetToPool(
     [apiPromise.tx.assetRegistry.addAssetToPool(poolAssetId,Number(assetId))], singer);
 }
 
-describe('Wrap/unwrap substrate tests', function() {
+describe.skip('Wrap/unwrap substrate tests', function() {
   this.timeout(220_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node

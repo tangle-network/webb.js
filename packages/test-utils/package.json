@@ -4,24 +4,24 @@
   "description": "Utilities to work with Webb in test environments",
   "author": "Webb Developers <drew@webb.tools>",
   "type": "module",
-  "main": "./cjs/index.js",
-  "module": "./index.js",
-  "types": "./index.d.ts",
+  "main": "./build/cjs/index.js",
+  "module": "./build/index.js",
+  "types": "./build/index.d.ts",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "require": "./cjs/index.js",
-      "default": "./index.js"
+      "types": "./build/index.d.ts",
+      "require": "./build/cjs/index.js",
+      "default": "./build/index.js"
     },
     "./index.js": {
-      "types": "./index.d.ts",
-      "require": "./cjs/index.js",
-      "default": "./index.js"
+      "types": "./build/index.d.ts",
+      "require": "./build/cjs/index.js",
+      "default": "./build/index.js"
     },
     "./src/index.js": {
-      "types": "./src/index.d.ts",
-      "require": "./src/cjs/index.js",
-      "default": "./src/index.js"
+      "types": "./build/src/index.d.ts",
+      "require": "./build/src/cjs/index.js",
+      "default": "./build/src/index.js"
     }
   },
   "license": "Apache-2.0",
@@ -30,6 +30,10 @@
     "registry": "https://registry.npmjs.org"
   },
   "repository": "https://github.com/webb-tools/webb.js.git",
+  "resolutions": {
+    "@webb-tools/api": "0.1.4-101",
+    "@webb-tools/sdk-core": "0.1.4-101"
+  },
   "dependencies": {
     "@polkadot/api": "9.2.3",
     "@polkadot/keyring": "10.1.6",

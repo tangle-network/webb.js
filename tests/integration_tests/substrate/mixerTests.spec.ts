@@ -72,12 +72,10 @@ describe('Mixer tests', function () {
       ports: 'auto',
     });
     // If LOCAL_NODE is set the tests will continue  to use the already running node
-    //nodes = startWebbNode();
-    //apiPromise = await preparePolkadotApi();
     apiPromise = await aliceNode.api();
   });
 
-  it.only('Mixer should work', async function () {
+  it('Mixer should work', async function () {
     try {
       const { bob, charlie, alice } = getKeyring();
       // transfer some funds to sudo & test account
@@ -110,7 +108,5 @@ describe('Mixer tests', function () {
   after(async function () {
     await aliceNode?.stop();
     await bobNode?.stop();
-    //await apiPromise?.disconnect();
-    //await nodes?.();
   });
 });
