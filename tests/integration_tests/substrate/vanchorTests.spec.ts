@@ -1,7 +1,11 @@
 import { ApiPromise } from '@polkadot/api';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { currencyToUnitI128, KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
+import {
+  currencyToUnitI128,
+  startWebbNodeV2, stopNodes,
+  transferBalance
+} from '../../utils/index.js';
 import {
   ArkworksProvingManager,
   calculateTypedChainId,
@@ -25,7 +29,6 @@ let keyring: {
   alice: KeyringPair;
   charlie: KeyringPair;
 } | null = null;
-let nodes: KillTask | undefined;
 
 const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
 
@@ -421,12 +424,12 @@ async function getleafIndex(
   return shiftedIndex;
 }
 
-describe.skip('VAnchor tests', function() {
+describe('VAnchor tests', function() {
   this.timeout(120_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
-    nodes = startWebbNode();
-    apiPromise = await preparePolkadotApi();
+    //nodes = startWebbNode();
+    apiPromise = await startWebbNodeV2();
     const { bob, charlie, alice } = getKeyring();
     console.log(`Transferring 10,000 balance to Alice and Bob`);
     await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
@@ -733,6 +736,6 @@ describe.skip('VAnchor tests', function() {
 
   after(async function() {
     await apiPromise?.disconnect();
-    await nodes?.();
+    await stopNodes();
   });
 });

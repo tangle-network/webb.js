@@ -107,14 +107,12 @@ export abstract class SubstrateNodeBase<TypedEvent extends SubstrateEvent> {
 
   public async waitForEvent (typedEvent: TypedEvent): Promise<void> {
     const api = await this.api();
-
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, _) => {
       // Subscribe to system events via storage
-      const unsub: any = api.query.system.events((events: any[]) => {
+      const unsub: any = await api.query.system!.events!((events: any[]) => {
         // Loop through the Vec<EventRecord>
         events.forEach((record: any) => {
           const { event } = record;
-
           if (
             event.section === typedEvent.section &&
             event.method === typedEvent.method
@@ -133,10 +131,8 @@ export abstract class SubstrateNodeBase<TypedEvent extends SubstrateEvent> {
     tx: SubmittableExtrinsic<'promise'>
   ): Promise<string> {
     const api = await this.api();
-
-    // @typescript-eslint/no-floating-promises
-    return new Promise(async (resolve, reject) => {
-      await tx.send(({ dispatchError, status }) => {
+    return new Promise((resolve, reject) => {
+      tx.send(({ status, dispatchError }) => {
         // status would still be set, but in the case of error we can shortcut
         // to just check it (so an error would indicate InBlock or Finalized)
         if (dispatchError) {

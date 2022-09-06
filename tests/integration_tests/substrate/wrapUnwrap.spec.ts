@@ -1,7 +1,11 @@
 import { Keyring } from '@polkadot/keyring';
 import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
+import {
+  startWebbNodeV2,
+  stopNodes,
+  transferBalance
+} from '../../utils/index.js';
 import { polkadotTx } from '@webb-tools/test-utils/index.js';
 import { expect } from 'chai';
 import { Option, U32 } from '@polkadot/types-codec';
@@ -12,7 +16,6 @@ let keyring: {
   alice: KeyringPair;
   charlie: KeyringPair;
 } | null = null;
-let nodes: KillTask | undefined;
 
 const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
 
@@ -73,12 +76,11 @@ async function addAssetToPool(
     [apiPromise.tx.assetRegistry.addAssetToPool(poolAssetId,Number(assetId))], singer);
 }
 
-describe.skip('Wrap/unwrap substrate tests', function() {
+describe('Wrap/unwrap substrate tests', function() {
   this.timeout(220_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
-    nodes = startWebbNode();
-    apiPromise = await preparePolkadotApi();
+    apiPromise = await startWebbNodeV2();
     const { bob, charlie, alice } = getKeyring();
     console.log(`Transferring 10,000 balance to Alice and Bob`);
     await transferBalance(apiPromise!, charlie, [alice, bob], 1000_000);
@@ -123,6 +125,6 @@ describe.skip('Wrap/unwrap substrate tests', function() {
 
   after(async function() {
     await apiPromise?.disconnect();
-    await nodes?.();
+    await stopNodes();
   });
 });

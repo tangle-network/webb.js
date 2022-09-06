@@ -2,17 +2,14 @@ import { JsNote, OperationError } from '@webb-tools/wasm-utils/njs/wasm-utils-nj
 import { ApiPromise } from '@polkadot/api';
 import { Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
-import isCi from 'is-ci';
 
 import {
   catchWasmError,
   depositMixerBnX5_3,
-  sleep,
+  sleep, startWebbNodeV2, stopNodes,
   transferBalance,
   withdrawMixerBnX5_3,
 } from '../../utils/index.js';
-import {LocalProtocolSubstrate, UsageMode} from "@webb-tools/test-utils";
-import path from "path";
 
 let apiPromise: ApiPromise | null = null;
 let keyring: {
@@ -42,35 +39,10 @@ function getKeyring() {
 
 describe('Mixer tests', function () {
   this.timeout(120_000);
-  const usageMode: UsageMode = isCi
-    ? { mode: 'docker', forcePullImage: false }
-    : {
-      mode: 'host',
-      nodePath: path.resolve(
-        '../../protocol-substrate/target/release/webb-standalone-node'
-      ),
-    };
 
-  let aliceNode: LocalProtocolSubstrate;
-  let bobNode: LocalProtocolSubstrate;
 
   before(async function () {
-
-    aliceNode = await LocalProtocolSubstrate.start({
-      name: 'substrate-alice',
-      authority: 'alice',
-      usageMode,
-      ports: 'auto',
-    });
-
-    bobNode = await LocalProtocolSubstrate.start({
-      name: 'substrate-bob',
-      authority: 'bob',
-      usageMode,
-      ports: 'auto',
-    });
-    // If LOCAL_NODE is set the tests will continue  to use the already running node
-    apiPromise = await aliceNode.api();
+    apiPromise = await startWebbNodeV2();
   });
 
   it('Mixer should work', async function () {
@@ -104,7 +76,6 @@ describe('Mixer tests', function () {
   });
 
   after(async function () {
-    await aliceNode?.stop();
-    await bobNode?.stop();
+      await stopNodes();
   });
 });

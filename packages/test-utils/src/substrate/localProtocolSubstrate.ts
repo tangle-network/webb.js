@@ -6,7 +6,7 @@ import { spawn } from 'child_process';
 import { LocalNodeOpts, SubstrateNodeBase } from './substrateNodeBase.js';
 
 const STANDALONE_DOCKER_IMAGE_URL =
-  'ghcr.io/webb-tools/protocol-substrate-standalone-node:stable';
+  'ghcr.io/webb-tools/protocol-substrate-standalone-node:edge';
 
 export class LocalProtocolSubstrate extends SubstrateNodeBase<TypedEvent> {
   public static async start (
@@ -14,11 +14,10 @@ export class LocalProtocolSubstrate extends SubstrateNodeBase<TypedEvent> {
   ): Promise<LocalProtocolSubstrate> {
     opts.ports = await super.makePorts(opts);
     const startArgs: string[] = [];
-
     if (opts.usageMode.mode === 'docker') {
       LocalProtocolSubstrate.pullImage({
         frocePull: opts.usageMode.forcePullImage,
-        image: STANDALONE_DOCKER_IMAGE_URL
+        image: STANDALONE_DOCKER_IMAGE_URL,
       });
       startArgs.push(
         'run',
