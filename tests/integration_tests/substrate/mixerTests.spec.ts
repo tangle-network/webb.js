@@ -7,10 +7,7 @@ import isCi from 'is-ci';
 import {
   catchWasmError,
   depositMixerBnX5_3,
-  //KillTask,
-  //preparePolkadotApi,
   sleep,
-  //startWebbNode,
   transferBalance,
   withdrawMixerBnX5_3,
 } from '../../utils/index.js';
@@ -58,6 +55,7 @@ describe('Mixer tests', function () {
   let bobNode: LocalProtocolSubstrate;
 
   before(async function () {
+
     aliceNode = await LocalProtocolSubstrate.start({
       name: 'substrate-alice',
       authority: 'alice',

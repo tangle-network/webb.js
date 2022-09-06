@@ -18,16 +18,13 @@
 /// This Could be through a Docker Container or a Local Compiled node.
 
 import '@webb-tools/types';
+
 import { spawn } from 'child_process';
-import { ECPairAPI, TinySecp256k1Interface, ECPairFactory } from 'ecpair';
+import { ECPairAPI, ECPairFactory, TinySecp256k1Interface } from 'ecpair';
 import isCI from 'is-ci';
 import * as TinySecp256k1 from 'tiny-secp256k1';
-import {
-  FullNodeInfo,
-  LocalNodeOpts,
-  SubstrateNodeBase,
-  ExportedConfigOptions,
-} from './substrateNodeBase.js';
+
+import { ExportedConfigOptions, FullNodeInfo, LocalNodeOpts, SubstrateNodeBase } from './substrateNodeBase.js';
 
 /** The image url */
 const DKG_STANDALONE_DOCKER_IMAGE_URL =
@@ -35,18 +32,19 @@ const DKG_STANDALONE_DOCKER_IMAGE_URL =
 
 /** Represents the LocalDkg Node that is to be spawned */
 export class LocalDkg extends SubstrateNodeBase<TypedEvent> {
-  public static async start(opts: LocalNodeOpts): Promise<LocalDkg> {
+  public static async start (opts: LocalNodeOpts): Promise<LocalDkg> {
     opts.ports = await SubstrateNodeBase.makePorts(opts);
     const startArgs: string[] = [
       '-ldkg=debug',
       '-ldkg_metadata=debug',
       '-lruntime::offchain=debug',
-      '-ldkg_proposal_handler=debug',
+      '-ldkg_proposal_handler=debug'
     ];
+
     if (opts.usageMode.mode === 'docker') {
       super.pullImage({
         frocePull: opts.usageMode.forcePullImage,
-        image: DKG_STANDALONE_DOCKER_IMAGE_URL,
+        image: DKG_STANDALONE_DOCKER_IMAGE_URL
       });
       const dockerArgs = [
         'run',
@@ -67,9 +65,10 @@ export class LocalDkg extends SubstrateNodeBase<TypedEvent> {
         '--ws-external',
         '--rpc-methods=unsafe',
         `--${opts.authority}`,
-        ...startArgs,
+        ...startArgs
       ];
       const proc = spawn('docker', dockerArgs);
+
       if (opts.enableLogging) {
         proc.stdout.on('data', (data: Buffer) => {
           console.log(data.toString());
@@ -78,6 +77,7 @@ export class LocalDkg extends SubstrateNodeBase<TypedEvent> {
           console.error(data.toString());
         });
       }
+
       return new LocalDkg(opts, proc);
     } else {
       startArgs.push(
@@ -92,6 +92,7 @@ export class LocalDkg extends SubstrateNodeBase<TypedEvent> {
         `--${opts.authority}`
       );
       const proc = spawn(opts.usageMode.nodePath, startArgs);
+
       if (opts.enableLogging) {
         proc.stdout.on('data', (data: Buffer) => {
           console.log(data.toString());
@@ -100,51 +101,57 @@ export class LocalDkg extends SubstrateNodeBase<TypedEvent> {
           console.error(data.toString());
         });
       }
+
       return new LocalDkg(opts, proc);
     }
   }
 
   /** Fetches the Dkg public key */
-  public async fetchDkgPublicKey(): Promise<`0x${string}` | null> {
+  public async fetchDkgPublicKey (): Promise<`0x${string}` | null> {
     const api = await super.api();
-    const res = await api.query.dkg!.dkgPublicKey!();
+    const res = await api.query.dkg.dkgPublicKey();
     const json = res.toJSON() as [number, string];
     const tinysecp: TinySecp256k1Interface = TinySecp256k1;
     const ECPair: ECPairAPI = ECPairFactory(tinysecp);
+
     if (json && json[1] !== '0x') {
       const key = json[1];
       const dkgPubKey = ECPair.fromPublicKey(Buffer.from(key.slice(2), 'hex'), {
-        compressed: false,
+        compressed: false
       }).publicKey.toString('hex');
+
       // now we remove the `04` prefix byte and return it.
       return `0x${dkgPubKey.slice(2)}`;
     } else {
       return null;
     }
   }
+
   /** Gets the DKG Chain id */
-  public async getChainId(): Promise<number> {
+  public async getChainId (): Promise<number> {
     const api = await super.api();
-    let chainId = (await api.consts.dkgProposals.chainIdentifier).toNumber();
+    const chainId = (await api.consts.dkgProposals.chainIdentifier).toNumber();
+
     return chainId;
   }
 
   /** Exports DKG config */
-  public async exportConfig(
+  public async exportConfig (
     opts: ExportedConfigOptions
   ): Promise<FullNodeInfo> {
     const ports = this.opts.ports as { ws: number; http: number; p2p: number };
     const host = isCI ? 'localhost' : '127.0.0.1';
     const nodeInfo: FullNodeInfo = {
-      name: 'localDKG',
+      chainId: opts.chainId,
       enabled: true,
       httpEndpoint: `http://${host}:${ports.http}`,
-      wsEndpoint: `ws://${host}:${ports.ws}`,
-      runtime: 'DKG',
+      name: 'localDKG',
       pallets: this.opts.enabledPallets ?? [],
+      runtime: 'DKG',
       suri: opts.suri,
-      chainId: opts.chainId,
+      wsEndpoint: `ws://${host}:${ports.ws}`
     };
+
     return nodeInfo;
   }
 }

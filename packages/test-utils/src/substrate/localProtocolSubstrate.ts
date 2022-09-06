@@ -2,24 +2,23 @@
 /// This Could be through a Docker Container or a Local Compiled node.
 
 import { spawn } from 'child_process';
-import {
-  LocalNodeOpts,
-  SubstrateNodeBase,
-} from './substrateNodeBase.js';
+
+import { LocalNodeOpts, SubstrateNodeBase } from './substrateNodeBase.js';
 
 const STANDALONE_DOCKER_IMAGE_URL =
   'ghcr.io/webb-tools/protocol-substrate-standalone-node:stable';
 
 export class LocalProtocolSubstrate extends SubstrateNodeBase<TypedEvent> {
-  public static async start(
+  public static async start (
     opts: LocalNodeOpts
   ): Promise<LocalProtocolSubstrate> {
     opts.ports = await super.makePorts(opts);
     const startArgs: string[] = [];
+
     if (opts.usageMode.mode === 'docker') {
       LocalProtocolSubstrate.pullImage({
         frocePull: opts.usageMode.forcePullImage,
-        image: STANDALONE_DOCKER_IMAGE_URL,
+        image: STANDALONE_DOCKER_IMAGE_URL
       });
       startArgs.push(
         'run',
@@ -41,8 +40,10 @@ export class LocalProtocolSubstrate extends SubstrateNodeBase<TypedEvent> {
         '--rpc-methods=unsafe',
         `--${opts.authority}`
       );
+
       if (!opts.isManual) {
         const proc = spawn('docker', startArgs, {});
+
         if (opts.enableLogging) {
           proc.stdout.on('data', (data: Buffer) => {
             console.log(data.toString());
@@ -51,6 +52,7 @@ export class LocalProtocolSubstrate extends SubstrateNodeBase<TypedEvent> {
             console.error(data.toString());
           });
         }
+
         return new LocalProtocolSubstrate(opts, proc);
       }
 
@@ -68,6 +70,7 @@ export class LocalProtocolSubstrate extends SubstrateNodeBase<TypedEvent> {
         `--${opts.authority}`
       );
       const proc = spawn(opts.usageMode.nodePath, startArgs);
+
       if (opts.enableLogging) {
         proc.stdout.on('data', (data: Buffer) => {
           console.log(data.toString());
@@ -76,13 +79,16 @@ export class LocalProtocolSubstrate extends SubstrateNodeBase<TypedEvent> {
           console.error(data.toString());
         });
       }
+
       return new LocalProtocolSubstrate(opts, proc);
     }
   }
+
   // get chainId
-  public async getChainId(): Promise<number> {
+  public async getChainId (): Promise<number> {
     const api = await super.api();
-    let chainId = api.consts.linkableTreeBn254.chainIdentifier.toNumber();
+    const chainId = api.consts.linkableTreeBn254.chainIdentifier.toNumber();
+
     return chainId;
   }
 }
