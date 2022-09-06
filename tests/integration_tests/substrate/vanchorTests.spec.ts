@@ -3,7 +3,7 @@ import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
 import {
   currencyToUnitI128,
-  startWebbNodeV2, stopNodes,
+  startWebbNode, stopNodes,
   transferBalance
 } from '../../utils/index.js';
 import {
@@ -429,7 +429,7 @@ describe('VAnchor tests', function() {
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
     //nodes = startWebbNode();
-    apiPromise = await startWebbNodeV2();
+    apiPromise = await startWebbNode();
     const { bob, charlie, alice } = getKeyring();
     console.log(`Transferring 10,000 balance to Alice and Bob`);
     await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);

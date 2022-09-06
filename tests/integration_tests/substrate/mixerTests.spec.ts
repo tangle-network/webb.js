@@ -6,7 +6,7 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import {
   catchWasmError,
   depositMixerBnX5_3,
-  sleep, startWebbNodeV2, stopNodes,
+  sleep, startWebbNode, stopNodes,
   transferBalance,
   withdrawMixerBnX5_3,
 } from '../../utils/index.js';
@@ -40,7 +40,7 @@ describe('Mixer tests', function () {
   this.timeout(120_000);
 
   before(async function () {
-    apiPromise = await startWebbNodeV2();
+    apiPromise = await startWebbNode();
   });
 
   it('Mixer should work', async function () {
