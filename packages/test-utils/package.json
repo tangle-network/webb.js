@@ -38,8 +38,14 @@
     "@webb-tools/tokens": "0.2.5",
     "@webb-tools/utils": "0.2.5",
     "@webb-tools/vbridge": "0.2.5",
+    "ecpair": "^2.0.1",
     "ethers": "5.7.0",
     "ganache": "7.4.1",
-    "get-port": "6.1.2"
+    "get-port": "6.1.2",
+    "is-ci": "^3.0.1",
+    "tiny-secp256k1": "^2.2.1"
+  },
+  "devDependencies": {
+    "@types/is-ci": "^3.0.0"
   }
 }

@@ -46,6 +46,7 @@ authority: 'alice' | 'bob' | 'charlie';
 usageMode: UsageMode;
 enableLogging?: boolean;
 isManual?: boolean; // for manual connection to the substrate node using 9944
+enabledPallets?: Pallet[];
 };
 
 export type SubstrateEvent = {
@@ -181,16 +182,16 @@ export abstract class SubstrateNodeBase<TypedEvent extends SubstrateEvent> {
 
 
 
-  protected static checkIfDkgImageExists(image: string): boolean {
+  protected static checkIfImageExists(image: string): boolean {
     const result = execSync('docker images', { encoding: 'utf8' });
     return result.includes(image);
   }
 
-  protected static pullDkgImage(opts: {
+  protected static pullImage(opts: {
     frocePull: boolean;
     image: string;
   }): void {
-    if (!this.checkIfDkgImageExists(opts.image) || opts.frocePull) {
+    if (!this.checkIfImageExists(opts.image) || opts.frocePull) {
     execSync(`docker pull ${opts.image}`, {
       encoding: 'utf8',
     });
@@ -253,3 +254,75 @@ async function createApiPromise(endpoint: string) {
     })
   );
 }
+
+export interface FeaturesConfig {
+  dataQuery?: boolean;
+  governanceRelay?: boolean;
+  privateTxRelay?: boolean;
+}
+
+export type ExportedConfigOptions = {
+  suri: string;
+  proposalSigningBackend?: ProposalSigningBackend;
+  linkedAnchors?: SubstrateLinkedAnchor[];
+  features?: FeaturesConfig;
+  chainId: number;
+};
+
+export interface SubstrateLinkedAnchor {
+  chainId: string;
+  chain: number;
+  tree: number;
+}
+
+export type DKGProposalSigningBackend = {
+  type: 'DKGNode';
+  node: string;
+}; /** DKG Node name in the config */
+
+/** DKG Node name in the config */
+export type MockedProposalSigningBackend = {
+  type: 'Mocked';
+  privateKey: string;
+}; /** Signer private key */
+export type ProposalSigningBackend =
+  | DKGProposalSigningBackend
+  | MockedProposalSigningBackend;
+
+export interface EventsWatcher {
+  enabled: boolean;
+  pollingInterval: number;
+  printProgressInterval?: number;
+}
+
+type PalletKind =
+  | 'DKG'
+  | 'DKGProposals'
+  | 'DKGProposalHandler'
+  | 'AnchorBn254'
+  | 'VAnchorBn254'
+  | 'SignatureBridge';
+
+export interface Pallet {
+  pallet: PalletKind;
+  eventsWatcher: EventsWatcher;
+  proposalSigningBackend?: ProposalSigningBackend;
+  linkedAnchors?: SubstrateLinkedAnchor[];
+}
+
+
+type RuntimeKind = 'DKG' | 'WebbProtocol';
+
+export interface NodeInfo {
+  enabled: boolean;
+  runtime: RuntimeKind;
+  pallets: Pallet[];
+}
+
+export type FullNodeInfo = NodeInfo & {
+  name: string;
+  httpEndpoint: string;
+  wsEndpoint: string;
+  suri: string;
+  chainId: number;
+};

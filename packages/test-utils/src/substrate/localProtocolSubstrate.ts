@@ -17,7 +17,7 @@ export class LocalProtocolSubstrate extends SubstrateNodeBase<TypedEvent> {
     opts.ports = await super.makePorts(opts);
     const startArgs: string[] = [];
     if (opts.usageMode.mode === 'docker') {
-      LocalProtocolSubstrate.pullDkgImage({
+      LocalProtocolSubstrate.pullImage({
         frocePull: opts.usageMode.forcePullImage,
         image: STANDALONE_DOCKER_IMAGE_URL,
       });
