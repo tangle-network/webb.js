@@ -7,7 +7,7 @@ import { derive as webbDerives } from '@webb-tools/api-derive/index.js';
 
 import { ApiOptions } from '@polkadot/api/types';
 
-export const rpcProperties =  {
+export const rpcProperties = {
   lt: {
     getNeighborEdges: {
       description: 'Query for the neighbor edges',
@@ -70,7 +70,7 @@ export const rpcProperties =  {
       type: 'Vec<[u8; 32]>'
     }
   }
-}
+};
 
 /**
  *
