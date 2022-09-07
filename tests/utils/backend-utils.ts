@@ -20,18 +20,18 @@ let apiPromise: ApiPromise | null = null;
 
 export async function startWebbNode(): Promise<ApiPromise>  {
   aliceNode = await LocalProtocolSubstrate.start({
-                                                   name: 'substrate-alice',
-                                                   authority: 'alice',
-                                                   usageMode,
-                                                   ports: 'auto',
-                                                 });
+    name: 'substrate-alice',
+    authority: 'alice',
+    usageMode,
+    ports: 'auto'
+  });
 
   bobNode = await LocalProtocolSubstrate.start({
-                                                 name: 'substrate-bob',
-                                                 authority: 'bob',
-                                                 usageMode,
-                                                 ports: 'auto',
-                                               });
+    name: 'substrate-bob',
+    authority: 'bob',
+    usageMode,
+    ports: 'auto'
+  });
   // If LOCAL_NODE is set the tests will continue  to use the already running node
   apiPromise = await aliceNode.api();
 

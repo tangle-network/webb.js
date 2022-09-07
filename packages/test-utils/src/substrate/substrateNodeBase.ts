@@ -15,7 +15,7 @@
  *
  */
 
-import { options } from '@webb-tools/api';
+import {options, rpcProperties} from '@webb-tools/api';
 import { ChildProcess, execSync } from 'child_process';
 import getPort, { portNumbers } from 'get-port';
 
@@ -215,54 +215,7 @@ async function createApiPromise (endpoint: string) {
   return ApiPromise.create(
     options({
       provider: new WsProvider(endpoint) as any,
-      rpc: {
-        lt: {
-          getNeighborRoots: {
-            description: 'Query for the neighbor roots',
-            params: [
-              {
-                isOptional: false,
-                name: 'tree_id',
-                type: 'u32'
-              },
-              {
-                isOptional: true,
-                name: 'at',
-                type: 'Hash'
-              }
-            ],
-            type: 'Vec<[u8; 32]>'
-          }
-        },
-        mt: {
-          getLeaves: {
-            description: 'Query for the tree leaves',
-            params: [
-              {
-                isOptional: false,
-                name: 'tree_id',
-                type: 'u32'
-              },
-              {
-                isOptional: false,
-                name: 'from',
-                type: 'u32'
-              },
-              {
-                isOptional: false,
-                name: 'to',
-                type: 'u32'
-              },
-              {
-                isOptional: false,
-                name: 'at',
-                type: 'Hash'
-              }
-            ],
-            type: 'Vec<[u8; 32]>'
-          }
-        }
-      }
+      rpc: rpcProperties
     })
   );
 }
