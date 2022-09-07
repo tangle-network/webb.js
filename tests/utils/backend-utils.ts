@@ -17,7 +17,7 @@ let bobNode: LocalProtocolSubstrate;
 
 let apiPromise: ApiPromise | null = null;
 
-export async function startWebbNode(): Promise<ApiPromise>  {
+export async function startWebbNodes(): Promise<ApiPromise>  {
   aliceNode = await LocalProtocolSubstrate.start({
     name: 'substrate-alice',
     authority: 'alice',
