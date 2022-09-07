@@ -13,7 +13,6 @@ const usageMode: UsageMode = isCi
   };
 
 let aliceNode: LocalProtocolSubstrate;
-// @ts-ignore
 let bobNode: LocalProtocolSubstrate;
 
 let apiPromise: ApiPromise | null = null;
