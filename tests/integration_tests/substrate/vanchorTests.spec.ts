@@ -37,7 +37,7 @@ function getKeys() {
     // tests path
     process.cwd(),
     'tests',
-    'protocol-substrate-fixtures',
+    'substrate-fixtures',
     'vanchor',
     'bn254',
     'x5',
@@ -49,7 +49,7 @@ function getKeys() {
     // tests path
     process.cwd(),
     'tests',
-    'protocol-substrate-fixtures',
+    'substrate-fixtures',
     'vanchor',
     'bn254',
     'x5',

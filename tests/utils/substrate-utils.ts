@@ -315,7 +315,7 @@ export async function withdrawMixerBnX5_3(
     // tests path
     process.cwd(),
     'tests',
-    'protocol-substrate-fixtures',
+    'substrate-fixtures',
     'mixer',
     'bn254',
     'x5',
