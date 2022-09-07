@@ -73,6 +73,12 @@
 <pre><code class="language-bash"><span class="hl-1">curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh</span>
 </code></pre>
 <p>Great! Now your <strong>Rust</strong> environment is ready! 🦀 🦀</p>
+<p>Lastly, install </p>
+<ul>
+<li><a href="https://dvc.org/">DVC</a> is used for fetching large ZK files and managing them alongside git</li>
+<li><a href="https://docs.substrate.io/main-docs/install/">substrate.io</a> may require additional dependencies</li>
+</ul>
+<p>🚀🚀 Your environment is complete! 🚀🚀</p>
 
 <a href="#installation-💻" id="installation-💻" style="color: inherit; text-decoration: none;">
   <h2>Installation 💻</h2>
@@ -83,8 +89,8 @@
 <p><strong>To build:</strong></p>
 <pre><code class="language-bash"><span class="hl-1">yarn build</span>
 </code></pre>
-<p><strong>To update fixtures:</strong></p>
-<pre><code class="language-bash"><span class="hl-1">git submodule update --init --recursive</span>
+<p><strong>To fetch fixtures:</strong></p>
+<pre><code class="language-bash"><span class="hl-1">dvc pull</span>
 </code></pre>
 <h1 id="usage"> Usage </h1>
 
@@ -115,7 +121,7 @@
 </a>
 <p>We have included implementation examples for using this API to interact with an <a href="./examples/node/substrate/anchor.ts">Anchor</a> and <a href="./examples/node/substrate/mixer.ts">Mixer</a>. </p>
 <p>To run the above mentioned usage examples you will need to use the experimental module loader and start a <a href="https://github.com/webb-tools/protocol-substrate#standalone-local-testnet">local substrate chain</a>. In addition please ensure you have updated the fixtures by running:</p>
-<pre><code class="language-bash"><span class="hl-1">git submodule update --init --recursive</span>
+<pre><code class="language-bash"><span class="hl-1">dvc pull</span>
 </code></pre>
 <p>Once started you may run the following command from root:</p>
 <pre><code class="language-bash"><span class="hl-7"># Runs the Anchor usage example script</span><br/><span class="hl-1">NODE_OPTIONS=</span><span class="hl-4">&quot;--loader ./loader.js&quot;</span><span class="hl-1"> node ./examples/node/substrate/anchor.ts</span><br/><br/><span class="hl-7"># Runs the Mixer usage example script</span><br/><span class="hl-1">NODE_OPTIONS=</span><span class="hl-4">&quot;--loader ./loader.js&quot;</span><span class="hl-1"> node ./examples/node/substrate/mixer.ts</span>
