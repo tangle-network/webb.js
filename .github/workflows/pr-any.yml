@@ -156,7 +156,9 @@ jobs:
         run: |
           yarn install --immutable | grep -v 'YN0013'
           yarn build
-      - name : Running tests
+      - name: Setup DVC
+        uses: iterative/setup-dvc@v1
+      - name: Running tests
         run: |
-          git submodule update --init --recursive
+          dvc pull
           yarn test
