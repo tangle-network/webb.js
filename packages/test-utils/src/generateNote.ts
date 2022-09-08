@@ -1,8 +1,9 @@
-import {JsNoteBuilder} from "@webb-tools/wasm-utils/njs";
-import {Note} from "@webb-tools/sdk-core";
+import { Note } from '@webb-tools/sdk-core';
+import { JsNoteBuilder } from '@webb-tools/wasm-utils/njs';
 
-export function generateMixerNote(amount: number, chainId: number, outputChainId: number) {
-  let noteBuilder = new JsNoteBuilder();
+export function generateMixerNote (amount: number, chainId: number, outputChainId: number) {
+  const noteBuilder = new JsNoteBuilder();
+
   noteBuilder.protocol('mixer');
   noteBuilder.version('v1');
 
@@ -25,7 +26,7 @@ export function generateMixerNote(amount: number, chainId: number, outputChainId
   return note;
 }
 
-export async function generateVAnchorNote(amount: number, chainId: number, outputChainId: number, index?: number) {
+export async function generateVAnchorNote (amount: number, chainId: number, outputChainId: number, index?: number) {
   const note = await Note.generateNote({
     amount: String(amount),
     backend: 'Arkworks',
