@@ -75,7 +75,6 @@ function runBuild() {
 }
 
 function runTest() {
-  execSync('git submodule update --init --recursive')
   execSync('yarn test');
 }
 
