@@ -18,6 +18,7 @@ import path from 'path';
 import fs from 'fs';
 import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
 import { MTBn254X5, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
+import {generateVAnchorNote} from "@webb-tools/test-utils/generateNote";
 
 let apiPromise: ApiPromise | null = null;
 let keyring: {
@@ -77,28 +78,6 @@ function getKeyring() {
     charlie
   };
   return keyring;
-}
-
-async function generateVAnchorNote(amount: number, chainId: number, outputChainId: number, index?: number) {
-  const note = await Note.generateNote({
-    amount: String(amount),
-    backend: 'Arkworks',
-    curve: 'Bn254',
-    denomination: String(18),
-    exponentiation: String(5),
-    hashFunction: 'Poseidon',
-    index,
-    protocol: 'vanchor',
-    sourceChain: String(chainId),
-    sourceIdentifyingData: '1',
-    targetChain: String(outputChainId),
-    targetIdentifyingData: '1',
-    tokenSymbol: 'WEBB',
-    version: 'v1',
-    width: String(5)
-  });
-
-  return note;
 }
 
 async function createVAnchor(apiPromise: ApiPromise, singer: KeyringPair): Promise<number> {

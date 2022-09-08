@@ -5,7 +5,6 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import {
   generate_proof_js,
   JsNote,
-  JsNoteBuilder,
   OperationError,
   JsProofInputBuilder,
 } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
@@ -225,30 +224,10 @@ export async function fetchRPCTreeLeaves(api: ApiPromise, treeId: string | numbe
   return leaves;
 }
 
-export async function depositMixerBnX5_3(api: ApiPromise, depositor: KeyringPair) {
-  let noteBuilder = new JsNoteBuilder();
-  noteBuilder.protocol('mixer');
-  noteBuilder.version('v1');
-
-  noteBuilder.sourceChainId('1');
-  noteBuilder.targetChainId('1');
-  noteBuilder.sourceIdentifyingData('3');
-  noteBuilder.targetIdentifyingData('3');
-
-  noteBuilder.tokenSymbol('WEBB');
-  noteBuilder.amount('1');
-  noteBuilder.denomination('18');
-
-  noteBuilder.backend('Arkworks');
-  noteBuilder.hashFunction('Poseidon');
-  noteBuilder.curve('Bn254');
-  noteBuilder.width('3');
-  noteBuilder.exponentiation('5');
-  const note = noteBuilder.build();
+export async function depositMixerBnX5_3(api: ApiPromise, depositor: KeyringPair, note: JsNote) {
   const leaf = note.getLeafCommitment();
 
   await polkadotTx(api, { section: 'mixerBn254', method: 'deposit' }, [0, leaf], depositor);
-  return note;
 }
 
 export type WithdrawProof = {

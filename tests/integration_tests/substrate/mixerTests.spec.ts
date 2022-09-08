@@ -13,6 +13,7 @@ import {
   transferBalance,
   withdrawMixerBnX5_3,
 } from '../../utils/index.js';
+import {generateMixerNote} from "@webb-tools/test-utils/generateNote";
 
 let apiPromise: ApiPromise | null = null;
 let keyring: {
@@ -55,10 +56,10 @@ describe('Mixer tests', function () {
       // transfer some funds to sudo & test account
       console.log(`Transferring 10,000 balance to Alice and Bob`);
       await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
-      let note: JsNote;
+      let note: JsNote = generateMixerNote();
       // deposit to the mixer
       console.log(`Depositing to the mixer`);
-      note = await catchWasmError(() => depositMixerBnX5_3(apiPromise!, bob));
+      await catchWasmError(() => depositMixerBnX5_3(apiPromise!, bob, note));
       ///Give the chain sometime to insure the leaf is there
       await sleep(10_000);
       // withdraw fro the mixer
