@@ -1,18 +1,18 @@
 import {JsNoteBuilder} from "@webb-tools/wasm-utils/njs";
 import {Note} from "@webb-tools/sdk-core";
 
-export function generateMixerNote() {
+export function generateMixerNote(amount: number, chainId: number, outputChainId: number) {
   let noteBuilder = new JsNoteBuilder();
   noteBuilder.protocol('mixer');
   noteBuilder.version('v1');
 
-  noteBuilder.sourceChainId('1');
-  noteBuilder.targetChainId('1');
+  noteBuilder.sourceChainId(String(chainId));
+  noteBuilder.targetChainId(String(outputChainId));
   noteBuilder.sourceIdentifyingData('3');
   noteBuilder.targetIdentifyingData('3');
 
   noteBuilder.tokenSymbol('WEBB');
-  noteBuilder.amount('1');
+  noteBuilder.amount(String(amount));
   noteBuilder.denomination('18');
 
   noteBuilder.backend('Arkworks');

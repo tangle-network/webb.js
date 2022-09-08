@@ -56,7 +56,7 @@ describe('Mixer tests', function () {
       // transfer some funds to sudo & test account
       console.log(`Transferring 10,000 balance to Alice and Bob`);
       await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
-      let note: JsNote = generateMixerNote();
+      let note: JsNote = generateMixerNote(1, 1, 1);
       // deposit to the mixer
       console.log(`Depositing to the mixer`);
       await catchWasmError(() => depositMixerBnX5_3(apiPromise!, bob, note));
