@@ -2646,7 +2646,7 @@
     ed2curve "^0.3.0"
     tweetnacl "^1.0.3"
 
-"@polkadot/util@10.1.7", "@polkadot/util@^10.1.6":
+"@polkadot/util@10.1.6", "@polkadot/util@10.1.7", "@polkadot/util@^10.1.6":
   version "10.1.7"
   resolved "https://registry.yarnpkg.com/@polkadot/util/-/util-10.1.7.tgz#c54ca2a5b29cb834b40d8a876baefa3a0efb93af"
   integrity sha512-s7gDLdNb4HUpoe3faXwoO6HwiUp8pi66voYKiUYRh1kEtW1o9vGBgyZPHPGC/FBgILzTJKii/9XxnSex60zBTA==
@@ -3498,6 +3498,21 @@
     "@webb-tools/contracts" "^0.2.6"
     "@webb-tools/sdk-core" "0.1.4-101"
 
+"@webb-tools/sdk-core@0.1.4-101":
+  version "0.1.4-101"
+  resolved "https://registry.yarnpkg.com/@webb-tools/sdk-core/-/sdk-core-0.1.4-101.tgz#bba0108f36bad2e01dcae5603b9ec6dd44d093da"
+  integrity sha512-eMhZ2CbpK71dckj5toWzKOPU5nSqB+C7cdhyDgorBT6RASb4vNkZiE/fj1hZwCyiT3w5lMbOINy0XNSfndfNIQ==
+  dependencies:
+    "@polkadot/util" "10.1.6"
+    "@webb-tools/wasm-utils" "0.1.4-101"
+    bignumber.js "^9.0.0"
+    circomlibjs "0.0.8"
+    elliptic "6.5.4"
+    eth-sig-util "^3.0.1"
+    ethers "5.7.0"
+    ffjavascript "0.2.55"
+    snarkjs "0.4.22"
+
 "@webb-tools/tokens@0.2.6", "@webb-tools/tokens@^0.2.6":
   version "0.2.6"
   resolved "https://registry.yarnpkg.com/@webb-tools/tokens/-/tokens-0.2.6.tgz#33c84b5e27c565dab4a0f4f7bec08bdeffabd46e"
@@ -3527,6 +3542,11 @@
     "@webb-tools/tokens" "^0.2.6"
     "@webb-tools/utils" "^0.2.6"
     ethers "5.7.0"
+
+"@webb-tools/wasm-utils@0.1.4-101":
+  version "0.1.4-101"
+  resolved "https://registry.yarnpkg.com/@webb-tools/wasm-utils/-/wasm-utils-0.1.4-101.tgz#bda8ccf34436b2d1e0fbc0be26a87df7fcb7e00b"
+  integrity sha512-Z7C11qJ7PoZDfCDdhtVqCeBc0m8qGJgpZ+vjVsUtSTp8KosraQxLWnZcrKsiR5xNt7lz3Eoqg4SCB192XUyeJQ==
 
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
