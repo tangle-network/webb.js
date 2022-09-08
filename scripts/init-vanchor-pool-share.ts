@@ -2,6 +2,7 @@ import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { polkadotTx } from '@webb-tools/test-utils/src/index.js';
 import { Keyring } from '@polkadot/keyring';
+// @ts-ignore
 import { preparePolkadotApi, startWebbNode, transferBalance } from '../tests/utils/index.js';
 import { expect } from 'chai';
 import { Option, U32 } from '@polkadot/types-codec';
@@ -101,20 +102,20 @@ async function main() {
     await polkadotTx(apiPromise!, {
       section: 'tokenWrapper',
       method: 'wrap'
-    }, ['0', webSqu, 1000_000_000, getKeyring().bob.address], getKeyring().bob);
+    }, ['0', webSqu, 1000_000_000_000, getKeyring().bob.address], getKeyring().bob);
 
     const balanceAfterWrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address, webSqu);
     const wrappedTokenBalanceAfterWrapping = balanceAfterWrapping.toJSON().free as number;
-    expect(wrappedTokenBalanceAfterWrapping).to.equal(1000_000_000);
+    expect(wrappedTokenBalanceAfterWrapping).to.equal(1000_000_000_000);
 
     await polkadotTx(apiPromise!, {
       section: 'tokenWrapper',
       method: 'unwrap'
-    }, [webSqu, '0', 1000_000_000 / 2, getKeyring().bob.address], getKeyring().bob);
+    }, [webSqu, '0', 1000_000_000_000 / 2, getKeyring().bob.address], getKeyring().bob);
 
     const balanceAfterUnwrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address, webSqu);
     const wrappedTokenBalanceAfterUnwrapping = balanceAfterUnwrapping.toJSON().free as number;
-    expect(wrappedTokenBalanceAfterUnwrapping).to.equal(1000_000_000 / 2);
+    expect(wrappedTokenBalanceAfterUnwrapping).to.equal(1000_000_000_000 / 2);
 
     const anchorId = await createVAnchor(apiPromise!, webSqu, getKeyring().alice);
     console.log(`Create anchorId ${anchorId}`);
