@@ -15,7 +15,7 @@
  *
  */
 
-import {options, rpcProperties} from '@webb-tools/api';
+import { options, rpcProperties } from '@webb-tools/api';
 import { ChildProcess, execSync } from 'child_process';
 import getPort, { portNumbers } from 'get-port';
 
@@ -107,12 +107,14 @@ export abstract class SubstrateNodeBase<TypedEvent extends SubstrateEvent> {
 
   public async waitForEvent (typedEvent: TypedEvent): Promise<void> {
     const api = await this.api();
-    return new Promise(async (resolve, _) => {
+
+    return new Promise((resolve, reject) => {
       // Subscribe to system events via storage
-      const unsub: any = await api.query.system!.events!((events: any[]) => {
+      const unsub: any = api.query.system.events((events: any[]) => {
         // Loop through the Vec<EventRecord>
         events.forEach((record: any) => {
           const { event } = record;
+
           if (
             event.section === typedEvent.section &&
             event.method === typedEvent.method
@@ -131,8 +133,9 @@ export abstract class SubstrateNodeBase<TypedEvent extends SubstrateEvent> {
     tx: SubmittableExtrinsic<'promise'>
   ): Promise<string> {
     const api = await this.api();
+
     return new Promise((resolve, reject) => {
-      tx.send(({ status, dispatchError }) => {
+      tx.send(({ dispatchError, status }) => {
         // status would still be set, but in the case of error we can shortcut
         // to just check it (so an error would indicate InBlock or Finalized)
         if (dispatchError) {
@@ -141,7 +144,7 @@ export abstract class SubstrateNodeBase<TypedEvent extends SubstrateEvent> {
             const decoded = api.registry.findMetaError(dispatchError.asModule);
             const { docs, name, section } = decoded;
 
-            reject(`${section}.${name}: ${docs.join(' ')}`);
+            reject(new Error(`${section}.${name}: ${docs.join(' ')}`));
           } else {
             // Other, CannotLookup, BadOrigin, no extra info
             reject(dispatchError.toString());
@@ -151,7 +154,7 @@ export abstract class SubstrateNodeBase<TypedEvent extends SubstrateEvent> {
         if (status.isFinalized && !dispatchError) {
           resolve(status.asFinalized.toString());
         }
-      });
+      }).catch((e) => reject(e));
     });
   }
 
@@ -178,7 +181,7 @@ export abstract class SubstrateNodeBase<TypedEvent extends SubstrateEvent> {
               );
               const { docs, name, section } = decoded;
 
-              reject(`${section}.${name}: ${docs.join(' ')}`);
+              reject(new Error(`${section}.${name}: ${docs.join(' ')}`));
             } else {
             // Other, CannotLookup, BadOrigin, no extra info
               reject(dispatchError.toString());
@@ -189,7 +192,7 @@ export abstract class SubstrateNodeBase<TypedEvent extends SubstrateEvent> {
             resolve(status.asFinalized.toString());
           }
         }
-      );
+      ).catch((e) => reject(e));
     });
   }
 
@@ -200,10 +203,10 @@ export abstract class SubstrateNodeBase<TypedEvent extends SubstrateEvent> {
   }
 
   protected static pullImage (opts: {
-    frocePull: boolean;
+    forcePull: boolean;
     image: string;
   }): void {
-    if (!this.checkIfImageExists(opts.image) || opts.frocePull) {
+    if (!this.checkIfImageExists(opts.image) || opts.forcePull) {
       execSync(`docker pull ${opts.image}`, {
         encoding: 'utf8'
       });
@@ -228,7 +231,6 @@ export interface FeaturesConfig {
 
 export type ExportedConfigOptions = {
   suri: string;
-  proposalSigningBackend?: ProposalSigningBackend;
   linkedAnchors?: SubstrateLinkedAnchor[];
   features?: FeaturesConfig;
   chainId: number;
@@ -238,26 +240,6 @@ export interface SubstrateLinkedAnchor {
   chainId: string;
   chain: number;
   tree: number;
-}
-
-export type DKGProposalSigningBackend = {
-  type: 'DKGNode';
-  node: string;
-}; /** DKG Node name in the config */
-
-/** DKG Node name in the config */
-export type MockedProposalSigningBackend = {
-  type: 'Mocked';
-  privateKey: string;
-}; /** Signer private key */
-export type ProposalSigningBackend =
-  | DKGProposalSigningBackend
-  | MockedProposalSigningBackend;
-
-export interface EventsWatcher {
-  enabled: boolean;
-  pollingInterval: number;
-  printProgressInterval?: number;
 }
 
 type PalletKind =
@@ -270,8 +252,6 @@ type PalletKind =
 
 export interface Pallet {
   pallet: PalletKind;
-  eventsWatcher: EventsWatcher;
-  proposalSigningBackend?: ProposalSigningBackend;
   linkedAnchors?: SubstrateLinkedAnchor[];
 }
 

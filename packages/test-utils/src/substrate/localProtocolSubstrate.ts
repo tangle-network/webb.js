@@ -14,10 +14,11 @@ export class LocalProtocolSubstrate extends SubstrateNodeBase<TypedEvent> {
   ): Promise<LocalProtocolSubstrate> {
     opts.ports = await super.makePorts(opts);
     const startArgs: string[] = [];
+
     if (opts.usageMode.mode === 'docker') {
       LocalProtocolSubstrate.pullImage({
-        frocePull: opts.usageMode.forcePullImage,
-        image: STANDALONE_DOCKER_IMAGE_URL,
+        forcePull: opts.usageMode.forcePullImage,
+        image: STANDALONE_DOCKER_IMAGE_URL
       });
       startArgs.push(
         'run',

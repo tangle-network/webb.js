@@ -43,7 +43,7 @@ export class LocalDkg extends SubstrateNodeBase<TypedEvent> {
 
     if (opts.usageMode.mode === 'docker') {
       super.pullImage({
-        frocePull: opts.usageMode.forcePullImage,
+        forcePull: opts.usageMode.forcePullImage,
         image: DKG_STANDALONE_DOCKER_IMAGE_URL
       });
       const dockerArgs = [
