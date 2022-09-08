@@ -12,10 +12,10 @@
   ],
   "resolutions": {
     "@polkadot/api": "9.2.3",
-    "@polkadot/keyring": "10.1.6",
+    "@polkadot/keyring": "10.1.7",
     "@polkadot/types": "9.2.3",
-    "@polkadot/util": "10.1.6",
-    "@polkadot/util-crypto": "10.1.6"
+    "@polkadot/util": "10.1.7",
+    "@polkadot/util-crypto": "10.1.7"
   },
   "scripts": {
     "pumbp": "./scripts/update-version.js prerelease",
@@ -45,10 +45,10 @@
   "devDependencies": {
     "@polkadot/api": "9.2.3",
     "@polkadot/dev": "^0.67.86",
-    "@polkadot/keyring": "10.1.6",
+    "@polkadot/keyring": "10.1.7",
     "@polkadot/types": "9.2.3",
-    "@polkadot/util": "10.1.6",
-    "@polkadot/util-crypto": "10.1.6",
+    "@polkadot/util": "10.1.7",
+    "@polkadot/util-crypto": "10.1.7",
     "@types/mocha": "^9.1.0",
     "@types/source-map-support": "^0.5.3",
     "cross-env": "^7.0.3",
