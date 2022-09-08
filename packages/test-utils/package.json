@@ -35,9 +35,10 @@
     "@polkadot/keyring": "10.1.6",
     "@webb-tools/api": "0.1.4-101",
     "@webb-tools/sdk-core": "0.1.4-101",
-    "@webb-tools/tokens": "0.2.5",
+    "@webb-tools/tokens": "0.2.6",
     "@webb-tools/utils": "0.2.5",
     "@webb-tools/vbridge": "0.2.5",
+    "@webb-tools/protocol-solidity": "0.2.6",
     "ethers": "5.7.0",
     "ganache": "7.4.1"
   }
