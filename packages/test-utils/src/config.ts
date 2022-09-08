@@ -1,4 +1,3 @@
-
 export interface EnabledContracts {
   contract: ContractKind;
 }
@@ -20,20 +19,6 @@ export interface WithdrawConfig {
   withdrawGaslimit: `0x${string}`;
 }
 
-export type DKGProposalSigningBackend = {
-  type: 'DKGNode';
-  node: string;
-}; /** DKG Node name in the config */
-export type MockedProposalSigningBackend = {
-  type: 'Mocked';
-  privateKey: string;
-};
-
-/** Signer private key */
-export type ProposalSigningBackend =
-  | DKGProposalSigningBackend
-  | MockedProposalSigningBackend;
-
 export interface LinkedAnchor {
   chain: string;
   chainId: string;
@@ -47,7 +32,6 @@ export interface Contract {
   eventsWatcher: EventsWatcher;
   size?: number;
   withdrawConfig?: WithdrawConfig;
-  proposalSigningBackend?: ProposalSigningBackend;
   linkedAnchors?: LinkedAnchor[];
 }
 
@@ -57,10 +41,4 @@ export interface ChainInfo {
   chainId: number;
   beneficiary?: string;
   contracts: Contract[];
-}
-
-export interface FeaturesConfig {
-  dataQuery?: boolean;
-  governanceRelay?: boolean;
-  privateTxRelay?: boolean;
 }

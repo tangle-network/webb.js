@@ -1,8 +1,14 @@
+import { IVariableAnchorExtData, IVariableAnchorPublicInputs } from '@webb-tools/interfaces';
+import { Anchors } from '@webb-tools/protocol-solidity';
+import { CircomUtxo, Keypair, Utxo } from '@webb-tools/sdk-core';
+import { LocalChain } from '@webb-tools/test-utils/localTestnet';
 import { MintableToken } from '@webb-tools/tokens';
 import { getChainIdType, ZkComponents } from '@webb-tools/utils';
 import { VBridge, VBridgeInput } from '@webb-tools/vbridge';
-import { ethers } from 'ethers';
+import { ethers, Wallet } from 'ethers';
 import { Server } from 'ganache';
+
+import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { GanacheAccounts, startGanacheServer } from './startGanacheServer.js';
 
@@ -95,4 +101,94 @@ export class LocalEvmChain {
       zkComponentsLarge
     );
   }
+}
+
+/** Sets up vanchor transaction for the evm
+    Generates extData and publicInputs to be used for vanchor transaction
+ **/
+export async function setupVanchorEvmTx (
+  depositUtxo: Utxo,
+  srcChain: LocalChain,
+  destChain: LocalChain,
+  randomKeypair: Keypair,
+  srcVanchor: Anchors.VAnchor,
+  destVanchor: Anchors.VAnchor,
+  relayerWallet2: Wallet
+): Promise<{
+    extData: IVariableAnchorExtData;
+    publicInputs: IVariableAnchorPublicInputs;
+  }> {
+  const extAmount = ethers.BigNumber.from(0).sub(depositUtxo.amount);
+
+  const dummyOutput1 = await CircomUtxo.generateUtxo({
+    amount: '0',
+    backend: 'Circom',
+    chainId: destChain.chainId.toString(),
+    curve: 'Bn254',
+    keypair: randomKeypair
+  });
+
+  const dummyOutput2 = await CircomUtxo.generateUtxo({
+    amount: '0',
+    backend: 'Circom',
+    chainId: destChain.chainId.toString(),
+    curve: 'Bn254',
+    keypair: randomKeypair
+  });
+
+  const dummyInput = await CircomUtxo.generateUtxo({
+    amount: '0',
+    backend: 'Circom',
+    chainId: destChain.chainId.toString(),
+    curve: 'Bn254',
+    keypair: randomKeypair,
+    originChainId: destChain.chainId.toString()
+  });
+
+  const recipient = '0x0000000001000000000100000000010000000001';
+
+  // Populate the leavesMap for generating the zkp against the source chain
+  //
+  const leaves1 = srcVanchor.tree
+    .elements()
+    .map((el) => hexToU8a(el.toHexString()));
+
+  const leaves2 = destVanchor.tree
+    .elements()
+    .map((el) => hexToU8a(el.toHexString()));
+
+  const depositUtxoIndex = srcVanchor.tree.getIndexByElement(
+    u8aToHex(depositUtxo.commitment)
+  );
+
+  const regeneratedUtxo = await CircomUtxo.generateUtxo({
+    amount: depositUtxo.amount,
+    backend: 'Circom',
+    blinding: hexToU8a(depositUtxo.blinding),
+    chainId: depositUtxo.chainId,
+    curve: 'Bn254',
+    index: depositUtxoIndex.toString(),
+    keypair: randomKeypair,
+    originChainId: depositUtxo.originChainId,
+    privateKey: hexToU8a(depositUtxo.secret_key)
+  });
+
+  const leavesMap = {
+    [srcChain.chainId]: leaves1,
+    [destChain.chainId]: leaves2
+  };
+
+  const { extData, publicInputs } = await destVanchor.setupTransaction(
+    [regeneratedUtxo, dummyInput],
+    [dummyOutput1, dummyOutput2],
+    extAmount,
+    0,
+    0,
+    relayerWallet2.address,
+    recipient,
+    relayerWallet2.address,
+    leavesMap
+  );
+
+  return { extData, publicInputs };
 }
