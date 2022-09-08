@@ -2,7 +2,7 @@ import { Keyring } from '@polkadot/keyring';
 import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import {
-  startWebbNode,
+  startWebbNodes,
   stopNodes,
   transferBalance
 } from '../../utils/index.js';
@@ -80,7 +80,7 @@ describe('Wrap/unwrap substrate tests', function() {
   this.timeout(220_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
-    apiPromise = await startWebbNode();
+    apiPromise = await startWebbNodes();
     const { bob, charlie, alice } = getKeyring();
     console.log(`Transferring 10,000 balance to Alice and Bob`);
     await transferBalance(apiPromise!, charlie, [alice, bob], 1000_000);
