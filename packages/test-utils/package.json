@@ -31,7 +31,7 @@
   },
   "repository": "https://github.com/webb-tools/webb.js.git",
   "dependencies": {
-    "@polkadot/api": "9.2.3",
+    "@polkadot/api": "9.2.4",
     "@polkadot/keyring": "10.1.7",
     "@webb-tools/api": "0.1.4-101",
     "@webb-tools/sdk-core": "0.1.4-101",

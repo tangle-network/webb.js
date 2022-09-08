@@ -11,9 +11,9 @@
     "tests/*"
   ],
   "resolutions": {
-    "@polkadot/api": "9.2.3",
+    "@polkadot/api": "9.2.4",
     "@polkadot/keyring": "10.1.7",
-    "@polkadot/types": "9.2.3",
+    "@polkadot/types": "9.2.4",
     "@polkadot/util": "10.1.7",
     "@polkadot/util-crypto": "10.1.7"
   },
@@ -43,10 +43,10 @@
     "deploy-ps-vanchor": "NODE_OPTIONS='--loader ./loader.js' node --experimental-specifier-resolution=node ./scripts/init-vanchor-pool-share.ts"
   },
   "devDependencies": {
-    "@polkadot/api": "9.2.3",
+    "@polkadot/api": "9.2.4",
     "@polkadot/dev": "^0.67.86",
     "@polkadot/keyring": "10.1.7",
-    "@polkadot/types": "9.2.3",
+    "@polkadot/types": "9.2.4",
     "@polkadot/util": "10.1.7",
     "@polkadot/util-crypto": "10.1.7",
     "@types/mocha": "^9.1.0",
