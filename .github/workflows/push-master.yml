@@ -40,6 +40,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Setup DVC
+        uses: iterative/setup-dvc@v1
       - name: ${{ matrix.step }}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
