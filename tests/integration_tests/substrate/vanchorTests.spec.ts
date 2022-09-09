@@ -18,7 +18,7 @@ import path from 'path';
 import fs from 'fs';
 import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
 import { MTBn254X5, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
-import {generateVAnchorNote} from "@webb-tools/test-utils/generateNote";
+import {generateVAnchorNote} from "@webb-tools/test-utils";
 
 let apiPromise: ApiPromise | null = null;
 let keyring: {
