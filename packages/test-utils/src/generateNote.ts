@@ -1,5 +1,5 @@
 import { Note } from '@webb-tools/sdk-core';
-import { JsNoteBuilder } from '@webb-tools/wasm-utils/njs';
+import { JsNoteBuilder } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 
 export function generateMixerNote (amount: number, chainId: number, outputChainId: number) {
   const noteBuilder = new JsNoteBuilder();
