@@ -13,7 +13,7 @@ import {
   transferBalance,
   withdrawMixerBnX5_3,
 } from '../../utils/index.js';
-import {generateMixerNote} from "@webb-tools/test-utils/generateNote";
+import {generateMixerNote} from "@webb-tools/test-utils";
 
 let apiPromise: ApiPromise | null = null;
 let keyring: {
