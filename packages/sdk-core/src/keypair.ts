@@ -123,15 +123,4 @@ export class Keypair {
   decrypt (data: string) {
     return Buffer.from(decrypt(unpackEncryptedMessage(data), this.privkey.slice(2)), 'base64');
   }
-
-  /**
-   * Sign a message using keypair private key
-   *
-   * @param commitment - a decimal string of the commitment
-   * @param merkleIndex - a number for the merkle index.
-   * @returns a decimal string representing the poseidon hash of [privKey, commitment, merkleIndex]
-   */
-  sign (commitment: string, merkleIndex: number): string {
-    return BigNumber.from(poseidon([this.privkey, commitment, merkleIndex])).toString();
-  }
 }

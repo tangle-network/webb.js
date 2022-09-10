@@ -161,6 +161,12 @@ export class CircomUtxo extends Utxo {
     return hexToU8a(BigNumber.from(hash).toHexString());
   }
 
+  createCommitmentWithPubkey (pubkey: string): Uint8Array {
+    const hash = poseidon([this._chainId, this._amount, pubkey, this._blinding]);
+
+    return hexToU8a(BigNumber.from(hash).toHexString());
+  }
+
   /**
    * @returns the index configured on this UTXO. Output UTXOs generated
    * before they have been inserted in a tree.
@@ -182,13 +188,17 @@ export class CircomUtxo extends Utxo {
     // If the amount of the UTXO is zero, then the nullifier is not important.
     // Return a 'dummy' value that will satisfy the circuit
     // Enforce index on the UTXO if there is an amount greater than zero
-    const utxoKeypair = new Keypair(this._secret_key);
-    const signature = utxoKeypair.sign(
-      BigNumber.from(u8aToHex(this.commitment)).toString(),
-      this.index > 0 ? this.index : 0
-    );
+    if (!this.keypair || !this.keypair.privkey) {
+      throw new Error('Cannot create nullifier, keypair with private key not configured');
+    }
 
-    const x = poseidon([u8aToHex(this.commitment), this.index > 0 ? this.index : 0, signature]);
+    const x = poseidon([
+      u8aToHex(this.commitment),
+      this.index > 0 ? this.index : 0,
+      // The following parameter is the 'ownership hash', a portion of the nullifier that enables
+      // compliance, and ties a utxo to a particular keypair.
+      poseidon([this.keypair.privkey, this.commitment, this.index])
+    ]);
 
     return x.toString();
   }
