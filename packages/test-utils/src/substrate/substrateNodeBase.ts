@@ -47,7 +47,6 @@ export type LocalNodeOpts = {
   usageMode: UsageMode;
   enableLogging?: boolean;
   isManual?: boolean; // for manual connection to the substrate node using 9944
-  enabledPallets?: Pallet[];
 };
 
 export type SubstrateEvent = {
@@ -222,51 +221,3 @@ async function createApiPromise (endpoint: string) {
     })
   );
 }
-
-export interface FeaturesConfig {
-  dataQuery?: boolean;
-  governanceRelay?: boolean;
-  privateTxRelay?: boolean;
-}
-
-export type ExportedConfigOptions = {
-  suri: string;
-  linkedAnchors?: SubstrateLinkedAnchor[];
-  features?: FeaturesConfig;
-  chainId: number;
-};
-
-export interface SubstrateLinkedAnchor {
-  chainId: string;
-  chain: number;
-  tree: number;
-}
-
-type PalletKind =
-  | 'DKG'
-  | 'DKGProposals'
-  | 'DKGProposalHandler'
-  | 'AnchorBn254'
-  | 'VAnchorBn254'
-  | 'SignatureBridge';
-
-export interface Pallet {
-  pallet: PalletKind;
-  linkedAnchors?: SubstrateLinkedAnchor[];
-}
-
-type RuntimeKind = 'DKG' | 'WebbProtocol';
-
-export interface NodeInfo {
-  enabled: boolean;
-  runtime: RuntimeKind;
-  pallets: Pallet[];
-}
-
-export type FullNodeInfo = NodeInfo & {
-  name: string;
-  httpEndpoint: string;
-  wsEndpoint: string;
-  suri: string;
-  chainId: number;
-};

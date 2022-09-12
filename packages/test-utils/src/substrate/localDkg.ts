@@ -21,10 +21,9 @@ import '@webb-tools/types';
 
 import { spawn } from 'child_process';
 import { ECPairAPI, ECPairFactory, TinySecp256k1Interface } from 'ecpair';
-import isCI from 'is-ci';
 import * as TinySecp256k1 from 'tiny-secp256k1';
 
-import { ExportedConfigOptions, FullNodeInfo, LocalNodeOpts, SubstrateNodeBase } from './substrateNodeBase.js';
+import { LocalNodeOpts, SubstrateNodeBase } from './substrateNodeBase.js';
 
 /** The image url */
 const DKG_STANDALONE_DOCKER_IMAGE_URL =
@@ -133,26 +132,6 @@ export class LocalDkg extends SubstrateNodeBase<TypedEvent> {
     const chainId = (await api.consts.dkgProposals.chainIdentifier).toNumber();
 
     return chainId;
-  }
-
-  /** Exports DKG config */
-  public async exportConfig (
-    opts: ExportedConfigOptions
-  ): Promise<FullNodeInfo> {
-    const ports = this.opts.ports as { ws: number; http: number; p2p: number };
-    const host = isCI ? 'localhost' : '127.0.0.1';
-    const nodeInfo: FullNodeInfo = {
-      chainId: opts.chainId,
-      enabled: true,
-      httpEndpoint: `http://${host}:${ports.http}`,
-      name: 'localDKG',
-      pallets: this.opts.enabledPallets ?? [],
-      runtime: 'DKG',
-      suri: opts.suri,
-      wsEndpoint: `ws://${host}:${ports.ws}`
-    };
-
-    return nodeInfo;
   }
 }
 
