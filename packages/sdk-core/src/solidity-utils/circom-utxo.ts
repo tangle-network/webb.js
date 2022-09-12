@@ -196,7 +196,7 @@ export class CircomUtxo extends Utxo {
       u8aToHex(this.commitment),
       this.index > 0 ? this.index : 0,
       // The following parameter is the 'ownership hash', a portion of the nullifier that enables
-      // compliance, and ties a utxo to a particular keypair.
+      // compliance and ties a utxo to a particular keypair.
       poseidon([this.keypair.privkey, this.commitment, this.index])
     ]);
 
