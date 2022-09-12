@@ -61,7 +61,7 @@ export class Keypair {
   }
 
   toString () {
-    return toFixedHex(this.pubkey) + Buffer.from(this.encryptionKey, 'base64').toString('hex');
+    return toFixedHex(this.pubkey) + toFixedHex(Buffer.from(this.encryptionKey, 'base64').toString('hex'));
   }
 
   /**
