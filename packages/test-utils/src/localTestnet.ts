@@ -18,8 +18,6 @@ import { Utility } from '@webb-tools/protocol-solidity';
 import { LocalEvmChain } from '@webb-tools/test-utils';
 import { ethers } from 'ethers';
 
-import { ChainInfo, EnabledContracts } from './config';
-
 // Describes the ganache account
 export type GanacheAccounts = {
   balance: string;
@@ -33,7 +31,6 @@ type LocalChainOpts = {
   chainId: number;
   populatedAccounts: GanacheAccounts[];
   enableLogging?: boolean;
-  enabledContracts: EnabledContracts[];
 };
 
 export class LocalChain {
@@ -81,9 +78,3 @@ export class LocalChain {
     await this.localEvmChain.stop();
   }
 }
-
-export type FullChainInfo = ChainInfo & {
-  httpEndpoint: string;
-  wsEndpoint: string;
-  privateKey: string;
-};
