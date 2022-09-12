@@ -124,7 +124,7 @@ export abstract class SubstrateNodeBase<TypedEvent extends SubstrateEvent> {
             resolve();
           }
         });
-      });
+      }).catch((e) => reject(e));
     });
   }
 
@@ -221,4 +221,3 @@ async function createApiPromise (endpoint: string) {
     })
   );
 }
-
