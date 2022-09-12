@@ -47,6 +47,7 @@ export type LocalNodeOpts = {
   usageMode: UsageMode;
   enableLogging?: boolean;
   isManual?: boolean; // for manual connection to the substrate node using 9944
+  enabledPallets?: Pallet[];
 };
 
 export type SubstrateEvent = {
@@ -221,3 +222,4 @@ async function createApiPromise (endpoint: string) {
     })
   );
 }
+
