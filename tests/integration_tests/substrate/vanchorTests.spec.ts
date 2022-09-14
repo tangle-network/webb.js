@@ -29,7 +29,7 @@ let nodes: KillTask | undefined;
 
 const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
 
-const token = new Uint8Array([0, 0, 0, 0]);
+const token = new Uint8Array([255, 255, 255, 254]);
 
 function getKeys() {
   const pkPath = path.join(
