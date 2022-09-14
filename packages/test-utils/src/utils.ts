@@ -5,6 +5,7 @@ import '@webb-tools/types';
 import { options } from '@webb-tools/api/index.js';
 import { ResourceId } from '@webb-tools/sdk-core/proposals/index.js';
 import { BigNumber } from 'ethers';
+import { SubmittableExtrinsic } from '@polkadot/api/types';
 
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -57,6 +58,24 @@ export function polkadotTx (api: ApiPromise, path: MethodPath, params: any[], si
         }
       }
     }).catch((e) => reject(e));
+  });
+}
+
+export async function sudoTx(
+  api: ApiPromise,
+  call: SubmittableExtrinsic<'promise'>
+): Promise<void> {
+  const keyring = new Keyring({ type: 'sr25519' });
+  const alice = keyring.addFromUri('//Alice');
+  return new Promise(async (resolve, _reject) => {
+    const unsub = await api.tx.sudo
+      .sudo(call)
+      .signAndSend(alice, ({ status }) => {
+        if (status.isFinalized) {
+          unsub();
+          resolve();
+        }
+      });
   });
 }
 

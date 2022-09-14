@@ -36,7 +36,7 @@ function getKeyring() {
   return keyring;
 }
 
-describe('Mixer tests', function () {
+describe.skip('Mixer tests', function () {
   this.timeout(120_000);
 
   before(async function () {

@@ -17,7 +17,7 @@ import {
   VAnchorProof
 } from '@webb-tools/sdk-core/index.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
-import { polkadotTx } from '@webb-tools/test-utils/index.js';
+import {polkadotTx, /*sudoTx*/} from '@webb-tools/test-utils/index.js';
 import path from 'path';
 import fs from 'fs';
 import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
@@ -31,6 +31,8 @@ let keyring: {
 } | null = null;
 
 const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
+
+const token = new Uint8Array([254, 255, 255, 255]);
 
 function getKeys() {
   const pkPath = path.join(
@@ -171,7 +173,7 @@ async function basicDeposit(
     extAmount: extAmount.toString(),
     fee: fee.toString(),
     refund: '0',
-    token: decodedAddress
+    token: token
   };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
   const extData = {
@@ -180,7 +182,7 @@ async function basicDeposit(
     fee,
     extAmount: extAmount,
     refund: '0',
-    token: address,
+    token,
     encryptedOutput1: u8aToHex(comEnc1),
     encryptedOutput2: u8aToHex(comEnc2)
   };
@@ -270,7 +272,7 @@ async function basicWithdraw(
     extAmount: extAmount.toString(),
     fee: fee.toString(),
     refund: '0',
-    token: decodedAddress
+    token: token
   };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
   const extData = {
@@ -279,7 +281,7 @@ async function basicWithdraw(
     fee,
     extAmount: extAmount,
     refund: '0',
-    token: address,
+    token: token,
     encryptedOutput1: u8aToHex(comEnc1),
     encryptedOutput2: u8aToHex(comEnc2)
   };
@@ -359,7 +361,7 @@ async function createVAnchorWithDeposit(
     extAmount: extAmount.toString(),
     fee: fee.toString(),
     refund: '0',
-    token: decodedAddress
+    token: token
   };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
   const extData = {
@@ -368,7 +370,7 @@ async function createVAnchorWithDeposit(
     fee,
     extAmount: extAmount,
     refund: '0',
-    token: address,
+    token: token,
     encryptedOutput1: u8aToHex(comEnc1),
     encryptedOutput2: u8aToHex(comEnc2)
   };
@@ -436,7 +438,7 @@ describe('VAnchor tests', function() {
     chainId = String(calculateTypedChainId(ChainType.Substrate, Number(chainIdentifier)));
   });
 
-  it('VAnchor deposit', async function() {
+  it.skip('VAnchor deposit', async function() {
     console.log('keyring');
     const { bob, alice } = getKeyring();
     const secret = randomAsU8a();
@@ -500,7 +502,7 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString(),
       refund: '0',
-      token: decodedAddress
+      token: token
     };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
@@ -509,7 +511,7 @@ describe('VAnchor tests', function() {
       fee,
       extAmount: extAmount,
       refund: '0',
-      token: address,
+      token: token,
       encryptedOutput1: u8aToHex(comEnc1),
       encryptedOutput2: u8aToHex(comEnc2),
     };
@@ -536,13 +538,72 @@ describe('VAnchor tests', function() {
 
   it('VAnchor deposit and withdraw', async function() {
     const { bob, alice } = getKeyring();
+
+    // register asset
+    /*const assetType = apiPromise!.createType(
+      'PalletAssetRegistryAssetType',{
+        'Token': {
+          '_enum': [
+            null
+          ]
+        },
+      }
+    );
+    //const assetType = apiPromise!.createType( 'PalletAssetRegistryAssetType', 'Token')
+    const assetName = new Uint8Array([0, 0, 0, 2]);
+    const assetRegisterCall = apiPromise!.tx.assetRegistry.register(assetName, assetType , 0)
+    await sudoTx(apiPromise!, assetRegisterCall);
+
+    let firstAssetId = await apiPromise!.query.assetRegistry.nextAssetId();
+    // @ts-ignore
+    firstAssetId = firstAssetId - 1
+
+    // @ts-ignore
+    console.log(`first asset id is ${firstAssetId}`);
+
+    const tokenBalanceCall = apiPromise!.tx.tokens.setBalance(bob.address, firstAssetId, 50_000_000_000_000, 0);
+    await sudoTx(apiPromise!, tokenBalanceCall);*/
+
+    // @ts-ignore
+    /*const firstAssetIdArray: number[] = [firstAssetId];
+    console.log(`first asset id array is ${firstAssetIdArray}`);*/
+
+    // register wrapped asset
+    /*const wrappedAssetType = apiPromise!.createType(
+      'PalletAssetRegistryAssetType',{
+          'PoolShare': [
+            0
+          ]
+
+      }
+    );*/
+    //const assetType = apiPromise!.createType( 'PalletAssetRegistryAssetType', 'Token')
+    /*const wrappedAssetName = new Uint8Array([0, 0, 0, 3]);
+    const wrappedAssetRegisterCall = apiPromise!.tx.assetRegistry.register(wrappedAssetName, wrappedAssetType , 0)
+    await sudoTx(apiPromise!, wrappedAssetRegisterCall);
+
+    let pooledAssetId = await apiPromise!.query.assetRegistry.nextAssetId();
+    // @ts-ignore
+    pooledAssetId = pooledAssetId - 1
+    // @ts-ignore
+    console.log(`pooled asset id is ${pooledAssetId}`);
+
+
+    await polkadotTx(apiPromise!, {
+      section: 'tokenWrapper',
+      method: 'wrap'
+    }, [0, pooledAssetId, 20_000_000_000_000, bob.address], bob);*/
+
+
     const fee = 0;
     const leavesMap: any = {};
+
 
     const [treeId, notes, [pk], secret] = await createVAnchorWithDeposit(apiPromise!, alice, bob);
     const chainId = notes[0].note.targetChainId; // both two notes have the same chain id
 
     const withdrawAmount = notes.reduce((acc, note) => acc + Number(note.note.amount), 0);
+    console.log(`withdraw amount ${withdrawAmount}`);
     const extAmount = -withdrawAmount;
 
     const publicAmount = -withdrawAmount;
@@ -592,7 +653,7 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString(),
       refund: '0',
-      token: decodedAddress
+      token: token
     };
     const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
@@ -601,7 +662,7 @@ describe('VAnchor tests', function() {
       fee,
       extAmount: extAmount,
       refund: '0',
-      token: address,
+      token,
       encryptedOutput1: u8aToHex(comEnc1),
       encryptedOutput2: u8aToHex(comEnc2)
     };
@@ -615,13 +676,14 @@ describe('VAnchor tests', function() {
       extDataHash: data.extDataHash
     };
 
+    console.log(`transacting`)
     await polkadotTx(apiPromise!, {
       section: 'vAnchorBn254',
       method: 'transact'
     }, [treeId, vanchorProofData, extData], bob);
   });
 
-  it('VAnchor deposit and withdraw with only one note', async function() {
+  it.skip('VAnchor deposit and withdraw with only one note', async function() {
     const { bob, alice } = getKeyring();
     const fee = 0;
     const leavesMap: any = {};
@@ -679,7 +741,7 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString(),
       refund: '0',
-      token: decodedAddress
+      token: token
     };
     const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
@@ -688,7 +750,7 @@ describe('VAnchor tests', function() {
       fee,
       extAmount: extAmount,
       refund: '0',
-      token: address,
+      token: token,
       encryptedOutput1: u8aToHex(comEnc1),
       encryptedOutput2: u8aToHex(comEnc2)
     };
@@ -709,7 +771,7 @@ describe('VAnchor tests', function() {
     }, [treeId, vanchorProofData, extData], bob);
   });
 
-  it('VAnchor multi deposits single execution', async function() {
+  it.skip('VAnchor multi deposits single execution', async function() {
     this.timeout(350_000);
 
     const numberOfDepoisits = 10;
@@ -721,7 +783,7 @@ describe('VAnchor tests', function() {
     }
   });
 
-  it('VAnchor multi deposits and withdraw', async function() {
+  it.skip('VAnchor multi deposits and withdraw', async function() {
     const numberOfDepoisits = 3;
     this.timeout(350_000);
     const { bob, alice } = getKeyring();
