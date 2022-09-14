@@ -30,6 +30,7 @@ let nodes: KillTask | undefined;
 const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
 
 const token = new Uint8Array([255, 255, 255, 254]);
+const tokenString = '4294967294';
 
 function getKeys() {
   const pkPath = path.join(
@@ -179,7 +180,7 @@ async function basicDeposit(
     fee,
     extAmount: extAmount,
     refund: '0',
-    token: '0',
+    token: tokenString,
     encryptedOutput1: u8aToHex(comEnc1),
     encryptedOutput2: u8aToHex(comEnc2)
   };
@@ -278,7 +279,7 @@ async function basicWithdraw(
     fee,
     extAmount: extAmount,
     refund: '0',
-    token: '0',
+    token: tokenString,
     encryptedOutput1: u8aToHex(comEnc1),
     encryptedOutput2: u8aToHex(comEnc2)
   };
@@ -367,7 +368,7 @@ async function createVAnchorWithDeposit(
     fee,
     extAmount: extAmount,
     refund: '0',
-    token: '0',
+    token: tokenString,
     encryptedOutput1: u8aToHex(comEnc1),
     encryptedOutput2: u8aToHex(comEnc2)
   };
@@ -509,7 +510,7 @@ describe('VAnchor tests', function() {
       fee,
       extAmount: extAmount,
       refund: '0',
-      token: 0,
+      token: tokenString,
       encryptedOutput1: u8aToHex(comEnc1),
       encryptedOutput2: u8aToHex(comEnc2),
     };
@@ -601,7 +602,7 @@ describe('VAnchor tests', function() {
       fee,
       extAmount: extAmount,
       refund: '0',
-      token: '0',
+      token: tokenString,
       encryptedOutput1: u8aToHex(comEnc1),
       encryptedOutput2: u8aToHex(comEnc2)
     };
@@ -688,7 +689,7 @@ describe('VAnchor tests', function() {
       fee,
       extAmount: extAmount,
       refund: '0',
-      token: '0',
+      token: tokenString,
       encryptedOutput1: u8aToHex(comEnc1),
       encryptedOutput2: u8aToHex(comEnc2)
     };
