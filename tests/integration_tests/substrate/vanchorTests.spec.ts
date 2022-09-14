@@ -29,6 +29,8 @@ let nodes: KillTask | undefined;
 
 const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
 
+const token = new Uint8Array([0, 0, 0, 0]);
+
 function getKeys() {
   const pkPath = path.join(
     // tests path
@@ -168,7 +170,7 @@ async function basicDeposit(
     extAmount: extAmount.toString(),
     fee: fee.toString(),
     refund: '0',
-    token: hexToU8a('0x0')
+    token: token
   };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
   const extData = {
@@ -267,7 +269,7 @@ async function basicWithdraw(
     extAmount: extAmount.toString(),
     fee: fee.toString(),
     refund: '0',
-    token: hexToU8a('0x0')
+    token: token
   };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
   const extData = {
@@ -356,7 +358,7 @@ async function createVAnchorWithDeposit(
     extAmount: extAmount.toString(),
     fee: fee.toString(),
     refund: '0',
-    token: hexToU8a('0x0')
+    token: token
   };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
   const extData = {
@@ -498,7 +500,7 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString(),
       refund: '0',
-      token: hexToU8a('0x0')
+      token: token
     };
   const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
@@ -507,7 +509,7 @@ describe('VAnchor tests', function() {
       fee,
       extAmount: extAmount,
       refund: '0',
-      token: 0, // represents asset id
+      token: 0,
       encryptedOutput1: u8aToHex(comEnc1),
       encryptedOutput2: u8aToHex(comEnc2),
     };
@@ -590,7 +592,7 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString(),
       refund: '0',
-      token: hexToU8a('0x0')
+      token: token
     };
     const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
@@ -677,7 +679,7 @@ describe('VAnchor tests', function() {
       extAmount: extAmount.toString(),
       fee: fee.toString(),
       refund: '0',
-      token: hexToU8a('0x0')
+      token: token
     };
     const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
