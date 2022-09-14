@@ -5,7 +5,7 @@ import { LocalChain } from '@webb-tools/test-utils/localTestnet';
 import { MintableToken } from '@webb-tools/tokens';
 import { getChainIdType, ZkComponents } from '@webb-tools/utils';
 import { VBridge, VBridgeInput } from '@webb-tools/vbridge';
-import { ethers, Wallet } from 'ethers';
+import { ethers } from 'ethers';
 import { Server } from 'ganache';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
