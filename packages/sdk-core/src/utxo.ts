@@ -3,6 +3,8 @@
 
 import type { Backend, Curve, JsUtxo } from '@webb-tools/wasm-utils';
 
+import { hexToU8a } from '@polkadot/util';
+
 import { toBuffer } from './big-number-utils.js';
 import { Keypair } from './keypair.js';
 
@@ -11,15 +13,21 @@ export type UtxoGenInput = {
   backend: Backend,
   amount: string,
   chainId: string,
-  index?: string,
-  privateKey?: Uint8Array,
   blinding?: Uint8Array
+  index?: string,
   keypair?: Keypair,
   originChainId?: string
 };
 
+/**
+ * Utxos are objects used to represent ownership of value within a VAnchor instance.
+ * The input Utxos to a VAnchor transaction represent the spending a previously created Utxo.
+ *   - Therefore, input Utxos should have a privkey configured on the given Utxo's keypair.
+ * The output Utxos to a VAnchor transaction represent the creation of new Utxos.
+ *   - Therefore, output Utxos don't need to have a privkey configured on the given Utxo's keypair.
+ */
 export class Utxo {
-  keypair: Keypair | undefined;
+  keypair: Keypair = new Keypair();
   originChainId: string | undefined;
 
   /** Initialize a new UTXO - unspent transaction output or input. Note, a full TX consists of 2/16 inputs and 2 outputs
@@ -52,6 +60,11 @@ export class Utxo {
 
   static async generateUtxo (input: UtxoGenInput): Promise<Utxo> {
     const wasm = await Utxo.wasm;
+    let wasmUtxoPrivateKey;
+
+    if (input.keypair && input.keypair.privkey) {
+      wasmUtxoPrivateKey = hexToU8a(input.keypair.privkey);
+    }
 
     const wasmUtxo = new wasm.JsUtxo(
       input.curve,
@@ -59,13 +72,16 @@ export class Utxo {
       input.amount,
       input.chainId,
       input.index,
-      input.privateKey,
+      wasmUtxoPrivateKey,
       input.blinding
     );
 
     const utxo = new Utxo(wasmUtxo);
 
-    utxo.setKeypair(input.keypair);
+    if (input.keypair) {
+      utxo.setKeypair(input.keypair);
+    }
+
     utxo.setOriginChainId(input.originChainId);
 
     return utxo;
@@ -113,7 +129,7 @@ export class Utxo {
     return this.keypair;
   }
 
-  setKeypair (keypair: Keypair | undefined) {
+  setKeypair (keypair: Keypair) {
     this.keypair = keypair;
   }
 
@@ -173,10 +189,28 @@ export class Utxo {
   }
 
   /**
+   * @returns the public key used for generating the commitment.
+   * If the utxo is configured with a secret_key, this value should be poseidonHash(secret_key)
+   */
+  get public_key (): string {
+    throw new Error('Can\'t get the public_key on base UTXO');
+  }
+
+  /**
    * @returns the secret_key AKA private_key used in the nullifier.
-   * this value is used to derive the public_key for the commitment.
    */
   get secret_key (): string {
     return this.inner.secret_key;
+  }
+
+  /**
+   * @returns secrets - an array of secret values represented in the utxo
+   */
+  getSecrets (): string[] {
+    if (!this.keypair.privkey) {
+      throw new Error('Missing private key for secrets');
+    }
+
+    return [this.chainId, this.amount, this.keypair.privkey, this.blinding];
   }
 }

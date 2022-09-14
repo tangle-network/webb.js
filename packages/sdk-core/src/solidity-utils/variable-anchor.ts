@@ -70,7 +70,7 @@ export function generateVariableWitnessInput (
     // data for 2 transaction outputs
     outChainID: outputs.map((x) => x.chainId),
     outAmount: outputs.map((x) => x.amount.toString()),
-    outPubkey: outputs.map((x) => x.keypair?.pubkey),
+    outPubkey: outputs.map((x) => x.keypair.getPubKey()),
     outBlinding: outputs.map((x) => BigNumber.from(x.blinding).toString())
   };
 
