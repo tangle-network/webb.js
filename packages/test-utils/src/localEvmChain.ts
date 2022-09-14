@@ -106,14 +106,14 @@ export class LocalEvmChain {
 /** Sets up vanchor transaction for the evm
     Generates extData and publicInputs to be used for vanchor transaction
  **/
-export async function setupVanchorEvmTx (
+export async function setupVanchorDepositEvmTx (
   depositUtxo: Utxo,
   srcChain: LocalChain,
   destChain: LocalChain,
   randomKeypair: Keypair,
   srcVanchor: Anchors.VAnchor,
   destVanchor: Anchors.VAnchor,
-  relayerWallet2: Wallet
+  walletAddress: string
 ): Promise<{
     extData: IVariableAnchorExtData;
     publicInputs: IVariableAnchorPublicInputs;
@@ -184,9 +184,9 @@ export async function setupVanchorEvmTx (
     extAmount,
     0,
     0,
-    relayerWallet2.address,
+    walletAddress,
     recipient,
-    relayerWallet2.address,
+    walletAddress,
     leavesMap
   );
 
