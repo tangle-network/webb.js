@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/test-utils",
-  "version": "0.1.4-102",
+  "version": "0.1.4-103",
   "description": "Utilities to work with Webb in test environments",
   "author": "Webb Developers <drew@webb.tools>",
   "type": "module",
@@ -33,8 +33,8 @@
   "dependencies": {
     "@polkadot/api": "9.2.4",
     "@polkadot/keyring": "10.1.7",
-    "@webb-tools/api": "0.1.4-102",
-    "@webb-tools/sdk-core": "0.1.4-102",
+    "@webb-tools/api": "0.1.4-103",
+    "@webb-tools/sdk-core": "0.1.4-103",
     "@webb-tools/tokens": "0.2.6",
     "@webb-tools/utils": "0.2.6",
     "@webb-tools/vbridge": "0.2.6",
