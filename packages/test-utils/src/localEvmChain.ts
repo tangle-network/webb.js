@@ -5,7 +5,7 @@ import { LocalChain } from '@webb-tools/test-utils/localTestnet';
 import { MintableToken } from '@webb-tools/tokens';
 import { getChainIdType, ZkComponents } from '@webb-tools/utils';
 import { VBridge, VBridgeInput } from '@webb-tools/vbridge';
-import { ethers } from 'ethers';
+import {BigNumber, ethers} from 'ethers';
 import { Server } from 'ganache';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
@@ -110,7 +110,7 @@ export async function setupVanchorDepositEvmTx (
   depositUtxo: Utxo,
   srcChain: LocalChain,
   destChain: LocalChain,
-  randomKeypair: Keypair,
+  keypair: Keypair,
   srcVanchor: Anchors.VAnchor,
   destVanchor: Anchors.VAnchor,
   walletAddress: string
@@ -125,7 +125,7 @@ export async function setupVanchorDepositEvmTx (
     backend: 'Circom',
     chainId: destChain.chainId.toString(),
     curve: 'Bn254',
-    keypair: randomKeypair
+    keypair: keypair
   });
 
   const dummyOutput2 = await CircomUtxo.generateUtxo({
@@ -133,7 +133,7 @@ export async function setupVanchorDepositEvmTx (
     backend: 'Circom',
     chainId: destChain.chainId.toString(),
     curve: 'Bn254',
-    keypair: randomKeypair
+    keypair: keypair
   });
 
   const dummyInput = await CircomUtxo.generateUtxo({
@@ -141,7 +141,7 @@ export async function setupVanchorDepositEvmTx (
     backend: 'Circom',
     chainId: destChain.chainId.toString(),
     curve: 'Bn254',
-    keypair: randomKeypair,
+    keypair: keypair,
     originChainId: destChain.chainId.toString()
   });
 
@@ -168,7 +168,7 @@ export async function setupVanchorDepositEvmTx (
     chainId: depositUtxo.chainId,
     curve: 'Bn254',
     index: depositUtxoIndex.toString(),
-    keypair: randomKeypair,
+    keypair: keypair,
     originChainId: depositUtxo.originChainId,
     privateKey: hexToU8a(depositUtxo.secret_key)
   });
