@@ -227,7 +227,7 @@ export class CircomUtxo extends Utxo {
   setKeypair (keypair: Keypair): void {
     this._pubkey = keypair.getPubKey();
 
-    if (keypair?.privkey) {
+    if (keypair.privkey) {
       this._secret_key = keypair.privkey;
     }
 

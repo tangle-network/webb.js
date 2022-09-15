@@ -82,6 +82,12 @@ function copyMiscFiles(dir, module = 'esm') {
 
     fs.writeFileSync('build/cjs/package.json', newPkgString);
   }
+
+  // The types package is a special case - it should only ever be cjs.
+  // So the root directory package.json should exist as commonjs.
+  if (dir === 'types') {
+    fs.writeFileSync('./build/package.json', newPkgString);
+  }
 }
 
 // For the given directory, modify the source code to be CJS compliant.
@@ -167,7 +173,11 @@ async function buildJs(dir) {
       buildWebpack(dir);
     } else {
       await buildBabel(dir, 'cjs');
-      await buildBabel(dir, 'esm');
+
+      // The types package should only be built for commonjs.
+      if (dir != 'types') {
+        await buildBabel(dir, 'esm');
+      }
     }
 
     console.log();

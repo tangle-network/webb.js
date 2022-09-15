@@ -1,6 +1,6 @@
 // Copyright 2022 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
-import '@nepoche/protocol-substrate-types';
+import '@webb-tools/types';
 
 import { options } from '@webb-tools/api/index.js';
 import { ResourceId } from '@webb-tools/sdk-core/proposals/index.js';

@@ -43,7 +43,6 @@
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
     "@polkadot/api": "9.2.4",
-    "@nepoche/protocol-substrate-types": "^0.0.7",
     "@polkadot/rpc-core": "9.2.4",
     "@webb-tools/types": "0.1.4-103"
   }
