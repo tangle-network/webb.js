@@ -1,4 +1,4 @@
-import { Note, Utxo } from '..';
+import { Note, Utxo } from '../index.js';
 
 export async function generateArkworksVAnchorNote (inputUtxo: Utxo) {
   const note = await Note.generateNote({

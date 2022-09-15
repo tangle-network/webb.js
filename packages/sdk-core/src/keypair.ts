@@ -166,7 +166,7 @@ export class Keypair {
    * @returns a 0x-prefixed, 32 fixed byte hex-string representation of the public key
    */
   getPubKey () {
-    return toFixedHex(BigNumber.from(this.pubkey));
+    return toFixedHex(this.pubkey.toHexString());
   }
 
   /**

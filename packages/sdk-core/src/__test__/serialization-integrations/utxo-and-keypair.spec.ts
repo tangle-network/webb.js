@@ -16,16 +16,22 @@ describe('Utxo and Keypair serialization integrations', () => {
       keypair
     });
 
+    const nullifierBefore = utxo.nullifier;
+
     const utxoEncryption = utxo.encrypt();
-    const utxoStringDecrypted = await CircomUtxo.decrypt(keypair, utxoEncryption);
+    const utxoDecrypted = await CircomUtxo.decrypt(keypair, utxoEncryption);
     const utxoString = utxo.serialize();
     const recreatedUtxo = await CircomUtxo.deserialize(utxoString);
     const recreatedUtxoString = recreatedUtxo.serialize();
     const recreatedUtxoEncryption = recreatedUtxo.encrypt();
-    const recreatedStringDecrypted = await CircomUtxo.decrypt(keypair, recreatedUtxoEncryption);
+    const recreatedUtxoDecrypted = await CircomUtxo.decrypt(keypair, recreatedUtxoEncryption);
+
+    const nullifierAfter = recreatedUtxoDecrypted.nullifier;
 
     expect(utxoString).to.deep.equal(recreatedUtxoString);
-    expect(utxoStringDecrypted).to.deep.equal(recreatedStringDecrypted);
+    expect(utxoString).to.deep.equal(utxoDecrypted.serialize());
+    expect(utxoDecrypted).to.deep.equal(recreatedUtxoDecrypted);
+    expect(nullifierBefore).to.deep.eq(nullifierAfter);
   });
 
   it('CircomUtxo with only pubkey data', async function () {

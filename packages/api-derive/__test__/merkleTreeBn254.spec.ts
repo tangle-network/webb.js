@@ -1,7 +1,7 @@
 // Copyright 2022 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import '@webb-tools/types/build/cjs/index.js';
+import '@nepoche/protocol-substrate-types';
 
 import { MerkleTree } from '@webb-tools/sdk-core/index.js';
 import { createLocalPolkadotApi, polkadotTx } from '@webb-tools/test-utils/index.js';

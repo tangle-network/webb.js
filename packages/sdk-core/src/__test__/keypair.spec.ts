@@ -15,6 +15,11 @@ describe('Keypair constructor tests', () => {
 
     assert(keypair.getPubKey() === toFixedHex(expectedPubkey));
     assert(keypair.getEncryptionKey() === expectedEncryptionKey);
+
+    const encryptedValue = keypair.encrypt(Buffer.from('hello'));
+    const decryptedValue = keypair.decrypt(encryptedValue);
+
+    assert(Buffer.from('hello').toString() === decryptedValue.toString());
   });
 
   it('Should create a Keypair consisting of just the public key', async function () {

@@ -35,7 +35,7 @@ export class CircomUtxo extends Utxo {
       this.index.toString(),
       this.blinding,
       this.keypair.getPubKey(),
-      this.keypair?.getEncryptionKey(),
+      this.keypair.getEncryptionKey(),
       this.secret_key
     ].join('&');
   }
@@ -102,14 +102,14 @@ export class CircomUtxo extends Utxo {
    * @returns `0x`-prefixed hex string with data
    */
   encrypt () {
-    if (!this.keypair) {
-      throw new Error('Must set a keypair to encrypt the utxo');
+    if (!this.keypair.getEncryptionKey()) {
+      throw new Error('Must have a configured encryption key on the keypair to encrypt the utxo');
     }
 
     const bytes = Buffer.concat([
       toBuffer(BigNumber.from(this._chainId), 8),
-      toBuffer(BigNumber.from(this._amount), 31),
-      toBuffer(BigNumber.from(this._blinding), 31)
+      toBuffer(BigNumber.from(this._amount), 32),
+      toBuffer(BigNumber.from(this._blinding), 32)
     ]);
 
     return this.keypair.encrypt(bytes);
@@ -125,14 +125,14 @@ export class CircomUtxo extends Utxo {
   static async decrypt (keypair: Keypair, data: string) {
     const buf = keypair.decrypt(data);
 
-    if (buf.length !== 70) {
+    if (buf.length !== 72) {
       throw new Error('malformed utxo encryption');
     }
 
     const utxo = await CircomUtxo.generateUtxo({
-      amount: BigNumber.from('0x' + buf.slice(8, 8 + 31).toString('hex')).toString(),
+      amount: BigNumber.from('0x' + buf.slice(8, 8 + 32).toString('hex')).toString(),
       backend: 'Circom',
-      blinding: hexToU8a('0x' + buf.slice(8 + 31, 8 + 62).toString('hex')),
+      blinding: hexToU8a(toFixedHex('0x' + buf.slice(8 + 32, 8 + 64).toString('hex'))),
       chainId: BigNumber.from('0x' + buf.slice(0, 8).toString('hex')).toString(),
       curve: 'Bn254',
       keypair
@@ -176,12 +176,6 @@ export class CircomUtxo extends Utxo {
     return hexToU8a(BigNumber.from(hash).toHexString());
   }
 
-  createCommitmentWithPubkey (pubkey: string): Uint8Array {
-    const hash = poseidon([this._chainId, this._amount, pubkey, this._blinding]);
-
-    return hexToU8a(BigNumber.from(hash).toHexString());
-  }
-
   /**
    * @returns the index configured on this UTXO. Output UTXOs generated
    * before they have been inserted in a tree.
@@ -212,7 +206,7 @@ export class CircomUtxo extends Utxo {
       this.index > 0 ? this.index : 0,
       // The following parameter is the 'ownership hash', a portion of the nullifier that enables
       // compliance, and ties a utxo to a particular keypair.
-      poseidon([this.keypair.privkey, this.commitment, this.index])
+      poseidon([this.keypair.privkey, u8aToHex(this.commitment), this.index])
     ]);
 
     return x.toString();

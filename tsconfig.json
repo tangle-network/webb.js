@@ -41,12 +41,6 @@
       "@webb-tools/api/*": [
         "packages/api/src/*"
       ],
-      "@webb-tools/types": [
-        "packages/types/src"
-      ],
-      "@webb-tools/types/*": [
-        "packages/types/src/*"
-      ],
       "@webb-tools/sdk-core": [
         "packages/sdk-core/src"
       ],

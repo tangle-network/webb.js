@@ -162,10 +162,6 @@ export class Utxo {
     return this.inner.commitment;
   }
 
-  createCommitmentWithPubkey (pubkey: string): Uint8Array {
-    throw new Error('Cannot create commitment with a passed public key');
-  }
-
   /**
    * @returns the index configured on this UTXO. Output UTXOs generated
    * before they have been inserted in a tree.
