@@ -88,13 +88,6 @@ export class Keypair {
   }
 
   /**
-   * Key address for this keypair, alias to {@link toString}
-   */
-  address () {
-    return this.toString();
-  }
-
-  /**
    * Initialize new keypair from string data.
    *
    * @param str - A string which contains public keydata.
