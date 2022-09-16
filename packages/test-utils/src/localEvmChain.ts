@@ -110,7 +110,7 @@ export class LocalEvmChain {
     The `inputUtxo` should be spendable by the `spender`
  **/
 export async function setupVanchorEvmTx (
-  depositUtxo: Utxo,
+  inputUtxo: Utxo,
   srcChain: LocalChain,
   destChain: LocalChain,
   spender: Keypair,
