@@ -113,7 +113,7 @@ export async function setupVanchorEvmTx (
   depositUtxo: Utxo,
   srcChain: LocalChain,
   destChain: LocalChain,
-  keypair: Keypair,
+  spender: Keypair,
   srcVanchor: Anchors.VAnchor,
   destVanchor: Anchors.VAnchor,
   walletAddress: string,
