@@ -103,8 +103,11 @@ export class LocalEvmChain {
   }
 }
 
-/** Sets up vanchor transaction for the evm
-    Generates extData and publicInputs to be used for vanchor transaction
+/** Setup a vanchor withdraw transaction for an evm target.
+    Generates extData and publicInputs to be used for a vanchor withdraw transaction.
+    This function handles boilerplate such as leaf fetching and regenerates the utxo to set the appropriate
+    index for proving.
+    The `inputUtxo` should be spendable by the `spender`
  **/
 export async function setupVanchorEvmTx (
   depositUtxo: Utxo,
