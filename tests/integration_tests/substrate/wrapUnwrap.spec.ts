@@ -2,8 +2,7 @@ import { Keyring } from '@polkadot/keyring';
 import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import {
-  startWebbNodes,
-  stopNodes,
+  startProtocolSubstrateNodes,
   transferBalance
 } from '../../utils/index.js';
 import { polkadotTx } from '@webb-tools/test-utils/index.js';
@@ -11,6 +10,7 @@ import { expect } from 'chai';
 import { Option, U32 } from '@polkadot/types-codec';
 import { BN } from '@polkadot/util';
 let apiPromise: ApiPromise | null = null;
+let nodes:any = null;
 let keyring: {
   bob: KeyringPair;
   alice: KeyringPair;
@@ -80,7 +80,8 @@ describe('Wrap/unwrap substrate tests', function() {
   this.timeout(220_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
-    apiPromise = await startWebbNodes();
+    nodes = await startProtocolSubstrateNodes();
+    apiPromise = await nodes[0].api();
     const { bob, charlie, alice } = getKeyring();
     console.log(`Transferring 10,000 balance to Alice and Bob`);
     await transferBalance(apiPromise!, charlie, [alice, bob], 1000_000);
@@ -125,6 +126,8 @@ describe('Wrap/unwrap substrate tests', function() {
 
   after(async function() {
     await apiPromise?.disconnect();
-    await stopNodes();
+    await nodes[0]?.stop();
+    await nodes[1]?.stop();
   });
 });
+

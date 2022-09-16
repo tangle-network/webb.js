@@ -6,12 +6,13 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import {
   catchWasmError,
   depositMixerBnX5_3,
-  sleep, startWebbNodes, stopNodes,
+  sleep, startProtocolSubstrateNodes,
   transferBalance,
   withdrawMixerBnX5_3,
 } from '../../utils/index.js';
 
 let apiPromise: ApiPromise | null = null;
+let nodes:any = null;
 let keyring: {
   bob: KeyringPair;
   alice: KeyringPair;
@@ -40,7 +41,8 @@ describe('Mixer tests', function () {
   this.timeout(120_000);
 
   before(async function () {
-    apiPromise = await startWebbNodes();
+    nodes = await startProtocolSubstrateNodes();
+    apiPromise = await nodes[0].api();
   });
 
   it('Mixer should work', async function () {
@@ -74,6 +76,7 @@ describe('Mixer tests', function () {
   });
 
   after(async function () {
-      await stopNodes();
+    await nodes[0]?.stop();
+    await nodes[1]?.stop();
   });
 });

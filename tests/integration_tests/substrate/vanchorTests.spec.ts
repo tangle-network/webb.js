@@ -3,7 +3,7 @@ import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
 import {
   currencyToUnitI128,
-  startWebbNodes, stopNodes,
+  startProtocolSubstrateNodes,
   transferBalance
 } from '../../utils/index.js';
 import {
@@ -24,6 +24,7 @@ import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
 import { MTBn254X5, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 
 let apiPromise: ApiPromise | null = null;
+let nodes:any = null;
 let keyring: {
   bob: KeyringPair;
   alice: KeyringPair;
@@ -424,15 +425,16 @@ async function getleafIndex(
   return shiftedIndex;
 }
 
-describe('VAnchor tests', function() {
+describe.skip('VAnchor tests', function() {
   this.timeout(120_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
-    apiPromise = await startWebbNodes();
+    nodes = await startProtocolSubstrateNodes();
+    apiPromise = await nodes[0].api();
     const { bob, charlie, alice } = getKeyring();
     console.log(`Transferring 10,000 balance to Alice and Bob`);
     await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
-    const chainIdentifier = apiPromise.consts.linkableTreeBn254.chainIdentifier.toString();
+    const chainIdentifier = apiPromise!.consts.linkableTreeBn254.chainIdentifier.toString();
     chainId = String(calculateTypedChainId(ChainType.Substrate, Number(chainIdentifier)));
   });
 
@@ -735,6 +737,7 @@ describe('VAnchor tests', function() {
 
   after(async function() {
     await apiPromise?.disconnect();
-    await stopNodes();
+    await nodes[0]?.stop();
+    await nodes[1]?.stop();
   });
 });
