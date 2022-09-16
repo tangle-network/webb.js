@@ -5,7 +5,7 @@ import { LocalChain } from '@webb-tools/test-utils/localTestnet';
 import { MintableToken } from '@webb-tools/tokens';
 import { getChainIdType, ZkComponents } from '@webb-tools/utils';
 import { VBridge, VBridgeInput } from '@webb-tools/vbridge';
-import {BigNumber, ethers} from 'ethers';
+import { ethers } from 'ethers';
 import { Server } from 'ganache';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
@@ -106,14 +106,15 @@ export class LocalEvmChain {
 /** Sets up vanchor transaction for the evm
     Generates extData and publicInputs to be used for vanchor transaction
  **/
-export async function setupVanchorDepositEvmTx (
+export async function setupVanchorEvmTx (
   depositUtxo: Utxo,
   srcChain: LocalChain,
   destChain: LocalChain,
   keypair: Keypair,
   srcVanchor: Anchors.VAnchor,
   destVanchor: Anchors.VAnchor,
-  walletAddress: string
+  walletAddress: string,
+  recipient: string
 ): Promise<{
     extData: IVariableAnchorExtData;
     publicInputs: IVariableAnchorPublicInputs;
@@ -125,7 +126,7 @@ export async function setupVanchorDepositEvmTx (
     backend: 'Circom',
     chainId: destChain.chainId.toString(),
     curve: 'Bn254',
-    keypair: keypair
+    keypair
   });
 
   const dummyOutput2 = await CircomUtxo.generateUtxo({
@@ -133,7 +134,7 @@ export async function setupVanchorDepositEvmTx (
     backend: 'Circom',
     chainId: destChain.chainId.toString(),
     curve: 'Bn254',
-    keypair: keypair
+    keypair
   });
 
   const dummyInput = await CircomUtxo.generateUtxo({
@@ -141,11 +142,9 @@ export async function setupVanchorDepositEvmTx (
     backend: 'Circom',
     chainId: destChain.chainId.toString(),
     curve: 'Bn254',
-    keypair: keypair,
+    keypair,
     originChainId: destChain.chainId.toString()
   });
-
-  const recipient = '0x0000000001000000000100000000010000000001';
 
   // Populate the leavesMap for generating the zkp against the source chain
   //
@@ -168,7 +167,7 @@ export async function setupVanchorDepositEvmTx (
     chainId: depositUtxo.chainId,
     curve: 'Bn254',
     index: depositUtxoIndex.toString(),
-    keypair: keypair,
+    keypair,
     originChainId: depositUtxo.originChainId,
     privateKey: hexToU8a(depositUtxo.secret_key)
   });
