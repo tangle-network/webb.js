@@ -122,14 +122,14 @@ export async function setupVanchorEvmWithdrawTx (
     extData: IVariableAnchorExtData;
     publicInputs: IVariableAnchorPublicInputs;
   }> {
-  const extAmount = ethers.BigNumber.from(0).sub(depositUtxo.amount);
+  const extAmount = ethers.BigNumber.from(0).sub(inputUtxo.amount);
 
   const dummyOutput1 = await CircomUtxo.generateUtxo({
     amount: '0',
     backend: 'Circom',
     chainId: destChain.chainId.toString(),
     curve: 'Bn254',
-    keypair
+    keypair: spender
   });
 
   const dummyOutput2 = await CircomUtxo.generateUtxo({
@@ -137,7 +137,7 @@ export async function setupVanchorEvmWithdrawTx (
     backend: 'Circom',
     chainId: destChain.chainId.toString(),
     curve: 'Bn254',
-    keypair
+    keypair: spender
   });
 
   const dummyInput = await CircomUtxo.generateUtxo({
@@ -145,7 +145,7 @@ export async function setupVanchorEvmWithdrawTx (
     backend: 'Circom',
     chainId: destChain.chainId.toString(),
     curve: 'Bn254',
-    keypair,
+    keypair: spender,
     originChainId: destChain.chainId.toString()
   });
 
@@ -160,19 +160,19 @@ export async function setupVanchorEvmWithdrawTx (
     .map((el) => hexToU8a(el.toHexString()));
 
   const depositUtxoIndex = srcVanchor.tree.getIndexByElement(
-    u8aToHex(depositUtxo.commitment)
+    u8aToHex(inputUtxo.commitment)
   );
 
   const regeneratedUtxo = await CircomUtxo.generateUtxo({
-    amount: depositUtxo.amount,
+    amount: inputUtxo.amount,
     backend: 'Circom',
-    blinding: hexToU8a(depositUtxo.blinding),
-    chainId: depositUtxo.chainId,
+    blinding: hexToU8a(inputUtxo.blinding),
+    chainId: inputUtxo.chainId,
     curve: 'Bn254',
     index: depositUtxoIndex.toString(),
-    keypair,
-    originChainId: depositUtxo.originChainId,
-    privateKey: hexToU8a(depositUtxo.secret_key)
+    keypair: spender,
+    originChainId: inputUtxo.originChainId,
+    privateKey: hexToU8a(inputUtxo.secret_key)
   });
 
   const leavesMap = {
