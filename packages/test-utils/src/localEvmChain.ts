@@ -109,7 +109,7 @@ export class LocalEvmChain {
     index for proving.
     The `inputUtxo` should be spendable by the `spender`
  **/
-export async function setupVanchorEvmTx (
+export async function setupVanchorEvmWithdrawTx (
   inputUtxo: Utxo,
   srcChain: LocalChain,
   destChain: LocalChain,
