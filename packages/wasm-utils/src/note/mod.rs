@@ -807,8 +807,6 @@ mod test {
 	use ark_bn254;
 	use wasm_bindgen_test::*;
 
-	use crate::utils::to_rust_string;
-
 	use super::*;
 
 	type Bn254Fr = ark_bn254::Fr;

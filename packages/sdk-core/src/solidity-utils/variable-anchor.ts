@@ -6,7 +6,6 @@ import { u8aToHex } from '@polkadot/util';
 
 import { FIELD_SIZE, toFixedHex } from '../big-number-utils.js';
 import { MerkleProof, MerkleTree, Utxo } from '../index.js';
-import { Keypair } from '../keypair.js';
 
 export function getVAnchorExtDataHash (
   encryptedOutput1: string,
@@ -48,9 +47,6 @@ export function generateVariableWitnessInput (
   extDataHash: BigNumber,
   externalMerkleProofs: MerkleProof[]
 ): any {
-  const keypair1 = new Keypair(outputs[0].secret_key);
-  const keypair2 = new Keypair(outputs[1].secret_key);
-
   const vanchorMerkleProofs = externalMerkleProofs.map((proof) => ({
     pathIndex: MerkleTree.calculateIndexFromPathIndices(proof.pathIndices),
     pathElements: proof.pathElements
@@ -74,7 +70,7 @@ export function generateVariableWitnessInput (
     // data for 2 transaction outputs
     outChainID: outputs.map((x) => x.chainId),
     outAmount: outputs.map((x) => x.amount.toString()),
-    outPubkey: [toFixedHex(keypair1.pubkey), toFixedHex(keypair2.pubkey)],
+    outPubkey: outputs.map((x) => BigNumber.from(x.keypair.getPubKey()).toString()),
     outBlinding: outputs.map((x) => BigNumber.from(x.blinding).toString())
   };
 

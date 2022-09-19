@@ -75,34 +75,10 @@ describe('Utxo Class', () => {
     expect(utxo.amount).to.deep.equal('1');
   });
 
-  it('should serialize and deserialize a CircomUtxo with the same values', async function () {
-    const keypair = new Keypair();
-
-    const utxo = await CircomUtxo.generateUtxo({
-      amount: '1',
-      backend: 'Circom',
-      chainId: '1',
-      curve: 'Bn254',
-      index: '0',
-      keypair
-    });
-
-    const utxoEncryption = utxo.encrypt();
-    const utxoStringDecrypted = await CircomUtxo.decrypt(keypair, utxoEncryption);
-    const utxoString = utxo.serialize();
-    const recreatedUtxo = await CircomUtxo.deserialize(utxoString);
-    const recreatedUtxoString = recreatedUtxo.serialize();
-    const recreatedUtxoEncryption = recreatedUtxo.encrypt();
-    const recreatedStringDecrypted = await CircomUtxo.decrypt(keypair, recreatedUtxoEncryption);
-
-    expect(utxoString).to.deep.equal(recreatedUtxoString);
-    expect(utxoStringDecrypted).to.deep.equal(recreatedStringDecrypted);
-  });
-
   it('Check valid encryption length', async function () {
     const kp = new Keypair();
 
-    const enc = Keypair.encryptWithKey(kp.encryptionKey, 'jumbo');
+    const enc = Keypair.encryptWithKey(kp.getEncryptionKey()!, 'jumbo');
 
     try {
       await CircomUtxo.decrypt(kp, enc);

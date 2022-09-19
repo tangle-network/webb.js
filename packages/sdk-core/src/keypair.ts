@@ -44,15 +44,29 @@ export function unpackEncryptedMessage (encryptedMessage: any) {
   };
 }
 
+/**
+ * A Keypair is an object that can group relevant keys for a user in the webb system.
+ * The keys managed by a keypair are as follows:
+ *    - pubkey: Required
+ *      - used in commitments of circuits, to indicate ownership of a UTXO.
+ *        The value can be derived from `pubkey = poseidon(privkey)`
+ *    - encryptionKey: Optional
+ *      - used to encrypting data for private communication. It is a pubkey of the privkey
+ *        in a different cryptography scheme.
+ *    - privkey: Optional
+ *      - used for proving knowledge of a value and thus ability to spend UTXOs (creating nullifier).
+ *      - used for decrypting data that has been encrypted with the encryptionKey.
+ */
 export class Keypair {
-  privkey: string;
-  pubkey: ethers.BigNumber;
-  encryptionKey: string;
+  privkey: string | undefined; // stored as a hex-encoded 0x-prefixed 32 byte string
+  private pubkey: ethers.BigNumber;
+  private encryptionKey: string | undefined; // stored as a base64 encryption key
 
   /**
-   * Initialize a new keypair. Generates a random private key if not defined
+   * Initialize a new keypair from a passed hex string. Generates a random private key if not defined
    *
    * @param privkey - hex string
+   * @returns - A 'Keypair' object with pubkey and encryptionKey values derived from the private key.
    */
   constructor (privkey = ethers.Wallet.createRandom().privateKey) {
     this.privkey = privkey;
@@ -60,45 +74,54 @@ export class Keypair {
     this.encryptionKey = getEncryptionPublicKey(privkey.slice(2));
   }
 
+  /**
+   * @returns a string of public parts of this keypair object: pubkey and encryption key.
+   */
   toString () {
-    return toFixedHex(this.pubkey) + Buffer.from(this.encryptionKey, 'base64').toString('hex');
+    let retVal = toFixedHex(this.pubkey);
+
+    if (this.encryptionKey) {
+      retVal = retVal + Buffer.from(this.encryptionKey, 'base64').toString('hex');
+    }
+
+    return retVal;
   }
 
   /**
-   * Key address for this keypair, alias to {@link toString}
-   */
-  address () {
-    return this.toString();
-  }
-
-  /**
-   * Initialize new keypair from address string
+   * Initialize new keypair from string data.
    *
-   * @param str - A string which contains the public key from (0,64) and
-   *              the encryption key from (64, 128)
-   * @returns The keypair object
+   * @param str - A string which contains public keydata.
+   *   (0, 66), the slice for the pubKey value, 0x-prefixed, which is required.
+   *   (66, 130), the slice for the encryptionKey value, which is optional to enable
+   *              encrypt and decrypt functionality. It should be hex encoded.
+   * @returns The keypair object configured with appropriate public values.
+   * @throws If the string object is not 66 chars or 130 chars.
    */
-  static fromString (str: string) {
-    if (str.length === 130) {
-      str = str.slice(2);
+  static fromString (str: string): Keypair {
+    if (str.length === 66) {
+      return Object.assign(new Keypair(), {
+        encryptionKey: undefined,
+        privkey: undefined,
+        pubkey: BigNumber.from(str)
+      });
+    } else if (str.length === 130) {
+      return Object.assign(new Keypair(), {
+        encryptionKey: Buffer.from(str.slice(66, 130), 'hex').toString('base64'),
+        privkey: undefined,
+        pubkey: BigNumber.from(str.slice(0, 66))
+      });
+    } else {
+      throw new Error('Invalid string passed');
     }
-
-    if (str.length !== 128) {
-      throw new Error('Invalid key length');
-    }
-
-    return Object.assign(new Keypair(), {
-      encryptionKey: Buffer.from(str.slice(64, 128), 'hex').toString('base64'),
-      privkey: null,
-      pubkey: BigNumber.from('0x' + str.slice(0, 64))
-    });
   }
 
   // This static method supports encrypting a base64-encoded data,
-  // with the provided encryption key
+  // with the provided hex-encoded encryption key
   static encryptWithKey (encryptionKey: string, data: string) {
+    const base64Key = Buffer.from(encryptionKey.slice(2), 'hex').toString('base64');
+
     return packEncryptedMessage(
-      encrypt(encryptionKey, { data }, 'x25519-xsalsa20-poly1305')
+      encrypt(base64Key, { data }, 'x25519-xsalsa20-poly1305')
     );
   }
 
@@ -109,6 +132,10 @@ export class Keypair {
    * @returns a hex string encoding of encrypted data with this encryption key
    */
   encrypt (bytes: Buffer) {
+    if (!this.encryptionKey) {
+      throw new Error('Cannot encrypt without a configured encryption key');
+    }
+
     return packEncryptedMessage(
       encrypt(this.encryptionKey, { data: bytes.toString('base64') }, 'x25519-xsalsa20-poly1305')
     );
@@ -121,17 +148,28 @@ export class Keypair {
    * @returns A Buffer of the decrypted data
    */
   decrypt (data: string) {
+    if (!this.privkey) {
+      throw new Error('Cannot decrypt without a configured private key');
+    }
+
     return Buffer.from(decrypt(unpackEncryptedMessage(data), this.privkey.slice(2)), 'base64');
   }
 
   /**
-   * Sign a message using keypair private key
-   *
-   * @param commitment - a decimal string of the commitment
-   * @param merkleIndex - a number for the merkle index.
-   * @returns a decimal string representing the poseidon hash of [privKey, commitment, merkleIndex]
+   * @returns a 0x-prefixed, 32 fixed byte hex-string representation of the public key
    */
-  sign (commitment: string, merkleIndex: number): string {
-    return BigNumber.from(poseidon([this.privkey, commitment, merkleIndex])).toString();
+  getPubKey () {
+    return toFixedHex(this.pubkey.toHexString());
+  }
+
+  /**
+   * @returns a 0x-prefixed, 32 fixed byte hex-string representation of the encryption key
+   */
+  getEncryptionKey () {
+    if (!this.encryptionKey) {
+      return undefined;
+    }
+
+    return '0x' + Buffer.from(this.encryptionKey, 'base64').toString('hex');
   }
 }
