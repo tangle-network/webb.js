@@ -109,7 +109,12 @@ impl JsUtxo {
 
 	pub fn get_secret_key(&self) -> Vec<u8> {
 		match &self.inner {
-			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.keypair.secret_key.into_repr().to_bytes_le(),
+			JsUtxoInner::Bn254(bn254_utxo) => {
+				match bn254_utxo.keypair.secret_key {
+					Some(key) => key.into_repr().to_bytes_le(),
+					None => 0u64.to_le_bytes().to_vec()
+				}
+			}
 		}
 	}
 
