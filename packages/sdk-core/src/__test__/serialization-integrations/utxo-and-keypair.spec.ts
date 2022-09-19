@@ -85,8 +85,4 @@ describe('Utxo and Keypair serialization integrations', () => {
 
     expect(utxo.serialize()).to.not.deep.equal(privkeyDecryptedUtxo.serialize());
   });
-
-  it('Output UTXOs from arkworks proving manager should be compatible with circom proving manager', async function () {
-    // Setup a transaction to create proofs against.
-  });
 });
