@@ -17,14 +17,14 @@ import {
   VAnchorProof
 } from '@webb-tools/sdk-core/index.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
-import { polkadotTx } from '@webb-tools/test-utils/index.js';
+import {LocalProtocolSubstrate, polkadotTx} from '@webb-tools/test-utils/index.js';
 import path from 'path';
 import fs from 'fs';
 import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
 import { MTBn254X5, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 
 let apiPromise: ApiPromise | null = null;
-let nodes:any = null;
+let nodes: LocalProtocolSubstrate[];
 let keyring: {
   bob: KeyringPair;
   alice: KeyringPair;

@@ -10,9 +10,10 @@ import {
   transferBalance,
   withdrawMixerBnX5_3,
 } from '../../utils/index.js';
+import {LocalProtocolSubstrate} from "@webb-tools/test-utils";
 
 let apiPromise: ApiPromise | null = null;
-let nodes:any = null;
+let nodes: LocalProtocolSubstrate[];
 let keyring: {
   bob: KeyringPair;
   alice: KeyringPair;

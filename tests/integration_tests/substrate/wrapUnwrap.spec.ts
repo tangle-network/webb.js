@@ -5,12 +5,12 @@ import {
   startProtocolSubstrateNodes,
   transferBalance
 } from '../../utils/index.js';
-import { polkadotTx } from '@webb-tools/test-utils/index.js';
+import { polkadotTx, LocalProtocolSubstrate } from '@webb-tools/test-utils/index.js';
 import { expect } from 'chai';
 import { Option, U32 } from '@polkadot/types-codec';
 import { BN } from '@polkadot/util';
 let apiPromise: ApiPromise | null = null;
-let nodes:any = null;
+let nodes: LocalProtocolSubstrate[];
 let keyring: {
   bob: KeyringPair;
   alice: KeyringPair;
