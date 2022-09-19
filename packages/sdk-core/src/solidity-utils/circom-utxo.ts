@@ -86,6 +86,10 @@ export class CircomUtxo extends Utxo {
       utxo._secret_key = input.keypair.privkey || '';
       utxo._pubkey = input.keypair.getPubKey();
       utxo.setKeypair(input.keypair);
+    } else {
+      utxo.keypair = new Keypair();
+      utxo._pubkey = utxo.keypair.getPubKey();
+      utxo._secret_key = utxo.keypair.privkey!;
     }
 
     utxo._blinding = input.blinding ? u8aToHex(input.blinding) : toFixedHex(randomBN(31));
