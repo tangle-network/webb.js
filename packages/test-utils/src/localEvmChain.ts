@@ -171,8 +171,7 @@ export async function setupVanchorEvmWithdrawTx (
     curve: 'Bn254',
     index: depositUtxoIndex.toString(),
     keypair: spender,
-    originChainId: inputUtxo.originChainId,
-    privateKey: hexToU8a(inputUtxo.secret_key)
+    originChainId: inputUtxo.originChainId
   });
 
   const leavesMap = {

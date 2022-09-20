@@ -45,10 +45,11 @@ For additional information, please refer to the [Webb Tools API reference docs](
 
 ```
 packages/
-  |____api/                 # Contains necessary options to create a polkadot.js API instance
+  |____api/                 # Contains necessary options to create a polkadot.js API instance.
+  |____api-derive/          # Routines and helper functions utilizing webb's api package.
   |____app-util/            # Utilities to work with Webb Network.
   |____sdk-core/            # The package provides a cleaner API to the underlying `wasm-utils`.
-  |____types/               # Polkadot.js type definitions for Webb Network.
+  |____test-utils/          # Common testing setup and helper functions.
   |____wasm-utils/          # Wasm utils for generating zero-knowledge proof and deposit notes. Consumed by `sdk-core`.
 ```
 
@@ -231,13 +232,6 @@ yarn lint
 
 ```
 yarn format
-```
-
-## Updating chain types
-In order to update the types for the runtimes we're interested in, you'll need to run a chain with the latest runtime. Currently, this is the egg standalone network.
-```
-yarn update-metadata
-yarn build:interfaces
 ```
 
 <h2 id="license"> License </h2>
