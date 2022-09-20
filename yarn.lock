@@ -3530,6 +3530,21 @@
     "@polkadot/typegen" "9.2.4"
     "@polkadot/types" "9.2.4"
 
+"@webb-tools/sdk-core@0.1.4-105":
+  version "0.1.4-105"
+  resolved "https://registry.yarnpkg.com/@webb-tools/sdk-core/-/sdk-core-0.1.4-105.tgz#807ebd41c8a0a2ef505b102d4a4014ba41b9f618"
+  integrity sha512-czHPQaO/VkMQ3YREoq7ibaVV1ljMVTCCKT4GI13KKT2uNYs5kWG18h8W/KnRDGI/BebOrB/DlHxIbUL9PPwSLw==
+  dependencies:
+    "@polkadot/util" "10.1.7"
+    "@webb-tools/wasm-utils" "0.1.4-105"
+    bignumber.js "^9.0.0"
+    circomlibjs "0.0.8"
+    elliptic "6.5.4"
+    eth-sig-util "^3.0.1"
+    ethers "5.7.0"
+    ffjavascript "0.2.55"
+    snarkjs "0.4.22"
+
 "@webb-tools/tokens@0.2.7", "@webb-tools/tokens@^0.2.7":
   version "0.2.7"
   resolved "https://registry.yarnpkg.com/@webb-tools/tokens/-/tokens-0.2.7.tgz#0e0ff05756b7d8f0bd583a225ce833f33d380723"
@@ -3559,6 +3574,11 @@
     "@webb-tools/tokens" "^0.2.7"
     "@webb-tools/utils" "^0.2.7"
     ethers "5.7.0"
+
+"@webb-tools/wasm-utils@0.1.4-105":
+  version "0.1.4-105"
+  resolved "https://registry.yarnpkg.com/@webb-tools/wasm-utils/-/wasm-utils-0.1.4-105.tgz#25c6e22c198af7cedfd4e64f9c883b4b99a220de"
+  integrity sha512-9Zk2zJgJgjnXF2N0mlArtri9yixRe1xEoPxSR5PWR9OW7B2YFsrMU0xSu+R8/R42YBuYDDKAY59iBsHkBS9vKg==
 
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
