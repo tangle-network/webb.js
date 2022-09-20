@@ -45,10 +45,11 @@ For additional information, please refer to the [Webb Tools API reference docs](
 
 ```
 packages/
-  |____api/                 # Contains necessary options to create a polkadot.js API instance
+  |____api/                 # Contains necessary options to create a polkadot.js API instance.
+  |____api-derive/          # Routines and helper functions utilizing webb's api package.
   |____app-util/            # Utilities to work with Webb Network.
   |____sdk-core/            # The package provides a cleaner API to the underlying `wasm-utils`.
-  |____types/               # Polkadot.js type definitions for Webb Network.
+  |____test-utils/          # Common testing setup and helper functions.
   |____wasm-utils/          # Wasm utils for generating zero-knowledge proof and deposit notes. Consumed by `sdk-core`.
 ```
 

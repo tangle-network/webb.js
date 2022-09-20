@@ -9,11 +9,13 @@ import { ApiInterfaceRx } from '@polkadot/api/types';
 import { memo } from '@polkadot/rpc-core';
 import { Observable } from '@polkadot/types/types';
 
-// An optional `end` parameter is provided to allow for pagination, or defaults to the last index.
+/**
+ * An optional `end` parameter is provided to allow for pagination.
+ */
 export function getLeavesForTree (
   instanceId: string,
   api: ApiInterfaceRx
-): (treeId: number, start: number, end: number) => Observable<Uint8Array[]> {
+): (treeId: number, startIndex: number, endIndex: number) => Observable<Uint8Array[]> {
   return memo(instanceId, (treeId: number, start: number, end: number) => {
     // get an array of numbers from start to end.
     const arr = [...Array(end - start + 1).keys()].map((x) => x + start);
