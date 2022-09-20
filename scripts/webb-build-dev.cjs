@@ -167,6 +167,7 @@ async function buildJs(dir) {
       buildWebpack(dir);
     } else {
       await buildBabel(dir, 'cjs');
+      await buildBabel(dir, 'esm');
     }
 
     console.log();
