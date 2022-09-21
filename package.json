@@ -1,5 +1,5 @@
 {
-  "version": "0.1.4-104",
+  "version": "0.1.4-105",
   "private": true,
   "type": "module",
   "engines": {
@@ -21,9 +21,6 @@
     "pumbp": "./scripts/update-version.js prerelease",
     "build": "yarn build-ts:dev",
     "build-ts:dev": "node ./scripts/webb-build-dev.cjs",
-    "build:interfaces": "yarn build:interfaces:defs && yarn build:interfaces:chain",
-    "build:interfaces:defs": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" -r tsconfig-paths/register node_modules/.bin/polkadot-types-from-defs --input packages/types/src/interfaces --package @webb-tools/types --endpoint packages/types/src/metadata/metadata.json && node ./scripts/after-interface-gen.cjs",
-    "build:interfaces:chain": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" -r tsconfig-paths/register node_modules/.bin/polkadot-types-from-chain --endpoint ws://localhost:9944 --output ./packages/types/src/interfaces && node ./scripts/after-interface-gen.cjs",
     "build:release": "node ./scripts/webb-build-release.cjs",
     "lint": "polkadot-dev-run-lint --skip-tsc",
     "clean": "polkadot-dev-clean-build",
@@ -31,7 +28,7 @@
     "wasm:test": "wasm-pack test --release --node ./packages/wasm-utils ",
     "test": "yarn test:unit && yarn test:integration && yarn wasm:test",
     "test:unit": "mocha 'packages/**/*.spec.ts' --parallel --exit",
-    "test:integration": "mocha 'tests/integration_tests/**/*.ts' --parallel --exit",
+    "test:integration": "mocha 'tests/integration_tests/**/*.ts' --exit",
     "test:perf": "cross-env NODE_OPTIONS=--experimental-wasm-modules jest --config ./jest.perf.config.js",
     "check-deps": "./node_modules/@open-web3/util/scripts/check-deps.js yarn.lock @polkadot/ @open-web3/",
     "update-metadata": "NODE_OPTIONS='--loader ./loader.js' node --experimental-specifier-resolution=node packages/types/scripts/updateMetadata.ts",
@@ -49,6 +46,7 @@
     "@polkadot/types": "9.2.4",
     "@polkadot/util": "10.1.7",
     "@polkadot/util-crypto": "10.1.7",
+    "@webb-tools/protocol-substrate-types": "^0.0.1",
     "@types/mocha": "^9.1.0",
     "@types/source-map-support": "^0.5.3",
     "cross-env": "^7.0.3",
