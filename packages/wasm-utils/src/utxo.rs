@@ -2,7 +2,7 @@ use core::fmt;
 use core::fmt::Formatter;
 use core::str::FromStr;
 
-use ark_bn254::Fr as Bn254Fr;
+use ark_bn254::{Fr as Bn254Fr};
 use ark_ff::{BigInteger, PrimeField};
 use ark_std::UniformRand;
 use arkworks_setups::utxo::Utxo;
@@ -36,26 +36,60 @@ impl JsUtxo {
 		backend: Backend,
 		amount: u128,
 		chain_id: u64,
-		index: Option<u64>,
-		private_key: Option<Vec<u8>>,
 		blinding: Option<Vec<u8>>,
+		public_key: Option<Vec<u8>>,
+		private_key: Option<Vec<u8>>,
+		index: Option<u64>,
 	) -> Result<JsUtxo, OperationError> {
 		let mut rng = OsRng;
 		let utxo = match (curve, backend) {
 			(Curve::Bn254, Backend::Arkworks) => {
-				let pk = private_key.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
-				let blinding = blinding.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
-				VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
-					ArkCurve::Bn254,
-					chain_id,
-					amount,
-					index,
-					pk,
-					blinding,
-				)
+
+				// If blinding wasn't passed, create it
+				let blinding = blinding.unwrap_or(Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
+
+				match private_key {
+					// If a private key was passed, generate the public key from the private key.
+					Some(priv_key) => {
+						VAnchorR1CSProverBn254_30_2_2_2::create_utxo(
+							ArkCurve::Bn254,
+							chain_id,
+							amount,
+							index,
+							priv_key,
+							blinding,
+						)
+					}
+					None => {
+						match public_key {
+							// If a public key has been configured without a private key, create a "public" utxo.
+							// This public utxo is useful for transferring ownership to the private key owner
+							// of a configured public key.
+							Some(pub_key) => {
+								VAnchorR1CSProverBn254_30_2_2_2::create_public_utxo(
+									ArkCurve::Bn254,
+									chain_id,
+									amount,
+									blinding,
+									pub_key,
+									index
+								)
+							},
+							// If neither key has been configured, simply create a utxo with a random private key.
+							None => VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
+								ArkCurve::Bn254,
+								chain_id,
+								amount,
+								index,
+								&mut rng
+							)
+						}
+					}
+				}
 			}
-			.map_err(|_| OpStatusCode::InvalidOutputUtxoConfig)
+			.map_err(|_| OpStatusCode::InvalidUtxoGenInput)
 			.map(JsUtxo::new_from_bn254_utxo),
+
 			_ => Err(OpStatusCode::InvalidNoteProtocol),
 		}?;
 
@@ -65,8 +99,8 @@ impl JsUtxo {
 	pub fn get_amount_raw(&self) -> u128 {
 		let amount_bytes = self.get_amount();
 		let mut amount_slice = [0u8; 16];
-		amount_slice.copy_from_slice(amount_bytes[..16].to_vec().as_slice());
-		u128::from_le_bytes(amount_slice)
+		amount_slice.copy_from_slice(amount_bytes[16..32].to_vec().as_slice());
+		u128::from_be_bytes(amount_slice)
 	}
 
 	pub fn default_bn254_utxo() -> Self {
@@ -97,22 +131,30 @@ impl JsUtxo {
 
 	pub fn get_amount(&self) -> Vec<u8> {
 		match &self.inner {
-			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.amount.into_repr().to_bytes_le(),
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.amount.into_repr().to_bytes_be(),
 		}
 	}
 
 	pub fn get_blinding(&self) -> Vec<u8> {
 		match &self.inner {
-			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.blinding.into_repr().to_bytes_le(),
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.blinding.into_repr().to_bytes_be(),
 		}
 	}
 
-	pub fn get_secret_key(&self) -> Vec<u8> {
+	pub fn get_public_key(&self) -> Vec<u8> {
+		match &self.inner {
+			JsUtxoInner::Bn254(bn254_utxo) => {
+				bn254_utxo.keypair.public_key.into_repr().to_bytes_be()
+			}
+		}
+	}
+
+	pub fn get_secret_key(&self) -> Option<Vec<u8>> {
 		match &self.inner {
 			JsUtxoInner::Bn254(bn254_utxo) => {
 				match bn254_utxo.keypair.secret_key {
-					Some(key) => key.into_repr().to_bytes_le(),
-					None => 0u64.to_le_bytes().to_vec()
+					Some(key) => Some(key.into_repr().to_bytes_be()),
+					None => None
 				}
 			}
 		}
@@ -124,25 +166,16 @@ impl JsUtxo {
 		}
 	}
 
-	pub fn get_index_bytes(&self) -> Vec<u8> {
-		match &self.inner {
-			JsUtxoInner::Bn254(bn254_utxo) => match bn254_utxo.index {
-				None => 0u64.to_le_bytes().to_vec(),
-				Some(index) => index.to_le_bytes().to_vec(),
-			},
-		}
-	}
-
 	pub fn get_nullifier(&self) -> Option<Vec<u8>> {
 		match &self.inner {
 			JsUtxoInner::Bn254(bn254_utxo) => &bn254_utxo.nullifier,
 		}
-		.map(|value| value.into_repr().to_bytes_le())
+		.map(|value| value.into_repr().to_bytes_be())
 	}
 
 	pub fn get_commitment(&self) -> Vec<u8> {
 		match &self.inner {
-			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.commitment.into_repr().to_bytes_le(),
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.commitment.into_repr().to_bytes_be(),
 		}
 	}
 
@@ -166,6 +199,9 @@ impl JsUtxo {
 	#[wasm_bindgen(js_name = deserialize)]
 	pub fn js_deserialize(utxo_str: JsString) -> Result<JsUtxo, JsValue> {
 		let utxo_str: String = utxo_str.into();
+		
+		// Reconstruct the Utxo string with little-endian values 
+
 		Self::deserialize(&utxo_str).map_err(Into::into)
 	}
 
@@ -176,9 +212,10 @@ impl JsUtxo {
 		backend: BE,
 		amount: JsString,
 		chain_id: JsString,
-		index: Option<JsString>,
-		private_key: Option<Uint8Array>,
 		blinding: Option<Uint8Array>,
+		public_key: Option<Uint8Array>,
+		private_key: Option<Uint8Array>,
+		index: Option<JsString>,
 	) -> Result<JsUtxo, JsValue> {
 		let curve: Curve = JsValue::from(curve)
 			.as_string()
@@ -198,30 +235,53 @@ impl JsUtxo {
 			None => None,
 			Some(index) => {
 				let index: String = index.into();
-				let index: u64 = index.parse().map_err(|_| OpStatusCode::InvalidUTXOIndex)?;
-				Some(index)
+				if index.len() == 0 {
+					None
+				} else {
+					let index: u64 = index.parse().map_err(|_| OpStatusCode::InvalidUTXOIndex)?;
+					Some(index)
+				}
 			}
 		};
-		let mut rng = OsRng;
 		let utxo = match (curve, backend) {
 			(Curve::Bn254, Backend::Arkworks) => {
-				let pk = private_key
-					.map(|p| p.to_vec())
-					.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
-				let blinding = blinding
-					.map(|b| b.to_vec())
-					.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
-				VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
-					ArkCurve::Bn254,
-					chain_id,
+				let blinding_vec: Option<Vec<u8>> = match blinding {
+					Some(val) => {
+						let mut vec = val.to_vec();
+						vec.reverse();
+						Some(vec)
+					},
+					None => None
+				};
+				let public_key_vec: Option<Vec<u8>> = match public_key {
+					Some(val) => {
+						let mut vec = val.to_vec();
+						vec.reverse();
+						Some(vec)
+					},
+					None => None
+				};
+				let private_key_vec: Option<Vec<u8>> = match private_key {
+					Some(val) => {
+						let mut vec = val.to_vec();
+						vec.reverse();
+						Some(vec)
+					},
+					None => None
+				};
+
+				JsUtxo::new(
+					Curve::Bn254,
+					Backend::Arkworks,
 					amount,
+					chain_id,
+					blinding_vec,
+					public_key_vec,
+					private_key_vec,
 					index,
-					pk,
-					blinding,
 				)
 			}
-			.map_err(|_| OpStatusCode::InvalidOutputUtxoConfig)
-			.map(JsUtxo::new_from_bn254_utxo),
+			.map_err(|_| OpStatusCode::InvalidOutputUtxoConfig),
 			_ => Err(OpStatusCode::InvalidNoteProtocol),
 		}?;
 
@@ -254,8 +314,14 @@ impl JsUtxo {
 	}
 
 	#[wasm_bindgen(getter)]
+	pub fn public_key(&self) -> JsString {
+		let public_key = self.get_public_key();
+		hex::encode(public_key).into()
+	}
+
+	#[wasm_bindgen(getter)]
 	pub fn secret_key(&self) -> JsString {
-		let secret_key = self.get_secret_key();
+		let secret_key = self.get_secret_key().unwrap_or(vec![]);
 		hex::encode(secret_key).into()
 	}
 
@@ -265,12 +331,21 @@ impl JsUtxo {
 		JsValue::from(index)
 	}
 
+	#[wasm_bindgen(setter)]
+	pub fn set_index(&self, val: u64) {
+		match self.inner.clone() {
+			JsUtxoInner::Bn254(mut utxo) => {
+				utxo.set_index(val.clone());
+			},
+		}
+	}
+
 	#[wasm_bindgen(getter)]
 	pub fn nullifier(&self) -> JsString {
 		let nullifier = self
 			.get_nullifier()
-			.map(|value| hex::encode(value.as_slice()))
-			.unwrap_or_else(|| "".to_string());
+			.map(|value| hex::encode(value))
+			.unwrap_or("".to_string());
 
 		JsString::from(nullifier)
 	}
@@ -294,11 +369,12 @@ impl fmt::Display for JsUtxo {
 		let index = self
 			.get_index()
 			.map(|v| v.to_string())
-			.unwrap_or_else(|| "None".to_string());
+			.unwrap_or_else(|| "".to_string());
 		let blinding = hex::encode(self.get_blinding());
-		let private_key = hex::encode(self.get_secret_key());
+		let public_key = hex::encode(self.get_public_key());
+		let private_key = hex::encode(self.get_secret_key().unwrap_or(vec![]));
 
-		let sec = vec![curve, backend, amount, chain_id, index, blinding, private_key].join("&");
+		let sec = vec![curve, backend, amount, chain_id, blinding, public_key, private_key, index].join("&");
 
 		write!(f, "{}", sec)
 	}
@@ -313,23 +389,43 @@ impl FromStr for JsUtxo {
 		let backend: Backend = parts[1].parse().map_err(|_| OpStatusCode::InvalidBackend)?;
 		let amount = parts[2].parse().map_err(|_| OpStatusCode::InvalidAmount)?;
 		let chain_id = parts[3].parse().map_err(|_| OpStatusCode::InvalidChainId)?;
-		let index = match parts[4] {
-			"None" => None,
+		let mut blinding = hex::decode(parts[4]).map_err(|_| OpStatusCode::Unknown)?;
+		let mut public_key = hex::decode(parts[5]).map_err(|_| OpStatusCode::Unknown)?;
+		let mut private_key = hex::decode(parts[6]).map_err(|_| OpStatusCode::Unknown)?;
+		let index = match parts[7] {
+			"" => None,
 			v => {
 				let index: u64 = v.parse().map_err(|_| OpStatusCode::InvalidUTXOIndex)?;
 				Some(index)
 			}
 		};
-		let blinding = hex::decode(parts[5]).map_err(|_| OpStatusCode::Unknown)?;
-		let private_key = hex::decode(parts[6]).map_err(|_| OpStatusCode::Unknown)?;
-		JsUtxo::new(
-			curve,
-			backend,
-			amount,
-			chain_id,
-			index,
-			Some(private_key),
-			Some(blinding),
-		)
+
+		blinding.reverse();
+		public_key.reverse();
+		private_key.reverse();
+
+		if private_key.len() == 32 {
+			JsUtxo::new(
+				curve,
+				backend,
+				amount,
+				chain_id,
+				Some(blinding),
+				Some(public_key),
+				Some(private_key),
+				index,
+			)
+		} else {
+			JsUtxo::new(
+				curve,
+				backend,
+				amount,
+				chain_id,
+				Some(blinding),
+				Some(public_key),
+				None,
+				index
+			)
+		}
 	}
 }

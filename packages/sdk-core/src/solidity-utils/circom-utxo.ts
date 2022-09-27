@@ -40,6 +40,25 @@ export class CircomUtxo extends Utxo {
     ].join('&');
   }
 
+  /**
+   * @param utxoString - A string representation of the parts that make up a utxo.
+   *   - All values are represented as 0x-prefixed, hex-encoded strings.
+   *   - Relevant values (amount, typedChainId, blinding, pubkey, encryptionKey, privkey) will be interpreted as encoded in BigEndian.
+   *   - Optional values are represented as the empty string if not present,
+   *     meaning the split call will always be an array of length "parts".
+   *
+   *   parts[0] - Curve value, e.g. Bn254, Bls381, Ed25519, etc.
+   *   parts[1] - Backend value, e.g. arkworks or circom
+   *   parts[2] - Amount in atomic units, e.g. ETH in wei amounts or DOT in 10^12 decimals
+   *   parts[3] - TypedChainId, the hex value of the calculated typed chain id
+   *   parts[4] - Blinding, secret random value
+   *   parts[5] - PublicKey, the "publicKey = hash(privateKey)" value which indicates ownership for a utxo.
+   *   parts[6] Optional - EncryptionKey, the public key of "publicKey = encryptionScheme(privateKey)" value used for messaging.
+   *   parts[7] Optional - PrivateKey, the secret key component correlated to the above values.
+   *   parts[8] Optional - Index, the leaf index if the utxo has been inserted in a merkle tree
+   *
+   * @returns The CircomUtxo object implementation of a Utxo.
+   */
   static async deserialize (utxoString: string): Promise<Utxo> {
     const inner = new CircomJsUtxo();
 
@@ -50,11 +69,11 @@ export class CircomUtxo extends Utxo {
     utxo._backend = 'Circom';
     utxo._amount = parts[2];
     utxo._chainId = parts[3];
-    utxo._index = Number(parts[4]);
-    utxo._blinding = parts[5];
-    utxo._pubkey = parts[6];
-    const maybeEncryptionKey = parts[7];
-    const maybeSecretKey = parts[8];
+    utxo._blinding = parts[4];
+    utxo._pubkey = parts[5];
+    const maybeEncryptionKey = parts[6];
+    const maybeSecretKey = parts[7];
+    const maybeIndex = parts[8];
 
     if (maybeSecretKey.length === 66) {
       utxo.setKeypair(new Keypair(maybeSecretKey));
@@ -64,6 +83,10 @@ export class CircomUtxo extends Utxo {
       } else {
         utxo.setKeypair(Keypair.fromString(utxo._pubkey));
       }
+    }
+
+    if (maybeIndex.length > 0) {
+      utxo._index = Number(maybeIndex);
     }
 
     return utxo;
@@ -257,5 +280,6 @@ class CircomJsUtxo implements JsUtxo {
   commitment: Uint8Array = new Uint8Array();
   index: any;
   nullifier = '';
+  public_key = '';
   secret_key = '';
 }

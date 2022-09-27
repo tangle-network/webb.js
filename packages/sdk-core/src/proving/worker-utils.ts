@@ -13,9 +13,9 @@
 // The 'workerProofTranslator' class contains logic to translate outputs of worker proofs
 // to the outputs expected by users of the proving-managers.
 
-import type { Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
+import type { Backend, Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
 
-import { Note, Utxo } from '@webb-tools/sdk-core/index.js';
+import { Utxo } from '@webb-tools/sdk-core/index.js';
 
 import { CircomUtxo } from '../solidity-utils/index.js';
 import { MixerPMSetupInput, MixerProof, ProofInterface, ProvingManagerSetupInput, VAnchorPMSetupInput } from './types.js';
@@ -46,8 +46,9 @@ export type WorkerVAnchorPMSetupInput = {
 };
 
 export type WorkerVAnchorProof = {
+  readonly backend: Backend;
   readonly inputUtxos: Array<string>;
-  readonly outputNotes: Array<string>;
+  readonly outputUtxos: Array<string>;
   readonly proof: string;
   readonly publicInputs: Array<string>;
   readonly publicAmount: Uint8Array;
@@ -71,8 +72,12 @@ export async function workerProofTranslator<T extends NoteProtocol> (
         ...proofData
       } as WorkerVAnchorProof;
 
-      const outputNotes = await Promise.all(sourceVAnchorProof.outputNotes.map((note) => Note.deserialize(note)));
-      const isCircom = outputNotes[0].note.backend === 'Circom';
+      const isCircom = sourceVAnchorProof.backend === 'Circom';
+
+      const outputUtxos = isCircom
+        ? await Promise.all(sourceVAnchorProof.outputUtxos.map((note) => CircomUtxo.deserialize(note)))
+        : await Promise.all(sourceVAnchorProof.outputUtxos.map((note) => Utxo.deserialize(note)));
+
       const inputUtxos = isCircom
         ? await Promise.all(sourceVAnchorProof.inputUtxos.map((utxo) => CircomUtxo.deserialize(utxo)))
         : await Promise.all(sourceVAnchorProof.inputUtxos.map((utxo) => Utxo.deserialize(utxo)));
@@ -80,7 +85,7 @@ export async function workerProofTranslator<T extends NoteProtocol> (
       return {
         extDataHash: sourceVAnchorProof.extDataHash,
         inputUtxos,
-        outputNotes,
+        outputUtxos,
         proof: sourceVAnchorProof.proof,
         publicAmount: sourceVAnchorProof.publicAmount,
         publicInputs: sourceVAnchorProof.publicInputs
@@ -102,7 +107,7 @@ export function workerInputMapper<T extends NoteProtocol> (
         ...setupData
       } as VAnchorPMSetupInput;
 
-      const inputNotes = sourceSetupInput.inputNotes.map((note) => note.serialize());
+      const inputUtxos = sourceSetupInput.inputUtxos.map((utxo) => utxo.serialize());
       const outputUtxos = sourceSetupInput.output.map((utxo) => utxo.serialize());
 
       return {
@@ -111,7 +116,7 @@ export function workerInputMapper<T extends NoteProtocol> (
         extAmount: sourceSetupInput.extAmount,
         fee: sourceSetupInput.fee,
         indices: sourceSetupInput.indices,
-        inputNotes,
+        inputUtxos,
         leavesMap: sourceSetupInput.leavesMap,
         output: outputUtxos,
         provingKey: sourceSetupInput.provingKey,

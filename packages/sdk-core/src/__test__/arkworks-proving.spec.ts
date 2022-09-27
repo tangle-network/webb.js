@@ -13,17 +13,16 @@ import path from 'path';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
 
-import { Note } from '../note.js';
 import { ArkworksProvingManager } from '../proving/index.js';
 import { generateArkworksVAnchorNote } from './utils.js';
 
-async function ensureIndecies (notes: Note[], leaves: Uint8Array[]) {
+async function ensureIndicies (utxos: Utxo[], leaves: Uint8Array[]) {
   const leavesHex = leaves.map((l) => u8aToHex(l));
 
-  for (const note of notes) {
-    const leaf = u8aToHex(note.getLeaf());
-    const index = Number(note.note.index);
-    const leafOfTree = leavesHex[index];
+  for (const utxo of utxos) {
+    const leaf = u8aToHex(utxo.commitment);
+    const index = utxo.index;
+    const leafOfTree = leavesHex[index!];
 
     if (leafOfTree !== leaf) {
       throw new Error(`${index} leaf=${leaf} don't match tree leaf ${leafOfTree}`);
@@ -118,13 +117,11 @@ describe('Arkworks Proving manager VAnchor', function () {
       originChainId: '0'
     });
 
-    const vanchorNote1 = await generateArkworksVAnchorNote(vanchorUtxo);
-
     const publicAmount = 10;
     const outputAmount = String(15);
     const outputChainId = '0';
 
-    const leaf1 = vanchorNote1.getLeaf();
+    const leaf1 = vanchorUtxo.commitment;
     const tree = new MTBn254X5([leaf1], '0');
     const root = `0x${tree.root}`;
     const rootsSet = [hexToU8a(root), hexToU8a(root)];
@@ -145,7 +142,7 @@ describe('Arkworks Proving manager VAnchor', function () {
       extAmount: '0',
       fee: '0',
       indices: [0],
-      inputNotes: [vanchorNote1],
+      inputUtxos: [vanchorUtxo],
       leavesMap,
       output: [new Utxo((output1)), new Utxo(output2)],
       provingKey: keys.pk,
@@ -181,15 +178,12 @@ describe('Arkworks Proving manager VAnchor', function () {
       originChainId: '0'
     });
 
-    const vanchorNote1 = await generateArkworksVAnchorNote(utxo1);
-    const vanchorNote2 = await generateArkworksVAnchorNote(utxo2);
-
     const publicAmount = 10;
     const outputAmount = String(15);
     const outputChainId = String(0);
 
-    const leaf1 = vanchorNote1.getLeaf();
-    const leaf2 = vanchorNote2.getLeaf();
+    const leaf1 = utxo1.commitment;
+    const leaf2 = utxo2.commitment;
     const tree = new MTBn254X5([leaf1, leaf2], '0');
     const root = `0x${tree.root}`;
     const rootsSet = [hexToU8a(root), hexToU8a(root)];
@@ -212,7 +206,7 @@ describe('Arkworks Proving manager VAnchor', function () {
       extAmount: '0',
       fee: '0',
       indices: [0, 1],
-      inputNotes: [vanchorNote1, vanchorNote2],
+      inputUtxos: [utxo1, utxo2],
       leavesMap,
       output: [new Utxo(output1), new Utxo(output2)],
       provingKey: keys.pk,
@@ -232,7 +226,7 @@ describe('Arkworks Proving manager VAnchor', function () {
   it('should prove using WASM API for VAnchor with three inputs amd three indices', async () => {
     const keys = vanchorBn2542_16_2;
 
-    const notes = await Promise.all(Array(3)
+    const inputUtxos = await Promise.all(Array(3)
       .fill(0)
       .map(async (_, index) => {
         const utxo = await Utxo.generateUtxo({
@@ -244,15 +238,13 @@ describe('Arkworks Proving manager VAnchor', function () {
           originChainId: '0'
         });
 
-        const note = await generateArkworksVAnchorNote(utxo);
-
-        return note;
+        return utxo;
       }));
 
     const publicAmount = 10;
     const outputAmount = String(10 * 1.5 + 5);
     const outputChainId = String(0);
-    const leaves = notes.map((note) => note.getLeaf());
+    const leaves = inputUtxos.map((utxo) => utxo.commitment);
 
     const tree = new MTBn254X5(leaves, '0');
     const root = `0x${tree.root}`;
@@ -274,8 +266,8 @@ describe('Arkworks Proving manager VAnchor', function () {
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
-      indices: notes.map((_, index) => index),
-      inputNotes: notes,
+      indices: inputUtxos.map((_, index) => index),
+      inputUtxos,
       leavesMap,
       output: [new Utxo(output1), new Utxo(output2)],
 
@@ -297,7 +289,7 @@ describe('Arkworks Proving manager VAnchor', function () {
   it('should prove using WASM API for VAnchor with 16 inputs and 16 indices', async () => {
     const keys = vanchorBn2542_16_2;
 
-    const notes = await Promise.all(Array(16)
+    const utxos = await Promise.all(Array(16)
       .fill(0)
       .map(async (_, index) => {
         const utxo = await Utxo.generateUtxo({
@@ -309,14 +301,12 @@ describe('Arkworks Proving manager VAnchor', function () {
           originChainId: '0'
         });
 
-        const note = await generateArkworksVAnchorNote(utxo);
-
-        return note;
+        return utxo;
       }));
     const publicAmount = 10;
     const outputAmount = String(10 * 8 + 5);
     const outputChainId = String(0);
-    const leaves = notes.map((note) => note.getLeaf());
+    const leaves = utxos.map((utxo) => utxo.commitment);
 
     const tree = new MTBn254X5(leaves, '0');
     const root = `0x${tree.root}`;
@@ -340,11 +330,10 @@ describe('Arkworks Proving manager VAnchor', function () {
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
-      indices: notes.map((_, index) => index),
-      inputNotes: notes,
+      indices: utxos.map((_, index) => index),
+      inputUtxos: utxos,
       leavesMap,
       output: [new Utxo(output1), new Utxo(output2)],
-
       provingKey: keys.pk,
       publicAmount: String(publicAmount),
       recipient: address,
@@ -366,7 +355,7 @@ describe('Arkworks Proving manager VAnchor', function () {
     try {
       const keys = vanchorBn2542_16_2;
 
-      const notes = await Promise.all(Array(16)
+      const utxos = await Promise.all(Array(16)
         .fill(0)
         .map(async (_, index) => {
           const utxo = await Utxo.generateUtxo({
@@ -377,14 +366,13 @@ describe('Arkworks Proving manager VAnchor', function () {
             index: index.toString(),
             originChainId: '0'
           });
-          const note = await generateArkworksVAnchorNote(utxo);
 
-          return note;
+          return utxo;
         }));
       const publicAmount = 10;
       const outputAmount = String(10 * 80 + 5);
       const outputChainId = String(0);
-      const leaves = notes.map((note) => note.getLeaf());
+      const leaves = utxos.map((utxos) => utxos.commitment);
       const tree = new MTBn254X5(leaves, '0');
       const root = `0x${tree.root}`;
       const rootsSet = [hexToU8a(root), hexToU8a(root)];
@@ -407,8 +395,8 @@ describe('Arkworks Proving manager VAnchor', function () {
         encryptedCommitments: [comEnc1, comEnc2],
         extAmount: '0',
         fee: '0',
-        indices: notes.map((_, index) => index),
-        inputNotes: notes,
+        indices: utxos.map((_, index) => index),
+        inputUtxos: utxos,
         leavesMap,
         output: [new Utxo(output1), new Utxo(output2)],
         provingKey: keys.pk,
@@ -460,10 +448,9 @@ describe('Arkworks Proving manager VAnchor', function () {
       index: OlderNotes.length.toString(),
       originChainId: '0'
     });
-    const depositedNote = await generateArkworksVAnchorNote(depositedUtxo);
 
     // insert the leaf
-    leaves.push(depositedNote.getLeaf());
+    leaves.push(depositedUtxo.commitment);
     const tree = new MTBn254X5(leaves, '0');
     const root = `0x${tree.root}`;
     // TODO: Use default root for other place holders
@@ -487,8 +474,8 @@ describe('Arkworks Proving manager VAnchor', function () {
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
-      indices: [Number(depositedNote.note.index)],
-      inputNotes: [depositedNote],
+      indices: [depositedUtxo.index!],
+      inputUtxos: [depositedUtxo],
       leavesMap,
       output: [new Utxo(output1), new Utxo(output2)],
 
@@ -509,7 +496,7 @@ describe('Arkworks Proving manager VAnchor', function () {
 
   it('should prove with pre existing leaves', async () => {
     const keys = vanchorBn2542_16_2;
-    const preExistingNotes = await Promise.all(Array(16)
+    const preExistingUtxos = await Promise.all(Array(16)
       .fill(0)
       .map(async (_, index) => {
         const utxo = await Utxo.generateUtxo({
@@ -521,11 +508,9 @@ describe('Arkworks Proving manager VAnchor', function () {
           originChainId: '0'
         });
 
-        const note = await generateArkworksVAnchorNote(utxo);
-
-        return note;
+        return utxo;
       }));
-    const notes = await Promise.all(Array(16)
+    const utxos = await Promise.all(Array(16)
       .fill(0)
       .map(async (_, index) => {
         const utxo = await Utxo.generateUtxo({
@@ -537,14 +522,12 @@ describe('Arkworks Proving manager VAnchor', function () {
           originChainId: '0'
         });
 
-        const note = await generateArkworksVAnchorNote(utxo);
-
-        return note;
+        return utxo;
       }));
     const publicAmount = 10;
     const outputAmount = String(10 * 8 + 5);
     const outputChainId = String(0);
-    const leaves = [...preExistingNotes, ...notes].map((note) => note.getLeaf());
+    const leaves = [...preExistingUtxos, ...utxos].map((utxo) => utxo.commitment);
 
     const tree = new MTBn254X5(leaves, '0');
     const root = `0x${tree.root}`;
@@ -563,15 +546,15 @@ describe('Arkworks Proving manager VAnchor', function () {
     const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
     const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
 
-    await ensureIndecies(notes, leaves);
+    await ensureIndicies(utxos, leaves);
 
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: '0',
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
-      indices: notes.map((note) => Number(note.note.index)),
-      inputNotes: notes,
+      indices: utxos.map((utxo) => utxo.index!),
+      inputUtxos: utxos,
       leavesMap,
       output: [new Utxo(output1), new Utxo(output2)],
 
@@ -591,7 +574,7 @@ describe('Arkworks Proving manager VAnchor', function () {
   });
   it('should prove with older deposit', async () => {
     const keys = vanchorBn2542_16_2;
-    const notesAfterDeposit = await Promise.all(Array(16)
+    const utxosAfterDeposit = await Promise.all(Array(16)
       .fill(0)
       .map(async (_, index) => {
         const utxo = await Utxo.generateUtxo({
@@ -603,11 +586,9 @@ describe('Arkworks Proving manager VAnchor', function () {
           originChainId: '0'
         });
 
-        const note = await generateArkworksVAnchorNote(utxo);
-
-        return note;
+        return utxo;
       }));
-    const notes = await Promise.all(Array(16)
+    const utxos = await Promise.all(Array(16)
       .fill(0)
       .map(async (_, index) => {
         const utxo = await Utxo.generateUtxo({
@@ -619,14 +600,12 @@ describe('Arkworks Proving manager VAnchor', function () {
           originChainId: '0'
         });
 
-        const note = await generateArkworksVAnchorNote(utxo);
-
-        return note;
+        return utxo;
       }));
     const publicAmount = 10;
     const outputAmount = String(10 * 8 + 5);
     const outputChainId = String(0);
-    const leaves = [...notes, ...notesAfterDeposit].map((note) => note.getLeaf());
+    const leaves = [...utxos, ...utxosAfterDeposit].map((note) => note.commitment);
 
     const tree = new MTBn254X5(leaves, '0');
     const root = `0x${tree.root}`;
@@ -645,15 +624,15 @@ describe('Arkworks Proving manager VAnchor', function () {
     const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
     const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
 
-    await ensureIndecies(notes, leaves);
+    await ensureIndicies(utxos, leaves);
 
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: '0',
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
-      indices: notes.map((note) => Number(note.note.index)),
-      inputNotes: notes,
+      indices: utxos.map((utxo) => utxo.index!),
+      inputUtxos: utxos,
       leavesMap,
       output: [new Utxo(output1), new Utxo(output2)],
 

@@ -92,7 +92,7 @@ impl JsNote {
 		match self.protocol {
 			NoteProtocol::VAnchor => {}
 			_ => {
-				let message = "Index secret can be set only for VAnchor".to_string();
+				let message = "Index can be set only for VAnchor".to_string();
 				let oe = OperationError::new_with_message(OpStatusCode::InvalidNoteProtocol, message);
 				return Err(oe);
 			}
@@ -136,8 +136,8 @@ impl JsNote {
 						let index = self.index;
 
 						let mut amount_slice = [0u8; 16];
-						amount_slice.copy_from_slice(amount[..16].to_vec().as_slice());
-						let amount = u128::from_le_bytes(amount_slice);
+						amount_slice.copy_from_slice(amount[16..32].to_vec().as_slice());
+						let amount = u128::from_be_bytes(amount_slice);
 
 						let mut chain_id_slice = [0u8; 8];
 						chain_id_slice.copy_from_slice(chain_id[chain_id.len() - 8..].to_vec().as_slice());
@@ -553,7 +553,7 @@ impl JsNoteBuilder {
 					let chain_id = utxo.get_chain_id_bytes();
 					let amount = utxo.get_amount();
 					let blinding = utxo.get_blinding();
-					let secret_key = utxo.get_secret_key();
+					let secret_key = utxo.get_secret_key().unwrap();
 
 					// secrets
 					vec![chain_id, amount, blinding, secret_key]
@@ -787,7 +787,7 @@ impl JsNote {
 		let chain_id = utxo.get_chain_id_bytes();
 		let amount = utxo.get_amount();
 		let blinding = utxo.get_blinding();
-		let secret_key = utxo.get_secret_key();
+		let secret_key = utxo.get_secret_key().unwrap();
 		self.amount = Some(utxo.get_amount_raw().to_string());
 		self.secrets = vec![chain_id, amount, blinding, secret_key];
 		Ok(())

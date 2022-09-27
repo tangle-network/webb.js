@@ -204,7 +204,7 @@ impl ProofInputBuilder {
 	pub fn set_input_utxos(&mut self, utxo_list: Vec<JsUtxo>) -> Result<(), OperationError> {
 		match self {
 			Self::VAnchor(input) => {
-				input.secret = Some(utxo_list);
+				input.input_utxos = Some(utxo_list);
 				Ok(())
 			}
 			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),

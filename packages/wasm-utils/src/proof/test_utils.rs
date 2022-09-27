@@ -36,6 +36,7 @@ pub fn new_utxo_bn254_2_2(curve: Curve, amount: u128, chain_id: u64) -> JsUtxo {
 		None,
 		None,
 		None,
+		None,
 	)
 	.unwrap()
 }
@@ -245,19 +246,19 @@ pub fn generate_vanchor_test_setup_2_inputs() -> VAnchorTestSetup {
 	let tree_hasher = Poseidon::new(params3);
 	let nullifier_hasher = Poseidon::new(params4);
 	let public_amount = 10;
-	let in_amount = 5;
+	let in_amount = 5u128;
 	let in_chain_id = 0;
 	let in_amount_fr = Bn254Fr::from(in_amount);
 
 	let mut in_utxo1 =
-		VAnchorR1CSProverBn254_30_2_2_2::new_utxo(curve, in_chain_id, in_amount_fr.clone(), None, None, None, &mut rng)
+		VAnchorR1CSProverBn254_30_2_2_2::new_utxo(curve, in_chain_id, in_amount_fr.clone(), Some(0), None, None, &mut rng)
 			.unwrap();
-	in_utxo1.set_index(index, &nullifier_hasher).unwrap();
+	in_utxo1.set_index(index);
 
 	let mut in_utxo2 =
-		VAnchorR1CSProverBn254_30_2_2_2::new_utxo(curve, in_chain_id, in_amount_fr, None, None, None, &mut rng)
+		VAnchorR1CSProverBn254_30_2_2_2::new_utxo(curve, in_chain_id, in_amount_fr, Some(1), None, None, &mut rng)
 			.unwrap();
-	in_utxo2.set_index(1, &nullifier_hasher).unwrap();
+	in_utxo2.set_index(1);
 
 	let output_1 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(curve, chain_id, 10, None, &mut rng).unwrap();
 	let output_2 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(curve, chain_id, 10, None, &mut rng).unwrap();
@@ -325,7 +326,7 @@ pub fn generate_vanchor_test_setup_16_non_default_inputs() -> VAnchorTestSetup {
 	let params4 = setup_params::<Bn254Fr>(curve, 5, 4);
 	let tree_hasher = Poseidon::new(params3);
 	let nullifier_hasher = Poseidon::new(params4);
-	let public_amount = 10;
+	let public_amount = 20;
 	let in_amount = 10u128;
 	let in_chain_id = 0;
 	let in_amount_fr = Bn254Fr::from(in_amount);
@@ -347,11 +348,15 @@ pub fn generate_vanchor_test_setup_16_non_default_inputs() -> VAnchorTestSetup {
 			&mut rng,
 		)
 		.unwrap();
-		utxo.set_index(next_utxo_index, &nullifier_hasher).unwrap();
+		utxo.set_index(next_utxo_index);
 
 		inputs.push(utxo);
 		indices.push(next_utxo_index);
 		next_utxo_index += 1;
+	}
+
+	for utxo in &inputs {
+		utxo.calculate_nullifier(&nullifier_hasher);
 	}
 
 	let output_1 = VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(curve, chain_id, 160, None, &mut rng).unwrap();

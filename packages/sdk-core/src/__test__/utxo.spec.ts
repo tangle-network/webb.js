@@ -1,3 +1,4 @@
+/* eslint-disable padding-line-between-statements */
 import { expect } from 'chai';
 
 import { u8aToHex } from '@polkadot/util';
@@ -6,7 +7,7 @@ import { CircomUtxo } from '../index.js';
 import { Keypair } from '../keypair.js';
 import { Utxo } from '../utxo.js';
 
-describe('Utxo Class', () => {
+describe.only('Utxo Class', () => {
   it('should construct with params', async function () {
     const utxo = await Utxo.generateUtxo({
       amount: '1',
@@ -16,20 +17,34 @@ describe('Utxo Class', () => {
       index: '0'
     });
     const nullifier = utxo.nullifier;
+    console.log('nullifier: ', nullifier);
     const commitment = utxo.commitment;
+    console.log('commitment: ', commitment);
     const blinding = utxo.blinding;
+    console.log('blinding: ', blinding);
     const secretKey = utxo.secret_key;
+    console.log('secret_key: ', secretKey);
     const amount = utxo.amount;
+    console.log('amount: ', amount);
     const index = utxo.index;
     const serializedUtxo = utxo.serialize();
+    console.log('serialize / deserialize');
     const deserializedUtxo = await Utxo.deserialize(serializedUtxo);
     const nullifier2 = deserializedUtxo.nullifier;
+    console.log('nullifier: ', nullifier2);
     const commitment2 = deserializedUtxo.commitment;
+    console.log('commitment: ', commitment2);
     const blinding2 = deserializedUtxo.blinding;
+    console.log('blinding: ', blinding2);
     const secretKey2 = deserializedUtxo.secret_key;
+    console.log('secret_key: ', secretKey2);
     const amount2 = deserializedUtxo.amount;
+    console.log('amount: ', amount2);
     const index2 = deserializedUtxo.index;
+    const reserializedUtxo = deserializedUtxo.serialize();
+    const utxoRegen = await Utxo.deserialize(reserializedUtxo);
 
+    expect(utxoRegen.nullifier).to.deep.equal(deserializedUtxo.nullifier);
     expect(nullifier2).to.deep.equal(nullifier);
     expect(secretKey2).to.deep.equal(secretKey);
     expect(blinding2).to.deep.equal(blinding);
@@ -38,29 +53,58 @@ describe('Utxo Class', () => {
     expect(u8aToHex(commitment2)).to.deep.equal(u8aToHex(commitment));
   });
 
-  it('should deserialize and serialize to the same value', async function () {
+  it('should deserialize and serialize to the same value when all secrets passed', async function () {
     const serializedInput = [
       'Bn254',
       'Arkworks',
-      '0',
-      '1',
-      '1',
-      '56fddd69bb4f989fcf3cb4e0b94ac887379e0f16b36d4d287c1e6059595b4118',
-      '4514d5386c01bc197292954194c807cbabdb43bc40404e8d0cd6a2c097871a06'
+      '1000',
+      '20000000438',
+      '17415b69c56a3c3897dcb339ce266a0f2a70c9372a6fec1676f81ddaf68e9926',
+      '2b1297db7d088c2e3fdfa7e626518c5ea6039917e8a75119bc0bb162b30f7a1c',
+      '258f154ce1eee4af55674c5b7c8b6976864f3f3c5af474c105dad8a372db9850',
+      '25e8b77121b8fcbf2332970720cd5b51d20a0548ca142eb8ae7814a53225d82c',
+      '1'
     ].join('&');
     const deserialized = await Utxo.deserialize(serializedInput);
+    console.log('deserialized amount: ', deserialized.amount);
+
     const serializedOutput = deserialized.serialize();
 
-    expect(serializedInput).to.deep.equal(serializedOutput);
+    expect(serializedOutput).to.deep.equal(serializedInput);
   });
 
   it('should deserialize and serialize a utxo which does not have an index', async function () {
-    const serializedInput = 'Bn254&Arkworks&10000000000000&2199023256632&None&1b44b30ac48be4b3448dc7ff2c2d4caa7bd43c61e348990717bd879005443e07&1cea7673e0c7c60df3b8ed4fb108bf38f04a00657e6219b1c2709a3d32e2ee00';
+    const serializedInput = [
+      'Bn254',
+      'Arkworks',
+      '10000000000000',
+      '2199023256632',
+      '17415b69c56a3c3897dcb339ce266a0f2a70c9372a6fec1676f81ddaf68e9926',
+      '2b1297db7d088c2e3fdfa7e626518c5ea6039917e8a75119bc0bb162b30f7a1c',
+      '258f154ce1eee4af55674c5b7c8b6976864f3f3c5af474c105dad8a372db9850',
+      '25e8b77121b8fcbf2332970720cd5b51d20a0548ca142eb8ae7814a53225d82c',
+      ''
+    ].join('&');
 
     const deserialized = await Utxo.deserialize(serializedInput);
     const serializedOutput = deserialized.serialize();
 
-    expect(serializedInput).to.deep.equal(serializedOutput);
+    expect(serializedOutput).to.deep.equal(serializedInput);
+  });
+
+  it('should deserialize and serialize a "public utxo"', async function () {
+    const keypair = Keypair.fromString('0x1111111111111111111111111111111111111111111111111111111111111111');
+
+    const utxo = await Utxo.generateUtxo({
+      amount: '10',
+      backend: 'Arkworks',
+      chainId: '1',
+      curve: 'Bn254',
+      keypair
+    });
+
+    const serializedUtxo = utxo.serialize();
+    console.log('serializedUtxo: ', serializedUtxo);
   });
 
   it('should generate a utxo with circom backend', async function () {

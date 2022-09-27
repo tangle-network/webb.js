@@ -1,8 +1,11 @@
+use std::fmt::Debug;
+
 use ark_bn254::Bn254;
 use ark_ff::{BigInteger, PrimeField};
 use ark_std::UniformRand;
 use arkworks_setups::common::{prove, prove_unchecked, setup_keys, setup_keys_unchecked, verify, verify_unchecked_raw};
-use arkworks_setups::Curve;
+use arkworks_setups::{Curve as ArkCurve};
+use crate::types::Curve;
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::JsValue;
@@ -15,7 +18,7 @@ use crate::proof::test_utils::{
 	MixerTestSetup, VAnchorTestSetup, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V1_X5_4,
 };
 use crate::proof::{generate_proof_js, truncate_and_pad, JsProofInputBuilder, LeavesMapInput, MTBn254X5};
-use crate::types::{Indices, Leaves, WasmCurve, BE};
+use crate::types::{Indices, Leaves, BE};
 use crate::utxo::JsUtxo;
 use crate::{VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF};
 
@@ -526,7 +529,7 @@ fn should_generate_a_valid_proof_for_already_used_merkle_tree() {
 	proof_input_builder.set_notes(notes).unwrap();
 	proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
 
-	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(Curve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
+	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
 	let (pk, vk) = setup_keys_unchecked::<Bn254, _, _>(c, &mut OsRng).unwrap();
 
 	proof_input_builder.set_pk(JsString::from(hex::encode(pk))).unwrap();

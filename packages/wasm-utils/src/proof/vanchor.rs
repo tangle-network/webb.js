@@ -27,7 +27,7 @@ pub struct VAnchorProof {
 	#[wasm_bindgen(skip)]
 	pub public_inputs: Vec<Vec<u8>>,
 	#[wasm_bindgen(skip)]
-	pub output_notes: Vec<JsNote>,
+	pub output_utxos: Vec<JsUtxo>,
 	#[wasm_bindgen(skip)]
 	pub input_utxos: Vec<JsUtxo>,
 	#[wasm_bindgen(skip)]
@@ -47,9 +47,9 @@ impl VAnchorProof {
 	}
 
 	#[wasm_bindgen(getter)]
-	#[wasm_bindgen(js_name = outputNotes)]
-	pub fn output_notes(&self) -> Array {
-		let inputs: Array = self.output_notes.clone().into_iter().map(JsValue::from).collect();
+	#[wasm_bindgen(js_name = outputUtxos)]
+	pub fn output_utxos(&self) -> Array {
+		let inputs: Array = self.output_utxos.clone().into_iter().map(JsValue::from).collect();
 		inputs
 	}
 
@@ -84,8 +84,10 @@ pub struct VAnchorProofPayload {
 	/// get roots for linkable tree
 	/// Available set can be of length 2 , 16 , 32
 	pub roots: Vec<Vec<u8>>,
-	// Notes for UTXOs
-	pub secret: Vec<JsUtxo>,
+	// Input UTXOs - The UTXOs that will be spent in the proof.
+	// Input UTXOs should have a nullfier, as well as a keypair
+	// that contains a private key.
+	pub input_utxos: Vec<JsUtxo>,
 	// Leaf indices
 	pub indices: Vec<u64>,
 	// Chain Id
@@ -109,7 +111,7 @@ pub struct VAnchorProofInput {
 	/// Available set can be of length 2 , 16 , 32
 	pub roots: Option<Vec<Vec<u8>>>,
 	// Notes for UTXOs
-	pub secret: Option<Vec<JsUtxo>>,
+	pub input_utxos: Option<Vec<JsUtxo>>,
 	// Leaf indices
 	pub indices: Option<Vec<u64>>,
 	// Chain Id
@@ -123,7 +125,7 @@ pub struct VAnchorProofInput {
 impl VAnchorProofInput {
 	pub fn build(self) -> Result<VAnchorProofPayload, OperationError> {
 		let pk = self.pk.ok_or(OpStatusCode::InvalidProvingKey)?;
-		let secret = self.secret.ok_or(OpStatusCode::InvalidNoteSecrets)?;
+		let input_utxos = self.input_utxos.ok_or(OpStatusCode::InvalidInputUtxo)?;
 		let leaves = self.leaves.ok_or(OpStatusCode::InvalidLeaves)?;
 		let ext_data_hash = self.ext_data_hash.ok_or(OpStatusCode::InvalidExtDataHash)?;
 		let roots = self.roots.ok_or(OpStatusCode::InvalidRoots)?;
@@ -143,14 +145,14 @@ impl VAnchorProofInput {
 		// chain_id of the first item in the list
 		let mut invalid_utxo_chain_id_indices = vec![];
 		let mut invalid_utxo_dublicate_nullifiers = vec![];
-		let utxos_chain_id = secret[0].clone().chain_id_raw();
+		let utxos_chain_id = input_utxos[0].clone().chain_id_raw();
 		// validate the all inputs share the same chain_id
-		secret.iter().enumerate().for_each(|(index, utxo)| {
+		input_utxos.iter().enumerate().for_each(|(index, utxo)| {
 			if utxo.get_chain_id_raw() != utxos_chain_id {
 				invalid_utxo_chain_id_indices.push(index)
 			}
 		});
-		let non_default_utxo = secret
+		let non_default_utxo = input_utxos
 			.iter()
 			.enumerate()
 			.filter(|(_, utxo)| {
@@ -181,8 +183,8 @@ impl VAnchorProofInput {
 		}
 
 		// validate amounts
-		let mut in_amount = public_amount;
-		secret.iter().for_each(|utxo| {
+		let mut in_amount = 0;
+		input_utxos.iter().for_each(|utxo| {
 			let utxo_amount: i128 = utxo
 				.get_amount_raw()
 				.try_into()
@@ -196,13 +198,13 @@ impl VAnchorProofInput {
 		let out_amount: i128 = out_amount
 			.try_into()
 			.expect("Failed to convert accumulated in amounts  value to i128");
-		if out_amount != in_amount {
+		if in_amount - out_amount != public_amount {
 			let message = format!(
-				"Output amount and input amount don't match input({}) != output({})",
-				in_amount, out_amount
+				"Invariant failed: in_amount:{} - out_amount:{} = public_amount:{}",
+				in_amount, out_amount, public_amount
 			);
 			let mut oe = OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message);
-			oe.data = Some(format!("{{ inputAmount:{} ,outputAmount:{}}}", in_amount, out_amount));
+			oe.data = Some(format!("{{ in_amount:{} - out_amount:{} = public_amount:{} }}", in_amount, out_amount, public_amount));
 			return Err(oe);
 		}
 		Ok(VAnchorProofPayload {
@@ -214,7 +216,7 @@ impl VAnchorProofInput {
 			leaves,
 			ext_data_hash,
 			roots,
-			secret,
+			input_utxos,
 			indices,
 			chain_id: chain_id.try_into().unwrap(),
 			public_amount,
@@ -223,54 +225,13 @@ impl VAnchorProofInput {
 	}
 }
 
-fn get_output_notes(
-	anchor_proof_input: &VAnchorProofPayload,
-	output_config: [JsUtxo; 2],
-) -> Result<[JsNote; 2], OperationError> {
-	output_config
-		.into_iter()
-		.map(|c| {
-			let mut note = JsNote {
-				scheme: NoteProtocol::VAnchor.to_string(),
-				protocol: NoteProtocol::VAnchor,
-				version: NoteVersion::V1,
-				source_chain_id: c.chain_id_raw().to_string(),
-				target_chain_id: c.chain_id_raw().to_string(),
-				source_identifying_data: "".to_string(),
-				target_identifying_data: "".to_string(),
-				// Are set with the utxo mutation
-				secrets: vec![],
-				curve: Some(anchor_proof_input.curve),
-				exponentiation: Some(anchor_proof_input.exponentiation),
-				width: Some(anchor_proof_input.width),
-				// TODO : fix the token_symbol
-				token_symbol: Some("ANY".to_string()),
-				amount: Some(c.get_amount_raw().to_string()),
-				denomination: None,
-				backend: Some(anchor_proof_input.backend),
-				hash_function: Some(HashFunction::Poseidon),
-				index: None,
-			};
-			note.update_vanchor_utxo(c)?;
-			Ok(note)
-		})
-		.collect::<Result<Vec<JsNote>, OperationError>>()?
-		.try_into()
-		.map_err(|_| {
-			OperationError::new_with_message(
-				OpStatusCode::Unknown,
-				"proof::vanchor: Failed to generate the notes".to_string(),
-			)
-		})
-}
-
 pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -> Result<VAnchorProof, OperationError> {
 	let VAnchorProofPayload {
 		public_amount,
 		backend,
 		curve,
 		width,
-		secret,
+		input_utxos,
 		indices,
 		leaves,
 		exponentiation,
@@ -286,12 +247,12 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		.try_into()
 		.expect("proof::vanchor: Failed to wrap public amount to bytes");
 	// Insure UTXO set has the required/supported input count
-	let in_utxos: Vec<JsUtxo> = if SUPPORTED_INPUT_COUNT.contains(&secret.len()) {
-		secret
+	let in_utxos: Vec<JsUtxo> = if SUPPORTED_INPUT_COUNT.contains(&input_utxos.len()) {
+		input_utxos
 	} else {
 		let message = format!(
 			"proof::vanchor: Input set has {} UTXOs while the supported set length should be one of {:?}",
-			&secret.len(),
+			&input_utxos.len(),
 			&SUPPORTED_INPUT_COUNT,
 		);
 		return Err(OperationError::new_with_message(
@@ -324,15 +285,15 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		));
 	};
 	// Initialize the output notes vec
-	let output_notes = get_output_notes(&vanchor_proof_input, output_utxos.clone())?.to_vec();
+	let utxos_out = output_utxos
+		.iter()
+		.map(|js_utx| js_utx.get_bn254_utxo())
+		.collect::<Result<Vec<_>, OpStatusCode>>()?
+		.try_into()
+		.map_err(|_| OpStatusCode::InvalidProofParameters)?;
+	
 	let proof = match (backend, curve, roots.len()) {
 		(Backend::Arkworks, Curve::Bn254, 2) => {
-			let utxos_out = output_utxos
-				.iter()
-				.map(|js_utx| js_utx.get_bn254_utxo())
-				.collect::<Result<Vec<_>, OpStatusCode>>()?
-				.try_into()
-				.map_err(|_| OpStatusCode::InvalidProofParameters)?;
 			match (exponentiation, width, in_utxos.len()) {
 				(5, 5, 2) => {
 					let utxos_in: [Utxo<Bn254Fr>; 2] = [in_utxos[0].get_bn254_utxo()?, in_utxos[1].get_bn254_utxo()?];
@@ -409,7 +370,7 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 	Ok(VAnchorProof {
 		proof: proof.proof,
 		public_inputs: proof.public_inputs_raw,
-		output_notes: output_notes.to_vec(),
+		output_utxos: output_utxos.to_vec(),
 		input_utxos: in_utxos,
 		public_amount: public_amount_bytes,
 	})
