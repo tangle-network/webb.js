@@ -43,8 +43,8 @@ impl JsUtxo {
 		let mut rng = OsRng;
 		let utxo = match (curve, backend) {
 			(Curve::Bn254, Backend::Arkworks) => {
-				let pk = private_key.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
-				let blinding = blinding.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
+				let pk = private_key.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_be());
+				let blinding = blinding.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_be());
 				VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
 					ArkCurve::Bn254,
 					chain_id,
@@ -97,19 +97,19 @@ impl JsUtxo {
 
 	pub fn get_amount(&self) -> Vec<u8> {
 		match &self.inner {
-			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.amount.into_repr().to_bytes_le(),
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.amount.into_repr().to_bytes_be(),
 		}
 	}
 
 	pub fn get_blinding(&self) -> Vec<u8> {
 		match &self.inner {
-			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.blinding.into_repr().to_bytes_le(),
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.blinding.into_repr().to_bytes_be(),
 		}
 	}
 
 	pub fn get_secret_key(&self) -> Vec<u8> {
 		match &self.inner {
-			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.keypair.secret_key.into_repr().to_bytes_le(),
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.keypair.secret_key.unwrap().into_repr().to_bytes_be(),
 		}
 	}
 
@@ -122,8 +122,8 @@ impl JsUtxo {
 	pub fn get_index_bytes(&self) -> Vec<u8> {
 		match &self.inner {
 			JsUtxoInner::Bn254(bn254_utxo) => match bn254_utxo.index {
-				None => 0u64.to_le_bytes().to_vec(),
-				Some(index) => index.to_le_bytes().to_vec(),
+				None => 0u64.to_be_bytes().to_vec(),
+				Some(index) => index.to_be_bytes().to_vec(),
 			},
 		}
 	}
@@ -132,12 +132,12 @@ impl JsUtxo {
 		match &self.inner {
 			JsUtxoInner::Bn254(bn254_utxo) => &bn254_utxo.nullifier,
 		}
-		.map(|value| value.into_repr().to_bytes_le())
+		.map(|value| value.into_repr().to_bytes_be())
 	}
 
 	pub fn get_commitment(&self) -> Vec<u8> {
 		match &self.inner {
-			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.commitment.into_repr().to_bytes_le(),
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.commitment.into_repr().to_bytes_be(),
 		}
 	}
 
@@ -202,10 +202,10 @@ impl JsUtxo {
 			(Curve::Bn254, Backend::Arkworks) => {
 				let pk = private_key
 					.map(|p| p.to_vec())
-					.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
+					.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_be());
 				let blinding = blinding
 					.map(|b| b.to_vec())
-					.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_le());
+					.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_be());
 				VAnchorR1CSProverBn254_30_2_2_2::create_leaf_with_privates(
 					ArkCurve::Bn254,
 					chain_id,

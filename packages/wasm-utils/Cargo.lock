@@ -241,9 +241,7 @@ dependencies = [
 
 [[package]]
 name = "arkworks-native-gadgets"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "094c12e098ab38468ddb50100a343662b6d643159de67bb29d2e8d092d10a3ce"
+version = "1.2.0"
 dependencies = [
  "ark-crypto-primitives",
  "ark-ff",
@@ -252,9 +250,7 @@ dependencies = [
 
 [[package]]
 name = "arkworks-r1cs-circuits"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe8f8b6631c33b1327efc923a57263653ff2d3645d3008cb7b1120fe39b73fd1"
+version = "1.2.0"
 dependencies = [
  "ark-ff",
  "ark-r1cs-std",
@@ -266,9 +262,7 @@ dependencies = [
 
 [[package]]
 name = "arkworks-r1cs-gadgets"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3df17a1a5266b0a6ae4894f3d750c3b91f9f90155e6c80a489348f4bbdf69e3"
+version = "1.2.0"
 dependencies = [
  "ark-crypto-primitives",
  "ark-ff",
@@ -280,9 +274,7 @@ dependencies = [
 
 [[package]]
 name = "arkworks-setups"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc95996fe19caa6f6ccc1c1747971b5214320783d9051db5385366b972b01c4f"
+version = "1.2.0"
 dependencies = [
  "ark-crypto-primitives",
  "ark-ec",
@@ -302,9 +294,7 @@ dependencies = [
 
 [[package]]
 name = "arkworks-utils"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5362ed351c04a1e906c655100a649963aefd9e4f3dc02ef1097d9ec49376c2ec"
+version = "1.0.1"
 dependencies = [
  "ark-ff",
  "ark-std",
@@ -1060,7 +1050,7 @@ dependencies = [
 
 [[package]]
 name = "wasm-utils"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "ark-bls12-381",
  "ark-bn254",
