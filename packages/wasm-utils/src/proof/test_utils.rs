@@ -169,7 +169,7 @@ pub fn generate_vanchor_test_js_setup() -> VAnchorTestSetup {
 	// Insert commitments
 	let leaves_f: Vec<_> = vec![note1_com, note2_com]
 		.iter()
-		.map(|c| Bn254Fr::from_le_bytes_mod_order(&c))
+		.map(|c| Bn254Fr::from_be_bytes_mod_order(&c))
 		.collect();
 	// tree 0
 	let (_tree0, in_path0) = setup_tree_and_create_path::<Bn254Fr, Poseidon<Bn254Fr>, TREE_HEIGHT>(

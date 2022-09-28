@@ -678,7 +678,7 @@ impl MTBn254X5 {
 			.collect::<Result<Vec<_>, _>>()
 			.map_err(|_| OpStatusCode::InvalidLeaves)?
 			.into_iter()
-			.map(|v| Bn254Fr::from_le_bytes_mod_order(v.0.as_ref()))
+			.map(|v| Bn254Fr::from_be_bytes_mod_order(v.0.as_ref()))
 			.collect();
 
 		let curve = ArkCurve::Bn254;
@@ -697,7 +697,7 @@ impl MTBn254X5 {
 
 	#[wasm_bindgen(getter)]
 	pub fn root(&self) -> JsString {
-		let root = self.inner.root().into_repr().to_bytes_le().to_vec();
+		let root = self.inner.root().into_repr().to_bytes_be().to_vec();
 		JsString::from(hex::encode(root))
 	}
 
@@ -716,7 +716,7 @@ impl MTBn254X5 {
 				leaves_bt
 					.insert(
 						leaves_bt.len() as u32 + 1_u32,
-						Bn254Fr::from_le_bytes_mod_order(leaf.0.as_ref()),
+						Bn254Fr::from_be_bytes_mod_order(leaf.0.as_ref()),
 					)
 					.unwrap();
 			});
