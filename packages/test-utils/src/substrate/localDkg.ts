@@ -129,7 +129,7 @@ export class LocalDkg extends SubstrateNodeBase<TypedEvent> {
   /** Gets the DKG Chain id */
   public async getChainId (): Promise<number> {
     const api = await super.api();
-    const chainId = (await api.consts.dkgProposals.chainIdentifier).toNumber();
+    const chainId = Number((await api.consts.dkgProposals.chainIdentifier).toString());
 
     return chainId;
   }
