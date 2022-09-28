@@ -15,6 +15,7 @@ import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
 
 import { Note } from '../note.js';
 import { ArkworksProvingManager } from '../proving/index.js';
+import { generateArkworksVAnchorNote } from './utils.js';
 
 async function ensureIndecies (notes: Note[], leaves: Uint8Array[]) {
   const leavesHex = leaves.map((l) => u8aToHex(l));
@@ -28,28 +29,6 @@ async function ensureIndecies (notes: Note[], leaves: Uint8Array[]) {
       throw new Error(`${index} leaf=${leaf} don't match tree leaf ${leafOfTree}`);
     }
   }
-}
-
-async function generateVAnchorNote (amount: number, chainId: number, outputChainId: number, index?: number) {
-  const note = await Note.generateNote({
-    amount: String(amount),
-    backend: 'Arkworks',
-    curve: 'Bn254',
-    denomination: String(18),
-    exponentiation: String(5),
-    hashFunction: 'Poseidon',
-    index,
-    protocol: 'vanchor',
-    sourceChain: String(chainId),
-    sourceIdentifyingData: '1',
-    targetChain: String(outputChainId),
-    targetIdentifyingData: '1',
-    tokenSymbol: 'WEBB',
-    version: 'v1',
-    width: String(5)
-  });
-
-  return note;
 }
 
 function getKeys_2_2 () {
@@ -130,8 +109,16 @@ describe('Arkworks Proving manager VAnchor', function () {
 
   it('should prove using WASM API for VAnchor with one input note and one index', async () => {
     const keys = vanchorBn2542_2_2;
+    const vanchorUtxo = await Utxo.generateUtxo({
+      amount: '20',
+      backend: 'Arkworks',
+      chainId: '0',
+      curve: 'Bn254',
+      index: '0',
+      originChainId: '0'
+    });
 
-    const vanchorNote1 = await generateVAnchorNote(20, 0, 0, 0);
+    const vanchorNote1 = await generateArkworksVAnchorNote(vanchorUtxo);
 
     const publicAmount = 10;
     const outputAmount = String(15);
@@ -177,9 +164,25 @@ describe('Arkworks Proving manager VAnchor', function () {
 
   it('should prove using WASM API for VAnchor with two inputs and two indices', async () => {
     const keys = vanchorBn2542_2_2;
+    const utxo1 = await Utxo.generateUtxo({
+      amount: '10',
+      backend: 'Arkworks',
+      chainId: '0',
+      curve: 'Bn254',
+      index: '0',
+      originChainId: '0'
+    });
+    const utxo2 = await Utxo.generateUtxo({
+      amount: '10',
+      backend: 'Arkworks',
+      chainId: '0',
+      curve: 'Bn254',
+      index: '1',
+      originChainId: '0'
+    });
 
-    const vanchorNote1 = await generateVAnchorNote(10, 0, 0, 0);
-    const vanchorNote2 = await generateVAnchorNote(10, 0, 0, 1);
+    const vanchorNote1 = await generateArkworksVAnchorNote(utxo1);
+    const vanchorNote2 = await generateArkworksVAnchorNote(utxo2);
 
     const publicAmount = 10;
     const outputAmount = String(15);
@@ -231,7 +234,20 @@ describe('Arkworks Proving manager VAnchor', function () {
 
     const notes = await Promise.all(Array(3)
       .fill(0)
-      .map((_, index) => generateVAnchorNote(10, 0, 0, index)));
+      .map(async (_, index) => {
+        const utxo = await Utxo.generateUtxo({
+          amount: '10',
+          backend: 'Arkworks',
+          chainId: '0',
+          curve: 'Bn254',
+          index: index.toString(),
+          originChainId: '0'
+        });
+
+        const note = await generateArkworksVAnchorNote(utxo);
+
+        return note;
+      }));
 
     const publicAmount = 10;
     const outputAmount = String(10 * 1.5 + 5);
@@ -283,8 +299,20 @@ describe('Arkworks Proving manager VAnchor', function () {
 
     const notes = await Promise.all(Array(16)
       .fill(0)
-      .map((_, index) => generateVAnchorNote(10, 0, 0, index)));
+      .map(async (_, index) => {
+        const utxo = await Utxo.generateUtxo({
+          amount: '10',
+          backend: 'Arkworks',
+          chainId: '0',
+          curve: 'Bn254',
+          index: index.toString(),
+          originChainId: '0'
+        });
 
+        const note = await generateArkworksVAnchorNote(utxo);
+
+        return note;
+      }));
     const publicAmount = 10;
     const outputAmount = String(10 * 8 + 5);
     const outputChainId = String(0);
@@ -340,8 +368,19 @@ describe('Arkworks Proving manager VAnchor', function () {
 
       const notes = await Promise.all(Array(16)
         .fill(0)
-        .map((_, index) => generateVAnchorNote(10, 0, 0, index)));
+        .map(async (_, index) => {
+          const utxo = await Utxo.generateUtxo({
+            amount: '10',
+            backend: 'Arkworks',
+            chainId: '0',
+            curve: 'Bn254',
+            index: index.toString(),
+            originChainId: '0'
+          });
+          const note = await generateArkworksVAnchorNote(utxo);
 
+          return note;
+        }));
       const publicAmount = 10;
       const outputAmount = String(10 * 80 + 5);
       const outputChainId = String(0);
@@ -394,14 +433,34 @@ describe('Arkworks Proving manager VAnchor', function () {
     // Previous commitment
     const OlderNotes = await Promise.all(Array(16)
       .fill(0)
-      .map((_, index) => generateVAnchorNote(10, 0, 0, index)));
+      .map(async (_, index) => {
+        const utxo = await Utxo.generateUtxo({
+          amount: '10',
+          backend: 'Arkworks',
+          chainId: '0',
+          curve: 'Bn254',
+          index: index.toString(),
+          originChainId: '0'
+        });
 
+        const note = await generateArkworksVAnchorNote(utxo);
+
+        return note;
+      }));
     const publicAmount = 10;
     const depositAmount = 10;
     const outputAmount = String(depositAmount + publicAmount);
     const outputChainId = String(0);
     const leaves = OlderNotes.map((note) => note.getLeaf());
-    const depositedNote = await generateVAnchorNote(depositAmount, 0, 0, OlderNotes.length);
+    const depositedUtxo = await Utxo.generateUtxo({
+      amount: depositAmount.toString(),
+      backend: 'Arkworks',
+      chainId: '0',
+      curve: 'Bn254',
+      index: OlderNotes.length.toString(),
+      originChainId: '0'
+    });
+    const depositedNote = await generateArkworksVAnchorNote(depositedUtxo);
 
     // insert the leaf
     leaves.push(depositedNote.getLeaf());
@@ -452,12 +511,36 @@ describe('Arkworks Proving manager VAnchor', function () {
     const keys = vanchorBn2542_16_2;
     const preExistingNotes = await Promise.all(Array(16)
       .fill(0)
-      .map((_, index) => generateVAnchorNote(10, 0, 0, index + 0)));
+      .map(async (_, index) => {
+        const utxo = await Utxo.generateUtxo({
+          amount: '10',
+          backend: 'Arkworks',
+          chainId: '0',
+          curve: 'Bn254',
+          index: index.toString(),
+          originChainId: '0'
+        });
 
+        const note = await generateArkworksVAnchorNote(utxo);
+
+        return note;
+      }));
     const notes = await Promise.all(Array(16)
       .fill(0)
-      .map((_, index) => generateVAnchorNote(10, 0, 0, index + 16)));
+      .map(async (_, index) => {
+        const utxo = await Utxo.generateUtxo({
+          amount: '10',
+          backend: 'Arkworks',
+          chainId: '0',
+          curve: 'Bn254',
+          index: (index + 16).toString(),
+          originChainId: '0'
+        });
 
+        const note = await generateArkworksVAnchorNote(utxo);
+
+        return note;
+      }));
     const publicAmount = 10;
     const outputAmount = String(10 * 8 + 5);
     const outputChainId = String(0);
@@ -510,12 +593,36 @@ describe('Arkworks Proving manager VAnchor', function () {
     const keys = vanchorBn2542_16_2;
     const notesAfterDeposit = await Promise.all(Array(16)
       .fill(0)
-      .map((_, index) => generateVAnchorNote(10, 0, 0, index + 16)));
+      .map(async (_, index) => {
+        const utxo = await Utxo.generateUtxo({
+          amount: '10',
+          backend: 'Arkworks',
+          chainId: '0',
+          curve: 'Bn254',
+          index: (index + 16).toString(),
+          originChainId: '0'
+        });
 
+        const note = await generateArkworksVAnchorNote(utxo);
+
+        return note;
+      }));
     const notes = await Promise.all(Array(16)
       .fill(0)
-      .map((_, index) => generateVAnchorNote(10, 0, 0, index + 0)));
+      .map(async (_, index) => {
+        const utxo = await Utxo.generateUtxo({
+          amount: '10',
+          backend: 'Arkworks',
+          chainId: '0',
+          curve: 'Bn254',
+          index: index.toString(),
+          originChainId: '0'
+        });
 
+        const note = await generateArkworksVAnchorNote(utxo);
+
+        return note;
+      }));
     const publicAmount = 10;
     const outputAmount = String(10 * 8 + 5);
     const outputChainId = String(0);

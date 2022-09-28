@@ -1,4 +1,4 @@
-import '../../packages/types/build/cjs/index.js';
+import '@webb-tools/protocol-substrate-types';
 import { options } from '@webb-tools/api/index.js';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -17,7 +17,6 @@ import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { BigNumber } from 'ethers';
 import { MultiAddress } from '@polkadot/types/interfaces';
 
-/// <reference path="@webb-tools/types/interfaces/types.d.ts"
 export function currencyToUnitI128(currencyAmount: number) {
   let bn = BigNumber.from(currencyAmount);
   return bn.mul(1_000_000_000_000);

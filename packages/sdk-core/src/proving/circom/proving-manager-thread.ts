@@ -140,8 +140,7 @@ export class CircomProvingManagerThread {
           chainId: note.note.targetChainId,
           curve: note.note.curve,
           index: note.note.index,
-          keypair: new Keypair(`0x${secrets[2]}`),
-          privateKey: hexToU8a(secrets[2])
+          keypair: new Keypair(`0x${secrets[2]}`)
         });
       }));
 

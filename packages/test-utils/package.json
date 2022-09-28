@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/test-utils",
-  "version": "0.1.4-103",
+  "version": "0.1.4-106",
   "description": "Utilities to work with Webb in test environments",
   "author": "Webb Developers <drew@webb.tools>",
   "type": "module",
@@ -31,17 +31,18 @@
   },
   "repository": "https://github.com/webb-tools/webb.js.git",
   "resolutions": {
-    "@webb-tools/api": "0.1.4-101",
-    "@webb-tools/sdk-core": "0.1.4-101"
+    "@webb-tools/api": "0.1.4-106",
+    "@webb-tools/sdk-core": "0.1.4-106"
   },
   "dependencies": {
     "@polkadot/api": "9.2.4",
     "@polkadot/keyring": "10.1.7",
-    "@webb-tools/api": "0.1.4-103",
-    "@webb-tools/sdk-core": "0.1.4-103",
-    "@webb-tools/tokens": "0.2.6",
-    "@webb-tools/utils": "0.2.6",
-    "@webb-tools/vbridge": "0.2.6",
+    "@webb-tools/api": "0.1.4-106",
+    "@webb-tools/protocol-solidity": "0.2.7",
+    "@webb-tools/sdk-core": "0.1.4-106",
+    "@webb-tools/tokens": "0.2.7",
+    "@webb-tools/utils": "0.2.7",
+    "@webb-tools/vbridge": "0.2.7",
     "ecpair": "^2.0.1",
     "ethers": "5.7.0",
     "ganache": "7.4.1",

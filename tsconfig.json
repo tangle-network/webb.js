@@ -30,22 +30,11 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@polkadot/types/lookup": [
-        "packages/types/src/interfaces/types-lookup.ts"
-      ],
-      "@polkadot/api/augment": ["packages/types/src/interfaces/augment-api.ts"],
-      "@polkadot/types/augment": ["packages/types/src/interfaces/augment-types.ts"],
       "@webb-tools/api": [
         "packages/api/src"
       ],
       "@webb-tools/api/*": [
         "packages/api/src/*"
-      ],
-      "@webb-tools/types": [
-        "packages/types/src"
-      ],
-      "@webb-tools/types/*": [
-        "packages/types/src/*"
       ],
       "@webb-tools/sdk-core": [
         "packages/sdk-core/src"
