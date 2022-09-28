@@ -65,7 +65,7 @@ impl JsUtxo {
 	pub fn get_amount_raw(&self) -> u128 {
 		let amount_bytes = self.get_amount();
 		let mut amount_slice = [0u8; 16];
-		amount_slice.copy_from_slice(amount_bytes[..16].to_vec().as_slice());
+		amount_slice.copy_from_slice(amount_bytes[16..32].to_vec().as_slice());
 		u128::from_be_bytes(amount_slice)
 	}
 

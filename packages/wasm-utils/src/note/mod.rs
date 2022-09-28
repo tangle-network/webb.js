@@ -136,7 +136,7 @@ impl JsNote {
 						let index = self.index;
 
 						let mut amount_slice = [0u8; 16];
-						amount_slice.copy_from_slice(amount[..16].to_vec().as_slice());
+						amount_slice.copy_from_slice(amount[16..32].to_vec().as_slice());
 						let amount = u128::from_be_bytes(amount_slice);
 
 						let mut chain_id_slice = [0u8; 8];
