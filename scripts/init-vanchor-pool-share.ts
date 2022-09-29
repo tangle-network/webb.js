@@ -2,7 +2,7 @@ import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { polkadotTx } from '@webb-tools/test-utils/src/index.js';
 import { Keyring } from '@polkadot/keyring';
-import { preparePolkadotApi, startWebbNode, transferBalance } from '../tests/utils/index.js';
+import {startWebbNode, stopNodes, transferBalance} from '../tests/utils/index.js';
 import { expect } from 'chai';
 import { Option, U32 } from '@polkadot/types-codec';
 import { BN } from '@polkadot/util/bn/bn';
@@ -81,8 +81,7 @@ async function addAssetToPool(
 }
 
 async function main() {
-  const nodes = startWebbNode();
-  const apiPromise = await preparePolkadotApi();
+  const apiPromise = await startWebbNode();
   const { bob, charlie, alice } = getKeyring();
   console.log(`Transferring 1000,000 balance to Alice and Bob`);
   await transferBalance(apiPromise!, charlie, [alice, bob], 1000_000);
@@ -121,7 +120,7 @@ async function main() {
 
   } finally {
       await apiPromise?.disconnect();
-      console.log(nodes);
+      await stopNodes();
   }
 
 }

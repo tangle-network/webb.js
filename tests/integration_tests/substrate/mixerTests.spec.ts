@@ -6,21 +6,19 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import {
   catchWasmError,
   depositMixerBnX5_3,
-  KillTask,
-  preparePolkadotApi,
-  sleep,
-  startWebbNode,
+  sleep, startProtocolSubstrateNodes,
   transferBalance,
   withdrawMixerBnX5_3,
 } from '../../utils/index.js';
+import {LocalProtocolSubstrate} from "@webb-tools/test-utils";
 
 let apiPromise: ApiPromise | null = null;
+let nodes: LocalProtocolSubstrate[];
 let keyring: {
   bob: KeyringPair;
   alice: KeyringPair;
   charlie: KeyringPair;
 } | null = null;
-let nodes: KillTask | undefined;
 
 const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
 
@@ -44,9 +42,8 @@ describe('Mixer tests', function () {
   this.timeout(120_000);
 
   before(async function () {
-    // If LOCAL_NODE is set the tests will continue  to use the already running node
-    nodes = startWebbNode();
-    apiPromise = await preparePolkadotApi();
+    nodes = await startProtocolSubstrateNodes();
+    apiPromise = await nodes[0].api();
   });
 
   it('Mixer should work', async function () {
@@ -80,7 +77,7 @@ describe('Mixer tests', function () {
   });
 
   after(async function () {
-    await apiPromise?.disconnect();
-    await nodes?.();
+    await nodes[0]?.stop();
+    await nodes[1]?.stop();
   });
 });
