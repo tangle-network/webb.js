@@ -202,7 +202,10 @@ impl VAnchorProofInput {
 				in_amount, out_amount
 			);
 			let mut oe = OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message);
-			oe.data = Some(format!("{{ inputAmount:{} ,outputAmount:{}, publicAmount: {}}}", in_amount, out_amount, public_amount));
+			oe.data = Some(format!(
+				"{{ inputAmount:{} ,outputAmount:{}, publicAmount: {}}}",
+				in_amount, out_amount, public_amount
+			));
 			return Err(oe);
 		}
 		Ok(VAnchorProofPayload {

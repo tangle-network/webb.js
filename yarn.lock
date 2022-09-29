@@ -3549,6 +3549,21 @@
     "@polkadot/typegen" "9.2.4"
     "@polkadot/types" "9.2.4"
 
+"@webb-tools/sdk-core@0.1.4-101":
+  version "0.1.4-101"
+  resolved "https://registry.yarnpkg.com/@webb-tools/sdk-core/-/sdk-core-0.1.4-101.tgz#bba0108f36bad2e01dcae5603b9ec6dd44d093da"
+  integrity sha512-eMhZ2CbpK71dckj5toWzKOPU5nSqB+C7cdhyDgorBT6RASb4vNkZiE/fj1hZwCyiT3w5lMbOINy0XNSfndfNIQ==
+  dependencies:
+    "@polkadot/util" "10.1.6"
+    "@webb-tools/wasm-utils" "0.1.4-101"
+    bignumber.js "^9.0.0"
+    circomlibjs "0.0.8"
+    elliptic "6.5.4"
+    eth-sig-util "^3.0.1"
+    ethers "5.7.0"
+    ffjavascript "0.2.55"
+    snarkjs "0.4.22"
+
 "@webb-tools/sdk-core@0.1.4-105":
   version "0.1.4-105"
   resolved "https://registry.yarnpkg.com/@webb-tools/sdk-core/-/sdk-core-0.1.4-105.tgz#807ebd41c8a0a2ef505b102d4a4014ba41b9f618"
