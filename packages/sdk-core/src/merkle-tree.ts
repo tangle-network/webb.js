@@ -100,6 +100,18 @@ export class MerkleTree {
     this.update(this._layers[0].length, BigNumber.from(element));
   }
 
+  removeByElem(element: BigNumberish) {
+    const index = this.indexOf(element)
+    if(index == -1) {
+      throw new Error('Element is not in the merkle tree');
+    }
+    this.removeByIndex(index)
+  }
+
+  removeByIndex(index: number) {
+    this.update(index, this.zeroElement);
+  }
+
   /**
    * Insert multiple elements into the tree.
    * @param elements - Elements to insert
