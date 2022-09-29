@@ -4,7 +4,7 @@ import { CircomUtxo } from '../../index.js';
 import { Keypair } from '../../keypair.js';
 
 describe('Utxo and Keypair serialization integrations', () => {
-  it('CircomUtxo with privateKey Keypair', async function () {
+  it.only('CircomUtxo with privateKey Keypair', async function () {
     const keypair = new Keypair();
 
     const utxo = await CircomUtxo.generateUtxo({
@@ -21,8 +21,10 @@ describe('Utxo and Keypair serialization integrations', () => {
     const utxoEncryption = utxo.encrypt();
     const utxoDecrypted = await CircomUtxo.decrypt(keypair, utxoEncryption);
     const utxoString = utxo.serialize();
+    console.log('utxoString from circomutxo: ', utxoString);
     const recreatedUtxo = await CircomUtxo.deserialize(utxoString);
     const recreatedUtxoString = recreatedUtxo.serialize();
+    console.log('recreated utxo string from circomutxo: ', recreatedUtxoString);
     const recreatedUtxoEncryption = recreatedUtxo.encrypt();
     const recreatedUtxoDecrypted = await CircomUtxo.decrypt(keypair, recreatedUtxoEncryption);
 

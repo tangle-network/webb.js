@@ -553,7 +553,7 @@ impl JsNoteBuilder {
 					let chain_id = utxo.get_chain_id_bytes();
 					let amount = utxo.get_amount();
 					let blinding = utxo.get_blinding();
-					let secret_key = utxo.get_secret_key();
+					let secret_key = utxo.get_secret_key().unwrap();
 
 					// secrets
 					vec![chain_id, amount, blinding, secret_key]
@@ -787,7 +787,7 @@ impl JsNote {
 		let chain_id = utxo.get_chain_id_bytes();
 		let amount = utxo.get_amount();
 		let blinding = utxo.get_blinding();
-		let secret_key = utxo.get_secret_key();
+		let secret_key = utxo.get_secret_key().unwrap();
 		self.amount = Some(utxo.get_amount_raw().to_string());
 		self.secrets = vec![chain_id, amount, blinding, secret_key];
 		Ok(())

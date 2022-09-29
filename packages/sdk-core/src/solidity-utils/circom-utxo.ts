@@ -32,14 +32,32 @@ export class CircomUtxo extends Utxo {
       this._backend,
       this.amount,
       this.chainId,
-      this.index.toString(),
-      this.blinding,
-      this.keypair.getPubKey(),
-      this.keypair.getEncryptionKey(),
-      this.secret_key
+      this.blinding.slice(2),
+      this.keypair.getPubKey().slice(2),
+      this.keypair.getEncryptionKey()?.slice(2),
+      this.secret_key.slice(2),
+      this.index.toString()
     ].join('&');
   }
 
+  /**
+   * @param utxoString - A string representation of the parts that make up a utxo.
+   *   - All values are represented as BigEndian, hex-encoded strings unless indicated otherwise.
+   *   - Optional values are represented as the empty string if not present,
+   *     meaning the split call will always be an array of length "parts".
+   *
+   *   parts[0] - Curve value, e.g. Bn254, Bls381, Ed25519, etc. value represented as string.
+   *   parts[1] - Backend value, e.g. arkworks or circom. value represented as string.
+   *   parts[2] - Amount of atomic units, e.g. ETH in wei amounts or DOT in 10^12 decimals. value represented as uint.
+   *   parts[3] - TypedChainId, the hex value of the calculated typed chain id
+   *   parts[4] - Blinding, secret random value
+   *   parts[5] - PublicKey, the "publicKey = hash(privateKey)" value which indicates ownership for a utxo.
+   *   parts[6] Optional - EncryptionKey, the public key of "publicKey = encryptionScheme(privateKey)" value used for messaging.
+   *   parts[7] Optional - PrivateKey, the secret key component correlated to the above values.
+   *   parts[8] Optional - Index, the leaf index if the utxo has been inserted in a merkle tree
+   *
+   * @returns The CircomUtxo object implementation of a Utxo.
+   */
   static async deserialize (utxoString: string): Promise<Utxo> {
     const inner = new CircomJsUtxo();
 
@@ -50,20 +68,24 @@ export class CircomUtxo extends Utxo {
     utxo._backend = 'Circom';
     utxo._amount = parts[2];
     utxo._chainId = parts[3];
-    utxo._index = Number(parts[4]);
-    utxo._blinding = parts[5];
-    utxo._pubkey = parts[6];
-    const maybeEncryptionKey = parts[7];
-    const maybeSecretKey = parts[8];
+    utxo._blinding = '0x' + parts[4];
+    utxo._pubkey = '0x' + parts[5];
+    const maybeEncryptionKey = parts[6];
+    const maybeSecretKey = parts[7];
+    const maybeIndex = parts[8];
 
-    if (maybeSecretKey.length === 66) {
-      utxo.setKeypair(new Keypair(maybeSecretKey));
+    if (maybeSecretKey.length === 64) {
+      utxo.setKeypair(new Keypair('0x' + maybeSecretKey));
     } else {
-      if (maybeEncryptionKey.length === 66) {
-        utxo.setKeypair(Keypair.fromString(utxo._pubkey + maybeEncryptionKey.slice(2)));
+      if (maybeEncryptionKey.length === 64) {
+        utxo.setKeypair(Keypair.fromString('0x' + utxo._pubkey.slice(2) + maybeEncryptionKey));
       } else {
-        utxo.setKeypair(Keypair.fromString(utxo._pubkey));
+        utxo.setKeypair(Keypair.fromString('0x' + utxo._pubkey.slice(2)));
       }
+    }
+
+    if (maybeIndex.length > 0) {
+      utxo._index = Number(maybeIndex);
     }
 
     return utxo;
@@ -87,9 +109,7 @@ export class CircomUtxo extends Utxo {
       utxo._pubkey = input.keypair.getPubKey();
       utxo.setKeypair(input.keypair);
     } else {
-      utxo.keypair = new Keypair();
-      utxo._pubkey = utxo.keypair.getPubKey();
-      utxo._secret_key = utxo.keypair.privkey!;
+      utxo.setKeypair(new Keypair());
     }
 
     utxo._blinding = input.blinding ? u8aToHex(input.blinding) : toFixedHex(randomBN(31));
@@ -257,5 +277,6 @@ class CircomJsUtxo implements JsUtxo {
   commitment: Uint8Array = new Uint8Array();
   index: any;
   nullifier = '';
+  public_key = '';
   secret_key = '';
 }
