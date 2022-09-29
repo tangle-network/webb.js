@@ -1,7 +1,11 @@
 import { ApiPromise } from '@polkadot/api';
 import { decodeAddress, Keyring } from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { currencyToUnitI128, KillTask, preparePolkadotApi, startWebbNode, transferBalance } from '../../utils/index.js';
+import {
+  currencyToUnitI128,
+  startProtocolSubstrateNodes,
+  transferBalance
+} from '../../utils/index.js';
 import {
   ArkworksProvingManager,
   calculateTypedChainId,
@@ -13,19 +17,19 @@ import {
   VAnchorProof
 } from '@webb-tools/sdk-core/index.js';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
-import { polkadotTx } from '@webb-tools/test-utils/index.js';
+import {LocalProtocolSubstrate, polkadotTx} from '@webb-tools/test-utils/index.js';
 import path from 'path';
 import fs from 'fs';
 import { naclEncrypt, randomAsU8a } from '@polkadot/util-crypto';
 import { MTBn254X5, verify_js_proof } from '@webb-tools/wasm-utils/njs/wasm-utils-njs.js';
 
 let apiPromise: ApiPromise | null = null;
+let nodes: LocalProtocolSubstrate[];
 let keyring: {
   bob: KeyringPair;
   alice: KeyringPair;
   charlie: KeyringPair;
 } | null = null;
-let nodes: KillTask | undefined;
 
 const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
 
@@ -427,12 +431,12 @@ describe('VAnchor tests', function() {
   this.timeout(120_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
-    nodes = startWebbNode();
-    apiPromise = await preparePolkadotApi();
+    nodes = await startProtocolSubstrateNodes();
+    apiPromise = await nodes[0].api();
     const { bob, charlie, alice } = getKeyring();
     console.log(`Transferring 10,000 balance to Alice and Bob`);
     await transferBalance(apiPromise!, charlie, [alice, bob], 10_000);
-    const chainIdentifier = apiPromise.consts.linkableTreeBn254.chainIdentifier.toString();
+    const chainIdentifier = apiPromise!.consts.linkableTreeBn254.chainIdentifier.toString();
     chainId = String(calculateTypedChainId(ChainType.Substrate, Number(chainIdentifier)));
   });
 
@@ -735,6 +739,7 @@ describe('VAnchor tests', function() {
 
   after(async function() {
     await apiPromise?.disconnect();
-    await nodes?.();
+    await nodes[0]?.stop();
+    await nodes[1]?.stop();
   });
 });

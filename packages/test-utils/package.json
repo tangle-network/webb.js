@@ -4,24 +4,24 @@
   "description": "Utilities to work with Webb in test environments",
   "author": "Webb Developers <drew@webb.tools>",
   "type": "module",
-  "main": "./cjs/index.js",
-  "module": "./index.js",
-  "types": "./index.d.ts",
+  "main": "./build/cjs/index.js",
+  "module": "./build/index.js",
+  "types": "./build/index.d.ts",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "require": "./cjs/index.js",
-      "default": "./index.js"
+      "types": "./build/index.d.ts",
+      "require": "./build/cjs/index.js",
+      "default": "./build/index.js"
     },
     "./index.js": {
-      "types": "./index.d.ts",
-      "require": "./cjs/index.js",
-      "default": "./index.js"
+      "types": "./build/index.d.ts",
+      "require": "./build/cjs/index.js",
+      "default": "./build/index.js"
     },
     "./src/index.js": {
-      "types": "./src/index.d.ts",
-      "require": "./src/cjs/index.js",
-      "default": "./src/index.js"
+      "types": "./build/src/index.d.ts",
+      "require": "./build/src/cjs/index.js",
+      "default": "./build/src/index.js"
     }
   },
   "license": "Apache-2.0",
@@ -30,16 +30,28 @@
     "registry": "https://registry.npmjs.org"
   },
   "repository": "https://github.com/webb-tools/webb.js.git",
+  "resolutions": {
+    "@webb-tools/api": "0.1.4-106",
+    "@webb-tools/sdk-core": "0.1.4-106"
+  },
   "dependencies": {
     "@polkadot/api": "9.2.4",
     "@polkadot/keyring": "10.1.7",
     "@webb-tools/api": "0.1.4-106",
-    "@webb-tools/protocol-solidity": "0.2.7",
     "@webb-tools/sdk-core": "0.1.4-106",
-    "@webb-tools/tokens": "0.2.7",
-    "@webb-tools/utils": "0.2.7",
-    "@webb-tools/vbridge": "0.2.7",
+    "@webb-tools/tokens": "0.2.6",
+    "@webb-tools/utils": "0.2.6",
+    "@webb-tools/vbridge": "0.2.6",
+    "@webb-tools/protocol-solidity": "0.2.6",
+    "ecpair": "^2.0.1",
     "ethers": "5.7.0",
-    "ganache": "7.4.1"
+    "ganache": "7.4.1",
+    "get-port": "6.1.2",
+    "is-ci": "^3.0.1",
+    "tiny-secp256k1": "^2.2.1",
+    "prettier": "^2.2.1"
+  },
+  "devDependencies": {
+    "@types/is-ci": "^3.0.0"
   }
 }
