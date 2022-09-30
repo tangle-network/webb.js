@@ -97,11 +97,15 @@ describe('Merkle Tree tests', () => {
         singleTree.remove(el);
       }
 
-      // for (let i = 0; i < elements.length; i++) {
-      //   // expect(bulkPath.element.toHexString()).to.eq(singlePath.element.toHexString());
-      //   // expect(bulkPath.pathIndices).to.eql(singlePath.pathIndices);
-      //   // expect(bulkPath.pathElements).to.eql(singlePath.pathElements);
-      // }
+      for (let i = 0; i < elements.length; i++) {
+        const bulkPath = bulkTree.path(i);
+        const singlePath = singleTree.path(i);
+
+        expect(bulkPath.merkleRoot.toHexString()).to.eq(singlePath.merkleRoot.toHexString());
+        expect(bulkPath.element.toHexString()).to.eq(singlePath.element.toHexString());
+        expect(bulkPath.pathIndices).to.eql(singlePath.pathIndices);
+        expect(bulkPath.pathElements).to.eql(singlePath.pathElements);
+      }
       expect(bulkTree.root().toHexString()).to.eq(singleTree.root().toHexString());
     });
   });
