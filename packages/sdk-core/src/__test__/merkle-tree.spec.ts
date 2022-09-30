@@ -74,7 +74,7 @@ describe('Merkle Tree tests', () => {
     before(async () => {
       singleTree = new MerkleTree(6);
       bulkTree = new MerkleTree(6);
-      initialRoot = singleTree.root()
+      initialRoot = singleTree.root();
 
       bulkTree.bulkInsert(elements);
 
