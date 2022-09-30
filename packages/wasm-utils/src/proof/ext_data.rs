@@ -67,8 +67,8 @@ impl ExtData {
 		keccak.update(codec.as_slice());
 		let mut output = [0u8; 32];
 		keccak.finalize(&mut output);
-		let field_res = Bn254Fr::from_le_bytes_mod_order(&output);
-		let value = field_res.into_repr().to_bytes_le();
+		let field_res = Bn254Fr::from_be_bytes_mod_order(&output);
+		let value = field_res.into_repr().to_bytes_be();
 
 		Uint8Array::from(value.as_slice())
 	}

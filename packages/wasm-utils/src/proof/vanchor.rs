@@ -202,7 +202,10 @@ impl VAnchorProofInput {
 				in_amount, out_amount
 			);
 			let mut oe = OperationError::new_with_message(OpStatusCode::InvalidProofParameters, message);
-			oe.data = Some(format!("{{ inputAmount:{} ,outputAmount:{}}}", in_amount, out_amount));
+			oe.data = Some(format!(
+				"{{ inputAmount:{} ,outputAmount:{}, publicAmount: {}}}",
+				in_amount, out_amount, public_amount
+			));
 			return Err(oe);
 		}
 		Ok(VAnchorProofPayload {
@@ -282,7 +285,7 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 	} = vanchor_proof_input.clone();
 	let public_amount_bytes = Bn254Fr::from(public_amount)
 		.into_repr()
-		.to_bytes_le()
+		.to_bytes_be()
 		.try_into()
 		.expect("proof::vanchor: Failed to wrap public amount to bytes");
 	// Insure UTXO set has the required/supported input count

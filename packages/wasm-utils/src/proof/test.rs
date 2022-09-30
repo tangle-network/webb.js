@@ -497,7 +497,7 @@ fn should_generate_a_valid_proof_for_already_used_merkle_tree() {
 	let tree = MTBn254X5::new(Leaves::from(JsValue::from(leaves.clone())), JsString::from("0")).unwrap();
 	let indices: Array = vec![JsValue::from("16"), JsValue::from("0")].into_iter().collect();
 	let roots: Array = vec![
-		Uint8Array::from(tree.inner.root().into_repr().to_bytes_le().as_slice()),
+		Uint8Array::from(tree.inner.root().into_repr().to_bytes_be().as_slice()),
 		Uint8Array::from([0u8; 32].to_vec().as_slice()),
 	]
 	.into_iter()

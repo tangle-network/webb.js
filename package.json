@@ -48,7 +48,7 @@
     "@polkadot/util-crypto": "10.1.7",
     "@types/mocha": "^9.1.0",
     "@types/source-map-support": "^0.5.3",
-    "@webb-tools/protocol-substrate-types": "^0.0.1",
+    "@webb-tools/protocol-substrate-types": "^0.0.2",
     "cross-env": "^7.0.3",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-tsdoc": "^0.2.14",
