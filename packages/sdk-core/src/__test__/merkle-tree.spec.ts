@@ -66,6 +66,56 @@ describe('Merkle Tree tests', () => {
     });
   });
 
+  describe('removal tests', () => {
+    let singleTree: MerkleTree;
+    let bulkTree: MerkleTree;
+    let initialRoot: any; // BigNumber
+
+    before(async () => {
+      singleTree = new MerkleTree(6);
+      bulkTree = new MerkleTree(6);
+      initialRoot = singleTree.root();
+
+      bulkTree.bulkInsert(elements);
+
+      for (const el of elements) {
+        singleTree.insert(el);
+      }
+
+      for (let i = 0; i < elements.length; i++) {
+        const bulkPath = bulkTree.path(i);
+        const singlePath = singleTree.path(i);
+
+        expect(bulkPath.merkleRoot.toHexString()).to.eq(singlePath.merkleRoot.toHexString());
+        expect(bulkPath.element.toHexString()).to.eq(singlePath.element.toHexString());
+        expect(bulkPath.pathIndices).to.eql(singlePath.pathIndices);
+        expect(bulkPath.pathElements).to.eql(singlePath.pathElements);
+      }
+    });
+
+    it('should evaluate the same for removeBulk and single remove', () => {
+      bulkTree.bulkRemove(elements);
+
+      for (const el of elements) {
+        singleTree.remove(el);
+      }
+
+      for (let i = 0; i < elements.length; i++) {
+        const bulkPath = bulkTree.path(i);
+        const singlePath = singleTree.path(i);
+
+        expect(bulkPath.merkleRoot.toHexString()).to.eq(singlePath.merkleRoot.toHexString());
+        expect(bulkPath.element.toHexString()).to.eq(singlePath.element.toHexString());
+        expect(bulkPath.pathIndices).to.eql(singlePath.pathIndices);
+        expect(bulkPath.pathElements).to.eql(singlePath.pathElements);
+      }
+
+      expect(bulkTree.root().toHexString()).to.eq(singleTree.root().toHexString());
+      // checking if root matches root without any elements as all of them have been removed
+      expect(bulkTree.root().toHexString()).to.eq(initialRoot.toHexString());
+    });
+  });
+
   it('should correctly calculate the index from pathIndices', () => {
     const pathIndices = [0, 1, 1, 0, 1];
     const calculatedIndex = MerkleTree.calculateIndexFromPathIndices(pathIndices);
