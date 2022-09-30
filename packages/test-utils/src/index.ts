@@ -4,3 +4,5 @@
 export * from './utils.js';
 export * from './startGanacheServer.js';
 export * from './localEvmChain.js';
+export * from './substrate/localProtocolSubstrate.js';
+export * from './substrate/substrateNodeBase.js';

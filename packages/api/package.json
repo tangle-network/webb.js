@@ -1,28 +1,28 @@
 {
   "name": "@webb-tools/api",
-  "version": "0.1.4-106",
+  "version": "0.1.4-107",
   "description": "Webb JS API",
   "type": "module",
   "author": "Webb Developers <drew@webb.tools>",
   "license": "Apache-2.0",
-  "main": "./cjs/index.js",
-  "module": "./index.js",
-  "types": "./index.d.ts",
+  "main": "./build/cjs/index.js",
+  "module": "./build/index.js",
+  "types": "./build/index.d.ts",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "require": "./cjs/index.js",
-      "default": "./index.js"
+      "types": "./build/index.d.ts",
+      "require": "./build/cjs/index.js",
+      "default": "./build/index.js"
     },
     "./index.js": {
-      "types": "./index.d.ts",
-      "require": "./cjs/index.js",
-      "default": "./index.js"
+      "types": "./build/index.d.ts",
+      "require": "./build/cjs/index.js",
+      "default": "./build/index.js"
     },
     "./src/index.js": {
-      "types": "./src/index.d.ts",
-      "require": "./src/cjs/index.js",
-      "default": "./src/index.js"
+      "types": "./build/src/index.d.ts",
+      "require": "./build/src/cjs/index.js",
+      "default": "./build/src/index.js"
     },
     "./cjs/index.js": "./cjs/index.js"
   },
@@ -37,6 +37,6 @@
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
     "@polkadot/api": "9.2.4",
-    "@webb-tools/api-derive": "0.1.4-106"
+    "@webb-tools/api-derive": "0.1.4-107"
   }
 }
