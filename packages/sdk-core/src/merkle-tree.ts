@@ -100,21 +100,23 @@ export class MerkleTree {
     this.update(this._layers[0].length, BigNumber.from(element));
   }
 
-  bulkRemove(elements: BigNumberish[]) {
+  bulkRemove (elements: BigNumberish[]) {
     for (const elem of elements) {
-      this.remove(elem)
+      this.remove(elem);
     }
   }
 
-  remove(element: BigNumberish) {
-    const index = this.indexOf(element)
-    if(index == -1) {
+  remove (element: BigNumberish) {
+    const index = this.indexOf(element);
+
+    if (index === -1) {
       throw new Error('Element is not in the merkle tree');
     }
-    this.removeByIndex(index)
+
+    this.removeByIndex(index);
   }
 
-  removeByIndex(index: number) {
+  removeByIndex (index: number) {
     this.update(index, this.zeroElement);
   }
 

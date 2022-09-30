@@ -67,8 +67,9 @@ describe('Merkle Tree tests', () => {
   });
 
   describe('removal tests', () => {
-    let singleTree: MerkleTree
-    let bulkTree: MerkleTree
+    let singleTree: MerkleTree;
+    let bulkTree: MerkleTree;
+
     before(async () => {
       singleTree = new MerkleTree(6);
       bulkTree = new MerkleTree(6);
@@ -88,7 +89,7 @@ describe('Merkle Tree tests', () => {
         expect(bulkPath.pathIndices).to.eql(singlePath.pathIndices);
         expect(bulkPath.pathElements).to.eql(singlePath.pathElements);
       }
-    })
+    });
 
     it('should evaluate the same for removeBulk and single remove', () => {
       bulkTree.bulkRemove(elements);
@@ -106,6 +107,7 @@ describe('Merkle Tree tests', () => {
         expect(bulkPath.pathIndices).to.eql(singlePath.pathIndices);
         expect(bulkPath.pathElements).to.eql(singlePath.pathElements);
       }
+
       expect(bulkTree.root().toHexString()).to.eq(singleTree.root().toHexString());
     });
   });
