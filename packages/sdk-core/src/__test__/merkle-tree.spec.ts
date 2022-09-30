@@ -69,10 +69,12 @@ describe('Merkle Tree tests', () => {
   describe('removal tests', () => {
     let singleTree: MerkleTree;
     let bulkTree: MerkleTree;
+    let initialRoot: any; // BigNumber
 
     before(async () => {
       singleTree = new MerkleTree(6);
       bulkTree = new MerkleTree(6);
+      initialRoot = singleTree.root()
 
       bulkTree.bulkInsert(elements);
 
@@ -109,6 +111,8 @@ describe('Merkle Tree tests', () => {
       }
 
       expect(bulkTree.root().toHexString()).to.eq(singleTree.root().toHexString());
+      // checking if root matches root without any elements as all of them have been removed
+      expect(bulkTree.root().toHexString()).to.eq(initialRoot.toHexString());
     });
   });
 
