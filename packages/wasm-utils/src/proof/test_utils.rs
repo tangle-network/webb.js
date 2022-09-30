@@ -250,9 +250,16 @@ pub fn generate_vanchor_test_setup_2_inputs() -> VAnchorTestSetup {
 	let in_chain_id = 0;
 	let in_amount_fr = Bn254Fr::from(in_amount);
 
-	let mut in_utxo1 =
-		VAnchorR1CSProverBn254_30_2_2_2::new_utxo(curve, in_chain_id, in_amount_fr.clone(), Some(0), None, None, &mut rng)
-			.unwrap();
+	let mut in_utxo1 = VAnchorR1CSProverBn254_30_2_2_2::new_utxo(
+		curve,
+		in_chain_id,
+		in_amount_fr.clone(),
+		Some(0),
+		None,
+		None,
+		&mut rng,
+	)
+	.unwrap();
 	in_utxo1.set_index(index);
 
 	let mut in_utxo2 =

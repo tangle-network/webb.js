@@ -31,6 +31,7 @@ pub struct JsUtxo {
 }
 
 impl JsUtxo {
+	#[allow(clippy::too_many_arguments)]
 	pub(crate) fn new(
 		curve: Curve,
 		backend: Backend,
@@ -45,43 +46,39 @@ impl JsUtxo {
 		let utxo = match (curve, backend) {
 			(Curve::Bn254, Backend::Arkworks) => {
 				// If blinding wasn't passed, create it
-				let blinding = blinding.unwrap_or(Bn254Fr::rand(&mut rng).into_repr().to_bytes_be());
+				let blinding = blinding.unwrap_or_else(|| Bn254Fr::rand(&mut rng).into_repr().to_bytes_be());
 
 				match private_key {
 					// If a private key was passed, generate the public key from the private key.
-					Some(priv_key) => {
-						VAnchorR1CSProverBn254_30_2_2_2::create_utxo(
-							ArkCurve::Bn254,
-							chain_id,
-							amount,
-							index,
-							priv_key,
-							blinding,
-						)
-					}
+					Some(priv_key) => VAnchorR1CSProverBn254_30_2_2_2::create_utxo(
+						ArkCurve::Bn254,
+						chain_id,
+						amount,
+						index,
+						priv_key,
+						blinding,
+					),
 					None => {
 						match public_key {
 							// If a public key has been configured without a private key, create a "public" utxo.
 							// This public utxo is useful for transferring ownership to the private key owner
 							// of a configured public key.
-							Some(pub_key) => {
-								VAnchorR1CSProverBn254_30_2_2_2::create_public_utxo(
-									ArkCurve::Bn254,
-									chain_id,
-									amount,
-									blinding,
-									pub_key,
-									index
-								)
-							},
+							Some(pub_key) => VAnchorR1CSProverBn254_30_2_2_2::create_public_utxo(
+								ArkCurve::Bn254,
+								chain_id,
+								amount,
+								blinding,
+								pub_key,
+								index,
+							),
 							// If neither key has been configured, simply create a utxo with a random private key.
 							None => VAnchorR1CSProverBn254_30_2_2_2::create_random_utxo(
 								ArkCurve::Bn254,
 								chain_id,
 								amount,
 								index,
-								&mut rng
-							)
+								&mut rng,
+							),
 						}
 					}
 				}
@@ -147,12 +144,7 @@ impl JsUtxo {
 
 	pub fn get_secret_key(&self) -> Option<Vec<u8>> {
 		match &self.inner {
-			JsUtxoInner::Bn254(bn254_utxo) => {
-				match bn254_utxo.keypair.secret_key {
-					Some(key) => Some(key.into_repr().to_bytes_be()),
-					None => None
-				}
-			}
+			JsUtxoInner::Bn254(bn254_utxo) => bn254_utxo.keypair.secret_key.map(|key| key.into_repr().to_bytes_be()),
 		}
 	}
 
@@ -237,7 +229,7 @@ impl JsUtxo {
 			None => None,
 			Some(index) => {
 				let index: String = index.into();
-				if index.len() == 0 {
+				if index.is_empty() {
 					None
 				} else {
 					let index: u64 = index.parse().map_err(|_| OpStatusCode::InvalidUTXOIndex)?;
@@ -247,18 +239,9 @@ impl JsUtxo {
 		};
 		let utxo = match (curve, backend) {
 			(Curve::Bn254, Backend::Arkworks) => {
-				let blinding_vec: Option<Vec<u8>> = match blinding {
-					Some(val) => Some(val.to_vec()),
-					None => None
-				};
-				let public_key_vec: Option<Vec<u8>> = match public_key {
-					Some(val) => Some(val.to_vec()),
-					None => None
-				};
-				let private_key_vec: Option<Vec<u8>> = match private_key {
-					Some(val) => Some(val.to_vec()),
-					None => None
-				};
+				let blinding_vec: Option<Vec<u8>> = blinding.map(|val| val.to_vec());
+				let public_key_vec: Option<Vec<u8>> = public_key.map(|val| val.to_vec());
+				let private_key_vec: Option<Vec<u8>> = private_key.map(|val| val.to_vec());
 
 				JsUtxo::new(
 					Curve::Bn254,
@@ -311,7 +294,7 @@ impl JsUtxo {
 
 	#[wasm_bindgen(getter)]
 	pub fn secret_key(&self) -> JsString {
-		let secret_key = self.get_secret_key().unwrap_or(vec![]);
+		let secret_key = self.get_secret_key().unwrap_or_default();
 		hex::encode(secret_key).into()
 	}
 
@@ -325,8 +308,8 @@ impl JsUtxo {
 	pub fn set_index(&self, val: u64) {
 		match self.inner.clone() {
 			JsUtxoInner::Bn254(mut utxo) => {
-				utxo.set_index(val.clone());
-			},
+				utxo.set_index(val);
+			}
 		}
 	}
 
@@ -362,9 +345,19 @@ impl fmt::Display for JsUtxo {
 			.unwrap_or_else(|| "".to_string());
 		let blinding = hex::encode(self.get_blinding());
 		let public_key = hex::encode(self.get_public_key());
-		let private_key = hex::encode(self.get_secret_key().unwrap_or(vec![]));
+		let private_key = hex::encode(self.get_secret_key().unwrap_or_default());
 
-		let sec = vec![curve, backend, amount, chain_id, blinding, public_key, private_key, index].join("&");
+		let sec = vec![
+			curve,
+			backend,
+			amount,
+			chain_id,
+			blinding,
+			public_key,
+			private_key,
+			index,
+		]
+		.join("&");
 
 		write!(f, "{}", sec)
 	}
@@ -410,7 +403,7 @@ impl FromStr for JsUtxo {
 				Some(blinding),
 				Some(public_key),
 				None,
-				index
+				index,
 			)
 		}
 	}
