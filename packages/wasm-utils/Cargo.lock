@@ -280,9 +280,9 @@ dependencies = [
 
 [[package]]
 name = "arkworks-setups"
-version = "1.2.0"
+version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3b52ce67f13652a62307fe59d77ff9504cc8454c09a382983435245c8783045"
+checksum = "11dca83367fb4195d476db9c65a69091b54f88c14da73deb5cbc623e8de69ddd"
 dependencies = [
  "ark-crypto-primitives",
  "ark-ec",
@@ -1060,7 +1060,7 @@ dependencies = [
 
 [[package]]
 name = "wasm-utils"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "ark-bls12-381",
  "ark-bn254",
