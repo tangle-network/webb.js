@@ -4,7 +4,7 @@ import { CircomUtxo } from '../../index.js';
 import { Keypair } from '../../keypair.js';
 
 describe('Utxo and Keypair serialization integrations', () => {
-  it.only('CircomUtxo with privateKey Keypair', async function () {
+  it('CircomUtxo with privateKey Keypair', async function () {
     const keypair = new Keypair();
 
     const utxo = await CircomUtxo.generateUtxo({
