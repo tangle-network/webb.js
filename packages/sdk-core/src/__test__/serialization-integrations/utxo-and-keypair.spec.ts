@@ -21,10 +21,8 @@ describe('Utxo and Keypair serialization integrations', () => {
     const utxoEncryption = utxo.encrypt();
     const utxoDecrypted = await CircomUtxo.decrypt(keypair, utxoEncryption);
     const utxoString = utxo.serialize();
-    console.log('utxoString from circomutxo: ', utxoString);
     const recreatedUtxo = await CircomUtxo.deserialize(utxoString);
     const recreatedUtxoString = recreatedUtxo.serialize();
-    console.log('recreated utxo string from circomutxo: ', recreatedUtxoString);
     const recreatedUtxoEncryption = recreatedUtxo.encrypt();
     const recreatedUtxoDecrypted = await CircomUtxo.decrypt(keypair, recreatedUtxoEncryption);
 
