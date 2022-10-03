@@ -6,7 +6,6 @@
 
 import type { Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
 
-import { Note } from '../note.js';
 import { Utxo } from '../utxo.js';
 
 export type ProvingManagerSetupInput<T extends NoteProtocol> = ProvingManagerPayload[T];
@@ -61,7 +60,7 @@ export type MixerPMSetupInput = {
  * @param token - The optional token to unwrap into upon withdrawal
  * */
 export type VAnchorPMSetupInput = {
-  inputNotes: Note[];
+  inputUtxos: Utxo[];
   leavesMap: Record<string, Leaves>;
   indices: number[];
   roots: Leaves;
@@ -88,7 +87,7 @@ export interface ProofPayload extends Record<NoteProtocol, any> {
 /**
  * Proving Manager proof output for the VAnchor
  * @param inputUtxos - The input UTXOs for the transaction
- * @param outputNotes - The output notes for the transaction
+ * @param outputUtxos - The output UTXOs for the transaction
  * @param proof - The proof for the transaction
  * @param publicInputs - Array of public inputs for the proof
  * @param publicAmount - The public amount for the transaction
@@ -96,7 +95,7 @@ export interface ProofPayload extends Record<NoteProtocol, any> {
  */
 export type VAnchorProof = {
   readonly inputUtxos: Array<Utxo>;
-  readonly outputNotes: Array<Note>;
+  readonly outputUtxos: Array<Utxo>;
   readonly proof: string;
   readonly publicInputs: Array<string>;
   readonly publicAmount: Uint8Array;

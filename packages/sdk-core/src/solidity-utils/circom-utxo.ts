@@ -33,8 +33,8 @@ export class CircomUtxo extends Utxo {
       this.amount,
       this.chainId,
       this.blinding.slice(2),
-      this.keypair.getPubKey().slice(2),
-      this.keypair.getEncryptionKey()?.slice(2),
+      this.getKeypair().getPubKey().slice(2),
+      this.getKeypair().getEncryptionKey()?.slice(2),
       this.secret_key.slice(2),
       this.index.toString()
     ].join('&');
@@ -126,7 +126,7 @@ export class CircomUtxo extends Utxo {
    * @returns `0x`-prefixed hex string with data
    */
   encrypt () {
-    if (!this.keypair.getEncryptionKey()) {
+    if (!this.getKeypair().getEncryptionKey()) {
       throw new Error('Must have a configured encryption key on the keypair to encrypt the utxo');
     }
 
@@ -136,7 +136,7 @@ export class CircomUtxo extends Utxo {
       toBuffer(BigNumber.from(this._blinding), 32)
     ]);
 
-    return this.keypair.encrypt(bytes);
+    return this.getKeypair().encrypt(bytes);
   }
 
   /**
@@ -221,7 +221,7 @@ export class CircomUtxo extends Utxo {
     // If the amount of the UTXO is zero, then the nullifier is not important.
     // Return a 'dummy' value that will satisfy the circuit
     // Enforce index on the UTXO if there is an amount greater than zero
-    if (!this.keypair || !this.keypair.privkey) {
+    if (!this.getKeypair() || !this.getKeypair().privkey) {
       throw new Error('Cannot create nullifier, keypair with private key not configured');
     }
 
@@ -230,7 +230,7 @@ export class CircomUtxo extends Utxo {
       this.index > 0 ? this.index : 0,
       // The following parameter is the 'ownership hash', a portion of the nullifier that enables
       // compliance, and ties a utxo to a particular keypair.
-      poseidon([this.keypair.privkey, u8aToHex(this.commitment), this.index])
+      poseidon([this.getKeypair().privkey, u8aToHex(this.commitment), this.index])
     ]);
 
     return x.toString();

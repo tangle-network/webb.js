@@ -9,10 +9,7 @@ import * as snarkjs from 'snarkjs';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
-import { toFixedHex } from '../../big-number-utils.js';
-import { Keypair } from '../../keypair.js';
 import { MerkleProof, MerkleTree } from '../../merkle-tree.js';
-import { Note } from '../../note.js';
 import { buildVariableWitnessCalculator, CircomUtxo, generateVariableWitnessInput, generateWithdrawProofCallData, getVAnchorExtDataHash } from '../../solidity-utils/index.js';
 import { PMEvents } from '../types.js';
 import { WorkerProofInterface, WorkerProvingManagerSetupInput, WorkerVAnchorPMSetupInput } from '../worker-utils.js';
@@ -77,30 +74,32 @@ export class CircomProvingManagerThread {
   async prove<T extends NoteProtocol> (protocol: T, pmSetupInput: WorkerProvingManagerSetupInput<T>): Promise<WorkerProofInterface<T>> {
     if (protocol === 'vanchor') {
       const input = pmSetupInput as WorkerVAnchorPMSetupInput;
-      const notes = await Promise.all(input.inputNotes.map((note) => Note.deserialize(note)));
+      const inputUtxos = await Promise.all(input.inputUtxos.map((utxo) => CircomUtxo.deserialize(utxo)));
       const indices = [...input.indices];
 
-      if (notes.length !== indices.length) {
+      if (inputUtxos.length !== indices.length) {
         throw new Error(
-          `Input notes and indices size don't match notes count (${notes.length}) indices count (${indices.length})`
+          `Input notes and indices size don't match notes count (${inputUtxos.length}) indices count (${indices.length})`
         );
       }
 
       // Set the leaf index on the notes
-      for (let i = 0; i < notes.length; i++) {
-        notes[i].mutateIndex(indices[i].toString());
+      for (let i = 0; i < inputUtxos.length; i++) {
+        inputUtxos[i].setIndex(indices[i]);
       }
 
       // Account for empty leaves set on the merkle tree
-      let mt: MerkleTree = new MerkleTree(this.treeDepth, input.leavesMap[notes[0].note.sourceChainId]
-        ? input.leavesMap[(notes[0].note.sourceChainId)].map((u8a) => u8aToHex(u8a))
+      const firstInputLeaves = input.leavesMap[inputUtxos[0].originChainId ?? inputUtxos[0].chainId];
+
+      let mt: MerkleTree = new MerkleTree(this.treeDepth, firstInputLeaves
+        ? firstInputLeaves.map((u8a) => u8aToHex(u8a))
         : []);
       const merkleProofs: MerkleProof[] = [];
 
       // loop through the jsNotes and generate merkle proofs
-      for (let i = 0; i < notes.length; i++) {
+      for (let i = 0; i < inputUtxos.length; i++) {
         // generate the merkle proof for this note. If it is a dummy utxo, return zeros
-        if (notes[i].note.amount === '0') {
+        if (inputUtxos[i].amount === '0') {
           merkleProofs.push({
             element: BigNumber.from(0),
             merkleRoot: BigNumber.from(u8aToHex(input.roots[0])),
@@ -108,13 +107,12 @@ export class CircomProvingManagerThread {
             pathIndices: new Array(this.treeDepth).fill(0)
           });
         } else {
-          mt = new MerkleTree(this.treeDepth, input.leavesMap[(notes[i].note.sourceChainId)].map((u8a) => u8aToHex(u8a)));
-
-          merkleProofs.push(mt.path(Number(notes[i].note.index)));
+          mt = new MerkleTree(this.treeDepth, input.leavesMap[(inputUtxos[i].originChainId || inputUtxos[i].chainId)].map((u8a) => u8aToHex(u8a)));
+          merkleProofs.push(mt.path(Number(inputUtxos[i].index)));
         }
       }
 
-      if (notes.length > 16) {
+      if (inputUtxos.length > 16) {
         throw new Error('The maximum support input count is 16');
       }
 
@@ -128,54 +126,6 @@ export class CircomProvingManagerThread {
         input.refund,
         u8aToHex(input.token)
       );
-
-      // create utxos for the inputs
-      const inputUtxos = await Promise.all(notes.map((note) => {
-        const secrets = note.note.secrets.split(':');
-
-        return CircomUtxo.generateUtxo({
-          amount: BigNumber.from(`0x${secrets[1]}`).toString(),
-          backend: note.note.backend,
-          blinding: hexToU8a(`0x${secrets[3]}`),
-          chainId: note.note.targetChainId,
-          curve: note.note.curve,
-          index: note.note.index,
-          keypair: new Keypair(`0x${secrets[2]}`)
-        });
-      }));
-
-      // create JsNotes for the outputs
-      // The output UTXO will have its sourceChainId as the targetChainId of the input UTXOs
-      // The output UTXO will have its targetChainId = sourceChainId
-      // TODO: Investigate if we can modify the above statement to other chains.
-      const outputNotes: Note[] = [];
-
-      for (const utxoString of input.output) {
-        const utxo = await CircomUtxo.deserialize(utxoString);
-        const secrets = [toFixedHex(utxo.chainId, 8), toFixedHex(utxo.amount), utxo.secret_key, utxo.blinding].join(':');
-
-        const note = await Note.generateNote({
-          amount: utxo.amount,
-          backend: 'Circom',
-          curve: 'Bn254',
-          denomination: '18',
-          exponentiation: '5',
-          hashFunction: 'Poseidon',
-          index: utxo.index,
-          privateKey: hexToU8a(utxo.secret_key),
-          protocol: 'vanchor',
-          secrets,
-          sourceChain: utxo.chainId,
-          sourceIdentifyingData: notes[0].note.targetIdentifyingData,
-          targetChain: utxo.chainId,
-          targetIdentifyingData: notes[0].note.targetIdentifyingData,
-          tokenSymbol: notes[0].note.tokenSymbol,
-          version: 'v1',
-          width: '5'
-        });
-
-        outputNotes.push(note);
-      }
 
       const outputUtxos = await Promise.all(input.output.map((utxoString) => CircomUtxo.deserialize(utxoString)));
 
@@ -198,7 +148,7 @@ export class CircomProvingManagerThread {
       const vanchorProof: WorkerProofInterface<'vanchor'> = {
         extDataHash: hexToU8a(dataHash.toHexString()),
         inputUtxos: inputUtxos.map((utxo) => utxo.serialize()),
-        outputNotes: outputNotes.map((note) => note.serialize()),
+        outputUtxos: outputUtxos.map((note) => note.serialize()),
         proof: proofEncoded,
         publicAmount: hexToU8a(input.publicAmount),
         // public inputs on ProofInterface not required for verifying in circom
