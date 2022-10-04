@@ -120,4 +120,25 @@ describe('Utxo Class', () => {
       expect(ex.message).to.contain('malformed utxo encryption');
     }
   });
+
+  it('Should set the index of an arkworks utxo', async function () {
+    const keypair = new Keypair();
+
+    const utxo = await Utxo.generateUtxo({
+      amount: '0',
+      backend: 'Arkworks',
+      chainId: '1',
+      curve: 'Bn254',
+      index: '0',
+      keypair
+    });
+
+    console.log('nullifierBeforeIndex: ', utxo.nullifier);
+
+    utxo.setIndex(2);
+
+    expect(utxo.index).to.eq(2);
+
+    console.log('nullifierAfterIndex: ', utxo.nullifier);
+  });
 });

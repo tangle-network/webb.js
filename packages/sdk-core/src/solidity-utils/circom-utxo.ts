@@ -270,6 +270,15 @@ class CircomJsUtxo implements JsUtxo {
     throw new Error('Method not implemented.');
   }
 
+  setIndex (val: bigint): void {
+    this.index = val;
+    throw new Error('Method not implemented.');
+  }
+
+  calculate_nullifier (): string {
+    throw new Error('Method not implemented.');
+  }
+
   amount = '';
   blinding = '';
   chainId = '';

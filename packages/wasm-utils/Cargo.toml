@@ -33,8 +33,8 @@ ark-ed-on-bn254 = { version = "^0.3.0", default-features = true, features = ["r1
 ark-bn254 = { version = "^0.3.0", default-features = true, features = ["curve"] }
 ark-bls12-381 = { version = "^0.3.0", default-features = false, features = ["curve"] }
 ark-std = { version = "^0.3.0", default-features = false }
-arkworks-setups = { version = "1.2.1", default-features = false, features = ["r1cs"] }
-arkworks-native-gadgets = { version = "1.2.0", default-features = false }
+arkworks-setups = { path = "../../../arkworks-gadgets/arkworks-setups", default-features = false, features = ["r1cs"] }
+arkworks-native-gadgets = {  path = "../../../arkworks-gadgets/arkworks-native-gadgets", default-features = false }
 
 ethabi = { version = "15.0.0", default-features = false }
 parity-scale-codec = { version = "3.1.2", default-features = false }

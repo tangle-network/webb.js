@@ -17,7 +17,6 @@
 
 import { options, rpcProperties } from '@webb-tools/api';
 import { ChildProcess, execSync } from 'child_process';
-import getPort, { portNumbers } from 'get-port';
 
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -68,11 +67,15 @@ export abstract class SubstrateNodeBase<TypedEvent extends SubstrateEvent> {
   public static async makePorts (
     opts: LocalNodeOpts
   ): Promise<{ ws: number; http: number; p2p: number }> {
+    // Dynamic import used for commonjs compatibility
+    const getPort = await import('get-port');
+    const { portNumbers } = getPort;
+
     return opts.ports === 'auto'
       ? {
-        http: await getPort({ port: portNumbers(9933, 9999) }),
-        p2p: await getPort({ port: portNumbers(30333, 30399) }),
-        ws: await getPort({ port: portNumbers(9944, 9999) })
+        http: await getPort.default({ port: portNumbers(9933, 9999) }),
+        p2p: await getPort.default({ port: portNumbers(30333, 30399) }),
+        ws: await getPort.default({ port: portNumbers(9944, 9999) })
 
       }
       : (opts.ports as { ws: number; http: number; p2p: number });

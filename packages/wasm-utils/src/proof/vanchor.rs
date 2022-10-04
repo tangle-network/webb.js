@@ -131,7 +131,7 @@ impl VAnchorProofInput {
 		let chain_id = self.chain_id.ok_or(OpStatusCode::InvalidChainId)?;
 		let indices = self.indices.ok_or(OpStatusCode::InvalidIndices)?;
 		let public_amount = self.public_amount.ok_or(OpStatusCode::InvalidPublicAmount)?;
-		let output_utxos = self.output_utxos.ok_or(OpStatusCode::InvalidPublicAmount)?;
+		let output_utxos = self.output_utxos.ok_or(OpStatusCode::InvalidOutputUtxoConfig)?;
 
 		let exponentiation = self.exponentiation.unwrap_or(5);
 		let width = self.width.unwrap_or(3);

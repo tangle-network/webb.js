@@ -329,13 +329,15 @@ async function createVAnchorWithDeposit(
     curve: 'Bn254',
     backend: 'Arkworks',
     amount: '0',
-    chainId: outputChainId.toString()
+    chainId: outputChainId.toString(),
+    index: '0'
   });
   const input2 = await Utxo.generateUtxo({
     curve: 'Bn254',
     backend: 'Arkworks',
     amount: '0',
-    chainId: outputChainId.toString()
+    chainId: outputChainId.toString(),
+    index: '0'
   });
   const publicAmount = currencyToUnitI128(10);
   const inputUtxos = [input1, input2];
@@ -478,13 +480,15 @@ describe('VAnchor tests', function() {
       curve: 'Bn254',
       backend: 'Arkworks',
       amount: '0',
-      chainId: outputChainId.toString()
+      chainId: outputChainId.toString(),
+      index: '0'
     });
     const input2 = await Utxo.generateUtxo({
       curve: 'Bn254',
       backend: 'Arkworks',
       amount: '0',
-      chainId: outputChainId.toString()
+      chainId: outputChainId.toString(),
+      index: '0'
     });
     console.log('notes ready')
     const publicAmount = currencyToUnitI128(10);
@@ -537,7 +541,7 @@ describe('VAnchor tests', function() {
       refund: '0',
       token: assetId
     };
-  const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
+    const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
       relayer: address,
       recipient: address,
@@ -569,7 +573,7 @@ describe('VAnchor tests', function() {
     }
   });
 
-  it('VAnchor deposit and withdraw', async function() {
+  it.only('VAnchor deposit and withdraw', async function() {
     const { bob, alice } = getKeyring();
     const fee = 0;
     const leavesMap: any = {};
@@ -611,6 +615,10 @@ describe('VAnchor tests', function() {
 
     const { encrypted: comEnc1 } = naclEncrypt(output1.commitment, secret);
     const { encrypted: comEnc2 } = naclEncrypt(output2.commitment, secret);
+
+    utxos.map((utxo) => console.log('input utxo: ', utxo.serialize()));
+    console.log('output1: ', output1.serialize());
+    console.log('output2: ', output2.serialize());
 
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: chainId.toString(),

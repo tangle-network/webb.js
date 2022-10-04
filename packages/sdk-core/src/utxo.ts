@@ -221,7 +221,7 @@ export class Utxo {
   }
 
   setIndex (index: number) {
-    this.inner.index = BigInt(index);
+    this.inner.setIndex(BigInt(index));
   }
 
   get amount (): string {
@@ -249,10 +249,12 @@ export class Utxo {
    * @returns the index configured on this UTXO. Output UTXOs generated
    * before they have been inserted in a tree.
    *
-   * TODO: Return null instead of 0 for the index if it is an output utxo?
+   * Utxos used as inputs are expected to have the index
    */
   get index (): number|undefined {
     if (this.inner.index !== undefined) {
+      console.log('index: ', this.inner.index);
+
       return Number(this.inner.index);
     }
 
@@ -264,7 +266,7 @@ export class Utxo {
    * where signature = hash([secret key, commitment, index])
    */
   get nullifier (): string {
-    return this.inner.nullifier;
+    return this.inner.calculate_nullifier();
   }
 
   /**

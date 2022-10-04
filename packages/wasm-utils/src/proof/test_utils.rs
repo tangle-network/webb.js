@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::process::Output;
 
 use ark_bn254::{Bn254, Fr as Bn254Fr};
 use ark_ff::{BigInteger, PrimeField, Zero};
@@ -10,14 +9,14 @@ use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
-use crate::note::{JsNote, JsNoteBuilder};
+use crate::note::{JsNote};
 use crate::proof::{JsProofInputBuilder, LeavesMapInput, ProofInputBuilder, VAnchorProofInput};
 use crate::types::{
-	Backend, Curve, HashFunction, Indices, Leaves, NoteProtocol, NoteVersion, Protocol, Version, WasmCurve, BE, HF,
+	Backend, Curve, Indices, Leaves, Protocol, WasmCurve, BE,
 };
 use crate::utxo::JsUtxo;
 use crate::{
-	MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_16_2, VAnchorR1CSProverBn254_30_2_2_2, ANCHOR_COUNT,
+	MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_16_2, VAnchorR1CSProverBn254_30_2_2_2,
 	DEFAULT_LEAF, TREE_HEIGHT,
 };
 
@@ -53,7 +52,7 @@ pub struct MixerTestSetup {
 pub struct VAnchorTestSetup {
 	pub(crate) proof_input_builder: JsProofInputBuilder,
 	pub(crate) roots_raw: Vec<Vec<u8>>,
-	pub(crate) notes: Vec<JsNote>,
+	pub(crate) notes: Vec<JsUtxo>,
 	pub(crate) leaf_index: u64,
 	pub(crate) vk: Vec<u8>,
 }
@@ -99,39 +98,33 @@ pub fn generate_mixer_test_setup(
 	}
 }
 
-// (output chain id , amount1,amount2)
-type VAnchorOutput = (u64, i128, i128);
-pub fn generate_vanchor_note(amount: i128, in_chain_id: u64, output_chain_id: u64, index: Option<u64>) -> JsNote {
-	let mut note_builder = JsNoteBuilder::new();
-	let protocol: Protocol = JsValue::from(NoteProtocol::VAnchor.to_string()).into();
-	let version: Version = JsValue::from(NoteVersion::V1.to_string()).into();
-	let backend: BE = JsValue::from(Backend::Arkworks.to_string()).into();
-	let hash_function: HF = JsValue::from(HashFunction::Poseidon.to_string()).into();
-	let curve: WasmCurve = JsValue::from(Curve::Bn254.to_string()).into();
+pub fn generate_vanchor_utxo(amount: i128, in_chain_id: u64, index: Option<u64>) -> JsUtxo {
 
-	note_builder.protocol(protocol).unwrap();
-	note_builder.version(version).unwrap();
+	// If the index is passed on generation - assume it is constructing an input JsUtxo
+	let utxo = match index {
+		Some(val) => JsUtxo::construct(
+			WasmCurve::from(JsValue::from("Bn254")),
+			BE::from(Backend::Arkworks),
+			JsString::from(amount.to_string()),
+			JsString::from(in_chain_id.to_string()),
+			None,
+			None,
+			None,
+			Some(JsString::from(val.to_string()))
+		),
+		None => JsUtxo::construct(
+			WasmCurve::from(JsValue::from("Bn254")),
+			BE::from(Backend::Arkworks),
+			JsString::from(amount.to_string()),
+			JsString::from(in_chain_id.to_string()),
+			None,
+			None,
+			None,
+			None
+		)
+	};
 
-	note_builder.source_chain_id(JsString::from(in_chain_id.to_string().as_str()));
-	note_builder.target_chain_id(JsString::from(output_chain_id.to_string().as_str()));
-	note_builder.source_identifying_data(JsString::from(in_chain_id.to_string().as_str()));
-	note_builder.target_identifying_data(JsString::from(output_chain_id.to_string().as_str()));
-
-	note_builder.width(JsString::from("5")).unwrap();
-	note_builder.exponentiation(JsString::from("5")).unwrap();
-	note_builder.denomination(JsString::from("18")).unwrap();
-	note_builder.amount(JsString::from(amount.to_string().as_str()));
-	note_builder.token_symbol(JsString::from("EDG"));
-	note_builder.curve(curve).unwrap();
-	note_builder.hash_function(hash_function).unwrap();
-	note_builder.backend(backend);
-	match index {
-		None => {}
-		Some(index) => {
-			note_builder.index(JsString::from(index.to_string().as_str()));
-		}
-	}
-	note_builder.build().unwrap()
+	utxo.unwrap()
 }
 
 pub fn compute_chain_id_type(chain_id: u64, chain_type: [u8; 2]) -> u64 {
@@ -148,13 +141,13 @@ pub fn generate_vanchor_test_js_setup() -> VAnchorTestSetup {
 	let chain_type = [2, 0];
 	let chain_id = compute_chain_id_type(0, chain_type);
 
-	// two output notes (Assuming are already deposited)
-	let note1 = generate_vanchor_note(5, chain_id, chain_id, Some(0));
-	let note2 = generate_vanchor_note(5, chain_id, chain_id, Some(0));
+	// Create the utxos that are assumed to already be deposited
+	let input_utxo1 = generate_vanchor_utxo(5, chain_id, Some(0));
+	let input_utxo2 = generate_vanchor_utxo(5, chain_id, Some(1));
 	// output configs
 
-	let output_1 = new_utxo_bn254_2_2(note1.curve.unwrap(), 10, chain_id);
-	let output_2 = new_utxo_bn254_2_2(note1.curve.unwrap(), 2, chain_id);
+	let output_1 = new_utxo_bn254_2_2(Curve::Bn254, 10, chain_id);
+	let output_2 = new_utxo_bn254_2_2(Curve::Bn254, 2, chain_id);
 	let index = 0;
 
 	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(ArkCurve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();
@@ -165,8 +158,8 @@ pub fn generate_vanchor_test_js_setup() -> VAnchorTestSetup {
 	let poseidon3 = Poseidon::new(params3);
 
 	// Output leaf commitment
-	let note1_com: Vec<u8> = note1.get_leaf_commitment().unwrap().to_vec();
-	let note2_com: Vec<u8> = note2.get_leaf_commitment().unwrap().to_vec();
+	let note1_com: Vec<u8> = input_utxo1.get_commitment();
+	let note2_com: Vec<u8> = input_utxo2.get_commitment();
 	// Insert commitments
 	let leaves_f: Vec<_> = vec![note1_com, note2_com]
 		.iter()
@@ -202,8 +195,8 @@ pub fn generate_vanchor_test_js_setup() -> VAnchorTestSetup {
 	// leaves
 	let mut leaves_map = LeavesMapInput::new();
 	let leaves_ua: Array = vec![
-		note1.get_leaf_commitment().unwrap(),
-		note2.get_leaf_commitment().unwrap(),
+		input_utxo1.commitment(),
+		input_utxo2.commitment(),
 	]
 	.iter()
 	.collect();
@@ -215,21 +208,21 @@ pub fn generate_vanchor_test_js_setup() -> VAnchorTestSetup {
 	js_builder.chain_id(JsString::from(chain_id.to_string())).unwrap();
 	let indices: Array = vec![JsValue::from("0"), JsValue::from("1")].iter().collect();
 	js_builder.set_indices(Indices::from(JsValue::from(indices))).unwrap();
-	let notes: Array = vec![JsValue::from(note1.clone()), JsValue::from(note2.clone())]
+	let input_utxos: Array = vec![JsValue::from(input_utxo1.clone()), JsValue::from(input_utxo2.clone())]
 		.iter()
 		.collect();
-	js_builder.set_notes(notes).unwrap();
-	js_builder.set_output_utxos(output_1, output_2);
+	js_builder.set_input_utxos(input_utxos).unwrap();
+	js_builder.set_output_utxos(output_1, output_2).unwrap();
 	// Assert the utxo chain id
-	let note_1_chain_id = note1.get_js_utxo().unwrap().chain_id_raw();
-	let note_2_chain_id = note2.get_js_utxo().unwrap().chain_id_raw();
+	let note_1_chain_id = input_utxo1.chain_id_raw();
+	let note_2_chain_id = input_utxo2.chain_id_raw();
 	assert_eq!(note_1_chain_id, chain_id);
 	assert_eq!(note_2_chain_id, chain_id);
 
 	VAnchorTestSetup {
 		vk,
 		leaf_index: index,
-		notes: vec![note1, note2],
+		notes: vec![input_utxo1, input_utxo2],
 		proof_input_builder: js_builder,
 		roots_raw: vec![],
 	}
@@ -242,9 +235,7 @@ pub fn generate_vanchor_test_setup_2_inputs() -> VAnchorTestSetup {
 	let chain_id = 0;
 
 	let params3 = setup_params::<Bn254Fr>(curve, 5, 3);
-	let params4 = setup_params::<Bn254Fr>(curve, 5, 4);
 	let tree_hasher = Poseidon::new(params3);
-	let nullifier_hasher = Poseidon::new(params4);
 	let public_amount = 10;
 	let in_amount = 5;
 	let in_chain_id = 0;
@@ -330,9 +321,7 @@ pub fn generate_vanchor_test_setup_16_non_default_inputs() -> VAnchorTestSetup {
 	let chain_id = 0;
 
 	let params3 = setup_params::<Bn254Fr>(curve, 5, 3);
-	let params4 = setup_params::<Bn254Fr>(curve, 5, 4);
 	let tree_hasher = Poseidon::new(params3);
-	let nullifier_hasher = Poseidon::new(params4);
 	let public_amount = 10;
 	let in_amount = 10u128;
 	let in_chain_id = 0;
