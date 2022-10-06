@@ -9,15 +9,13 @@ use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::prelude::*;
 
-use crate::note::{JsNote};
+use crate::note::JsNote;
 use crate::proof::{JsProofInputBuilder, LeavesMapInput, ProofInputBuilder, VAnchorProofInput};
-use crate::types::{
-	Backend, Curve, Indices, Leaves, Protocol, WasmCurve, BE,
-};
+use crate::types::{Backend, Curve, Indices, Leaves, Protocol, WasmCurve, BE};
 use crate::utxo::JsUtxo;
 use crate::{
-	MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_16_2, VAnchorR1CSProverBn254_30_2_2_2,
-	DEFAULT_LEAF, TREE_HEIGHT,
+	MixerR1CSProverBn254_30, VAnchorR1CSProverBn254_30_2_16_2, VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF,
+	TREE_HEIGHT,
 };
 
 pub const MIXER_NOTE_V1_X5_5:&str  = "webb://v1:mixer/2:2/2:2/fd717cfe463b3ffec71ee6b7606bbd0179170510abf41c9f16c1d20ca9923f0e:18b6b080e6a43262f00f6fb3da0d2409c4871b8f26d89d5c8836358e1af5a41c/?curve=Bn254&width=3&exp=5&hf=Poseidon&backend=Arkworks&token=EDG&denom=18&amount=10&index=10";
@@ -99,8 +97,8 @@ pub fn generate_mixer_test_setup(
 }
 
 pub fn generate_vanchor_utxo(amount: i128, in_chain_id: u64, index: Option<u64>) -> JsUtxo {
-
-	// If the index is passed on generation - assume it is constructing an input JsUtxo
+	// If the index is passed on generation - assume it is constructing an input
+	// JsUtxo
 	let utxo = match index {
 		Some(val) => JsUtxo::construct(
 			WasmCurve::from(JsValue::from("Bn254")),
@@ -110,7 +108,7 @@ pub fn generate_vanchor_utxo(amount: i128, in_chain_id: u64, index: Option<u64>)
 			None,
 			None,
 			None,
-			Some(JsString::from(val.to_string()))
+			Some(JsString::from(val.to_string())),
 		),
 		None => JsUtxo::construct(
 			WasmCurve::from(JsValue::from("Bn254")),
@@ -120,8 +118,8 @@ pub fn generate_vanchor_utxo(amount: i128, in_chain_id: u64, index: Option<u64>)
 			None,
 			None,
 			None,
-			None
-		)
+			None,
+		),
 	};
 
 	utxo.unwrap()
@@ -194,12 +192,9 @@ pub fn generate_vanchor_test_js_setup() -> VAnchorTestSetup {
 	js_builder.set_roots(Leaves::from(JsValue::from(roots_array))).unwrap();
 	// leaves
 	let mut leaves_map = LeavesMapInput::new();
-	let leaves_ua: Array = vec![
-		input_utxo1.commitment(),
-		input_utxo2.commitment(),
-	]
-	.iter()
-	.collect();
+	let leaves_ua: Array = vec![input_utxo1.commitment(), input_utxo2.commitment()]
+		.iter()
+		.collect();
 	leaves_map
 		.set_chain_leaves(chain_id, Leaves::from(JsValue::from(leaves_ua)))
 		.unwrap();

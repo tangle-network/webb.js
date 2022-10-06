@@ -242,7 +242,7 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		chain_id,
 		output_utxos,
 		ext_data_hash,
-	} = vanchor_proof_input.clone();
+	} = vanchor_proof_input;
 	let public_amount_bytes = Bn254Fr::from(public_amount)
 		.into_repr()
 		.to_bytes_be()
@@ -294,53 +294,52 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 		.try_into()
 		.map_err(|_| OpStatusCode::InvalidProofParameters)?;
 	let proof = match (backend, curve, roots.len()) {
-		(Backend::Arkworks, Curve::Bn254, 2) => {
-			match (exponentiation, width, in_utxos.len()) {
-				(5, 5, 2) => {
-					let utxos_in: [Utxo<Bn254Fr>; 2] = [in_utxos[0].get_bn254_utxo()?, in_utxos[1].get_bn254_utxo()?];
-					let indices = indices.try_into().map_err(|_| OpStatusCode::InvalidIndices)?;
-					let roots = roots.try_into().map_err(|_| OpStatusCode::InvalidRoots)?;
-					VAnchorR1CSProverBn254_30_2_2_2::create_proof(
-						ArkCurve::Bn254,
-						chain_id,
-						public_amount,
-						ext_data_hash,
-						roots,
-						indices,
-						leaves,
-						utxos_in,
-						utxos_out,
-						pk,
-						DEFAULT_LEAF,
-						rng,
-					)
-				}
-				(5, 5, 16) => {
-					let in_utxos = in_utxos
-						.iter()
-						.map(|utxo| utxo.get_bn254_utxo())
-						.collect::<Result<Vec<_>, _>>()?;
-					let utxos_slice = in_utxos.try_into().map_err(|_| OpStatusCode::InvalidNoteSecrets)?;
-					let indices = indices.try_into().map_err(|_| OpStatusCode::InvalidIndices)?;
-					let roots = roots.try_into().map_err(|_| OpStatusCode::InvalidRoots)?;
+		(Backend::Arkworks, Curve::Bn254, 2) => match (exponentiation, width, in_utxos.len()) {
+			(5, 5, 2) => {
+				let utxos_in: [Utxo<Bn254Fr>; 2] = [in_utxos[0].get_bn254_utxo()?, in_utxos[1].get_bn254_utxo()?];
+				let indices = indices.try_into().map_err(|_| OpStatusCode::InvalidIndices)?;
+				let roots = roots.try_into().map_err(|_| OpStatusCode::InvalidRoots)?;
+				VAnchorR1CSProverBn254_30_2_2_2::create_proof(
+					ArkCurve::Bn254,
+					chain_id,
+					public_amount,
+					ext_data_hash,
+					roots,
+					indices,
+					leaves,
+					utxos_in,
+					utxos_out,
+					pk,
+					DEFAULT_LEAF,
+					rng,
+				)
+			}
+			(5, 5, 16) => {
+				let in_utxos = in_utxos
+					.iter()
+					.map(|utxo| utxo.get_bn254_utxo())
+					.collect::<Result<Vec<_>, _>>()?;
+				let utxos_slice = in_utxos.try_into().map_err(|_| OpStatusCode::InvalidNoteSecrets)?;
+				let indices = indices.try_into().map_err(|_| OpStatusCode::InvalidIndices)?;
+				let roots = roots.try_into().map_err(|_| OpStatusCode::InvalidRoots)?;
 
-					VAnchorR1CSProverBn254_30_2_16_2::create_proof(
-						ArkCurve::Bn254,
-						chain_id,
-						public_amount,
-						ext_data_hash,
-						roots,
-						indices,
-						leaves,
-						utxos_slice,
-						utxos_out,
-						pk,
-						DEFAULT_LEAF,
-						rng,
-					)
-				}
-				_ => {
-					let message = format!(
+				VAnchorR1CSProverBn254_30_2_16_2::create_proof(
+					ArkCurve::Bn254,
+					chain_id,
+					public_amount,
+					ext_data_hash,
+					roots,
+					indices,
+					leaves,
+					utxos_slice,
+					utxos_out,
+					pk,
+					DEFAULT_LEAF,
+					rng,
+				)
+			}
+			_ => {
+				let message = format!(
 						"proof::vanchor: The proofing setup for backend {} curve {} width {} exp {} input size {} isn't implemented!",
 						backend,
 						curve,
@@ -348,10 +347,9 @@ pub fn create_proof(vanchor_proof_input: VAnchorProofPayload, rng: &mut OsRng) -
 						exponentiation,
 						&in_utxos.len(),
 					);
-					Err(Error::from(message))
-				}
+				Err(Error::from(message))
 			}
-		}
+		},
 		_ => {
 			let message = format!(
 				"proof::vanchor: The proofing setup for backend {} curve {} width {} exp {} input size {} isn't implemented!",

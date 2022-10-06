@@ -9,11 +9,11 @@ use wasm_bindgen_test::*;
 
 use crate::proof::test_utils::{
 	generate_mixer_test_setup, generate_vanchor_test_setup_16_mixed_inputs,
-	generate_vanchor_test_setup_16_non_default_inputs, generate_vanchor_test_setup_2_inputs, new_utxo_bn254_2_2,
-	MixerTestSetup, VAnchorTestSetup, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, generate_vanchor_utxo,
+	generate_vanchor_test_setup_16_non_default_inputs, generate_vanchor_test_setup_2_inputs, generate_vanchor_utxo,
+	new_utxo_bn254_2_2, MixerTestSetup, VAnchorTestSetup, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5,
 };
 use crate::proof::{generate_proof_js, truncate_and_pad, JsProofInputBuilder, LeavesMapInput, MTBn254X5};
-use crate::types::{Indices, Leaves, };
+use crate::types::{Indices, Leaves};
 use crate::utxo::JsUtxo;
 use crate::{VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF};
 
@@ -118,16 +118,10 @@ fn should_generate_vanchor_proof_input() {
 		hex::encode([0u8; 32].to_vec())
 	);
 	assert_eq!(vanchor_proof_input_payload.roots.len(), 2);
-	assert_eq!(
-		vanchor_proof_input_payload.backend.to_string(),
-		"Arkworks"
-	);
+	assert_eq!(vanchor_proof_input_payload.backend.to_string(), "Arkworks");
 	assert_eq!(vanchor_proof_input_payload.exponentiation, 5);
 	assert_eq!(vanchor_proof_input_payload.width, 5);
-	assert_eq!(
-		vanchor_proof_input_payload.curve.to_string(),
-		"Bn254"
-	);
+	assert_eq!(vanchor_proof_input_payload.curve.to_string(), "Bn254");
 	assert_eq!(hex::encode(vanchor_proof_input_payload.pk), "0000");
 }
 
@@ -361,7 +355,9 @@ fn should_fail_to_proof_with_3_inputs() {
 	let protocol = JsValue::from("vanchor").into();
 	let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
 
-	let leaves: Array = vec![utxo1.commitment(), utxo2.commitment(), utxo3.commitment()].into_iter().collect();
+	let leaves: Array = vec![utxo1.commitment(), utxo2.commitment(), utxo3.commitment()]
+		.into_iter()
+		.collect();
 
 	let mut leaves_map = LeavesMapInput::new();
 	leaves_map
