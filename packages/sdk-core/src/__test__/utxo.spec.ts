@@ -95,7 +95,7 @@ describe('Utxo Class', () => {
     expect(utxoString).to.deep.equal(serializedUtxo);
   });
 
-  it.only('CircomUtxo and Utxo should generate compatible outputs public utxo', async function () {
+  it('CircomUtxo and Utxo should generate compatible outputs public utxo', async function () {
     const keypair = Keypair.fromString('0x1111111111111111111111111111111111111111111111111111111111111111');
     const blinding = hexToU8a('0x17415b69c56a3c3897dcb339ce266a0f2a70c9372a6fec1676f81ddaf68e9926', 256);
 
@@ -118,9 +118,6 @@ describe('Utxo Class', () => {
       keypair
     });
 
-    console.log('utxo: ', utxo.serialize());
-    console.log('circomUtxo: ', circomUtxo.serialize());
-
     expect(utxo.amount).to.deep.equal(circomUtxo.amount);
     expect(utxo.chainId).to.deep.equal(circomUtxo.chainId);
     expect(utxo.public_key).to.deep.equal(circomUtxo.public_key);
@@ -128,7 +125,7 @@ describe('Utxo Class', () => {
     expect(utxo.commitment).to.deep.equal(circomUtxo.commitment);
   });
 
-  it.only('CircomUtxo and Utxo should generate compatible outputs private utxo', async function () {
+  it('CircomUtxo and Utxo should generate compatible outputs private utxo', async function () {
     const keypair = new Keypair();
     const blinding = hexToU8a('0x17415b69c56a3c3897dcb339ce266a0f2a70c9372a6fec1676f81ddaf68e9926', 256);
 
@@ -150,9 +147,6 @@ describe('Utxo Class', () => {
       index: '0',
       keypair
     });
-
-    console.log('utxo: ', utxo.serialize());
-    console.log('circomUtxo: ', circomUtxo.serialize());
 
     expect(utxo.amount).to.deep.equal(circomUtxo.amount);
     expect(utxo.chainId).to.deep.equal(circomUtxo.chainId);

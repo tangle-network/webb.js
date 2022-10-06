@@ -68,8 +68,8 @@ export class CircomUtxo extends Utxo {
     utxo._backend = 'Circom';
     utxo._amount = parts[2];
     utxo._chainId = parts[3];
-    utxo._blinding = '0x' + parts[4];
-    utxo._pubkey = '0x' + parts[5];
+    utxo._blinding = parts[4];
+    utxo._pubkey = parts[5];
     const maybeEncryptionKey = parts[6];
     const maybeSecretKey = parts[7];
     const maybeIndex = parts[8];
@@ -78,9 +78,9 @@ export class CircomUtxo extends Utxo {
       utxo.setKeypair(new Keypair('0x' + maybeSecretKey));
     } else {
       if (maybeEncryptionKey.length === 64) {
-        utxo.setKeypair(Keypair.fromString('0x' + utxo._pubkey.slice(2) + maybeEncryptionKey));
+        utxo.setKeypair(Keypair.fromString('0x' + utxo._pubkey + maybeEncryptionKey));
       } else {
-        utxo.setKeypair(Keypair.fromString('0x' + utxo._pubkey.slice(2)));
+        utxo.setKeypair(Keypair.fromString('0x' + utxo._pubkey));
       }
     }
 
@@ -129,7 +129,7 @@ export class CircomUtxo extends Utxo {
     const bytes = Buffer.concat([
       toBuffer(BigNumber.from(this._chainId), 8),
       toBuffer(BigNumber.from(this._amount), 32),
-      toBuffer(BigNumber.from(this._blinding), 32)
+      toBuffer(BigNumber.from('0x' + this._blinding), 32)
     ]);
 
     return this.getKeypair().encrypt(bytes);
@@ -229,7 +229,7 @@ export class CircomUtxo extends Utxo {
       poseidon([this.getKeypair().privkey, u8aToHex(this.commitment), this.index])
     ]);
 
-    return x.toString();
+    return toFixedHex(x).slice(2);
   }
 
   get public_key (): string {

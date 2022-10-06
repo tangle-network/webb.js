@@ -52,8 +52,6 @@ export class Utxo {
     // required of the parts - except for the Keypair information used for encryption.
     const wasmUtxoString = this.inner.serialize();
 
-    console.log('wasmUtxoString: ', wasmUtxoString);
-
     const parts = wasmUtxoString.split('&');
 
     const encryptionKey = this.keypair.getEncryptionKey()?.slice(2) ?? '';
@@ -142,7 +140,6 @@ export class Utxo {
     if (input.keypair) {
       if (input.keypair.privkey) {
         wasmUtxoPrivateKey = hexToU8a(input.keypair.privkey, 256);
-        console.log('wasmUtxo private key input: ', wasmUtxoPrivateKey);
       }
 
       wasmUtxoPublicKey = hexToU8a(input.keypair.getPubKey());
