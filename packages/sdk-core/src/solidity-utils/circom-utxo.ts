@@ -32,10 +32,10 @@ export class CircomUtxo extends Utxo {
       this._backend,
       this.amount,
       this.chainId,
-      this.blinding.slice(2),
+      this.blinding,
       this.getKeypair().getPubKey().slice(2),
       this.getKeypair().getEncryptionKey()?.slice(2),
-      this.secret_key.slice(2),
+      this.getKeypair().privkey?.slice(2),
       this.index.toString()
     ].join('&');
   }
@@ -105,14 +105,10 @@ export class CircomUtxo extends Utxo {
     utxo._index = input.index ? Number(input.index) : 0;
 
     if (input.keypair) {
-      utxo._secret_key = input.keypair.privkey || '';
-      utxo._pubkey = input.keypair.getPubKey();
       utxo.setKeypair(input.keypair);
-    } else {
-      utxo.setKeypair(new Keypair());
     }
 
-    utxo._blinding = input.blinding ? u8aToHex(input.blinding) : toFixedHex(randomBN(31));
+    utxo._blinding = input.blinding ? u8aToHex(input.blinding).slice(2) : toFixedHex(randomBN(31)).slice(2);
     utxo.setOriginChainId(input.originChainId);
 
     return utxo;
@@ -195,7 +191,7 @@ export class CircomUtxo extends Utxo {
    * @returns the poseidon hash of [chainId, amount, pubKey, blinding]
    */
   get commitment (): Uint8Array {
-    const hash = poseidon([this._chainId, this._amount, this._pubkey, this._blinding]);
+    const hash = poseidon([this._chainId, this._amount, '0x' + this._pubkey, '0x' + this._blinding]);
 
     return hexToU8a(BigNumber.from(hash).toHexString());
   }
@@ -236,6 +232,10 @@ export class CircomUtxo extends Utxo {
     return x.toString();
   }
 
+  get public_key (): string {
+    return this._pubkey;
+  }
+
   /**
    * @returns the secret_key AKA private_key used in the nullifier.
    * this value is used to derive the public_key for the commitment.
@@ -249,13 +249,17 @@ export class CircomUtxo extends Utxo {
   }
 
   setKeypair (keypair: Keypair): void {
-    this._pubkey = keypair.getPubKey();
+    this._pubkey = keypair.getPubKey().slice(2);
 
     if (keypair.privkey) {
-      this._secret_key = keypair.privkey;
+      this._secret_key = keypair.privkey.slice(2);
     }
 
     this.keypair = keypair;
+  }
+
+  setIndex (val: number): void {
+    this.index = val;
   }
 }
 

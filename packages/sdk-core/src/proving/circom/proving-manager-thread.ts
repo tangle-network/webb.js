@@ -148,7 +148,7 @@ export class CircomProvingManagerThread {
       const vanchorProof: WorkerProofInterface<'vanchor'> = {
         extDataHash: hexToU8a(dataHash.toHexString()),
         inputUtxos: inputUtxos.map((utxo) => utxo.serialize()),
-        outputUtxos: outputUtxos.map((note) => note.serialize()),
+        outputUtxos: outputUtxos.map((utxo) => utxo.serialize()),
         proof: proofEncoded,
         publicAmount: hexToU8a(input.publicAmount),
         // public inputs on ProofInterface not required for verifying in circom

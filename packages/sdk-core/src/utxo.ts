@@ -51,6 +51,9 @@ export class Utxo {
     // The wasmUtxo is a string representation of the utxo. It has all of the information
     // required of the parts - except for the Keypair information used for encryption.
     const wasmUtxoString = this.inner.serialize();
+
+    console.log('wasmUtxoString: ', wasmUtxoString);
+
     const parts = wasmUtxoString.split('&');
 
     const encryptionKey = this.keypair.getEncryptionKey()?.slice(2) ?? '';
@@ -138,7 +141,8 @@ export class Utxo {
     // Format the inputs as little-endian for wasm.
     if (input.keypair) {
       if (input.keypair.privkey) {
-        wasmUtxoPrivateKey = hexToU8a(input.keypair.privkey);
+        wasmUtxoPrivateKey = hexToU8a(input.keypair.privkey, 256);
+        console.log('wasmUtxo private key input: ', wasmUtxoPrivateKey);
       }
 
       wasmUtxoPublicKey = hexToU8a(input.keypair.getPubKey());
@@ -276,7 +280,7 @@ export class Utxo {
    * If the utxo is configured with a secret_key, this value should be poseidonHash(secret_key)
    */
   get public_key (): string {
-    throw new Error('Can\'t get the public_key on base UTXO');
+    return this.inner.public_key;
   }
 
   /**
@@ -294,6 +298,6 @@ export class Utxo {
       throw new Error('Missing private key for secrets');
     }
 
-    return [toFixedHex(this.chainId, 8).slice(2), toFixedHex(this.amount).slice(2), this.keypair.privkey.slice(2), this.blinding];
+    return [toFixedHex(this.chainId, 8).slice(2), toFixedHex(this.amount, 32).slice(2), this.secret_key, this.blinding];
   }
 }

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { u8aToHex } from '@polkadot/util';
+import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { CircomUtxo } from '../index.js';
 import { Keypair } from '../keypair.js';
@@ -95,16 +95,73 @@ describe('Utxo Class', () => {
     expect(utxoString).to.deep.equal(serializedUtxo);
   });
 
-  it('should generate a utxo with circom backend', async function () {
-    const utxo = await CircomUtxo.generateUtxo({
-      amount: '1',
-      backend: 'Circom',
-      chainId: '1',
+  it.only('CircomUtxo and Utxo should generate compatible outputs public utxo', async function () {
+    const keypair = Keypair.fromString('0x1111111111111111111111111111111111111111111111111111111111111111');
+    const blinding = hexToU8a('0x17415b69c56a3c3897dcb339ce266a0f2a70c9372a6fec1676f81ddaf68e9926', 256);
+
+    const utxo = await Utxo.generateUtxo({
+      amount: '1000000000',
+      backend: 'Arkworks',
+      blinding,
+      chainId: '2199023256632',
       curve: 'Bn254',
-      index: '0'
+      index: '0',
+      keypair
+    });
+    const circomUtxo = await CircomUtxo.generateUtxo({
+      amount: '1000000000',
+      backend: 'Circom',
+      blinding,
+      chainId: '2199023256632',
+      curve: 'Bn254',
+      index: '0',
+      keypair
     });
 
-    expect(utxo.amount).to.deep.equal('1');
+    console.log('utxo: ', utxo.serialize());
+    console.log('circomUtxo: ', circomUtxo.serialize());
+
+    expect(utxo.amount).to.deep.equal(circomUtxo.amount);
+    expect(utxo.chainId).to.deep.equal(circomUtxo.chainId);
+    expect(utxo.public_key).to.deep.equal(circomUtxo.public_key);
+    expect(utxo.blinding).to.deep.equal(circomUtxo.blinding);
+    expect(utxo.commitment).to.deep.equal(circomUtxo.commitment);
+  });
+
+  it.only('CircomUtxo and Utxo should generate compatible outputs private utxo', async function () {
+    const keypair = new Keypair();
+    const blinding = hexToU8a('0x17415b69c56a3c3897dcb339ce266a0f2a70c9372a6fec1676f81ddaf68e9926', 256);
+
+    const utxo = await Utxo.generateUtxo({
+      amount: '1000000000',
+      backend: 'Arkworks',
+      blinding,
+      chainId: '2199023256632',
+      curve: 'Bn254',
+      index: '0',
+      keypair
+    });
+    const circomUtxo = await CircomUtxo.generateUtxo({
+      amount: '1000000000',
+      backend: 'Circom',
+      blinding,
+      chainId: '2199023256632',
+      curve: 'Bn254',
+      index: '0',
+      keypair
+    });
+
+    console.log('utxo: ', utxo.serialize());
+    console.log('circomUtxo: ', circomUtxo.serialize());
+
+    expect(utxo.amount).to.deep.equal(circomUtxo.amount);
+    expect(utxo.chainId).to.deep.equal(circomUtxo.chainId);
+    expect(utxo.keypair.toString()).to.deep.equal(circomUtxo.keypair.toString());
+    expect(utxo.public_key).to.deep.equal(circomUtxo.public_key);
+    expect(utxo.secret_key).to.deep.equal(circomUtxo.secret_key);
+    expect(utxo.blinding).to.deep.equal(circomUtxo.blinding);
+    expect(utxo.commitment).to.deep.equal(circomUtxo.commitment);
+    expect(utxo.nullifier).to.deep.equal(circomUtxo.nullifier);
   });
 
   it('Check valid encryption length', async function () {
