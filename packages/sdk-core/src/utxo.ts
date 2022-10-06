@@ -5,7 +5,7 @@ import type { Backend, Curve, JsUtxo } from '@webb-tools/wasm-utils';
 
 import { hexToU8a } from '@polkadot/util';
 
-import { toBuffer } from './big-number-utils.js';
+import { toBuffer, toFixedHex } from './big-number-utils.js';
 import { Keypair } from './keypair.js';
 
 export type UtxoGenInput = {
@@ -225,7 +225,9 @@ export class Utxo {
   }
 
   get amount (): string {
-    return this.inner.amount;
+    const value = BigInt('0x' + this.inner.amount);
+
+    return value.toString();
   }
 
   get blinding (): string {
@@ -233,7 +235,9 @@ export class Utxo {
   }
 
   get chainId (): string {
-    return this.inner.chainId;
+    const value = BigInt('0x' + this.inner.chainId);
+
+    return value.toString();
   }
 
   /**
@@ -253,8 +257,6 @@ export class Utxo {
    */
   get index (): number|undefined {
     if (this.inner.index !== undefined) {
-      console.log('index: ', this.inner.index);
-
       return Number(this.inner.index);
     }
 
@@ -287,11 +289,11 @@ export class Utxo {
   /**
    * @returns secrets - an array of secret values represented in the utxo
    */
-  getSecrets (): string[] {
+  getSecretsForNote (): string[] {
     if (!this.keypair.privkey) {
       throw new Error('Missing private key for secrets');
     }
 
-    return [this.chainId, this.amount, this.keypair.privkey, this.blinding];
+    return [toFixedHex(this.chainId, 8).slice(2), toFixedHex(this.amount).slice(2), this.keypair.privkey.slice(2), this.blinding];
   }
 }

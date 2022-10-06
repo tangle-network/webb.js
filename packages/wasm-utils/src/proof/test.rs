@@ -123,7 +123,7 @@ fn should_generate_vanchor_proof_input() {
 		"Arkworks"
 	);
 	assert_eq!(vanchor_proof_input_payload.exponentiation, 5);
-	assert_eq!(vanchor_proof_input_payload.width, 3);
+	assert_eq!(vanchor_proof_input_payload.width, 5);
 	assert_eq!(
 		vanchor_proof_input_payload.curve.to_string(),
 		"Bn254"

@@ -54,8 +54,6 @@ describe('Utxo Class', () => {
 
     const serializedOutput = deserialized.serialize();
 
-    console.log(serializedOutput);
-
     expect(serializedOutput).to.deep.equal(serializedInput);
   });
 
@@ -133,12 +131,8 @@ describe('Utxo Class', () => {
       keypair
     });
 
-    console.log('nullifierBeforeIndex: ', utxo.nullifier);
-
     utxo.setIndex(2);
 
     expect(utxo.index).to.eq(2);
-
-    console.log('nullifierAfterIndex: ', utxo.nullifier);
   });
 });
