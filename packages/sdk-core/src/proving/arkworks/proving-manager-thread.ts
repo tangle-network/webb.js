@@ -102,12 +102,11 @@ export class ArkworksProvingManagerThread {
     } else if (protocol === 'vanchor') {
       const input = pmSetupInput as WorkerVAnchorPMSetupInput;
       const inputUtxos = await Promise.all(input.inputUtxos.map((utxo) => Utxo.deserialize(utxo)));
-      const rawIndices = [...input.indices];
-      const indices = rawIndices;
+      const leafIds = [...input.leafIds];
 
-      if (inputUtxos.length !== indices.length) {
+      if (inputUtxos.length !== leafIds.length) {
         throw new Error(
-          `Input utxos and indices size don't match notes count (${inputUtxos.length}) indices count (${indices.length})`
+          `Input utxos and leaf ids size don't match! utxo count (${inputUtxos.length}) ids count (${leafIds.length})`
         );
       }
 
@@ -123,7 +122,7 @@ export class ArkworksProvingManagerThread {
         });
 
         inputUtxos.push(dummyUtxo);
-        indices.push(0);
+        leafIds.push({ index: 0, typedChainId: Number(inputUtxos[0].chainId) });
       }
 
       if (inputUtxos.length > 2 && inputUtxos.length < 16) {
@@ -146,7 +145,10 @@ export class ArkworksProvingManagerThread {
         inputUtxos.push(
           ...gap
         );
-        indices.push(...Array(inputGap).fill(0));
+        leafIds.push(...Array(inputGap).fill({
+          index: 0,
+          typedChainId: Number(inputUtxos[0].chainId)
+        }));
       }
 
       if (inputUtxos.length > 16) {
@@ -158,7 +160,7 @@ export class ArkworksProvingManagerThread {
       const outputUtxos = await Promise.all(input.output.map((utxoString) => Utxo.deserialize(utxoString)));
 
       pm.setInputUtxos(inputUtxos.map((utxo) => utxo.inner));
-      pm.setIndices(indices.map((i) => i.toString()) as any);
+      pm.setIndices(leafIds.map((i) => i.index.toString()) as any);
       pm.setPk(u8aToHex(input.provingKey).replace('0x', ''));
       pm.setRoots(input.roots);
       pm.chain_id(input.chainId);

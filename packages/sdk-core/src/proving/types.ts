@@ -20,6 +20,17 @@ export interface ProvingManagerPayload extends Record<NoteProtocol, any> {
 }
 
 /**
+ * Interface to pass as parameter for proving managers.
+ * Corresponds to the respective inputUtxo at the same index.
+ * @param index - Index of the leaf in the tree
+ * @param chainId - The typedChainId index into the leavesMap.
+ */
+export interface LeafIdentifier {
+  index: number,
+  typedChainId: number
+}
+
+/**
  * Proving Manager setup input for the proving manager over sdk-core
  * @param note - Serialized note representation
  * @param relayer - Relayer account id converted to hex string (Without a `0x` prefix)
@@ -45,7 +56,7 @@ export type MixerPMSetupInput = {
  * Proving Manager setup input for anchor API proving manager over sdk-core
  * @param inputNotes - VAnchor notes representing input UTXOs for proving
  * @param leavesMap - Leaves for generating the merkle path, it's indexed by the chain_id and for each entry the values are list of leaves for this chain
- * @param indices -  Leaf indices for input UTXOs leaves
+ * @param leafIds -  Identify a leaf's <index> for leaves at <typedChainId>'s entry in the leavesMap
  * @param roots - Roots set for every anchor
  * @param chainId - The chain id where the input UTXOs being spent
  * @param output - Configuration to shape the output UTXOs
@@ -62,7 +73,7 @@ export type MixerPMSetupInput = {
 export type VAnchorPMSetupInput = {
   inputUtxos: Utxo[];
   leavesMap: Record<string, Leaves>;
-  indices: number[];
+  leafIds: LeafIdentifier[];
   roots: Leaves;
   chainId: string;
   output: [Utxo, Utxo];
