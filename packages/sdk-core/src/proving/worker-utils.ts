@@ -18,7 +18,7 @@ import type { Backend, Leaves, NoteProtocol } from '@webb-tools/wasm-utils';
 import { Utxo } from '@webb-tools/sdk-core/index.js';
 
 import { CircomUtxo } from '../solidity-utils/index.js';
-import { MixerPMSetupInput, MixerProof, ProofInterface, ProvingManagerSetupInput, VAnchorPMSetupInput } from './types.js';
+import { LeafIdentifier, MixerPMSetupInput, MixerProof, ProofInterface, ProvingManagerSetupInput, VAnchorPMSetupInput } from './types.js';
 
 export type WorkerProvingManagerSetupInput<T extends NoteProtocol> = WorkerProvingManagerPayload[T];
 
@@ -30,7 +30,7 @@ export interface WorkerProvingManagerPayload extends Record<NoteProtocol, any> {
 export type WorkerVAnchorPMSetupInput = {
   inputUtxos: string[];
   leavesMap: Record<string, Leaves>;
-  indices: number[];
+  leafIds: LeafIdentifier[];
   roots: Leaves;
   chainId: string;
   output: [string, string];
@@ -113,8 +113,8 @@ export function workerInputMapper<T extends NoteProtocol> (
         encryptedCommitments: sourceSetupInput.encryptedCommitments,
         extAmount: sourceSetupInput.extAmount,
         fee: sourceSetupInput.fee,
-        indices: sourceSetupInput.indices,
         inputUtxos,
+        leafIds: sourceSetupInput.leafIds,
         leavesMap: sourceSetupInput.leavesMap,
         output: outputUtxos,
         provingKey: sourceSetupInput.provingKey,

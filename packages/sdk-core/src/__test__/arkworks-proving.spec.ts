@@ -147,8 +147,8 @@ describe('Arkworks Proving manager VAnchor', function () {
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
-      indices: [0],
       inputUtxos: [vanchorUtxo],
+      leafIds: [{ index: 0, typedChainId: 0 }],
       leavesMap,
       output: [new Utxo((output1)), new Utxo(output2)],
       provingKey: keys.pk,
@@ -211,8 +211,8 @@ describe('Arkworks Proving manager VAnchor', function () {
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
-      indices: [0, 1],
       inputUtxos: [utxo1, utxo2],
+      leafIds: [{ index: 0, typedChainId: 0 }, { index: 1, typedChainId: 0 }],
       leavesMap,
       output: [new Utxo(output1), new Utxo(output2)],
       provingKey: keys.pk,
@@ -272,8 +272,10 @@ describe('Arkworks Proving manager VAnchor', function () {
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
-      indices: inputUtxos.map((_, index) => index),
       inputUtxos,
+      leafIds: [...inputUtxos.map((utxo) => {
+        return { index: utxo.index!, typedChainId: Number(utxo.chainId) };
+      })],
       leavesMap,
       output: [new Utxo(output1), new Utxo(output2)],
 
@@ -336,8 +338,10 @@ describe('Arkworks Proving manager VAnchor', function () {
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
-      indices: utxos.map((_, index) => index),
       inputUtxos: utxos,
+      leafIds: [...utxos.map((utxo) => {
+        return { index: utxo.index!, typedChainId: Number(utxo.chainId) };
+      })],
       leavesMap,
       output: [new Utxo(output1), new Utxo(output2)],
 
@@ -404,8 +408,10 @@ describe('Arkworks Proving manager VAnchor', function () {
         encryptedCommitments: [comEnc1, comEnc2],
         extAmount: '0',
         fee: '0',
-        indices: utxos.map((_, index) => index),
         inputUtxos: utxos,
+        leafIds: [...utxos.map((utxo) => {
+          return { index: utxo.index!, typedChainId: Number(utxo.chainId) };
+        })],
         leavesMap,
         output: [new Utxo(output1), new Utxo(output2)],
         provingKey: keys.pk,
@@ -483,8 +489,8 @@ describe('Arkworks Proving manager VAnchor', function () {
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
-      indices: [depositedUtxo.index!],
       inputUtxos: [depositedUtxo],
+      leafIds: [{ index: depositedUtxo.index!, typedChainId: Number(depositedUtxo.chainId) }],
       leavesMap,
       output: [new Utxo(output1), new Utxo(output2)],
 
@@ -562,8 +568,10 @@ describe('Arkworks Proving manager VAnchor', function () {
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
-      indices: utxos.map((utxo) => utxo.index!),
       inputUtxos: utxos,
+      leafIds: [...utxos.map((utxo) => {
+        return { index: utxo.index!, typedChainId: Number(utxo.chainId) };
+      })],
       leavesMap,
       output: [new Utxo(output1), new Utxo(output2)],
 
@@ -644,8 +652,10 @@ describe('Arkworks Proving manager VAnchor', function () {
       encryptedCommitments: [comEnc1, comEnc2],
       extAmount: '0',
       fee: '0',
-      indices: utxos.map((utxo) => utxo.index!),
       inputUtxos: utxos,
+      leafIds: [...utxos.map((utxo) => {
+        return { index: utxo.index!, typedChainId: Number(utxo.chainId) };
+      })],
       leavesMap,
       output: [new Utxo(output1), new Utxo(output2)],
 

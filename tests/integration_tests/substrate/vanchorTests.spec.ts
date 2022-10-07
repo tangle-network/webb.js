@@ -179,8 +179,13 @@ async function basicDeposit(
 
   const setup: ProvingManagerSetupInput<'vanchor'> = {
     chainId: outputChainId.toString(),
-    indices: [0, 0],
     inputUtxos,
+    leafIds: inputUtxos.map((utxo) => {
+      return {
+        index: utxo.index!,
+        typedChainId: Number(utxo.chainId)
+      } 
+    }),
     leavesMap: leavesMap,
     output: [output1, output2],
     encryptedCommitments: [comEnc1, comEnc2],
@@ -287,8 +292,8 @@ async function basicWithdraw(
 
   const setup: ProvingManagerSetupInput<'vanchor'> = {
     chainId: chainId.toString(),
-    indices: [inputUtxo].map(({ index }) => index!),
     inputUtxos: [inputUtxo],
+    leafIds: [{ index: inputUtxo.index!, typedChainId: Number(inputUtxo.chainId)}],
     leavesMap: leavesMap,
     output: [output1, output2],
     encryptedCommitments: [comEnc1, comEnc2],
@@ -388,8 +393,13 @@ async function createVAnchorWithDeposit(
 
   const setup: ProvingManagerSetupInput<'vanchor'> = {
     chainId: outputChainId.toString(),
-    indices: [0, 0],
     inputUtxos,
+    leafIds: inputUtxos.map((utxo) => {
+      return {
+        index: utxo.index!,
+        typedChainId: Number(utxo.chainId)
+      } 
+    }),
     leavesMap: leavesMap,
     output: [output1, output2],
     encryptedCommitments: [comEnc1, comEnc2],
@@ -540,8 +550,13 @@ describe('VAnchor tests', function() {
 
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: outputChainId.toString(),
-      indices: [0, 0],
       inputUtxos: utxos,
+      leafIds: utxos.map((utxo) => {
+        return {
+          index: utxo.index!,
+          typedChainId: Number(utxo.chainId)
+        } 
+      }),
       leavesMap: leavesMap,
       output: [output1, output2],
       encryptedCommitments: [comEnc1, comEnc2],
@@ -634,8 +649,13 @@ describe('VAnchor tests', function() {
 
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: chainId.toString(),
-      indices: [leaf1Index, leaf2Index],
       inputUtxos: utxos,
+      leafIds: utxos.map((utxo) => {
+        return {
+          index: utxo.index!,
+          typedChainId: Number(utxo.chainId)
+        } 
+      }),
       leavesMap: leavesMap,
       output: [output1, output2],
       encryptedCommitments: [comEnc1, comEnc2],
@@ -720,8 +740,13 @@ describe('VAnchor tests', function() {
 
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: chainId.toString(),
-      indices: utxos.map((utxo) => utxo.index!),
       inputUtxos: utxos,
+      leafIds: utxos.map((utxo) => {
+        return {
+          index: utxo.index!,
+          typedChainId: Number(utxo.chainId)
+        } 
+      }),
       leavesMap: leavesMap,
       output: [output1, output2],
       encryptedCommitments: [comEnc1, comEnc2],

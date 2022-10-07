@@ -75,17 +75,16 @@ export class CircomProvingManagerThread {
     if (protocol === 'vanchor') {
       const input = pmSetupInput as WorkerVAnchorPMSetupInput;
       const inputUtxos = await Promise.all(input.inputUtxos.map((utxo) => CircomUtxo.deserialize(utxo)));
-      const indices = [...input.indices];
 
-      if (inputUtxos.length !== indices.length) {
+      if (inputUtxos.length !== input.leafIds.length) {
         throw new Error(
-          `Input notes and indices size don't match notes count (${inputUtxos.length}) indices count (${indices.length})`
+          `Input utxos and leaf identifiers don't match! utxos count (${inputUtxos.length}) ids count (${input.leafIds.length})`
         );
       }
 
       // Set the leaf index on the notes
       for (let i = 0; i < inputUtxos.length; i++) {
-        inputUtxos[i].setIndex(indices[i]);
+        inputUtxos[i].setIndex(input.leafIds[i].index);
       }
 
       // Account for empty leaves set on the merkle tree
@@ -107,7 +106,7 @@ export class CircomProvingManagerThread {
             pathIndices: new Array(this.treeDepth).fill(0)
           });
         } else {
-          mt = new MerkleTree(this.treeDepth, input.leavesMap[(inputUtxos[i].originChainId || inputUtxos[i].chainId)].map((u8a) => u8aToHex(u8a)));
+          mt = new MerkleTree(this.treeDepth, input.leavesMap[input.leafIds[i].typedChainId].map((u8a) => u8aToHex(u8a)));
           merkleProofs.push(mt.path(Number(inputUtxos[i].index)));
         }
       }

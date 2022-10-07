@@ -55,7 +55,6 @@ export class CircomUtxo extends Utxo {
    *   parts[6] Optional - EncryptionKey, the public key of "publicKey = encryptionScheme(privateKey)" value used for messaging.
    *   parts[7] Optional - PrivateKey, the secret key component correlated to the above values.
    *   parts[8] Optional - Index, the leaf index if the utxo has been inserted in a merkle tree
-   *
    * @returns The CircomUtxo object implementation of a Utxo.
    */
   static async deserialize (utxoString: string): Promise<Utxo> {
@@ -106,6 +105,10 @@ export class CircomUtxo extends Utxo {
 
     if (input.keypair) {
       utxo.setKeypair(input.keypair);
+    } else {
+      // Populate the _pubkey and _secret_key values with
+      // the random default keypair
+      utxo.setKeypair(utxo.keypair);
     }
 
     utxo._blinding = input.blinding ? u8aToHex(input.blinding).slice(2) : toFixedHex(randomBN(31)).slice(2);
