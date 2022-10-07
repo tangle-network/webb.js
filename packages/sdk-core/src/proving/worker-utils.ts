@@ -71,9 +71,11 @@ export async function workerProofTranslator<T extends NoteProtocol> (
       const sourceVAnchorProof = {
         ...proofData
       } as WorkerVAnchorProof;
-
-      const outputUtxos = await Promise.all(sourceVAnchorProof.outputUtxos.map((utxo) => Utxo.deserialize(utxo)));
       const isCircom = sourceVAnchorProof.backend === 'Circom';
+
+      const outputUtxos = isCircom
+        ? await Promise.all(sourceVAnchorProof.outputUtxos.map((utxo) => CircomUtxo.deserialize(utxo)))
+        : await Promise.all(sourceVAnchorProof.outputUtxos.map((utxo) => Utxo.deserialize(utxo)));
       const inputUtxos = isCircom
         ? await Promise.all(sourceVAnchorProof.inputUtxos.map((utxo) => CircomUtxo.deserialize(utxo)))
         : await Promise.all(sourceVAnchorProof.inputUtxos.map((utxo) => Utxo.deserialize(utxo)));

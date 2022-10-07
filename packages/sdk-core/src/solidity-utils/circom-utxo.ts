@@ -22,7 +22,7 @@ export class CircomUtxo extends Utxo {
   _blinding = '';
   _originChainId?: string;
 
-  private constructor (readonly inner: JsUtxo) {
+  private constructor (inner: JsUtxo) {
     super(inner);
   }
 
@@ -246,6 +246,10 @@ export class CircomUtxo extends Utxo {
 
   set secret_key (secret: string) {
     this._secret_key = secret;
+  }
+
+  getKeypair (): Keypair {
+    return this.keypair;
   }
 
   setKeypair (keypair: Keypair): void {

@@ -27,6 +27,7 @@ export type UtxoGenInput = {
  *   - Therefore, output Utxos don't need to have a privkey configured on the given Utxo's keypair.
  */
 export class Utxo {
+  inner: JsUtxo;
   keypair: Keypair = new Keypair();
   originChainId: string | undefined;
 
@@ -34,8 +35,8 @@ export class Utxo {
    *
    * @param inner - The wasm representation of a utxo
    */
-  constructor (readonly inner: JsUtxo) {
-
+  constructor (inner: JsUtxo) {
+    this.inner = inner;
   }
 
   private static get wasm () {

@@ -55,15 +55,15 @@ export function generateVariableWitnessInput (
   const input = {
     roots: roots.map((x) => x.toString()),
     chainID: chainId.toString(),
-    inputNullifier: inputs.map((x) => BigNumber.from(x.nullifier).toString()),
+    inputNullifier: inputs.map((x) => '0x' + x.nullifier),
     outputCommitment: outputs.map((x) => BigNumber.from(u8aToHex(x.commitment)).toString()),
     publicAmount: BigNumber.from(extAmount).sub(fee).add(FIELD_SIZE).mod(FIELD_SIZE).toString(),
     extDataHash: extDataHash.toString(),
 
     // data for 2 transaction inputs
     inAmount: inputs.map((x) => x.amount.toString()),
-    inPrivateKey: inputs.map((x) => x.secret_key.toString()),
-    inBlinding: inputs.map((x) => BigNumber.from(x.blinding).toString()),
+    inPrivateKey: inputs.map((x) => '0x' + x.secret_key),
+    inBlinding: inputs.map((x) => BigNumber.from('0x' + x.blinding).toString()),
     inPathIndices: vanchorMerkleProofs.map((x) => x.pathIndex),
     inPathElements: vanchorMerkleProofs.map((x) => x.pathElements),
 
@@ -71,8 +71,10 @@ export function generateVariableWitnessInput (
     outChainID: outputs.map((x) => x.chainId),
     outAmount: outputs.map((x) => x.amount.toString()),
     outPubkey: outputs.map((x) => BigNumber.from(x.getKeypair().getPubKey()).toString()),
-    outBlinding: outputs.map((x) => BigNumber.from(x.blinding).toString())
+    outBlinding: outputs.map((x) => BigNumber.from('0x' + x.blinding).toString())
   };
+
+  console.log('input: ', input);
 
   return input;
 }

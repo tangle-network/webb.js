@@ -146,6 +146,7 @@ export class CircomProvingManagerThread {
       const proofEncoded = await this.snarkjsProveAndVerify(input.provingKey, witness);
 
       const vanchorProof: WorkerProofInterface<'vanchor'> = {
+        backend: 'Circom',
         extDataHash: hexToU8a(dataHash.toHexString()),
         inputUtxos: inputUtxos.map((utxo) => utxo.serialize()),
         outputUtxos: outputUtxos.map((utxo) => utxo.serialize()),
