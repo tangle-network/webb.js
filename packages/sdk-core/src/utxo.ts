@@ -5,7 +5,7 @@ import type { Backend, Curve, JsUtxo } from '@webb-tools/wasm-utils';
 
 import { hexToU8a } from '@polkadot/util';
 
-import { toBuffer } from './big-number-utils.js';
+import { toBuffer, toFixedHex } from './big-number-utils.js';
 import { Keypair } from './keypair.js';
 
 export type UtxoGenInput = {
@@ -27,6 +27,7 @@ export type UtxoGenInput = {
  *   - Therefore, output Utxos don't need to have a privkey configured on the given Utxo's keypair.
  */
 export class Utxo {
+  inner: JsUtxo;
   keypair: Keypair = new Keypair();
   originChainId: string | undefined;
 
@@ -34,8 +35,8 @@ export class Utxo {
    *
    * @param inner - The wasm representation of a utxo
    */
-  constructor (readonly inner: JsUtxo) {
-
+  constructor (inner: JsUtxo) {
+    this.inner = inner;
   }
 
   private static get wasm () {
@@ -51,6 +52,7 @@ export class Utxo {
     // The wasmUtxo is a string representation of the utxo. It has all of the information
     // required of the parts - except for the Keypair information used for encryption.
     const wasmUtxoString = this.inner.serialize();
+
     const parts = wasmUtxoString.split('&');
 
     const encryptionKey = this.keypair.getEncryptionKey()?.slice(2) ?? '';
@@ -138,7 +140,7 @@ export class Utxo {
     // Format the inputs as little-endian for wasm.
     if (input.keypair) {
       if (input.keypair.privkey) {
-        wasmUtxoPrivateKey = hexToU8a(input.keypair.privkey);
+        wasmUtxoPrivateKey = hexToU8a(input.keypair.privkey, 256);
       }
 
       wasmUtxoPublicKey = hexToU8a(input.keypair.getPubKey());
@@ -221,11 +223,13 @@ export class Utxo {
   }
 
   setIndex (index: number) {
-    this.inner.index = BigInt(index);
+    this.inner.setIndex(BigInt(index));
   }
 
   get amount (): string {
-    return this.inner.amount;
+    const value = BigInt('0x' + this.inner.amount);
+
+    return value.toString();
   }
 
   get blinding (): string {
@@ -233,7 +237,9 @@ export class Utxo {
   }
 
   get chainId (): string {
-    return this.inner.chainId;
+    const value = BigInt('0x' + this.inner.chainId);
+
+    return value.toString();
   }
 
   /**
@@ -249,7 +255,7 @@ export class Utxo {
    * @returns the index configured on this UTXO. Output UTXOs generated
    * before they have been inserted in a tree.
    *
-   * TODO: Return null instead of 0 for the index if it is an output utxo?
+   * Utxos used as inputs are expected to have the index
    */
   get index (): number|undefined {
     if (this.inner.index !== undefined) {
@@ -264,7 +270,7 @@ export class Utxo {
    * where signature = hash([secret key, commitment, index])
    */
   get nullifier (): string {
-    return this.inner.nullifier;
+    return this.inner.calculate_nullifier();
   }
 
   /**
@@ -272,7 +278,7 @@ export class Utxo {
    * If the utxo is configured with a secret_key, this value should be poseidonHash(secret_key)
    */
   get public_key (): string {
-    throw new Error('Can\'t get the public_key on base UTXO');
+    return this.inner.public_key;
   }
 
   /**
@@ -285,11 +291,11 @@ export class Utxo {
   /**
    * @returns secrets - an array of secret values represented in the utxo
    */
-  getSecrets (): string[] {
+  getSecretsForNote (): string[] {
     if (!this.keypair.privkey) {
       throw new Error('Missing private key for secrets');
     }
 
-    return [this.chainId, this.amount, this.keypair.privkey, this.blinding];
+    return [toFixedHex(this.chainId, 8).slice(2), toFixedHex(this.amount, 32).slice(2), this.secret_key, this.blinding];
   }
 }

@@ -5,6 +5,8 @@ use core::str::FromStr;
 use ark_bn254::Fr as Bn254Fr;
 use ark_ff::{BigInteger, PrimeField};
 use ark_std::UniformRand;
+use arkworks_native_gadgets::poseidon::Poseidon;
+use arkworks_setups::common::setup_params;
 use arkworks_setups::utxo::Utxo;
 use arkworks_setups::{Curve as ArkCurve, VAnchorProver};
 use js_sys::{JsString, Uint8Array};
@@ -23,6 +25,19 @@ impl fmt::Debug for JsUtxoInner {
 		write!(f, "JsUtxoInner")
 	}
 }
+
+impl JsUtxoInner {
+	// When the index is set on the wasm-utils object, recalculate the nullifier for
+	// the utxo.
+	pub fn set_index(&mut self, val: u64) {
+		match self {
+			JsUtxoInner::Bn254(utxo) => {
+				utxo.set_index(val);
+			}
+		}
+	}
+}
+
 #[wasm_bindgen]
 #[derive(Clone, Debug)]
 pub struct JsUtxo {
@@ -163,11 +178,18 @@ impl JsUtxo {
 		}
 	}
 
-	pub fn get_nullifier(&self) -> Option<Vec<u8>> {
+	pub fn get_nullifier(&self) -> Result<Vec<u8>, OpStatusCode> {
 		match &self.inner {
-			JsUtxoInner::Bn254(bn254_utxo) => &bn254_utxo.nullifier,
+			JsUtxoInner::Bn254(bn254_utxo) => {
+				let params4 = setup_params::<Bn254Fr>(ArkCurve::Bn254, 5, 4);
+				let hasher4 = Poseidon::<Bn254Fr>::new(params4);
+				let nullifier = bn254_utxo.calculate_nullifier(&hasher4);
+				match nullifier {
+					Ok(val) => Ok(val.into_repr().to_bytes_be()),
+					Err(_) => Err(OpStatusCode::InvalidNullifer),
+				}
+			}
 		}
-		.map(|value| value.into_repr().to_bytes_be())
 	}
 
 	pub fn get_commitment(&self) -> Vec<u8> {
@@ -304,21 +326,14 @@ impl JsUtxo {
 		JsValue::from(index)
 	}
 
-	#[wasm_bindgen(setter)]
-	pub fn set_index(&self, val: u64) {
-		match self.inner.clone() {
-			JsUtxoInner::Bn254(mut utxo) => {
-				utxo.set_index(val);
-			}
-		}
+	#[wasm_bindgen(js_name = setIndex)]
+	pub fn set_index(&mut self, val: u64) {
+		self.inner.set_index(val);
 	}
 
-	#[wasm_bindgen(getter)]
+	#[wasm_bindgen(js_name = calculate_nullifier)]
 	pub fn nullifier(&self) -> JsString {
-		let nullifier = self
-			.get_nullifier()
-			.map(|value| hex::encode(value.as_slice()))
-			.unwrap_or_else(|| "".to_string());
+		let nullifier = self.get_nullifier().map(|value| hex::encode(value.as_slice())).unwrap();
 
 		JsString::from(nullifier)
 	}

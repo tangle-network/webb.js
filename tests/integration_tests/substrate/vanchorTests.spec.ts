@@ -85,7 +85,7 @@ function getKeyring() {
   return keyring;
 }
 
-async function generateVAnchorNote(amount: number, chainId: number, outputChainId: number, index?: number) {
+async function generateVAnchorNote(amount: number, chainId: number, outputChainId: number, secrets?: string, index?: number) {
   const note = await Note.generateNote({
     amount: String(amount),
     backend: 'Arkworks',
@@ -94,6 +94,7 @@ async function generateVAnchorNote(amount: number, chainId: number, outputChainI
     exponentiation: String(5),
     hashFunction: 'Poseidon',
     index,
+    secrets,
     protocol: 'vanchor',
     sourceChain: String(chainId),
     sourceIdentifyingData: '1',
@@ -129,17 +130,34 @@ async function basicDeposit(
   const { pk } = getKeys();
 
   // Creating two empty vanchor notes
-  const input1 = await generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0);
-  const input2 = await input1.getDefaultUtxoNote();
+  const input1 = await Utxo.generateUtxo({
+    curve: 'Bn254',
+    backend: 'Arkworks',
+    amount: '0',
+    chainId: outputChainId.toString(),
+    index: '0'
+  });
+  const input2 = await Utxo.generateUtxo({
+    curve: 'Bn254',
+    backend: 'Arkworks',
+    amount: '0',
+    chainId: outputChainId.toString(),
+    index: '0'
+  });
   const publicAmount = BigInt(output.note.amount);
-  const notes = [input1, input2];
+  const inputUtxos = [input1, input2];
   // Output UTXOs configs
-  const output1 = new Utxo(output.note.getUtxo());
+  const output1 = await Utxo.generateUtxo({
+    curve: 'Bn254',
+    backend: 'Arkworks',
+    amount: output.note.amount,
+    chainId: outputChainId.toString()
+  });
   const output2 = await Utxo.generateUtxo({
     curve: 'Bn254',
     backend: 'Arkworks',
     amount: '0',
-    chainId
+    chainId: outputChainId.toString()
   });
   // Configure a new proving manager with direct call
   const provingManager = new ArkworksProvingManager(null);
@@ -162,7 +180,7 @@ async function basicDeposit(
   const setup: ProvingManagerSetupInput<'vanchor'> = {
     chainId: outputChainId.toString(),
     indices: [0, 0],
-    inputNotes: notes,
+    inputUtxos,
     leavesMap: leavesMap,
     output: [output1, output2],
     encryptedCommitments: [comEnc1, comEnc2],
@@ -193,7 +211,7 @@ async function basicDeposit(
     publicAmount: data.publicAmount,
     roots: rootsSet,
     inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-    outputCommitments: data.outputNotes.map(note => u8aToHex(note.note.getLeafCommitment())),
+    outputCommitments: data.outputUtxos.map(utxo => u8aToHex(utxo.commitment)),
     extDataHash: data.extDataHash
   };
   const leafsCount = await apiPromise.derive.merkleTreeBn254.getLeafCountForTree(Number(treeId));
@@ -204,25 +222,34 @@ async function basicDeposit(
     method: 'transact'
   }, [treeId, vanchorProofData, extData], depositer);
 
-  const leaf1 = data.outputNotes[0].getLeaf();
+  const leaf1 = data.outputUtxos[0].commitment;
   const indexOfLeaf1 = await getleafIndex(apiPromise, leaf1, predictedIndex, treeId);
+
+  const outputNote = await generateVAnchorNote(
+    Number(data.outputUtxos[0].amount),
+    Number(data.outputUtxos[0].chainId),
+    Number(data.outputUtxos[0].chainId),
+    data.outputUtxos[0].getSecretsForNote().join(':'),
+    indexOfLeaf1
+  );
+
   output.mutateIndex(String(indexOfLeaf1));
-  return [output, secret];
+  return [outputNote, secret];
 }
 
 async function basicWithdraw(
   api: ApiPromise,
   treeId: number,
   withdrawAccount: KeyringPair,
-  inputNote: Note,
+  inputUtxo: Utxo,
   secret: Uint8Array
 ) {
   const leavesMap = {} as any;
-  const chainId = inputNote.note.targetChainId;
+  const chainId = inputUtxo.chainId;
   const fee = 0;
   const { pk, vk } = getKeys();
 
-  const withdrawAmount = inputNote.note.amount;
+  const withdrawAmount = inputUtxo.amount;
   const extAmount = -withdrawAmount;
 
   const publicAmount = -withdrawAmount;
@@ -242,7 +269,7 @@ async function basicWithdraw(
 
   const provingManager = new ArkworksProvingManager(null);
   const address = withdrawAccount.address;
-  const maxLeafIndex = Number(inputNote.note.index);
+  const maxLeafIndex = Number(inputUtxo.index);
   const leafsCount = await apiPromise!.derive.merkleTreeBn254.getLeafCountForTree(Number(treeId));
   const leaves = await apiPromise!.derive.merkleTreeBn254.getLeavesForTree(treeId, 0, leafsCount -1);
   const neighborRoots: string[] = await (apiPromise!.rpc as any).lt.getNeighborRoots(treeId).then((roots: any) => roots.toHuman());
@@ -260,8 +287,8 @@ async function basicWithdraw(
 
   const setup: ProvingManagerSetupInput<'vanchor'> = {
     chainId: chainId.toString(),
-    indices: [inputNote].map(({ note }) => Number(note.index)),
-    inputNotes: [inputNote],
+    indices: [inputUtxo].map(({ index }) => index!),
+    inputUtxos: [inputUtxo],
     leavesMap: leavesMap,
     output: [output1, output2],
     encryptedCommitments: [comEnc1, comEnc2],
@@ -292,7 +319,7 @@ async function basicWithdraw(
     publicAmount: data.publicAmount,
     roots: rootsSet,
     inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-    outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeaf())),
+    outputCommitments: data.outputUtxos.map(utxo => utxo.commitment),
     extDataHash: data.extDataHash
   };
   const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(vk).replace('0x', ''), 'Bn254');
@@ -307,29 +334,41 @@ async function createVAnchorWithDeposit(
   apiPromise: ApiPromise,
   sudo: KeyringPair,
   depositer: KeyringPair
-): Promise<[number, [Note, Note], [Uint8Array, Uint8Array], Uint8Array]> {
+  ): Promise<[number, [Utxo, Utxo], [Uint8Array, Uint8Array], Uint8Array]> {
   const treeId = await createVAnchor(apiPromise, sudo);
   const outputChainId = BigInt(chainId);
   const secret = randomAsU8a();
   const { pk, vk } = getKeys();
 
-  // Creating two empty vanchor notes
-  const note1 = await generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0);
-  const note2 = await note1.getDefaultUtxoNote();
+  // Creating two empty vanchor utxos
+  const input1 = await Utxo.generateUtxo({
+    curve: 'Bn254',
+    backend: 'Arkworks',
+    amount: '0',
+    chainId: outputChainId.toString(),
+    index: '0'
+  });
+  const input2 = await Utxo.generateUtxo({
+    curve: 'Bn254',
+    backend: 'Arkworks',
+    amount: '0',
+    chainId: outputChainId.toString(),
+    index: '0'
+  });
   const publicAmount = currencyToUnitI128(10);
-  const notes = [note1, note2];
+  const inputUtxos = [input1, input2];
   // Output UTXOs configs
   const output1 = await Utxo.generateUtxo({
     curve: 'Bn254',
     backend: 'Arkworks',
     amount: publicAmount.toString(),
-    chainId
+    chainId: outputChainId.toString()
   });
   const output2 = await Utxo.generateUtxo({
     curve: 'Bn254',
     backend: 'Arkworks',
     amount: '0',
-    chainId
+    chainId: outputChainId.toString()
   });
   // Configure a new proving manager with direct call
   const provingManager = new ArkworksProvingManager(null);
@@ -350,7 +389,7 @@ async function createVAnchorWithDeposit(
   const setup: ProvingManagerSetupInput<'vanchor'> = {
     chainId: outputChainId.toString(),
     indices: [0, 0],
-    inputNotes: notes,
+    inputUtxos,
     leavesMap: leavesMap,
     output: [output1, output2],
     encryptedCommitments: [comEnc1, comEnc2],
@@ -381,7 +420,7 @@ async function createVAnchorWithDeposit(
     publicAmount: data.publicAmount,
     roots: rootsSet,
     inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-    outputCommitments: data.outputNotes.map(note => u8aToHex(note.note.getLeafCommitment())),
+    outputCommitments: data.outputUtxos.map(utxo => u8aToHex(utxo.commitment)),
     extDataHash: data.extDataHash
   };
   const leafsCount = await apiPromise.derive.merkleTreeBn254.getLeafCountForTree(Number(treeId));
@@ -392,16 +431,16 @@ async function createVAnchorWithDeposit(
     method: 'transact'
   }, [treeId, vanchorProofData, extData], depositer);
 
-  const leaf1 = data.outputNotes[0].getLeaf();
-  const leaf2 = data.outputNotes[1].getLeaf();
+  const leaf1 = data.outputUtxos[0].commitment;
+  const leaf2 = data.outputUtxos[1].commitment;
   const indexOfLeaf1 = await getleafIndex(apiPromise, leaf1, predictedIndex, treeId);
   const indexOfLeaf2 = await getleafIndex(apiPromise, leaf2, predictedIndex, treeId);
-  const note1WithIndex = data.outputNotes[0];
-  note1WithIndex.mutateIndex(String(indexOfLeaf1));
-  const note2WithIndex = data.outputNotes[1];
-  note2WithIndex.mutateIndex(String(indexOfLeaf2));
+  const utxo1WithIndex = data.outputUtxos[0];
+  utxo1WithIndex.setIndex(indexOfLeaf1);
+  const utxo2WithIndex = data.outputUtxos[1];
+  utxo2WithIndex.setIndex(indexOfLeaf2);
 
-  return [treeId, [note1WithIndex, note2WithIndex], [pk, vk], secret];
+  return [treeId, [utxo1WithIndex, utxo2WithIndex], [pk, vk], secret];
 }
 
 async function getleafIndex(
@@ -441,7 +480,6 @@ describe('VAnchor tests', function() {
   });
 
   it('VAnchor deposit', async function() {
-    console.log('keyring');
     const { bob, alice } = getKeyring();
     const secret = randomAsU8a();
 
@@ -453,11 +491,22 @@ describe('VAnchor tests', function() {
     const treeId = await createVAnchor(apiPromise!, alice);
 
     // Creating two empty vanchor notes
-    const note1 = await generateVAnchorNote(0, Number(outputChainId.toString()), Number(outputChainId.toString()), 0);
-    const note2 =await note1.getDefaultUtxoNote();
-    console.log('notes ready')
+    const input1 = await Utxo.generateUtxo({
+      curve: 'Bn254',
+      backend: 'Arkworks',
+      amount: '0',
+      chainId: outputChainId.toString(),
+      index: '0'
+    });
+    const input2 = await Utxo.generateUtxo({
+      curve: 'Bn254',
+      backend: 'Arkworks',
+      amount: '0',
+      chainId: outputChainId.toString(),
+      index: '0'
+    });
     const publicAmount = currencyToUnitI128(10);
-    const notes = [note1, note2];
+    const utxos = [input1, input2];
     // Output UTXOs configs
     const output1 = await Utxo.generateUtxo({
       curve: 'Bn254',
@@ -492,7 +541,7 @@ describe('VAnchor tests', function() {
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: outputChainId.toString(),
       indices: [0, 0],
-      inputNotes: notes,
+      inputUtxos: utxos,
       leavesMap: leavesMap,
       output: [output1, output2],
       encryptedCommitments: [comEnc1, comEnc2],
@@ -506,7 +555,7 @@ describe('VAnchor tests', function() {
       refund: '0',
       token: assetId
     };
-  const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
+    const data = await provingManager.prove('vanchor', setup) as VAnchorProof;
     const extData = {
       relayer: address,
       recipient: address,
@@ -523,7 +572,7 @@ describe('VAnchor tests', function() {
       publicAmount: data.publicAmount,
       roots: rootsSet,
       inputNullifiers: data.inputUtxos.map((input) => `0x${input.nullifier}`),
-      outputCommitments: data.outputNotes.map((note) => u8aToHex(note.getLeaf())),
+      outputCommitments: data.outputUtxos.map((utxo) => u8aToHex(utxo.commitment)),
       extDataHash: data.extDataHash
     };
     try {
@@ -543,10 +592,12 @@ describe('VAnchor tests', function() {
     const fee = 0;
     const leavesMap: any = {};
 
-    const [treeId, notes, [pk], secret] = await createVAnchorWithDeposit(apiPromise!, alice, bob);
-    const chainId = notes[0].note.targetChainId; // both two notes have the same chain id
+    const [treeId, utxos, [pk], secret] = await createVAnchorWithDeposit(apiPromise!, alice, bob);
+    const chainId = utxos[0].chainId; // both two utxos have the same chain id
 
-    const withdrawAmount = notes.reduce((acc, note) => acc + Number(note.note.amount), 0);
+    const withdrawAmount = utxos.reduce((acc, utxo) => {
+      return Number(utxo.amount) + acc;
+    }, 0);
     const extAmount = -withdrawAmount;
 
     const publicAmount = -withdrawAmount;
@@ -555,7 +606,7 @@ describe('VAnchor tests', function() {
       curve: 'Bn254',
       backend: 'Arkworks',
       amount: '0',
-      chainId
+      chainId: chainId
     });
     const output2 = await Utxo.generateUtxo({
       curve: 'Bn254',
@@ -566,8 +617,8 @@ describe('VAnchor tests', function() {
 
     const provingManager = new ArkworksProvingManager(null);
     const address = bob.address;
-    const leaf1Index = Number(notes[0].note.index);
-    const leaf2Index = Number(notes[1].note.index);
+    const leaf1Index = utxos[0].index!;
+    const leaf2Index = utxos[1].index!;
     const maxLeafIndex = Math.max(leaf1Index, leaf2Index);
     const leaves = await apiPromise!.derive.merkleTreeBn254.getLeavesForTree(treeId, 0, maxLeafIndex);
     const neighborRoots: string[] = await (apiPromise!.rpc as any).lt.getNeighborRoots(treeId).then((roots: any) => roots.toHuman());
@@ -584,7 +635,7 @@ describe('VAnchor tests', function() {
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: chainId.toString(),
       indices: [leaf1Index, leaf2Index],
-      inputNotes: notes,
+      inputUtxos: utxos,
       leavesMap: leavesMap,
       output: [output1, output2],
       encryptedCommitments: [comEnc1, comEnc2],
@@ -615,7 +666,7 @@ describe('VAnchor tests', function() {
       publicAmount: data.publicAmount,
       roots: rootsSet,
       inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-      outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeaf())),
+      outputCommitments: data.outputUtxos.map(output => u8aToHex(output.commitment)),
       extDataHash: data.extDataHash
     };
 
@@ -630,12 +681,11 @@ describe('VAnchor tests', function() {
     const fee = 0;
     const leavesMap: any = {};
 
-    const [treeId, notesRaw, [pk, vk], secret] = await createVAnchorWithDeposit(apiPromise!, alice, bob);
+    const [treeId, utxos, [pk, vk], secret] = await createVAnchorWithDeposit(apiPromise!, alice, bob);
     // Ignoring the second note which is for a default UTXO
-    const notes = [notesRaw[0]];
-    const chainId = notes[0].note.targetChainId;
+    const chainId = utxos[0].chainId;
 
-    const withdrawAmount = notes.reduce((acc, note) => acc + Number(note.note.amount), 0);
+    const withdrawAmount = utxos.reduce((acc, utxo) => acc + Number(utxo.amount), 0);
     const extAmount = -withdrawAmount;
 
     const publicAmount = -withdrawAmount;
@@ -655,7 +705,7 @@ describe('VAnchor tests', function() {
 
     const provingManager = new ArkworksProvingManager(null);
     const address = bob.address;
-    const maxLeafIndex = Number(notes[0].note.index);
+    const maxLeafIndex = Number(utxos[0].index);
     const leaves = await apiPromise!.derive.merkleTreeBn254.getLeavesForTree(treeId, 0, maxLeafIndex);
     const neighborRoots: string[] = await (apiPromise!.rpc as any).lt.getNeighborRoots(treeId).then((roots: any) => roots.toHuman());
 
@@ -670,8 +720,8 @@ describe('VAnchor tests', function() {
 
     const setup: ProvingManagerSetupInput<'vanchor'> = {
       chainId: chainId.toString(),
-      indices: notes.map(({ note }) => Number(note.index)),
-      inputNotes: notes,
+      indices: utxos.map((utxo) => utxo.index!),
+      inputUtxos: utxos,
       leavesMap: leavesMap,
       output: [output1, output2],
       encryptedCommitments: [comEnc1, comEnc2],
@@ -702,7 +752,7 @@ describe('VAnchor tests', function() {
       publicAmount: data.publicAmount,
       roots: rootsSet,
       inputNullifiers: data.inputUtxos.map(input => `0x${input.nullifier}`),
-      outputCommitments: data.outputNotes.map(note => u8aToHex(note.getLeaf())),
+      outputCommitments: data.outputUtxos.map(utxo => u8aToHex(utxo.commitment)),
       extDataHash: data.extDataHash
     };
     const isValidProof = verify_js_proof(data.proof, data.publicInputs, u8aToHex(vk).replace('0x', ''), 'Bn254');
@@ -733,7 +783,9 @@ describe('VAnchor tests', function() {
     for (let i = 0; i < numberOfDepoisits; i++) {
       const note = await generateVAnchorNote(Number(currencyToUnitI128(100).toString()), Number(chainId), Number(chainId));
       const [outputNote, secret] = await basicDeposit(apiPromise!, bob, treeId, note);
-      await basicWithdraw(apiPromise!, treeId, bob, outputNote, secret);
+      const wasmUtxo = outputNote.note.getUtxo();
+      const inputUtxo = new Utxo(wasmUtxo);
+      await basicWithdraw(apiPromise!, treeId, bob, inputUtxo, secret); 
     }
   });
 

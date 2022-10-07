@@ -22,7 +22,7 @@ export class CircomUtxo extends Utxo {
   _blinding = '';
   _originChainId?: string;
 
-  private constructor (readonly inner: JsUtxo) {
+  private constructor (inner: JsUtxo) {
     super(inner);
   }
 
@@ -32,10 +32,10 @@ export class CircomUtxo extends Utxo {
       this._backend,
       this.amount,
       this.chainId,
-      this.blinding.slice(2),
-      this.keypair.getPubKey().slice(2),
-      this.keypair.getEncryptionKey()?.slice(2),
-      this.secret_key.slice(2),
+      this.blinding,
+      this.getKeypair().getPubKey().slice(2),
+      this.getKeypair().getEncryptionKey()?.slice(2),
+      this.getKeypair().privkey?.slice(2),
       this.index.toString()
     ].join('&');
   }
@@ -68,8 +68,8 @@ export class CircomUtxo extends Utxo {
     utxo._backend = 'Circom';
     utxo._amount = parts[2];
     utxo._chainId = parts[3];
-    utxo._blinding = '0x' + parts[4];
-    utxo._pubkey = '0x' + parts[5];
+    utxo._blinding = parts[4];
+    utxo._pubkey = parts[5];
     const maybeEncryptionKey = parts[6];
     const maybeSecretKey = parts[7];
     const maybeIndex = parts[8];
@@ -78,9 +78,9 @@ export class CircomUtxo extends Utxo {
       utxo.setKeypair(new Keypair('0x' + maybeSecretKey));
     } else {
       if (maybeEncryptionKey.length === 64) {
-        utxo.setKeypair(Keypair.fromString('0x' + utxo._pubkey.slice(2) + maybeEncryptionKey));
+        utxo.setKeypair(Keypair.fromString('0x' + utxo._pubkey + maybeEncryptionKey));
       } else {
-        utxo.setKeypair(Keypair.fromString('0x' + utxo._pubkey.slice(2)));
+        utxo.setKeypair(Keypair.fromString('0x' + utxo._pubkey));
       }
     }
 
@@ -105,14 +105,10 @@ export class CircomUtxo extends Utxo {
     utxo._index = input.index ? Number(input.index) : 0;
 
     if (input.keypair) {
-      utxo._secret_key = input.keypair.privkey || '';
-      utxo._pubkey = input.keypair.getPubKey();
       utxo.setKeypair(input.keypair);
-    } else {
-      utxo.setKeypair(new Keypair());
     }
 
-    utxo._blinding = input.blinding ? u8aToHex(input.blinding) : toFixedHex(randomBN(31));
+    utxo._blinding = input.blinding ? u8aToHex(input.blinding).slice(2) : toFixedHex(randomBN(31)).slice(2);
     utxo.setOriginChainId(input.originChainId);
 
     return utxo;
@@ -126,17 +122,17 @@ export class CircomUtxo extends Utxo {
    * @returns `0x`-prefixed hex string with data
    */
   encrypt () {
-    if (!this.keypair.getEncryptionKey()) {
+    if (!this.getKeypair().getEncryptionKey()) {
       throw new Error('Must have a configured encryption key on the keypair to encrypt the utxo');
     }
 
     const bytes = Buffer.concat([
       toBuffer(BigNumber.from(this._chainId), 8),
       toBuffer(BigNumber.from(this._amount), 32),
-      toBuffer(BigNumber.from(this._blinding), 32)
+      toBuffer(BigNumber.from('0x' + this._blinding), 32)
     ]);
 
-    return this.keypair.encrypt(bytes);
+    return this.getKeypair().encrypt(bytes);
   }
 
   /**
@@ -195,7 +191,7 @@ export class CircomUtxo extends Utxo {
    * @returns the poseidon hash of [chainId, amount, pubKey, blinding]
    */
   get commitment (): Uint8Array {
-    const hash = poseidon([this._chainId, this._amount, this._pubkey, this._blinding]);
+    const hash = poseidon([this._chainId, this._amount, '0x' + this._pubkey, '0x' + this._blinding]);
 
     return hexToU8a(BigNumber.from(hash).toHexString());
   }
@@ -221,7 +217,7 @@ export class CircomUtxo extends Utxo {
     // If the amount of the UTXO is zero, then the nullifier is not important.
     // Return a 'dummy' value that will satisfy the circuit
     // Enforce index on the UTXO if there is an amount greater than zero
-    if (!this.keypair || !this.keypair.privkey) {
+    if (!this.getKeypair() || !this.getKeypair().privkey) {
       throw new Error('Cannot create nullifier, keypair with private key not configured');
     }
 
@@ -230,10 +226,14 @@ export class CircomUtxo extends Utxo {
       this.index > 0 ? this.index : 0,
       // The following parameter is the 'ownership hash', a portion of the nullifier that enables
       // compliance, and ties a utxo to a particular keypair.
-      poseidon([this.keypair.privkey, u8aToHex(this.commitment), this.index])
+      poseidon([this.getKeypair().privkey, u8aToHex(this.commitment), this.index])
     ]);
 
-    return x.toString();
+    return toFixedHex(x).slice(2);
+  }
+
+  get public_key (): string {
+    return this._pubkey;
   }
 
   /**
@@ -248,14 +248,22 @@ export class CircomUtxo extends Utxo {
     this._secret_key = secret;
   }
 
+  getKeypair (): Keypair {
+    return this.keypair;
+  }
+
   setKeypair (keypair: Keypair): void {
-    this._pubkey = keypair.getPubKey();
+    this._pubkey = keypair.getPubKey().slice(2);
 
     if (keypair.privkey) {
-      this._secret_key = keypair.privkey;
+      this._secret_key = keypair.privkey.slice(2);
     }
 
     this.keypair = keypair;
+  }
+
+  setIndex (val: number): void {
+    this.index = val;
   }
 }
 
@@ -267,6 +275,15 @@ class CircomJsUtxo implements JsUtxo {
   }
 
   serialize (): string {
+    throw new Error('Method not implemented.');
+  }
+
+  setIndex (val: bigint): void {
+    this.index = val;
+    throw new Error('Method not implemented.');
+  }
+
+  calculate_nullifier (): string {
     throw new Error('Method not implemented.');
   }
 

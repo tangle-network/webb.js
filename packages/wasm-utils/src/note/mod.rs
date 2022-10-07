@@ -131,8 +131,8 @@ impl JsNote {
 						let chain_id = self.secrets[0].clone();
 
 						let amount = self.secrets[1].clone();
-						let blinding = self.secrets[2].clone();
-						let secret_key = self.secrets[3].clone();
+						let secret_key = self.secrets[2].clone();
+						let blinding = self.secrets[3].clone();
 						let index = self.index;
 
 						let mut amount_slice = [0u8; 16];

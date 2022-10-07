@@ -1,25 +1,21 @@
 use ark_bn254::Bn254;
 use ark_ff::{BigInteger, PrimeField};
-use ark_std::UniformRand;
-use arkworks_setups::common::{prove, prove_unchecked, setup_keys, setup_keys_unchecked, verify, verify_unchecked_raw};
+use arkworks_setups::common::{setup_keys_unchecked, verify_unchecked_raw};
 use arkworks_setups::Curve;
 use js_sys::{Array, JsString, Uint8Array};
 use rand::rngs::OsRng;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
 
-use crate::note::JsNote;
 use crate::proof::test_utils::{
-	generate_mixer_test_setup, generate_vanchor_note, generate_vanchor_test_setup_16_mixed_inputs,
-	generate_vanchor_test_setup_16_non_default_inputs, generate_vanchor_test_setup_2_inputs, new_utxo_bn254_2_2,
-	MixerTestSetup, VAnchorTestSetup, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5, VANCHOR_NOTE_V1_X5_4,
+	generate_mixer_test_setup, generate_vanchor_test_setup_16_mixed_inputs,
+	generate_vanchor_test_setup_16_non_default_inputs, generate_vanchor_test_setup_2_inputs, generate_vanchor_utxo,
+	new_utxo_bn254_2_2, MixerTestSetup, VAnchorTestSetup, DECODED_SUBSTRATE_ADDRESS, MIXER_NOTE_V1_X5_5,
 };
 use crate::proof::{generate_proof_js, truncate_and_pad, JsProofInputBuilder, LeavesMapInput, MTBn254X5};
-use crate::types::{Indices, Leaves, WasmCurve, BE};
+use crate::types::{Indices, Leaves};
 use crate::utxo::JsUtxo;
 use crate::{VAnchorR1CSProverBn254_30_2_2_2, DEFAULT_LEAF};
-
-use super::*;
 
 const TREE_DEPTH: usize = 30;
 
@@ -72,12 +68,11 @@ fn generate_mixer_proof() {
 
 #[wasm_bindgen_test]
 fn should_generate_vanchor_proof_input() {
-	let vanchor_note_str: String = generate_vanchor_note(10, 0, 0, Some(0)).serialize().into();
+	let vanchor_utxo = generate_vanchor_utxo(10, 0, Some(0));
 	let protocol = JsValue::from("vanchor").into();
 	let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
 
-	let note = JsNote::deserialize(&vanchor_note_str).unwrap();
-	let leaf = note.get_leaf_commitment().unwrap();
+	let leaf = vanchor_utxo.commitment();
 	let leaves: Array = vec![leaf].into_iter().collect();
 
 	let mut leaves_map = LeavesMapInput::new();
@@ -106,12 +101,12 @@ fn should_generate_vanchor_proof_input() {
 	proof_input_builder.chain_id(JsString::from("0")).unwrap();
 	proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
 
-	let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
+	let input_utxos: Array = vec![JsValue::from(vanchor_utxo.clone())].into_iter().collect();
 
-	let output_1 = new_utxo_bn254_2_2(note.curve.unwrap(), 10, 0);
-	let output_2 = new_utxo_bn254_2_2(note.curve.unwrap(), 10, 3);
+	let output_1 = new_utxo_bn254_2_2(crate::types::Curve::Bn254, 10, 0);
+	let output_2 = new_utxo_bn254_2_2(crate::types::Curve::Bn254, 10, 3);
 
-	proof_input_builder.set_notes(notes).unwrap();
+	proof_input_builder.set_input_utxos(input_utxos).unwrap();
 	proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
 	let proof_builder = proof_input_builder.build_js().unwrap();
 	let vanchor_proof_input_payload = proof_builder.inner.vanchor_input().unwrap();
@@ -123,27 +118,21 @@ fn should_generate_vanchor_proof_input() {
 		hex::encode([0u8; 32].to_vec())
 	);
 	assert_eq!(vanchor_proof_input_payload.roots.len(), 2);
-	assert_eq!(
-		vanchor_proof_input_payload.backend.to_string(),
-		note.backend.unwrap().to_string()
-	);
-	assert_eq!(vanchor_proof_input_payload.exponentiation, note.exponentiation.unwrap());
-	assert_eq!(vanchor_proof_input_payload.width, note.width.unwrap());
-	assert_eq!(
-		vanchor_proof_input_payload.curve.to_string(),
-		note.curve.unwrap().to_string()
-	);
+	assert_eq!(vanchor_proof_input_payload.backend.to_string(), "Arkworks");
+	assert_eq!(vanchor_proof_input_payload.exponentiation, 5);
+	assert_eq!(vanchor_proof_input_payload.width, 5);
+	assert_eq!(vanchor_proof_input_payload.curve.to_string(), "Bn254");
 	assert_eq!(hex::encode(vanchor_proof_input_payload.pk), "0000");
 }
 
 #[wasm_bindgen_test]
 fn should_fail_to_generate_vanchor_proof_input_with_invalid_amounts() {
-	let vanchor_note_str: String = generate_vanchor_note(15, 0, 0, Some(0)).serialize().into();
+	let vanchor_utxo_str: String = generate_vanchor_utxo(15, 0, Some(0)).serialize().into();
 	let protocol = JsValue::from("vanchor").into();
 	let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
 
-	let note = JsNote::deserialize(&vanchor_note_str).unwrap();
-	let leaf = note.get_leaf_commitment().unwrap();
+	let utxo = JsUtxo::deserialize(&vanchor_utxo_str).unwrap();
+	let leaf = utxo.commitment();
 	let leaves: Array = vec![leaf].into_iter().collect();
 
 	let mut leaves_map = LeavesMapInput::new();
@@ -172,12 +161,12 @@ fn should_fail_to_generate_vanchor_proof_input_with_invalid_amounts() {
 	proof_input_builder.chain_id(JsString::from("0")).unwrap();
 	proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
 
-	let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
+	let input_utxos: Array = vec![JsValue::from(utxo.clone())].into_iter().collect();
 
-	let output_1 = new_utxo_bn254_2_2(note.curve.unwrap(), 10, 0);
-	let output_2 = new_utxo_bn254_2_2(note.curve.unwrap(), 10, 0);
+	let output_1 = new_utxo_bn254_2_2(crate::types::Curve::Bn254, 10, 0);
+	let output_2 = new_utxo_bn254_2_2(crate::types::Curve::Bn254, 10, 0);
 
-	proof_input_builder.set_notes(notes).unwrap();
+	proof_input_builder.set_input_utxos(input_utxos).unwrap();
 	proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
 
 	let proof_builder = proof_input_builder.build();
@@ -191,14 +180,14 @@ fn should_fail_to_generate_vanchor_proof_input_with_invalid_amounts() {
 
 #[wasm_bindgen_test]
 fn should_fail_to_generate_vanchor_proof_input_with_inconsistent_notes_chain_id() {
-	let note = generate_vanchor_note(15, 0, 0, Some(0));
-	let note2 = generate_vanchor_note(15, 1, 1, Some(1));
+	let utxo1 = generate_vanchor_utxo(15, 0, Some(0));
+	let utxo2 = generate_vanchor_utxo(15, 1, Some(1));
 	let protocol = JsValue::from("vanchor").into();
 	let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
 
-	let leaf = note.get_leaf_commitment().unwrap();
-	let leaf2 = note2.get_leaf_commitment().unwrap();
-	let leaves: Array = vec![leaf, leaf2].into_iter().collect();
+	let leaf1 = utxo1.commitment();
+	let leaf2 = utxo2.commitment();
+	let leaves: Array = vec![leaf1, leaf2].into_iter().collect();
 
 	let mut leaves_map = LeavesMapInput::new();
 	leaves_map
@@ -226,16 +215,16 @@ fn should_fail_to_generate_vanchor_proof_input_with_inconsistent_notes_chain_id(
 	proof_input_builder.chain_id(JsString::from("0")).unwrap();
 	proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
 
-	let notes: Array = vec![JsValue::from(note.clone()), JsValue::from(note2.clone())]
+	let input_utxos: Array = vec![JsValue::from(utxo1.clone()), JsValue::from(utxo2.clone())]
 		.into_iter()
 		.collect();
 
-	let output_1 = new_utxo_bn254_2_2(note.curve.unwrap(), 10, 0);
-	let output_2 = new_utxo_bn254_2_2(note.curve.unwrap(), 10, 3);
+	let output_1 = new_utxo_bn254_2_2(crate::types::Curve::Bn254, 10, 0);
+	let output_2 = new_utxo_bn254_2_2(crate::types::Curve::Bn254, 10, 3);
 
 	proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
 
-	proof_input_builder.set_notes(notes).unwrap();
+	proof_input_builder.set_input_utxos(input_utxos).unwrap();
 	let proof_builder = proof_input_builder.build();
 	let mut message = "".to_string();
 	if let Err(e) = proof_builder {
@@ -249,14 +238,12 @@ fn should_fail_to_generate_vanchor_proof_input_with_inconsistent_notes_chain_id(
 
 #[wasm_bindgen_test]
 fn should_fail_to_generate_vanchor_proof_input_with_inconsistent_notes_indices() {
-	let note = generate_vanchor_note(15, 0, 0, Some(0));
-	let note2 = generate_vanchor_note(15, 1, 1, Some(0));
+	let utxo1 = generate_vanchor_utxo(15, 0, Some(0));
+	let utxo2 = generate_vanchor_utxo(15, 1, Some(0));
 	let protocol = JsValue::from("vanchor").into();
 	let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
 
-	let leaf = note.get_leaf_commitment().unwrap();
-	let leaf2 = note2.get_leaf_commitment().unwrap();
-	let leaves: Array = vec![leaf, leaf2].into_iter().collect();
+	let leaves: Array = vec![utxo1.commitment(), utxo2.commitment()].into_iter().collect();
 
 	let mut leaves_map = LeavesMapInput::new();
 	leaves_map
@@ -284,14 +271,14 @@ fn should_fail_to_generate_vanchor_proof_input_with_inconsistent_notes_indices()
 	proof_input_builder.chain_id(JsString::from("0")).unwrap();
 	proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
 
-	let notes: Array = vec![JsValue::from(note.clone()), JsValue::from(note2.clone())]
+	let input_utxos: Array = vec![JsValue::from(utxo1.clone()), JsValue::from(utxo2.clone())]
 		.into_iter()
 		.collect();
 
-	let output_1 = new_utxo_bn254_2_2(note.curve.unwrap(), 20, 0);
-	let output_2 = new_utxo_bn254_2_2(note.curve.unwrap(), 20, 3);
+	let output_1 = new_utxo_bn254_2_2(crate::types::Curve::Bn254, 20, 0);
+	let output_2 = new_utxo_bn254_2_2(crate::types::Curve::Bn254, 20, 3);
 
-	proof_input_builder.set_notes(notes).unwrap();
+	proof_input_builder.set_input_utxos(input_utxos).unwrap();
 	proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
 
 	let proof_builder = proof_input_builder.build();
@@ -307,11 +294,11 @@ fn should_fail_to_generate_vanchor_proof_input_with_inconsistent_notes_indices()
 
 #[wasm_bindgen_test]
 fn should_fail_to_proof_with_1_input() {
-	let note = generate_vanchor_note(30, 0, 0, Some(0));
+	let utxo = generate_vanchor_utxo(30, 0, Some(0));
 	let protocol = JsValue::from("vanchor").into();
 	let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
 
-	let leaf = note.get_leaf_commitment().unwrap();
+	let leaf = utxo.commitment();
 	let leaves: Array = vec![leaf].into_iter().collect();
 
 	let mut leaves_map = LeavesMapInput::new();
@@ -340,12 +327,12 @@ fn should_fail_to_proof_with_1_input() {
 	proof_input_builder.chain_id(JsString::from("0")).unwrap();
 	proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
 
-	let notes: Array = vec![JsValue::from(note.clone())].into_iter().collect();
+	let input_utxos: Array = vec![JsValue::from(utxo.clone())].into_iter().collect();
 
-	let output_1 = new_utxo_bn254_2_2(note.curve.unwrap(), 20, 0);
-	let output_2 = new_utxo_bn254_2_2(note.curve.unwrap(), 20, 3);
+	let output_1 = new_utxo_bn254_2_2(crate::types::Curve::Bn254, 20, 0);
+	let output_2 = new_utxo_bn254_2_2(crate::types::Curve::Bn254, 20, 3);
 
-	proof_input_builder.set_notes(notes).unwrap();
+	proof_input_builder.set_input_utxos(input_utxos).unwrap();
 	proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
 
 	let proof_input = proof_input_builder.build_js().unwrap();
@@ -362,16 +349,15 @@ fn should_fail_to_proof_with_1_input() {
 
 #[wasm_bindgen_test]
 fn should_fail_to_proof_with_3_inputs() {
-	let note = generate_vanchor_note(10, 0, 0, Some(0));
-	let note2 = generate_vanchor_note(10, 0, 0, Some(0));
-	let note3 = generate_vanchor_note(10, 0, 0, Some(0));
+	let utxo1 = generate_vanchor_utxo(10, 0, Some(0));
+	let utxo2 = generate_vanchor_utxo(10, 0, Some(0));
+	let utxo3 = generate_vanchor_utxo(10, 0, Some(0));
 	let protocol = JsValue::from("vanchor").into();
 	let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
 
-	let leaf = note.get_leaf_commitment().unwrap();
-	let leaf2 = note2.get_leaf_commitment().unwrap();
-	let leaf3 = note2.get_leaf_commitment().unwrap();
-	let leaves: Array = vec![leaf, leaf2, leaf3].into_iter().collect();
+	let leaves: Array = vec![utxo1.commitment(), utxo2.commitment(), utxo3.commitment()]
+		.into_iter()
+		.collect();
 
 	let mut leaves_map = LeavesMapInput::new();
 	leaves_map
@@ -399,18 +385,18 @@ fn should_fail_to_proof_with_3_inputs() {
 	proof_input_builder.chain_id(JsString::from("0")).unwrap();
 	proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
 
-	let notes: Array = vec![
-		JsValue::from(note.clone()),
-		JsValue::from(note2.clone()),
-		JsValue::from(note3.clone()),
+	let input_utxos: Array = vec![
+		JsValue::from(utxo1.clone()),
+		JsValue::from(utxo2.clone()),
+		JsValue::from(utxo3.clone()),
 	]
 	.into_iter()
 	.collect();
 
-	let output_1 = new_utxo_bn254_2_2(note.curve.unwrap(), 20, 0);
-	let output_2 = new_utxo_bn254_2_2(note.curve.unwrap(), 20, 3);
+	let output_1 = new_utxo_bn254_2_2(crate::types::Curve::Bn254, 20, 0);
+	let output_2 = new_utxo_bn254_2_2(crate::types::Curve::Bn254, 20, 3);
 
-	proof_input_builder.set_notes(notes).unwrap();
+	proof_input_builder.set_input_utxos(input_utxos).unwrap();
 	proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
 
 	let proof_builder = proof_input_builder.build_js().unwrap();
@@ -473,20 +459,20 @@ fn generate_vanchor_proof_16_mixed_inputs() {
 
 #[wasm_bindgen_test]
 fn should_generate_a_valid_proof_for_already_used_merkle_tree() {
-	let dummy_note = generate_vanchor_note(0, 0, 0, Some(0));
+	let dummy_input_utxo = generate_vanchor_utxo(0, 0, Some(0));
 	// Create 16 previously inserted UTXOs
-	let mut older_notes = vec![];
+	let mut existing_utxos = vec![];
 	for i in 0..16 {
-		let note = generate_vanchor_note(10, 0, 0, Some(i));
-		older_notes.push(note);
+		let note = generate_vanchor_utxo(10, 0, Some(i));
+		existing_utxos.push(note);
 	}
-	let leaves: Array = older_notes.iter().map(|n| n.get_leaf_commitment().unwrap()).collect();
-	// Create a new input note to be spent
-	let deposited_note = generate_vanchor_note(10, 0, 0, Some(16));
+	let leaves: Array = existing_utxos.iter().map(|n| n.commitment()).collect();
+	// Create a spendable utxo (the output note)
+	let new_utxo = generate_vanchor_utxo(10, 0, Some(16));
 	let protocol = JsValue::from("vanchor").into();
 	let mut proof_input_builder = JsProofInputBuilder::new(protocol).unwrap();
 
-	let leaf = deposited_note.get_leaf_commitment().unwrap();
+	let leaf = new_utxo.commitment();
 	leaves.push(&leaf);
 
 	let mut leaves_map = LeavesMapInput::new();
@@ -516,14 +502,14 @@ fn should_generate_a_valid_proof_for_already_used_merkle_tree() {
 	proof_input_builder.chain_id(JsString::from("0")).unwrap();
 	proof_input_builder.set_ext_data_hash(JsString::from("1111")).unwrap();
 
-	let notes: Array = vec![JsValue::from(deposited_note.clone()), JsValue::from(dummy_note)]
+	let notes: Array = vec![JsValue::from(new_utxo.clone()), JsValue::from(dummy_input_utxo)]
 		.into_iter()
 		.collect();
 
-	let output_1 = new_utxo_bn254_2_2(deposited_note.curve.unwrap(), 10, 0);
-	let output_2 = new_utxo_bn254_2_2(deposited_note.curve.unwrap(), 10, 3);
+	let output_1 = new_utxo_bn254_2_2(crate::types::Curve::Bn254, 10, 0);
+	let output_2 = new_utxo_bn254_2_2(crate::types::Curve::Bn254, 10, 3);
 
-	proof_input_builder.set_notes(notes).unwrap();
+	proof_input_builder.set_input_utxos(notes).unwrap();
 	proof_input_builder.set_output_utxos(output_1, output_2).unwrap();
 
 	let c = VAnchorR1CSProverBn254_30_2_2_2::setup_random_circuit(Curve::Bn254, DEFAULT_LEAF, &mut OsRng).unwrap();

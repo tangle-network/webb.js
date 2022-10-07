@@ -110,6 +110,11 @@ pub fn js_note_of_jsval(js: JsValue) -> Option<JsNote> {
 }
 
 #[wasm_bindgen]
+pub fn js_utxo_of_jsval(js: JsValue) -> Option<JsUtxo> {
+	generic_of_jsval(js, "JsUtxo").unwrap_or(None)
+}
+
+#[wasm_bindgen]
 pub struct LeavesMapInput {
 	#[wasm_bindgen(skip)]
 	pub leaves: BTreeMap<u64, Vec<Vec<u8>>>,
@@ -204,7 +209,7 @@ impl ProofInputBuilder {
 	pub fn set_input_utxos(&mut self, utxo_list: Vec<JsUtxo>) -> Result<(), OperationError> {
 		match self {
 			Self::VAnchor(input) => {
-				input.secret = Some(utxo_list);
+				input.input_utxos = Some(utxo_list);
 				Ok(())
 			}
 			_ => Err(OpStatusCode::ProofInputFieldInstantiationProtocolInvalid.into()),
@@ -618,15 +623,19 @@ impl JsProofInputBuilder {
 		Ok(JsProofInput { inner: proof_input })
 	}
 
-	/// Set notes for VAnchor
-	#[wasm_bindgen(js_name=setNotes)]
-	pub fn set_notes(&mut self, notes: Array) -> Result<(), JsValue> {
-		let notes: Vec<JsNote> = notes
+	/// Set utxos for vanchor
+	#[wasm_bindgen(js_name=setInputUtxos)]
+	pub fn set_input_utxos(&mut self, input_utxos: Array) -> Result<(), JsValue> {
+		let utxos: Vec<JsUtxo> = input_utxos
 			.iter()
-			.map(|v| js_note_of_jsval(v).ok_or(OpStatusCode::InvalidNoteSecrets))
-			.collect::<Result<Vec<JsNote>, _>>()?;
-		self.set_meta_data(&notes[0])?;
-		let utxos = notes.iter().map(|n| n.get_js_utxo()).collect::<Result<Vec<_>, _>>()?;
+			.map(|v| js_utxo_of_jsval(v).ok_or(OpStatusCode::InvalidInputUtxoConfig))
+			.collect::<Result<Vec<JsUtxo>, _>>()?;
+
+		self.inner.exponentiation(5)?;
+		self.inner.backend(Backend::Arkworks)?;
+		self.inner.width(5)?;
+		self.inner.curve(Curve::Bn254)?;
+		self.inner.chain_id(utxos[0].chain_id_raw().into())?;
 
 		self.inner.set_input_utxos(utxos)?;
 		Ok(())

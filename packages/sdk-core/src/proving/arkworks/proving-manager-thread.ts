@@ -1,7 +1,7 @@
 // Copyright 2022 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import type { JsNote, JsProofInput, JsProofOutput, NoteProtocol } from '@webb-tools/wasm-utils';
+import type { JsProofInput, JsProofOutput, NoteProtocol } from '@webb-tools/wasm-utils';
 
 import { u8aToHex } from '@polkadot/util';
 
@@ -101,47 +101,55 @@ export class ArkworksProvingManagerThread {
       return mixerProof as any;
     } else if (protocol === 'vanchor') {
       const input = pmSetupInput as WorkerVAnchorPMSetupInput;
-      const metaDataNote = input.inputNotes[0];
-      const rawNote = await Note.deserialize(metaDataNote);
-      const { note } = rawNote;
-      const rawNotes = await Promise.all(input.inputNotes.map((note) => Note.deserialize(note)));
-      const jsNotes: JsNote[] = rawNotes.map((n) => n.note);
+      const inputUtxos = await Promise.all(input.inputUtxos.map((utxo) => Utxo.deserialize(utxo)));
       const rawIndices = [...input.indices];
       const indices = rawIndices;
 
-      if (rawNotes.length !== indices.length) {
+      if (inputUtxos.length !== indices.length) {
         throw new Error(
-          `Input notes and indices size don't match notes count (${rawNotes.length}) indices count (${indices.length})`
+          `Input utxos and indices size don't match notes count (${inputUtxos.length}) indices count (${indices.length})`
         );
       }
 
       // Pad the 1 note to make 2 inputs
-      if (rawNotes.length === 1) {
-        const defaultNote = await rawNote.getDefaultUtxoNote();
+      if (inputUtxos.length === 1) {
+        const dummyUtxo = await Utxo.generateUtxo({
+          amount: '0',
+          backend: 'Arkworks',
+          chainId: inputUtxos[0].chainId,
+          curve: 'Bn254',
+          index: '0',
+          keypair: inputUtxos[0].getKeypair()
+        });
 
-        jsNotes.push(defaultNote.note);
+        inputUtxos.push(dummyUtxo);
         indices.push(0);
       }
 
-      if (rawNotes.length > 2 && rawNotes.length < 16) {
-        const inputGap = 16 - rawNotes.length;
+      if (inputUtxos.length > 2 && inputUtxos.length < 16) {
+        const inputGap = 16 - inputUtxos.length;
         const gap = await Promise.all(Array(inputGap)
           .fill(0)
           .map(async () => {
-            const newNote = new Note(note);
+            const dummyUtxo = await Utxo.generateUtxo({
+              amount: '0',
+              backend: 'Arkworks',
+              chainId: inputUtxos[0].chainId,
+              curve: 'Bn254',
+              index: '0',
+              keypair: inputUtxos[0].getKeypair()
+            });
 
-            const defNote = await newNote.getDefaultUtxoNote();
-
-            return defNote.note;
+            return dummyUtxo;
           }));
 
-        jsNotes.push(
+        inputUtxos.push(
           ...gap
         );
         indices.push(...Array(inputGap).fill(0));
       }
 
-      if (rawNotes.length > 16) {
+      if (inputUtxos.length > 16) {
         throw new Error('The maximum support input count is 16');
       }
 
@@ -149,7 +157,7 @@ export class ArkworksProvingManagerThread {
       const wasm = await this.wasmBlob;
       const outputUtxos = await Promise.all(input.output.map((utxoString) => Utxo.deserialize(utxoString)));
 
-      pm.setNotes(jsNotes);
+      pm.setInputUtxos(inputUtxos.map((utxo) => utxo.inner));
       pm.setIndices(indices.map((i) => i.toString()) as any);
       pm.setPk(u8aToHex(input.provingKey).replace('0x', ''));
       pm.setRoots(input.roots);
@@ -185,7 +193,7 @@ export class ArkworksProvingManagerThread {
       const vanchorProof: WorkerProofInterface<'vanchor'> = {
         extDataHash: dataHash,
         inputUtxos: proof.inputUtxos.map((jsUtxo) => new Utxo(jsUtxo).serialize()),
-        outputNotes: proof.outputNotes.map((jsNote) => Note.fromDepositNote(jsNote).serialize()),
+        outputUtxos: proof.outputUtxos.map((jsUtxo) => new Utxo(jsUtxo).serialize()),
         proof: proof.proof,
         publicAmount: proof.publicAmount,
         publicInputs: proof.publicInputs

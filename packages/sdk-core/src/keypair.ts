@@ -9,7 +9,7 @@ import { poseidon } from 'circomlibjs';
 import { decrypt, encrypt, getEncryptionPublicKey } from 'eth-sig-util';
 import { BigNumber, ethers } from 'ethers';
 
-import { toFixedHex } from './big-number-utils.js';
+import { FIELD_SIZE, randomBN, toFixedHex } from './big-number-utils.js';
 
 export function packEncryptedMessage (encryptedMessage: any) {
   const nonceBuf = Buffer.from(encryptedMessage.nonce, 'base64');
@@ -63,15 +63,15 @@ export class Keypair {
   private encryptionKey: string | undefined; // stored as a base64 encryption key
 
   /**
-   * Initialize a new keypair from a passed hex string. Generates a random private key if not defined
+   * Initialize a new keypair from a passed hex string. Generates a random private key if not defined.
    *
-   * @param privkey - hex string
+   * @param privkey - hex string of a field element for the
    * @returns - A 'Keypair' object with pubkey and encryptionKey values derived from the private key.
    */
-  constructor (privkey = ethers.Wallet.createRandom().privateKey) {
-    this.privkey = privkey;
+  constructor (privkey = randomBN(32).toHexString()) {
+    this.privkey = toFixedHex(BigNumber.from(privkey).mod(FIELD_SIZE));
     this.pubkey = BigNumber.from(poseidon([this.privkey]));
-    this.encryptionKey = getEncryptionPublicKey(privkey.slice(2));
+    this.encryptionKey = getEncryptionPublicKey(this.privkey.slice(2));
   }
 
   /**

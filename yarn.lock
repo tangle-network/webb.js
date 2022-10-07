@@ -3537,6 +3537,18 @@
     "@polkadot/typegen" "9.2.4"
     "@polkadot/types" "9.2.4"
 
+"@webb-tools/protocol-substrate-types@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@webb-tools/protocol-substrate-types/-/protocol-substrate-types-0.0.2.tgz#27953ee61a248430cee3fc2bbfc6b2260ecc8b16"
+  integrity sha512-tFJWGJQz9czS0Zkdn6C2fPRMUCa6eWlzIAEjshOBowharqodfSKwvdZCaXJCrs9VCUxGDFMj/7HKk9oe4lh/5A==
+  dependencies:
+    "@babel/runtime" "^7.19.0"
+    "@open-web3/orml-types" "^1.1.3"
+    "@polkadot/api-derive" "9.2.4"
+    "@polkadot/dev" "^0.67.86"
+    "@polkadot/typegen" "9.2.4"
+    "@polkadot/types" "9.2.4"
+
 "@webb-tools/sdk-core@0.1.4-101":
   version "0.1.4-101"
   resolved "https://registry.yarnpkg.com/@webb-tools/sdk-core/-/sdk-core-0.1.4-101.tgz#bba0108f36bad2e01dcae5603b9ec6dd44d093da"

@@ -10,7 +10,7 @@ export async function generateArkworksVAnchorNote (inputUtxo: Utxo) {
     hashFunction: 'Poseidon',
     index: inputUtxo.index,
     protocol: 'vanchor',
-    secrets: inputUtxo.getSecrets().join(':'),
+    secrets: inputUtxo.getSecretsForNote().join(':'),
     sourceChain: String(inputUtxo.chainId),
     sourceIdentifyingData: '1',
     targetChain: String(inputUtxo.chainId),
