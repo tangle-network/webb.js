@@ -74,7 +74,5 @@ export function generateVariableWitnessInput (
     outBlinding: outputs.map((x) => BigNumber.from('0x' + x.blinding).toString())
   };
 
-  console.log('input: ', input);
-
   return input;
 }
