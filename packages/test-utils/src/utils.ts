@@ -3,6 +3,7 @@
 import '@webb-tools/protocol-substrate-types';
 
 import { options } from '@webb-tools/api/index.js';
+import { Keypair, Utxo } from '@webb-tools/sdk-core';
 import { ResourceId } from '@webb-tools/sdk-core/proposals/index.js';
 import { BigNumber } from 'ethers';
 
@@ -146,4 +147,24 @@ export async function registerResourceId (api: ApiPromise, resourceId: ResourceI
         }
       });
   });
+}
+
+async function generateArkworksUtxo (
+  amount: number,
+  chainId: number,
+  outputChainId: number,
+  index?: number,
+  keypair?: Keypair
+) {
+  const utxo = await Utxo.generateUtxo({
+    amount: String(amount),
+    backend: 'Arkworks',
+    chainId: String(chainId),
+    curve: 'Bn254',
+    index: index ? String(index) : undefined,
+    keypair: keypair ?? new Keypair(),
+    originChainId: String(outputChainId)
+  });
+
+  return utxo;
 }

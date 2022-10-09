@@ -39,6 +39,8 @@
     "@polkadot/keyring": "10.1.7",
     "@webb-tools/api": "0.1.4-111",
     "@webb-tools/protocol-solidity": "0.2.6",
+    "@webb-tools/protocol-substrate-types": "0.0.3",
+    "@webb-tools/dkg-substrate-types": "0.0.1",
     "@webb-tools/sdk-core": "0.1.4-111",
     "@webb-tools/tokens": "0.2.6",
     "@webb-tools/utils": "0.2.6",
