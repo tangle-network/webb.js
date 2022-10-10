@@ -3097,15 +3097,10 @@
     "@types/node" "*"
     form-data "^3.0.0"
 
-"@types/node@*":
-  version "18.6.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.6.1.tgz#828e4785ccca13f44e2fb6852ae0ef11e3e20ba5"
-  integrity sha512-z+2vB6yDt1fNwKOeGbckpmirO+VBDuQqecXkgeIqDlaOtmKn6hPR/viQ8cxCfqLU4fTlvM3+YjM367TukWdxpg==
-
-"@types/node@^12.12.6":
-  version "12.20.55"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.20.55.tgz#c329cbd434c42164f846b909bd6f85b5537f6240"
-  integrity sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==
+"@types/node@*", "@types/node@16.11.7", "@types/node@^12.12.6":
+  version "16.11.7"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.7.tgz#36820945061326978c42a01e56b61cd223dfdc42"
+  integrity sha512-QB5D2sqfSjCmTuWcBWyJ+/44bcjO7VbjSbOE0ucoVbAsSNQc4Lt6QkgkVXkTDwkL4z/beecZNDvVX15D4P8Jbw==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -3504,6 +3499,18 @@
   dependencies:
     ethers "5.7.0"
 
+"@webb-tools/dkg-substrate-types@0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@webb-tools/dkg-substrate-types/-/dkg-substrate-types-0.0.1.tgz#a374cea87002b26bb567c5ab3df14f878c9647c8"
+  integrity sha512-B7vk+1PRF7BdT9URJF+U1+JsBPmhvMkzldVyEE+tQaKYsyyaZPmb+Bye7DkMZCSDqJKgyfIBaN3zcKxKqqjTAA==
+  dependencies:
+    "@babel/runtime" "^7.19.0"
+    "@open-web3/orml-types" "^1.1.3"
+    "@polkadot/api-derive" "9.2.4"
+    "@polkadot/dev" "^0.67.86"
+    "@polkadot/typegen" "9.2.4"
+    "@polkadot/types" "9.2.4"
+
 "@webb-tools/interfaces@^0.2.6", "@webb-tools/interfaces@^0.2.7":
   version "0.2.7"
   resolved "https://registry.yarnpkg.com/@webb-tools/interfaces/-/interfaces-0.2.7.tgz#f2129e67cda9bf24afb02c75961e2f2cfbf24808"
@@ -3525,10 +3532,10 @@
     "@webb-tools/utils" "^0.2.6"
     "@webb-tools/vbridge" "^0.2.6"
 
-"@webb-tools/protocol-substrate-types@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@webb-tools/protocol-substrate-types/-/protocol-substrate-types-0.0.2.tgz#27953ee61a248430cee3fc2bbfc6b2260ecc8b16"
-  integrity sha512-tFJWGJQz9czS0Zkdn6C2fPRMUCa6eWlzIAEjshOBowharqodfSKwvdZCaXJCrs9VCUxGDFMj/7HKk9oe4lh/5A==
+"@webb-tools/protocol-substrate-types@0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@webb-tools/protocol-substrate-types/-/protocol-substrate-types-0.0.3.tgz#38b35fe6bc13dc9c7219b5ffab78894fc7b500f8"
+  integrity sha512-DKeyu94Yetsk3weJOiPa2Rwtlr47f/+zVg+v5eld0ET/KtosH1hKrRIIXJdJ1sAMet2SqRC0jxxDRh1OhDcZRw==
   dependencies:
     "@babel/runtime" "^7.19.0"
     "@open-web3/orml-types" "^1.1.3"
