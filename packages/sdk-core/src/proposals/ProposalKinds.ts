@@ -4,6 +4,36 @@ import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { ProposalHeader } from './ProposalHeader.js';
 import { ResourceId } from './ResourceId.js';
+export interface IRefreshVoteProposal {
+  readonly  nonce:number;
+  readonly publicKey:string;
+}
+export class RefreshVoteProposal implements IRefreshVoteProposal {
+  nonce:number;
+  publicKey:string
+  constructor(
+    nonce:number,
+    publicKey:string,
+  ) {
+    this.nonce = nonce;
+    this.publicKey =publicKey
+  }
+
+  toU8a():Uint8Array {
+    const publicKey = hexToU8a(this.publicKey);
+    const nonceBytes = new Uint8Array(4);
+    const dataView = new DataView(nonceBytes);
+    dataView.setUint32(this.nonce,0,BE);
+    return  new Uint8Array([...nonceBytes,...publicKey])
+  }
+  fromBytes(bytes:Uint8Array):RefreshVoteProposal {
+    const dataView = new DataView(bytes);
+    const nonce = dataView.getUint32(0,BE);
+    const publicKey = bytes.slice(4,bytes.length);
+    return new RefreshVoteProposal(nonce , publicKey)
+  }
+}
+
 
 export interface IAnchorCreateProposal {
   readonly header: ProposalHeader;
