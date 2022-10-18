@@ -1,11 +1,12 @@
-import {BE} from '@webb-tools/sdk-core/proposals/index';
+import type { TransactionV2 } from '@polkadot/types/interfaces/eth';
 
-import {hexToU8a, u8aToHex} from '@polkadot/util';
+import { BE } from '@webb-tools/sdk-core/proposals/index';
 
-import {ProposalHeader} from './ProposalHeader.js';
-import {ResourceId} from './ResourceId.js';
-import type {TransactionV2} from "@polkadot/types/interfaces/eth";
-import {TypeRegistry} from "@polkadot/types";
+import { TypeRegistry } from '@polkadot/types';
+import { hexToU8a, u8aToHex } from '@polkadot/util';
+
+import { ProposalHeader } from './ProposalHeader.js';
+import { ResourceId } from './ResourceId.js';
 
 export interface IEVMProposal {
   readonly chainId: number;
@@ -18,83 +19,92 @@ export class EVMProposal implements IEVMProposal {
   readonly nonce: number;
   readonly tx: TransactionV2;
 
-  constructor(
+  constructor (
     chainId: number,
     nonce: number,
-    tx: TransactionV2,
+    tx: TransactionV2
   ) {
     this.chainId = chainId;
     this.nonce = nonce;
     this.tx = tx;
   }
-  fromBytes(bytes:Uint8Array):EVMProposal{
+
+  fromBytes (bytes: Uint8Array): EVMProposal {
     const reg = new TypeRegistry();
-    const tx = reg.createType<TransactionV2>('TransactionV2' , bytes);
-    let nonce:number;
+    const tx = reg.createType<TransactionV2>('TransactionV2', bytes);
+    let nonce: number;
     let chainId = 0;
-    switch (tx.type){
-      case "Legacy":{
-        const txValue= tx.asLegacy;
-        nonce = txValue.nonce.toNumber()
-        chainId = 0
-      }
-        break;
-      case "Eip2930":{
-        const txValue= tx.asEip2930;
-        chainId = txValue.chainId.toNumber()
-        nonce =  txValue.nonce.toNumber()
-      }
-        break;
-      case "Eip1559":{
-        const txValue= tx.asEip1559;
-        chainId = txValue.chainId.toNumber()
-        nonce =  txValue.nonce.toNumber()
-      }
-        break;
 
+    switch (tx.type) {
+      case 'Legacy':{
+        const txValue = tx.asLegacy;
+
+        nonce = txValue.nonce.toNumber();
+        chainId = 0;
+      }
+
+        break;
+      case 'Eip2930':{
+        const txValue = tx.asEip2930;
+
+        chainId = txValue.chainId.toNumber();
+        nonce = txValue.nonce.toNumber();
+      }
+
+        break;
+      case 'Eip1559':{
+        const txValue = tx.asEip1559;
+
+        chainId = txValue.chainId.toNumber();
+        nonce = txValue.nonce.toNumber();
+      }
+
+        break;
     }
-    return new EVMProposal(chainId , nonce ,tx)
-  }
-  toBytes():Uint8Array{
-    return this.tx.toU8a()
+
+    return new EVMProposal(chainId, nonce, tx);
   }
 
-
+  toBytes (): Uint8Array {
+    return this.tx.toU8a();
+  }
 }
 
 export interface IRefreshVoteProposal {
-  readonly  nonce: number;
+  readonly nonce: number;
   readonly publicKey: string;
 }
 
 export class RefreshVoteProposal implements IRefreshVoteProposal {
   nonce: number;
-  publicKey: string
+  publicKey: string;
 
-  constructor(
+  constructor (
     nonce: number,
-    publicKey: string,
+    publicKey: string
   ) {
     this.nonce = nonce;
-    this.publicKey = publicKey
+    this.publicKey = publicKey;
   }
 
-  toU8a(): Uint8Array {
+  toU8a (): Uint8Array {
     const publicKey = hexToU8a(this.publicKey);
     const nonceBytes = new Uint8Array(4);
     const dataView = new DataView(nonceBytes);
+
     dataView.setUint32(this.nonce, 0, BE);
-    return new Uint8Array([...nonceBytes, ...publicKey])
+
+    return new Uint8Array([...nonceBytes, ...publicKey]);
   }
 
-  fromBytes(bytes: Uint8Array): RefreshVoteProposal {
+  fromBytes (bytes: Uint8Array): RefreshVoteProposal {
     const dataView = new DataView(bytes);
     const nonce = dataView.getUint32(0, BE);
     const publicKey = bytes.slice(4, bytes.length);
-    return new RefreshVoteProposal(nonce, u8aToHex(publicKey))
+
+    return new RefreshVoteProposal(nonce, u8aToHex(publicKey));
   }
 }
-
 
 export interface IAnchorCreateProposal {
   readonly header: ProposalHeader;
@@ -105,12 +115,12 @@ export class AnchorCreateProposal implements IAnchorCreateProposal {
   header: ProposalHeader;
   encodedCall: string;
 
-  constructor(header: ProposalHeader, encodedCall: string) {
+  constructor (header: ProposalHeader, encodedCall: string) {
     this.header = header;
     this.encodedCall = encodedCall;
   }
 
-  static fromU8a(bytes: Uint8Array): AnchorCreateProposal {
+  static fromU8a (bytes: Uint8Array): AnchorCreateProposal {
     const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
 
     const encodedCall = u8aToHex(bytes.slice(40, bytes.length));
@@ -118,7 +128,7 @@ export class AnchorCreateProposal implements IAnchorCreateProposal {
     return new AnchorCreateProposal(header, encodedCall);
   }
 
-  toU8a(): Uint8Array {
+  toU8a (): Uint8Array {
     const header = this.header.toU8a();
     const encodedCall = hexToU8a(this.encodedCall);
 
@@ -139,7 +149,7 @@ export class ProposerSetUpdateProposal implements IProposerSetUpdateProposal {
   numberOfProposers: number;
   nonce: number;
 
-  constructor(
+  constructor (
     merkleRoot: string,
     averageSessionLength: bigint,
     numberOfProposers: number,
@@ -151,7 +161,7 @@ export class ProposerSetUpdateProposal implements IProposerSetUpdateProposal {
     this.numberOfProposers = numberOfProposers;
   }
 
-  static fromBytes(bytes: Uint8Array): ProposerSetUpdateProposal {
+  static fromBytes (bytes: Uint8Array): ProposerSetUpdateProposal {
     const merkleRoot = u8aToHex(bytes.slice(0, 32));
     const dataView = new DataView(bytes);
     const averageSessionLength = dataView.getBigUint64(32, BE);
@@ -161,7 +171,7 @@ export class ProposerSetUpdateProposal implements IProposerSetUpdateProposal {
     return new ProposerSetUpdateProposal(merkleRoot, averageSessionLength, numberOfProposers, nonce);
   }
 
-  toU8a(): Uint8Array {
+  toU8a (): Uint8Array {
     const merkleRootBytesLength = 32;
     const proposerSetUpdate = new Uint8Array(32 + 8 + 4 + 4);
     const merkleRoot = hexToU8a(this.merkleRoot, merkleRootBytesLength * 8);
@@ -197,13 +207,13 @@ export class AnchorUpdateProposal implements IAnchorUpdateProposal {
   merkleRoot: string;
   srcResourceId: ResourceId;
 
-  constructor(header: ProposalHeader, merkleRoot: string, srcResourceId: ResourceId) {
+  constructor (header: ProposalHeader, merkleRoot: string, srcResourceId: ResourceId) {
     this.header = header;
     this.merkleRoot = merkleRoot;
     this.srcResourceId = srcResourceId;
   }
 
-  static fromBytes(bytes: Uint8Array): AnchorUpdateProposal {
+  static fromBytes (bytes: Uint8Array): AnchorUpdateProposal {
     const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
     const merkleRoot = u8aToHex(bytes.slice(40, 72));
     const srcResourceId = ResourceId.fromBytes(bytes.slice(72, 104));
@@ -211,7 +221,7 @@ export class AnchorUpdateProposal implements IAnchorUpdateProposal {
     return new AnchorUpdateProposal(header, merkleRoot, srcResourceId);
   }
 
-  toU8a(): Uint8Array {
+  toU8a (): Uint8Array {
     const merkleRootBytesLength = 32;
     const rIdBytesLength = 32;
     const header = this.header.toU8a();
@@ -244,19 +254,19 @@ export class TokenAddProposal implements ITokenAddProposal {
   header: ProposalHeader;
   newTokenAddress: string;
 
-  constructor(header: ProposalHeader, newTokenAddress: string) {
+  constructor (header: ProposalHeader, newTokenAddress: string) {
     this.header = header;
     this.newTokenAddress = newTokenAddress;
   }
 
-  static fromBytes(bytes: Uint8Array): TokenAddProposal {
+  static fromBytes (bytes: Uint8Array): TokenAddProposal {
     const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
     const newTokenAddress = u8aToHex(bytes.slice(40, 60));
 
     return new TokenAddProposal(header, newTokenAddress);
   }
 
-  toU8a(): Uint8Array {
+  toU8a (): Uint8Array {
     const header = this.header.toU8a();
     const addressBytesLength = 20;
     const tokenAddProposal = new Uint8Array(header.length + 20);
@@ -283,19 +293,19 @@ export class TokenRemoveProposal implements ITokenRemoveProposal {
   header: ProposalHeader;
   removeTokenAddress: string;
 
-  constructor(header: ProposalHeader, removeTokenAddress: string) {
+  constructor (header: ProposalHeader, removeTokenAddress: string) {
     this.header = header;
     this.removeTokenAddress = removeTokenAddress;
   }
 
-  static fromBytes(bytes: Uint8Array): TokenRemoveProposal {
+  static fromBytes (bytes: Uint8Array): TokenRemoveProposal {
     const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
     const removeTokenAddress = u8aToHex(bytes.slice(40, 60));
 
     return new TokenRemoveProposal(header, removeTokenAddress);
   }
 
-  toU8a(): Uint8Array {
+  toU8a (): Uint8Array {
     const header = this.header.toU8a();
     const addressBytesLength = 20;
     const tokenRemoveProposal = new Uint8Array(header.length + addressBytesLength);
@@ -322,19 +332,19 @@ export class WrappingFeeUpdateProposal implements IWrappingFeeUpdateProposal {
   header: ProposalHeader;
   newFee: string;
 
-  constructor(header: ProposalHeader, newFee: string) {
+  constructor (header: ProposalHeader, newFee: string) {
     this.header = header;
     this.newFee = newFee;
   }
 
-  static fromBytes(bytes: Uint8Array): WrappingFeeUpdateProposal {
+  static fromBytes (bytes: Uint8Array): WrappingFeeUpdateProposal {
     const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
     const newFee = u8aToHex(bytes.slice(40, 42));
 
     return new WrappingFeeUpdateProposal(header, newFee);
   }
 
-  toU8a(): Uint8Array {
+  toU8a (): Uint8Array {
     const newFeeBytesLength = 2;
     const header = this.header.toU8a();
     const wrappingFeeUpdateProposal = new Uint8Array(header.length + newFeeBytesLength);
@@ -361,19 +371,19 @@ export class MinWithdrawalLimitProposal implements IMinWithdrawalLimitProposal {
   header: ProposalHeader;
   minWithdrawalLimitBytes: string;
 
-  constructor(header: ProposalHeader, minWithdrawalLimitBytes: string) {
+  constructor (header: ProposalHeader, minWithdrawalLimitBytes: string) {
     this.header = header;
     this.minWithdrawalLimitBytes = minWithdrawalLimitBytes;
   }
 
-  static fromBytes(bytes: Uint8Array): MinWithdrawalLimitProposal {
+  static fromBytes (bytes: Uint8Array): MinWithdrawalLimitProposal {
     const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
     const minWithdrawalLimitBytes = u8aToHex(bytes.slice(40, 72));
 
     return new MinWithdrawalLimitProposal(header, minWithdrawalLimitBytes);
   }
 
-  toU8a(): Uint8Array {
+  toU8a (): Uint8Array {
     const limitBytesLength = 32;
     const header = this.header.toU8a();
     const minWithdrawalLimitProposal = new Uint8Array(header.length + limitBytesLength);
@@ -400,19 +410,19 @@ export class MaxDepositLimitProposal implements IMaxDepositLimitProposal {
   header: ProposalHeader;
   maxDepositLimitBytes: string;
 
-  constructor(header: ProposalHeader, maxDepositLimitBytes: string) {
+  constructor (header: ProposalHeader, maxDepositLimitBytes: string) {
     this.header = header;
     this.maxDepositLimitBytes = maxDepositLimitBytes;
   }
 
-  static fromBytes(bytes: Uint8Array): MaxDepositLimitProposal {
+  static fromBytes (bytes: Uint8Array): MaxDepositLimitProposal {
     const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
     const maxDepositLimitBytes = u8aToHex(bytes.slice(40, 72));
 
     return new MaxDepositLimitProposal(header, maxDepositLimitBytes);
   }
 
-  toU8a(): Uint8Array {
+  toU8a (): Uint8Array {
     const limitBytesLength = 32;
     const header = this.header.toU8a();
     const maxDepositLimitProposal = new Uint8Array(header.length + limitBytesLength);
@@ -444,13 +454,13 @@ export class ResourceIdUpdateProposal implements IResourceIdUpdateProposal {
   newResourceId: string;
   handlerAddress: string;
 
-  constructor(header: ProposalHeader, newResourceId: string, handlerAddress: string) {
+  constructor (header: ProposalHeader, newResourceId: string, handlerAddress: string) {
     this.header = header;
     this.newResourceId = newResourceId;
     this.handlerAddress = handlerAddress;
   }
 
-  static fromBytes(bytes: Uint8Array): ResourceIdUpdateProposal {
+  static fromBytes (bytes: Uint8Array): ResourceIdUpdateProposal {
     const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
     const newResourceId = u8aToHex(bytes.slice(40, 72));
     const handlerAddress = u8aToHex(bytes.slice(72, 92));
@@ -458,7 +468,7 @@ export class ResourceIdUpdateProposal implements IResourceIdUpdateProposal {
     return new ResourceIdUpdateProposal(header, newResourceId, handlerAddress);
   }
 
-  toU8a(): Uint8Array {
+  toU8a (): Uint8Array {
     const rIdBytesLength = 32;
     const addressBytesLength = 20;
     const header = this.header.toU8a();
@@ -487,19 +497,19 @@ export class SetTreasuryHandlerProposal implements ISetTreasuryHandlerProposal {
   header: ProposalHeader;
   newTreasuryHandler: string;
 
-  constructor(header: ProposalHeader, newTreasuryHandler: string) {
+  constructor (header: ProposalHeader, newTreasuryHandler: string) {
     this.header = header;
     this.newTreasuryHandler = newTreasuryHandler;
   }
 
-  static fromBytes(bytes: Uint8Array): SetTreasuryHandlerProposal {
+  static fromBytes (bytes: Uint8Array): SetTreasuryHandlerProposal {
     const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
     const newTreasuryHandler = u8aToHex(bytes.slice(40, 60));
 
     return new SetTreasuryHandlerProposal(header, newTreasuryHandler);
   }
 
-  toU8a(): Uint8Array {
+  toU8a (): Uint8Array {
     const addressBytesLength = 20;
     const header = this.header.toU8a();
     const setTreasuryHandlerProposal = new Uint8Array(header.length + addressBytesLength);
@@ -526,19 +536,19 @@ export class SetVerifierProposal implements ISetVerifierProposal {
   header: ProposalHeader;
   newVerifier: string;
 
-  constructor(header: ProposalHeader, newVerifier: string) {
+  constructor (header: ProposalHeader, newVerifier: string) {
     this.header = header;
     this.newVerifier = newVerifier;
   }
 
-  static fromBytes(bytes: Uint8Array): SetVerifierProposal {
+  static fromBytes (bytes: Uint8Array): SetVerifierProposal {
     const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
     const newVerifier = u8aToHex(bytes.slice(40, 60));
 
     return new SetVerifierProposal(header, newVerifier);
   }
 
-  toU8a(): Uint8Array {
+  toU8a (): Uint8Array {
     const addressBytesLength = 20;
     const header = this.header.toU8a();
     const setVerifierProposal = new Uint8Array(header.length + addressBytesLength);
@@ -565,19 +575,19 @@ export class FeeRecipientUpdateProposal implements IFeeRecipientUpdateProposal {
   header: ProposalHeader;
   newFeeRecipient: string;
 
-  constructor(header: ProposalHeader, newFeeRecipient: string) {
+  constructor (header: ProposalHeader, newFeeRecipient: string) {
     this.header = header;
     this.newFeeRecipient = newFeeRecipient;
   }
 
-  static fromBytes(bytes: Uint8Array): FeeRecipientUpdateProposal {
+  static fromBytes (bytes: Uint8Array): FeeRecipientUpdateProposal {
     const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
     const newFeeRecipient = u8aToHex(bytes.slice(40, 60));
 
     return new FeeRecipientUpdateProposal(header, newFeeRecipient);
   }
 
-  toU8a(): Uint8Array {
+  toU8a (): Uint8Array {
     const addressBytesLength = 20;
     const header = this.header.toU8a();
     const feeRecipientUpdateProposal = new Uint8Array(header.length + addressBytesLength);
@@ -615,14 +625,14 @@ export class RescueTokensProposal implements IRescueTokensProposal {
   toAddress: string;
   amount: string;
 
-  constructor(header: ProposalHeader, tokenAddress: string, toAddress: string, amount: string) {
+  constructor (header: ProposalHeader, tokenAddress: string, toAddress: string, amount: string) {
     this.header = header;
     this.tokenAddress = tokenAddress;
     this.toAddress = toAddress;
     this.amount = amount;
   }
 
-  static fromBytes(bytes: Uint8Array): RescueTokensProposal {
+  static fromBytes (bytes: Uint8Array): RescueTokensProposal {
     const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
     const tokenAddress = u8aToHex(bytes.slice(40, 60));
     const toAddress = u8aToHex(bytes.slice(60, 80));
@@ -631,7 +641,7 @@ export class RescueTokensProposal implements IRescueTokensProposal {
     return new RescueTokensProposal(header, tokenAddress, toAddress, amount);
   }
 
-  toU8a(): Uint8Array {
+  toU8a (): Uint8Array {
     const addressBytesLength = 20;
     const amountBytesLength = 32;
     const header = this.header.toU8a();
