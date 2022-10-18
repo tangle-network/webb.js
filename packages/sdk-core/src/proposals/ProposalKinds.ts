@@ -32,34 +32,24 @@ export class EVMProposal implements IEVMProposal {
   fromBytes (bytes: Uint8Array): EVMProposal {
     const reg = new TypeRegistry();
     const tx = reg.createType<TransactionV2>('TransactionV2', bytes);
-    let nonce: number;
+    let nonce = 0;
     let chainId = 0;
 
-    switch (tx.type) {
-      case 'Legacy':{
-        const txValue = tx.asLegacy;
+    if (tx.type === 'Legacy') {
+      const txValue = tx.asLegacy;
 
-        nonce = txValue.nonce.toNumber();
-        chainId = 0;
-      }
+      nonce = txValue.nonce.toNumber();
+      chainId = 0;
+    } else if (tx.type === 'Eip2930') {
+      const txValue = tx.asEip2930;
 
-        break;
-      case 'Eip2930':{
-        const txValue = tx.asEip2930;
+      chainId = txValue.chainId.toNumber();
+      nonce = txValue.nonce.toNumber();
+    } else if (tx.type === 'Eip1559') {
+      const txValue = tx.asEip1559;
 
-        chainId = txValue.chainId.toNumber();
-        nonce = txValue.nonce.toNumber();
-      }
-
-        break;
-      case 'Eip1559':{
-        const txValue = tx.asEip1559;
-
-        chainId = txValue.chainId.toNumber();
-        nonce = txValue.nonce.toNumber();
-      }
-
-        break;
+      chainId = txValue.chainId.toNumber();
+      nonce = txValue.nonce.toNumber();
     }
 
     return new EVMProposal(chainId, nonce, tx);
