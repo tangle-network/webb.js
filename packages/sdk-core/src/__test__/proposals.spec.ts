@@ -5,7 +5,7 @@ import { assert } from 'chai';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
-import { ChainType } from '../index.js';
+import { AnchorCreateProposal, ChainType, ProposerSetUpdateProposal } from '../index.js';
 import { ProposalHeader } from '../proposals/ProposalHeader.js';
 import { AnchorUpdateProposal } from '../proposals/ProposalKinds.js';
 import { ResourceId } from '../proposals/ResourceId.js';
@@ -47,5 +47,59 @@ describe('test various conversion functions', () => {
     assert.equal(updateProposalDecoded.header.nonce, lastLeafIndex);
     assert.equal(updateProposalDecoded.merkleRoot, merkleRoot);
     assert.equal(updateProposalDecoded.srcResourceId.toString(), srcResourceId.toString());
+  });
+
+  it.only('should encode and decode proposer set update proposal types correctly', () => {
+    const merkleRoot = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
+    const averageSessionLength = BigInt(10);
+    const numberOfProposes = 3;
+    const nonce = 1;
+    const proposerSetUpdateProposal = new ProposerSetUpdateProposal(
+      merkleRoot,
+      averageSessionLength,
+      numberOfProposes,
+      nonce
+    );
+
+    const proposerPostdateEncoded = proposerSetUpdateProposal.toU8a();
+    const proposerSetUpdateProposalDecoded = ProposerSetUpdateProposal.fromBytes(proposerPostdateEncoded);
+
+    assert.equal(proposerSetUpdateProposalDecoded.merkleRoot, merkleRoot);
+    assert.equal(proposerSetUpdateProposalDecoded.nonce, nonce);
+    assert.equal(proposerSetUpdateProposalDecoded.averageSessionLength, averageSessionLength);
+    assert.equal(proposerSetUpdateProposalDecoded.numberOfProposers, numberOfProposes);
+  });
+
+  it.only('should encode and decode anchor create proposal types correctly', () => {
+    const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const chainId = 0xcafe;
+    const chainType = ChainType.EVM;
+    const resourceId = new ResourceId(anchorAddress, chainType, chainId);
+    const functionSignature = hexToU8a('0xdeadbeef');
+    const lastLeafIndex = 0x0000feed;
+    const header = new ProposalHeader(
+      resourceId,
+      functionSignature,
+      lastLeafIndex
+    );
+    const encodedCall = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
+    const anchorCreate = new AnchorCreateProposal(
+      header,
+      encodedCall
+    );
+    const headerEncoded = header.toU8a();
+    const headerDecoded = ProposalHeader.fromBytes(headerEncoded);
+
+    assert.equal(headerDecoded.resourceId.toString(), resourceId.toString());
+    assert.equal(u8aToHex(headerDecoded.functionSignature), u8aToHex(functionSignature));
+    assert.equal(headerDecoded.nonce, lastLeafIndex);
+
+    const anchorCreateEncoded = anchorCreate.toU8a();
+    const anchorCreateDecoded = AnchorCreateProposal.fromBytes(anchorCreateEncoded);
+
+    assert.equal(anchorCreateDecoded.header.resourceId.toString(), resourceId.toString());
+    assert.equal(u8aToHex(anchorCreateDecoded.header.functionSignature), u8aToHex(functionSignature));
+    assert.equal(anchorCreateDecoded.header.nonce, lastLeafIndex);
+    assert.equal(anchorCreateDecoded.encodedCall, encodedCall);
   });
 });

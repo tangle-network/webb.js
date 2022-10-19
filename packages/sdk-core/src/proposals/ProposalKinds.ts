@@ -1,4 +1,4 @@
-import { BE } from '@webb-tools/sdk-core/proposals/index';
+import { BE } from '@webb-tools/sdk-core/proposals/index.js';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
@@ -19,7 +19,7 @@ export class AnchorCreateProposal implements IAnchorCreateProposal {
     this.encodedCall = encodedCall;
   }
 
-  static fromU8a (bytes: Uint8Array): AnchorCreateProposal {
+  static fromBytes (bytes: Uint8Array): AnchorCreateProposal {
     const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
 
     const encodedCall = u8aToHex(bytes.slice(40, bytes.length));
