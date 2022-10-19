@@ -3,9 +3,10 @@
 
 import { assert } from 'chai';
 
+import { TypeRegistry } from '@polkadot/types';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
-import { AnchorCreateProposal, ChainType, ProposerSetUpdateProposal } from '../index.js';
+import { AnchorCreateProposal, ChainType, EVMProposal, ProposerSetUpdateProposal } from '../index.js';
 import { ProposalHeader } from '../proposals/ProposalHeader.js';
 import { AnchorUpdateProposal } from '../proposals/ProposalKinds.js';
 import { ResourceId } from '../proposals/ResourceId.js';
@@ -101,5 +102,33 @@ describe('test various conversion functions', () => {
     assert.equal(u8aToHex(anchorCreateDecoded.header.functionSignature), u8aToHex(functionSignature));
     assert.equal(anchorCreateDecoded.header.nonce, lastLeafIndex);
     assert.equal(anchorCreateDecoded.encodedCall, encodedCall);
+  });
+  it.only('Should encode and decode an evm proposal', () => {
+    const t = new TypeRegistry();
+    const legacyTransaction = t.createType('LegacyTransaction', {
+      action: t.createType('EthTransactionAction', {
+        Create: []
+      }),
+      gasLimit: 400,
+      gasPrice: 300,
+      input: hexToU8a('0x0000'),
+      nonce: 0,
+      signature: {
+        r: hexToU8a('0x0000'),
+        s: hexToU8a('0x0000'),
+        v: '300'
+      },
+      value: 0
+    });
+    const transactionV2 = t.createType('TransactionV2', {
+      Legacy: legacyTransaction
+    });
+
+    const evmProposal = new EVMProposal(0, 0, transactionV2);
+    const eVMProposalEncoded = evmProposal.toBytes();
+    const eVMProposalDecoded = EVMProposal.fromBytes(eVMProposalEncoded);
+
+    assert.equal(eVMProposalDecoded.nonce, 0);
+    assert.equal(eVMProposalDecoded.chainId, 0);
   });
 });

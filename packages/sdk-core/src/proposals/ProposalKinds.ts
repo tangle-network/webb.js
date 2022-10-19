@@ -29,7 +29,7 @@ export class EVMProposal implements IEVMProposal {
     this.tx = tx;
   }
 
-  fromBytes (bytes: Uint8Array): EVMProposal {
+  static fromBytes (bytes: Uint8Array): EVMProposal {
     const reg = new TypeRegistry();
     const tx = reg.createType<TransactionV2>('TransactionV2', bytes);
     let nonce = 0;
@@ -87,7 +87,7 @@ export class RefreshVoteProposal implements IRefreshVoteProposal {
     return new Uint8Array([...nonceBytes, ...publicKey]);
   }
 
-  fromBytes (bytes: Uint8Array): RefreshVoteProposal {
+  static fromBytes (bytes: Uint8Array): RefreshVoteProposal {
     const dataView = new DataView(bytes);
     const nonce = dataView.getUint32(0, BE);
     const publicKey = bytes.slice(4, bytes.length);
