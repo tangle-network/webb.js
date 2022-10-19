@@ -1,9 +1,98 @@
 import { BE } from '@webb-tools/sdk-core/proposals/index.js';
+import type { TransactionV2 } from '@polkadot/types/interfaces/eth';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { ProposalHeader } from './ProposalHeader.js';
 import { ResourceId } from './ResourceId.js';
+
+export interface IEVMProposal {
+  readonly chainId: number;
+  readonly nonce: number;
+  readonly tx: TransactionV2
+}
+
+export class EVMProposal implements IEVMProposal {
+  readonly chainId: number;
+  readonly nonce: number;
+  readonly tx: TransactionV2;
+
+  constructor (
+    chainId: number,
+    nonce: number,
+    tx: TransactionV2
+  ) {
+    this.chainId = chainId;
+    this.nonce = nonce;
+    this.tx = tx;
+  }
+
+  fromBytes (bytes: Uint8Array): EVMProposal {
+    const reg = new TypeRegistry();
+    const tx = reg.createType<TransactionV2>('TransactionV2', bytes);
+    let nonce = 0;
+    let chainId = 0;
+
+    if (tx.type === 'Legacy') {
+      const txValue = tx.asLegacy;
+
+      nonce = txValue.nonce.toNumber();
+      chainId = 0;
+    } else if (tx.type === 'Eip2930') {
+      const txValue = tx.asEip2930;
+
+      chainId = txValue.chainId.toNumber();
+      nonce = txValue.nonce.toNumber();
+    } else if (tx.type === 'Eip1559') {
+      const txValue = tx.asEip1559;
+
+      chainId = txValue.chainId.toNumber();
+      nonce = txValue.nonce.toNumber();
+    }
+
+    return new EVMProposal(chainId, nonce, tx);
+  }
+
+  toBytes (): Uint8Array {
+    return this.tx.toU8a();
+  }
+}
+
+export interface IRefreshVoteProposal {
+  readonly nonce: number;
+  readonly publicKey: string;
+}
+
+export class RefreshVoteProposal implements IRefreshVoteProposal {
+  nonce: number;
+  publicKey: string;
+
+  constructor (
+    nonce: number,
+    publicKey: string
+  ) {
+    this.nonce = nonce;
+    this.publicKey = publicKey;
+  }
+
+  toU8a (): Uint8Array {
+    const publicKey = hexToU8a(this.publicKey);
+    const nonceBytes = new Uint8Array(4);
+    const dataView = new DataView(nonceBytes);
+
+    dataView.setUint32(this.nonce, 0, BE);
+
+    return new Uint8Array([...nonceBytes, ...publicKey]);
+  }
+
+  fromBytes (bytes: Uint8Array): RefreshVoteProposal {
+    const dataView = new DataView(bytes);
+    const nonce = dataView.getUint32(0, BE);
+    const publicKey = bytes.slice(4, bytes.length);
+
+    return new RefreshVoteProposal(nonce, u8aToHex(publicKey));
+  }
+}
 
 export interface IAnchorCreateProposal {
   readonly header: ProposalHeader;
