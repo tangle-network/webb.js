@@ -1,6 +1,8 @@
-import { BE } from '@webb-tools/sdk-core/proposals/index.js';
 import type { TransactionV2 } from '@polkadot/types/interfaces/eth';
 
+import { BE } from '@webb-tools/sdk-core/proposals/index.js';
+
+import { TypeRegistry } from '@polkadot/types';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { ProposalHeader } from './ProposalHeader.js';
