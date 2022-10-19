@@ -50,7 +50,7 @@ describe('test various conversion functions', () => {
     assert.equal(updateProposalDecoded.srcResourceId.toString(), srcResourceId.toString());
   });
 
-  it.only('should encode and decode proposer set update proposal types correctly', () => {
+  it('should encode and decode proposer set update proposal types correctly', () => {
     const merkleRoot = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
     const averageSessionLength = BigInt(10);
     const numberOfProposes = 3;
@@ -71,7 +71,7 @@ describe('test various conversion functions', () => {
     assert.equal(proposerSetUpdateProposalDecoded.numberOfProposers, numberOfProposes);
   });
 
-  it.only('should encode and decode anchor create proposal types correctly', () => {
+  it('should encode and decode anchor create proposal types correctly', () => {
     const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
     const chainId = 0xcafe;
     const chainType = ChainType.EVM;
@@ -103,7 +103,7 @@ describe('test various conversion functions', () => {
     assert.equal(anchorCreateDecoded.header.nonce, lastLeafIndex);
     assert.equal(anchorCreateDecoded.encodedCall, encodedCall);
   });
-  it.only('Should encode and decode an evm proposal', () => {
+  it('Should encode and decode an evm proposal', () => {
     const t = new TypeRegistry();
     const legacyTransaction = t.createType('LegacyTransaction', {
       action: t.createType('EthTransactionAction', {
@@ -111,7 +111,7 @@ describe('test various conversion functions', () => {
       }),
       gasLimit: 400,
       gasPrice: 300,
-      input: hexToU8a('0x0000'),
+      input: hexToU8a('0xf17a454600000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000001a0000000000000000000000000000000000000000000000000000000003f18ef30000000000000000000000000000000000000000000000000000000003e7767ad000000000000000000000000c6cf51f57969129654c5014748e44e2a8f6ebd81000000000000000000000000000000000000000000000000000000000000022000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000000000000000000000000000000000003f18ef30000000000000000000000000e7b0ce0526fbe3969035a145c9e9691d4d9d216c000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec70000000000000000000000000000000000000000000000000000000000000001000000000000000000000000a98f8043eb2c880765c952970988cd12d0b8664d00000000000000000000000000000000000000000000000000000000000000c8050203001b010001021cbc51eeea0b3d732211d7dba4cb7615f470939a704511ed19c09ace4b099bb8027563496fa2f009483e8e3fbc6e7ca02de9b9513825f5e623d1476d42813be6950000000000000000000000003f18ef300000000000000000000000003f18ef300000000005f5e1000000000005f5e10000b1a2bc2ec5000000bc0131634fe65b020202ff000000000000000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48dac17f958d2ee523a2206206994597c13d831ec7000000000000000000000000000000000000000000000000'),
       nonce: 0,
       signature: {
         r: hexToU8a('0x0000'),
