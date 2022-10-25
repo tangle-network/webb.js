@@ -55,7 +55,7 @@ export class EVMProposal implements IEVMProposal {
     return new EVMProposal(chainId, nonce, tx);
   }
 
-  toBytes (): Uint8Array {
+  toU8a (): Uint8Array {
     return this.tx.toU8a();
   }
 }
@@ -163,17 +163,16 @@ export class ProposerSetUpdateProposal implements IProposerSetUpdateProposal {
 
   toU8a (): Uint8Array {
     const merkleRootBytesLength = 32;
-    const proposerSetUpdate = new Uint8Array(32 + 8 + 4 + 4);
+    const proposerSetUpdate = new Uint8Array(8 + 4 + 4);
     const merkleRoot = hexToU8a(this.merkleRoot, merkleRootBytesLength * 8);
 
-    proposerSetUpdate.set(merkleRoot, 0);
     const dataView = new DataView(proposerSetUpdate);
 
-    dataView.setBigUint64(32, this.averageSessionLength, BE);
-    dataView.setUint32(32 + 8, this.numberOfProposers, BE);
-    dataView.setUint32(32 + 8 + 4, this.nonce, BE);
+    dataView.setBigUint64(0, this.averageSessionLength, BE);
+    dataView.setUint32(8, this.numberOfProposers, BE);
+    dataView.setUint32(8 + 4, this.nonce, BE);
 
-    return proposerSetUpdate;
+    return new Uint8Array([...merkleRoot, ...proposerSetUpdate]);
   }
 }
 
