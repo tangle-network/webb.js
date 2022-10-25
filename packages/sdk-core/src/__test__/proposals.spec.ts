@@ -11,7 +11,7 @@ import { ProposalHeader } from '../proposals/ProposalHeader.js';
 import { AnchorUpdateProposal } from '../proposals/ProposalKinds.js';
 import { ResourceId } from '../proposals/ResourceId.js';
 
-describe.only('test various conversion functions', () => {
+describe('test various conversion functions', () => {
   it('should encode and decode anchor update proposal types correctly', () => {
     const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
     const chainId = 0xcafe;
