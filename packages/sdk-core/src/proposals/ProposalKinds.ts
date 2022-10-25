@@ -1,6 +1,5 @@
 import { BE } from '@webb-tools/sdk-core/proposals/index.js';
-import { Transaction } from 'ethers';
-import { parseTransaction, serializeTransaction } from 'ethers/lib/utils';
+import { Transaction, utils } from 'ethers';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
@@ -29,7 +28,7 @@ export class EVMProposal implements IEVMProposal {
   }
 
   static fromBytes (bytes: Uint8Array): EVMProposal {
-    const tx = parseTransaction(bytes);
+    const tx = utils.parseTransaction(bytes);
     const chainId = tx.chainId || 0;
     const nonce = tx.nonce;
 
@@ -37,7 +36,7 @@ export class EVMProposal implements IEVMProposal {
   }
 
   toU8a (): Uint8Array {
-    const serialized = serializeTransaction(this.tx);
+    const serialized = utils.serializeTransaction(this.tx);
 
     return hexToU8a(serialized);
   }
