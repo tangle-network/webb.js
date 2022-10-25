@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { assert } from 'chai';
+import { parseTransaction } from 'ethers/lib/utils';
 
-import { TypeRegistry } from '@polkadot/types';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { AnchorCreateProposal, ChainType, EVMProposal, ProposerSetUpdateProposal } from '../index.js';
@@ -104,27 +104,8 @@ describe.only('test various conversion functions', () => {
     assert.equal(anchorCreateDecoded.encodedCall, encodedCall);
   });
   it('Should encode and decode an evm proposal', () => {
-    const t = new TypeRegistry();
-    const legacyTransaction = t.createType('LegacyTransaction', {
-      action: t.createType('EthTransactionAction', {
-        Create: []
-      }),
-      gasLimit: 400,
-      gasPrice: 300,
-      input: new Uint8Array(7870),
-      nonce: 0,
-      signature: {
-        r: new Uint8Array(32),
-        s: new Uint8Array(32),
-        v: t.createType('u64', 3)
-      },
-      value: 0
-    });
-    const transactionV2 = t.createType('TransactionV2', {
-      Legacy: legacyTransaction
-    });
-
-    const evmProposal = new EVMProposal(0, 0, transactionV2);
+    const tx = parseTransaction('0xf86e821d5a8506fcda247482753094378cdc4e9e9bccd7aeda011888ecf6a8528271fb8801123d5fd0f473118025a0eca14f413c016d65c0de0f31d7a7e090a3f6def4a0d2cebb9034baedf4198821a02d15f8593f161732b4b3f6688b68d5e6d560aaf0bbf2a22dc99db368d1fcdceb');
+    const evmProposal = new EVMProposal(0, 0, tx);
     const eVMProposalEncoded = evmProposal.toU8a();
     const eVMProposalDecoded = EVMProposal.fromBytes(eVMProposalEncoded);
 

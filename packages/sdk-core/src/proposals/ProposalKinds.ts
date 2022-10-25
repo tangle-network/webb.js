@@ -1,8 +1,7 @@
-import type { TransactionV2 } from '@polkadot/types/interfaces/eth';
-
 import { BE } from '@webb-tools/sdk-core/proposals/index.js';
+import { Transaction } from 'ethers';
+import { parseTransaction, serializeTransaction } from 'ethers/lib/utils';
 
-import { TypeRegistry } from '@polkadot/types';
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { ProposalHeader } from './ProposalHeader.js';
@@ -11,18 +10,18 @@ import { ResourceId } from './ResourceId.js';
 export interface IEVMProposal {
   readonly chainId: number;
   readonly nonce: number;
-  readonly tx: TransactionV2
+  readonly tx: Transaction
 }
 
 export class EVMProposal implements IEVMProposal {
   readonly chainId: number;
   readonly nonce: number;
-  readonly tx: TransactionV2;
+  readonly tx: Transaction;
 
   constructor (
     chainId: number,
     nonce: number,
-    tx: TransactionV2
+    tx: Transaction
   ) {
     this.chainId = chainId;
     this.nonce = nonce;
@@ -30,33 +29,17 @@ export class EVMProposal implements IEVMProposal {
   }
 
   static fromBytes (bytes: Uint8Array): EVMProposal {
-    const reg = new TypeRegistry();
-    const tx = reg.createType<TransactionV2>('TransactionV2', bytes);
-    let nonce = 0;
-    let chainId = 0;
-
-    if (tx.type === 'Legacy') {
-      const txValue = tx.asLegacy;
-
-      nonce = txValue.nonce.toNumber();
-      chainId = 0;
-    } else if (tx.type === 'Eip2930') {
-      const txValue = tx.asEip2930;
-
-      chainId = txValue.chainId.toNumber();
-      nonce = txValue.nonce.toNumber();
-    } else if (tx.type === 'Eip1559') {
-      const txValue = tx.asEip1559;
-
-      chainId = txValue.chainId.toNumber();
-      nonce = txValue.nonce.toNumber();
-    }
+    const tx = parseTransaction(bytes);
+    const chainId = tx.chainId || 0;
+    const nonce = tx.nonce;
 
     return new EVMProposal(chainId, nonce, tx);
   }
 
   toU8a (): Uint8Array {
-    return this.tx.toU8a();
+    const serialized = serializeTransaction(this.tx);
+
+    return hexToU8a(serialized);
   }
 }
 
