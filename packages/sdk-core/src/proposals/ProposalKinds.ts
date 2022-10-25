@@ -153,7 +153,7 @@ export class ProposerSetUpdateProposal implements IProposerSetUpdateProposal {
 
   static fromBytes (bytes: Uint8Array): ProposerSetUpdateProposal {
     const merkleRoot = u8aToHex(bytes.slice(0, 32));
-    const dataView = new DataView(bytes);
+    const dataView = new DataView(bytes.buffer);
     const averageSessionLength = dataView.getBigUint64(32, BE);
     const numberOfProposers = dataView.getUint32(32 + 8, BE);
     const nonce = dataView.getUint32(32 + 12, BE);
@@ -166,7 +166,7 @@ export class ProposerSetUpdateProposal implements IProposerSetUpdateProposal {
     const proposerSetUpdate = new Uint8Array(8 + 4 + 4);
     const merkleRoot = hexToU8a(this.merkleRoot, merkleRootBytesLength * 8);
 
-    const dataView = new DataView(proposerSetUpdate);
+    const dataView = new DataView(proposerSetUpdate.buffer);
 
     dataView.setBigUint64(0, this.averageSessionLength, BE);
     dataView.setUint32(8, this.numberOfProposers, BE);
