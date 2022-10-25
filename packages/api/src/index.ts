@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import '@webb-tools/protocol-substrate-types';
-import '@webb-tools/api-derive';
+import '@webb-tools/api-derive/augmentDerives.js';
 
 import { derive as webbDerives } from '@webb-tools/api-derive/index.js';
 
