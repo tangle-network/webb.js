@@ -1,7 +1,162 @@
+import { BE } from '@webb-tools/sdk-core/proposals/index.js';
+import { Transaction, utils } from 'ethers';
+
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
 import { ProposalHeader } from './ProposalHeader.js';
 import { ResourceId } from './ResourceId.js';
+
+export interface IEVMProposal {
+  readonly chainId: number;
+  readonly nonce: number;
+  readonly tx: Transaction
+}
+
+export class EVMProposal implements IEVMProposal {
+  readonly chainId: number;
+  readonly nonce: number;
+  readonly tx: Transaction;
+
+  constructor (
+    chainId: number,
+    nonce: number,
+    tx: Transaction
+  ) {
+    this.chainId = chainId;
+    this.nonce = nonce;
+    this.tx = tx;
+  }
+
+  static fromBytes (bytes: Uint8Array): EVMProposal {
+    const tx = utils.parseTransaction(bytes);
+    const chainId = tx.chainId || 0;
+    const nonce = tx.nonce;
+
+    return new EVMProposal(chainId, nonce, tx);
+  }
+
+  toU8a (): Uint8Array {
+    const serialized = utils.serializeTransaction(this.tx);
+
+    return hexToU8a(serialized);
+  }
+}
+
+export interface IRefreshVoteProposal {
+  readonly nonce: number;
+  readonly publicKey: string;
+}
+
+export class RefreshVoteProposal implements IRefreshVoteProposal {
+  nonce: number;
+  publicKey: string;
+
+  constructor (
+    nonce: number,
+    publicKey: string
+  ) {
+    this.nonce = nonce;
+    this.publicKey = publicKey;
+  }
+
+  toU8a (): Uint8Array {
+    const publicKey = hexToU8a(this.publicKey);
+    const nonceBytes = new Uint8Array(4);
+    const dataView = new DataView(nonceBytes);
+
+    dataView.setUint32(this.nonce, 0, BE);
+
+    return new Uint8Array([...nonceBytes, ...publicKey]);
+  }
+
+  static fromBytes (bytes: Uint8Array): RefreshVoteProposal {
+    const dataView = new DataView(bytes);
+    const nonce = dataView.getUint32(0, BE);
+    const publicKey = bytes.slice(4, bytes.length);
+
+    return new RefreshVoteProposal(nonce, u8aToHex(publicKey));
+  }
+}
+
+export interface IAnchorCreateProposal {
+  readonly header: ProposalHeader;
+  readonly encodedCall: string;
+}
+
+export class AnchorCreateProposal implements IAnchorCreateProposal {
+  header: ProposalHeader;
+  encodedCall: string;
+
+  constructor (header: ProposalHeader, encodedCall: string) {
+    this.header = header;
+    this.encodedCall = encodedCall;
+  }
+
+  static fromBytes (bytes: Uint8Array): AnchorCreateProposal {
+    const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
+
+    const encodedCall = u8aToHex(bytes.slice(40, bytes.length));
+
+    return new AnchorCreateProposal(header, encodedCall);
+  }
+
+  toU8a (): Uint8Array {
+    const header = this.header.toU8a();
+    const encodedCall = hexToU8a(this.encodedCall);
+
+    return new Uint8Array([...header, ...encodedCall]);
+  }
+}
+
+export interface IProposerSetUpdateProposal {
+  readonly merkleRoot: string;
+  readonly averageSessionLength: bigint;
+  readonly numberOfProposers: number;
+  readonly nonce: number;
+}
+
+export class ProposerSetUpdateProposal implements IProposerSetUpdateProposal {
+  merkleRoot: string;
+  averageSessionLength: bigint;
+  numberOfProposers: number;
+  nonce: number;
+
+  constructor (
+    merkleRoot: string,
+    averageSessionLength: bigint,
+    numberOfProposers: number,
+    nonce: number
+  ) {
+    this.averageSessionLength = averageSessionLength;
+    this.merkleRoot = merkleRoot;
+    this.nonce = nonce;
+    this.numberOfProposers = numberOfProposers;
+  }
+
+  static fromBytes (bytes: Uint8Array): ProposerSetUpdateProposal {
+    const merkleRoot = u8aToHex(bytes.slice(0, 32));
+    const dataView = new DataView(bytes.buffer);
+    const averageSessionLength = dataView.getBigUint64(32, BE);
+    const numberOfProposers = dataView.getUint32(32 + 8, BE);
+    const nonce = dataView.getUint32(32 + 12, BE);
+
+    return new ProposerSetUpdateProposal(merkleRoot, averageSessionLength, numberOfProposers, nonce);
+  }
+
+  toU8a (): Uint8Array {
+    const merkleRootBytesLength = 32;
+    const proposerSetUpdate = new Uint8Array(8 + 4 + 4);
+    const merkleRoot = hexToU8a(this.merkleRoot, merkleRootBytesLength * 8);
+
+    const dataView = new DataView(proposerSetUpdate.buffer);
+
+    dataView.setBigUint64(0, this.averageSessionLength, BE);
+    dataView.setUint32(8, this.numberOfProposers, BE);
+    dataView.setUint32(8 + 4, this.nonce, BE);
+
+    return new Uint8Array([...merkleRoot, ...proposerSetUpdate]);
+  }
+}
 
 export interface IAnchorUpdateProposal {
   /**
@@ -56,13 +211,13 @@ export class AnchorUpdateProposal implements IAnchorUpdateProposal {
 
 export interface ITokenAddProposal {
   /**
-     * The Token Add Proposal Header.
+   * The Token Add Proposal Header.
 
-     */
+   */
   readonly header: ProposalHeader;
   /**
-     * 20 bytes Hex-encoded string.
-     */
+   * 20 bytes Hex-encoded string.
+   */
   readonly newTokenAddress: string;
 }
 
