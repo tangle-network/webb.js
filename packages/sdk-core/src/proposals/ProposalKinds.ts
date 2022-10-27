@@ -1,8 +1,8 @@
-import { BE } from '@webb-tools/sdk-core/proposals/index.js';
 import { Transaction, utils } from 'ethers';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
+import { BE } from './index.js';
 import { ProposalHeader } from './ProposalHeader.js';
 import { ResourceId } from './ResourceId.js';
 
