@@ -11,7 +11,7 @@ const usageMode: UsageMode = isCi
     ),
   };
 
-export async function startProtocolSubstrateNodes(): Promise<LocalProtocolSubstrate[]> {
+export async function startProtocolSubstrateNodes(): Promise<[LocalProtocolSubstrate, LocalProtocolSubstrate]> {
   let aliceNode = await LocalProtocolSubstrate.start({
     name: 'substrate-alice',
     authority: 'alice',

@@ -77,7 +77,7 @@ async function addAssetToPool(
 }
 
 describe('Wrap/unwrap substrate tests', function() {
-  this.timeout(220_000);
+  this.timeout(300_000);
   before(async function() {
     // If LOCAL_NODE is set the tests will continue  to use the already running node
     nodes = await startProtocolSubstrateNodes();

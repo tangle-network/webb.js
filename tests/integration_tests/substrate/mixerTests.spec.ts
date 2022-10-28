@@ -39,7 +39,7 @@ function getKeyring() {
 }
 
 describe('Mixer tests', function () {
-  this.timeout(120_000);
+  this.timeout(300_000);
 
   before(async function () {
     nodes = await startProtocolSubstrateNodes();

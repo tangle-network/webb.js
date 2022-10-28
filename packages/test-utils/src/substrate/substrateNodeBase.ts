@@ -57,7 +57,7 @@ export abstract class SubstrateNodeBase<TypedEvent extends SubstrateEvent> {
   #api: ApiPromise | null = null;
   constructor (
     protected readonly opts: LocalNodeOpts,
-    private readonly proc?: ChildProcess
+    protected readonly proc?: ChildProcess
   ) {}
 
   public get name (): string {
@@ -216,7 +216,7 @@ export abstract class SubstrateNodeBase<TypedEvent extends SubstrateEvent> {
   }
 }
 
-async function createApiPromise (endpoint: string) {
+export async function createApiPromise (endpoint: string) {
   return ApiPromise.create(
     options({
       provider: new WsProvider(endpoint) as any,

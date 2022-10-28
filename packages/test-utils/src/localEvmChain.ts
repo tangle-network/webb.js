@@ -163,16 +163,7 @@ export async function setupVanchorEvmWithdrawTx (
     u8aToHex(inputUtxo.commitment)
   );
 
-  const regeneratedUtxo = await CircomUtxo.generateUtxo({
-    amount: inputUtxo.amount,
-    backend: 'Circom',
-    blinding: hexToU8a(inputUtxo.blinding),
-    chainId: inputUtxo.chainId,
-    curve: 'Bn254',
-    index: depositUtxoIndex.toString(),
-    keypair: spender,
-    originChainId: inputUtxo.originChainId
-  });
+  inputUtxo.setIndex(depositUtxoIndex);
 
   const leavesMap = {
     [srcChain.chainId]: leaves1,
@@ -180,7 +171,7 @@ export async function setupVanchorEvmWithdrawTx (
   };
 
   const { extData, publicInputs } = await destVanchor.setupTransaction(
-    [regeneratedUtxo, dummyInput],
+    [inputUtxo, dummyInput],
     [dummyOutput1, dummyOutput2],
     extAmount,
     0,
