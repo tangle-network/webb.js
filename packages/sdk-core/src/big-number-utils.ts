@@ -33,15 +33,21 @@ export const toHex = (covertThis: ethers.utils.BytesLike | number | bigint, padd
   return ethers.utils.hexZeroPad(ethers.utils.hexlify(covertThis), padding);
 };
 
-/** BigNumber to hex string of specified length */
+/** BigNumber to hex string of specified length
+ * input value buffer , or hex string with/without 0x
+ * */
 export function toFixedHex (number: BigNumberish, length = 32): string {
-  let result =
-    '0x' +
-    (number instanceof Buffer
-      ? number.toString('hex')
-      : BigNumber.from(number).toHexString().replace('0x', '')
-    ).padStart(length * 2, '0');
+  let result = '0x';
 
+  if(number instanceof  Buffer){
+    result = number.toString('hex');
+  }else if(number instanceof String){
+     result = BigNumber.from(number.startsWith('0x') ? number : `0x${number}`).toHexString().replace('0x', '')
+  }else{
+    result = BigNumber.from(number).toHexString().replace('0x','')
+  }
+  // adding padding
+  result = result.padStart(length* 2 ,'0');
   if (result.indexOf('-') > -1) {
     result = '-' + result.replace('-', '');
   }
