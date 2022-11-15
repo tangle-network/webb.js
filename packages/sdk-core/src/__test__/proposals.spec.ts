@@ -6,12 +6,12 @@ import { utils } from 'ethers';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
-import { AnchorCreateProposal, ChainType, EVMProposal, MinWithdrawalLimitProposal, ProposerSetUpdateProposal, RefreshVoteProposal, TokenAddProposal, TokenRemoveProposal, WrappingFeeUpdateProposal } from '../index.js';
+import { AnchorCreateProposal, ChainType, EVMProposal, FeeRecipientUpdateProposal, MaxDepositLimitProposal, MinWithdrawalLimitProposal, ProposerSetUpdateProposal, RefreshVoteProposal, RescueTokensProposal, ResourceIdUpdateProposal, SetTreasuryHandlerProposal, SetVerifierProposal, TokenAddProposal, TokenRemoveProposal, WrappingFeeUpdateProposal } from '../index.js';
 import { ProposalHeader } from '../proposals/ProposalHeader.js';
 import { AnchorUpdateProposal } from '../proposals/ProposalKinds.js';
 import { ResourceId } from '../proposals/ResourceId.js';
 
-describe.only('test various conversion functions', () => {
+describe('test various conversion functions', () => {
   it('should encode and decode anchor update proposal types correctly', () => {
     const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
     const chainId = 0xcafe;
@@ -233,5 +233,144 @@ describe.only('test various conversion functions', () => {
 
     assert.equal(minWithdrawLimitProposalDecoded.minWithdrawalLimitBytes, minWithdrawalLimitBytes);
     assert.equal(minWithdrawLimitProposalDecoded.header.toString(), header.toString());
+  });
+
+  it('Should encode and decode max deposit limit proposal', () => {
+    const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const maxDepositLimitBytes = '0x0000000000000000000000000000000000000000000000000000000000001111';
+    const chainId = 0xcafe;
+    const chainType = ChainType.EVM;
+    const resourceId = new ResourceId(anchorAddress, chainType, chainId);
+    const functionSignature = hexToU8a('0xdeadbeef');
+    const lastLeafIndex = 0x0000feed;
+    const header = new ProposalHeader(
+      resourceId,
+      functionSignature,
+      lastLeafIndex
+    );
+
+    const maxDepositLimitProposal = new MaxDepositLimitProposal(header, maxDepositLimitBytes);
+    const maxDepositLimitProposalEncoded = maxDepositLimitProposal.toU8a();
+    const maxDepositLimitProposalDecoded = MaxDepositLimitProposal.fromBytes(maxDepositLimitProposalEncoded);
+
+    assert.equal(maxDepositLimitProposalDecoded.maxDepositLimitBytes, maxDepositLimitBytes);
+    assert.equal(maxDepositLimitProposalDecoded.header.toString(), header.toString());
+  });
+
+  it('Should encode and decode resourceId update  proposal', () => {
+    const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const handlerAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabb';
+    const chainId = 0xcafe;
+    const chainId2 = 0xcafa;
+    const chainType = ChainType.EVM;
+    const resourceId = new ResourceId(anchorAddress, chainType, chainId);
+    const newResourceId = new ResourceId(anchorAddress, chainType, chainId2);
+    const functionSignature = hexToU8a('0xdeadbeef');
+    const lastLeafIndex = 0x0000feed;
+    const header = new ProposalHeader(
+      resourceId,
+      functionSignature,
+      lastLeafIndex
+    );
+
+    const resourceIdUpdateProposal = new ResourceIdUpdateProposal(header, newResourceId.toString(), handlerAddress);
+    const resourceIdUpdateProposalEncoded = resourceIdUpdateProposal.toU8a();
+    const resourceIdUpdateProposalDecoded = ResourceIdUpdateProposal.fromBytes(resourceIdUpdateProposalEncoded);
+
+    assert.equal(resourceIdUpdateProposalDecoded.handlerAddress, handlerAddress);
+    assert.equal(resourceIdUpdateProposalDecoded.newResourceId, newResourceId.toString());
+    assert.equal(resourceIdUpdateProposalDecoded.header.toString(), header.toString());
+  });
+
+  it('Should encode and decode set treasury handler proposal', () => {
+    const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const newTreasuryHandler = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabb';
+    const chainId = 0xcafe;
+    const chainType = ChainType.EVM;
+    const resourceId = new ResourceId(anchorAddress, chainType, chainId);
+    const functionSignature = hexToU8a('0xdeadbeef');
+    const lastLeafIndex = 0x0000feed;
+    const header = new ProposalHeader(
+      resourceId,
+      functionSignature,
+      lastLeafIndex
+    );
+
+    const setTreasuryHandlerProposal = new SetTreasuryHandlerProposal(header, newTreasuryHandler);
+    const setTreasuryHandlerProposalEncoded = setTreasuryHandlerProposal.toU8a();
+    const setTreasuryHandlerProposalDecoded = SetTreasuryHandlerProposal.fromBytes(setTreasuryHandlerProposalEncoded);
+
+    assert.equal(setTreasuryHandlerProposalDecoded.newTreasuryHandler, newTreasuryHandler);
+    assert.equal(setTreasuryHandlerProposalDecoded.header.toString(), header.toString());
+  });
+
+  it('Should encode and decode set verifier proposal', () => {
+    const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const newVerifier = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabb';
+    const chainId = 0xcafe;
+    const chainType = ChainType.EVM;
+    const resourceId = new ResourceId(anchorAddress, chainType, chainId);
+    const functionSignature = hexToU8a('0xdeadbeef');
+    const lastLeafIndex = 0x0000feed;
+    const header = new ProposalHeader(
+      resourceId,
+      functionSignature,
+      lastLeafIndex
+    );
+
+    const setVerifierProposal = new SetVerifierProposal(header, newVerifier);
+    const setVerifierProposalEncoded = setVerifierProposal.toU8a();
+    const setVerifierProposalDecoded = SetVerifierProposal.fromBytes(setVerifierProposalEncoded);
+
+    assert.equal(setVerifierProposalDecoded.newVerifier, newVerifier);
+    assert.equal(setVerifierProposalDecoded.header.toString(), header.toString());
+  });
+
+  it('Should encode and decode fee recipient update proposal', () => {
+    const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const newFeeRecipient = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabb';
+    const chainId = 0xcafe;
+    const chainType = ChainType.EVM;
+    const resourceId = new ResourceId(anchorAddress, chainType, chainId);
+    const functionSignature = hexToU8a('0xdeadbeef');
+    const lastLeafIndex = 0x0000feed;
+    const header = new ProposalHeader(
+      resourceId,
+      functionSignature,
+      lastLeafIndex
+    );
+
+    const feeRecipientUpdateProposal = new FeeRecipientUpdateProposal(header, newFeeRecipient);
+    const feeRecipientUpdateProposalEncoded = feeRecipientUpdateProposal.toU8a();
+    const feeRecipientUpdateProposalDecoded = FeeRecipientUpdateProposal.fromBytes(feeRecipientUpdateProposalEncoded);
+
+    assert.equal(feeRecipientUpdateProposalDecoded.newFeeRecipient, newFeeRecipient);
+    assert.equal(feeRecipientUpdateProposalDecoded.header.toString(), header.toString());
+  });
+
+  it('Should encode and decode rescue token proposal', () => {
+    const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const tokenAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabb';
+    const toAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaacc';
+    const amount = '0x0000000000000000000000000000000000000000000000000000000000001111';
+    const chainId = 0xcafe;
+    const chainType = ChainType.EVM;
+    const resourceId = new ResourceId(anchorAddress, chainType, chainId);
+    const functionSignature = hexToU8a('0xdeadbeef');
+    const lastLeafIndex = 0x0000feed;
+    const header = new ProposalHeader(
+      resourceId,
+      functionSignature,
+      lastLeafIndex
+    );
+
+    const feeRecipientUpdateProposal = new RescueTokensProposal(header, tokenAddress, toAddress, amount);
+    const feeRecipientUpdateProposalEncoded = feeRecipientUpdateProposal.toU8a();
+    const feeRecipientUpdateProposalDecoded = RescueTokensProposal.fromBytes(feeRecipientUpdateProposalEncoded);
+
+    assert.equal(feeRecipientUpdateProposalDecoded.tokenAddress, tokenAddress);
+    assert.equal(feeRecipientUpdateProposalDecoded.toAddress, toAddress);
+    assert.equal(feeRecipientUpdateProposalDecoded.amount, amount);
+    assert.equal(feeRecipientUpdateProposalDecoded.header.toString(), header.toString());
   });
 });
