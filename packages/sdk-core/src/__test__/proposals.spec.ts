@@ -191,7 +191,7 @@ describe('test various conversion functions', () => {
     assert.equal(tokenRemoveProposalDecoded.header.toString(), header.toString());
   });
 
-  it('Should encode and decode  wrapping fee update proposal', () => {
+  it('Should encode and decode wrapping fee update proposal', () => {
     const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
     const newFee = '0x1011';
     const chainId = 0xcafe;
