@@ -213,7 +213,7 @@ describe('test various conversion functions', () => {
     assert.equal(wrappingFeeUpdateProposalDecoded.header.toString(), header.toString());
   });
 
-  it('Should encode and decode  min withdraw limit proposal', () => {
+  it('Should encode and decode min withdraw limit proposal', () => {
     const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
     const minWithdrawalLimitBytes = '0x0000000000000000000000000000000000000000000000000000000000001111';
     const chainId = 0xcafe;
