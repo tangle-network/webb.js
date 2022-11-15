@@ -126,7 +126,7 @@ describe('test various conversion functions', () => {
     assert.equal(refreshVoteProposalDecoded.publicKey, publicKey);
   });
 
-  it('Should encode and decode  proposer set update proposal', () => {
+  it('Should encode and decode proposer set update proposal', () => {
     const merkleRoot = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
     const averageSessionLength = BigInt(10);
     const nonce = 0;
