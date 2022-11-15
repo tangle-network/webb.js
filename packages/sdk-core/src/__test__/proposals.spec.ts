@@ -169,7 +169,7 @@ describe('test various conversion functions', () => {
     assert.equal(tokenAddProposalDecoded.header.toString(), header.toString());
   });
 
-  it('Should encode and decode  token remove proposal', () => {
+  it('Should encode and decode token remove proposal', () => {
     const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
     const removedTokenAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab';
     const chainId = 0xcafe;
