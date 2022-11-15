@@ -62,7 +62,7 @@ export class RefreshVoteProposal implements IRefreshVoteProposal {
   toU8a (): Uint8Array {
     const publicKey = hexToU8a(this.publicKey);
     const nonceBytes = new Uint8Array(4);
-    const dataView = new DataView(nonceBytes);
+    const dataView = new DataView(nonceBytes.buffer);
 
     dataView.setUint32(this.nonce, 0, BE);
 
@@ -70,7 +70,7 @@ export class RefreshVoteProposal implements IRefreshVoteProposal {
   }
 
   static fromBytes (bytes: Uint8Array): RefreshVoteProposal {
-    const dataView = new DataView(bytes);
+    const dataView = new DataView(bytes.buffer);
     const nonce = dataView.getUint32(0, BE);
     const publicKey = bytes.slice(4, bytes.length);
 
