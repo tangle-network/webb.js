@@ -3752,6 +3752,21 @@
     ffjavascript "0.2.55"
     snarkjs "0.4.22"
 
+"@webb-tools/sdk-core@0.1.4-113":
+  version "0.1.4-113"
+  resolved "https://registry.yarnpkg.com/@webb-tools/sdk-core/-/sdk-core-0.1.4-113.tgz#e7da09e8c5274aa78752e4d806defcf116646393"
+  integrity sha512-N5dYC3vc+ZEwYjze6oSNpd1eYaULBc6ynli4BeCfOOqrBcdBY1H69YlobsuBMJHOYprmxMDD3vvdXJFSESpvag==
+  dependencies:
+    "@polkadot/util" "10.1.7"
+    "@webb-tools/wasm-utils" "0.1.4-113"
+    bignumber.js "^9.0.0"
+    circomlibjs "0.0.8"
+    elliptic "6.5.4"
+    eth-sig-util "^3.0.1"
+    ethers "5.7.0"
+    ffjavascript "0.2.55"
+    snarkjs "0.4.22"
+
 "@webb-tools/semaphore-group@0.0.1-1":
   version "0.0.1-1"
   resolved "https://registry.yarnpkg.com/@webb-tools/semaphore-group/-/semaphore-group-0.0.1-1.tgz#969475fa015287d95505310a4cae4b1f769dd016"
@@ -3929,6 +3944,11 @@
   version "0.1.4-106"
   resolved "https://registry.yarnpkg.com/@webb-tools/wasm-utils/-/wasm-utils-0.1.4-106.tgz#88541220233edf75bed69f259d5392ca05eddf6b"
   integrity sha512-grKAT2/rAChMp0rNdxmAGvhaGaenoLHBcyHHgcJt9OiAt+jJR6/dRJkHsyCjgBWEjmtZGXGQ2rXWGRSmKuGlKQ==
+
+"@webb-tools/wasm-utils@0.1.4-113":
+  version "0.1.4-113"
+  resolved "https://registry.yarnpkg.com/@webb-tools/wasm-utils/-/wasm-utils-0.1.4-113.tgz#742fb5d1bd22acbc80c4b5bf8a116f622ebd5b38"
+  integrity sha512-8MLiGFyGxnDS+iV6wZdtdBHDKFnySmTUD81SlvqJcCGQ+6VoHDP9Y1iYTm5cEW0fvpuwPtyJnDm6du/wcn3GKw==
 
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
