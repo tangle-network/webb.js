@@ -257,7 +257,7 @@ describe('test various conversion functions', () => {
     assert.equal(maxDepositLimitProposalDecoded.header.toString(), header.toString());
   });
 
-  it('Should encode and decode resourceId update  proposal', () => {
+  it('Should encode and decode resourceId update proposal', () => {
     const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
     const handlerAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabb';
     const chainId = 0xcafe;
