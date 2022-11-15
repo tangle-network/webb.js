@@ -114,7 +114,7 @@ describe('test various conversion functions', () => {
     assert.equal(eVMProposalDecoded.chainId, tx.chainId);
   });
 
-  it('Should encode and decode  refresh vote proposal', () => {
+  it('Should encode and decode refresh vote proposal', () => {
     const publicKey = '0x020258d309d321e1108e1f055100b86df5d104ca589c1349e5731ef82b19ade12b';
     const nonce = 0;
 
