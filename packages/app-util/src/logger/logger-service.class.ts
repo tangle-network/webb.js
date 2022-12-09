@@ -35,11 +35,18 @@ export class LoggerService {
     return LoggerService.new(ctx);
   }
 
-  constructor (private readonly ctx: string, private readonly logLevel: LogLevel) {
+  constructor (
+    private readonly ctx: string,
+    private readonly logLevel: LogLevel
+  ) {
     return this;
   }
 
-  private logger = (level: LogLevel = LogLevel.trace, color: Color, ...message: any[]): any[] | void => {
+  private logger = (
+    level: LogLevel = LogLevel.trace,
+    color: Color,
+    ...message: any[]
+  ): any[] | void => {
     let m = '';
 
     try {
@@ -62,69 +69,98 @@ export class LoggerService {
       const date = new Date();
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      return [`${color}[${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}], [${this.ctx}] `, ...message];
+      return [
+        `${color}[${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}], [${
+          this.ctx
+        }] `,
+        ...message
+      ];
     }
   };
 
   mutedLogger = (): null => null;
 
-  debug = ((...message: any[]) => {
+  debug = (function debug (this: LoggerService, ...message: any[]) {
     const log = this.logger(LogLevel.debug, Color.FgBlack, ...message);
 
     if (!log) {
       return this.mutedLogger;
     }
 
-    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
-  })();
+    return Function.prototype.bind.call(
+      console.log,
+      console,
+      ...log
+    ) as LoggerFn;
+  }.call(this));
 
-  error = ((...message: any[]) => {
+  error = (function error (this: LoggerService, ...message: any[]) {
     const log = this.logger(LogLevel.error, Color.FgRed, ...message);
 
     if (!log) {
       return this.mutedLogger;
     }
 
-    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
-  })();
+    return Function.prototype.bind.call(
+      console.log,
+      console,
+      ...log
+    ) as LoggerFn;
+  }.call(this));
 
-  info = ((...message: any[]) => {
+  info = (function info (this: LoggerService, ...message: any[]) {
     const log = this.logger(LogLevel.info, Color.FgCyan, ...message);
 
     if (!log) {
       return this.mutedLogger;
     }
 
-    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
-  })();
+    return Function.prototype.bind.call(
+      console.log,
+      console,
+      ...log
+    ) as LoggerFn;
+  }.call(this));
 
-  warn = ((...message: any[]) => {
+  warn = (function warn (this: LoggerService, ...message: any[]) {
     const log = this.logger(LogLevel.warn, Color.FgYellow, ...message);
 
     if (!log) {
       return this.mutedLogger;
     }
 
-    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
-  })();
+    return Function.prototype.bind.call(
+      console.log,
+      console,
+      ...log
+    ) as LoggerFn;
+  }.call(this));
 
-  trace = ((...message: any[]) => {
+  trace = (function trace (this: LoggerService, ...message: any[]) {
     const log = this.logger(LogLevel.trace, Color.FgBlack, ...message);
 
     if (!log) {
       return this.mutedLogger;
     }
 
-    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
-  })();
+    return Function.prototype.bind.call(
+      console.log,
+      console,
+      ...log
+    ) as LoggerFn;
+  }.call(this));
 
-  log = ((...message: any[]) => {
+  log = (function log (this: LoggerService, ...message: any[]) {
     const log = this.logger(LogLevel.log, Color.FgWhite, ...message);
 
     if (!log) {
       return this.mutedLogger;
     }
 
-    return Function.prototype.bind.call(console.log, console, ...log) as LoggerFn;
-  })();
+    return Function.prototype.bind.call(
+      console.log,
+      console,
+      ...log
+    ) as LoggerFn;
+  }.call(this));
 }
