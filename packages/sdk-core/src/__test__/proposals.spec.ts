@@ -6,7 +6,7 @@ import { utils } from 'ethers';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
-import { AnchorCreateProposal, ChainType, EVMProposal, FeeRecipientUpdateProposal, MaxDepositLimitProposal, MinWithdrawalLimitProposal, ProposerSetUpdateProposal, RefreshVoteProposal, RescueTokensProposal, ResourceIdUpdateProposal, SetTreasuryHandlerProposal, SetVerifierProposal, TokenAddProposal, TokenRemoveProposal, WrappingFeeUpdateProposal } from '../index.js';
+import { AnchorCreateProposal, ChainType, EVMProposal, FeeRecipientUpdateProposal, MaxDepositLimitProposal, MinWithdrawalLimitProposal, ProposerSetUpdateProposal, RefreshVoteProposal, RegisterFungibleTokenProposal, RegisterNftTokenProposal, RescueTokensProposal, ResourceIdUpdateProposal, SetTreasuryHandlerProposal, SetVerifierProposal, TokenAddProposal, TokenRemoveProposal, WrappingFeeUpdateProposal } from '../index.js';
 import { ProposalHeader } from '../proposals/ProposalHeader.js';
 import { AnchorUpdateProposal } from '../proposals/ProposalKinds.js';
 import { ResourceId } from '../proposals/ResourceId.js';
@@ -372,5 +372,65 @@ describe('test various conversion functions', () => {
     assert.equal(feeRecipientUpdateProposalDecoded.toAddress, toAddress);
     assert.equal(feeRecipientUpdateProposalDecoded.amount, amount);
     assert.equal(feeRecipientUpdateProposalDecoded.header.toString(), header.toString());
+  });
+
+  it('Should encode and decode register fungible token proposal', () => {
+    const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const chainId = 0xcafe;
+    const chainType = ChainType.EVM;
+    const resourceId = new ResourceId(anchorAddress, chainType, chainId);
+    const functionSignature = hexToU8a('0xdeadbeef');
+    const nonce = 0x0000feed;
+    const header = new ProposalHeader(
+      resourceId,
+      functionSignature,
+      nonce
+    );
+
+    const tokenHandler = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const assetId = '0xbbbbbbbb';
+    const name = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
+    const symbol = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'; 
+
+    const registerFungibleTokenProposal = new RegisterFungibleTokenProposal(header, tokenHandler, assetId, name, symbol);
+    const registerFungibleTokenProposalEncoded = registerFungibleTokenProposal.toU8a();
+    const registerFungibleTokenProposalDecoded = RegisterFungibleTokenProposal.fromBytes(registerFungibleTokenProposalEncoded);
+
+    assert.equal(registerFungibleTokenProposalDecoded.header.toString(), header.toString());
+    assert.equal(registerFungibleTokenProposalDecoded.tokenHandler, tokenHandler);
+    assert.equal(registerFungibleTokenProposalDecoded.assetId, assetId);
+    assert.equal(registerFungibleTokenProposalDecoded.name, name);
+    assert.equal(registerFungibleTokenProposalDecoded.symbol, symbol);
+  });
+
+  it('Should encode and decode register nft token proposal', () => {
+    const anchorAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const chainId = 0xcafe;
+    const chainType = ChainType.EVM;
+    const resourceId = new ResourceId(anchorAddress, chainType, chainId);
+    const functionSignature = hexToU8a('0xdeadbeef');
+    const nonce = 0x0000feed;
+    const header = new ProposalHeader(
+      resourceId,
+      functionSignature,
+      nonce
+    );
+
+    const tokenHandler = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const assetId = '0xbbbbbbbb';
+    const collectionAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const salt = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
+    const uri = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'; 
+
+    const registerNftTokenProposal = new RegisterNftTokenProposal(header, tokenHandler, assetId, collectionAddress, salt, uri);
+    const registerNftTokenProposalEncoded = registerNftTokenProposal.toU8a();
+    const registerNftTokenProposalDecoded = RegisterNftTokenProposal.fromBytes(registerNftTokenProposalEncoded);
+
+    assert.equal(registerNftTokenProposalDecoded.header.toString(), header.toString());
+    assert.equal(registerNftTokenProposalDecoded.tokenHandler, tokenHandler);
+    assert.equal(registerNftTokenProposalDecoded.assetId, assetId);
+    assert.equal(registerNftTokenProposalDecoded.collectionAddress, collectionAddress);
+    assert.equal(registerNftTokenProposalDecoded.salt, salt);
+    assert.equal(registerNftTokenProposalDecoded.uri, uri);
   });
 });
