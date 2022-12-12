@@ -765,7 +765,7 @@ export class RegisterNftTokenProposal implements IRegisterNftTokenProposal {
     registerNftTokenProposal.set(hexToU8a(this.collectionAddress, collectionAddressBytesLength * 8), 64); // 64 -> 84
     registerNftTokenProposal.set(hexToU8a(this.salt, saltBytesLength * 8), 84); // 84 -> 116
     registerNftTokenProposal.set(hexToU8a(this.uri, uriBytesLength * 8), 116); // 116 -> 180
-    
+
     return registerNftTokenProposal;
   }
 }
