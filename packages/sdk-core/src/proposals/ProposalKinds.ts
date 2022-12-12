@@ -668,7 +668,7 @@ export class RegisterFungibleTokenProposal implements IRegisterFungibleTokenProp
 
   static fromBytes (bytes: Uint8Array): RegisterFungibleTokenProposal {
     const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
-    const tokenHandler= u8aToHex(bytes.slice(40, 60));
+    const tokenHandler = u8aToHex(bytes.slice(40, 60));
     const assetId = u8aToHex(bytes.slice(60, 64));
     const name = u8aToHex(bytes.slice(64, 96));
     const symbol = u8aToHex(bytes.slice(96, 128));
@@ -741,7 +741,7 @@ export class RegisterNftTokenProposal implements IRegisterNftTokenProposal {
 
   static fromBytes (bytes: Uint8Array): RegisterNftTokenProposal {
     const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
-    const tokenHandler= u8aToHex(bytes.slice(40, 60));
+    const tokenHandler = u8aToHex(bytes.slice(40, 60));
     const assetId = u8aToHex(bytes.slice(60, 64));
     const collectionAddress = u8aToHex(bytes.slice(64, 84));
     const salt = u8aToHex(bytes.slice(84, 116));
@@ -765,6 +765,7 @@ export class RegisterNftTokenProposal implements IRegisterNftTokenProposal {
     registerNftTokenProposal.set(hexToU8a(this.collectionAddress, collectionAddressBytesLength * 8), 64); // 64 -> 84
     registerNftTokenProposal.set(hexToU8a(this.salt, saltBytesLength * 8), 84); // 84 -> 116
     registerNftTokenProposal.set(hexToU8a(this.uri, uriBytesLength * 8), 116); // 116 -> 180
+    
     return registerNftTokenProposal;
   }
 }

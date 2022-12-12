@@ -390,7 +390,7 @@ describe('test various conversion functions', () => {
     const tokenHandler = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
     const assetId = '0xbbbbbbbb';
     const name = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
-    const symbol = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'; 
+    const symbol = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
 
     const registerFungibleTokenProposal = new RegisterFungibleTokenProposal(header, tokenHandler, assetId, name, symbol);
     const registerFungibleTokenProposalEncoded = registerFungibleTokenProposal.toU8a();
@@ -420,7 +420,7 @@ describe('test various conversion functions', () => {
     const assetId = '0xbbbbbbbb';
     const collectionAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
     const salt = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
-    const uri = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'; 
+    const uri = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
 
     const registerNftTokenProposal = new RegisterNftTokenProposal(header, tokenHandler, assetId, collectionAddress, salt, uri);
     const registerNftTokenProposalEncoded = registerNftTokenProposal.toU8a();
