@@ -626,3 +626,146 @@ export class RescueTokensProposal implements IRescueTokensProposal {
     return rescueTokensProposal;
   }
 }
+
+export interface IRegisterFungibleTokenProposal {
+  /**
+   * The Rescue Token Proposals Header.
+   */
+  readonly header: ProposalHeader;
+
+  /**
+   * 20 bytes Hex-encoded string.
+   */
+  readonly tokenHandler: string;
+  /**
+   * 4 bytes Hex-encoded string.
+   */
+  readonly assetId: string;
+  /**
+   * 32 bytes Hex-encoded string.
+   */
+  readonly name: string;
+  /**
+   * 32 bytes Hex-encoded string.
+   */
+  readonly symbol: string;
+}
+
+export class RegisterFungibleTokenProposal implements IRegisterFungibleTokenProposal {
+  header: ProposalHeader;
+  tokenHandler: string;
+  assetId: string;
+  name: string;
+  symbol: string;
+
+  constructor (header: ProposalHeader, tokenHandler: string, assetId: string, name: string, symbol: string) {
+    this.header = header;
+    this.tokenHandler = tokenHandler;
+    this.assetId = assetId;
+    this.name = name;
+    this.symbol = symbol;
+  }
+
+  static fromBytes (bytes: Uint8Array): RegisterFungibleTokenProposal {
+    const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
+    const tokenHandler = u8aToHex(bytes.slice(40, 60));
+    const assetId = u8aToHex(bytes.slice(60, 64));
+    const name = u8aToHex(bytes.slice(64, 96));
+    const symbol = u8aToHex(bytes.slice(96, 128));
+
+    return new RegisterFungibleTokenProposal(header, tokenHandler, assetId, name, symbol);
+  }
+
+  toU8a (): Uint8Array {
+    const header = this.header.toU8a();
+    const tokenHandlerBytesLength = 20;
+    const assetIdBytesLength = 4;
+    const nameBytesLength = 32;
+    const symbolBytesLength = 32;
+    const registerFungibleTokenProposal = new Uint8Array(header.length + tokenHandlerBytesLength + assetIdBytesLength + nameBytesLength + symbolBytesLength);
+
+    registerFungibleTokenProposal.set(header, 0); // 0 -> 40
+    registerFungibleTokenProposal.set(hexToU8a(this.tokenHandler, tokenHandlerBytesLength * 8), 40); // 40 -> 60
+    registerFungibleTokenProposal.set(hexToU8a(this.assetId, assetIdBytesLength * 8), 60); // 60 -> 64
+    registerFungibleTokenProposal.set(hexToU8a(this.name, nameBytesLength * 8), 64); // 64 -> 96
+    registerFungibleTokenProposal.set(hexToU8a(this.symbol, symbolBytesLength * 8), 96); // 96 -> 128
+
+    return registerFungibleTokenProposal;
+  }
+}
+
+export interface IRegisterNftTokenProposal {
+  /**
+   * The Rescue Token Proposals Header.
+   */
+  readonly header: ProposalHeader;
+
+  /**
+   * 20 bytes Hex-encoded string.
+   */
+  readonly tokenHandler: string;
+  /**
+   * 4 bytes Hex-encoded string.
+   */
+  readonly assetId: string;
+  /**
+   * 20 bytes Hex-encoded string.
+   */
+  readonly collectionAddress: string;
+  /**
+   * 32 bytes Hex-encoded string.
+   */
+  readonly salt: string;
+  /**
+   * 64 bytes Hex-encoded string.
+   */
+  readonly uri: string;
+}
+
+export class RegisterNftTokenProposal implements IRegisterNftTokenProposal {
+  header: ProposalHeader;
+  tokenHandler: string;
+  assetId: string;
+  collectionAddress: string;
+  salt: string;
+  uri: string;
+
+  constructor (header: ProposalHeader, tokenHandler: string, assetId: string, collectionAddress: string, salt: string, uri: string) {
+    this.header = header;
+    this.tokenHandler = tokenHandler;
+    this.assetId = assetId;
+    this.collectionAddress = collectionAddress;
+    this.salt = salt;
+    this.uri = uri;
+  }
+
+  static fromBytes (bytes: Uint8Array): RegisterNftTokenProposal {
+    const header = ProposalHeader.fromBytes(bytes.slice(0, 40));
+    const tokenHandler = u8aToHex(bytes.slice(40, 60));
+    const assetId = u8aToHex(bytes.slice(60, 64));
+    const collectionAddress = u8aToHex(bytes.slice(64, 84));
+    const salt = u8aToHex(bytes.slice(84, 116));
+    const uri = u8aToHex(bytes.slice(116, 180));
+
+    return new RegisterNftTokenProposal(header, tokenHandler, assetId, collectionAddress, salt, uri);
+  }
+
+  toU8a (): Uint8Array {
+    const header = this.header.toU8a();
+    const tokenHandlerBytesLength = 20;
+    const assetIdBytesLength = 4;
+    const collectionAddressBytesLength = 20;
+    const saltBytesLength = 32;
+    const uriBytesLength = 64;
+    const registerNftTokenProposal = new Uint8Array(header.length + tokenHandlerBytesLength + assetIdBytesLength + collectionAddressBytesLength + saltBytesLength + uriBytesLength);
+
+    registerNftTokenProposal.set(header, 0); // 0 -> 40
+    registerNftTokenProposal.set(hexToU8a(this.tokenHandler, tokenHandlerBytesLength * 8), 40); // 40 -> 60
+    registerNftTokenProposal.set(hexToU8a(this.assetId, assetIdBytesLength * 8), 60); // 60 -> 64
+    registerNftTokenProposal.set(hexToU8a(this.collectionAddress, collectionAddressBytesLength * 8), 64); // 64 -> 84
+    registerNftTokenProposal.set(hexToU8a(this.salt, saltBytesLength * 8), 84); // 84 -> 116
+    registerNftTokenProposal.set(hexToU8a(this.uri, uriBytesLength * 8), 116); // 116 -> 180
+
+    return registerNftTokenProposal;
+  }
+}
