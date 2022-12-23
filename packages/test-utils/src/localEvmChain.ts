@@ -31,9 +31,6 @@ export class LocalEvmChain {
   ): Promise<LocalEvmChain> {
     const endpoint = `http://localhost:${evmId}`;
     const server = await startGanacheServer(evmId, evmId, initalBalances, {
-      miner: {
-        blockTime: 1
-      },
       quiet: true,
       ...options
     });
