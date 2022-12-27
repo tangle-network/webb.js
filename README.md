@@ -121,7 +121,7 @@ dvc pull
 
 <h2 style="border-bottom:none"> Quick Start ⚡ </h2>
 
-In order to make use of `@webb-tools/api` you will need to have a node available and running. Below we assume you have started a node locally, but you may also make use of our deployed [Standalone Testnet here](https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fstandalone1.webb.tools#/explorer).
+In order to make use of `@webb-tools/api` you will need to have a node available and running. Below we assume you have started a node locally, but you may also make use of our deployed [Tangle Network Minerva Parachain Testnet](https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Ftangle1.webb.tools#/explorer).
 #### Install package dependencies
 
 ```bash
