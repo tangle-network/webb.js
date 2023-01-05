@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/api",
-  "version": "0.1.4-118",
+  "version": "0.1.4-119",
   "description": "Webb JS API",
   "type": "module",
   "author": "Webb Developers <drew@webb.tools>",
@@ -37,7 +37,7 @@
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
     "@polkadot/api": "9.2.4",
-    "@webb-tools/api-derive": "0.1.4-118",
+    "@webb-tools/api-derive": "0.1.4-119",
     "@webb-tools/protocol-substrate-types": "0.0.3"
   }
 }
