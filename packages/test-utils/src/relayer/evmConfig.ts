@@ -2,7 +2,7 @@ import fs from 'fs';
 
 import { Contract, ConvertToKebabCase, EventsWatcher, FullChainInfo, LinkedAnchor, ProposalSigningBackend, WithdrawConfig } from './config';
 
-export async function writeConfig (
+export async function writeEvmChainConfig (
   path: string,
   config: FullChainInfo
 ): Promise<void> {
