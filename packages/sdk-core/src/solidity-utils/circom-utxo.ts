@@ -9,8 +9,8 @@ import { randomBN, toBuffer, toFixedHex } from '../big-number-utils.js';
 import { Keypair } from '../keypair.js';
 import { Utxo, UtxoGenInput } from '../utxo.js';
 
-/// The CircomUtxo class implements the Utxo interface so that
-/// the same 'Utxo' type may be used in serialization between worker contexts
+// The CircomUtxo class implements the Utxo interface so that
+// the same 'Utxo' type may be used in serialization between worker contexts
 export class CircomUtxo extends Utxo {
   _curve: Curve = 'Bn254';
   _backend: Backend = 'Circom';

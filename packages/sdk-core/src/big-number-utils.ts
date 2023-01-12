@@ -77,7 +77,7 @@ export function createRootsBytes (rootArray: string[] | BigNumberish[]) {
   let rootsBytes = '0x';
 
   for (let i = 0; i < rootArray.length; i++) {
-    rootsBytes += toFixedHex(rootArray[i]).substr(2);
+    rootsBytes += toFixedHex(rootArray[i]).slice(2);
   }
 
   return rootsBytes; // root byte string (32 * array.length bytes)

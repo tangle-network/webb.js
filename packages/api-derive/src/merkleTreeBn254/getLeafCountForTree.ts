@@ -8,6 +8,7 @@ import { memo } from '@polkadot/rpc-core';
 
 export function getLeafCountForTree (instanceId: string, api: ApiInterfaceRx): (treeId: number) => Observable<number> {
   return memo(instanceId, (treeId: number) => {
-    return api.query.merkleTreeBn254.nextLeafIndex(treeId).pipe(map((value) => Number(value.toHex())));
+    // eslint-disable-next-line
+    return api.query.merkleTreeBn254.nextLeafIndex(treeId).pipe(map(value => Number(value.toHex())));
   });
 }

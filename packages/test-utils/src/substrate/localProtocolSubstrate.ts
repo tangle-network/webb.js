@@ -1,5 +1,5 @@
-/// A Helper Class to Start and Manage a Local Protocol Substrate Node.
-/// This Could be through a Docker Container or a Local Compiled node.
+// A Helper Class to Start and Manage a Local Protocol Substrate Node.
+// This Could be through a Docker Container or a Local Compiled node.
 
 import { spawn } from 'child_process';
 
