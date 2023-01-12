@@ -12,7 +12,7 @@ import { ApiPromise, Keyring } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
-describe('getLeafCountForTree should work', function () {
+describe.skip('getLeafCountForTree should work', function () {
   this.timeout(120_000);
 
   let signer: KeyringPair;

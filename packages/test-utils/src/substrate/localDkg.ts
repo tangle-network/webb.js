@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-/// A Helper Class to Start and Manage a Local DKG Node.
-/// This Could be through a Docker Container or a Local Compiled node.
+// A Helper Class to Start and Manage a Local DKG Node.
+// This Could be through a Docker Container or a Local Compiled node.
 
 import '@webb-tools/dkg-substrate-types';
 

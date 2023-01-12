@@ -19,7 +19,7 @@ export function getLeavesForTree (
   return memo(instanceId, (treeId: number, start: number, end: number) => {
     // get an array of numbers from start to end.
     const arr = [...Array(end - start + 1).keys()].map((x) => x + start);
-
+    /* eslint-disable */
     return api.query.merkleTreeBn254.leaves
       .multi([
         // Generate arrays for the multi calls of [treeId, index]
