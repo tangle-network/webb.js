@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/api-derive",
-  "version": "0.1.4-120",
+  "version": "0.1.4-121",
   "description": "Webb JS API derived methods",
   "type": "module",
   "main": "./cjs/index.js",
