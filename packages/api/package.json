@@ -38,6 +38,6 @@
   "dependencies": {
     "@polkadot/api": "9.2.4",
     "@webb-tools/api-derive": "0.1.4-120",
-    "@webb-tools/protocol-substrate-types": "0.0.3"
+    "@webb-tools/protocol-substrate-types": "0.0.4"
   }
 }
