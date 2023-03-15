@@ -33,7 +33,7 @@ let keyring: {
 
 const BOBPhrase = 'asthma early danger glue satisfy spatial decade wing organ bean census announce';
 
-const assetId = new Uint8Array([254, 255, 255, 255]);
+const assetId = new Uint8Array([0,0,0,0]);
 
 function getKeys() {
   const pkPath = path.join(
