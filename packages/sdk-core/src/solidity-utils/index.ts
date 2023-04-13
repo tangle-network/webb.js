@@ -73,7 +73,7 @@ export const signMessage = (wallet: ethers.Wallet, data: BytesLike) => {
   // Transaction malleability fix if s is too large (Bitcoin allows it, Ethereum rejects it)
   try {
     sig = ethers.utils.joinSignature(expandedSig);
-  } catch (e) {
+  } catch (_) {
     expandedSig.s = '0x' + (new BN(ec.curve.n).sub(signature.s)).toString('hex');
     expandedSig.v = (expandedSig.v === 27) ? 28 : 27;
     sig = ethers.utils.joinSignature(expandedSig);

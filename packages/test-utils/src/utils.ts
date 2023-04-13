@@ -43,7 +43,7 @@ export function polkadotTx (api: ApiPromise, path: MethodPath, params: any[], si
                 const error = dispatchError.registry.findMetaError(mod);
 
                 message = `${error.section}.${error.name}`;
-              } catch (error) {
+              } catch (_) {
                 reject(message);
               }
             } else if (dispatchError.isToken) {
