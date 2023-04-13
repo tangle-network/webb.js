@@ -644,7 +644,7 @@ impl JsProofInputBuilder {
 	#[wasm_bindgen(js_name=setExtDatahash)]
 	pub fn set_ext_data_hash(&mut self, ex_data_hash: JsString) -> Result<(), JsValue> {
 		let ex_data_hash: String = ex_data_hash.into();
-		let bytes = hex::decode(&ex_data_hash).map_err(|_| OpStatusCode::InvalidExtDataHash)?;
+		let bytes = hex::decode(ex_data_hash).map_err(|_| OpStatusCode::InvalidExtDataHash)?;
 
 		self.inner.ext_data_hash(bytes)?;
 		Ok(())
@@ -746,7 +746,7 @@ pub fn verify_js_proof(proof: JsString, public_inputs: Array, vk: JsString, curv
 		.to_vec()
 		.into_iter()
 		.map(|v| JsValue::from(JsString::from(v)).as_string().unwrap())
-		.map(|x| hex::decode(&x).unwrap())
+		.map(|x| hex::decode(x).unwrap())
 		.collect();
 
 	let curve: Curve = JsValue::from(curve).as_string().unwrap().parse().unwrap();
