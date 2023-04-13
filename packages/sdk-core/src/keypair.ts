@@ -32,9 +32,9 @@ export function unpackEncryptedMessage (encryptedMessage: any) {
   }
 
   const messageBuff = Buffer.from(encryptedMessage, 'hex');
-  const nonceBuf = messageBuff.slice(0, 24);
-  const ephemPublicKeyBuf = messageBuff.slice(24, 56);
-  const ciphertextBuf = messageBuff.slice(56);
+  const nonceBuf = messageBuff.subarray(0, 24);
+  const ephemPublicKeyBuf = messageBuff.subarray(24, 56);
+  const ciphertextBuf = messageBuff.subarray(56);
 
   return {
     ciphertext: ciphertextBuf.toString('base64'),
