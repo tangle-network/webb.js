@@ -44,6 +44,6 @@
   "dependencies": {
     "@polkadot/api": "9.2.4",
     "@polkadot/rpc-core": "9.2.4",
-    "@webb-tools/protocol-substrate-types": "^0.0.2"
+    "@webb-tools/protocol-substrate-types": "^0.0.9"
   }
 }
