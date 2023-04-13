@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "engines": {
-    "yarn": "^1.10.1"
+    "yarn": "^1.10.1",
+    "node": "18.x.x"
   },
   "workspaces": [
     "examples/*",
