@@ -121,39 +121,7 @@ function buildWebpack() {
   executeSync('yarn polkadot-exec-webpack --config webpack.config.cjs --mode production');
 }
 
-// @param module - the module system to use cjs or esm.
-async function buildBabel(dir, module = 'esm') {
-  console.log('build babel for: ', module);
 
-  // babel configuratiom
-  const configFileName = `babel-config-${module}.cjs`;
-
-  // Get Config Options:
-  const rootConfig = path.join(process.cwd(), `../../${configFileName}`);
-  const potentialLocalConfig = path.join(process.cwd(), configFileName);
-
-  // Prefer to use local config over the root one.
-  const conf = fs.existsSync(potentialLocalConfig) ? potentialLocalConfig : rootConfig;
-
-  // Commonjs builds will exist in a '/cjs' directory for the package.
-  await babel({
-    babelOptions: {
-      configFile: conf
-    },
-    cliOptions: {
-      extensions: ['.ts'],
-      filenames: ['src'],
-      ignore: '**/*.d.ts',
-      outDir: module === 'esm' ? path.join(process.cwd(), 'build') : path.join(process.cwd(), 'build/cjs'),
-      outFileExtension: '.js'
-    }
-  });
-
-  copyMiscFiles(dir, module);
-  if (module != 'esm') {
-    postProcessingForCjs(path.join(process.cwd(), 'build/cjs'));
-  }
-}
 
 async function buildJs(dir) {
   if (!fs.existsSync(path.join(process.cwd(), '.skip-build'))) {
@@ -165,12 +133,7 @@ async function buildJs(dir) {
 
     if (fs.existsSync(path.join(process.cwd(), 'public'))) {
       buildWebpack(dir);
-    } else {
-      await buildBabel(dir, 'cjs');
-      await buildBabel(dir, 'esm');
     }
-
-    console.log();
   }
 }
 
