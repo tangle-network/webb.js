@@ -46,6 +46,7 @@ module.exports = {
     '@typescript-eslint/ban-ts-comment': 0,
     "@typescript-eslint/require-await": 0,
     "@typescript-eslint/no-var-requires": 0,
-    "tsdoc/syntax":"error"
+    "tsdoc/syntax":"error",
+    "import/extensions": "off",
   }
 };
