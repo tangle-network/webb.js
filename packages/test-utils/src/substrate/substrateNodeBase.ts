@@ -15,7 +15,7 @@
  *
  */
 
-import { options, rpcProperties } from '@webb-tools/api';
+import { options, rpcProperties } from '@webb-tools/api/index.js';
 import { ChildProcess, execSync } from 'child_process';
 
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
