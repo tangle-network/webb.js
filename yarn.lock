@@ -10,7 +10,7 @@
     "@jridgewell/gen-mapping" "^0.3.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@babel/cli@^7.20.7", "@babel/cli@^7.21.0":
+"@babel/cli@^7.20.7":
   version "7.21.0"
   resolved "https://registry.yarnpkg.com/@babel/cli/-/cli-7.21.0.tgz#1868eb70e9824b427fc607610cce8e9e7889e7e1"
   integrity sha512-xi7CxyS8XjSyiwUGCfwf+brtJxjW1/ZTcBUkP10xawIEXLX5HzLn+3aXkgxozcP2UhRhtKTmQurw9Uaes7jZrA==
@@ -38,7 +38,7 @@
   resolved "https://registry.yarnpkg.com/@babel/compat-data/-/compat-data-7.21.4.tgz#457ffe647c480dff59c2be092fc3acf71195c87f"
   integrity sha512-/DYyDpeCfaVinT40FPGdkkb+lYSKvsVuMjDAG7jPOWWiM1ibOaB9CXJAlc4d1QpP/U2q2P9jbrSlClKSErd55g==
 
-"@babel/core@^7.11.6", "@babel/core@^7.12.3", "@babel/core@^7.18.13", "@babel/core@^7.20.12", "@babel/core@^7.21.3":
+"@babel/core@^7.11.6", "@babel/core@^7.12.3", "@babel/core@^7.18.13", "@babel/core@^7.20.12":
   version "7.21.4"
   resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.21.4.tgz#c6dc73242507b8e2a27fd13a9c1814f9fa34a659"
   integrity sha512-qt/YV149Jman/6AfmlxJ04LMIu8bMoyl3RB91yTFrxQmgbrSvQMy7cI8Q62FHx1t8wJ8B5fu0UDoLwHAhUo1QA==
@@ -2153,7 +2153,7 @@
     "@polkadot/util" "^10.1.6"
     rxjs "^7.5.6"
 
-"@polkadot/api-derive@10.1.4", "@polkadot/api-derive@10.3.2", "@polkadot/api-derive@9.2.4":
+"@polkadot/api-derive@10.3.2", "@polkadot/api-derive@9.2.4":
   version "10.3.2"
   resolved "https://registry.yarnpkg.com/@polkadot/api-derive/-/api-derive-10.3.2.tgz#3d2fb8e8b0f6b824300cfda267e92bb4f6afc3df"
   integrity sha512-vU6ymw/XykrPZseCgO2BgsX9niRfystXAVUltxO9m/aqZdmf3yeFl+77MwQd9zdLsPOmcoWpiEPRRKWQThqgSA==
@@ -2417,6 +2417,27 @@
     mock-socket "^9.1.5"
     nock "^13.2.9"
 
+"@polkadot/typegen@10.3.2":
+  version "10.3.2"
+  resolved "https://registry.yarnpkg.com/@polkadot/typegen/-/typegen-10.3.2.tgz#fbba8bb39445d54240d5f9a86c620db9e965e4ff"
+  integrity sha512-ho0oRXRTQfu85nOOHAZ/N1LMPzkn6gaT82PwUi2Rvt7hXCZVK5sYe6s9NSRK6eqlrp9gRXS55rmo+H7WQ7OIVw==
+  dependencies:
+    "@polkadot/api" "10.3.2"
+    "@polkadot/api-augment" "10.3.2"
+    "@polkadot/rpc-augment" "10.3.2"
+    "@polkadot/rpc-provider" "10.3.2"
+    "@polkadot/types" "10.3.2"
+    "@polkadot/types-augment" "10.3.2"
+    "@polkadot/types-codec" "10.3.2"
+    "@polkadot/types-create" "10.3.2"
+    "@polkadot/types-support" "10.3.2"
+    "@polkadot/util" "^11.1.3"
+    "@polkadot/util-crypto" "^11.1.3"
+    "@polkadot/x-ws" "^11.1.3"
+    handlebars "^4.7.7"
+    tslib "^2.5.0"
+    yargs "^17.7.1"
+
 "@polkadot/typegen@9.2.4":
   version "9.2.4"
   resolved "https://registry.yarnpkg.com/@polkadot/typegen/-/typegen-9.2.4.tgz#766af32c3ab1a6ba4438ef3f5e02b9b56d85e3da"
@@ -2525,7 +2546,7 @@
     "@babel/runtime" "^7.18.9"
     "@polkadot/util" "^10.1.6"
 
-"@polkadot/types@10.1.4", "@polkadot/types@10.3.2", "@polkadot/types@9.2.4":
+"@polkadot/types@10.3.2", "@polkadot/types@9.2.4":
   version "10.3.2"
   resolved "https://registry.yarnpkg.com/@polkadot/types/-/types-10.3.2.tgz#b9f475524edba08948ddd72681054fbeaf38249c"
   integrity sha512-dwCB2S8yGS2gdvAMlqTiKB+ysGoiZgqhyD+hxpE2JsDtjDHb5q6BCAyeKGnG7BcUHdnspYAt9g0EcjRDkTt5Tw==
@@ -4040,6 +4061,42 @@
     "@polkadot/typegen" "9.2.4"
     "@polkadot/types" "9.2.4"
 
+"@webb-tools/protocol-substrate-types@0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@webb-tools/protocol-substrate-types/-/protocol-substrate-types-0.0.10.tgz#1fb383c97f63bfc7e7f302f97cb747b0d79c4276"
+  integrity sha512-GNxozh5hnfHAsAYbwlNsH3TfOL/gCRw8jLqj+H4a1dG5D8Ch7XbCNoaJeWlHGHMLQC+Kqb9vqm3Z1fxIuBP16w==
+  dependencies:
+    "@babel/cli" "^7.20.7"
+    "@babel/core" "^7.20.12"
+    "@babel/plugin-proposal-nullish-coalescing-operator" "^7.18.6"
+    "@babel/plugin-proposal-numeric-separator" "^7.18.6"
+    "@babel/plugin-proposal-optional-chaining" "^7.20.7"
+    "@babel/plugin-syntax-bigint" "^7.8.3"
+    "@babel/plugin-syntax-dynamic-import" "^7.8.3"
+    "@babel/plugin-syntax-import-assertions" "^7.20.0"
+    "@babel/plugin-syntax-import-meta" "^7.10.4"
+    "@babel/plugin-syntax-top-level-await" "^7.14.5"
+    "@babel/plugin-transform-regenerator" "^7.20.5"
+    "@babel/plugin-transform-runtime" "^7.19.6"
+    "@babel/preset-env" "^7.20.2"
+    "@babel/preset-react" "^7.18.6"
+    "@babel/preset-typescript" "^7.18.6"
+    "@babel/register" "^7.18.9"
+    "@babel/runtime" "^7.20.13"
+    "@open-web3/orml-types" "^1.1.3"
+    "@polkadot/api-derive" "10.3.2"
+    "@polkadot/dev" "^0.72.42"
+    "@polkadot/typegen" "10.3.2"
+    "@polkadot/types" "10.3.2"
+    babel-jest "^29.4.1"
+    babel-plugin-module-extension-resolver "^1.0.0"
+    babel-plugin-module-resolver "^5.0.0"
+    babel-plugin-styled-components "^2.0.7"
+    fs-extra "^11.1.1"
+    glob2base "^0.0.12"
+    minimatch "^7.4.2"
+    mkdirp "^2.1.5"
+
 "@webb-tools/protocol-substrate-types@0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@webb-tools/protocol-substrate-types/-/protocol-substrate-types-0.0.3.tgz#38b35fe6bc13dc9c7219b5ffab78894fc7b500f8"
@@ -4051,22 +4108,6 @@
     "@polkadot/dev" "^0.67.86"
     "@polkadot/typegen" "9.2.4"
     "@polkadot/types" "9.2.4"
-
-"@webb-tools/protocol-substrate-types@0.0.9":
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/@webb-tools/protocol-substrate-types/-/protocol-substrate-types-0.0.9.tgz#13588ac5c79e0f92114c49936cb3f632d961f0c1"
-  integrity sha512-/7CrEpxoR9/zpBvAPZCh8aZSEMFvKP3/n5I4QqmxYxtMYGHEhkqiLr0n7VDSmsfh29ig/ow7PpfieEEn0XkfWA==
-  dependencies:
-    "@babel/cli" "^7.21.0"
-    "@babel/core" "^7.21.3"
-    "@babel/runtime" "^7.19.0"
-    "@open-web3/orml-types" "^1.1.3"
-    "@polkadot/api-derive" "10.1.4"
-    "@polkadot/types" "10.1.4"
-    fs-extra "^11.1.1"
-    glob2base "^0.0.12"
-    minimatch "^7.4.2"
-    mkdirp "^2.1.5"
 
 "@webb-tools/protocol-substrate-types@^0.0.2":
   version "0.0.2"
@@ -4433,7 +4474,7 @@
     "@webb-tools/sdk-core" "0.1.4-113"
     ethers "5.7.0"
 
-"@webb-tools/utils@0.5.27", "@webb-tools/utils@^0.5.24":
+"@webb-tools/utils@0.5.24", "@webb-tools/utils@^0.5.24":
   version "0.5.24"
   resolved "https://registry.yarnpkg.com/@webb-tools/utils/-/utils-0.5.24.tgz#1fc58d68f9d3b4dcd8ded124eef58bcd1008ef17"
   integrity sha512-Yo/E2pMnQOibSMvgkJ9idPGFSw7BMspF26sw1QLCixVEvBa9uwi6XTp954jlto2v6GPcBwb1ev226ReGQ/VVSg==

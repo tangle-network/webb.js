@@ -41,7 +41,7 @@
     "@webb-tools/api": "0.1.4-121",
     "@webb-tools/dkg-substrate-types": "0.0.3",
     "@webb-tools/protocol-solidity": "0.5.32",
-    "@webb-tools/protocol-substrate-types": "0.0.9",
+    "@webb-tools/protocol-substrate-types": "0.0.10",
     "@webb-tools/sdk-core": "0.1.4-121",
     "@webb-tools/tokens": "0.5.32",
     "@webb-tools/utils": "0.5.24",

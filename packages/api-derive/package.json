@@ -43,6 +43,6 @@
   "homepage": "https://github.com/webb-tools/webb.js",
   "dependencies": {
     "@polkadot/api": "10.3.2",
-    "@webb-tools/protocol-substrate-types": "0.0.9"
+    "@webb-tools/protocol-substrate-types": "0.0.10"
   }
 }
