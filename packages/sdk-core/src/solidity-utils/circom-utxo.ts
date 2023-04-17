@@ -153,10 +153,10 @@ export class CircomUtxo extends Utxo {
     }
 
     const utxo = await CircomUtxo.generateUtxo({
-      amount: BigNumber.from('0x' + buf.slice(8, 8 + 32).toString('hex')).toString(),
+      amount: BigNumber.from('0x' + buf.subarray(8, 8 + 32).toString('hex')).toString(),
       backend: 'Circom',
-      blinding: hexToU8a(toFixedHex('0x' + buf.slice(8 + 32, 8 + 64).toString('hex'))),
-      chainId: BigNumber.from('0x' + buf.slice(0, 8).toString('hex')).toString(),
+      blinding: hexToU8a(toFixedHex('0x' + buf.subarray(8 + 32, 8 + 64).toString('hex'))),
+      chainId: BigNumber.from('0x' + buf.subarray(0, 8).toString('hex')).toString(),
       curve: 'Bn254',
       keypair
     });

@@ -77,10 +77,10 @@ export const rpcProperties = {
  *
  * @returns Returns the `ApiOptions` for a Webb `protocol-substrate` node.
  */
-export const options = ({ types = {},
+export const options = ({ derives = {},
+  types = {},
   typesAlias = {},
   typesBundle = {},
-  derives = {},
   ...otherOptions }: ApiOptions = {}): ApiOptions => ({
   derives: {
     ...webbDerives,
@@ -112,7 +112,7 @@ export const options = ({ types = {},
  */
 export const optionsWithChain =
   (chainTypes: any) =>
-    ({ types = {}, rpc = {}, typesAlias = {}, typesBundle = {}, ...otherOptions }: ApiOptions = {}): ApiOptions => ({
+    ({ rpc = {}, types = {}, typesAlias = {}, typesBundle = {}, ...otherOptions }: ApiOptions = {}): ApiOptions => ({
       rpc: {
         ...rpc
       },

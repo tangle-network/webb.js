@@ -62,6 +62,23 @@ async function createPoolShare(
   return id;
 }
 
+async function RegisterTokenAsset(
+  apiPromise: ApiPromise,
+  name: string,
+  singer: KeyringPair,
+  existentialDeposit: number = 0
+) {
+  await polkadotTx(apiPromise, {
+      section: 'sudo',
+      method: 'sudo'
+    },
+    [apiPromise.tx.assetRegistry.register(name,"Token",existentialDeposit)], singer);
+  const nextAssetId = await apiPromise.query.assetRegistry.nextAssetId();
+
+  const id = nextAssetId.toNumber() - 1;
+  return id;
+}
+
 async function addAssetToPool(
   apiPromise: ApiPromise,
   assetId:string,
@@ -84,43 +101,61 @@ describe('Wrap/unwrap substrate tests', function() {
     apiPromise = await nodes[0].api();
     const { bob, charlie, alice } = getKeyring();
     console.log(`Transferring 10,000 balance to Alice and Bob`);
-    await transferBalance(apiPromise!, charlie, [alice, bob], 1000_000);
+    await transferBalance(apiPromise!, charlie, [alice, bob], 1000000);
   });
 
   it('should wrap and unwrap for substrate', async function() {
-    const name = 'WEBB^2';
-    // Create the PoolShare asset
-    const webSqu = await createPoolShare(apiPromise!, name, getKeyring().alice, 0);
-    console.log(`${name} asset created`);
-    await addAssetToPool(apiPromise! ,"0" , name, getKeyring().alice);
-    console.log(`Added Asset 0 to Pool ${name}`);
+    const POOL_SHARE_NAME = 'WebbTNT';
+    const TOKEN_NAME = 'TNT';
+    const BALANCE = 1000000;
+    const EXISTENTIAL_DEPOSIT = 0;
+    // Register new Asset for TNT token.
+    const assetId = await RegisterTokenAsset(apiPromise!,TOKEN_NAME,getKeyring().alice, EXISTENTIAL_DEPOSIT);
+    console.log(`${TOKEN_NAME} token asset created.`);
+    // Register new asset for WebbTNT PoolShare.
+    const poolShareId = await createPoolShare(apiPromise!, POOL_SHARE_NAME, getKeyring().alice, EXISTENTIAL_DEPOSIT);
+    console.log(`${POOL_SHARE_NAME} pool share asset created.`);
+    await addAssetToPool(apiPromise! ,assetId.toString() , POOL_SHARE_NAME, getKeyring().alice);
+    console.log(`Added Asset ${TOKEN_NAME} to Pool ${POOL_SHARE_NAME}`);
 
-    const balanceBeforeWrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,webSqu);
+
+    await polkadotTx(apiPromise!, {
+      section: 'sudo',
+      method: 'sudo'
+    } ,
+    [apiPromise?.tx.currencies.updateBalance(getKeyring().bob.address, assetId, BALANCE)], getKeyring().alice);
+    apiPromise?.tx.currencies
+    const webbTokenBalance = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,assetId);
+    const webbTokenBalanceBefore  = webbTokenBalance.toJSON().free as number;
+    expect(webbTokenBalanceBefore).to.equal(BALANCE);
+
+    
+    const balanceBeforeWrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,poolShareId);
     const wrappedTokenBalanceBeforeWrapping  = balanceBeforeWrapping.toJSON().free as number;
     expect(wrappedTokenBalanceBeforeWrapping).to.equal(0);
 
-    console.log(`Wrapping 1_000_000_000 ${name} tokens `);
+    console.log(`Wrapping 100000 ${POOL_SHARE_NAME} tokens `);
     await polkadotTx(apiPromise!, {
       section: 'tokenWrapper',
       method:"wrap"
-    } ,["0" , webSqu , 1_000_000_000 , getKeyring().bob.address], getKeyring().bob)
-    console.log(`Wrapped 1_000_000_000 ${name} tokens `);
+    } ,[assetId , poolShareId , 100000 , getKeyring().bob.address], getKeyring().bob)
+    console.log(`Wrapped 100000 ${POOL_SHARE_NAME} tokens `);
 
-    const balanceAfterWrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,webSqu);
+    const balanceAfterWrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,poolShareId);
     const wrappedTokenBalanceAfterWrapping  = balanceAfterWrapping.toJSON().free as number;
-    expect(wrappedTokenBalanceAfterWrapping).to.equal(1_000_000_000);
+    expect(wrappedTokenBalanceAfterWrapping).to.equal(100000);
 
 
-    console.log(`Unwrapping ${1_000_000_000 /2} ${name} tokens `);
+    console.log(`Unwrapping ${100000 /2} ${POOL_SHARE_NAME} tokens `);
     await polkadotTx(apiPromise!, {
       section: 'tokenWrapper',
       method:"unwrap"
-    } ,[webSqu  ,"0" , 1_000_000_000 /2 , getKeyring().bob.address], getKeyring().bob)
-    console.log(`Unwrapped ${1_000_000_000 /2} ${name} tokens `);
+    } ,[poolShareId  ,assetId , 100000 /2 , getKeyring().bob.address], getKeyring().bob)
+    console.log(`Unwrapped ${100000 /2} ${POOL_SHARE_NAME} tokens `);
 
-    const balanceAfterUnwrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,webSqu);
+    const balanceAfterUnwrapping = await apiPromise!.query.tokens.accounts(getKeyring().bob.address,poolShareId);
     const wrappedTokenBalanceAfterUnwrapping  = balanceAfterUnwrapping.toJSON().free as number;
-    expect(wrappedTokenBalanceAfterUnwrapping).to.equal(1_000_000_000/2);
+    expect(wrappedTokenBalanceAfterUnwrapping).to.equal(100000/2);
     console.log('DONE TESTING');
   });
 
