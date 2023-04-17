@@ -10,7 +10,6 @@ import {
   ArkworksProvingManager,
   calculateTypedChainId,
   ChainType,
-  Keypair,
   Note,
   ProvingManagerSetupInput,
   Utxo,
@@ -418,7 +417,7 @@ async function createVAnchorWithDeposit(
     relayer: address,
     recipient: address,
     fee,
-    extAmount: extAmount,
+    extAmount: extAmount.toNumber(),
     refund: '0',
     token: assetId,
     encryptedOutput1: u8aToHex(comEnc1),
@@ -522,15 +521,13 @@ describe('VAnchor tests', function() {
       curve: 'Bn254',
       backend: 'Arkworks',
       amount: publicAmount.toString(),
-      chainId,
-      keypair: new Keypair()
+      chainId
     });
     const output2 = await Utxo.generateUtxo({
       curve: 'Bn254',
       backend: 'Arkworks',
       amount: '0',
-      chainId,
-      keypair: new Keypair()
+      chainId
     });
     // Configure a new proving manager with direct call
     const provingManager = new ArkworksProvingManager(null);
@@ -575,7 +572,7 @@ describe('VAnchor tests', function() {
       relayer: address,
       recipient: address,
       fee,
-      extAmount: extAmount,
+      extAmount: extAmount.toNumber(),
       refund: '0',
       token: assetId,
       encryptedOutput1: u8aToHex(comEnc1),
