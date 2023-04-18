@@ -1,4 +1,4 @@
-import {LocalProtocolSubstrate, UsageMode} from "@webb-tools/test-utils/index.js";
+import {LocalProtocolSubstrate, UsageMode} from "@webb-tools/test-utils";
 import isCi from "is-ci";
 import path from "path";
 
