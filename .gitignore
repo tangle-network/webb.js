@@ -6,6 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 *.vscode
 rust/target
+.DS_STORE
 
 # Runtime data
 pids

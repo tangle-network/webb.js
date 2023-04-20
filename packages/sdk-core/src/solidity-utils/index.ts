@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import EC from 'elliptic';
-import { BytesLike, ethers } from 'ethers';
+import { BytesLike, ethers, getBytes, keccak256, toUtf8Bytes } from 'ethers';
 
 import { BN } from '@polkadot/util';
 
@@ -51,17 +51,17 @@ export function generateWithdrawProofCallData (proof: any, publicSignals: any) {
 }
 
 export const generateFunctionSigHash = (functionSignature: string): string => {
-  return ethers.utils.keccak256(
-    ethers.utils.toUtf8Bytes(functionSignature)
-  ).slice(0, 10).padEnd(10, '0');
+  return keccak256(toUtf8Bytes(functionSignature))
+    .slice(0, 10)
+    .padEnd(10, '0');
 };
 
 export const signMessage = (wallet: ethers.Wallet, data: BytesLike) => {
   // eslint-disable-next-line new-cap
   const ec = new EC.ec('secp256k1');
   const key = ec.keyFromPrivate(wallet.privateKey.slice(2), 'hex');
-  const hash = ethers.utils.keccak256(data);
-  const hashedData = ethers.utils.arrayify(hash);
+  const hash = keccak256(data);
+  const hashedData = getBytes(hash);
   const signature = key.sign(hashedData);
   const expandedSig = {
     r: '0x' + signature.r.toString('hex'),
@@ -72,11 +72,11 @@ export const signMessage = (wallet: ethers.Wallet, data: BytesLike) => {
 
   // Transaction malleability fix if s is too large (Bitcoin allows it, Ethereum rejects it)
   try {
-    sig = ethers.utils.joinSignature(expandedSig);
+    sig = ethers.Signature.from(expandedSig).serialized;
   } catch (_) {
     expandedSig.s = '0x' + (new BN(ec.curve.n).sub(signature.s)).toString('hex');
     expandedSig.v = (expandedSig.v === 27) ? 28 : 27;
-    sig = ethers.utils.joinSignature(expandedSig);
+    sig = ethers.Signature.from(expandedSig).serialized;
   }
 
   return sig;

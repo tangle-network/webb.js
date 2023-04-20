@@ -1,4 +1,4 @@
-import { Transaction, utils } from 'ethers';
+import { Transaction } from 'ethers';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
@@ -7,19 +7,19 @@ import { ProposalHeader } from './ProposalHeader.js';
 import { ResourceId } from './ResourceId.js';
 
 export interface IEVMProposal {
-  readonly chainId: number;
-  readonly nonce: number;
+  readonly chainId: bigint;
+  readonly nonce: bigint;
   readonly tx: Transaction
 }
 
 export class EVMProposal implements IEVMProposal {
-  readonly chainId: number;
-  readonly nonce: number;
+  readonly chainId: bigint;
+  readonly nonce: bigint;
   readonly tx: Transaction;
 
   constructor (
-    chainId: number,
-    nonce: number,
+    chainId: bigint,
+    nonce: bigint,
     tx: Transaction
   ) {
     this.chainId = chainId;
@@ -28,31 +28,31 @@ export class EVMProposal implements IEVMProposal {
   }
 
   static fromBytes (bytes: Uint8Array): EVMProposal {
-    const tx = utils.parseTransaction(bytes);
-    const chainId = tx.chainId || 0;
+    const tx = Transaction.from(`0x${Buffer.from(bytes).toString('hex')}`);
+    const chainId = tx.chainId || BigInt(0);
     const nonce = tx.nonce;
 
-    return new EVMProposal(chainId, nonce, tx);
+    return new EVMProposal(chainId, BigInt(nonce), tx);
   }
 
   toU8a (): Uint8Array {
-    const serialized = utils.serializeTransaction(this.tx);
+    const serialized = Transaction.from(this.tx).serialized;
 
     return hexToU8a(serialized);
   }
 }
 
 export interface IRefreshVoteProposal {
-  readonly nonce: number;
+  readonly nonce: bigint;
   readonly publicKey: string;
 }
 
 export class RefreshVoteProposal implements IRefreshVoteProposal {
-  nonce: number;
+  nonce: bigint;
   publicKey: string;
 
   constructor (
-    nonce: number,
+    nonce: bigint,
     publicKey: string
   ) {
     this.nonce = nonce;
@@ -64,7 +64,7 @@ export class RefreshVoteProposal implements IRefreshVoteProposal {
     const nonceBytes = new Uint8Array(4);
     const dataView = new DataView(nonceBytes.buffer);
 
-    dataView.setUint32(this.nonce, 0, BE);
+    dataView.setUint32(Number(this.nonce), 0, BE);
 
     return new Uint8Array([...nonceBytes, ...publicKey]);
   }
@@ -74,7 +74,7 @@ export class RefreshVoteProposal implements IRefreshVoteProposal {
     const nonce = dataView.getUint32(0, BE);
     const publicKey = bytes.slice(4, bytes.length);
 
-    return new RefreshVoteProposal(nonce, u8aToHex(publicKey));
+    return new RefreshVoteProposal(BigInt(nonce), u8aToHex(publicKey));
   }
 }
 
@@ -111,21 +111,21 @@ export class AnchorCreateProposal implements IAnchorCreateProposal {
 export interface IProposerSetUpdateProposal {
   readonly merkleRoot: string;
   readonly averageSessionLength: bigint;
-  readonly numberOfProposers: number;
-  readonly nonce: number;
+  readonly numberOfProposers: bigint;
+  readonly nonce: bigint;
 }
 
 export class ProposerSetUpdateProposal implements IProposerSetUpdateProposal {
   merkleRoot: string;
   averageSessionLength: bigint;
-  numberOfProposers: number;
-  nonce: number;
+  numberOfProposers: bigint;
+  nonce: bigint;
 
   constructor (
     merkleRoot: string,
     averageSessionLength: bigint,
-    numberOfProposers: number,
-    nonce: number
+    numberOfProposers: bigint,
+    nonce: bigint
   ) {
     this.averageSessionLength = averageSessionLength;
     this.merkleRoot = merkleRoot;
@@ -140,7 +140,7 @@ export class ProposerSetUpdateProposal implements IProposerSetUpdateProposal {
     const numberOfProposers = dataView.getUint32(32 + 8, BE);
     const nonce = dataView.getUint32(32 + 12, BE);
 
-    return new ProposerSetUpdateProposal(merkleRoot, averageSessionLength, numberOfProposers, nonce);
+    return new ProposerSetUpdateProposal(merkleRoot, averageSessionLength, BigInt(numberOfProposers), BigInt(nonce));
   }
 
   toU8a (): Uint8Array {
@@ -151,8 +151,8 @@ export class ProposerSetUpdateProposal implements IProposerSetUpdateProposal {
     const dataView = new DataView(proposerSetUpdate.buffer);
 
     dataView.setBigUint64(0, this.averageSessionLength, BE);
-    dataView.setUint32(8, this.numberOfProposers, BE);
-    dataView.setUint32(8 + 4, this.nonce, BE);
+    dataView.setUint32(8, Number(this.numberOfProposers), BE);
+    dataView.setUint32(8 + 4, Number(this.nonce), BE);
 
     return new Uint8Array([...merkleRoot, ...proposerSetUpdate]);
   }

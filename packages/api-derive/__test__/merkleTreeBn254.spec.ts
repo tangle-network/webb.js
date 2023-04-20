@@ -6,7 +6,6 @@ import '@webb-tools/protocol-substrate-types';
 import { MerkleTree } from '@webb-tools/sdk-core/index.js';
 import { createLocalPolkadotApi, polkadotTx } from '@webb-tools/test-utils/index.js';
 import { expect } from 'chai';
-import { BigNumber } from 'ethers';
 
 import { ApiPromise, Keyring } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -69,6 +68,6 @@ describe.skip('getLeafCountForTree should work', function () {
     console.log(stringLeaves);
     const calculatedTree = new MerkleTree(30, stringLeaves);
 
-    expect(BigNumber.from(calculatedTree.root())).to.eq(BigNumber.from(chainRoot));
+    expect(BigInt(calculatedTree.root().toString())).to.eq(BigInt(chainRoot));
   });
 });

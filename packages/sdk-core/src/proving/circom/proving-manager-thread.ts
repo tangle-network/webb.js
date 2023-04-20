@@ -4,7 +4,6 @@
 // Import wasm-generated types
 import type { NoteProtocol } from '@webb-tools/wasm-utils';
 
-import { BigNumber } from 'ethers';
 import * as snarkjs from 'snarkjs';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
@@ -100,8 +99,8 @@ export class CircomProvingManagerThread {
         // generate the merkle proof for this note. If it is a dummy utxo, return zeros
         if (inputUtxos[i].amount === '0') {
           merkleProofs.push({
-            element: BigNumber.from(0),
-            merkleRoot: BigNumber.from(u8aToHex(input.roots[0])),
+            element: BigInt(0),
+            merkleRoot: BigInt(u8aToHex(input.roots[0])),
             pathElements: new Array(this.treeDepth).fill(0),
             pathIndices: new Array(this.treeDepth).fill(0)
           });
@@ -131,7 +130,7 @@ export class CircomProvingManagerThread {
       // Build the appropriate witnessCalculator for this circuit
       const witnessCalculator = await buildVariableWitnessCalculator(this.circuitWasm, 0);
       const witnessInput = generateVariableWitnessInput(
-        input.roots.map((root) => BigNumber.from(root)),
+        input.roots.map((root) => BigInt(root.toString())),
         input.chainId,
         inputUtxos,
         outputUtxos,
@@ -146,7 +145,7 @@ export class CircomProvingManagerThread {
 
       const vanchorProof: WorkerProofInterface<'vanchor'> = {
         backend: 'Circom',
-        extDataHash: hexToU8a(dataHash.toHexString()),
+        extDataHash: hexToU8a(dataHash.toString(16)),
         inputUtxos: inputUtxos.map((utxo) => utxo.serialize()),
         outputUtxos: outputUtxos.map((utxo) => utxo.serialize()),
         proof: proofEncoded,

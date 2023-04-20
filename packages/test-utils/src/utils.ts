@@ -4,7 +4,6 @@ import '@webb-tools/protocol-substrate-types';
 
 import { options } from '@webb-tools/api/index.js';
 import { ResourceId } from '@webb-tools/sdk-core/proposals/index.js';
-import { BigNumber } from 'ethers';
 
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -16,9 +15,9 @@ type MethodPath = {
 };
 
 export function currencyToUnitI128 (currencyAmount: number) {
-  const bn = BigNumber.from(currencyAmount);
+  const bn = BigInt(currencyAmount);
 
-  return bn.mul(1_000_000_000_000);
+  return bn * BigInt(1_000_000_000_000);
 }
 
 export function polkadotTx (api: ApiPromise, path: MethodPath, params: any[], signer: KeyringPair) {

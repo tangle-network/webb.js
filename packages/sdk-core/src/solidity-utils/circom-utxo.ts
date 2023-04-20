@@ -1,7 +1,6 @@
 import type { Backend, Curve, JsUtxo } from '@webb-tools/wasm-utils';
 
 import { poseidon } from 'circomlibjs';
-import { BigNumber } from 'ethers';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
@@ -130,9 +129,9 @@ export class CircomUtxo extends Utxo {
     }
 
     const bytes = Buffer.concat([
-      toBuffer(BigNumber.from(this._chainId), 8),
-      toBuffer(BigNumber.from(this._amount), 32),
-      toBuffer(BigNumber.from('0x' + this._blinding), 32)
+      toBuffer(BigInt(this._chainId), 8),
+      toBuffer(BigInt(this._amount), 32),
+      toBuffer(BigInt('0x' + this._blinding), 32)
     ]);
 
     return this.getKeypair().encrypt(bytes);
@@ -153,10 +152,10 @@ export class CircomUtxo extends Utxo {
     }
 
     const utxo = await CircomUtxo.generateUtxo({
-      amount: BigNumber.from('0x' + buf.subarray(8, 8 + 32).toString('hex')).toString(),
+      amount: BigInt('0x' + buf.subarray(8, 8 + 32).toString('hex')).toString(),
       backend: 'Circom',
       blinding: hexToU8a(toFixedHex('0x' + buf.subarray(8 + 32, 8 + 64).toString('hex'))),
-      chainId: BigNumber.from('0x' + buf.subarray(0, 8).toString('hex')).toString(),
+      chainId: BigInt('0x' + buf.subarray(0, 8).toString('hex')).toString(),
       curve: 'Bn254',
       keypair
     });
@@ -196,7 +195,7 @@ export class CircomUtxo extends Utxo {
   get commitment (): Uint8Array {
     const hash = poseidon([this._chainId, this._amount, '0x' + this._pubkey, '0x' + this._blinding]);
 
-    return hexToU8a(BigNumber.from(hash).toHexString());
+    return hexToU8a(BigInt(hash).toString(16));
   }
 
   /**

@@ -7,7 +7,7 @@
 
 import { poseidon } from 'circomlibjs';
 import { decrypt, encrypt, getEncryptionPublicKey } from 'eth-sig-util';
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 
 import { FIELD_SIZE, randomBN, toFixedHex } from './big-number-utils.js';
 
@@ -59,7 +59,7 @@ export function unpackEncryptedMessage (encryptedMessage: any) {
  */
 export class Keypair {
   privkey: string | undefined; // stored as a hex-encoded 0x-prefixed 32 byte string
-  private pubkey: ethers.BigNumber;
+  private pubkey: ethers.BigNumberish;
   private encryptionKey: string | undefined; // stored as a base64 encryption key
 
   /**
@@ -68,9 +68,9 @@ export class Keypair {
    * @param privkey - hex string of a field element for the
    * @returns - A 'Keypair' object with pubkey and encryptionKey values derived from the private key.
    */
-  constructor (privkey = randomBN(32).toHexString()) {
-    this.privkey = toFixedHex(BigNumber.from(privkey).mod(FIELD_SIZE));
-    this.pubkey = BigNumber.from(poseidon([this.privkey]));
+  constructor (privkey = `0x${randomBN(32).toString(16)}`) {
+    this.privkey = toFixedHex(BigInt(privkey) % BigInt(FIELD_SIZE));
+    this.pubkey = BigInt(poseidon([this.privkey]));
     this.encryptionKey = getEncryptionPublicKey(this.privkey.slice(2));
   }
 
@@ -102,13 +102,13 @@ export class Keypair {
       return Object.assign(new Keypair(), {
         encryptionKey: undefined,
         privkey: undefined,
-        pubkey: BigNumber.from(str)
+        pubkey: BigInt(str)
       });
     } else if (str.length === 130) {
       return Object.assign(new Keypair(), {
         encryptionKey: Buffer.from(str.slice(66, 130), 'hex').toString('base64'),
         privkey: undefined,
-        pubkey: BigNumber.from(str.slice(0, 66))
+        pubkey: BigInt(str.slice(0, 66))
       });
     } else {
       throw new Error('Invalid string passed');
@@ -159,7 +159,7 @@ export class Keypair {
    * @returns a 0x-prefixed, 32 fixed byte hex-string representation of the public key
    */
   getPubKey () {
-    return toFixedHex(this.pubkey.toHexString());
+    return toFixedHex(`0x${this.pubkey.toString(16)}`);
   }
 
   /**

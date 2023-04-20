@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { assert } from 'chai';
-import { utils } from 'ethers';
+import { Transaction } from 'ethers';
 
 import { hexToU8a, u8aToHex } from '@polkadot/util';
 
@@ -53,8 +53,8 @@ describe('test various conversion functions', () => {
   it('should encode and decode proposer set update proposal types correctly', () => {
     const merkleRoot = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
     const averageSessionLength = BigInt(10);
-    const numberOfProposes = 3;
-    const nonce = 1;
+    const numberOfProposes = BigInt(3);
+    const nonce = BigInt(1);
     const proposerSetUpdateProposal = new ProposerSetUpdateProposal(
       merkleRoot,
       averageSessionLength,
@@ -104,19 +104,19 @@ describe('test various conversion functions', () => {
     assert.equal(anchorCreateDecoded.encodedCall, encodedCall);
   });
   it('Should encode and decode evm proposal', () => {
-    const tx = utils.parseTransaction('0x02f901fb018265708414077824850f609e3a0a83012c6f94f4c62b4f8b7b1b1c4ba88bfd3a8ea392641516e98726f8e5ab97bbd5b90184e3a54629000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000050000000000000000000000003696ce3b3d62326bc54ee471b329df7c60d94c2900000000000000000000000000000000000000000000000000091a706b2d1f7e0000000000000000000000002bdf24d26391195668acdf429c26c605b72029700000000000000000000000000000000000000000000000000007c575c8277aaf0000000000000000000000008da6869b882f27a0624e8a6736ef77ade0124adb0000000000000000000000000000000000000000000000000008bbcfdd814df50000000000000000000000006d4d6a996a670f80751f52c9c121710c06512a230000000000000000000000000000000000000000000000000008bc4ae2731e45000000000000000000000000214872c00ef77571916bf6773ab017cb5623b1410000000000000000000000000000000000000000000000000004a0e4b84eb56ec080a04f866699aaaefd51ca25e1202b7c7326184743888c191d2a13a16de013da2f84a07ac203cc7e5a0c7a390f6115be844d85db6892e681a3a7b4eb0f028909802548');
+    const tx = Transaction.from('0x02f901fb018265708414077824850f609e3a0a83012c6f94f4c62b4f8b7b1b1c4ba88bfd3a8ea392641516e98726f8e5ab97bbd5b90184e3a54629000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000050000000000000000000000003696ce3b3d62326bc54ee471b329df7c60d94c2900000000000000000000000000000000000000000000000000091a706b2d1f7e0000000000000000000000002bdf24d26391195668acdf429c26c605b72029700000000000000000000000000000000000000000000000000007c575c8277aaf0000000000000000000000008da6869b882f27a0624e8a6736ef77ade0124adb0000000000000000000000000000000000000000000000000008bbcfdd814df50000000000000000000000006d4d6a996a670f80751f52c9c121710c06512a230000000000000000000000000000000000000000000000000008bc4ae2731e45000000000000000000000000214872c00ef77571916bf6773ab017cb5623b1410000000000000000000000000000000000000000000000000004a0e4b84eb56ec080a04f866699aaaefd51ca25e1202b7c7326184743888c191d2a13a16de013da2f84a07ac203cc7e5a0c7a390f6115be844d85db6892e681a3a7b4eb0f028909802548');
 
-    const evmProposal = new EVMProposal(tx.chainId, tx.nonce, tx);
+    const evmProposal = new EVMProposal(tx.chainId, BigInt(tx.nonce), tx);
     const eVMProposalEncoded = evmProposal.toU8a();
     const eVMProposalDecoded = EVMProposal.fromBytes(eVMProposalEncoded);
 
-    assert.equal(eVMProposalDecoded.nonce, tx.nonce);
+    assert.equal(eVMProposalDecoded.nonce, BigInt(tx.nonce));
     assert.equal(eVMProposalDecoded.chainId, tx.chainId);
   });
 
   it('Should encode and decode refresh vote proposal', () => {
     const publicKey = '0x020258d309d321e1108e1f055100b86df5d104ca589c1349e5731ef82b19ade12b';
-    const nonce = 0;
+    const nonce = BigInt(0);
 
     const refreshVoteProposal = new RefreshVoteProposal(nonce, publicKey);
     const refreshVoteProposalEncoded = refreshVoteProposal.toU8a();
@@ -129,8 +129,8 @@ describe('test various conversion functions', () => {
   it('Should encode and decode proposer set update proposal', () => {
     const merkleRoot = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
     const averageSessionLength = BigInt(10);
-    const nonce = 0;
-    const numberOfProposers = 10;
+    const nonce = BigInt(0);
+    const numberOfProposers = BigInt(10);
 
     const proposerSetUpdateProposal = new ProposerSetUpdateProposal(
       merkleRoot,

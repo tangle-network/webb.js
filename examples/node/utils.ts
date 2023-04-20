@@ -1,6 +1,5 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { BigNumber } from 'ethers';
 
 type MethodPath = {
   section: string;
@@ -8,8 +7,8 @@ type MethodPath = {
 };
 
 export function currencyToUnitI128(currencyAmount: number) {
-  let bn = BigNumber.from(currencyAmount);
-  return bn.mul(1_000_000_000_000);
+  let bn = BigInt(currencyAmount);
+  return bn * BigInt(1_000_000_000_000);
 }
 export function polkadotTx(api: ApiPromise, path: MethodPath, params: any[], signer: KeyringPair) {
   // @ts-ignore

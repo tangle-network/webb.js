@@ -18,7 +18,7 @@ describe('Merkle Tree tests', () => {
         treeThenInsert.insert(element);
       }
 
-      expect(treeThenInsert.root().toHexString()).to.eq(treeWithElements.root().toHexString());
+      expect(treeThenInsert.root().toString(16)).to.eq(treeWithElements.root().toString(16));
     });
   });
 
@@ -37,8 +37,8 @@ describe('Merkle Tree tests', () => {
         const bulkPath = bulkTree.path(i);
         const singlePath = singleTree.path(i);
 
-        expect(bulkPath.merkleRoot.toHexString()).to.eq(singlePath.merkleRoot.toHexString());
-        expect(bulkPath.element.toHexString()).to.eq(singlePath.element.toHexString());
+        expect(bulkPath.merkleRoot.toString(16)).to.eq(singlePath.merkleRoot.toString(16));
+        expect(bulkPath.element.toString(16)).to.eq(singlePath.element.toString(16));
         expect(bulkPath.pathIndices).to.eql(singlePath.pathIndices);
         expect(bulkPath.pathElements).to.eql(singlePath.pathElements);
       }
@@ -86,8 +86,8 @@ describe('Merkle Tree tests', () => {
         const bulkPath = bulkTree.path(i);
         const singlePath = singleTree.path(i);
 
-        expect(bulkPath.merkleRoot.toHexString()).to.eq(singlePath.merkleRoot.toHexString());
-        expect(bulkPath.element.toHexString()).to.eq(singlePath.element.toHexString());
+        expect(bulkPath.merkleRoot.toString(16)).to.eq(singlePath.merkleRoot.toString(16));
+        expect(bulkPath.element.toString(16)).to.eq(singlePath.element.toString(16));
         expect(bulkPath.pathIndices).to.eql(singlePath.pathIndices);
         expect(bulkPath.pathElements).to.eql(singlePath.pathElements);
       }
@@ -104,15 +104,15 @@ describe('Merkle Tree tests', () => {
         const bulkPath = bulkTree.path(i);
         const singlePath = singleTree.path(i);
 
-        expect(bulkPath.merkleRoot.toHexString()).to.eq(singlePath.merkleRoot.toHexString());
-        expect(bulkPath.element.toHexString()).to.eq(singlePath.element.toHexString());
+        expect(bulkPath.merkleRoot.toString(16)).to.eq(singlePath.merkleRoot.toString(16));
+        expect(bulkPath.element.toString(16)).to.eq(singlePath.element.toString(16));
         expect(bulkPath.pathIndices).to.eql(singlePath.pathIndices);
         expect(bulkPath.pathElements).to.eql(singlePath.pathElements);
       }
 
-      expect(bulkTree.root().toHexString()).to.eq(singleTree.root().toHexString());
+      expect(bulkTree.root().toString(16)).to.eq(singleTree.root().toString(16));
       // checking if root matches root without any elements as all of them have been removed
-      expect(bulkTree.root().toHexString()).to.eq(initialRoot.toHexString());
+      expect(bulkTree.root().toString(16)).to.eq(initialRoot.toString(16));
     });
   });
 

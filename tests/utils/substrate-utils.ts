@@ -14,12 +14,11 @@ import { decodeAddress } from '@polkadot/keyring';
 import path from 'path';
 import fs from 'fs';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { BigNumber } from 'ethers';
 import { MultiAddress } from '@polkadot/types/interfaces';
 
 export function currencyToUnitI128(currencyAmount: number) {
-  let bn = BigNumber.from(currencyAmount);
-  return bn.mul(1_000_000_000_000);
+  let bn = BigInt(currencyAmount);
+  return bn * BigInt(1_000_000_000_000);
 }
 
 type MethodPath = {
