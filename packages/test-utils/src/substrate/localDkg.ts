@@ -12,7 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 // A Helper Class to Start and Manage a Local DKG Node.
 // This Could be through a Docker Container or a Local Compiled node.

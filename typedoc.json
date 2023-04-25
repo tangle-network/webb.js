@@ -1,6 +1,6 @@
 {
     "$schema": "https://typedoc.org/schema.json",
-    "entryPoints": ["./packages/api/src/index.ts", "./packages/app-util/src/index.ts","./packages/sdk-core/src/index.ts", "./packages/types/src/index.ts","./packages/wasm-utils/build/wasm-utils.d.ts"],
+    "entryPoints": ["./packages/api/src/index.ts", "./packages/sdk-core/src/index.ts", "./packages/types/src/index.ts","./packages/wasm-utils/build/wasm-utils.d.ts"],
     "out": "doc",
     "exclude": "**/*+(.spec|.e2e|__test__).ts"
 }
