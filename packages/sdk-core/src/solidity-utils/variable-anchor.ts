@@ -16,7 +16,7 @@ export function getVAnchorExtDataHash (
   relayer: string,
   refund: string,
   token: string
-) {
+): BigNumberish {
   const abi = new ethers.utils.AbiCoder();
   const encodedData = abi.encode(
     ['tuple(address recipient,int256 extAmount,address relayer,uint256 fee,uint256 refund,address token,bytes encryptedOutput1,bytes encryptedOutput2)'],
@@ -38,13 +38,13 @@ export function getVAnchorExtDataHash (
 }
 
 export function generateVariableWitnessInput (
-  roots: BigNumber[],
+  roots: BigNumberish[],
   chainId: BigNumberish,
   inputs: Utxo[],
   outputs: Utxo[],
   extAmount: BigNumberish,
   fee: BigNumberish,
-  extDataHash: BigNumber,
+  extDataHash: BigNumberish,
   externalMerkleProofs: MerkleProof[]
 ): any {
   const vanchorMerkleProofs = externalMerkleProofs.map((proof) => ({

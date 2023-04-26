@@ -146,7 +146,7 @@ export class CircomProvingManagerThread {
 
       const vanchorProof: WorkerProofInterface<'vanchor'> = {
         backend: 'Circom',
-        extDataHash: hexToU8a(dataHash.toHexString()),
+        extDataHash: hexToU8a(BigNumber.from(dataHash).toHexString()),
         inputUtxos: inputUtxos.map((utxo) => utxo.serialize()),
         outputUtxos: outputUtxos.map((utxo) => utxo.serialize()),
         proof: proofEncoded,
