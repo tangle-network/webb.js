@@ -121,7 +121,11 @@ export class Keypair {
     const base64Key = Buffer.from(encryptionKey.slice(2), 'hex').toString('base64');
 
     return packEncryptedMessage(
-      encrypt(base64Key, { data }, 'x25519-xsalsa20-poly1305')
+      encrypt({
+        data,
+        publicKey: base64Key,
+        version: 'x25519-xsalsa20-poly1305'
+      })
     );
   }
 
@@ -137,7 +141,11 @@ export class Keypair {
     }
 
     return packEncryptedMessage(
-      encrypt(this.encryptionKey, { data: bytes.toString('base64') }, 'x25519-xsalsa20-poly1305')
+      encrypt({
+        data: bytes.toString('base64'),
+        publicKey: this.encryptionKey,
+        version: 'x25519-xsalsa20-poly1305'
+      })
     );
   }
 
@@ -152,7 +160,10 @@ export class Keypair {
       throw new Error('Cannot decrypt without a configured private key');
     }
 
-    return Buffer.from(decrypt(unpackEncryptedMessage(data), this.privkey.slice(2)), 'base64');
+    return Buffer.from(decrypt({
+      encryptedData: unpackEncryptedMessage(data),
+      privateKey: this.privkey.slice(2)
+    }), 'base64');
   }
 
   /**

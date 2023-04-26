@@ -1,4 +1,4 @@
-// Copyright 2022 Webb Technologies Inc.
+// Copyright 2022-2023 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 // This file hosts types that are only meant for internal use of sdk-core.

@@ -135,7 +135,7 @@ pub enum Curve {
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum HashFunction {
 	Poseidon,
-	MiMCTornado,
+	MiMC,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -209,7 +209,7 @@ impl fmt::Display for HashFunction {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
 			HashFunction::Poseidon => write!(f, "Poseidon"),
-			HashFunction::MiMCTornado => write!(f, "MiMCTornado"),
+			HashFunction::MiMC => write!(f, "MiMC"),
 		}
 	}
 }
@@ -241,7 +241,7 @@ impl FromStr for HashFunction {
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
 			"Poseidon" => Ok(HashFunction::Poseidon),
-			"MiMCTornado" => Ok(HashFunction::MiMCTornado),
+			"MiMC" => Ok(HashFunction::MiMC),
 			_ => Err(OpStatusCode::InvalidHasFunction),
 		}
 	}
@@ -411,7 +411,7 @@ const LEAVES: &str = "type Leaves = Array<Uint8Array>;";
 const INDICES: &str = "type Indices = Array<number>;";
 
 #[wasm_bindgen(typescript_custom_section)]
-const HF: &str = "type HashFunction = 'Poseidon' | 'MiMCTornado'";
+const HF: &str = "type HashFunction = 'Poseidon' | 'MiMC'";
 
 #[wasm_bindgen(typescript_custom_section)]
 const CURVE: &str = "type Curve = 'Bls381' | 'Bn254'";

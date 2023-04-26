@@ -1,4 +1,3 @@
-import { VBridge } from '@webb-tools/protocol-solidity';
 import { Wallet } from 'ethers';
 
 export type CamelToKebabCase<S extends string> =
@@ -12,12 +11,12 @@ export type ConvertToKebabCase<T> = {
   [P in keyof T as Lowercase<CamelToKebabCase<string & P>>]: T[P];
 };
 
-export type ExportedConfigOptions = {
+export type ExportedConfigOptions<VBridge> = {
   chainId: number;
   underlyingChainId: number;
   endpoint: string;
   wsEndpoint?: string;
-  signatureVBridge?: VBridge.VBridge;
+  signatureVBridge?: VBridge;
   proposalSigningBackend?: ProposalSigningBackend;
   withdrawConfig?: WithdrawConfig;
   relayerWallet?: Wallet;

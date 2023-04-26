@@ -1,4 +1,4 @@
-// Copyright 2022 Webb Technologies Inc.
+// Copyright 2022-2023 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 // Get leaves for mixer function returns a function for getting the leaves for a tree in an interval.
