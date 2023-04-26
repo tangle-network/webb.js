@@ -1,6 +1,6 @@
+import { getEncryptionPublicKey } from '@metamask/eth-sig-util';
 import assert from 'assert';
 import { poseidon } from 'circomlibjs';
-import { getEncryptionPublicKey } from 'eth-sig-util';
 
 import { toFixedHex } from '../big-number-utils.js';
 import { Keypair } from '../keypair.js';

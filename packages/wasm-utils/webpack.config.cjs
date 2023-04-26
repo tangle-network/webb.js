@@ -1,10 +1,6 @@
-// Copyright 2022 Webb Technologies Inc.
+// Copyright 2022-2023 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-// import WasmPackPlugin from '@wasm-tool/wasm-pack-plugin';
-// import CopyPlugin from 'copy-webpack-plugin';
-// import fs from 'fs';
-// import path from 'path';
 const path = require('path');
 const fs = require('fs');
 const CopyPlugin = require('copy-webpack-plugin');

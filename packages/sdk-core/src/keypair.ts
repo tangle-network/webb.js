@@ -1,12 +1,9 @@
-// Copyright (C) 2022 Tornado Cash.
-// SPDX-License-Identifier: Apache-2.0
-
 // Copyright 2022 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
 // This file has been modified by Webb Technologies Inc.
 
+import { decrypt, encrypt, getEncryptionPublicKey } from '@metamask/eth-sig-util';
 import { poseidon } from 'circomlibjs';
-import { decrypt, encrypt, getEncryptionPublicKey } from 'eth-sig-util';
 import { BigNumber, ethers } from 'ethers';
 
 import { FIELD_SIZE, randomBN, toFixedHex } from './big-number-utils.js';
@@ -58,9 +55,11 @@ export function unpackEncryptedMessage (encryptedMessage: any) {
  *      - used for decrypting data that has been encrypted with the encryptionKey.
  */
 export class Keypair {
-  privkey: string | undefined; // stored as a hex-encoded 0x-prefixed 32 byte string
-  private pubkey: ethers.BigNumber;
-  private encryptionKey: string | undefined; // stored as a base64 encryption key
+  // Stored as a hex-encoded 0x-prefixed 32 byte string
+  privkey: string | undefined;
+  private pubkey: ethers.BigNumber = BigNumber.from(0);
+  // Stored as a base64 encryption key
+  private encryptionKey: string | undefined;
 
   /**
    * Initialize a new keypair from a passed hex string. Generates a random private key if not defined.
@@ -121,7 +120,11 @@ export class Keypair {
     const base64Key = Buffer.from(encryptionKey.slice(2), 'hex').toString('base64');
 
     return packEncryptedMessage(
-      encrypt(base64Key, { data }, 'x25519-xsalsa20-poly1305')
+      encrypt({
+        data,
+        publicKey: base64Key,
+        version: 'x25519-xsalsa20-poly1305'
+      })
     );
   }
 
@@ -137,7 +140,11 @@ export class Keypair {
     }
 
     return packEncryptedMessage(
-      encrypt(this.encryptionKey, { data: bytes.toString('base64') }, 'x25519-xsalsa20-poly1305')
+      encrypt({
+        data: bytes.toString('base64'),
+        publicKey: this.encryptionKey,
+        version: 'x25519-xsalsa20-poly1305'
+      })
     );
   }
 
@@ -152,7 +159,10 @@ export class Keypair {
       throw new Error('Cannot decrypt without a configured private key');
     }
 
-    return Buffer.from(decrypt(unpackEncryptedMessage(data), this.privkey.slice(2)), 'base64');
+    return Buffer.from(decrypt({
+      encryptedData: unpackEncryptedMessage(data),
+      privateKey: this.privkey.slice(2)
+    }), 'base64');
   }
 
   /**
