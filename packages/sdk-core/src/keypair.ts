@@ -1,12 +1,9 @@
-// Copyright (C) 2022 Tornado Cash.
-// SPDX-License-Identifier: Apache-2.0
-
 // Copyright 2022 Webb Technologies Inc.
 // SPDX-License-Identifier: Apache-2.0
 // This file has been modified by Webb Technologies Inc.
 
+import { decrypt, encrypt, getEncryptionPublicKey } from '@metamask/eth-sig-util';
 import { poseidon } from 'circomlibjs';
-import { decrypt, encrypt, getEncryptionPublicKey } from 'eth-sig-util';
 import { BigNumber, ethers } from 'ethers';
 
 import { FIELD_SIZE, randomBN, toFixedHex } from './big-number-utils.js';
@@ -58,9 +55,11 @@ export function unpackEncryptedMessage (encryptedMessage: any) {
  *      - used for decrypting data that has been encrypted with the encryptionKey.
  */
 export class Keypair {
-  privkey: string | undefined; // stored as a hex-encoded 0x-prefixed 32 byte string
-  private pubkey: ethers.BigNumber;
-  private encryptionKey: string | undefined; // stored as a base64 encryption key
+  // Stored as a hex-encoded 0x-prefixed 32 byte string
+  privkey: string | undefined;
+  private pubkey: ethers.BigNumber = BigNumber.from(0);
+  // Stored as a base64 encryption key
+  private encryptionKey: string | undefined;
 
   /**
    * Initialize a new keypair from a passed hex string. Generates a random private key if not defined.
