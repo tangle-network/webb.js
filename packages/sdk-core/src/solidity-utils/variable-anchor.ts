@@ -16,17 +16,23 @@ export function getVAnchorExtDataHash (
   relayer: string,
   refund: string,
   token: string
-): BigNumberish {
+): BigNumber {
   const abi = new ethers.utils.AbiCoder();
   const encodedData = abi.encode(
-    ['tuple(address recipient,int256 extAmount,address relayer,uint256 fee,uint256 refund,address token,bytes encryptedOutput1,bytes encryptedOutput2)'],
+    ['tuple(bytes recipient,bytes extAmount,bytes relayer,uint256 fee,uint256 refund,bytes token,bytes encryptedOutput1,bytes encryptedOutput2)'],
     [{
-      recipient: toFixedHex(recipient, 20),
-      extAmount: toFixedHex(extAmount),
-      relayer: toFixedHex(relayer, 20),
-      fee: toFixedHex(fee),
-      refund: toFixedHex(refund),
-      token: toFixedHex(token, 20),
+      // For recipient, since it is an Account (32 bytes) we use toFixedHex to pad it to 32 bytes.
+      recipient: toFixedHex(recipient),
+      // For extAmount, since it is an Amount (i128) it should be 16 bytes
+      extAmount: toFixedHex(extAmount, 16),
+      // For relayer, since it should be 32 bytes we use toFixedHex to pad it to 32 bytes.
+      relayer: toFixedHex(relayer),
+      // For fee, since it is a Balance (u128) it should be 16 bytes
+      fee: toFixedHex(fee, 16),
+      // For refund, since it is a Balance (u128) it should be 16 bytes
+      refund: toFixedHex(refund, 16),
+      // For token, since it is an Account (32 bytes) we use toFixedHex to pad it to 32 bytes.
+      token: toFixedHex(token),
       encryptedOutput1,
       encryptedOutput2
     }]
