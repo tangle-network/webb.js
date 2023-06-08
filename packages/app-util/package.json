@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/app-util",
-  "version": "0.1.4-125",
+  "version": "0.1.4-126",
   "description": "Utilities to work with Webb",
   "author": "Webb Developers <drew@webb.tools>",
   "type": "module",
