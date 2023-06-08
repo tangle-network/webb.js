@@ -143,6 +143,16 @@
       "types": "./build/proposals/ResourceId.d.ts",
       "require": "./build/cjs/proposals/ResourceId.js",
       "default": "./build/cjs/proposals/ResourceId.js"
+    },
+    "./typed-chain-id": {
+      "types": "./build/typed-chain-id.d.ts",
+      "require": "./build/cjs/typed-chain-id.js",
+      "default": "./build/typed-chain-id.js"
+    },
+    "./cjs/typed-chain-id": {
+      "types": "./build/typed-chain-id.d.ts",
+      "require": "./build/cjs/typed-chain-id.js",
+      "default": "./build/cjs/typed-chain-id.js"
     }
   },
   "publishConfig": {
