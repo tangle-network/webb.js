@@ -354,15 +354,12 @@ impl fmt::Display for JsUtxo {
 		let backend = Backend::Arkworks.to_string();
 		let amount = self.get_amount_raw().to_string();
 		let chain_id = self.get_chain_id_raw().to_string();
-		let index = self
-			.get_index()
-			.map(|v| v.to_string())
-			.unwrap_or_else(|| "".to_string());
+		let index = self.get_index().map(|v| v.to_string()).unwrap_or_default();
 		let blinding = hex::encode(self.get_blinding());
 		let public_key = hex::encode(self.get_public_key());
 		let private_key = hex::encode(self.get_secret_key().unwrap_or_default());
 
-		let sec = vec![
+		let sec = [
 			curve,
 			backend,
 			amount,
