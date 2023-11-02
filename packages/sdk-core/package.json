@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/sdk-core",
-  "version": "0.1.4-126",
+  "version": "0.1.4-127",
   "description": "the core of webb tools sdk",
   "author": "Webb Developers <drew@webb.tools>",
   "license": "Apache-2.0",
@@ -167,7 +167,7 @@
   "dependencies": {
     "@metamask/eth-sig-util": "^5.0.2",
     "@polkadot/util": "11.1.3",
-    "@webb-tools/wasm-utils": "0.1.4-126",
+    "@webb-tools/wasm-utils": "0.1.4-127",
     "big-integer": "^1.6.51",
     "bignumber.js": "^9.0.0",
     "circomlibjs": "^0.0.8",
