@@ -187,11 +187,11 @@ impl fmt::Display for JsNote {
 		// Note URI scheme
 		let scheme = "webb://";
 		// Note URI authority
-		let authority = vec![self.version.to_string(), self.protocol.to_string()].join(":");
+		let authority = [self.version.to_string(), self.protocol.to_string()].join(":");
 		// Note URI chain IDs
-		let chain_ids = vec![self.source_chain_id.to_string(), self.target_chain_id.to_string()].join(":");
+		let chain_ids = [self.source_chain_id.to_string(), self.target_chain_id.to_string()].join(":");
 		// Note URI chain identifying data (smart contracts, tree IDs)
-		let chain_identifying_data = vec![
+		let chain_identifying_data = [
 			self.source_identifying_data.to_string(),
 			self.target_identifying_data.to_string(),
 		]
@@ -254,11 +254,11 @@ impl fmt::Display for JsNote {
 		.collect::<Vec<String>>()
 		.join("&");
 		// Note URI queries are prefixed with `?`
-		let misc = vec!["?".to_string(), misc_values].join("");
+		let misc = ["?".to_string(), misc_values].join("");
 
 		let parts: Vec<String> = vec![authority, chain_ids, chain_identifying_data, secrets.to_string(), misc];
 		// Join the parts with `/` and connect to the scheme as is
-		let note = vec![scheme.to_string(), parts.join("/")].join("");
+		let note = [scheme.to_string(), parts.join("/")].join("");
 		write!(f, "{}", note)
 	}
 }
